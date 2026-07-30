@@ -40,10 +40,11 @@ republished directly** — they are read for coverage/correctness only, never co
 
 ## Current phase
 
-**SCOPING / PRE-BUILD.** Audience, interactivity, and the free/paid phasing are now
-decided (see Decisions below). Not yet decided: which course to build first, the exact
-quiz interaction model, and the technical stack. No code, no content conversion, no build
-has started.
+**BUILDING — started 2026-07-30.** User confirmed: start now with the two probability
+courses (Introduction to Probability, Probability Theory); Mat1110 and Introduction to
+Statistics material expected from the user "by next week." First technical step is
+testing LaTeX-to-web conversion on real content (Introduction to Probability, the
+no-conflict course) before committing to a tech stack — see log for findings.
 
 ## Decisions (settled 2026-07-30)
 
@@ -181,7 +182,30 @@ Mat1110/Intro Stats material is pending:**
 
 *(most recent first — append new entries, never rewrite old ones)*
 
-### 2026-07-30 (latest) — Confirmed: combine-and-own is the rule for every course
+### 2026-07-30 (latest) — Power cut mid-session; resumed cleanly from this file
+- A power cut interrupted the session mid-way through testing LaTeX-to-HTML conversion.
+  On resume, this file (read fresh from disk, not from conversation memory) had every
+  decision through "combine-and-own is the standing rule" intact and committed, plus the
+  in-progress conversion test findings below as uncommitted edits that also survived on
+  disk. **The mechanism worked as intended.**
+- In-progress technical finding, carried over: tested `make4ht` on the real Introduction
+  to Probability document (64 real TikZ diagrams confirmed present, not just imported
+  packages; 182 theorem/definition/example/remark blocks). First attempt used SVG mode,
+  which rasterised **every math expression** into an image (948 images, garbage alt text
+  like `"M(ME)-"` for a fraction) — this would make notes unsearchable and inaccessible,
+  directly against the "searchable notes" requirement. **Switched to `make4ht ... mathjax`
+  mode**: down to 33 images (real diagrams only) plus live MathJax for all math notation.
+  Title page rendered and visually checked — clean, correct metadata (confirms course code
+  MAT2901 for Introduction to Probability). Was mid-way through checking a content page
+  with actual diagrams/equations (anchor-based screenshot navigation was not working
+  reliably in headless Chrome) when the cut happened.
+- `scratch/` added to `.gitignore` — it holds this throwaway conversion test output,
+  regenerable, not final content, not meant to be committed.
+- **Next step:** finish visually verifying a content page (math + a real diagram) from the
+  mathjax-mode conversion, then report the technical recommendation and get it confirmed
+  before writing the real Introduction to Probability content.
+
+### 2026-07-30 — Confirmed: combine-and-own is the rule for every course
 - User confirmed the reconciliation ("combine so we own the material") process is not a
   one-off for Probability Theory but the standing rule as more courses are added over
   time. Generalised in the section above rather than left implicit. Practical
