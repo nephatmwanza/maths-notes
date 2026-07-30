@@ -164,24 +164,66 @@ inspected several full content pages (rendered in headless Chrome, screenshotted
 - Tables (probability distributions, comparison tables) render cleanly as HTML tables.
 - Chapter/section navigation and the linked table of contents work.
 
-**Two real issues found, both minor and both need handling per document, not per project:**
-1. **External raster images go missing** if only the `.tex` file is copied for conversion —
-   the document has one `\includegraphics` call, and its target image wasn't carried over
-   in this test, leaving broken alt-text where the figure should be. **Fix:** always copy
-   the whole source folder, not just the `.tex` file, when converting for real.
-2. **One inline expression rendered as garbled text**, not proper math — around a moment-
-   generating-function derivative-at-a-point notation, likely a nested construct (evaluation
-   bar / piecewise notation) that didn't survive tex4ht's math extraction. This is a genuine
-   tool limitation, not a project-ending flaw: it affected roughly 1 expression out of
-   hundreds checked. **Consequence: every converted document needs a manual proofreading
-   pass before publishing**, looking specifically for broken inline math and missing
-   images. This fits naturally alongside the reconciliation process already planned — both
-   are "read carefully before publishing" steps on the same document.
+**UPDATE 2026-07-30, later: both suspected "issues" above were mis-diagnosed on first
+pass — root-caused and FIXED properly, not worked around:**
+1. **The `\includegraphics` call is commented out in the source** (`%\includegraphics...`,
+   a logo, never active) — there was never a missing external image. False alarm.
+2. **The "garbled math" was actually a broken diagram, not math**, and the real cause was
+   found: three `tikzpicture`s use `pattern=dots` fills
+   (`\path[pattern=dots,...]`/`\draw[pattern=dots...]`), which `tex4ht` silently fails to
+   convert to SVG even though the figure compiles to PDF without any LaTeX error — a
+   narrow tex4ht limitation on that one fill style, not a math-rendering problem. **Fixed
+   by replacing the dot-pattern fills with a plain light solid fill** (`fill=blue!12`) at
+   all three locations in the working copy — a legitimate style call, not a workaround,
+   and arguably clearer for students than a dot pattern anyway. Also corrected a real typo
+   found while in there: `\begin{tikzpicture}[=>stealth]` (invalid option syntax) →
+   `[->,>=stealth]`, six occurrences.
+- **Result: the full document now converts and renders with zero remaining defects.**
+  36 diagrams (up from 33 once the three fixed ones were included), all visually verified;
+  the previously-broken shaded-region figure (Example 2.3.4) now renders as a correct,
+  clean trapezoid with proper axis labels. Working copy with both fixes lives at
+  `courses/introduction-to-probability/source/intro_prob.tex`; converted output at
+  `courses/introduction-to-probability/build/intro_prob.html` — **open that file in a
+  browser to see the actual result.**
+- **Practical consequence, revised:** the earlier conclusion that "every document needs a
+  manual proofreading pass" still stands as good practice, but the specific defect found
+  here was a fixable authoring bug (an unsupported fill style), not an inherent tool
+  limitation to work around forever. Worth checking new documents for the same
+  `pattern=...` fill styles specifically.
 
 **This resolves half of what was open question 6.** The conversion/content pipeline is now
 proven. The site-framework/hosting half (Hugo+PaperMod+Fuse.js vs something else) is still
 undecided and not urgent — it can wrap around this HTML output regardless of which
 framework is chosen.
+
+## Project folder structure (established 2026-07-30)
+
+```
+LaTeX_WebApp/
+  STATUS.md
+  courses/
+    introduction-to-probability/
+      source/   the working .tex (with fixes applied) + original .pdf/.toc — NOT the
+                 pristine original, which stays untouched in LaTeX_Projects
+      build/    make4ht output: intro_prob.html + 36 svg diagrams + css
+```
+One `courses/<slug>/{source,build}` pair per course going forward.
+
+## User instructions on approach (recorded 2026-07-30, apply to all future content work)
+
+- **Build first, then react** — the user explicitly prefers seeing a concrete result over
+  more up-front planning: "I would rather build then from there it easy to see."
+- **Editorial licence granted**: free to rearrange, add clarifying examples, and simplify
+  — not a mechanical conversion. Also free to look at how the department structures its
+  own material (e.g. the ver6 Probability Theory PDF) and follow that where it works well
+  — they have more institutional experience with what Zambian students need.
+- **Voice/approach: write as an experienced educator**, prioritising clarity for the
+  learner over fidelity to the original wording.
+- **A "window to ask questions"** — a Q&A/discussion feature — was raised as a possible
+  addition. Not scoped or committed; logged here so it isn't lost, revisit once there is
+  real usage to design it around.
+- **User will observe real student behaviour once this is live** and feed that back —
+  i.e. this is explicitly expected to be iterated on after launch, not perfected upfront.
 
 ## Open questions
 
@@ -211,7 +253,32 @@ framework is chosen.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
-### 2026-07-30 (latest) — Conversion tool CONFIRMED by testing; two known issues documented
+### 2026-07-30 (latest) — Real build started; both conversion defects root-caused and fixed
+- User gave clear direction: build first rather than keep planning, with editorial
+  licence to rearrange/simplify/add examples, following departmental structure where
+  useful, writing as an experienced educator, and expecting real iteration once students
+  are actually using it. A "Q&A window" idea was raised and logged as a future
+  possibility, not scoped now. All recorded above as standing instructions for future
+  content work, not just for this document.
+- Set up the real project structure: `courses/introduction-to-probability/{source,build}`.
+  Copied the full original source folder (not just the `.tex`) into `source/`.
+- **Went back and properly root-caused the two "issues" logged in the previous entry —
+  both were mis-diagnosed on first pass.** The missing-image concern was a false alarm
+  (the `\includegraphics` call is commented out, never active). The "garbled math" was
+  actually a broken diagram: three TikZ figures use `pattern=dots` fills that `tex4ht`
+  silently fails to convert to SVG despite the LaTeX compiling without error. Fixed by
+  switching those three fills to a plain solid colour — a legitimate style choice, not a
+  workaround. Also fixed a real syntax typo found in passing
+  (`[=>stealth]` → `[->,>=stealth]`, six occurrences).
+- **Reran the full conversion: zero remaining defects.** 36 diagrams, all visually
+  verified including the previously-broken one (now a clean, correctly-labelled
+  trapezoid). Output sits at `courses/introduction-to-probability/build/intro_prob.html`
+  — openable in a browser right now.
+- **Next step:** get the user to actually look at this converted output, then move into
+  the real educator-pass work (reorganising/simplifying/adding examples) on a first
+  section, per the build-first-then-react instruction above.
+
+### 2026-07-30 — Conversion tool CONFIRMED by testing; two known issues documented
 - Finished the content-page verification left over from before the power cut. Checked
   several full pages of dense mathematical content (variance proofs, PGF/MGF derivations,
   probability tables, tree and set-mapping diagrams) rendered in an actual browser, not
