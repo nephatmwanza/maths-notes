@@ -258,6 +258,43 @@ structure is being copied deliberately:
   barrier for Zambian students. Fine for the free/early phase; revisit when the paid phase
   brings real user accounts.
 
+## MIT OpenCourseWare — catalogue/index design, reviewed 2026-07-30
+
+User pointed at `ocw.mit.edu/search/?t=Mathematics`. Rendered and inspected it (the page is
+JS-driven, so it needs a real browser, not a plain fetch). It is the best available model
+for the **course index / catalogue page** — the thing this project does not have yet.
+
+**Worth copying now:**
+- **Course cards**, one per course, each carrying: course code + level on one line in a
+  coloured small-caps style (`18.900 | UNDERGRADUATE`), bold title, instructor, **topic
+  tags as pill chips**, and a **thumbnail image** on the right.
+- **Level as a first-class label.** Maps naturally onto UNZA numbering, where the first
+  digit already encodes year: MAT1110 → first year, MAT2901 → second year, MAT3902 →
+  third year. Free structure, already present in the course codes.
+- **Topic tags** (`Mathematics`, `Probability and Statistics`, `Algebra and Number
+  Theory`), with a `+3 more` overflow rather than an unbounded row.
+- **Thumbnails.** MIT uses a small figure per course. **This project can generate these
+  free** — the converted notes already contain 36 SVG diagrams; one good figure per course
+  makes an honest, subject-specific thumbnail at zero cost.
+- **Prominent search at the top**, above the results, not tucked in a corner.
+
+**Deliberately NOT copying yet, and why:**
+- **The faceted filter sidebar** (Departments / Level / Topics / Features, each with result
+  counts). MIT is filtering **330 courses**; this project has **one**. Filters over one to
+  three items are noise, not navigation. Revisit at roughly 10+ courses.
+- **COURSES / RESOURCES tabs** and the list/grid view toggle — same reason, premature.
+- **Sort-by-relevance dropdown** — meaningless until there are enough courses to sort.
+
+**Tension worth resolving with the user (raised, not yet decided).** The user asked to drop
+the course code from the title page, reasoning that going online means not tying the
+material to one university. That is right for the *title*. But Zambian students very
+likely **search by course code** — "MAT1110" is exactly what a UNZA student types. MIT
+keeps the code visible on every card for precisely that reason. Suggested resolution: keep
+the code **out of the title/heading** but **in the searchable metadata and card label**
+(e.g. a tag, or an "also known as" line), so the page stays a general resource while still
+being findable by the students it is for. Cheap to do, and it protects discoverability
+without undoing the depersonalisation.
+
 ## Multi-page output — SOLVED, no custom build needed
 
 `make4ht` splits automatically by depth: `make4ht -u -a debug file.tex "mathjax,3"`.
@@ -296,7 +333,32 @@ is exactly the Paul's-Notes structure, for free, out of the tool.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
-### 2026-07-30 (latest) — Depersonalised; multi-page navigation working; design research done
+### 2026-07-30 (latest) — Catalogue page built, following the MIT OCW card pattern
+- User pointed at MIT OpenCourseWare's maths search page. Rendered and analysed it (see
+  the new section above), then **built the first real site page**: `site/index.html`.
+- Follows MIT's course-card pattern: subject + level line, bold title, short description,
+  topic tag chips, and a thumbnail. **The thumbnail is one of the converted SVG diagrams**
+  from the notes themselves (the probability-density trapezoid) — subject-specific
+  artwork at zero cost, which MIT pays illustrators for.
+- **Deliberately omitted MIT's faceted filter sidebar** — they filter 330 courses, this
+  filters one. Noted in the design section to revisit at ~10+ courses.
+- **Planned courses are shown as visible "in preparation" placeholders** rather than
+  hidden. A catalogue that visibly grows is a better signal to students than one that
+  looks finished and then stalls — and the user explicitly liked the "building up over
+  time" idea earlier.
+- **Resolved the course-code tension** flagged above without undoing the depersonalisation:
+  codes stay out of titles and headings, but appear as a small "also listed as MAT2901"
+  tag and in the searchable metadata. **Verified by test:** searching `mat1110` finds the
+  right course.
+- **Verified, not assumed:** automated probe confirms the live search filters correctly
+  (4 → 1 on "bayes", 1 on "mat1110", 0 + no-results message on nonsense, back to 4 when
+  cleared) and that the page has **no horizontal overflow at 390px**.
+- Dark mode supported via `prefers-color-scheme`.
+- **Next step:** wire the notes pages themselves into this shell — a persistent sidebar
+  showing the course tree (the Paul's Notes pattern), consistent styling with this
+  catalogue page, and giscus at the foot of each section page.
+
+### 2026-07-30 — Depersonalised; multi-page navigation working; design research done
 - **Removed all personal and institutional identifiers from the title page** per the user's
   instruction (going online, so no name, no university, no course code). Replaced with a
   clean professional title block: "Introduction to Probability / Course Notes /
