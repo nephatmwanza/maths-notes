@@ -421,6 +421,22 @@ bug. `.viewport/m390.html` iframes the page at exactly 390px to get a real narro
 use it rather than trusting a small `--window-size`. Sidebar collapses to a "Contents"
 drawer, no horizontal overflow, wide aligned displays scroll rather than clip.
 
+**Equation numbering — a defect the split created.** MathJax numbers equations *per page*,
+restarting at 1; LaTeX numbers them *per chapter*, continuing across the sections a chapter
+is split into. So the display LaTeX calls (2.2) rendered as (2), while the `\eqref` pointing
+at it — which tex4ht resolves from LaTeX's numbering — said 2.2. Two numbers for one
+equation on the same page. `build.py` now counts numbered environments per chapter in
+document order and injects a per-page MathJax `tagformat` with the right prefix and offset
+(section 2.5 correctly continues at 2.3). The proof that surfaced this had `(2.1) and (2.2)`
+as hardcoded text matching nothing — now real `\label`/`\eqref`.
+
+**Overflow checking.** `.viewport/overflow-check.html` loads all 22 pages and reports
+anything a reader would have to scroll to see. It filters two benign cases: a display that
+scrolls inside its own box, and an equation tag positioned in the right margin (where a book
+puts it). **Currently reports none.** Two things it caught: display maths had no
+`max-width`, so a wide formula dragged its enclosing proof box out with it; and the text
+measure at 36rem clipped `cases` blocks — now 41rem.
+
 **Still open from this round:**
 - Departmental material (MAT 3902 ver6 PDF) not yet used to fill gaps — the reconciliation
   process above still applies, and nothing from it has been copied.
