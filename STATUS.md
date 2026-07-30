@@ -142,31 +142,60 @@ Mat1110/Intro Stats material is pending:**
     his notes as draft base, the ver6 PDF as the coverage checklist, original synthesis as
     the output — never copy the ver6 PDF directly.
 
+## Technical decision — CONFIRMED by testing on real content, 2026-07-30
+
+**LaTeX-to-HTML conversion tool: `make4ht`, in `mathjax` build mode** (i.e.
+`make4ht -u -a debug file.tex "mathjax"`), NOT the default `svg` mode.
+
+**Why `svg` mode was rejected:** it rasterises every math expression into a separate image
+(948 images for one document), with meaningless alt text (e.g. `"M(ME)-"` for a fraction).
+That would make the notes unsearchable and inaccessible — directly against the searchable-
+notes requirement.
+
+**Why `mathjax` mode was chosen, and how it was verified — not assumed:** run on the real
+Introduction to Probability document (195 KB source, 64 real TikZ diagrams, 182 theorem/
+definition/example/remark blocks) rather than a toy file. Result: only 33 images (the real
+diagrams), all other math left as live text for MathJax to render client-side. Manually
+inspected several full content pages (rendered in headless Chrome, screenshotted, read):
+- Tree diagrams and set-mapping diagrams (TikZ/xy-pic) render correctly as images.
+- Dense multi-line derivations (variance proofs, PGF/MGF work, integrals, sums) render
+  correctly throughout — this was checked over several pages of continuous content, not
+  a single cherry-picked example.
+- Tables (probability distributions, comparison tables) render cleanly as HTML tables.
+- Chapter/section navigation and the linked table of contents work.
+
+**Two real issues found, both minor and both need handling per document, not per project:**
+1. **External raster images go missing** if only the `.tex` file is copied for conversion —
+   the document has one `\includegraphics` call, and its target image wasn't carried over
+   in this test, leaving broken alt-text where the figure should be. **Fix:** always copy
+   the whole source folder, not just the `.tex` file, when converting for real.
+2. **One inline expression rendered as garbled text**, not proper math — around a moment-
+   generating-function derivative-at-a-point notation, likely a nested construct (evaluation
+   bar / piecewise notation) that didn't survive tex4ht's math extraction. This is a genuine
+   tool limitation, not a project-ending flaw: it affected roughly 1 expression out of
+   hundreds checked. **Consequence: every converted document needs a manual proofreading
+   pass before publishing**, looking specifically for broken inline math and missing
+   images. This fits naturally alongside the reconciliation process already planned — both
+   are "read carefully before publishing" steps on the same document.
+
+**This resolves half of what was open question 6.** The conversion/content pipeline is now
+proven. The site-framework/hosting half (Hugo+PaperMod+Fuse.js vs something else) is still
+undecided and not urgent — it can wrap around this HTML output regardless of which
+framework is chosen.
+
 ## Open questions
 
-4. **Which course to build first? — Narrowing.** Mat1110 and Introduction to Statistics
-   remain the semester's real teaching priority but are both blocked on the user supplying
-   current material ("I will get everything this week or as days proceed"). **Introduction
-   to Probability has no such blocker and could be started immediately** — proposed in
-   this conversation turn, not yet confirmed by the user, as the first real build target:
-   it needs conversion but not reconciliation, making it the simplest possible first pass
-   at the notes+quiz pattern. Probability Theory (MAT 3902) would be a good *second*
-   example specifically because it exercises the reconciliation process, once the simple
-   case is proven.
 5. **Exact quiz interaction model.** User said: "solve the questions and put them in the
    engine where learners have to search for themselves" — read as: worked solutions exist
    in the system, but the interaction requires the learner to search/attempt rather than
    being handed the answer passively. Needs confirming whether that means (a) an
    attempt-first-then-reveal quiz flow, (b) a searchable bank of solved problems the
    learner browses/searches directly, or (c) both.
-6. **Technical approach for the free phase.** Not yet decided. Leaning towards reusing the
-   pattern already proven on the climate portfolio site — a static site (the climate site
-   uses Hugo + PaperMod, which already has client-side search via Fuse.js) for the notes
-   side, plus a lightweight client-side quiz component (question/answer data in JSON, no
-   backend) for the engine side. This would let phase 1 be free to host (e.g. GitHub
-   Pages) with no accounts or payment infrastructure, deferring that harder problem to the
-   paid phase as the user already intends. Not committed — worth confirming before
-   building anything.
+6. **Site framework/hosting** (separate from the now-proven conversion tool above). Leaning
+   towards reusing the pattern already proven on the climate portfolio site — Hugo +
+   PaperMod with its client-side Fuse.js search — for the notes side, plus a lightweight
+   client-side quiz component (question/answer data in JSON, no backend) for the engine
+   side. Not committed — worth confirming before building the real site shell.
 
 ## How to resume this project cold
 
@@ -182,7 +211,24 @@ Mat1110/Intro Stats material is pending:**
 
 *(most recent first — append new entries, never rewrite old ones)*
 
-### 2026-07-30 (latest) — Power cut mid-session; resumed cleanly from this file
+### 2026-07-30 (latest) — Conversion tool CONFIRMED by testing; two known issues documented
+- Finished the content-page verification left over from before the power cut. Checked
+  several full pages of dense mathematical content (variance proofs, PGF/MGF derivations,
+  probability tables, tree and set-mapping diagrams) rendered in an actual browser, not
+  just inspected as raw HTML. All render correctly via `make4ht ... mathjax` mode.
+- Found and documented two real, minor issues (external images need the full source folder
+  copied, not just the `.tex`; rare garbled inline-math expressions need a manual
+  proofreading pass) — both written up in the Technical decision section above, with the
+  practical consequence: every converted document needs a manual QA pass before
+  publishing, not just an automated conversion.
+- **The conversion/content half of the technical stack is now settled and evidence-based,
+  not assumed.** Site framework/hosting remains open (question 6) but is decoupled from
+  this and not urgent.
+- **Next step:** do the real conversion of Introduction to Probability (copying the full
+  source folder this time, then a manual QA pass), and decide the quiz-interaction model
+  (question 5) — both can proceed without waiting on Mat1110/Intro Stats material.
+
+### 2026-07-30 — Power cut mid-session; resumed cleanly from this file
 - A power cut interrupted the session mid-way through testing LaTeX-to-HTML conversion.
   On resume, this file (read fresh from disk, not from conversation memory) had every
   decision through "combine-and-own is the standing rule" intact and committed, plus the
