@@ -225,6 +225,49 @@ One `courses/<slug>/{source,build}` pair per course going forward.
 - **User will observe real student behaviour once this is live** and feed that back —
   i.e. this is explicitly expected to be iterated on after launch, not perfected upfront.
 
+## Design research — real precedents, checked 2026-07-30
+
+The user asked to look at how strong online maths courses do this rather than invent it.
+Three findings, all now driving concrete decisions:
+
+**1. Paul's Online Notes (`tutorial.math.lamar.edu`)** — the closest precedent that exists:
+one professor's own LaTeX lecture notes turned into a widely-used free maths site. Its
+structure is being copied deliberately:
+- **A dedicated page per section**, not one long scrolling document.
+- A persistent expandable sidebar showing the whole course tree, so a learner can jump
+  anywhere.
+- **"Notes" and "Practice Problems" kept as separate parallel sections** — which maps
+  exactly onto the notes + quiz-engine split already decided here.
+- Next/previous navigation at the foot of each page; download options.
+
+**2. Brilliant.org** — for the quiz interaction pattern specifically:
+- **Progressive reveal**: answers/steps hidden behind a click rather than shown alongside.
+- Practice sets are deliberately **low-stakes**, and scaffolding (hints, worked steps) is
+  progressively removed as the learner is tested on independent ability.
+- This is directly relevant to open question 5 and suggests the answer is "both": a
+  searchable bank of solved problems, where the solution is behind a reveal rather than
+  visible by default.
+
+**3. giscus (`giscus.app`)** — answers the user's "window to ask questions" request:
+- A commenting/discussion widget backed by **GitHub Discussions**. Free, open source, no
+  ads, no tracking, actively maintained (the older `utterances` is largely unmaintained).
+- **No backend, no database, no accounts to build** — it fits the free-phase constraint
+  exactly, and can sit at the foot of every section page so questions attach to the
+  specific topic rather than a general forum.
+- Caveat to confirm with the user later: commenters need a GitHub account, which is a real
+  barrier for Zambian students. Fine for the free/early phase; revisit when the paid phase
+  brings real user accounts.
+
+## Multi-page output — SOLVED, no custom build needed
+
+`make4ht` splits automatically by depth: `make4ht -u -a debug file.tex "mathjax,3"`.
+Verified on the real document: **22 pages** — one per numbered section, plus chapter pages
+and a contents page. Confirmed working: the table of contents links each entry straight to
+its own page, and every section page carries automatic `next / prev / up` navigation. This
+is exactly the Paul's-Notes structure, for free, out of the tool.
+- `,2` = split at chapter level (3 pages) — too coarse.
+- `,3` = split at section level (22 pages) — **chosen**.
+
 ## Open questions
 
 5. **Exact quiz interaction model.** User said: "solve the questions and put them in the
@@ -253,7 +296,32 @@ One `courses/<slug>/{source,build}` pair per course going forward.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
-### 2026-07-30 (latest) — Real build started; both conversion defects root-caused and fixed
+### 2026-07-30 (latest) — Depersonalised; multi-page navigation working; design research done
+- **Removed all personal and institutional identifiers from the title page** per the user's
+  instruction (going online, so no name, no university, no course code). Replaced with a
+  clean professional title block: "Introduction to Probability / Course Notes /
+  Foundations, random variables, and distributions / 2026". Verified: zero occurrences of
+  the name, university or course code in any generated page.
+- **Solved the user's table-of-contents request**: switched to `make4ht ... "mathjax,3"`,
+  which splits the document into **22 pages — one per section** — with the contents page
+  linking directly to each, and automatic next/prev/up navigation on every page. No custom
+  code needed; this is built into the tool. Visually verified both the new contents page
+  and a section page (1.4 Bayes/Independent Events — definitions, lemma, theorem and full
+  proofs all rendering correctly).
+- **Did the design research the user asked for** (see the new section above): Paul's Online
+  Notes as the structural model (page-per-section, persistent tree sidebar, Notes and
+  Practice Problems as separate parallel tracks); Brilliant.org for the quiz pattern
+  (progressive reveal, low-stakes practice, scaffolding removed over time); and **giscus**
+  as the answer to the "window to ask questions" request — a free, no-backend discussion
+  widget backed by GitHub Discussions that can attach to each section page individually.
+- **One cosmetic defect noted, not yet fixed:** the contents page shows the heading "TABLE
+  OF CONTENTS" twice (once from the document's own `\chapter*` heading, once from tex4ht's
+  generated list). Trivial to remove; left for the next pass.
+- **Next step:** fix the duplicate heading, then build the actual site shell around this
+  output — sidebar navigation, styling, and giscus at the foot of each section page — so
+  the user has something concrete to react to, per the build-first instruction.
+
+### 2026-07-30 — Real build started; both conversion defects root-caused and fixed
 - User gave clear direction: build first rather than keep planning, with editorial
   licence to rearrange/simplify/add examples, following departmental structure where
   useful, writing as an experienced educator, and expecting real iteration once students
