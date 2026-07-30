@@ -29,30 +29,88 @@ copied yet. That directory holds:
   folders — downloaded textbooks (e.g. Casella & Berger) and other people's notes (MIT OCW
   slides, a PDF titled "Dr Nawas", a file literally named "Document from Jeshurun Mwanza").
 
-## Scope rule — settled, do not revisit without the user raising it
+## Scope rule — settled, refined 2026-07-30 (see log)
 
-**Only the 61 authored `.tex` files are in scope for the web app.** The reference PDFs
-sitting alongside them are other people's copyrighted material and must not be republished,
-converted, or otherwise built into any public-facing product. This was flagged and agreed
-on 2026-07-30, before any brainstorming started.
+**Only the user's own authored content goes on the platform** — but "authored" now means
+*originally written or reconciled by the user*, not necessarily identical to the existing
+61 `.tex` files verbatim. See "Content reconciliation process" below: some course notes
+need to be rewritten/simplified from multiple existing sources, not just converted as-is.
+The reference PDFs from other authors (Dr Nawa, textbooks, MIT OCW, etc.) are **never
+republished directly** — they are read for coverage/correctness only, never copied.
 
 ## Current phase
 
-**BRAINSTORMING.** No decisions have been made yet on audience, format, or technology. No
-code, no build, no content has been touched. The three open questions below are what the
-brainstorm needs to resolve before any building starts.
+**SCOPING / PRE-BUILD.** Audience, interactivity, and the free/paid phasing are now
+decided (see Decisions below). Not yet decided: which course to build first, the exact
+quiz interaction model, and the technical stack. No code, no content conversion, no build
+has started.
+
+## Decisions (settled 2026-07-30)
+
+1. **Audience: local Zambian system** — UNZA and other Zambian institutions specifically.
+   Not international, not a generic public resource. This is a deliberate narrowing.
+2. **Interactivity: both**, not either/or —
+   - a clean **searchable/browsable notes** side, AND
+   - a **quiz/problem engine** built from solved exam questions.
+3. **Rollout: free first, paid is the actual goal.** Launch free while the mechanism is
+   being built and while students discover it exists; convert to paid once it has traction.
+   The user has said the paid model is "something we will go over and over" — i.e. do not
+   over-plan monetisation mechanics now, but do not architect anything that would make
+   adding payment/gating later gratuitously hard.
+
+## Content reconciliation process — the Dr Nawa problem
+
+**Why this matters.** In the Zambian university system, lecturers/tutors teaching
+different sections of the *same* course are expected to teach broadly the *same* content,
+for fairness across sections. That is why the user's folders contain other people's
+material (e.g. "Dr Nawas.pdf") alongside his own — those are the shared/departmental
+reference notes for courses he also teaches, not random downloads.
+
+**The risk this creates for the platform:** if the site's notes for a course omit
+something another section's students are taught, or present it differently, that is a
+real conflict for a student comparing the site against their own lecturer — not just a
+copyright problem.
+
+**The process going forward, per course, before writing any web content:**
+1. Treat the user's own `.tex` notes as the primary draft.
+2. Treat the departmental/shared material (Dr Nawa or equivalent) as a **coverage
+   checklist** — what must be included so no section's student is missing something —
+   never as text to copy.
+3. Where the user's own notes are thin against that checklist, **write new original
+   material** to close the gap (textbooks like Casella & Berger may be consulted for
+   correctness, never copied).
+4. The result per course is **one clean, simplified, original synthesis** — a superset of
+   what any section teaches, in the user's own words, so no student is contradicted by it.
+
+This is materially more work than "convert existing tex to html" for courses where the
+user's own notes are not already the most complete version. Budget for it accordingly when
+picking the first course.
 
 ## Open questions
 
-1. **Audience** — the user's own students (a companion to lectures), the general public
-   (a portfolio/reputation piece, parallel to the climate site), or a paid/gated product?
-   This last option connects to an earlier side conversation about serving *local* Zambian
-   MSc/BSc students directly.
-2. **What "interactive" means** — a clean searchable/browsable notes site (documentation
-   style), a quiz/practice engine built from the exam-question banks with revealable
-   solutions, or something more ambitious?
-3. **Free and open, or gated/paid?** Affects hosting, whether accounts/payments are needed,
-   and how much of the 61 documents ship at launch versus later.
+4. **Which course to build first?** Two candidates, both live — the user is tutoring both
+   this semester:
+   - **Introduction to Statistics** — user's own notes AND exam questions both exist as
+     `.tex` (2020, dated but complete as a pair). Best candidate to prove the *whole*
+     pattern (notes + quiz engine) end to end, since both halves already exist in some form.
+   - **Mat1110** — recent (Jan 2026) authored notes exist, but no exam-question companion
+     has been located under an obviously matching name yet. Possibly the same course as the
+     folder "Analytic Geometry and Calculus Exam Questions" under UNZA's course-code
+     naming — **needs the user to confirm this mapping**, not assumed.
+5. **Exact quiz interaction model.** User said: "solve the questions and put them in the
+   engine where learners have to search for themselves" — read as: worked solutions exist
+   in the system, but the interaction requires the learner to search/attempt rather than
+   being handed the answer passively. Needs confirming whether that means (a) an
+   attempt-first-then-reveal quiz flow, (b) a searchable bank of solved problems the
+   learner browses/searches directly, or (c) both.
+6. **Technical approach for the free phase.** Not yet decided. Leaning towards reusing the
+   pattern already proven on the climate portfolio site — a static site (the climate site
+   uses Hugo + PaperMod, which already has client-side search via Fuse.js) for the notes
+   side, plus a lightweight client-side quiz component (question/answer data in JSON, no
+   backend) for the engine side. This would let phase 1 be free to host (e.g. GitHub
+   Pages) with no accounts or payment infrastructure, deferring that harder problem to the
+   paid phase as the user already intends. Not committed — worth confirming before
+   building anything.
 
 ## How to resume this project cold
 
@@ -67,6 +125,24 @@ brainstorm needs to resolve before any building starts.
 ## Status Log
 
 *(most recent first — append new entries, never rewrite old ones)*
+
+### 2026-07-30 (later same day) — Audience, interactivity and rollout decided
+- User confirmed: local Zambian system (UNZA + others), both notes-site and quiz-engine
+  (not either/or), free-first-then-paid rollout with paid as the real long-term goal.
+- User explained why some folders hold other authors' PDFs (e.g. Dr Nawas.pdf): Zambian
+  departments expect lecturers teaching the same course to teach the same content, so
+  these are shared/departmental reference notes, not arbitrary downloads.
+- This changes the scope rule: notes need active *reconciliation* against that shared
+  material (as a coverage checklist, never copied) plus original writing to fill gaps —
+  not a simple tex-to-html conversion. Documented as its own section above.
+- Checked the two courses the user is tutoring this semester (Introduction to Statistics,
+  Mat1110) as first-course candidates. Introduction to Statistics has both a notes and an
+  exam-questions `.tex` file (2020, dated but complete); Mat1110 has recent notes
+  (Jan 2026) but no confirmed matching exam-question source yet.
+- Three new open questions raised (4-6 above): which course to start with, the exact quiz
+  interaction model, and the technical approach for the free phase. **None answered yet.**
+- **Next step:** get the user's advice request answered — recommendation given in the same
+  conversation turn this log entry was written; awaiting the user's response to it.
 
 ### 2026-07-30 — Project opened, not yet scoped
 - User asked to build an interactive web app from the LaTeX teaching materials, as a
