@@ -66,7 +66,16 @@ has started.
    earlier Monday-deadline framing — Monday matters for the user's own teaching, not for
    the platform.
 
-## Content reconciliation process — the Dr Nawa problem
+## Content reconciliation process — the standing rule for EVERY course, not a one-off
+
+**Confirmed 2026-07-30: this applies uniformly as more courses are added over time, not
+just to Probability Theory.** The user's own framing: "combine so that at the same time we
+own the material as we [keep] adding more and more." Read as: growth in course count must
+not outpace ownership — every course added, however many there eventually are, goes
+through the same combine-and-own step before publishing, never a shortcut conversion of
+someone else's material. This is a deliberate constraint on the pace of growth: a course
+is not "added" until it has been synthesised into original material, however long that
+takes for that particular course.
 
 **Why this matters.** In the Zambian university system, lecturers/tutors teaching
 different sections of the *same* course are expected to teach broadly the *same* content,
@@ -94,17 +103,55 @@ This is materially more work than "convert existing tex to html" for courses whe
 user's own notes are not already the most complete version. Budget for it accordingly when
 picking the first course.
 
+## Course reference — corrected 2026-07-30, do not re-guess this
+
+**UNZA's foundation maths courses are three separate courses by faculty, not variants of
+one thing** (an earlier guess in this file wrongly conflated them — corrected):
+- **MAT1100** — Engineering and Natural Sciences
+- **MAT1110** — Humanities (= "Foundation Mathematics and Statistics for Social Sciences",
+  the one the user tutors). **The "Foundation Mathematics" folder in `LaTeX_Projects` is a
+  DIFFERENT course for different learners — do not use it for Mat1110.**
+- **MAT1120** — Health Sciences
+
+**Mat1110 content is on hold until the user supplies this semester's actual material** —
+do not build from the existing `Mat1110.tex` (Jan 2026) without checking with the user
+first, since he is writing fresh notes for this course this semester.
+
+**Two courses inspected in detail as worked examples of the reconciliation problem, while
+Mat1110/Intro Stats material is pending:**
+
+- **Introduction to Probability — LOW CONFLICT, good candidate to start on now.**
+  `Introduction To Probability.tex` (Jan 2026) is the user's own, complete, well-structured
+  notes (2 chapters seen in the ToC: probability axioms/Bayes/counting; random variables
+  and distributions incl. PGFs/MGFs). A matching `Introduction To Probability Exam
+  Questions.tex` (2020) exists as the question-bank half. User's comment: this 2026
+  version "is what was done last semester... often the notes they don't even change them"
+  — i.e. treat as current/usable, not stale. **No competing departmental version found for
+  this course** — unlike the cases below, this one may not need the reconciliation process,
+  only conversion.
+
+- **Probability Theory (MAT 3902) — HIGH CONFLICT, a second Dr-Nawa-style case.** Two
+  versions exist:
+  - the user's own `PROBABILITY THEORY` (2020, in `LaTeX_Projects`) — his authored notes.
+  - `Probality_Theory_Notes/MAT 3902 Probability theory.ver6.pdf` (Dec 2025) plus three
+    2024 tutorial sheets — reads as the **departmental/currently-used version** ("ver6"
+    versioning, recent tutorial sheets attached). User's own words: "there is that I did
+    and the one they be using this time" — confirming the ver6 PDF is what is actually
+    taught now, not his 2020 version. **This is exactly the reconciliation-process case**:
+    his notes as draft base, the ver6 PDF as the coverage checklist, original synthesis as
+    the output — never copy the ver6 PDF directly.
+
 ## Open questions
 
-4. **Which course to build first? — PARTLY SUPERSEDED, see log 2026-07-30 (later).** The
-   user will write **fresh notes and exam questions for this semester** for both Mat1110
-   and Introduction to Statistics — the existing 2020/2026 `.tex` files in `LaTeX_Projects`
-   are prior versions, not necessarily this semester's content as-is. **Semester starts
-   Monday.** So the real question is not "which course" but "what pipeline can receive and
-   publish new content as the user produces it week by week," for both courses in
-   parallel, starting almost immediately. The old files are still useful as a starting
-   pattern/style reference and for the reconciliation-checklist process above, but should
-   not be assumed to be what goes live.
+4. **Which course to build first? — Narrowing.** Mat1110 and Introduction to Statistics
+   remain the semester's real teaching priority but are both blocked on the user supplying
+   current material ("I will get everything this week or as days proceed"). **Introduction
+   to Probability has no such blocker and could be started immediately** — proposed in
+   this conversation turn, not yet confirmed by the user, as the first real build target:
+   it needs conversion but not reconciliation, making it the simplest possible first pass
+   at the notes+quiz pattern. Probability Theory (MAT 3902) would be a good *second*
+   example specifically because it exercises the reconciliation process, once the simple
+   case is proven.
 5. **Exact quiz interaction model.** User said: "solve the questions and put them in the
    engine where learners have to search for themselves" — read as: worked solutions exist
    in the system, but the interaction requires the learner to search/attempt rather than
@@ -134,7 +181,39 @@ picking the first course.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
-### 2026-07-30 (latest) — Scope widened, timeline relaxed
+### 2026-07-30 (latest) — Confirmed: combine-and-own is the rule for every course
+- User confirmed the reconciliation ("combine so we own the material") process is not a
+  one-off for Probability Theory but the standing rule as more courses are added over
+  time. Generalised in the section above rather than left implicit. Practical
+  consequence: the rate at which courses are added is paced by how much original
+  synthesis each needs, not by conversion speed — which is fine given the relaxed,
+  end-of-semester timeline already agreed.
+- No new open question raised by this; it tightens an existing rule rather than adding
+  a new decision to make.
+
+### 2026-07-30 — Narrowed to 2 courses; corrected Mat1110; found a clean starter
+- User clarified the "showcase more courses" comment: the real driver is that **students
+  repeat courses often**, not that many different topics are needed for launch. Confirmed
+  going with **two courses this semester** (Mat1110, Introduction to Statistics), with
+  wider-catalogue growth as a later, visible "building up over time" phase — which the
+  user explicitly said he likes.
+- **Corrected a wrong assumption:** MAT1100/1110/1120 are three separate UNZA foundation
+  courses split by faculty (Engineering/NS, Humanities, Health Sciences respectively), not
+  variants of one course. Mat1110 = Humanities = "Foundation Mathematics and Statistics
+  for Social Sciences." The "Foundation Mathematics" folder in `LaTeX_Projects` is for a
+  *different* course entirely — must not be used as a Mat1110 source. Mat1110 build is on
+  hold until the user delivers this semester's real material.
+- Per the user's redirect, inspected two courses as worked examples while waiting on
+  Mat1110/Intro Stats content: **Introduction to Probability** (clean, recent, complete,
+  no conflicting version — a strong immediate starting candidate) and **Probability
+  Theory / MAT 3902** (a second real reconciliation case: the user's 2020 notes vs a
+  "ver6" departmental PDF that is what's actually taught now). Both documented in detail
+  above.
+- **Proposed, not yet confirmed:** start real building on Introduction to Probability now,
+  since it has no blocker, while Mat1110/Intro Stats material is pending this week.
+- **Next step:** get the user's go-ahead on that proposal.
+
+### 2026-07-30 (earlier) — Scope widened, timeline relaxed
 - User wants **more than the 2 current courses** showcased at launch — breadth helps
   build an audience. The other ~28 topics already sitting in `LaTeX_Projects` (as authored
   `.tex`, needing the same reconciliation treatment) are back in scope for the launch
