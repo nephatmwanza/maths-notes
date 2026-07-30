@@ -20,7 +20,10 @@
   --thm:#12603f;  --thm-wash:#e9f3ee;
   --ex:#a16207;   --ex-wash:#fdf6e7;
   --rem:#6b7280;  --rem-wash:#f4f5f7;
-  --sidebar:19rem; --measure:36rem;
+  /* 36rem is the classic prose measure, but it clips wide displays - a `cases`
+     block loses the end of "is continuous" behind a scroll edge. 41rem keeps
+     the line length comfortable and fits the widest formulas in the notes. */
+  --sidebar:19rem; --measure:41rem;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme=light]){
@@ -137,7 +140,19 @@ a:hover{color:var(--accent-deep)}
 .newtheorem ol .proof,.newtheorem ul .proof{margin-left:-.6rem}
 
 /* ---------- maths ---------- */
-mjx-container[display]{margin:1.25rem 0!important;overflow-x:auto;overflow-y:hidden}
+/* A handful of displays (long `cases` blocks, wide conditional-density
+   fractions) are simply wider than any sane text measure. They scroll rather
+   than shrink - but WITHOUT max-width the container grows past its parent and
+   drags the whole proof box out with it, so both properties are needed. */
+mjx-container[display]{
+  margin:1.25rem 0!important;max-width:100%;overflow-x:auto;overflow-y:hidden;
+}
+/* Give the scroll a visible edge, otherwise the reader has no clue the rest of
+   the formula exists. */
+mjx-container[display]::-webkit-scrollbar{height:6px}
+mjx-container[display]::-webkit-scrollbar-thumb{
+  background:var(--rule);border-radius:3px;
+}
 .equation,.equation-star{margin:1.25rem 0}
 
 /* ---------- figures ---------- */

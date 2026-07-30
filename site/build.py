@@ -111,6 +111,48 @@ def read_toc(build: Path) -> list[dict]:
     return items
 
 
+# A numbered equation environment. `equation*`/`align*` carry no number, so the
+# trailing `\b` (not `[*]`) matters.
+NUMBERED_EQ = re.compile(r"\\begin\s*\{(equation|align|gather|multline)\}")
+
+
+def equation_numbering(build: Path, items: list[dict]) -> dict[str, tuple[int, int]]:
+    """Work out what number LaTeX gives each page's equations.
+
+    Splitting the document hands MathJax a problem it cannot see: it numbers
+    equations per *page*, restarting at 1, while LaTeX numbers them per
+    *chapter*, continuing across the sections a chapter is split into. So a
+    display that LaTeX calls (2.2) renders as (1), and an \\eqref pointing at
+    it - which tex4ht resolves using LaTeX's number - says 2.2. The two
+    disagree on the same page.
+
+    Returns {page: (chapter_number, offset)} so each page can be told which
+    chapter it is in and how many numbered equations came before it.
+    """
+    chapter_of: dict[str, int] = {}
+    order: list[str] = []
+    chapter = 0
+    for it in items:
+        href = it["href"]
+        if re.match(r".*ch\d+\.html$", href):
+            chapter += 1
+        if href not in chapter_of:
+            chapter_of[href] = max(chapter, 1)
+            order.append(href)
+
+    numbering, seen = {}, {}
+    for href in order:
+        page = build / href
+        if not page.is_file():
+            continue
+        ch = chapter_of[href]
+        count = len(NUMBERED_EQ.findall(
+            page.read_text(encoding="utf-8", errors="replace")))
+        numbering[href] = (ch, seen.get(ch, 0))
+        seen[ch] = seen.get(ch, 0) + count
+    return numbering
+
+
 def sidebar(items: list[dict], current: str, course_title: str) -> str:
     rows = [
         '<aside class="sidebar" id="sidebar">',
@@ -167,7 +209,8 @@ def qa_block(page_id: str) -> str:
 MARKER = "<!-- built by site/build.py -->"
 
 
-def process(path: Path, items: list[dict], course_title: str) -> bool:
+def process(path: Path, items: list[dict], course_title: str,
+            numbering: tuple[int, int] | None = None) -> bool:
     html = path.read_text(encoding="utf-8", errors="replace")
 
     # Not idempotent: a second pass would nest another layout shell and a second
@@ -193,6 +236,17 @@ def process(path: Path, items: list[dict], course_title: str) -> bool:
         r"../../../site/assets/mathjax/es5/\1",
         html,
     )
+
+    # Make MathJax's equation tags agree with the numbers LaTeX assigned (and
+    # that \eqref links already use). See equation_numbering().
+    if numbering and NUMBERED_EQ.search(html):
+        chapter, offset = numbering
+        html = html.replace(
+            'MathJax = { tex: { tags: "ams", }, };',
+            "MathJax = { tex: { tags: \"ams\", tagformat: { "
+            f"number: (n) => `{chapter}.` + (n + {offset}) "
+            "} }, };",
+        )
 
     nav = page_nav(html)
     body = re.search(r"<body>(.*)</body>", html, re.S)
@@ -235,8 +289,12 @@ def main() -> int:
         print("warning: no contents entries found — sidebar will be empty",
               file=sys.stderr)
 
+    # Must be computed before any page is rewritten: it counts equations in the
+    # raw conversion output, in document order.
+    eqnums = equation_numbering(build, items)
+
     pages = sorted(build.glob("*.html"))
-    done = sum(process(p, items, title) for p in pages)
+    done = sum(process(p, items, title, eqnums.get(p.name)) for p in pages)
     skipped = len(pages) - done
     print(f"processed {done} pages, {len(items)} sidebar entries")
     if skipped:
