@@ -37,6 +37,51 @@
 \usetikzlibrary{patterns,graphs,arrows.meta,shapes,trees,bending,fadings,quotes,angles}
 \usepackage{forest}
 
+% ---------------------------------------------------------------------------
+% House diagram style.
+%
+% The diagrams were drawn over several years and drifted apart: five different
+% blues, arrow tips from two different libraries, label sizes ranging from
+% \tiny to \large, and line weights from "thin" to "ultra thick". Individually
+% each is fine; read one after another they look like they came from different
+% books.
+%
+% Rather than edit 41 pictures by hand, this block redefines the few names they
+% already share. Every diagram keeps its own structure and picks up one
+% consistent look:
+%   * the named colours are repointed at a single palette, so every "blue"
+%     curve in the notes is the same blue (and matches the theorem boxes in
+%     the stylesheet);
+%   * the built-in weight keywords are flattened to a narrow range, so no
+%     diagram shouts next to its neighbour;
+%   * arrow tips, joins and label size are set once for all pictures.
+% ---------------------------------------------------------------------------
+
+% Palette. These match the accent colours used by the web stylesheet.
+\definecolor{blue}{HTML}{1D4ED8}    % primary: curves, bars, the main object
+\definecolor{red}{HTML}{B91C1C}     % contrast: the second object, highlights
+\definecolor{green}{HTML}{12603F}   % agreement / accepted region
+\definecolor{orange}{HTML}{A16207}  % annotation, worked-example emphasis
+\definecolor{gray}{HTML}{6B7280}    % axes, grids, everything structural
+\definecolor{cyan}{HTML}{0E7490}
+\definecolor{purple}{HTML}{6D28D9}
+\definecolor{pink}{HTML}{DB2777}    % (was rgb 1,0.5,0.5 - too pale to print)
+
+\tikzset{
+  every picture/.style={
+    font=\small,
+    line join=round,
+    line cap=round,
+    >=Stealth,                      % one arrow tip everywhere
+  },
+  % Flatten the weight range. The keywords stay valid so no picture needs
+  % editing; they just no longer differ by a factor of five.
+  thin/.style={line width=0.5pt},
+  thick/.style={line width=0.9pt},
+  very thick/.style={line width=1.1pt},
+  ultra thick/.style={line width=1.3pt},
+}
+
 
 % Required for combinations calculation in pgfplots
 \pgfmathdeclarefunction{binom}{2}{%
@@ -57,6 +102,22 @@
 
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
+
+% Second half of the house diagram style (see the block above). It has to sit
+% after \usepackage{pgfplots}, which defines \pgfplotsset.
+\pgfplotsset{
+  every axis/.append style={
+    axis lines=left,
+    axis line style={gray, line width=0.6pt},
+    tick style={gray},
+    grid style={dashed, gray!30, line width=0.4pt},
+    label style={font=\small},
+    tick label style={font=\footnotesize},
+    title style={font=\small\bfseries, yshift=2pt},
+    legend style={font=\footnotesize, draw=gray!40, fill=white},
+    every axis plot/.append style={line width=1pt},
+  },
+}
 
 
 
@@ -93,7 +154,7 @@
 \newtheorem{lem}[thm]{Lemma}
 \newtheorem{tech}{Technique}[section]
 \newtheorem{fact}[thm]{Fact}
-\renewcommand{\contentsname}{TABLE OF CONTENTS}
+\renewcommand{\contentsname}{Contents}
 \renewcommand\bibname{REFERENCES}
 %\renewcommand{\qedsymbol}{$\blacksquare$}
 
@@ -196,7 +257,6 @@
 %Table of contents
 \begin{spacing}{1.7}
 \tableofcontents
-\addcontentsline{toc}{chapter}{TABLE of CONTENTS}
 \end{spacing}
 
 \newpage
@@ -471,7 +531,7 @@ We know that $P(A \cup B)$ is the sum of the disjoint regions:
 
 
 
-\section{Independent Events, Condition Probability and Bayes Theorem}
+\section{Independent Events, Conditional Probability and Bayes' Theorem}
 \subsection{Independent Events}
 \begin{definition}
 Events $A$ and $B$ are said to be independent if and only if $P(A\cap B)=P(A)P(B)$.
@@ -533,7 +593,7 @@ i.e $PA'$ and $B'$ are independent.
 
 
 \subsection{Conditional Probabilities}
-The probability properties discussed so far relate to the entire sample space. We have used the symbol $P(A)$ and will continue to do so however we should have been more precise and used $P(A/S)$ to read " probability of $A$ given the sample space $S$".
+The probability properties discussed so far relate to the entire sample space. We have used the symbol $P(A)$ and will continue to do so however we should have been more precise and used $P(A/S)$ to read `` probability of $A$ given the sample space $S$''.
 
 The following definition justifies why $P(A/S)$ is simply $P(A)$ if $S$ is the sample space.
 
@@ -1238,7 +1298,7 @@ $$P(2.4 < X < 3.5) = \int_{2.4}^{3.5} \frac{x+1}{8} \, dx = \left[ \frac{(x+1)^2
 
 
 \section{Mathematical Expectations and Generating Functions of Random Variables}
-While the p.m.f and p.d.f provide a complete description of a random variable, we often require concise numerical descriptors to summarize a distribution's location and spread. This section moves from basic Expectations to the powerful "transform" methods—Generating Functions—which serve as essential tools for identifying distributions and simplifying the calculation of higher-order moments.
+While the p.m.f and p.d.f provide a complete description of a random variable, we often require concise numerical descriptors to summarize a distribution's location and spread. This section moves from basic Expectations to the powerful ``transform'' methods—Generating Functions—which serve as essential tools for identifying distributions and simplifying the calculation of higher-order moments.
 
 \subsection{Expectations and Moments}
 \vspace{-8pt}
@@ -1529,7 +1589,7 @@ Let $X$ have the p.d.f \[f_X(x) = \begin{cases}
 
 
 \subsection{Probability Generating Functions (PGFs)}
-For discrete random variables taking non-negative integer values, the PGF acts as a powerful "storage device" where the individual probabilities of the distribution are encoded as the coefficients of a power series.
+For discrete random variables taking non-negative integer values, the PGF acts as a powerful ``storage device'' where the individual probabilities of the distribution are encoded as the coefficients of a power series.
 
 \begin{definition}
 For a discrete random variable $X$, the PGF, denoted by $G_X(t)$, is defined as $$G_X(t) = E(t^X) = \sum_{x=0}^{\infty} t^x P(X=x)$$ for all values of $t \in \mathbb{R}$ for which the power series converges.
@@ -1598,7 +1658,7 @@ G_X(t) & = \sum_x t^x P(X = x)\\
 \end{align*}
 
 
-Not that ``Standard Geometric Series" is usually presented as:$$\sum_{n=0}^{\infty} r^n = \frac{1}{1-r}$$However, if you start at $n=1$, you are simply missing the first term ($r^0 = 1$):$$\sum_{n=1}^{\infty} r^n = \left(\sum_{n=0}^{\infty} r^n\right) - 1 = \frac{1}{1-r} - 1 = \frac{r}{1-r}.$$
+Note that the ``standard geometric series'' is usually presented as:$$\sum_{n=0}^{\infty} r^n = \frac{1}{1-r}$$However, if you start at $n=1$, you are simply missing the first term ($r^0 = 1$):$$\sum_{n=1}^{\infty} r^n = \left(\sum_{n=0}^{\infty} r^n\right) - 1 = \frac{1}{1-r} - 1 = \frac{r}{1-r}.$$
 
 Thus, the closed-form PGF is $$G_X(t) = \frac{\frac{t}{2}}{1 - \frac{t}{2}} = \frac{t}{2-t}, \quad \text{for } |t| < 2.$$
 \end{proof}
@@ -1779,11 +1839,11 @@ The mean
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Some Important Discrete Probability Mass Function}
-we focus on specific families of discrete random variables that appear frequently in scientific research, engineering, and economics. Each distribution is defined by one or more parameters that determine its shape and characteristics. By identifying a situation as fitting one of these models, we can use pre-derived formulas for their mean, variance, and generating functions.
+We focus on specific families of discrete random variables that appear frequently in scientific research, engineering, and economics. Each distribution is defined by one or more parameters that determine its shape and characteristics. By identifying a situation as fitting one of these models, we can use pre-derived formulas for their mean, variance, and generating functions.
 
 
 \subsection{The Bernoulli Distribution}
-The Bernoulli trial is the simplest form of a random experiment, characterized by exactly two possible outcomes: "success" and "failure." By convention, we map the outcome "success" to the value $1$ and "failure" to the value $0$. Let $p$ denote the probability of success, where $0 \le p \le 1$. It follows that the probability of failure is $1-p$, often denoted as $q$.
+The Bernoulli trial is the simplest form of a random experiment, characterized by exactly two possible outcomes: ``success'' and ``failure.'' By convention, we map the outcome ``success'' to the value $1$ and ``failure'' to the value $0$. Let $p$ denote the probability of success, where $0 \le p \le 1$. It follows that the probability of failure is $1-p$, often denoted as $q$.
 
 \begin{definition}
 A random variable $X$ is said to follow a Bernoulli distribution, denoted $X \sim \operatorname{Ber}(p)$, if its probability mass function (PMF) is:$$ f(x; p) = p^x(1-p)^{1-x}, \quad x \in {0, 1} $$where $p = P(X=1)$.
@@ -2001,7 +2061,7 @@ To derive the mean $E(X)$ using the PGF, it is mathematically more convenient to
 
 \begin{proof}
 \begin{enumerate}
-\item Instead of using the "shortcut" formula, it is often easier to differentiate the summation form directly. This avoids the denominator issue entirely:$$ G_X'(t) = \frac{d}{dt} \left[ \sum_{x=1}^N \frac{1}{N}t^x \right] = \sum_{x=1}^N \frac{x}{N}t^{x-1} $$When we evaluate at $t=1$:$$ E(X) = G_X'(1) = \sum_{x=1}^N \frac{x}{N}(1)^{x-1} = \frac{1}{N} \sum_{x=1}^N x = \frac{N+1}{2} $$
+\item Instead of using the ``shortcut'' formula, it is often easier to differentiate the summation form directly. This avoids the denominator issue entirely:$$ G_X'(t) = \frac{d}{dt} \left[ \sum_{x=1}^N \frac{1}{N}t^x \right] = \sum_{x=1}^N \frac{x}{N}t^{x-1} $$When we evaluate at $t=1$:$$ E(X) = G_X'(1) = \sum_{x=1}^N \frac{x}{N}(1)^{x-1} = \frac{1}{N} \sum_{x=1}^N x = \frac{N+1}{2} $$
 \item The L'Hôpital's Rule Method (Using the Closed Form)If you insist on using the closed-form $G_X(t) = \frac{t(1-t^N)}{N(1-t)}$, you must use limits. 
 \end{enumerate}
 \end{proof}
@@ -2817,7 +2877,7 @@ P(X<7) & = P(X\leq 6)\\
 
 \subsection{The Zeta (or Zipf) Distribution}
 \vspace{-10pt}
-The Zeta distribution, frequently referred to as the Zipf distribution, is a power-law distribution typically utilized to model the frequency of occurrences of data in diverse fields such as linguistics, economics, and social sciences. It effectively accounts for "long-tail" phenomena where a small number of members in a population account for a high proportion of the total frequency (popularity), while the majority remain in relative obscurity. Notable applications include the distribution of family incomes, the frequency of words in a language, and the population sizes of cities.
+The Zeta distribution, frequently referred to as the Zipf distribution, is a power-law distribution typically utilized to model the frequency of occurrences of data in diverse fields such as linguistics, economics, and social sciences. It effectively accounts for ``long-tail'' phenomena where a small number of members in a population account for a high proportion of the total frequency (popularity), while the majority remain in relative obscurity. Notable applications include the distribution of family incomes, the frequency of words in a language, and the population sizes of cities.
 
 
 \begin{definition}
@@ -3042,7 +3102,7 @@ Thus \[M_X(t)= \begin{cases}
 \end{cases}.\]
 
 \begin{remark}
-Foundation of Simulation: In computer science and computational statistics, the "Random" function in almost all programming languages generates a $U(0, 1)$ value. Other distributions (like Normal or Exponential) are then generated by transforming these uniform values using the Inverse Transform Method.
+Foundation of Simulation: In computer science and computational statistics, the ``Random'' function in almost all programming languages generates a $U(0, 1)$ value. Other distributions (like Normal or Exponential) are then generated by transforming these uniform values using the Inverse Transform Method.
 \end{remark}
 
 
@@ -3051,7 +3111,7 @@ Foundation of Simulation: In computer science and computational statistics, the 
 
 \subsection{Exponential Distribution}
 \vspace{-15pt}
-The exponential is the distribution of the amount of time until some specific event occurs (i.e waiting time). For instance, how long one waits before a new component ''dies"?
+The exponential is the distribution of the amount of time until some specific event occurs (i.e waiting time). For instance, how long one waits before a new component ``dies''?
 
 
 
@@ -3146,7 +3206,7 @@ where the mean and variance are
     \end{tikzpicture}
 \end{minipage}
 
-\caption{Comparison of Exponential Distribution parameterizations. Note how increasing $\lambda$ makes the Rate Form (left) "taller," but makes the Scale Form (right) "flatter."}
+\caption{Comparison of Exponential Distribution parameterizations. Note how increasing $\lambda$ makes the Rate Form (left) ``taller,'' but makes the Scale Form (right) ``flatter.''}
 \end{figure}
 
 
@@ -3308,7 +3368,7 @@ therefore
 \textbf{ }
 \begin{enumerate}
 \item We can present the m.g.f of the gamma as \[M_X(t)=\left(\frac{\lambda}{\lambda -t}\right)^{\alpha}=\left(\frac{1}{1-t/\lambda}\right)^{\alpha}=\left(1-\frac{t}{\lambda}\right)^{-\alpha}.\]
-\item The "Shape" parameter ($\alpha$) dictates the physical appearance of the curve (as seen in plots below), while the "Rate" parameter ($\lambda$) determines the scale or "spread" of the data along the $x$-axis.
+\item The ``Shape'' parameter ($\alpha$) dictates the physical appearance of the curve (as seen in plots below), while the ``Rate'' parameter ($\lambda$) determines the scale or ``spread'' of the data along the $x$-axis.
 \item While the Exponential distribution models the time until the first event occurs in a Poisson process, the Gamma distribution models the time required for $\alpha$ independent events to occur.
 \item The gamma is a sum of independent exponentials. Exponential is  $X\thicksim \operatorname{GAM}(1,\lambda).$
 \end{enumerate}
@@ -3575,7 +3635,7 @@ Therefore, the variance of $X$ is
 
 
 \begin{remark}
-The Beta distribution is famously known as the "Probability of a Probability." In Bayesian statistics, it is used as the conjugate prior for the Bernoulli and Binomial distributions. For example, if you are trying to estimate the probability of success of a new crop variety in a specific Zambian province, the Beta distribution represents your "certainty" about that probability.
+The Beta distribution is famously known as the ``Probability of a Probability.'' In Bayesian statistics, it is used as the conjugate prior for the Bernoulli and Binomial distributions. For example, if you are trying to estimate the probability of success of a new crop variety in a specific Zambian province, the Beta distribution represents your ``certainty'' about that probability.
 \end{remark}
 
 
@@ -3730,7 +3790,7 @@ A random variable is said to have a Cauchy distribution with parameters $a$ and 
 
 \end{axis}
 \end{tikzpicture}
-\caption{The Cauchy distribution under different parameters. Note how $\alpha$ controls the ``scale" and $a$ controls the location.}
+\caption{The Cauchy distribution under different parameters. Note how $\alpha$ controls the ``scale'' and $a$ controls the location.}
 \end{figure}
 
 
@@ -3864,7 +3924,7 @@ Show that the mean of $X \thicksim \operatorname{Rayleigh}(\alpha)$ is \[E(X) = 
 
 \subsection{The Pareto Distribution}
 \vspace{-15pt}
-The Pareto distribution is a "power-law" distribution traditionally used to model the distribution of wealth and income. In this model, the parameter $\lambda$ represents the minimum value (such as a minimum wage), while $\kappa$ determines the shape of the distribution. Beyond economics, it is used to model the lifetime of objects with a mandatory warranty period $\lambda$, or the duration of events with a guaranteed minimum length $\lambda$, such as a labor strike.
+The Pareto distribution is a ``power-law'' distribution traditionally used to model the distribution of wealth and income. In this model, the parameter $\lambda$ represents the minimum value (such as a minimum wage), while $\kappa$ determines the shape of the distribution. Beyond economics, it is used to model the lifetime of objects with a mandatory warranty period $\lambda$, or the duration of events with a guaranteed minimum length $\lambda$, such as a labor strike.
 
 \begin{definition}[\textbf{Pareto Distribution $X\thicksim\operatorname{Pareto}(\lambda, \kappa)$}]
 A Pareto random variable $X$ with scale parameter $\lambda > 0$ and shape parameter $\kappa > 0$ has a p.d.f. given by:$$f\_X(x) = \frac{\kappa \lambda^{\kappa}}{x^{\kappa + 1}}, , \quad\quad x \geq \lambda.$$
@@ -3927,7 +3987,7 @@ the mean is \[E(X) = \frac{\kappa \lambda}{\kappa - 1}\,\,\, \text{for}\quad \ka
 \textbf{ }
 \begin{enumerate}
 \item The Pareto distribution is the mathematical backbone of the 80/20 rule (the Pareto Principle). For example, it often models how $80\%$ of a country's wealth is held by $20\%$ of the population.
-\item Unlike the Normal or Gamma distributions, which can approach zero, the Pareto has a hard ``floor" at $\lambda$. In many engineering applications, this represents the ``guaranteed" life of a component before any failure is even possible.
+\item Unlike the Normal or Gamma distributions, which can approach zero, the Pareto has a hard ``floor'' at $\lambda$. In many engineering applications, this represents the ``guaranteed'' life of a component before any failure is even possible.
 \end{enumerate}
 \end{remark}
 
@@ -4502,7 +4562,7 @@ Now, since  $(X-\mu)^2\geq t^2  \iff |X-\mu|\geq t$. Therefore, \[P(|X-\mu|\geq 
 \begin{remark}
 \textbf{ }
 \begin{enumerate}
-\item[i)] \textbf{The Complementary Nature of the Bound:}The event $|X-\mu| \geq t$ represents the "tails" of the distribution—values that are far from the mean.$$ |X-\mu| \geq t \iff (X \geq \mu + t) \text{ or } (X \leq \mu - t) $$
+\item[i)] \textbf{The Complementary Nature of the Bound:}The event $|X-\mu| \geq t$ represents the ``tails'' of the distribution—values that are far from the mean.$$ |X-\mu| \geq t \iff (X \geq \mu + t) \text{ or } (X \leq \mu - t) $$
 \item[ii)] \textbf{Visualizing the Upper and Lower Bounds:}
 If we set $t = k\sigma$, Chebyshev's inequality tells us:
 \begin{itemize}
@@ -4562,7 +4622,7 @@ If we set $t = k\sigma$, Chebyshev's inequality tells us:
 
 
 \begin{example}
-From a quick analysis of records a materials control manger estimates that the mean and standard deviation of the "lead time" required in ordering a small value are 8 days and 1.5 days respectively. The manager is willing to assume the mean and variance to be absolutely correct. The manager would like to determine a time interval such that the probability is at least $\frac{8}{9}$  that the order will be received during the time interval.
+From a quick analysis of records a materials control manager estimates that the mean and standard deviation of the ``lead time'' required in ordering a small value are 8 days and 1.5 days respectively. The manager is willing to assume the mean and variance to be absolutely correct. The manager would like to determine a time interval such that the probability is at least $\frac{8}{9}$  that the order will be received during the time interval.
 \end{example}
 
 \begin{proof}[\textbf{\textit{Solution}}]
@@ -4742,7 +4802,7 @@ What probability that a teenager chosen at random spends at least twice as much 
 
 
 \begin{proof}[\textit{Solution}.]
-The region, $B$, in the $xy-$plane corresponding to the event $``X \geq 2Y"$.
+The region, $B$, in the $xy-$plane corresponding to the event ``$X \geq 2Y$''.
 
 \begin{figure}[H]
 \centering

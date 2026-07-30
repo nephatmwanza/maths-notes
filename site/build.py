@@ -1,0 +1,260 @@
+#!/usr/bin/env python3
+"""
+Post-process tex4ht output into finished course pages.
+
+tex4ht gets the *structure* right — split pages, working navigation, correct
+maths — but the presentation is plain and it loses some semantics on the way.
+This script closes that gap. It is deliberately a post-processing step rather
+than a fork of tex4ht: the conversion stays a stock, reproducible command, and
+everything opinionated lives here where it can be read and changed.
+
+What it does, per page:
+
+1. TAGS THEOREM BLOCKS BY TYPE. tex4ht marks Definition, Theorem, Lemma,
+   Example and Remark all as `class='newtheorem'`, so they are visually
+   identical. The type is only recoverable from the bold label inside the
+   block, so we read that and add `nt-definition`, `nt-theorem`, etc. This is
+   what lets the stylesheet colour them apart — the single biggest readability
+   win in the whole pipeline.
+2. WRAPS PROOFS so they can be styled as subordinate to the statement above.
+3. BUILDS A SIDEBAR from the generated contents page, marks the current page,
+   and injects it into every page — the persistent course tree that Paul's
+   Online Notes uses and that tex4ht does not provide.
+4. REPLACES the bare `[next] [prev] [up]` link row with a proper page-footer
+   nav.
+5. ADDS a giscus question box at the foot of each section page, so a learner
+   can ask about the specific topic rather than in a general forum.
+
+Usage:  python3 build.py <course-dir>
+        e.g. python3 build.py ../courses/introduction-to-probability
+"""
+from __future__ import annotations
+
+import re
+import sys
+from html import unescape
+from pathlib import Path
+
+# Recognised theorem-like environments, in the order we test for them.
+THEOREM_TYPES = [
+    "definition", "theorem", "lemma", "proposition", "corollary",
+    "example", "exercise", "remark", "note", "conjecture",
+]
+
+# giscus configuration. Left as placeholders on purpose: the repo has to exist
+# and have Discussions enabled before these resolve to anything, and publishing
+# a half-configured widget would silently fail in the learner's browser. Set
+# GISCUS_READY = True once the real values are in.
+GISCUS_READY = False
+GISCUS = {
+    "repo": "OWNER/REPO",
+    "repo_id": "REPO_ID",
+    "category": "Q&A",
+    "category_id": "CATEGORY_ID",
+}
+
+
+def theorem_type(block: str) -> str | None:
+    """Read the bold label at the head of a theorem block to recover its type."""
+    head = re.search(r"<span class='head'>(.*?)</span>", block, re.S)
+    text = unescape(re.sub(r"<[^>]+>", " ", head.group(1) if head else block[:400])).lower()
+    for t in THEOREM_TYPES:
+        if re.search(rf"\b{t}\b", text):
+            return t
+    return None
+
+
+def tag_theorems(html: str) -> str:
+    """Add a type class to each generic `newtheorem` div."""
+    out, pos = [], 0
+    for m in re.finditer(r"<div class='newtheorem'>", html):
+        # find this div's matching close so we only inspect its own content
+        start = m.end()
+        depth, i = 1, start
+        while depth and i < len(html):
+            nxt = re.search(r"<div\b|</div>", html[i:])
+            if not nxt:
+                break
+            i += nxt.end()
+            depth += 1 if nxt.group(0) != "</div>" else -1
+        t = theorem_type(html[start:i])
+        cls = f"newtheorem nt-{t}" if t else "newtheorem"
+        out.append(html[pos:m.start()])
+        out.append(f"<div class='{cls}'>")
+        pos = m.end()
+    out.append(html[pos:])
+    return "".join(out)
+
+
+# NOTE: proofs need no wrapping here. tex4ht already emits `<div class='proof'>`
+# around them; an earlier version of this script added a second one, which left
+# an unbalanced div that browsers silently repaired. The stylesheet targets
+# tex4ht's own `.proof` class directly.
+
+
+def read_toc(build: Path) -> list[dict]:
+    """Parse the generated contents page into a flat nav structure."""
+    toc_files = sorted(build.glob("*li1.html"))
+    if not toc_files:
+        return []
+    html = toc_files[0].read_text(encoding="utf-8", errors="replace")
+    items = []
+    for m in re.finditer(
+        r"href='([^']*?(?:ch|se)\d+\.html)#[^']*'>([^<]+)", html
+    ):
+        href, label = m.group(1), unescape(m.group(2)).strip()
+        items.append({
+            "href": href,
+            "label": label,
+            "kind": "ch" if "ch" in Path(href).stem[-4:] else "sec",
+        })
+    return items
+
+
+def sidebar(items: list[dict], current: str, course_title: str) -> str:
+    rows = [
+        '<aside class="sidebar" id="sidebar">',
+        '<a class="sb-brand" href="../../../site/index.html">Maths &amp; Stats <span>Notes</span></a>',
+        f'<div class="sb-course">{course_title}</div>',
+        '<ul class="sb-nav">',
+    ]
+    for it in items:
+        cls = "ch" if it["kind"] == "ch" else "sec"
+        cur = " current" if it["href"] == current else ""
+        rows.append(
+            f'<li class="{cls}"><a class="{cur.strip()}" href="{it["href"]}">'
+            f'{it["label"]}</a></li>'
+        )
+    rows += ["</ul>", "</aside>"]
+    return "\n".join(rows)
+
+
+def page_nav(html: str) -> str:
+    """Turn tex4ht's `[next] [prev] [up]` row into a styled footer nav."""
+    links = dict(re.findall(r"<a href='([^']+)'>(next|prev|up)</a>", html))
+    inv = {v: k for k, v in links.items()}
+    parts = []
+    if "prev" in inv:
+        parts.append(f'<a class="prev" href="{inv["prev"]}">&larr; Previous</a>')
+    if "up" in inv:
+        parts.append(f'<a class="up" href="{inv["up"]}">Contents</a>')
+    if "next" in inv:
+        parts.append(f'<a class="next" href="{inv["next"]}">Next &rarr;</a>')
+    return f'<nav class="pagenav">{"".join(parts)}</nav>' if parts else ""
+
+
+def qa_block(page_id: str) -> str:
+    heading = (
+        '<section class="qa"><h2>Questions on this section</h2>'
+        "<p>Stuck on something here? Ask below and it stays attached to this topic.</p>"
+    )
+    if not GISCUS_READY:
+        return heading + (
+            '<p style="opacity:.65">Discussion will be enabled when the site goes live.</p>'
+            "</section>"
+        )
+    return heading + (
+        '<script src="https://giscus.app/client.js"'
+        f' data-repo="{GISCUS["repo"]}" data-repo-id="{GISCUS["repo_id"]}"'
+        f' data-category="{GISCUS["category"]}" data-category-id="{GISCUS["category_id"]}"'
+        f' data-mapping="specific" data-term="{page_id}"'
+        ' data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top"'
+        ' data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async>'
+        "</script></section>"
+    )
+
+
+MARKER = "<!-- built by site/build.py -->"
+
+
+def process(path: Path, items: list[dict], course_title: str) -> bool:
+    html = path.read_text(encoding="utf-8", errors="replace")
+
+    # Not idempotent: a second pass would nest another layout shell and a second
+    # sidebar inside the first. Always run this on fresh conversion output.
+    if MARKER in html:
+        return False
+
+    html = tag_theorems(html)
+
+    # our stylesheet, after tex4ht's so it wins
+    html = html.replace(
+        "</head>",
+        '<link rel="stylesheet" href="../../../site/assets/notes.css">\n</head>',
+    )
+
+    # Serve MathJax from this site rather than jsDelivr. tex4ht hardcodes the
+    # CDN, which means every reader waits on a ~1MB third-party download before
+    # any formula is legible - on a slow mobile connection the page sits there
+    # showing upright, mis-spaced maths for several seconds. Same-origin means
+    # it caches with the rest of the site and works offline once visited.
+    html = re.sub(
+        r"https://cdn\.jsdelivr\.net/npm/mathjax@3/es5/([\w.-]+\.js)",
+        r"../../../site/assets/mathjax/es5/\1",
+        html,
+    )
+
+    nav = page_nav(html)
+    body = re.search(r"<body>(.*)</body>", html, re.S)
+    if not body:
+        return False
+    inner = body.group(1)
+
+    shell = (
+        '<div class="layout">'
+        + sidebar(items, path.name, course_title)
+        + '<main class="content"><div class="inner">'
+        + inner
+        + nav
+        # Only section pages get a question box. The title page, the chapter
+        # landings and the contents page have no topic to ask about, and an
+        # empty thread on each would just look abandoned.
+        + (qa_block(path.stem) if re.search(r"se\d+$", path.stem) else "")
+        + "</div></main></div>"
+        + '<button class="sb-toggle" onclick="document.getElementById(\'sidebar\')'
+          '.classList.toggle(\'open\')">Contents</button>'
+    )
+    html = html[: body.start(1)] + MARKER + shell + html[body.end(1):]
+    path.write_text(html, encoding="utf-8")
+    return True
+
+
+def main() -> int:
+    if len(sys.argv) < 2:
+        print(__doc__)
+        return 1
+    course = Path(sys.argv[1]).resolve()
+    build = course / "build"
+    if not build.is_dir():
+        print(f"no build directory at {build}", file=sys.stderr)
+        return 1
+
+    title = course.name.replace("-", " ").title()
+    items = read_toc(build)
+    if not items:
+        print("warning: no contents entries found — sidebar will be empty",
+              file=sys.stderr)
+
+    pages = sorted(build.glob("*.html"))
+    done = sum(process(p, items, title) for p in pages)
+    skipped = len(pages) - done
+    print(f"processed {done} pages, {len(items)} sidebar entries")
+    if skipped:
+        print(f"SKIPPED {skipped} already-built page(s). Re-run the conversion "
+              f"first — this script must see fresh tex4ht output.", file=sys.stderr)
+        return 1
+
+    # Cheap structural check: the conversion output is balanced, so if our
+    # rewriting unbalances a page we want to hear about it now, not from a
+    # browser quietly repairing the DOM.
+    for p in pages:
+        t = p.read_text(encoding="utf-8", errors="replace")
+        if t.count("<div") != t.count("</div>"):
+            print(f"WARNING unbalanced divs in {p.name}: "
+                  f"{t.count('<div')} open / {t.count('</div>')} close",
+                  file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

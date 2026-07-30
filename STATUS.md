@@ -333,7 +333,102 @@ is exactly the Paul's-Notes structure, for free, out of the tool.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
-### 2026-07-30 (latest) — Catalogue page built, following the MIT OCW card pattern
+### 2026-07-30 (latest) — Book-quality presentation: build pipeline, house diagram style, self-hosted maths
+
+User's brief: *"make things look beautiful, you free to change things work diagrams make
+them uniform, like a proper book… you can use also those from the department to fill in.
+Have not yet gone live. We are looking at things so be free."*
+
+**The build is now one command.** `site/make-course.sh <course-dir>` converts the LaTeX and
+post-processes it in a single step:
+
+```
+site/make-course.sh courses/introduction-to-probability
+```
+
+It wipes `build/`, runs the same stock `make4ht -u -a debug <file>.tex "mathjax,3"` as
+before, fails loudly on LaTeX errors, then runs `site/build.py`. **The two halves must
+always run together** — `build.py` rewrites pages in place and is *not* idempotent. It now
+refuses to run twice (marker comment + non-zero exit) and warns on unbalanced `<div>`s.
+
+**`site/build.py` — what the post-processor does.**
+1. **Tags theorem blocks by type.** This was the single biggest win. tex4ht marks
+   Definition, Theorem, Lemma, Example and Remark all as `class='newtheorem'`, so they
+   render identically. The type is only recoverable from the bold label text, so the
+   script reads it and adds `nt-definition`, `nt-theorem`, … Colour-coding follows in CSS.
+2. **Injects a persistent sidebar** (course tree parsed from the generated contents page,
+   current page highlighted) into all 22 pages — the Paul's Online Notes pattern.
+3. **Wraps content** in the `.layout` / `.content .inner` shell.
+4. **Replaces** tex4ht's bare `[next][prev][up]` row with a styled footer nav.
+5. **Adds a Q&A block** — *section pages only*; the title/chapter/contents pages have no
+   topic to ask about and an empty thread on each would look abandoned.
+6. **Repoints MathJax at a local copy** (see below).
+
+**`site/assets/notes.css`** — serif body at a 36rem measure, sans chrome, colour-coded
+theorem blocks, quiet proofs, styled contents page, mobile drawer, full dark mode.
+One trick worth remembering: several theorems carry their proofs *inside* the environment,
+which turned the tinted panel into a page-long field of colour. `.newtheorem:has(.proof)`
+drops the fill and keeps only the coloured rule and label — statement then proof, the way
+a book sets it.
+
+**Self-hosted MathJax — this one matters for the actual audience.** tex4ht hardcodes
+`cdn.jsdelivr.net`. A headless screenshot caught the consequence: with a short load budget
+the page renders *upright, mis-spaced* maths until ~1MB of third-party JS and fonts
+arrive. That is exactly what a student on slow Zambian mobile data would stare at.
+MathJax 3.2.2 (`tex-chtml-full.js` + all woff-v2 fonts, **1.7MB total**) now lives in
+`site/assets/mathjax/`. Verified by re-rendering with *every external host blocked*
+(`--host-resolver-rules="MAP * 0.0.0.0, EXCLUDE 127.0.0.1"`): output was byte-identical to
+the online render. The site now works offline once visited.
+
+**House diagram style — uniformity without touching 41 pictures.** The diagrams had drifted
+apart over the years: five different blues, arrow tips from two libraries, label sizes from
+`\tiny` to `\large`, weights from `thin` to `ultra thick`. Rather than edit each one, one
+preamble block in `intro_prob.tex` redefines the names they *already share*:
+- the named colours (`blue`, `red`, `green`, `orange`, `gray`, …) are repointed at a single
+  palette that matches the theorem-box colours in the stylesheet;
+- the built-in weight keywords are flattened to a narrow range (`thin` 0.5pt →
+  `ultra thick` 1.3pt), so no diagram shouts next to its neighbour;
+- `every picture` sets one arrow tip (`>=Stealth`), line join/cap and label size;
+- `every axis` (pgfplots) unifies axis lines, tick/grid/label/legend styling.
+
+Every diagram keeps its own structure and picks up one consistent look. 36 SVGs, clean
+compile, no LaTeX errors. Note the ordering constraint: the `\pgfplotsset` half must sit
+*after* `\usepackage{pgfplots}`, not with the rest of the block.
+
+**Source corrections applied** (user: *"you are free to rearrange"*):
+- Section 1.4 title: "Condition Probability and Bayes Theorem" → "Conditional Probability
+  and Bayes' Theorem".
+- **18 lines of quote damage fixed.** `"word"` compiles to `”word”` — *both glyphs are
+  closing quotes*. Converted to proper `` ``word'' `` pairs, and moved one pair out of
+  math mode. Script kept at `scratchpad/fixquotes.py`; it skips comments and refuses
+  ambiguous odd-quote lines, and every change was reviewed before applying.
+- Contents page was listing *itself* as a chapter (`\addcontentsline` on line 260) —
+  removed. `\contentsname` changed from shouty `TABLE OF CONTENTS` to `Contents`.
+- "we focus on…" → "We focus on…"; "Not that" → "Note that"; "manger" → "manager".
+
+**Two of my own mistakes, caught and fixed:**
+- `build.py` originally wrapped proofs in `<div class='proof'>` — but **tex4ht already
+  emits that div**. The result was a duplicate opening div plus a stray `</div>` at the
+  QED: unbalanced DOM that browsers silently repaired. Removed; CSS targets tex4ht's own
+  class. A div-balance check now runs after every build.
+- I then ran `build.py` twice over the same files and misread the resulting imbalance as a
+  new bug. Hence the idempotence guard.
+
+**Verification.** Screenshotted at 1400px and at a *true* 390px viewport. Note the trap
+hit before on the climate site: **headless Chrome clamps windows to ~500px**, so
+`--window-size=390,…` produces a *cropped* 500px render that looks like a mobile overflow
+bug. `.viewport/m390.html` iframes the page at exactly 390px to get a real narrow viewport;
+use it rather than trusting a small `--window-size`. Sidebar collapses to a "Contents"
+drawer, no horizontal overflow, wide aligned displays scroll rather than clip.
+
+**Still open from this round:**
+- Departmental material (MAT 3902 ver6 PDF) not yet used to fill gaps — the reconciliation
+  process above still applies, and nothing from it has been copied.
+- giscus is stubbed, not live: `GISCUS_READY = False` in `build.py` renders a placeholder
+  line. Needs a GitHub repo with Discussions enabled, then the four IDs filled in.
+- Quiz interaction model still undecided (open question 5).
+
+### 2026-07-30 — Catalogue page built, following the MIT OCW card pattern
 - User pointed at MIT OpenCourseWare's maths search page. Rendered and analysed it (see
   the new section above), then **built the first real site page**: `site/index.html`.
 - Follows MIT's course-card pattern: subject + level line, bold title, short description,
