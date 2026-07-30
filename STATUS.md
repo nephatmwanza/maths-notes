@@ -88,15 +88,15 @@ picking the first course.
 
 ## Open questions
 
-4. **Which course to build first?** Two candidates, both live — the user is tutoring both
-   this semester:
-   - **Introduction to Statistics** — user's own notes AND exam questions both exist as
-     `.tex` (2020, dated but complete as a pair). Best candidate to prove the *whole*
-     pattern (notes + quiz engine) end to end, since both halves already exist in some form.
-   - **Mat1110** — recent (Jan 2026) authored notes exist, but no exam-question companion
-     has been located under an obviously matching name yet. Possibly the same course as the
-     folder "Analytic Geometry and Calculus Exam Questions" under UNZA's course-code
-     naming — **needs the user to confirm this mapping**, not assumed.
+4. **Which course to build first? — PARTLY SUPERSEDED, see log 2026-07-30 (later).** The
+   user will write **fresh notes and exam questions for this semester** for both Mat1110
+   and Introduction to Statistics — the existing 2020/2026 `.tex` files in `LaTeX_Projects`
+   are prior versions, not necessarily this semester's content as-is. **Semester starts
+   Monday.** So the real question is not "which course" but "what pipeline can receive and
+   publish new content as the user produces it week by week," for both courses in
+   parallel, starting almost immediately. The old files are still useful as a starting
+   pattern/style reference and for the reconciliation-checklist process above, but should
+   not be assumed to be what goes live.
 5. **Exact quiz interaction model.** User said: "solve the questions and put them in the
    engine where learners have to search for themselves" — read as: worked solutions exist
    in the system, but the interaction requires the learner to search/attempt rather than
@@ -125,6 +125,22 @@ picking the first course.
 ## Status Log
 
 *(most recent first — append new entries, never rewrite old ones)*
+
+### 2026-07-30 (later still) — Timeline constraint: semester starts Monday
+- User will personally write **new** notes and exam questions for Mat1110 and
+  Introduction to Statistics **this semester** — not simply reuse the archived
+  2020/2026 `.tex` files as-is. Those old files remain useful as style/coverage
+  reference (per the reconciliation process above) but are not the content going live.
+- **Classes start Monday.** This is a hard, near-term deadline that changes what "which
+  course first" means — see revised open question 4. Realistic framing: content will
+  arrive incrementally, week by week, as the user teaches, for both courses at once,
+  rather than one course being fully built up front.
+- **Not yet answered:** whether anything needs to be visible/live to students by Monday
+  itself, or whether it's acceptable to start building the pipeline now and publish the
+  first real content whenever the user's first batch of new material is ready.
+- **Next step:** resolve that scheduling question with the user, then decide the
+  lightest-weight pipeline that can take "user writes a new note/question set" to
+  "published on the site" repeatedly, starting this week.
 
 ### 2026-07-30 (later same day) — Audience, interactivity and rollout decided
 - User confirmed: local Zambian system (UNZA + others), both notes-site and quiz-engine
