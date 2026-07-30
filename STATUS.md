@@ -57,6 +57,14 @@ has started.
    The user has said the paid model is "something we will go over and over" — i.e. do not
    over-plan monetisation mechanics now, but do not architect anything that would make
    adding payment/gating later gratuitously hard.
+4. **Scope is broader than the 2 current courses, and the timeline is relaxed.** User
+   wants more courses showcased at launch to help build an audience, not just Mat1110 and
+   Introduction to Statistics — draw on the wider ~30-topic library already in
+   `LaTeX_Projects` (Real Analysis, Linear Algebra, Probability Theory, Time Series,
+   Design of Experiments, etc.), reconciled per the process above. **No rush: the user
+   explicitly said it is fine to go live at the end of the semester.** This supersedes the
+   earlier Monday-deadline framing — Monday matters for the user's own teaching, not for
+   the platform.
 
 ## Content reconciliation process — the Dr Nawa problem
 
@@ -125,6 +133,23 @@ picking the first course.
 ## Status Log
 
 *(most recent first — append new entries, never rewrite old ones)*
+
+### 2026-07-30 (latest) — Scope widened, timeline relaxed
+- User wants **more than the 2 current courses** showcased at launch — breadth helps
+  build an audience. The other ~28 topics already sitting in `LaTeX_Projects` (as authored
+  `.tex`, needing the same reconciliation treatment) are back in scope for the launch
+  version, not deferred to "later."
+- User explicitly relaxed the timeline: **"don't worry about time even at the end of the
+  semester we can go live."** The earlier Monday framing was about the user's own teaching
+  prep, not a platform deadline. Full semester is available as build time.
+- Recommended approach (given in this turn, not yet confirmed by user): prove the
+  notes+quiz pipeline on 1-2 courses first — Mat1110 and Introduction to Statistics remain
+  the natural pilots since they are being actively (re)written this semester anyway — then
+  use the reconciliation process to progressively add the remaining ~28 topics through the
+  semester, prioritising by likely enrolment/how foundational a course is, ending with a
+  broader-catalogue launch at semester end.
+- **Not yet answered:** whether the user agrees with that prioritisation heuristic, or has
+  a specific order in mind for which of the ~28 other topics matter most.
 
 ### 2026-07-30 (later still) — Timeline constraint: semester starts Monday
 - User will personally write **new** notes and exam questions for Mat1110 and
