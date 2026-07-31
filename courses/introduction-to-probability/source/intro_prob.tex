@@ -564,6 +564,89 @@ We know that $P(A \cup B)$ is the sum of the disjoint regions:
 Past tutorial-sheet questions on sample spaces and the axioms. Try each one before
 opening the solution.
 
+\begin{problem}{Assignment}
+Consider the experiment of tossing four coins simultaneously and observing the side
+facing up for each coin.
+\begin{enumerate}
+\item[(a).] Write down the sample space for the experiment, the event $A$ of observing
+at least one head, the event $B$ of observing at most two heads, and the event $C$ of
+observing at least two tails.
+\item[(b).] Calculate $P(A\cup B)$, $P(A\cap B)$ and $P(A^c\cup C)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} Each coin lands two ways, so $|S| = 2^4 = 16$ equally likely outcomes:
+\begin{align*}
+S = \{&HHHH,\ HHHT,\ HHTH,\ HTHH,\ THHH,\ HHTT,\ HTHT,\ HTTH,\\
+      &THHT,\ THTH,\ TTHH,\ HTTT,\ THTT,\ TTHT,\ TTTH,\ TTTT\}.
+\end{align*}
+$A$ excludes only $TTTT$, so $|A| = 15$. $B$ collects the outcomes with $0$, $1$ or $2$
+heads, so $|B| = 1+4+6 = 11$. $C$ collects those with at least two tails, so
+$|C| = 6+4+1 = 11$.
+
+It is worth noticing that $B$ and $C$ are the \emph{same event}. With four coins, at most
+two heads means at least two tails -- the two descriptions pick out exactly the same 11
+outcomes.
+
+\textbf{(b).} \[P(A) = \frac{15}{16},\qquad P(B) = P(C) = \frac{11}{16}.\]
+$A\cup B = S$, because the only outcome outside $A$ is $TTTT$, and $TTTT$ is in $B$:
+\[P(A\cup B) = 1.\]
+$A\cap B$ is the set of outcomes with one or two heads, $4+6 = 10$ of them:
+\[P(A\cap B) = \frac{10}{16} = \frac{5}{8}.\]
+$A^c = \{TTTT\}$, which already lies in $C$, so $A^c\cup C = C$:
+\[P(A^c\cup C) = \frac{11}{16}.\]
+\end{solution}
+
+\begin{problem}{Assignment}
+For any events $A$, $B$ and $C$, prove that
+\[P(A\cup B\cup C) = P(A)+P(B)+P(C)-P(A\cap B)-P(A\cap C)-P(B\cap C)+P(A\cap B\cap C).\]
+\end{problem}
+
+\begin{solution}
+Apply the two-event addition rule twice. Treat $A\cup B$ as a single event and add $C$ to
+it:
+\[P\big((A\cup B)\cup C\big) = P(A\cup B) + P(C) - P\big((A\cup B)\cap C\big).\]
+The first term expands by the same rule, $P(A\cup B) = P(A)+P(B)-P(A\cap B)$. For the
+last term, distribute the intersection over the union:
+\[(A\cup B)\cap C = (A\cap C)\cup(B\cap C),\]
+and apply the addition rule once more to that:
+\[P\big((A\cap C)\cup(B\cap C)\big) = P(A\cap C)+P(B\cap C)-P\big((A\cap C)\cap(B\cap C)\big).\]
+Now $(A\cap C)\cap(B\cap C) = A\cap B\cap C$. Substituting the two expansions,
+\begin{align*}
+P(A\cup B\cup C) &= \big[P(A)+P(B)-P(A\cap B)\big] + P(C)\\
+&\quad - \big[P(A\cap C)+P(B\cap C)-P(A\cap B\cap C)\big]\\
+&= P(A)+P(B)+P(C)-P(A\cap B)-P(A\cap C)-P(B\cap C)+P(A\cap B\cap C),
+\end{align*}
+as required.
+
+The pattern is worth remembering: adding the three single probabilities counts each
+pairwise overlap twice, so the pairwise terms are subtracted; that subtraction removes
+the triple overlap three times having added it three times, so it must be added back
+once.
+\end{solution}
+
+\begin{problem}{Assignment}
+A game is played as follows: a player selects a point at random from the square
+$0\leq x\leq 1$, $0\leq y\leq 1$. There is a number $\beta$ such that the player wins if
+at least one of the coordinates of the chosen point is greater than $\beta$. Find the
+value of $\beta$ that makes the game fair.
+\end{problem}
+
+\begin{solution}
+``At random'' from the square means the probability of landing in a region equals that
+region's area, since the whole square has area 1.
+
+It is easier to work with the losing event. The player loses when \emph{both} coordinates
+are at most $\beta$, that is when the point falls in the smaller square
+$0\leq x\leq\beta$, $0\leq y\leq\beta$, which has area $\beta^{2}$. Hence
+\[P(\text{win}) = 1 - \beta^{2}.\]
+The game is fair when the player wins half the time:
+\[1-\beta^{2} = \frac{1}{2} \implies \beta^{2} = \frac{1}{2}
+ \implies \beta = \frac{1}{\sqrt{2}} = \frac{\sqrt{2}}{2} \approx 0.707.\]
+(The negative root is discarded because $\beta$ must lie in $[0,1]$.)
+\end{solution}
+
 \begin{problem}{Tutorial Sheet 1}
 You wish to choose two different numbers from $1, 2, 3, 4, 5$, and do not care about
 the order of selection.
@@ -1213,6 +1296,122 @@ The Lakeview Lodge takes only 30\% of the clients but accounts for 44\% of the c
 because its rooms are the worst.
 \end{solution}
 
+\begin{problem}{Assignment}
+Three members of a private club have been nominated for the office of president. The
+three members are Mr Tembo, Mr Chela and Mr Haziyu, and their probabilities of being
+elected are $0.3$, $0.4$ and $0.3$ respectively. Should Mr Tembo be elected, the
+probability of an increase in membership fees is $0.6$; should Mr Chela or Mr Haziyu be
+elected, the corresponding probabilities are $0.2$ and $0.4$.
+\begin{enumerate}
+\item[(a).] What is the probability that there will be an increase in membership fees?
+\item[(b).] Someone considering joining the club delays the decision for several weeks,
+only to find that the fees have been increased. What is the probability that Mr Chela was
+elected president?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Let $T$, $C$ and $H$ be the events that each man is elected, and $I$ the event of an
+increase in fees. Exactly one of the three is elected, so they partition the sample space
+-- note $0.3+0.4+0.3 = 1$.
+
+\textbf{(a).} By the law of total probability,
+\begin{align*}
+P(I) &= P(T)P(I/T)+P(C)P(I/C)+P(H)P(I/H)\\
+     &= (0.3)(0.6)+(0.4)(0.2)+(0.3)(0.4)\\
+     &= 0.18+0.08+0.12 = 0.38.
+\end{align*}
+
+\textbf{(b).} The fee increase is known and the election is what we are asking about, so
+the conditioning is reversed and this is Bayes' theorem:
+\[P(C/I) = \frac{P(C)P(I/C)}{P(I)} = \frac{0.08}{0.38} = \frac{4}{19} \approx 0.211.\]
+Mr Chela was the most likely to be elected, at $0.4$, yet learning that the fees went up
+makes him the \emph{least} likely of the three to have won -- he was the candidate least
+inclined to raise them.
+\end{solution}
+
+\begin{problem}{Assignment}
+Psychologists tend to believe that there is a relationship between aggressiveness and
+order of birth. The percentages of students falling into the four categories are:
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+Aggressiveness & First born & Not first born\\
+\hline
+Aggressive     & 25\% & 20\%\\
+Not aggressive & 15\% & 40\%\\
+\end{tabular}
+\caption{Aggressiveness against order of birth, as percentages of all students.}
+\end{table}
+A student is chosen at random.
+\begin{enumerate}
+\item[(a).] What is the probability that the student is (i) first born, (ii) aggressive,
+(iii) aggressive given that the student was first born?
+\item[(b).] If $A$ is the event that a student is aggressive and $B$ that a student is
+first born, are $A$ and $B$ independent? Explain.
+\item[(c).] What can you say about the psychologists' belief?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+The four cells are the joint probabilities and they sum to $1$.
+
+\textbf{(a).} Summing the first-born column and the aggressive row,
+\begin{align*}
+\text{(i)}\quad P(B) &= 0.25+0.15 = 0.40,\\
+\text{(ii)}\quad P(A) &= 0.25+0.20 = 0.45,\\
+\text{(iii)}\quad P(A/B) &= \frac{P(A\cap B)}{P(B)} = \frac{0.25}{0.40} = 0.625.
+\end{align*}
+
+\textbf{(b).} Independence would require $P(A\cap B) = P(A)P(B)$. Here
+\[P(A)P(B) = (0.45)(0.40) = 0.18, \qquad\text{but}\qquad P(A\cap B) = 0.25.\]
+These differ, so $A$ and $B$ are \emph{not} independent. Equivalently, $P(A/B)=0.625$ is
+not equal to $P(A)=0.45$: knowing a student is first born changes the probability that
+they are aggressive.
+
+\textbf{(c).} In these data the psychologists' belief is supported. A first born is
+aggressive with probability $0.625$, against $0.45$ for a student chosen without regard to
+birth order, so the two characteristics are associated.
+
+Association is not causation, though, and it is worth being careful here: these figures
+show only that aggressiveness and birth order occur together more often than chance would
+produce. They say nothing about which, if either, brings about the other.
+\end{solution}
+
+\begin{problem}{Assignment}
+A sociologist wants to estimate the percentage of students who have smoked cannabis. One
+hundred students are randomly selected. To allay any fears about confidentiality the
+question is asked indirectly: each student first picks a number at random between $00$ and
+$99$ without revealing it. Anyone whose number is between $00$ and $69$ answers the
+cannabis question; the others answer the non-sensitive question ``does your computer
+number end with an even digit?''. Each student writes only the answer on a slip of paper,
+without indicating which question it belongs to. It turns out that $44\%$ of the responses
+are ``yes''. What fraction would you estimate to be answering ``yes'' to the cannabis
+question?
+\end{problem}
+
+\begin{solution}
+The design is deliberate: because nobody knows which question a slip refers to, no
+individual answer reveals anything -- yet the aggregate is still informative, because the
+two questions are mixed in known proportions.
+
+Of the hundred numbers $00$ to $99$, seventy fall in $00$--$69$, so a student answers the
+cannabis question with probability $0.7$ and the computer-number question with probability
+$0.3$. A computer number is as likely to end in an even digit as an odd one, so the
+non-sensitive question yields ``yes'' with probability $0.5$.
+
+Let $p$ be the proportion who would answer ``yes'' to the cannabis question. By the law of
+total probability,
+\[P(\text{yes}) = 0.7p + 0.3(0.5) = 0.7p + 0.15.\]
+Setting this equal to the observed $0.44$,
+\[0.7p = 0.44-0.15 = 0.29 \implies p = \frac{0.29}{0.7} = \frac{29}{70} \approx 0.414.\]
+So an estimated $41.4\%$ of students have smoked cannabis.
+
+Note what the randomisation costs. The $0.3$ of responses answering the harmless question
+carry no information about cannabis at all, so the estimate rests on fewer usable answers
+than the hundred collected -- the price paid for honest ones.
+\end{solution}
+
 \section{Counting Techniques}
 In the classical definition of probability, $P(E) = \frac{n(E)}{N}$, we must be able to count the number of outcomes in the event space and the sample space. When the number of outcomes is too large to list manually, we use \textit{counting techniques} or \textit{combinatorial analysis}.
 
@@ -1812,6 +2011,69 @@ There are special discrete probability functions which do arise in many experime
 
 
 
+\subsection{Practice problems}
+
+\begin{problem}{Tutorial Sheet 2}
+The probability distribution of a random variable $X$ is given by
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+$x$      & 0 & 1     & 2       & 3\\
+\hline
+$P(X=x)$ & $c$ & $c^2$ & $c^2+c$ & $3c^2+2c$\\
+\end{tabular}
+\end{table}
+Find
+\begin{enumerate}
+\item[(a).] the value of the constant $c$;
+\item[(b).] $E(X)$ and $\operatorname{Var}(X)$;
+\item[(c).] the cumulative distribution function of $X$;
+\item[(d).] $P(X\geq 2)$;
+\item[(e).] $P(0 < X \leq 2)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The probabilities must sum to 1:
+\[c + c^2 + (c^2+c) + (3c^2+2c) = 5c^2+4c = 1,\]
+so $5c^2+4c-1 = 0$, that is $(5c-1)(c+1) = 0$, giving $c = \tfrac15$ or $c = -1$. A
+probability cannot be negative, so
+\[c = \frac{1}{5}.\]
+This gives the distribution
+\[P(0) = \frac{5}{25},\quad P(1) = \frac{1}{25},\quad P(2) = \frac{6}{25},\quad
+P(3) = \frac{13}{25},\]
+which sums to $\tfrac{25}{25}=1$, as it must.
+
+\textbf{(b).}
+\begin{align*}
+E(X) &= 0\cdot\tfrac{5}{25}+1\cdot\tfrac{1}{25}+2\cdot\tfrac{6}{25}+3\cdot\tfrac{13}{25}
+ = \frac{0+1+12+39}{25} = \frac{52}{25} = 2.08,\\
+E(X^2) &= 0\cdot\tfrac{5}{25}+1\cdot\tfrac{1}{25}+4\cdot\tfrac{6}{25}+9\cdot\tfrac{13}{25}
+ = \frac{1+24+117}{25} = \frac{142}{25},\\
+\operatorname{Var}(X) &= E(X^2)-[E(X)]^2 = \frac{142}{25}-\left(\frac{52}{25}\right)^{2}
+ = \frac{3550-2704}{625} = \frac{846}{625} = 1.3536.
+\end{align*}
+
+\textbf{(c).} The c.d.f. accumulates the probabilities:
+\[F(x) = \begin{cases}
+0 & x<0\\
+\frac{5}{25} = \frac{1}{5} & 0\leq x<1\\
+\frac{6}{25} & 1\leq x<2\\
+\frac{12}{25} & 2\leq x<3\\
+1 & x\geq 3.
+\end{cases}\]
+Sketched, this is a step function rising by $P(X=x)$ at each of $x=0,1,2,3$, constant
+between the steps, and continuous from the right.
+
+\textbf{(d).} \[P(X\geq 2) = P(2)+P(3) = \frac{6}{25}+\frac{13}{25} = \frac{19}{25}.\]
+
+\textbf{(e).} The inequality is strict on the left, so $x=0$ is excluded and $x=2$ is
+included:
+\[P(0<X\leq 2) = P(1)+P(2) = \frac{1}{25}+\frac{6}{25} = \frac{7}{25}.\]
+For a discrete variable the difference between $<$ and $\leq$ matters, unlike the
+continuous case where single points carry no probability.
+\end{solution}
+
 \section{Continuous Random Variables}
 \vspace{-15pt}
 
@@ -1937,6 +2199,111 @@ $$P(2.4 < X < 3.5) = \int_{2.4}^{3.5} \frac{x+1}{8} \, dx = \left[ \frac{(x+1)^2
 
 
 
+
+\subsection{Practice problems}
+
+\begin{problem}{Tutorial Sheet 2}
+A continuous random variable $X$ has p.d.f. $f(x) = k(x+2)^2$ for $0\leq x\leq 2$. Find
+\begin{enumerate}
+\item[(a).] the value of the constant $k$;
+\item[(b).] the mean and standard deviation of $X$;
+\item[(c).] the c.d.f. of $X$;
+\item[(d).] $P(X\geq 1)$;
+\item[(e).] $P\left(\frac{1}{2}<X<\frac{3}{2}\right)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} A density must integrate to 1 over its range:
+\[\int_0^2 k(x+2)^2\,dx = k\left[\frac{(x+2)^3}{3}\right]_0^2
+ = k\cdot\frac{64-8}{3} = \frac{56k}{3} = 1 \implies k = \frac{3}{56}.\]
+
+\textbf{(b).} Expanding $(x+2)^2 = x^2+4x+4$,
+\begin{align*}
+E(X) &= \frac{3}{56}\int_0^2 (x^3+4x^2+4x)\,dx
+ = \frac{3}{56}\left[\frac{x^4}{4}+\frac{4x^3}{3}+2x^2\right]_0^2\\
+ &= \frac{3}{56}\left(4+\frac{32}{3}+8\right) = \frac{3}{56}\cdot\frac{68}{3}
+  = \frac{17}{14} \approx 1.214,\\
+E(X^2) &= \frac{3}{56}\int_0^2 (x^4+4x^3+4x^2)\,dx
+ = \frac{3}{56}\left[\frac{x^5}{5}+x^4+\frac{4x^3}{3}\right]_0^2\\
+ &= \frac{3}{56}\cdot\frac{496}{15} = \frac{62}{35}.
+\end{align*}
+Hence
+\[\operatorname{Var}(X) = \frac{62}{35}-\left(\frac{17}{14}\right)^{2}
+ = \frac{1736-1445}{980} = \frac{291}{980} \approx 0.2969,\]
+and the standard deviation is $\sqrt{291/980} \approx 0.545$.
+
+\textbf{(c).} For $0\leq x\leq 2$,
+\[F(x) = \int_0^x \frac{3}{56}(t+2)^2\,dt = \frac{(x+2)^3-8}{56},\]
+so
+\[F(x) = \begin{cases} 0 & x<0\\[2pt]
+\dfrac{(x+2)^3-8}{56} & 0\leq x\leq 2\\[6pt]
+1 & x>2.\end{cases}\]
+As a check, $F(2) = (64-8)/56 = 1$.
+
+\textbf{(d).} \[P(X\geq 1) = 1-F(1) = 1-\frac{27-8}{56} = 1-\frac{19}{56} = \frac{37}{56}.\]
+
+\textbf{(e).} The two constants $-8$ cancel when the c.d.f.\ is differenced:
+\begin{align*}
+P\left(\tfrac12<X<\tfrac32\right)
+ &= F\left(\tfrac32\right)-F\left(\tfrac12\right)
+  = \frac{1}{56}\left[\left(\tfrac{7}{2}\right)^{3}-\left(\tfrac{5}{2}\right)^{3}\right]\\
+ &= \frac{1}{56}\cdot\frac{343-125}{8} = \frac{218}{448} = \frac{109}{224}.
+\end{align*}
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 2}
+A continuous random variable $X$ has p.d.f.
+\[f(x) = \begin{cases}
+kx & 0\leq x<1\\
+k & 1\leq x<3\\
+k(4-x) & 3\leq x<4\\
+0 & \text{otherwise.}
+\end{cases}\]
+Find
+\begin{enumerate}
+\item[(a).] the value of the constant $k$;
+\item[(b).] $E(X)$ and $\operatorname{Var}(X)$;
+\item[(c).] the c.d.f. of $X$;
+\item[(d).] $P(X>2)$;
+\item[(e).] $P\left(\frac{1}{2}<X\leq\frac{7}{2}\right)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} Integrate piece by piece and set the total to 1. The graph is a trapezium
+-- a straight rise, a flat top, a straight fall -- so the areas can also be read off
+geometrically:
+\[\underbrace{\int_0^1 kx\,dx}_{k/2} + \underbrace{\int_1^3 k\,dx}_{2k}
+ + \underbrace{\int_3^4 k(4-x)\,dx}_{k/2} = 3k = 1 \implies k = \frac{1}{3}.\]
+
+\textbf{(b).} Before integrating, notice that the density is \emph{symmetric about
+$x=2$}: the rising piece on $[0,1)$ mirrors the falling piece on $[3,4)$, and the flat
+piece is centred at 2. So $E(X) = 2$ without any calculation. Confirming it,
+\[E(X) = \frac13\left[\int_0^1 x^2\,dx + \int_1^3 x\,dx + \int_3^4 x(4-x)\,dx\right]
+ = \frac13\left[\frac13+4+\frac{5}{3}\right] = 2.\]
+For the variance,
+\[E(X^2) = \frac13\left[\int_0^1 x^3\,dx + \int_1^3 x^2\,dx + \int_3^4 x^2(4-x)\,dx\right]
+ = \frac{29}{6},\]
+so
+\[\operatorname{Var}(X) = \frac{29}{6}-2^2 = \frac{5}{6} \approx 0.833.\]
+
+\textbf{(c).} Accumulate the pieces, carrying forward the area already covered:
+\[F(x) = \begin{cases}
+0 & x<0\\[2pt]
+\dfrac{x^2}{6} & 0\leq x<1\\[6pt]
+\dfrac{x}{3}-\dfrac{1}{6} & 1\leq x<3\\[6pt]
+-\dfrac{x^2}{6}+\dfrac{4x}{3}-\dfrac{5}{3} & 3\leq x<4\\[6pt]
+1 & x\geq 4.
+\end{cases}\]
+The pieces agree at the joins -- $F(1)=\tfrac16$, $F(3)=\tfrac56$ -- and $F(4)=1$.
+
+\textbf{(d).} \[P(X>2) = 1-F(2) = 1-\left(\frac23-\frac16\right) = 1-\frac12 = \frac12,\]
+which is what the symmetry about $x=2$ already told us.
+
+\textbf{(e).} \[P\left(\tfrac12<X\leq\tfrac72\right) = F\left(\tfrac72\right)-F\left(\tfrac12\right)
+ = \frac{23}{24}-\frac{1}{24} = \frac{11}{12}.\]
+\end{solution}
 
 \section{Mathematical Expectations and Generating Functions of Random Variables}
 While the p.m.f and p.d.f provide a complete description of a random variable, we often require concise numerical descriptors to summarize a distribution's location and spread. This section moves from basic Expectations to the powerful ``transform'' methods—Generating Functions—which serve as essential tools for identifying distributions and simplifying the calculation of higher-order moments.
@@ -5169,6 +5536,69 @@ Therefore
 
 
 
+
+\subsection{Practice problems}
+
+\begin{problem}{Tutorial Sheet 2}
+The c.d.f. of a continuous random variable $X$ is given by
+\[F(x) = \begin{cases}
+0 & x<0\\[2pt]
+\dfrac{1}{2}x-\dfrac{1}{8}x^2 & 0\leq x<1\\[6pt]
+a+\dfrac{1}{4}x & 1\leq x<2\\[6pt]
+b+\dfrac{1}{8}x^2-\dfrac{1}{4}x & 2\leq x\leq 3\\[6pt]
+1 & x>3.
+\end{cases}\]
+Find
+\begin{enumerate}
+\item[(a).] the values of $a$ and $b$;
+\item[(b).] the p.d.f. of $X$;
+\item[(c).] the mean and standard deviation of $X$;
+\item[(d).] $P\left(1\leq X<\frac{5}{2}\right)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The c.d.f. of a continuous random variable is continuous, so the pieces
+must agree where they meet. That is what determines $a$ and $b$.
+
+At $x=1$:
+\[\frac{1}{2}(1)-\frac{1}{8}(1)^2 = a+\frac{1}{4}(1)
+ \implies \frac{3}{8} = a+\frac{1}{4} \implies a = \frac{1}{8}.\]
+At $x=2$:
+\[a+\frac{1}{4}(2) = b+\frac{1}{8}(2)^2-\frac{1}{4}(2)
+ \implies \frac{1}{8}+\frac{1}{2} = b+\frac{1}{2}-\frac{1}{2} \implies b = \frac{5}{8}.\]
+As a check, the last piece must reach 1 at $x=3$:
+$\tfrac58+\tfrac98-\tfrac34 = 1$. It does.
+
+\textbf{(b).} The density is the derivative of the c.d.f. on each piece:
+\[f(x) = F'(x) = \begin{cases}
+\dfrac{1}{2}-\dfrac{1}{4}x & 0\leq x<1\\[6pt]
+\dfrac{1}{4} & 1\leq x<2\\[6pt]
+\dfrac{1}{4}x-\dfrac{1}{4} & 2\leq x\leq 3\\[6pt]
+0 & \text{otherwise.}
+\end{cases}\]
+It integrates to 1, as it must.
+
+\textbf{(c).} The density falls from $\tfrac12$ to $\tfrac14$, is flat, then rises from
+$\tfrac14$ back to $\tfrac12$ -- it is symmetric about $x = \tfrac32$, so
+$E(X) = \tfrac32$. Confirming by integration,
+\[E(X) = \int_0^1 x\left(\tfrac12-\tfrac{x}{4}\right)dx + \int_1^2 \frac{x}{4}\,dx
+ + \int_2^3 x\left(\tfrac{x}{4}-\tfrac14\right)dx = \frac{3}{2}.\]
+For the variance,
+\[E(X^2) = \int_0^1 x^2\left(\tfrac12-\tfrac{x}{4}\right)dx + \int_1^2 \frac{x^2}{4}\,dx
+ + \int_2^3 x^2\left(\tfrac{x}{4}-\tfrac14\right)dx = \frac{19}{6},\]
+so
+\[\operatorname{Var}(X) = \frac{19}{6}-\left(\frac{3}{2}\right)^{2} = \frac{11}{12}
+ \approx 0.917,\]
+and the standard deviation is $\sqrt{11/12}\approx 0.957$.
+
+\textbf{(d).} Work directly from the c.d.f.:
+\[P\left(1\leq X<\tfrac52\right) = F\left(\tfrac52\right)-F(1)
+ = \left(\frac58+\frac{25}{32}-\frac58\right)-\frac38 = \frac{25}{32}-\frac{12}{32}
+ = \frac{13}{32}.\]
+Because $X$ is continuous, $P(X=1) = 0$, so it makes no difference here whether the
+endpoint is included.
+\end{solution}
 
 \section{Markov's and Chebyshev's Inequality}
 \vspace{-15pt}

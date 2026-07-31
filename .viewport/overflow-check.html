@@ -23,7 +23,9 @@ const lines = [];
       // Ignore MathJax's hidden accessibility MathML and its internal table
       // boxes - they are visually hidden or off by a rounding pixel, and they
       // drown out the overflows that a reader would actually see.
-      const noise = /^(mjx-assistive-mml|math|mjx-dbox|mjx-dtable|mtable|mtr|mtd|mjx-mrow|semantics|mrow)$/;
+      // mjx-ext is the middle segment MathJax stretches to build a tall brace or
+      // bracket; its scrollWidth is an artefact of that construction, not layout.
+      const noise = /^(mjx-assistive-mml|math|mjx-dbox|mjx-dtable|mtable|mtr|mtd|mjx-mrow|mjx-ext|semantics|mrow)$/;
       for (const el of d.querySelectorAll('.inner *')) {
         if (noise.test(el.tagName.toLowerCase())) continue;
         const over = el.scrollWidth - el.clientWidth;
