@@ -331,6 +331,28 @@ is exactly the Paul's-Notes structure, for free, out of the tool.
 
 ## Identity and hosting — settled 2026-07-31
 
+**Positioning: free, community, not commercial — settled 2026-07-31.** The paid tier is
+dropped. The user's reasoning: *"it will be enough for me to contribute to the community,
+so I don't want to sound like a try-hard, like a lot of people who sell past papers and
+solved sheets."* This is a deliberate strategic choice, not an unfinished plan — do not
+reintroduce payment mechanics without asking.
+
+Consequences already applied, and worth preserving:
+- The front page states the pledge plainly: **"No sign-up. No adverts. Nothing to pay."**
+  That single line is what distinguishes the site from the people selling past papers, so
+  it sits in the hero, not buried in About.
+- The word "past-paper" is gone from the lead. It is "worked problems".
+- **The past-paper and tutorial-sheet source extracts were deleted from the repository and
+  purged from git history** (`git filter-branch` + reflog expire + gc, then a force-push;
+  verified zero recoverable objects). The originals remain in `~/LaTeX_Projects`, outside
+  the repo. The problems themselves live on in the `.tex` as the user's own transcriptions
+  with original solutions — that is authored work, not republished material.
+- No author name on the site. The user's portfolio site covers attribution, and the
+  repository URL carries the name for anyone who wants it.
+- No "new courses are added through the semester" — the "In preparation" status on each
+  card says it without making a promise about timing.
+- Footer colophon credits LaTeX, tex4ht, MathJax and Claude.
+
 **No course codes anywhere on the site — settled 2026-07-31.** Not MAT2901, not MAT1110,
 not in the hidden search keywords. They are a local UNZA label and would confuse a learner
 from another school. Courses are identified by name only: "Introduction to Probability".
