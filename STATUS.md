@@ -353,6 +353,18 @@ papers. Extracted to `courses/introduction-to-probability/problems/tutorial_shee
 | 3 | 11 | m.g.f.s, named discrete distributions | §2.4, §2.5 |
 | 4 | 12 | named continuous, joint distributions, covariance | §2.6, ch.3 |
 
+**Two source-editing traps, both hit while doing this — read before bulk-editing the .tex:**
+
+1. **`...` inside `samples at={0,1,...,15}` is pgfplots range syntax, not maths.** Converting
+   it to `\ldots` as a typography fix breaks the build with a confusing
+   `Missing \endcsname` error pointing at an unrelated `hypergeom(...)` line. Only convert
+   `...` to `\ldots` in prose and maths, never inside a tikz/pgfplots option.
+2. **Never use `\s*` in a regex over the `.tex`** — it matches newlines and will silently
+   join two lines. Anchor patterns within a single line.
+
+`site/make-course.sh` catches both by failing loudly and refusing to leave a stale
+`build/`. Trust it rather than eyeballing the output.
+
 **`pdftotext` silently drops set symbols — always render the page.** Sheet 2 Q5 extracts as
 `P(A  B) = 1/3`, which is unsolvable as printed: with `P(A|B)=5/14` it forces
 `P(A∪B) > 1`. The PDF actually shows `P(A ∩ B′)`, and it then works out cleanly.
