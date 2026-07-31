@@ -362,7 +362,7 @@ papers. Extracted to `courses/introduction-to-probability/problems/tutorial_shee
 **Assignment 1 duplicates Tutorial Sheet 1** — 7 of its 15 questions are the same
 questions. Transcribe once, cite the sheet. Check `problems/README.md` before adding.
 
-**Done — 33 problems. Chapter 1 complete; Tutorial Sheet 2 complete.**
+**Done — 44 problems. Chapter 1 complete; Tutorial Sheets 1, 2 and 3 complete.**
 
 | Section | Problems |
 |---|---|
@@ -371,14 +371,17 @@ questions. Transcribe once, cite the sheet. Check `problems/README.md` before ad
 | §1.5 Counting Techniques | 9 |
 | §2.2 Discrete Random Variables | 1 |
 | §2.3 Continuous Random Variables | 2 |
+| §2.4 Expectations and generating functions | 5 |
+| §2.5 Named discrete distributions | 6 |
 | §2.7 Cumulative Distribution Function | 1 |
 
 **Remaining, in suggested order:**
 
-1. **Tutorial Sheet 3 (11)** → §2.4–2.5 — m.g.f.s and named discrete distributions.
-2. **Tutorial Sheet 4 (12)** → §2.6, ch.3 — named continuous and joint distributions.
-3. **Assignments 2–4 (12)** → chapters 2–3; overlaps sheets 3 and 4, dedupe first.
-4. **Exam papers** — the user has said *ignore for now*. They are also not separable at
+1. **Tutorial Sheet 4 (12)** → §2.6, ch.3 — named continuous and joint distributions.
+   Questions 11 and 12 are proofs (covariance identities, and a Beta–Binomial mixture)
+   rather than computations.
+2. **Assignments 2–4 (12)** → chapters 2–3; overlaps sheets 3 and 4, dedupe first.
+3. **Exam papers** — the user has said *ignore for now*. They are also not separable at
    question level (see the previous entry).
 
 **Verification is not optional.** Every answer written so far was checked computationally
