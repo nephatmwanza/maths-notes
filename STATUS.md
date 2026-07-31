@@ -362,7 +362,7 @@ papers. Extracted to `courses/introduction-to-probability/problems/tutorial_shee
 **Assignment 1 duplicates Tutorial Sheet 1** — 7 of its 15 questions are the same
 questions. Transcribe once, cite the sheet. Check `problems/README.md` before adding.
 
-**Done — 44 problems. Chapter 1 complete; Tutorial Sheets 1, 2 and 3 complete.**
+**Done — 56 problems. Chapter 1 complete; all four Tutorial Sheets complete.**
 
 | Section | Problems |
 |---|---|
@@ -372,17 +372,26 @@ questions. Transcribe once, cite the sheet. Check `problems/README.md` before ad
 | §2.2 Discrete Random Variables | 1 |
 | §2.3 Continuous Random Variables | 2 |
 | §2.4 Expectations and generating functions | 5 |
-| §2.5 Named discrete distributions | 6 |
+| §2.5 Named discrete distributions | 7 |
+| §2.6 Named continuous distributions | 6 |
 | §2.7 Cumulative Distribution Function | 1 |
+| §3.2 Joint Distributions | 4 |
+| §3.3 Conditional functions and independence | 1 |
 
-**Remaining, in suggested order:**
+**Remaining:**
 
-1. **Tutorial Sheet 4 (12)** → §2.6, ch.3 — named continuous and joint distributions.
-   Questions 11 and 12 are proofs (covariance identities, and a Beta–Binomial mixture)
-   rather than computations.
-2. **Assignments 2–4 (12)** → chapters 2–3; overlaps sheets 3 and 4, dedupe first.
-3. **Exam papers** — the user has said *ignore for now*. They are also not separable at
-   question level (see the previous entry).
+1. **Assignments 2–4 (12)** → chapters 2–3. **Dedupe against Sheets 3 and 4 first** —
+   Assignment 1 turned out to be 7/15 duplicates of Sheet 1, so expect overlap here too.
+2. **Exam papers** — the user has said *ignore for now*. They are also not separable at
+   question level (see the earlier entry).
+
+**A second false statement found in the source material.** Sheet 4 Q11(c) asks for a proof
+that $\rho(aX+b, cY+d) = \rho(X,Y)$. That holds only when $ac>0$: in general
+$\rho = \operatorname{sign}(ac)\,\rho(X,Y)$, since $\operatorname{sd}(aX+b)=|a|\operatorname{sd}(X)$.
+Verified numerically — with $a=-2$, $c=5$ the correlation flips sign. The solution proves
+the correct statement and flags the exception rather than "proving" something false. This
+is the second such case after the Vandermonde identity; **do not assume a printed identity
+is true — check it.**
 
 **Verification is not optional.** Every answer written so far was checked computationally
 before being written down — exhaustive enumeration where the space allows (all 15 gender

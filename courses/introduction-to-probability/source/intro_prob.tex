@@ -4417,6 +4417,37 @@ equally among them -- one per gap on average. So the first defective is preceded
 good part on average, giving $E(X) = 1+1 = 2$.
 \end{solution}
 
+\begin{problem}{Tutorial Sheet 4}
+A collection of 30 gems, all identical in appearance and supposed to be genuine diamonds,
+actually contains 8 worthless stones. The genuine diamonds are valued at \$1200 each. Two
+gems are selected. Let $X$ be the total actual value of the gems selected.
+\begin{enumerate}
+\item[(a).] Find the probability function for $X$.
+\item[(b).] Find $E(X)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} There are $30-8 = 22$ genuine diamonds. Selecting 2 of 30 without
+replacement makes the number of genuine gems hypergeometric, and the value is \$1200 per
+genuine gem, so $X\in\{0,\,1200,\,2400\}$. With $\binom{30}{2} = 435$ selections in all,
+\begin{align*}
+P(X=0) &= \frac{\binom{8}{2}}{\binom{30}{2}} = \frac{28}{435},\\
+P(X=1200) &= \frac{\binom{22}{1}\binom{8}{1}}{\binom{30}{2}} = \frac{176}{435},\\
+P(X=2400) &= \frac{\binom{22}{2}}{\binom{30}{2}} = \frac{231}{435}.
+\end{align*}
+These sum to $\tfrac{28+176+231}{435} = 1$.
+
+\textbf{(b).}
+\[E(X) = \frac{0(28)+1200(176)+2400(231)}{435} = \frac{765\,600}{435} = \$1760.\]
+There is a quicker route. If $G$ is the number of genuine gems, then $X = 1200G$ and
+$E(G) = 2\times\tfrac{22}{30}$, so
+\[E(X) = 1200\times 2\times\frac{22}{30} = \$1760.\]
+Expectation is linear whether or not the draws are independent, so the hypergeometric
+mean is just $n$ times the population proportion -- the same as it would be with
+replacement. It is the \emph{variance}, not the mean, that without replacement changes.
+\end{solution}
+
 \section{Some Important Continuous Probability Density Functions}
 \vspace{-15pt}
 In this section, we describe models frequently used in continuous random phenomena. These distributions are the building blocks of statistical inference and engineering applications.
@@ -5417,6 +5448,172 @@ the mean is \[E(X) = \frac{\kappa \lambda}{\kappa - 1}\,\,\, \text{for}\quad \ka
 
 
 
+
+\subsection{Practice problems}
+
+\begin{problem}{Tutorial Sheet 4}
+You arrive at a bus stop at 10:00, knowing that the bus will arrive at some time
+uniformly distributed between 10:00 and 10:30. What is the probability that you will wait
+\begin{enumerate}
+\item[(a).] longer than 10 minutes;
+\item[(b).] an additional 10 or more minutes, if at 10:15 the bus has not yet arrived?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Let $T$ be the arrival time in minutes after 10:00, so $T\sim U(0,30)$ and for
+$0\leq t\leq 30$, $P(T>t) = \dfrac{30-t}{30}$.
+
+\textbf{(a).} \[P(T>10) = \frac{30-10}{30} = \frac{20}{30} = \frac{2}{3}.\]
+
+\textbf{(b).} Waiting 10 more minutes from 10:15 means $T\geq 25$, given $T>15$:
+\[P(T\geq 25 \mid T>15) = \frac{P(T\geq 25)}{P(T>15)} = \frac{5/30}{15/30}
+ = \frac{5}{15} = \frac{1}{3}.\]
+Note that this is \emph{smaller} than the answer to (a). The uniform distribution is not
+memoryless: having waited already, the remaining wait is bounded by the 30-minute window,
+so a further 10 minutes becomes less likely, not equally likely. The exponential is the
+distribution that behaves otherwise, as the next question shows.
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 4}
+Buses arrive at a bus stop at 15-minute intervals starting at 7 a.m.; that is, they
+arrive at 7:00, 7:15, 7:30, 7:45 and so on. If a passenger arrives at the bus stop at a
+time uniformly distributed between 7:00 and 7:30, find the probability that he waits
+\begin{enumerate}
+\item[(a).] less than 5 minutes for a bus;
+\item[(b).] more than 10 minutes for a bus.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Let $T\sim U(0,30)$ be the passenger's arrival time in minutes after 7:00. Buses leave at
+$0$, $15$ and $30$, so the wait is
+\[W = \begin{cases} 15-T & 0\leq T<15\\ 30-T & 15\leq T<30.\end{cases}\]
+The wait resets at $T=15$, so each half of the window has to be looked at separately.
+
+\textbf{(a).} $W<5$ requires $15-T<5$ (i.e. $T>10$) in the first half, or $30-T<5$
+(i.e. $T>25$) in the second. That is $T\in(10,15)\cup(25,30)$, of total length
+$5+5 = 10$:
+\[P(W<5) = \frac{10}{30} = \frac{1}{3}.\]
+
+\textbf{(b).} $W>10$ requires $T<5$ in the first half or $T<20$ in the second, that is
+$T\in[0,5)\cup[15,20)$, again of total length 10:
+\[P(W>10) = \frac{10}{30} = \frac{1}{3}.\]
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 4}
+The time in hours a transistor lasts follows an exponential distribution with a mean of
+100. Find the probability that a transistor lasts longer than
+\begin{enumerate}
+\item[(a).] 15 hours;
+\item[(b).] 110 hours;
+\item[(c).] 110 hours given that it lasts longer than 95 hours.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+For an exponential with mean $\mu = 100$, the rate is $\lambda = \tfrac{1}{100}$ and the
+survival function is $P(X>x) = e^{-x/100}$.
+
+\textbf{(a).} $P(X>15) = e^{-0.15} \approx 0.8607$.
+
+\textbf{(b).} $P(X>110) = e^{-1.1} \approx 0.3329$.
+
+\textbf{(c).} \[P(X>110\mid X>95) = \frac{P(X>110)}{P(X>95)} = \frac{e^{-1.10}}{e^{-0.95}}
+ = e^{-0.15} \approx 0.8607.\]
+This is exactly the answer to (a), and not by coincidence: the exponential is
+\emph{memoryless}. A transistor that has already survived 95 hours is no more likely to
+fail in the next 15 hours than a brand new one -- the component does not age. Contrast the
+uniform bus in the previous question but one, where waiting made the further wait
+\emph{less} likely.
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 4}
+Rainfall in Solwezi follows an exponential distribution with mean 15\,mm per day. Find the
+probability that
+\begin{enumerate}
+\item[(a).] the rainfall will exceed 17\,mm on a given day;
+\item[(b).] in four out of the next 5 days the rainfall will be less than the mean.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} With mean 15, $P(X>x) = e^{-x/15}$, so
+\[P(X>17) = e^{-17/15} \approx 0.3220.\]
+
+\textbf{(b).} First, the probability that a single day is below the mean:
+\[P(X<15) = 1-e^{-15/15} = 1-e^{-1} \approx 0.6321.\]
+Notice this is not $\tfrac12$. The exponential is skewed, so the mean sits above the
+median -- about 63\% of days fall below the average rainfall, and a few very wet days pull
+the mean up.
+
+The five days are independent, each below the mean with probability
+$p = 1-e^{-1}$, so the number of such days is binomial:
+\[P(\text{exactly }4) = \binom{5}{4}p^{4}(1-p)
+ \approx 5(0.6321)^{4}(0.3679) \approx 0.2937.\]
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 4}
+Given that the probability density function of a random variable $X$ is
+\[f(x) = \frac{x^{\alpha-1}e^{-x/\beta}}{\beta^{\alpha}\Gamma(\alpha)},\qquad x>0,\]
+find (a) $E(X)$, \, (b) $E(X^{k})$, \, (c) $\operatorname{Var}(X)$.
+\end{problem}
+
+\begin{solution}
+It is quickest to do (b) first and read the others off it. The key is that a gamma
+density integrates to 1 for \emph{any} valid shape and scale, so
+\[\int_0^{\infty}x^{c-1}e^{-x/\beta}\,dx = \beta^{c}\,\Gamma(c).\]
+
+\textbf{(b).}
+\[E(X^{k}) = \frac{1}{\beta^{\alpha}\Gamma(\alpha)}\int_0^{\infty}
+ x^{\alpha+k-1}e^{-x/\beta}\,dx
+ = \frac{\beta^{\alpha+k}\Gamma(\alpha+k)}{\beta^{\alpha}\Gamma(\alpha)}
+ = \beta^{k}\,\frac{\Gamma(\alpha+k)}{\Gamma(\alpha)}.\]
+
+\textbf{(a).} Put $k=1$ and use $\Gamma(\alpha+1) = \alpha\Gamma(\alpha)$:
+\[E(X) = \beta\,\frac{\Gamma(\alpha+1)}{\Gamma(\alpha)} = \alpha\beta.\]
+
+\textbf{(c).} Put $k=2$, using
+$\Gamma(\alpha+2) = (\alpha+1)\alpha\Gamma(\alpha)$:
+\[E(X^{2}) = \beta^{2}\alpha(\alpha+1)
+ \implies \operatorname{Var}(X) = \alpha(\alpha+1)\beta^{2}-(\alpha\beta)^{2}
+ = \alpha\beta^{2}.\]
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 4}
+A die is biased so that the probability of obtaining a six is $\frac{1}{4}$. If the die is
+thrown 200 times, find the approximate probability of obtaining a six
+\begin{enumerate}
+\item[(a).] more than 60 times;
+\item[(b).] less than 45 times;
+\item[(c).] between 40 and 55 times (inclusive).
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Let $X$ be the number of sixes, so $X\sim B\left(200,\tfrac14\right)$ with
+\[\mu = np = 50, \qquad \sigma^{2} = npq = 200\left(\tfrac14\right)\left(\tfrac34\right)
+ = 37.5, \qquad \sigma \approx 6.124.\]
+Since $np$ and $nq$ are both comfortably above 5, the normal approximation applies. The
+word ``approximate'' in the question is the signal to use it.
+
+Because a discrete count is being approximated by a continuous curve, apply the
+\textbf{continuity correction}: replace each integer boundary by the half-way point.
+
+\textbf{(a).} ``More than 60'' means $X\geq 61$, so use $60.5$:
+\[P(X>60) \approx P\left(Z>\frac{60.5-50}{6.124}\right) = P(Z>1.71) \approx 0.0432.\]
+
+\textbf{(b).} ``Less than 45'' means $X\leq 44$, so use $44.5$:
+\[P(X<45) \approx P\left(Z<\frac{44.5-50}{6.124}\right) = P(Z<-0.90) \approx 0.1846.\]
+
+\textbf{(c).} ``Between 40 and 55 inclusive'' spans $39.5$ to $55.5$:
+\[P(40\leq X\leq 55) \approx P\left(\frac{39.5-50}{6.124}<Z<\frac{55.5-50}{6.124}\right)
+ = P(-1.71<Z<0.90) \approx 0.7722.\]
+The exact binomial values are $0.0454$, $0.1852$ and $0.7757$, so the approximation is
+good to about two decimal places. The correction earns its keep: without it, part (a)
+would give $0.0512$ against the true $0.0454$ -- an error more than twice as large as the
+$0.0432$ obtained with it.
+\end{solution}
 
 \section{Cumulative Distribution Function (CDF)}
 \begin{definition}
@@ -6568,6 +6765,11 @@ E[g(X,Y)] & = E[XY]\\
                & = (1)(1)\, P(X=1,Y=1)\\
                & = \frac{6}{28}\\
                & = \frac{3}{14}.
+\end{align*}
+Every other term vanishes: those with $x=0$ or $y=0$ contribute nothing because
+$xy=0$, and the only remaining cells, $(2,1)$, $(1,2)$ and $(2,2)$, all have
+probability zero. So a double sum over nine cells reduces to a single term.
+\begin{align*}
 \end{align*}   
 \end{proof}
 
@@ -6587,10 +6789,12 @@ E(XY^2) & =\sum^2_{x=0}\sum^2_{y=0}xy^2\cdot P(X=x,Y=y)\\
 \item $g(x,y)=x$
 \begin{proof}[\textit{Solution}.]
 \begin{align*}
-E(X) & = \sum^2_{x = 0} x\, P(X = x, \, Y = y)\\
-& = 1\cdot P(X = 1, \, Y = 0) + 1\cdot P(X = 1, \, Y = 0) + 2\cdot P(X=2,\, Y=0)\\
-& = 1\cdot\frac{9}{28} + 1\cdot \frac{6}{28}+2\cdot\frac{3}{28}\\
-& = \frac{3}{4}.
+% The middle term was labelled P(X=1,Y=0) twice; the second is P(X=1,Y=1).
+% The single sum also had a dangling y - E(X) needs both indices, or the marginal.
+E(X) & = \sum^2_{x = 0}\sum^2_{y = 0} x\, P(X = x, \, Y = y)\\
+& = 1\cdot\big[P(X = 1, Y = 0) + P(X = 1, Y = 1)\big] + 2\cdot P(X=2, Y=0)\\
+& = 1\cdot\left(\frac{9}{28} + \frac{6}{28}\right)+2\cdot\frac{3}{28}\\
+& = \frac{15}{28}+\frac{6}{28} \, = \, \frac{21}{28} \, = \, \frac{3}{4}.
 \end{align*}
 \end{proof}
 \end{enumerate}      
@@ -6655,6 +6859,171 @@ E(X^2Y) & = \int^2_0\int^1_0x^2y\left(x^2+\frac{xy}{3}\right)\,dx\, dy\\
 
 
 
+
+\subsection{Practice problems}
+
+\begin{problem}{Tutorial Sheet 4}
+Suppose $X$ and $Y$ have joint probability function
+\[f(x,y) = \frac{x+y}{21},\qquad x = 1,2,3;\quad y = 1,2.\]
+Find (a) $f_X(x)$ and $f_Y(y)$; \, (b) $\operatorname{Cov}(X,Y)$; \, (c) $f(x\mid y)$; \,
+(d) $f(y\mid x)$; \, (e) $\operatorname{Var}(X\mid y)$.
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} Sum out the other variable:
+\[f_X(x) = \sum_{y=1}^{2}\frac{x+y}{21} = \frac{2x+3}{21},\qquad
+f_Y(y) = \sum_{x=1}^{3}\frac{x+y}{21} = \frac{6+3y}{21}.\]
+So $f_X = \tfrac{5}{21},\tfrac{7}{21},\tfrac{9}{21}$ for $x=1,2,3$, and
+$f_Y = \tfrac{9}{21},\tfrac{12}{21}$ for $y=1,2$. Each set sums to 1.
+
+\textbf{(b).}
+\[E(X) = \frac{5+14+27}{21} = \frac{46}{21},\qquad
+E(Y) = \frac{9+24}{21} = \frac{11}{7},\]
+and summing $xy\,f(x,y)$ over the six cells gives $E(XY) = \tfrac{72}{21} = \tfrac{24}{7}$.
+Hence
+\[\operatorname{Cov}(X,Y) = \frac{24}{7}-\frac{46}{21}\cdot\frac{11}{7}
+ = \frac{504-506}{147} = -\frac{2}{147}.\]
+The covariance is negative but very small. It is not zero, so $X$ and $Y$ are
+\emph{not} independent -- which is also clear from the fact that $x+y$ does not factorise
+into a function of $x$ times a function of $y$.
+
+\textbf{(c), (d).} Dividing the joint by each marginal,
+\[f(x\mid y) = \frac{x+y}{6+3y},\qquad f(y\mid x) = \frac{x+y}{2x+3}.\]
+
+\textbf{(e).} From $f(x\mid y)$,
+\[E(X\mid y) = \frac{\sum x(x+y)}{6+3y} = \frac{14+6y}{6+3y},\qquad
+E(X^{2}\mid y) = \frac{\sum x^{2}(x+y)}{6+3y} = \frac{36+14y}{6+3y}.\]
+So $\operatorname{Var}(X\mid y) = E(X^{2}\mid y)-\left[E(X\mid y)\right]^{2}$, giving
+\[\operatorname{Var}(X\mid Y=1) = \frac{50}{9}-\left(\frac{20}{9}\right)^{2} = \frac{50}{81},
+\qquad
+\operatorname{Var}(X\mid Y=2) = \frac{16}{3}-\left(\frac{13}{6}\right)^{2} = \frac{23}{36}.\]
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 4}
+The random variables $X$ and $Y$ have joint density function
+\[f(x,y) = 12xy(1-x),\qquad 0<x<1,\quad 0<y<1.\]
+Find (a) whether $X$ and $Y$ are independent; \, (b) $E(X)$ and $E(Y)$; \,
+(c) $\operatorname{Var}(X)$ and $\operatorname{Var}(Y)$; \, (d) $\rho(X,Y)$.
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The marginals are
+\[f_X(x) = \int_0^1 12xy(1-x)\,dy = 6x(1-x),\qquad
+f_Y(y) = \int_0^1 12xy(1-x)\,dx = 2y.\]
+Their product is $12xy(1-x)$, which is exactly $f(x,y)$, so $X$ and $Y$ \emph{are}
+independent.
+
+This could have been seen without integrating: the density factorises as
+$\left[6x(1-x)\right]\left[2y\right]$ and the region $0<x<1$, $0<y<1$ is a rectangle. Both
+conditions are needed -- a density that factorises over a triangular region is not
+independent, because the range of one variable would then depend on the other.
+
+\textbf{(b).}
+\[E(X) = \int_0^1 6x^{2}(1-x)\,dx = 6\left(\tfrac13-\tfrac14\right) = \frac{1}{2},\qquad
+E(Y) = \int_0^1 2y^{2}\,dy = \frac{2}{3}.\]
+$E(X) = \tfrac12$ is no surprise: $6x(1-x)$ is symmetric about $x=\tfrac12$.
+
+\textbf{(c).}
+\[E(X^{2}) = \int_0^1 6x^{3}(1-x)\,dx = \frac{3}{10}
+ \implies \operatorname{Var}(X) = \frac{3}{10}-\frac{1}{4} = \frac{1}{20},\]
+\[E(Y^{2}) = \int_0^1 2y^{3}\,dy = \frac{1}{2}
+ \implies \operatorname{Var}(Y) = \frac{1}{2}-\frac{4}{9} = \frac{1}{18}.\]
+
+\textbf{(d).} Independent variables are uncorrelated, so
+$\operatorname{Cov}(X,Y) = 0$ and hence $\rho(X,Y) = 0$. (The converse does not hold:
+zero correlation does not imply independence.)
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 4}
+Suppose $X$ and $Y$ have joint probability density function
+\[f(x,y) = k(x+y^{2}),\qquad 0<x<2,\quad 0<y<1.\]
+Find (a) $k$; \, (b) $P\left(X>1,\,Y<\tfrac12\right)$; \, (c) $f_X(x)$ and $f_Y(y)$; \,
+(d) $\operatorname{Cov}(X,Y)$; \, (e) $\operatorname{Var}(X)$ and $\operatorname{Var}(Y)$;
+\, (f) $f(y\mid x)$; \, (g) $P\left(Y>\tfrac12 \mid X=1\right)$.
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} \[\int_0^1\!\!\int_0^2 k(x+y^{2})\,dx\,dy
+ = k\int_0^1\left(2+2y^{2}\right)dy = k\left(2+\tfrac23\right) = \frac{8k}{3} = 1
+ \implies k = \frac{3}{8}.\]
+
+\textbf{(b).} \[P\left(X>1,\,Y<\tfrac12\right)
+ = \frac{3}{8}\int_0^{1/2}\!\!\int_1^2 (x+y^{2})\,dx\,dy
+ = \frac{3}{8}\int_0^{1/2}\left(\tfrac32+y^{2}\right)dy = \frac{19}{64}.\]
+
+\textbf{(c).} \[f_X(x) = \frac{3}{8}\int_0^1 (x+y^{2})\,dy = \frac{3}{8}\left(x+\tfrac13\right)
+ = \frac{3x+1}{8},\qquad
+f_Y(y) = \frac{3}{8}\int_0^2 (x+y^{2})\,dx = \frac{3\left(1+y^{2}\right)}{4}.\]
+
+\textbf{(d).} \[E(X) = \frac{5}{4},\qquad E(Y) = \frac{9}{16},\qquad E(XY) = \frac{11}{16},\]
+so
+\[\operatorname{Cov}(X,Y) = \frac{11}{16}-\frac{5}{4}\cdot\frac{9}{16}
+ = \frac{44-45}{64} = -\frac{1}{64}.\]
+Non-zero, so unlike the previous question $X$ and $Y$ are \emph{not} independent -- and
+indeed $x+y^{2}$ does not factorise.
+
+\textbf{(e).} \[E(X^{2}) = \frac{11}{6} \implies \operatorname{Var}(X) = \frac{11}{6}-\frac{25}{16}
+ = \frac{13}{48},\]
+\[E(Y^{2}) = \frac{2}{5} \implies \operatorname{Var}(Y) = \frac{2}{5}-\frac{81}{256}
+ = \frac{107}{1280}.\]
+
+\textbf{(f).} \[f(y\mid x) = \frac{f(x,y)}{f_X(x)} = \frac{x+y^{2}}{x+\tfrac13}
+ = \frac{3\left(x+y^{2}\right)}{3x+1},\qquad 0<y<1.\]
+
+\textbf{(g).} Setting $x=1$ gives $f(y\mid 1) = \tfrac34\left(1+y^{2}\right)$, so
+\[P\left(Y>\tfrac12\mid X=1\right) = \frac{3}{4}\int_{1/2}^{1}\left(1+y^{2}\right)dy
+ = \frac{3}{4}\left(\frac{4}{3}-\frac{13}{24}\right) = \frac{3}{4}\cdot\frac{19}{24}
+ = \frac{19}{32}.\]
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 4}
+Prove the following:
+% Set as displays, not inline: the first identity is wider than the text measure
+% and inline maths cannot wrap, so it would push the list out of the page.
+\begin{enumerate}
+\item[(a).] \[\operatorname{Cov}(aX+bY,\,cX+dY) = ac\operatorname{Var}(X)
+ +(ad+bc)\operatorname{Cov}(X,Y)+bd\operatorname{Var}(Y)\]
+\item[(b).] \[\operatorname{Cov}(X-Y,\,X+Y) = \operatorname{Var}(X)-\operatorname{Var}(Y)\]
+\item[(c).] \[\rho(aX+b,\,cY+d) = \rho(X,Y)\]
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Everything follows from two facts: covariance is \emph{bilinear} -- linear in each
+argument separately -- and $\operatorname{Cov}(X,X) = \operatorname{Var}(X)$. Adding a
+constant to either argument changes nothing, since $\operatorname{Cov}(X,c) = 0$.
+
+\textbf{(a).} Expanding by bilinearity,
+\begin{align*}
+\operatorname{Cov}(aX+bY,\,cX+dY)
+&= ac\operatorname{Cov}(X,X)+ad\operatorname{Cov}(X,Y)\\
+&\quad + bc\operatorname{Cov}(Y,X)+bd\operatorname{Cov}(Y,Y).
+\end{align*}
+Covariance is symmetric, so $\operatorname{Cov}(Y,X) = \operatorname{Cov}(X,Y)$, and the
+two middle terms combine:
+\[= ac\operatorname{Var}(X)+(ad+bc)\operatorname{Cov}(X,Y)+bd\operatorname{Var}(Y).\]
+
+\textbf{(b).} Apply (a) with $a=1$, $b=-1$, $c=1$, $d=1$:
+\[\operatorname{Cov}(X-Y,\,X+Y) = (1)(1)\operatorname{Var}(X)
+ +\big[(1)(1)+(-1)(1)\big]\operatorname{Cov}(X,Y)+(-1)(1)\operatorname{Var}(Y),\]
+and the middle coefficient is $1-1 = 0$, leaving
+\[\operatorname{Cov}(X-Y,\,X+Y) = \operatorname{Var}(X)-\operatorname{Var}(Y).\]
+A useful consequence: if $X$ and $Y$ have equal variances, their sum and difference are
+uncorrelated, however strongly $X$ and $Y$ themselves are related.
+
+\textbf{(c).} \emph{As stated this is not quite true, and the exception is worth knowing.}
+Using bilinearity and $\operatorname{sd}(aX+b) = |a|\operatorname{sd}(X)$,
+\[\rho(aX+b,\,cY+d) = \frac{ac\operatorname{Cov}(X,Y)}
+ {|a|\operatorname{sd}(X)\cdot|c|\operatorname{sd}(Y)}
+ = \frac{ac}{|ac|}\,\rho(X,Y) = \operatorname{sign}(ac)\,\rho(X,Y).\]
+So the result holds when $ac>0$ -- in particular for any positive $a$ and $c$, which is
+the case the question intends. If $ac<0$ the correlation \emph{reverses sign}:
+$\rho(-2X+3,\,5Y+7) = -\rho(X,Y)$.
+
+The underlying point is the right one, though: correlation is unaffected by a change of
+units or origin. Measuring in centimetres rather than metres, or from a different zero,
+leaves $\rho$ alone -- only reversing a direction flips it.
+\end{solution}
 
 \section{Conditional Probability Functions and Independence of Random Variables}
 \begin{definition}
@@ -7202,6 +7571,46 @@ f_{X/Y}(x\vert y)  & = \frac{f_{X,Y}(x,y)}{f_Y(y)}\\
 From the last equation we can conclude that, given $Y = y$, the random variable $X$ is normally distributed with mean $\mu_X + \rho\frac{\sigma_X}{\sigma_Y}(y - \mu_Y)$ and the variance $\sigma^2_X(1 - \rho^2)$.
 
 
+
+\subsection{Practice problems}
+
+\begin{problem}{Tutorial Sheet 4}
+Suppose that $X\sim \text{BETA}(a,b)$ and $Y\mid x \sim B(n,x)$. Find (a) $E(Y)$ and
+(b) $\operatorname{Var}(Y)$.
+\end{problem}
+
+\begin{solution}
+Here the success probability of a binomial is itself random -- a \emph{mixture}. The tools
+are the tower property and the conditional variance formula:
+\[E(Y) = E\big[E(Y\mid X)\big], \qquad
+\operatorname{Var}(Y) = E\big[\operatorname{Var}(Y\mid X)\big]
+ + \operatorname{Var}\big[E(Y\mid X)\big].\]
+Given $X=x$, $Y$ is binomial, so $E(Y\mid X) = nX$ and
+$\operatorname{Var}(Y\mid X) = nX(1-X)$. For the beta distribution,
+\[E(X) = \frac{a}{a+b}, \qquad
+\operatorname{Var}(X) = \frac{ab}{(a+b)^{2}(a+b+1)}.\]
+
+\textbf{(a).} \[E(Y) = E(nX) = nE(X) = \frac{na}{a+b}.\]
+
+\textbf{(b).} Take the two pieces in turn. Since
+$E(X^{2}) = \operatorname{Var}(X)+\left[E(X)\right]^{2}$,
+\[E\big[\operatorname{Var}(Y\mid X)\big] = n\left[E(X)-E(X^{2})\right]
+ = n\left[E(X)-E(X)^{2}-\operatorname{Var}(X)\right],\]
+\[\operatorname{Var}\big[E(Y\mid X)\big] = n^{2}\operatorname{Var}(X).\]
+Adding them and writing $s = a+b$ for brevity,
+\begin{align*}
+\operatorname{Var}(Y) &= n\left[\frac{a}{s}-\frac{a^{2}}{s^{2}}-\frac{ab}{s^{2}(s+1)}\right]
+ + n^{2}\frac{ab}{s^{2}(s+1)}\\
+&= \frac{nab\,(s+n)}{s^{2}(s+1)}
+ = \frac{nab\,(a+b+n)}{(a+b)^{2}(a+b+1)}.
+\end{align*}
+This is the beta--binomial distribution. Compare it with an ordinary binomial having the
+same mean, whose variance would be $np(1-p) = \dfrac{nab}{(a+b)^{2}}$: the mixture carries
+an extra factor of $\dfrac{a+b+n}{a+b+1}$, which exceeds 1 whenever $n>1$. Letting the
+success probability vary makes the count \emph{more} variable than a plain binomial --
+this is overdispersion, and it is why the beta--binomial is reached for when count data
+are more scattered than a binomial can explain.
+\end{solution}
 
 \section{Joint Moment Generating Function}
 \begin{definition}
