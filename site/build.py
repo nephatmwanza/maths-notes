@@ -51,12 +51,12 @@ THEOREM_TYPES = [
 # It stays off until all four values are real. A half-configured widget fails
 # silently in the reader's browser, which is worse than the honest placeholder
 # the pages show now.
-GISCUS_READY = False
+GISCUS_READY = True
 GISCUS = {
     "repo": "nephatmwanza/maths-notes",
-    "repo_id": "REPO_ID",          # from giscus.app once the repo is public
+    "repo_id": "R_kgDOTowVJw",
     "category": "Q&A",
-    "category_id": "CATEGORY_ID",  # from giscus.app
+    "category_id": "DIC_kwDOTowVJ84DCaQH",
 }
 
 # Privacy-friendly page analytics, same as the climate site uses. Set the site
@@ -239,6 +239,24 @@ def page_nav(html: str) -> str:
     return f'<nav class="pagenav">{"".join(parts)}</nav>' if parts else ""
 
 
+def discussion_term(course_title: str, section_title: str) -> str:
+    """A stable, readable key for the discussion thread behind a page.
+
+    giscus offers `pathname` or a page-stem term. Both are fragile here:
+    inserting one section renumbers every page after it, so `intro_probse4`
+    silently becomes a different topic and its thread orphans. A slug built
+    from the section's own title survives insertions, and it also means the
+    Discussions tab lists something legible - "counting-techniques" rather than
+    "intro_probse5" - so it is possible to see at a glance which topics readers
+    are actually stuck on.
+    """
+    def slug(s: str) -> str:
+        s = unescape(re.sub(r"<[^>]+>", " ", s)).lower()
+        s = re.sub(r"[^a-z0-9]+", "-", s)
+        return re.sub(r"^-+|-+$", "", s)[:70]
+    return f"{slug(course_title)}/{slug(section_title)}"
+
+
 def qa_block(page_id: str) -> str:
     heading = (
         '<section class="qa"><h2>Questions on this section</h2>'
@@ -255,6 +273,7 @@ def qa_block(page_id: str) -> str:
         f' data-category="{GISCUS["category"]}" data-category-id="{GISCUS["category_id"]}"'
         f' data-mapping="specific" data-term="{page_id}"'
         ' data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top"'
+        ' data-loading="lazy"'
         ' data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async>'
         "</script></section>"
     )
@@ -306,6 +325,16 @@ def process(path: Path, items: list[dict], course_title: str,
             "} }, };",
         )
 
+    # The page's section heading keys its discussion thread. Use the *numbered*
+    # heading ("1.1 Introduction"), not the bare <title>: two sections in this
+    # document are both called "Introduction", and without the number they would
+    # share a single thread.
+    m = re.search(r"class='sectionHead'>(.*?)</h\d>", html, re.S)
+    if not m:
+        m = re.search(r"<title>(.*?)</title>", html, re.S)
+    section_title = (unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", m.group(1)))).strip()
+                     if m else path.stem)
+
     nav = page_nav(html)
     body = re.search(r"<body>(.*)</body>", html, re.S)
     if not body:
@@ -321,7 +350,8 @@ def process(path: Path, items: list[dict], course_title: str,
         # Only section pages get a question box. The title page, the chapter
         # landings and the contents page have no topic to ask about, and an
         # empty thread on each would just look abandoned.
-        + (qa_block(path.stem) if re.search(r"se\d+$", path.stem) else "")
+        + (qa_block(discussion_term(course_title, section_title))
+           if re.search(r"se\d+$", path.stem) else "")
         + "</div></main></div>"
         + '<button class="sb-toggle" onclick="document.getElementById(\'sidebar\')'
           '.classList.toggle(\'open\')">Contents</button>'
