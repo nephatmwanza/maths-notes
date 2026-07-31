@@ -331,6 +331,13 @@ is exactly the Paul's-Notes structure, for free, out of the tool.
 
 ## Identity and hosting — settled 2026-07-31
 
+**No course codes anywhere on the site — settled 2026-07-31.** Not MAT2901, not MAT1110,
+not in the hidden search keywords. They are a local UNZA label and would confuse a learner
+from another school. Courses are identified by name only: "Introduction to Probability".
+The same reasoning removed "written for the Zambian curriculum" from the front page — the
+audience starts Zambian but the material is not Zambia-specific, and nothing on the site
+should imply otherwise.
+
 **Site name: WJ Maths.** Display form `WJ Maths`, handle/email/domain form `wjmaths`. The
 initials are the user's parents'; **do not publish what they stand for** — in a small
 community that is an identifying detail, and the name works without the story.
