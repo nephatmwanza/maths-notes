@@ -209,7 +209,8 @@ def equation_numbering(build: Path, items: list[dict]) -> dict[str, tuple[int, i
 def sidebar(items: list[dict], current: str, course_title: str) -> str:
     rows = [
         '<aside class="sidebar" id="sidebar">',
-        '<a class="sb-brand" href="../../../site/index.html">WJ <span>Maths</span></a>',
+        '<a class="sb-brand" href="../../../site/index.html">'
+        '<span class="tile">WJ</span>WJ <span>Maths</span></a>',
         f'<div class="sb-course">{course_title}</div>',
         '<ul class="sb-nav">',
     ]
