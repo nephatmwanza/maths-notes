@@ -42,17 +42,28 @@ THEOREM_TYPES = [
     "problem", "technique", "fact",
 ]
 
-# giscus configuration. Left as placeholders on purpose: the repo has to exist
-# and have Discussions enabled before these resolve to anything, and publishing
-# a half-configured widget would silently fail in the learner's browser. Set
-# GISCUS_READY = True once the real values are in.
+# giscus - the per-section question box, backed by GitHub Discussions.
+#
+# To switch it on: make the repo public, enable Discussions with a "Q&A"
+# category, install the giscus app (github.com/apps/giscus), then read the two
+# IDs off giscus.app and paste them below with GISCUS_READY = True.
+#
+# It stays off until all four values are real. A half-configured widget fails
+# silently in the reader's browser, which is worse than the honest placeholder
+# the pages show now.
 GISCUS_READY = False
 GISCUS = {
-    "repo": "OWNER/REPO",
-    "repo_id": "REPO_ID",
+    "repo": "nephatmwanza/maths-notes",
+    "repo_id": "REPO_ID",          # from giscus.app once the repo is public
     "category": "Q&A",
-    "category_id": "CATEGORY_ID",
+    "category_id": "CATEGORY_ID",  # from giscus.app
 }
+
+# Privacy-friendly page analytics, same as the climate site uses. Set the site
+# code (the subdomain you choose at goatcounter.com) to switch it on. Left
+# empty, no script is emitted at all - so no third-party request is made and
+# nothing needs disclosing to readers.
+GOATCOUNTER_CODE = ""
 
 
 def theorem_type(block: str) -> str | None:
@@ -198,7 +209,7 @@ def equation_numbering(build: Path, items: list[dict]) -> dict[str, tuple[int, i
 def sidebar(items: list[dict], current: str, course_title: str) -> str:
     rows = [
         '<aside class="sidebar" id="sidebar">',
-        '<a class="sb-brand" href="../../../site/index.html">Maths &amp; Stats <span>Notes</span></a>',
+        '<a class="sb-brand" href="../../../site/index.html">WJ <span>Maths</span></a>',
         f'<div class="sb-course">{course_title}</div>',
         '<ul class="sb-nav">',
     ]
@@ -264,10 +275,13 @@ def process(path: Path, items: list[dict], course_title: str,
     html = collapse_solutions(html)
 
     # our stylesheet, after tex4ht's so it wins
-    html = html.replace(
-        "</head>",
-        '<link rel="stylesheet" href="../../../site/assets/notes.css">\n</head>',
-    )
+    head_extra = '<link rel="stylesheet" href="../../../site/assets/notes.css">'
+    if GOATCOUNTER_CODE:
+        head_extra += (
+            f'\n<script data-goatcounter="https://{GOATCOUNTER_CODE}.goatcounter.com/count"'
+            ' async src="//gc.zgo.at/count.js"></script>'
+        )
+    html = html.replace("</head>", head_extra + "\n</head>")
 
     # Serve MathJax from this site rather than jsDelivr. tex4ht hardcodes the
     # CDN, which means every reader waits on a ~1MB third-party download before

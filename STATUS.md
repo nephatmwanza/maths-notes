@@ -329,6 +329,37 @@ is exactly the Paul's-Notes structure, for free, out of the tool.
 
 ---
 
+## Identity and hosting — settled 2026-07-31
+
+**Site name: WJ Maths.** Display form `WJ Maths`, handle/email/domain form `wjmaths`. The
+initials are the user's parents'; **do not publish what they stand for** — in a small
+community that is an identifying detail, and the name works without the story.
+
+**Authorship is open.** A pseudonymous build was considered and rejected: "what we've built
+is too big to hide." The existing GitHub account and commit identity stay as they are, so
+there is no history rewrite and nothing is blocked. WJ Maths is a brand name over open
+authorship, not a disguise.
+
+**Hosting: GitHub Pages from `main`, folder `/` (root).** No Actions workflow — every path
+in the project is already relative and correct when served from the root, so the only
+addition is a root `index.html` that redirects to `site/index.html`. Fewer moving parts,
+nothing to break on a rebuild. Verified locally by serving the repo root: catalogue,
+course pages, stylesheet and MathJax all resolve.
+
+**Still gated on the user (three clicks in GitHub settings):**
+1. Make the repo **public** — required for both Pages on a free account and for giscus.
+2. **Settings → Pages** → Source: Deploy from a branch → `main` / `/ (root)`.
+3. **Settings → General → Features → Discussions** on, with a **Q&A** category, then
+   install the giscus app and read the two IDs off giscus.app into `site/build.py`.
+
+**Analytics:** `GOATCOUNTER_CODE` in `site/build.py`. Empty by default, and when empty **no
+script tag is emitted at all** — no third-party request, nothing to disclose. Set it to the
+subdomain chosen at goatcounter.com to switch it on.
+
+**Note before making the repo public:** it contains past-paper questions and tutorial
+sheets (2020 exams, Feb–March 2026 tutorial sheets — last semester's). Worth a final check
+that none are current assessed coursework.
+
 ## Status Log
 
 *(most recent first — append new entries, never rewrite old ones)*
