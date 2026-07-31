@@ -333,6 +333,62 @@ is exactly the Paul's-Notes structure, for free, out of the tool.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-07-31 (latest) — Tutorial sheets found and added; Chapter 1 problems complete
+
+**Repository is now on GitHub**: `github.com/nephatmwanza/maths-notes`, **private**, branch
+`main`. Name is deliberately provisional — nothing depends on it, rename freely. (The user
+is considering `wj-…`; undecided.) A `git bundle` snapshot also sits in
+`~/Backups/` for Google Drive; verified restorable, all 106 tracked files byte-identical.
+
+**The tutorial sheets are the better source, and they were being missed.**
+`~/LaTeX_Projects/Introduction to Probability 2026/` holds `Tutorial_Sheet_1..4.pdf`
+(Feb–March 2026, last semester) — **49 questions**, already grouped one sheet per block of
+the syllabus, and the thing students actually work through. Prefer these over the exam
+papers. Extracted to `courses/introduction-to-probability/problems/tutorial_sheet_*.txt`.
+
+| Sheet | Qs | Topic | Maps to |
+|---|---|---|---|
+| 1 | 12 | sample spaces, axioms, counting | §1.2–1.3, §1.5 |
+| 2 | 14 | conditional probability, Bayes; then discrete/continuous r.v.s, c.d.f. | §1.4; ch.2 |
+| 3 | 11 | m.g.f.s, named discrete distributions | §2.4, §2.5 |
+| 4 | 12 | named continuous, joint distributions, covariance | §2.6, ch.3 |
+
+**`pdftotext` silently drops set symbols — always render the page.** Sheet 2 Q5 extracts as
+`P(A  B) = 1/3`, which is unsolvable as printed: with `P(A|B)=5/14` it forces
+`P(A∪B) > 1`. The PDF actually shows `P(A ∩ B′)`, and it then works out cleanly.
+
+    pdftoppm -png -r 130 -f 1 -l 1 Tutorial_Sheet_2.pdf out
+
+**Assignment 1 duplicates Tutorial Sheet 1** — 7 of its 15 questions are the same
+questions. Transcribe once, cite the sheet. Check `problems/README.md` before adding.
+
+**Done: Chapter 1 is complete — 23 problems.** §1.3 sample spaces/axioms (4), §1.4
+conditional & Bayes (10), §1.5 counting (9).
+
+**Remaining, in suggested order:**
+
+1. **Assignment 1 leftovers (8)** — still Chapter 1: four-coin sample space, inclusion–exclusion
+   for three events (a proof), geometric probability on the unit square, birth-order and
+   cannabis-survey contingency questions, club-election problem.
+2. **Tutorial Sheet 2 Q11–14 (4)** → §2.2–2.3, §2.7 — discrete/continuous r.v.s, c.d.f.
+3. **Tutorial Sheet 3 (11)** → §2.4–2.5 — m.g.f.s and named discrete distributions.
+4. **Tutorial Sheet 4 (12)** → §2.6, ch.3 — named continuous and joint distributions.
+5. **Assignments 2–4 (12)** → chapters 2–3; overlaps sheets 3 and 4, dedupe first.
+6. **Exam papers** — the user has said *ignore for now*. They are also not separable at
+   question level (see the previous entry).
+
+**Verification is not optional.** Every answer written so far was checked computationally
+before being written down — exhaustive enumeration where the space allows (all 15 gender
+arrangements, all 210 committees, all 24 die-and-coin outcomes, every ordered triple from
+the ball box, all 30240 arrangements of EXCELLENT), exact rational arithmetic otherwise.
+This is what has been turning up the errors in the notes; keep doing it.
+
+**Style note for solutions.** Where the arithmetic is the easy part, say the thing students
+actually miss. Two examples now in §1.4: why drawing without replacement leaves
+`P(second is white)` equal to `P(first is white)`, and why a 98%-sensitive test still
+returns almost nothing but false alarms for a disease affecting one person in ten thousand.
+
+
 ### 2026-07-31 (latest) — Past-paper practice problems; corrections found by verifying the maths
 
 **The new direction (user's idea, 2026-07-31):** turn the tutorial/past-paper problems
