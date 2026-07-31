@@ -333,6 +333,85 @@ is exactly the Paul's-Notes structure, for free, out of the tool.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-07-31 (latest) — Past-paper practice problems; corrections found by verifying the maths
+
+**The new direction (user's idea, 2026-07-31):** turn the tutorial/past-paper problems
+into *the* solved problems on the site, **grouped by topic**, because —
+
+> "one of the issues learners have is identifying on which topic is the question coming from"
+
+That is the product insight. The solutions are the draw; the topic labelling is the thing
+nobody else provides.
+
+**Source material.** `/home/corban/LaTeX_Projects/Introduction To Probability Exam
+Questions/` — 11 papers (4 assignments, a quiz, 3 tests, 3 exams), **57 top-level
+questions, 469 items including parts. Questions only, no solutions.**
+
+**Critical scoping finding — tag at sub-part level, not question level.** The assignments
+and quiz contain clean single-topic questions. The *exam* papers do not: a single
+"question" is typically "(a) define … (b) prove … (c) compute …" and spans four or five
+topics. A keyword classifier put 39 of 57 questions in multiple topics and 9 in none —
+which is itself evidence for the user's point: if a matcher cannot place these, students
+certainly cannot. **The unit of work is the sub-part.** Rough topic spread across the 57
+questions (a question can touch several): expectation 33, continuous r.v. 26, conditional
+25, joint 17, named continuous 13, counting 12, c.d.f. 11, axioms 10, named discrete 10,
+inequalities 4, discrete r.v. 4.
+
+**Mechanism, built and working.** In the LaTeX preamble:
+
+```latex
+\begin{problem}{Examination}  ... \end{problem}
+\begin{solution}              ... \end{solution}
+```
+
+`problem` records provenance (shown as a `[Examination]` tag). `build.py` collapses each
+solution that follows a problem into a `<details>` — no JavaScript, works without it,
+keyboard- and screen-reader-accessible. Worked examples in the body of the notes are
+exposition and stay open; only problem solutions collapse.
+
+**Done so far:** section 1.5 (Counting Techniques) has five past-paper problems with full
+solutions. **Remaining: the other ten topics.** Suggested order — counting (done),
+conditional probability/Bayes, expectation, named discrete, named continuous, joint.
+
+**Verification is now part of the job.** Every answer written was checked by *exhaustive
+enumeration*, not by re-deriving it — all 9! arrangements of FACETIOUS, all 30240 of
+EXCELLENT, all 2520 of BIOLOGY, counted directly and compared against the closed form.
+Do this for every solution added; it is cheap and it is the only thing that makes the
+site trustworthy.
+
+**Errors found in the existing notes by doing this** (all fixed):
+
+| Where | Error |
+|---|---|
+| Remark 1.5.8 (4) | Vandermonde stated as $\binom{m+n}{n}$; it is $\binom{m+n}{k}$. The stated form fails in 222 of 510 cases for $m,n\le 6$. |
+| Example 1.5.9 | "at most 2 defectives" read $\binom50+\binom51+\binom42$; last term is $\binom52$ (gave 12, not 16). |
+| Remark 2.4.19 | `d^^2` is a LaTeX escape, not $d^2$ — printed raw source. Same line differentiated w.r.t. $X$ instead of $t$. |
+| Total probability example | intermediate line `0.0125+0.140+0.080` sums to 0.2325, not the 0.0345 concluded. Products are 0.014 and 0.008. |
+| Exponential warranty (ii) | dropped the minus sign from the antiderivative (part (i) had it right). |
+| Multinomial example | missing `!` on $k_3$; $P^7$ subscripted `{1,2}` instead of the group sizes `{3,2,2}`. |
+
+Checked and **correct**: all other Remark 1.5.8 identities, the two hypergeometric
+identities, every numeric answer in the document (Bayes 0.0345/0.246, binomial 0.26272,
+Poisson 0.1563/0.9084/0.3134, normal 0.1357/0.0228/0.8211/0.8164, hypergeometric
+0.07022/0.584/0.9934/0.0769, licence plates 1 757 600), and all four probability tables
+(each sums to 1 with correct marginals). The 24 listed permutations of $\{p,q,r,s\}$ taken
+3 at a time are the complete distinct set.
+
+**Blank figures were not empty.** Figures 2.27–2.29 shaded regions under the normal curve
+with TikZ `pattern=north east lines`, which tex4ht cannot convert — the same defect class
+as the `pattern=dots` fixed earlier. Solid translucent fills in the house palette; 36 → 41
+SVGs. These are the diagrams that teach z-table reading, so they were worth repairing
+rather than deleting. Every figure and table in the document now has a real caption.
+
+**Also:** tables and the arrangements list are centred (they always carried `\centering`;
+the CSS that made them scrollable also made them fill the line). Several `tikzpicture`
+environments set `[->]` as the default for *every* path, which put an arrowhead on the peak
+of the bell curve.
+
+**Open question for the user:** these are past papers. Fine to publish with solutions, but
+worth a sanity check that none are *current* assessed coursework before going live.
+
+
 ### 2026-07-30 (latest) — Book-quality presentation: build pipeline, house diagram style, self-hosted maths
 
 User's brief: *"make things look beautiful, you free to change things work diagrams make
