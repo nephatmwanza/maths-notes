@@ -362,19 +362,23 @@ papers. Extracted to `courses/introduction-to-probability/problems/tutorial_shee
 **Assignment 1 duplicates Tutorial Sheet 1** — 7 of its 15 questions are the same
 questions. Transcribe once, cite the sheet. Check `problems/README.md` before adding.
 
-**Done: Chapter 1 is complete — 23 problems.** §1.3 sample spaces/axioms (4), §1.4
-conditional & Bayes (10), §1.5 counting (9).
+**Done — 33 problems. Chapter 1 complete; Tutorial Sheet 2 complete.**
+
+| Section | Problems |
+|---|---|
+| §1.3 Definitions and Axioms | 7 |
+| §1.4 Conditional probability & Bayes | 13 |
+| §1.5 Counting Techniques | 9 |
+| §2.2 Discrete Random Variables | 1 |
+| §2.3 Continuous Random Variables | 2 |
+| §2.7 Cumulative Distribution Function | 1 |
 
 **Remaining, in suggested order:**
 
-1. **Assignment 1 leftovers (8)** — still Chapter 1: four-coin sample space, inclusion–exclusion
-   for three events (a proof), geometric probability on the unit square, birth-order and
-   cannabis-survey contingency questions, club-election problem.
-2. **Tutorial Sheet 2 Q11–14 (4)** → §2.2–2.3, §2.7 — discrete/continuous r.v.s, c.d.f.
-3. **Tutorial Sheet 3 (11)** → §2.4–2.5 — m.g.f.s and named discrete distributions.
-4. **Tutorial Sheet 4 (12)** → §2.6, ch.3 — named continuous and joint distributions.
-5. **Assignments 2–4 (12)** → chapters 2–3; overlaps sheets 3 and 4, dedupe first.
-6. **Exam papers** — the user has said *ignore for now*. They are also not separable at
+1. **Tutorial Sheet 3 (11)** → §2.4–2.5 — m.g.f.s and named discrete distributions.
+2. **Tutorial Sheet 4 (12)** → §2.6, ch.3 — named continuous and joint distributions.
+3. **Assignments 2–4 (12)** → chapters 2–3; overlaps sheets 3 and 4, dedupe first.
+4. **Exam papers** — the user has said *ignore for now*. They are also not separable at
    question level (see the previous entry).
 
 **Verification is not optional.** Every answer written so far was checked computationally
