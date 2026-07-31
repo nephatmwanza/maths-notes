@@ -154,6 +154,34 @@
 \newtheorem{lem}[thm]{Lemma}
 \newtheorem{tech}{Technique}[section]
 \newtheorem{fact}[thm]{Fact}
+
+% ---------------------------------------------------------------------------
+% Practice problems taken from past papers.
+%
+% Each problem records where it came from. That provenance is the point: a
+% learner revising from a past paper can see which topic each question belongs
+% to, which is the thing they most often cannot work out for themselves.
+%
+%   \begin{problem}{2019 Exam, Q2}  ... \end{problem}
+%   \begin{solution} ... \end{solution}
+%
+% build.py turns each solution into a collapsed <details> block on the web, so
+% the problem can be attempted before the answer is visible.
+% ---------------------------------------------------------------------------
+% `definition` style, not `plain`: a problem statement is upright text, not an
+% italicised assertion. (\theoremstyle is stateful - the block above leaves it
+% set to `plain`.)
+\theoremstyle{definition}
+\newtheorem{problemx}{Problem}[section]
+\newenvironment{problem}[1]
+  {\begin{problemx}\textup{\small[#1]}\hspace{0.4em}\ignorespaces}
+  {\end{problemx}}
+% Built on `proof` so it inherits the same quiet styling, but a solution is not
+% a proof - it ends with an answer, not a QED square.
+\newenvironment{solution}
+  {\renewcommand{\qedsymbol}{}\begin{proof}[\textit{Solution}.]}
+  {\end{proof}}
+
 \renewcommand{\contentsname}{Contents}
 \renewcommand\bibname{REFERENCES}
 %\renewcommand{\qedsymbol}{$\blacksquare$}
@@ -964,7 +992,8 @@ The number of combinations of $n$ distinct objects taken $k$ at a time is denote
 \item Express the permutation as a combination \[P^n_k = k!\, \binom{n}{k}.\]
 \item Let $n\in \mathbb{N}$ and $k = 0, 1, 2, \cdots, n$. Then \[\binom{n}{k} = \binom{n}{n-k}.\]
 \item For any positive integer $n$ and $k = 1, 2, 3 , \cdots, n$, we have \[\binom{n}{k} = \binom{n - 1}{k} + \binom{n - 1}{k - 1}.\]
-\item Let $m$ and $n$ be positive integers. Then \[\sum^k_{r = 0}\binom{m}{r}\binom{n}{k-r} = \binom{m+n}{n}.\]
+\item Let $m$ and $n$ be positive integers. Then % Vandermonde's identity: the sum is C(m+n, k), not C(m+n, n).
+\[\sum^k_{r = 0}\binom{m}{r}\binom{n}{k-r} = \binom{m+n}{k}.\]
 \end{enumerate}
 \end{remark}
 
@@ -1010,7 +1039,7 @@ Event space $n(B)$ \[n(B) = \binom{5}{0}\binom{95}{10}.\]
 The probability \[P(B) = \frac{\binom{5}{0}\, \binom{95}{10}}{\binom{100}{10}} \approx 0.584 \]
 
 \subsubsection{$C$: At most 2 defectives}
-Ways to pick at most 2 defectives \[\binom{5}{0}+ \binom{5}{1} + \binom{4}{2}\]
+Ways to pick at most 2 defectives \[\binom{5}{0}+ \binom{5}{1} + \binom{5}{2}\]
 Event space \[n(C) = \binom{5}{0}\binom{95}{10} + \binom{5}{1}\binom{95}{9} + \binom{5}{2}\binom{95}{8}.\]
 The probability \[P(C) = \frac{\binom{5}{0}\binom{95}{10}}{\binom{100}{10}} + \frac{\binom{5}{1}\binom{95}{9}}{\binom{100}{10}} + \frac{\binom{5}{2}\binom{95}{8}}{\binom{100}{10}}\approx  0.9934\]
 
@@ -1018,6 +1047,144 @@ The probability \[P(C) = \frac{\binom{5}{0}\binom{95}{10}}{\binom{100}{10}} + \f
 $P(D) = 1 - P(X < 2)$
 \[P(D) = 1 -\left[\frac{\binom{5}{0}\binom{95}{10}}{\binom{100}{10}} + \frac{\binom{5}{1}\binom{95}{9}}{\binom{100}{10}}\right] = 0.0769\]
 \end{proof}
+
+\subsection{Practice problems}
+
+These are past assignment, quiz and examination questions on counting. Each one
+says where it came from. Try it before opening the solution.
+
+\begin{problem}{Assignment}
+In how many ways can the letters of the word \textbf{FACETIOUS} be arranged in a
+line? What is the probability that an arrangement begins with \textbf{F} and
+ends with \textbf{S}?
+\end{problem}
+
+\begin{solution}
+The nine letters of \textbf{FACETIOUS} are all different, so the number of
+arrangements is \[9! = 362\,880.\]
+If the arrangement must begin with \textbf{F} and end with \textbf{S}, those two
+positions are fixed and the remaining seven letters may be arranged freely in
+the seven middle positions, giving $7!$ arrangements. Hence
+\[P(\text{begins with F and ends with S}) = \frac{7!}{9!} = \frac{5040}{362\,880} = \frac{1}{72}.\]
+\end{solution}
+
+\begin{problem}{Assignment}
+The letters of the word \textbf{EXCELLENT} are arranged in a random order. Find
+the probability that
+\begin{enumerate}
+\item[(a).] the same letter occurs at each end;
+\item[(b).] \textbf{X}, \textbf{C} and \textbf{N} occur together in any order;
+\item[(c).] the letters occur in alphabetical order.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{EXCELLENT} has nine letters, of which \textbf{E} occurs three times and
+\textbf{L} twice. The number of distinct arrangements is
+\[\frac{9!}{3!\,2!} = \frac{362\,880}{12} = 30\,240.\]
+
+\textbf{(a).} Only \textbf{E} and \textbf{L} are repeated, so only those can
+occupy both ends. If both ends are \textbf{E}, the remaining seven letters are
+\textbf{E, X, C, L, L, N, T} with \textbf{L} twice, giving $7!/2! = 2520$
+arrangements. If both ends are \textbf{L}, the remaining seven are
+\textbf{E, E, E, X, C, N, T} with \textbf{E} three times, giving $7!/3! = 840$.
+Therefore
+\[P = \frac{2520 + 840}{30\,240} = \frac{3360}{30\,240} = \frac{1}{9}.\]
+
+\textbf{(b).} Treat \textbf{XCN} as a single block. There are then seven units
+to arrange -- the block together with \textbf{E, E, E, L, L, T} -- which can be
+done in $7!/(3!\,2!) = 420$ ways, and the three letters inside the block can be
+ordered in $3! = 6$ ways. Therefore
+\[P = \frac{420 \times 6}{30\,240} = \frac{2520}{30\,240} = \frac{1}{12}.\]
+
+\textbf{(c).} Alphabetical order is a single arrangement,
+\textbf{C E E E L L N T X}, so
+\[P = \frac{1}{30\,240}.\]
+\end{solution}
+
+\begin{problem}{Examination}
+If all the letters of the word \textbf{BIOLOGY} are to be arranged in a line,
+find the
+\begin{enumerate}
+\item[(a).] number of distinct letter arrangements possible;
+\item[(b).] probability that the arrangement starts and ends with the letter \textbf{O};
+\item[(c).] probability that the two \textbf{O}'s are together.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} \textbf{BIOLOGY} has seven letters with \textbf{O} repeated twice,
+so the number of distinct arrangements is
+\[\frac{7!}{2!} = \frac{5040}{2} = 2520.\]
+
+\textbf{(b).} Both \textbf{O}'s are used at the two ends, and the remaining five
+distinct letters \textbf{B, I, L, G, Y} fill the middle in $5! = 120$ ways.
+\[P = \frac{120}{2520} = \frac{1}{21}.\]
+
+\textbf{(c).} Treat \textbf{OO} as a single block. There are then six units, all
+different, giving $6! = 720$ arrangements. (The two \textbf{O}'s are identical,
+so the block is not counted twice.)
+\[P = \frac{720}{2520} = \frac{2}{7}.\]
+\end{solution}
+
+\begin{problem}{Quiz}
+\begin{enumerate}
+\item[(a).] A drug for the relief of asthma can be purchased from five different
+manufacturers in liquid, tablet or capsule form, all of which come in regular
+and extra strength. In how many different ways can a doctor prescribe the drug
+for a patient suffering from asthma?
+\item[(b).] A witness to a hit-and-run accident told the police that the licence
+plate number has letters \textbf{ABF} followed by four digits, the first of
+which was a six. If the witness cannot recall the last three digits, but is sure
+that all four digits are different, find the maximum number of vehicle
+registrations the police have to check.
+\item[(c).] The UNZA football team plays 10 games during the season. In how many
+ways can the team end the season with six wins, three losses and one draw?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The three choices -- manufacturer, form and strength -- are made
+independently, so by the multiplication principle
+\[5 \times 3 \times 2 = 30 \text{ ways}.\]
+
+\textbf{(b).} The first digit is known to be 6. The remaining three digits must
+all differ from 6 and from one another, so there are 9 choices for the second,
+8 for the third and 7 for the fourth:
+\[9 \times 8 \times 7 = 504 \text{ registrations}.\]
+
+\textbf{(c).} The season is a sequence of 10 results made up of six \textbf{W}s,
+three \textbf{L}s and one \textbf{D}. This is a permutation with repetition:
+\[P^{10}_{6,3,1} = \frac{10!}{6!\,3!\,1!} = \frac{3\,628\,800}{4320} = 840 \text{ ways}.\]
+\end{solution}
+
+\begin{problem}{Examination}
+The integers $1, 2, 3, \ldots, 9$ are arranged in a row, resulting in a
+nine-digit number. Find the probability that
+\begin{enumerate}
+\item[(a).] the resulting number is even;
+\item[(b).] the resulting number is divisible by 5;
+\item[(c).] the digits 4 and 6 are next to each other.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+The nine digits are all different, so there are $9! = 362\,880$ equally likely
+arrangements.
+
+\textbf{(a).} The number is even exactly when the last digit is one of
+$2, 4, 6, 8$. There are 4 choices for that digit and $8!$ arrangements of the
+rest:
+\[P = \frac{4 \times 8!}{9!} = \frac{4}{9}.\]
+
+\textbf{(b).} The number is divisible by 5 exactly when it ends in 5 (there is
+no 0 among the digits). That fixes one position and leaves $8!$:
+\[P = \frac{8!}{9!} = \frac{1}{9}.\]
+
+\textbf{(c).} Treat 4 and 6 as a single block, giving eight units to arrange in
+$8!$ ways, and the two digits can be ordered within the block in $2!$ ways:
+\[P = \frac{2 \times 8!}{9!} = \frac{2}{9}.\]
+\end{solution}
 
 
 

@@ -139,6 +139,49 @@ a:hover{color:var(--accent-deep)}
 /* the source nests proofs inside enumerate; claw back the double indent */
 .newtheorem ol .proof,.newtheorem ul .proof{margin-left:-.6rem}
 
+/* ---------- practice problems ---------- */
+/* Deliberately not one of the theorem colours: a problem is a task, not
+   something to read, and should look different from the exposition above it. */
+.newtheorem.nt-problem,.newtheorem.nt-problemx{
+  border-left-color:var(--accent);background:transparent;
+  border:1px solid var(--line);border-left:3px solid var(--accent);
+}
+.nt-problem .head .cmbx-12,.nt-problemx .head .cmbx-12{color:var(--accent-deep)}
+/* the "[Examination]" provenance tag */
+.nt-problem .head + .small,.newtheorem .head ~ .small{color:var(--mute)}
+
+/* tex4ht discards the optional label on \item[(a).] and lets the browser number
+   the list 1, 2, 3 instead. Harmless in the notes, but these problems are past
+   examination questions and students recognise them by their (a)/(b)/(c) parts,
+   so restore that lettering here. The LaTeX source already carries the same
+   labels, so print and web agree. */
+.nt-problem ol.enumerate1{list-style:none;counter-reset:part;padding-left:2rem}
+.nt-problem ol.enumerate1 > li{counter-increment:part;position:relative}
+.nt-problem ol.enumerate1 > li::before{
+  content:"(" counter(part,lower-alpha) ").";
+  position:absolute;left:-1.9rem;width:1.7rem;text-align:left;color:var(--soft);
+}
+
+details.solution{
+  margin:-.6rem 0 1.8rem;border-left:2px solid var(--line);padding-left:1.1rem;
+}
+details.solution > summary{
+  cursor:pointer;list-style:none;display:inline-block;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-weight:600;color:var(--accent-deep);
+  padding:.3rem .8rem;border:1px solid var(--line);border-radius:999px;
+  background:var(--surface);user-select:none;
+  font-size:0;                       /* hide the markup's own label ... */
+}
+details.solution > summary::before{  /* ... and swap it by state */
+  content:"Show solution";font-size:.86rem;
+}
+details.solution[open] > summary::before{content:"Hide solution"}
+details.solution > summary::-webkit-details-marker{display:none}
+details.solution > summary:hover{border-color:var(--accent);background:var(--accent-wash)}
+details.solution[open] > summary{margin-bottom:.6rem;color:var(--mute)}
+details.solution .proof{border-left:none;padding-left:0;margin-top:.4rem}
+
 /* ---------- maths ---------- */
 /* A handful of displays (long `cases` blocks, wide conditional-density
    fractions) are simply wider than any sane text measure. They scroll rather

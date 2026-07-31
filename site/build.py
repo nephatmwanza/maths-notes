@@ -39,6 +39,7 @@ from pathlib import Path
 THEOREM_TYPES = [
     "definition", "theorem", "lemma", "proposition", "corollary",
     "example", "exercise", "remark", "note", "conjecture",
+    "problem", "technique", "fact",
 ]
 
 # giscus configuration. Left as placeholders on purpose: the repo has to exist
@@ -82,6 +83,47 @@ def tag_theorems(html: str) -> str:
         out.append(html[pos:m.start()])
         out.append(f"<div class='{cls}'>")
         pos = m.end()
+    out.append(html[pos:])
+    return "".join(out)
+
+
+def collapse_solutions(html: str) -> str:
+    """Hide practice-problem solutions behind a disclosure control.
+
+    A solution printed directly under its problem is read instead of attempted,
+    which is most of its value gone. Every solution that follows a problem
+    becomes a collapsed <details> - no JavaScript, works without it, and stays
+    keyboard- and screen-reader-accessible.
+
+    Only solutions attached to a `problem` are collapsed. Worked examples in the
+    body of the notes are exposition and stay open.
+
+    Runs after tag_theorems(), which is what puts the `nt-problem` class on the
+    block - tex4ht itself marks every theorem-like environment the same way.
+    """
+    out, pos, armed = [], 0, False
+    for m in re.finditer(r"<div class='(newtheorem nt-problem|proof)'>", html):
+        kind = m.group(1)
+        if kind != "proof":
+            armed = True
+            continue
+        if not armed:
+            continue
+        armed = False
+        # find this proof div's matching close
+        depth, i = 1, m.end()
+        while depth and i < len(html):
+            nxt = re.search(r"<div\b|</div>", html[i:])
+            if not nxt:
+                break
+            i += nxt.end()
+            depth += 1 if nxt.group(0) != "</div>" else -1
+        out.append(html[pos:m.start()])
+        out.append(
+            "<details class='solution'><summary>Show solution</summary>"
+            "<div class='proof'>" + html[m.end():i] + "</details>"
+        )
+        pos = i
     out.append(html[pos:])
     return "".join(out)
 
@@ -219,6 +261,7 @@ def process(path: Path, items: list[dict], course_title: str,
         return False
 
     html = tag_theorems(html)
+    html = collapse_solutions(html)
 
     # our stylesheet, after tex4ht's so it wins
     html = html.replace(
