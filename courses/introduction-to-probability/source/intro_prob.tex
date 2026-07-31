@@ -2850,6 +2850,79 @@ The mean
 
 
 
+\subsection{Practice problems}
+
+\begin{problem}{Tutorial Sheet 3}
+For each of the following p.f./p.d.f.s derive the moment generating function $M_X(t)$.
+State the range of values of $t$ for which the moment generating function is valid, and
+use it to find the mean and variance of $X$.
+\begin{enumerate}
+\item[(a).] $f(x) = pq^{x}$, \quad $x = 0,1,2,\ldots$
+\item[(b).] $f(x) = \dbinom{-k}{x}p^{k}(-q)^{x}$, \quad $x = 0,1,2,\ldots$
+\item[(c).] $f(x) = \dfrac{e^{-x/\theta}}{\theta}$, \quad $x>0$
+\item[(d).] $f(x) = \dfrac{x^{\alpha-1}e^{-x/\beta}}{\beta^{\alpha}\Gamma(\alpha)}$,
+ \quad $x>0$
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Throughout, $M_X(t) = E(e^{tX})$, and the mean and variance come from
+\[E(X) = M_X'(0), \qquad \operatorname{Var}(X) = M_X''(0)-\left[M_X'(0)\right]^{2}.\]
+In every case the range of $t$ is dictated by where the sum or integral converges.
+
+\textbf{(a).} This is the geometric distribution counting failures before the first
+success, with $q = 1-p$. The sum is geometric with ratio $qe^{t}$:
+\[M_X(t) = \sum_{x=0}^{\infty}e^{tx}pq^{x} = p\sum_{x=0}^{\infty}\left(qe^{t}\right)^{x}
+ = \frac{p}{1-qe^{t}},\]
+which converges precisely when $qe^{t}<1$, that is for
+$t < \ln\left(\tfrac{1}{q}\right)$. Differentiating,
+\[M_X'(t) = \frac{pqe^{t}}{\left(1-qe^{t}\right)^{2}}
+ \implies E(X) = \frac{pq}{(1-q)^{2}} = \frac{pq}{p^{2}} = \frac{q}{p},\]
+and a second differentiation gives $M_X''(0) = \dfrac{q(1+q)}{p^{2}}$, so
+\[\operatorname{Var}(X) = \frac{q(1+q)}{p^{2}}-\frac{q^{2}}{p^{2}} = \frac{q}{p^{2}}.\]
+
+\textbf{(b).} This is the negative binomial written with a negative upper index. The
+identity
+\[\binom{-k}{x}(-1)^{x} = \binom{k+x-1}{x}\]
+turns it into the familiar form $\binom{k+x-1}{x}p^{k}q^{x}$: the number of failures
+before the $k$th success. Using the binomial series
+$(1+z)^{-k} = \sum_{x\geq 0}\binom{-k}{x}z^{x}$ with $z = -qe^{t}$,
+\[M_X(t) = p^{k}\sum_{x=0}^{\infty}\binom{-k}{x}\left(-qe^{t}\right)^{x}
+ = p^{k}\left(1-qe^{t}\right)^{-k} = \left(\frac{p}{1-qe^{t}}\right)^{\!k},\]
+valid for $t<\ln\left(\tfrac1q\right)$ as before. This is the $k$th power of the m.g.f.\
+in part (a) -- exactly what one expects, since a negative binomial is the sum of $k$
+independent geometrics. Hence
+\[E(X) = \frac{kq}{p}, \qquad \operatorname{Var}(X) = \frac{kq}{p^{2}}.\]
+
+\textbf{(c).} This is the exponential distribution with mean $\theta$:
+\[M_X(t) = \int_0^{\infty}e^{tx}\frac{e^{-x/\theta}}{\theta}\,dx
+ = \frac{1}{\theta}\int_0^{\infty}e^{-x\left(\frac{1}{\theta}-t\right)}dx
+ = \frac{1}{\theta}\cdot\frac{1}{\frac{1}{\theta}-t} = \frac{1}{1-\theta t}.\]
+The integral converges only if $\tfrac{1}{\theta}-t>0$, so the m.g.f.\ is valid for
+$t<\tfrac{1}{\theta}$. Then
+\[M_X'(t) = \frac{\theta}{(1-\theta t)^{2}},\qquad
+M_X''(t) = \frac{2\theta^{2}}{(1-\theta t)^{3}},\]
+giving $E(X) = \theta$ and
+$\operatorname{Var}(X) = 2\theta^{2}-\theta^{2} = \theta^{2}$.
+
+\textbf{(d).} This is the gamma distribution with shape $\alpha$ and scale $\beta$.
+\[M_X(t) = \int_0^{\infty}e^{tx}\frac{x^{\alpha-1}e^{-x/\beta}}{\beta^{\alpha}\Gamma(\alpha)}dx
+ = \frac{1}{\beta^{\alpha}\Gamma(\alpha)}\int_0^{\infty}x^{\alpha-1}
+   e^{-x\left(\frac{1}{\beta}-t\right)}dx.\]
+The remaining integral is a gamma integral: substituting
+$u = x\left(\tfrac{1}{\beta}-t\right)$ gives
+$\Gamma(\alpha)\left(\tfrac{1}{\beta}-t\right)^{-\alpha}$, so
+\[M_X(t) = \frac{\left(\frac{1}{\beta}-t\right)^{-\alpha}}{\beta^{\alpha}}
+ = (1-\beta t)^{-\alpha}, \qquad t<\frac{1}{\beta}.\]
+Then
+\[M_X'(t) = \alpha\beta(1-\beta t)^{-\alpha-1},\qquad
+M_X''(t) = \alpha(\alpha+1)\beta^{2}(1-\beta t)^{-\alpha-2},\]
+so $E(X) = \alpha\beta$ and
+\[\operatorname{Var}(X) = \alpha(\alpha+1)\beta^{2}-\alpha^{2}\beta^{2} = \alpha\beta^{2}.\]
+Setting $\alpha = 1$ recovers part (c), as it must: the exponential is a gamma with
+shape 1.
+\end{solution}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Some Important Discrete Probability Mass Function}
 We focus on specific families of discrete random variables that appear frequently in scientific research, engineering, and economics. Each distribution is defined by one or more parameters that determine its shape and characteristics. By identifying a situation as fitting one of these models, we can use pre-derived formulas for their mean, variance, and generating functions.
@@ -4009,6 +4082,107 @@ The transform functions for $X \sim \operatorname{Zeta}(\alpha)$ are characteriz
 
 
 
+
+\subsection{Practice problems}
+
+The hardest part of these questions is usually not the arithmetic but deciding
+\emph{which} distribution applies. It is worth pausing on that each time before
+substituting anything.
+
+\begin{problem}{Tutorial Sheet 3}
+A netball player makes 10 shots and the probability of scoring on each shot is $0.4$.
+What is the probability that
+\begin{enumerate}
+\item[(a).] she scores 4 times;
+\item[(b).] she scores at least 7 times;
+\item[(c).] the first score occurs on the sixth shot;
+\item[(d).] the third score occurs on the tenth shot?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Parts (a) and (b) fix the number of shots at 10 and count successes, so they are
+\emph{binomial}. Parts (c) and (d) fix the number of successes and ask which shot it
+happens on, so they are \emph{geometric} and \emph{negative binomial}. Same experiment,
+different question, different distribution -- that is the distinction to watch for.
+
+\textbf{(a).} $X\sim B(10,0.4)$:
+\[P(X=4) = \binom{10}{4}(0.4)^{4}(0.6)^{6} = 210(0.0256)(0.046656) \approx 0.2508.\]
+
+\textbf{(b).} \[P(X\geq 7) = \sum_{x=7}^{10}\binom{10}{x}(0.4)^{x}(0.6)^{10-x}
+ \approx 0.0425+0.0106+0.0016+0.0001 \approx 0.0548.\]
+
+\textbf{(c).} The first score on the sixth shot means five misses then a score:
+\[P = (0.6)^{5}(0.4) \approx 0.0311.\]
+
+\textbf{(d).} The third score on the tenth shot means exactly two scores in the first
+nine shots, then a score on the tenth:
+\[P = \binom{9}{2}(0.4)^{2}(0.6)^{7}\times(0.4)
+ = \binom{9}{2}(0.4)^{3}(0.6)^{7} \approx 0.0645.\]
+Note the binomial coefficient is $\binom{9}{2}$, not $\binom{10}{3}$: the last shot is
+\emph{fixed} as a score, so only the first nine are free to be arranged.
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 3}
+Suppose an ordinary six-sided die is rolled repeatedly and the outcome noted on each
+roll. What is the probability that
+\begin{enumerate}
+\item[(a).] the third 6 occurs on the seventh roll;
+\item[(b).] the number of rolls until the first 6 occurs is at most 10?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Each roll gives a 6 with probability $\tfrac16$, independently.
+
+\textbf{(a).} The seventh roll must be a 6, and exactly two of the first six rolls must be
+6s:
+\[P = \binom{6}{2}\left(\frac{1}{6}\right)^{2}\left(\frac{5}{6}\right)^{4}
+ \times\frac{1}{6}
+ = \binom{6}{2}\left(\frac{1}{6}\right)^{3}\left(\frac{5}{6}\right)^{4}
+ = \frac{3125}{93312} \approx 0.0335.\]
+
+\textbf{(b).} It is far quicker to negate. The first 6 takes more than 10 rolls exactly
+when the first 10 rolls are all non-sixes:
+\[P(\text{at most }10) = 1-\left(\frac{5}{6}\right)^{10}
+ = 1-\frac{9765625}{60466176} = \frac{50700551}{60466176} \approx 0.8385.\]
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 3}
+A sales manager receives 6 calls on average between 9:30 a.m.\ and 10:30 a.m.\ on a
+weekday. Find the probability that
+\begin{enumerate}
+\item[(a).] he will receive 2 or more calls between 9:30 a.m.\ and 10:30 a.m.\ on a
+certain weekday;
+\item[(b).] he will receive exactly 2 calls between 9:30 a.m.\ and 9:40 a.m.\ on a
+certain weekday;
+\item[(c).] during a 5-day working week, there will be exactly 3 days on which he
+receives no calls between 9:30 a.m.\ and 9:40 a.m.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Calls arriving at random over time are modelled by a Poisson distribution, and the key
+point is that \emph{the rate must be rescaled to match the interval}.
+
+\textbf{(a).} Over the full hour, $\lambda = 6$:
+\[P(X\geq 2) = 1-P(0)-P(1) = 1-e^{-6}-6e^{-6} = 1-7e^{-6} \approx 0.9826.\]
+
+\textbf{(b).} Ten minutes is one sixth of an hour, so the rate becomes
+$\lambda = 6\times\tfrac{10}{60} = 1$:
+\[P(X=2) = \frac{e^{-1}1^{2}}{2!} = \frac{e^{-1}}{2} \approx 0.1839.\]
+
+\textbf{(c).} First, the probability that a given day has no calls in that ten-minute
+window:
+\[p_0 = P(X=0) = e^{-1} \approx 0.3679.\]
+Now the five days are independent trials, each a ``success'' if there are no calls, so
+the count of such days is binomial with $n=5$ and $p = e^{-1}$:
+\[P(\text{exactly }3) = \binom{5}{3}\left(e^{-1}\right)^{3}\left(1-e^{-1}\right)^{2}
+ \approx 10(0.0498)(0.3996) \approx 0.1989.\]
+This is a Poisson calculation feeding a binomial one -- worth recognising, because
+questions that chain two distributions like this are common and easy to misread as a
+single one.
+\end{solution}
 
 \section{Some Important Continuous Probability Density Functions}
 \vspace{-15pt}
