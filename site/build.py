@@ -152,15 +152,31 @@ def read_toc(build: Path) -> list[dict]:
         return []
     html = toc_files[0].read_text(encoding="utf-8", errors="replace")
     items = []
+    # Which page kinds appear depends on the document class. The probability
+    # notes use \chapter, so tex4ht emits chN/seN and subsections stay inside
+    # their section's page. These statistics notes are an `article` with
+    # \section at the top, so subsections get pages of their own (suN) - and
+    # matching only ch/se left ten of nineteen pages reachable by next/prev
+    # alone, absent from the sidebar entirely.
     for m in re.finditer(
-        r"href='([^']*?(?:ch|se)\d+\.html)#[^']*'>([^<]+)", html
+        r"href='([^']*?(?:ch|se|su)\d+\.html)#[^']*'>([^<]+)", html
     ):
         href, label = m.group(1), unescape(m.group(2)).strip()
-        items.append({
-            "href": href,
-            "label": label,
-            "kind": "ch" if "ch" in Path(href).stem[-4:] else "sec",
-        })
+        stem = Path(href).stem
+        if re.search(r"ch\d+$", stem):
+            kind = "ch"
+        elif re.search(r"su\d+$", stem):
+            kind = "sub"
+        else:
+            kind = "sec"
+        items.append({"href": href, "label": label, "kind": kind})
+
+    # A document with no chapters has sections as its top level, so they should
+    # read as headings rather than as indented children of nothing.
+    if not any(i["kind"] == "ch" for i in items):
+        for i in items:
+            if i["kind"] == "sec":
+                i["kind"] = "ch"
     return items
 
 
@@ -215,7 +231,7 @@ def sidebar(items: list[dict], current: str, course_title: str) -> str:
         '<ul class="sb-nav">',
     ]
     for it in items:
-        cls = "ch" if it["kind"] == "ch" else "sec"
+        cls = {"ch": "ch", "sub": "sub"}.get(it["kind"], "sec")
         cur = " current" if it["href"] == current else ""
         rows.append(
             f'<li class="{cls}"><a class="{cur.strip()}" href="{it["href"]}">'
