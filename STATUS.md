@@ -485,30 +485,57 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
-### 2026-08-01 (night, final) — Rest of the tall tables laid across
+### 2026-08-01 (night, after) — \hat for single symbols, \widehat only when wide
 
-User pointed at Table 2 and Table 3. Table 3 was already transposed in the local
-build — they were reading the deployed site, which was behind. Worth remembering
-when a report does not match what is on disk: **check whether the fix has shipped
-before re-investigating it.**
+User, on Estimation and Sampling Distributions: "we still have the `\widehat`."
 
-Transposed the rest of the same family on that page and its neighbours: Table 2
-(ungrouped distribution), Table 5 (cumulative frequencies with class boundaries),
-Table 6 (scores of 50 students), the five-class travel-time distribution which
-recurs **five times** across the median, quartile and mode examples, and the
-heights problem. Cumulative-frequency columns re-derived and checked in each.
+Checked first whether it was failing to render — it was not; all 89 occurrences
+on that page sit inside `\(...\)` and display correctly. The complaint is the
+notation itself, and it is right.
 
-**Deliberately not transposed**, and the reason matters: tables whose first column
-is long text (the distributions reference table, "Question / Distribution /
-Degrees of freedom"), the tally-mark tables, and the relative-frequency tables
-whose cells hold text like "3/20 or 0.15". Laid across, those exceed a phone's
-width — which is precisely what `.viewport/check-overflow.sh` exists to catch. A
-table that is tall on a desktop is a cosmetic complaint; one that is too wide on a
-phone is a broken page.
+**`\widehat` stretches the accent to fit its argument.** Over a single letter that
+is the wrong accent and it is exactly what makes `\widehat{S}` look drawn out.
+`\hat` is for one symbol; `\widehat` for anything wider.
 
-> **Transposing is not free.** It trades vertical space for horizontal, and
-> horizontal is the axis that has a hard limit. Run the overflow check after any
-> batch of them.
+An earlier pass had standardised everything onto `\widehat` on the grounds that
+115 beat 7 — **counting which form was more common, instead of asking which was
+correct.** The majority was simply wrong more often.
+
+Converted 232: $S$ (55), $b$ (73), $a$ (36), $\theta$ (29), $Y$ (22), $P$ (16),
+$p$ (1). Kept the 7 `\widehat{\overline{X}}`, where the argument genuinely is
+wide and the stretched accent is correct.
+
+Also closed an unmatched bracket found in the same section,
+`E(\widehat{\overline{X}} &= …`, and verified every `E(` in the file now balances.
+
+> **A house style settled by frequency is not a house style.** When two forms
+> disagree, the question is which is right, not which is winning.
+
+### 2026-08-01 (night, final) — Transposed too many tables; reverted
+
+User pointed at Example 1.45's table, then Table 2 and Table 3. I transposed
+those **and six more of the same shape** — Table 4, Table 5, Table 6, the
+travel-time distribution (5 copies), the heights problem, the nine-samples table.
+User: "no, i only wanted the transpose for the tables i request, the others where
+okay without transposing them."
+
+Reverted all six. Only the three requested are laid across.
+
+> **A named example is a scope, not a sample.** When a user points at a specific
+> table, figure or example, the request is that one. Finding others that share
+> the trait is not evidence they want the trait changed everywhere — a tall table
+> is a judgement call about that table, and the author is making it. Ask, or do
+> the named ones and *say* what else matches.
+>
+> This is distinct from the sweeps that were right today: a wrong caption, a
+> broken formula, a marker that renders unstyled are all defects, and finding
+> more of a defect is a reason to fix them all. Layout is a preference. **Fix
+> defects broadly; apply preferences narrowly.**
+
+One note worth keeping from the episode: Table 3 was already transposed locally
+when the user reported it as still tall — they were reading the deployed site,
+which was behind. **When a report does not match what is on disk, check whether
+the fix has shipped before re-investigating it.**
 
 ### 2026-08-01 (night, end) — Central Limit Theorem stated properly; wide tables
 
