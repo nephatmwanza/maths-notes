@@ -127,6 +127,46 @@ def tag_bold_markers(html: str) -> str:
     return MARKER_RE.sub(repl, html)
 
 
+# A marker only starts a paragraph if a BLANK LINE precedes it in the .tex.
+# After `\\` it stays inside the running paragraph, tex4ht emits it as an
+# ordinary inline <span>, and MARKER_RE never sees it - so the example loses its
+# label, its rule and its number while every other example on the page keeps
+# theirs. That is invisible in the LaTeX and easy to miss in the HTML, so the
+# build reports it rather than waiting for a reader to notice.
+STRAY_MARKER_RE = re.compile(
+    r"(?<!<p class='noindent'>)<span class='cm(?:bx|ti)[^']*'>\s*"
+    r"(" + "|".join(MARKER_WORDS) + r")\s*:?\s*</span>"
+)
+
+
+def report_stray_markers(html: str, page: str) -> int:
+    """Warn about Example/Solution headings that never became paragraphs.
+
+    Ignores headings emitted by a real LaTeX environment - `\\begin{solution}`
+    and friends render inside `<span class='head'>` and are already styled by
+    tag_theorems(). The probability course is written entirely that way, and
+    without this exclusion every one of its 43 solutions reads as a defect.
+    """
+    strays = []
+    for m in STRAY_MARKER_RE.finditer(html):
+        # Anchor to the enclosing paragraph rather than guessing a window size:
+        # tex4ht pads its output with runs of whitespace hundreds of characters
+        # long, so a fixed lookback silently misses the `head` span it is meant
+        # to find and reports every environment heading as a defect.
+        para = html.rfind("<p", 0, m.start())
+        before = html[para:m.start()] if para != -1 else html[:m.start()]
+        if "mk mk-" in before or "class='head'" in before:
+            continue
+        # `(Exercise)` and the like are deliberate inline labels, not headings.
+        if before.rstrip().endswith("("):
+            continue
+        strays.append(m.group(1))
+    for word in strays:
+        print(f"    WARNING {page}: '{word}' is inline, so it gets no label or "
+              f"number. Put a blank line before it in the .tex (not `\\\\`).")
+    return len(strays)
+
+
 def collapse_solutions(html: str) -> str:
     """Hide practice-problem solutions behind a disclosure control.
 
@@ -338,6 +378,7 @@ def process(path: Path, items: list[dict], course_title: str,
 
     html = tag_theorems(html)
     html = tag_bold_markers(html)
+    report_stray_markers(html, path.name)
     html = collapse_solutions(html)
 
     # our stylesheet, after tex4ht's so it wins

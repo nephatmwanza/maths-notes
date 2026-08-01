@@ -485,6 +485,42 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-01 (later) — A marker after `\\` is silently not a marker
+
+User spotted an `Example` on the Moments page that had no label and no number,
+while every other example on the page had both. The maths was fine and the
+solution was there; the *heading* had come loose.
+
+**Cause.** `tag_bold_markers()` in `site/build.py` matches
+`<p class='noindent'><span class='cmbx…'>Example</span>`. A marker only becomes
+its own paragraph if a **blank line** precedes it in the `.tex`. After `\\` it
+stays inside the running paragraph, tex4ht emits it as an inline `<span>`, and
+the regex never sees it — no label, no rule, no number, and the example is
+skipped by the counter so every later example on that page is misnumbered too.
+
+Nine markers in the statistics source were affected. **One of them I introduced
+myself** in the previous commit, adding a `Solution` label directly under a line
+of given data with no blank line. So this is not a legacy-notes problem — it is
+a trap for anyone editing these files, including me.
+
+**The build now reports it.** `report_stray_markers()` warns with the page name
+and the fix. Verified both directions: silent on correct source, and it names
+`intro_statssu15.html` when the bug is deliberately reintroduced.
+
+Getting the check right took three attempts, which is the part worth remembering:
+
+1. First version flagged **43** in the probability course. All false — that course
+   uses real `\begin{solution}` environments, which render inside
+   `<span class='head'>` and are already styled by `tag_theorems()`.
+2. Excluding `class='head'` within 80 characters left **7** still false. tex4ht
+   pads output with runs of whitespace hundreds of characters long, so a fixed
+   lookback window misses the very thing it is looking for.
+3. Anchoring to the enclosing `<p` instead of a character count gives **0** false
+   positives on both courses. Also skips `(Exercise)`-style inline parentheticals.
+
+> **A checker that reports clean proves nothing until it has been shown to fail
+> on a known-bad input.** Same lesson as the overflow checker in `.viewport/`.
+
 ### 2026-08-01 — Captions settled; every unsolved example resolved
 
 **Caption policy is written down** in `.viewport/CAPTIONS.md`. Every figure gets one;
