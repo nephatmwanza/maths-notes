@@ -4046,9 +4046,12 @@ $F_1$ & $F_2$ & $F_3$\\
 \begin{align*}
 T(\text{sum of all n observations}) & = T =\sum x_{ij}\\\\
 SS_T  = \text{Total sum of squares} &= SS_T = \sum x^2_{ij}-\frac{T^2}{n}\\\\
-SS_B = \text{Between samples sum of squares} & = SS_B = \sum_{j=1}\frac{T^2}{n_j}-\frac{T^2}{n}\\\
+% This read T^2/n_j, using the GRAND total in every term. It must be the total
+% of each group, T_j, or the quantity is not a between-groups sum of squares at
+% all - on a worked check it came out 46896 against a true 55.6.
+SS_B = \text{Between samples sum of squares} & = SS_B = \sum_{j=1}^{k}\frac{T_j^2}{n_j}-\frac{T^2}{n}\\\
 SS_W = \text{Within sample sum of squares} &= SS_W =SS_T - SS_B\\\\
-MS_e & =\text{sum of standard errors}\\
+MS_{\varepsilon} & =\text{mean square error} = \frac{SS_W}{n-k}\\
 \end{align*}
 
 
@@ -4065,7 +4068,7 @@ Squares of Variance & SS & df & MS & F-statistics\\
 &&&&\\
 Between Sample & $SS_B$ & $v_1=k-1$ & $\dfrac{SS_B}{k-1}=MS_B$ & $F-\dfrac{MS_B}{MS_{\varepsilon}}$\\
 &&&&\\
-Within Sample & $SS_{\varepsilon}$ & $v_2=n-k$ & $\dfrac{SS_{\varepsilon}}{n-1}$ &\\
+Within Sample & $SS_{\varepsilon}$ & $v_2=n-k$ & $\dfrac{SS_{\varepsilon}}{n-k}=MS_{\varepsilon}$ &\\
 \hline
 Total & $SS_T$ & $n-1$ &&\\
 \hline
@@ -4110,7 +4113,21 @@ Total & $SS_T$ & $n-1$ &&\\
 \end{enumerate}
 
 Sum of squares identity $SS_T = SS_C + SS_E$
-$$\sum_{i=1}^k \sum_{j=1}^n(x_{ij}-\overline{x}^2)=\sum^k_{i=1}(\overline{x}_i-\overline{x})^2+\sum_{i=1}^k\sum^n_{j}(x_{ij}-\overline{x})^2$$
+% As printed this identity was false three ways: the square sat on xbar rather
+% than on the bracket, the between-groups term was missing its n_i factor, and
+% the within-groups term measured deviations from the GRAND mean instead of each
+% group mean. Numerically the two sides did not balance. The derivation that
+% follows below had it right all along.
+$$\underbrace{\sum_{i=1}^k \sum_{j=1}^{n_i}(x_{ij}-\overline{\overline{x}})^2}_{SS_T}
+=\underbrace{\sum_{i=1}^k n_i(\overline{x}_i-\overline{\overline{x}})^2}_{SS_B}
++\underbrace{\sum_{i=1}^k\sum_{j=1}^{n_i}(x_{ij}-\overline{x}_i)^2}_{SS_W}$$
+
+Read it as the sentence it is: the total spread of every observation about the grand mean
+splits exactly into the spread \emph{between} group means and the spread \emph{within}
+groups. The two right-hand terms must use different centres -- the grand mean
+$\overline{\overline{x}}$ for the first, each group's own mean $\overline{x}_i$ for the
+second -- and that is the whole content of the identity. Using the same centre in both
+would not add up.
 
 
 
