@@ -2456,6 +2456,122 @@ mid-value.
 
 \section{Estimation and Sampling Distributions}
 
+\subsection{The Four Distributions You Will Need}
+
+Everything that follows -- confidence intervals, hypothesis tests, analysis of variance,
+regression -- is built from four distributions. They are introduced together here because
+the hardest part is not the arithmetic but knowing \emph{which one applies}, and that is
+easier to see when they are side by side.
+
+\subsubsection{The normal distribution}
+
+A continuous variable $X$ with mean $\mu$ and variance $\sigma^2$ is normal, written
+$X\sim N(\mu,\sigma^2)$, if its curve is the familiar symmetric bell centred at $\mu$.
+Its properties:
+\begin{enumerate}
+\item It is symmetric about $\mu$, so mean, median and mode coincide there.
+\item The total area under the curve is 1, and $\sigma$ controls the spread -- a larger
+$\sigma$ gives a flatter, wider curve.
+\item Probabilities are areas: $P(a<X<b)$ is the area under the curve between $a$ and $b$.
+\end{enumerate}
+
+There is a different normal curve for every pair $(\mu,\sigma)$, so tables for each are out
+of the question. Instead we \textbf{standardise}:
+$$Z=\frac{X-\mu}{\sigma} \sim N(0,1).$$
+$Z$ counts how many standard deviations a value sits from its mean, which is a pure number
+with no units. The \textbf{standard normal} $N(0,1)$ is centred at 0 with
+$P(Z<0)=P(Z>0)=0.5$, and it is the one distribution that needs tabulating.
+
+The notation $Z_{\alpha}$ means the value with area $\alpha$ to its \emph{right}, so
+$P(Z>Z_{\alpha})=\alpha$. The ones worth knowing by heart are
+$$Z_{0.05}=1.645, \qquad Z_{0.025}=1.96, \qquad Z_{0.005}=2.576,$$
+which give the $90\%$, $95\%$ and $99\%$ two-sided intervals. Because the curve is
+symmetric, $Z_{1-\alpha}=-Z_{\alpha}$ -- one table serves both tails.
+
+\subsubsection{Why the sample mean is normal: the Central Limit Theorem}
+
+The reason the normal distribution dominates a course about \emph{samples} is that
+$\overline{X}$ tends to be normal even when the individual observations are not. If a
+sample of size $n$ is drawn from a population with mean $\mu$ and variance $\sigma^2$, then
+$$E(\overline{X})=\mu, \qquad \operatorname{Var}(\overline{X})=\frac{\sigma^2}{n},
+\qquad\text{so}\qquad Z=\frac{\overline{X}-\mu}{\sigma/\sqrt{n}}\sim N(0,1)$$
+for large $n$, whatever the shape of the population. In practice $n\geq 30$ is the usual
+rule of thumb.
+
+Two consequences worth noticing. The spread of $\overline{X}$ is $\sigma/\sqrt{n}$, not
+$\sigma$ -- averages vary less than individual observations, which is why sampling works at
+all. And the $\sqrt{n}$ means precision improves slowly: to halve the standard error you
+must \emph{quadruple} the sample.
+
+\subsubsection{The $t$-distribution}
+
+The formula above needs $\sigma$, which is almost never known. Replacing it by the sample
+value $\widehat{S}$ introduces a second source of variation, and the result is no longer
+normal:
+$$t=\frac{\overline{X}-\mu}{\widehat{S}/\sqrt{n}} \sim t_{n-1}.$$
+Its properties:
+\begin{enumerate}
+\item It is symmetric about 0, like the standard normal, but with \textbf{heavier tails} --
+wider, to pay for the extra uncertainty in estimating $\sigma$.
+\item It has one parameter, the \textbf{degrees of freedom}, here $n-1$. One is lost
+because $\overline{X}$ had to be estimated before $\widehat{S}$ could be computed.
+\item As the degrees of freedom grow, $t$ approaches $N(0,1)$. By about $n=30$ the
+difference hardly matters, which is why large-sample work uses $Z$.
+\end{enumerate}
+So $t_{n-1,\alpha}$ is always a little larger than $Z_{\alpha}$, and confidence intervals
+built with $t$ are correspondingly wider. That is not a defect: it is the price of not
+knowing $\sigma$.
+
+\subsubsection{The chi-square distribution}
+
+Where the normal and $t$ concern \emph{means}, the chi-square distribution, $\chi^2_{v}$,
+concerns \emph{squared} quantities -- variances and counts.
+\begin{enumerate}
+\item It takes only non-negative values, since it is built from squares, and it is
+\textbf{not symmetric}. It is skewed to the right, becoming more symmetric as the degrees
+of freedom increase.
+\item Because it is not symmetric, the two tails must be looked up \emph{separately}:
+$\chi^2_{1-\alpha/2}$ and $\chi^2_{\alpha/2}$ are not negatives of one another, and there
+is no shortcut of the kind symmetry allows for $Z$ and $t$.
+\end{enumerate}
+It appears twice in this course: for inference about a variance, where
+$(n-1)\widehat{S}^2/\sigma^2\sim\chi^2_{n-1}$, and in the goodness-of-fit and independence
+tests, where the statistic sums squared discrepancies between observed and expected counts.
+
+\subsubsection{The $F$-distribution}
+
+The $F$-distribution arises when \emph{two} variances are compared, as a ratio:
+$$F=\frac{\widehat{S}_1^2/\sigma_1^2}{\widehat{S}_2^2/\sigma_2^2}
+\sim F_{v_1,\,v_2}.$$
+\begin{enumerate}
+\item It has \textbf{two} degrees-of-freedom parameters -- numerator $v_1$ and denominator
+$v_2$ -- and the order matters: $F_{5,20}$ is not $F_{20,5}$.
+\item It is positive and right-skewed, being a ratio of non-negative quantities.
+\item Tables usually give only the upper tail. The lower tail is recovered from
+$$F_{1-\alpha,\,v_1,v_2}=\frac{1}{F_{\alpha,\,v_2,v_1}},$$
+noting that the degrees of freedom swap.
+\end{enumerate}
+It is used for testing the equality of two variances, and -- as the next chapter shows --
+throughout the analysis of variance, where the whole method rests on comparing variation
+between groups with variation within them.
+
+\subsubsection{Choosing between them}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+Question & Distribution & Degrees of freedom\\
+\hline
+A mean, $\sigma$ known & $Z$ & --\\
+A mean, $\sigma$ unknown & $t$ & $n-1$\\
+A proportion, $n$ large & $Z$ & --\\
+A single variance & $\chi^2$ & $n-1$\\
+Two variances compared & $F$ & $v_1, v_2$\\
+Counts against expected counts & $\chi^2$ & $k-1-m$ or $(r-1)(c-1)$\\
+Several means compared & $F$ & $k-1,\ n-k$\\
+\end{tabular}
+\end{table}
+
 \begin{align*}
 \textbf{Notation:} & \\ 
 \overline{X}&=\hspace{0.3cm}\text{Sample Mean}\\
