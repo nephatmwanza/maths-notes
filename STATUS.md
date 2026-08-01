@@ -485,6 +485,44 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-01 (evening) — Median Example 1 rebuilt; two more boundary errors
+
+User flagged the median / interquartile-range Example 1 as poorly done. It was,
+and not only in presentation.
+
+**The question** asked "Find the medians" over three parts, but only (b) and (c)
+were labelled — part (a) was an `\item` rendering as "1.", and (b) and (c) were
+literal text wedged into a single table float with `\hspace`, side by side.
+
+**The solution** was worse:
+- part (a) listed the sorted data as **seven** values when the question gives
+  **eight** — a 15 was dropped. The printed answer 20 is the eight-value answer,
+  so the working contradicted its own result;
+- part (b) printed `n=1` where $n=\sum f=15$;
+- **part (c) was never answered at all**;
+- and the block then ran on into two unrelated sections of new exposition.
+
+All three parts are now worked, each table captioned, and part (c) shows why the
+answer lands exactly on a class boundary (the cumulative frequency reaches $n/2$
+precisely at the end of that class) and why the boundaries are $0.5, 5.5, 10.5$
+when the classes read $1-5, 6-10$.
+
+Also fixed the interpolation diagram, which labelled $B$ as $(1.3,29)$ where the
+table says $13.95$, and $E$ as $(m,205)$ for $(m,25)$. The similar-triangles step
+asserted $m=13.06$ with no working; it now derives it, and the point is made that
+this *is* the grouped-median formula read off a picture.
+
+**Two more boundary errors from the environment conversion**, both found by
+searching for a `\textbf{...}` pseudo-heading trapped inside a worked block:
+
+> the median solution had swallowed "median from a frequency table for discrete
+> data" and "Median of a Continuous Data"; the LSD solution had swallowed
+> "Design of Experiments" and its table.
+
+That check — *a heading inside a solution means the solution ran too far* — is a
+better detector than block length, because these blocks were not unusually long.
+Worth running after any change that infers where a block ends.
+
 ### 2026-08-01 (later still) — Both courses now use the same environments
 
 User asked why examples were not uniform: `\begin{example} … \end{example}` and
