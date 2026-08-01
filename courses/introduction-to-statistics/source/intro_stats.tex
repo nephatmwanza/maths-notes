@@ -4798,6 +4798,73 @@ $A_4$&$B_3$&$C_5$&$D_3$\\$B_5$&$A_4$&$D_5$&$C_2$\\$C_4$&$D_2$&$A_3$&$B_3$\\$D_2$
 
 
 \pagebreak
+\subsection{Practice problems}
+
+\begin{problem}{Sample Questions}
+Three systems were compared, each on six occasions:
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccccc}
+System A & 55 & 60 & 63 & 56 & 59 & 55\\
+System B & 54 & 57 & 53 & 64 & 49 & 62\\
+System C & 66 & 52 & 61 & 60 & 57 & 58\\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item[(a).] Obtain the analysis of variance table, showing all calculations.
+\item[(b).] Are the three systems equally effective? Use $\alpha=0.05$.
+\item[(c).] Is it necessary to carry out pairwise tests? Give your reasons.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The totals are $T_A=348$, $T_B=339$, $T_C=354$, so the grand total is
+$T=1041$ with $n=18$ observations in $k=3$ groups of $n_j=6$.
+
+Start with the correction factor, which appears in every sum of squares:
+$$CF=\frac{T^2}{n}=\frac{1041^2}{18}=\frac{1083681}{18}=60204.5.$$
+With $\sum\sum x_{ij}^2=60545$,
+$$SS_T=\sum\sum x_{ij}^2-CF=60545-60204.5=340.5,$$
+$$SS_B=\sum_{j}\frac{T_j^2}{n_j}-CF=\frac{348^2+339^2+354^2}{6}-60204.5=60223.5-60204.5=19.0,$$
+$$SS_W=SS_T-SS_B=340.5-19.0=321.5.$$
+Note $SS_B$ uses each group's own total $T_j$, not the grand total.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+Source & $SS$ & df & $MS$ & $F$\\
+\hline
+Between systems & $19.0$ & $k-1=2$ & $9.50$ & $0.44$\\
+Within systems  & $321.5$ & $n-k=15$ & $21.43$ & \\
+\hline
+Total & $340.5$ & $n-1=17$ & & \\
+\end{tabular}
+\end{table}
+The degrees of freedom add up, $2+15=17$, which is worth checking every time. Note that
+$MS_W$ divides $SS_W$ by $n-k=15$, matching its own row.
+
+\textbf{(b).} Testing $H_0:\mu_A=\mu_B=\mu_C$ against the alternative that at least one
+differs:
+$$F=\frac{MS_B}{MS_W}=\frac{9.50}{21.43}=0.44.$$
+The critical value is $F_{2,15,\,0.05}=3.68$, and $0.44$ falls far short of it; the
+$P$-value is $0.65$. We fail to reject $H_0$. There is no evidence that the three systems
+differ in effectiveness.
+
+Look at why. The group means are $58.0$, $56.5$ and $59.0$ -- a spread of only $2.5$ --
+while individual readings within a single system run from $49$ to $66$. The variation
+\emph{between} systems is far smaller than the variation \emph{within} them, and $F$ is
+precisely the ratio of those two. An $F$ below 1 says the group means are closer together
+than one would expect from chance alone.
+
+\textbf{(c).} \textbf{No.} Pairwise tests are what one does \emph{after} a significant $F$,
+to find which groups differ. Here $F$ is not significant, so there is nothing to locate:
+we have no evidence that any of the systems differ from any other.
+
+Running pairwise tests anyway would be a mistake, and not a harmless one. Three comparisons
+each at $5\%$ give a much higher chance than $5\%$ of at least one false positive, which is
+the whole reason for testing all groups together with a single $F$ first.
+\end{solution}
+
 \section{Linear Regression and Correlation Analysis}
 
 
