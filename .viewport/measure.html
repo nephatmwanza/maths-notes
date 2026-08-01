@@ -1,0 +1,33 @@
+<!doctype html><meta charset=utf-8><title>measure</title>
+<body><pre id=out>pending</pre>
+<style>iframe{width:1400px;height:1200px;border:0;position:absolute;left:-9999px}</style>
+<script>
+// Measures ONE page, passed as ?u=... , and writes the result into #out so a
+// --dump-dom run can read it. One page per Chrome run is deliberate: the
+// batched version shared a single virtual-time budget, which accelerates timers
+// but not MathJax's CPU work, so it dumped after three pages and reported the
+// rest clean. A false pass is worse than no check.
+const noise = /^(mjx-assistive-mml|math|mjx-dbox|mjx-dtable|mtable|mtr|mtd|mjx-mrow|mjx-ext|semantics|mrow)$/;
+const u = new URLSearchParams(location.search).get('u');
+const fr = document.createElement('iframe');
+fr.src = u;
+document.body.appendChild(fr);
+fr.onload = () => setTimeout(() => {
+  try {
+    const d = fr.contentDocument, out = [];
+    for (const el of d.querySelectorAll('.inner *')) {
+      if (noise.test(el.tagName.toLowerCase())) continue;
+      const over = el.scrollWidth - el.clientWidth;
+      if (over <= 2 || !el.clientWidth) continue;
+      if (getComputedStyle(el).overflowX === 'auto') continue;
+      const lab = el.querySelector('mjx-labels');
+      if (lab && over <= lab.getBoundingClientRect().width + 8) continue;
+      out.push(`${el.tagName.toLowerCase()}.${(el.className||'').toString().slice(0,30)} +${over}px`);
+    }
+    document.getElementById('out').textContent = out.length ? out.join('\n') : 'OK';
+  } catch (e) {
+    document.getElementById('out').textContent = 'ERROR ' + e.message;
+  }
+  document.title = 'done';
+}, 2500);
+</script>
