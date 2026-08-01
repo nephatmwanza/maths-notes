@@ -63,7 +63,7 @@ GISCUS = {
 # code (the subdomain you choose at goatcounter.com) to switch it on. Left
 # empty, no script is emitted at all - so no third-party request is made and
 # nothing needs disclosing to readers.
-GOATCOUNTER_CODE = ""
+GOATCOUNTER_CODE = "wjmaths"
 
 
 def theorem_type(block: str) -> str | None:
