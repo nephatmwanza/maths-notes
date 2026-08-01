@@ -485,6 +485,41 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-01 — Captions settled; every unsolved example resolved
+
+**Caption policy is written down** in `.viewport/CAPTIONS.md`. Every figure gets one;
+tables only when the table is a *thing* rather than the *working*. The test: if removing
+the surrounding text leaves the table meaningless, caption it. Statistics went from 0/42
+figures captioned to 42/42; probability was already 31/38.
+
+**All 12 unsolved examples resolved.** Nine were false alarms — worked but never labelled
+`Solution`, or not examples at all (a list of continuous variables, two illustrations of
+how to write H0/H1). Two were genuinely unfinished and are now worked in full.
+
+**A second recurring pattern, alongside the "loose statement first" one below.**
+
+> **Orphan data.** A dataset is presented under `\textbf{Example}` and then never used.
+> Found three times now: the bar-chart 18 values, the ANOVA `F1/F2/F3` table, and the
+> sit-ups data. Each time the surrounding prose reads fine, so it survives proofreading.
+> **When auditing a course, list every table and check something downstream consumes it.**
+
+> **Answers computed from numbers that are not the ones printed.** The Type II error
+> example printed z = −1.26 but its answer 0.8925 is the area for −1.24. The printed
+> answer was right and the printed working was wrong, which is the hardest kind to catch
+> by reading. **Recompute every stated numerical answer, don't check the algebra only.**
+
+**My own error worth recording**: I captioned 42 figures by matching position in the file
+to a list I had built from node labels, without opening each drawing. Eleven were wrong —
+a box plot captioned as a stem-and-leaf plot, and six correlation diagrams labelled
+strong/weak where the pictures say perfect/fair. **A caption asserts something about the
+picture; it has to be read off the picture.** Corrected the same day, but it was live for
+one commit.
+
+Also fixed: deciles labelled `D_25, D_50, D_75` (deciles divide into ten parts, so those do
+not exist), the ANOVA sum-of-squares proof abandoning its cross-product term rather than
+showing it is zero, and LSD using 1.96 one line below quoting t = 1.943.
+
+
 ### 2026-07-31 (latest) — Tutorial sheets found and added; Chapter 1 problems complete
 
 **Repository is now on GitHub**: `github.com/nephatmwanza/maths-notes`, **private**, branch
