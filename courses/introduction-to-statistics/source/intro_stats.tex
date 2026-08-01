@@ -5735,14 +5735,43 @@ The correlation coefficient will be in the interval $[-1,1]$.
 \text{(b).}\hspace{1cm} r&=\frac{n\sum XY-\sum X\sum Y}{\sqrt{n\sum X^2-\Bigg(\sum X\Bigg)^2}\sqrt{n\sum Y^2-\Bigg(\sum Y\Bigg)^2}}\\
 \end{align*}
 
-\textbf{Example}
+% The table was printed with the XY, X^2 and Y^2 columns empty, and its last
+% two rows disagreed with the same data given earlier for the scatter diagram.
+% Filled in, and made to match, so the chapter carries one dataset through from
+% scatter plot to correlation to regression to inference.
+\begin{example_}
+Compute the product-moment correlation coefficient for the examination marks used in the
+scatter diagram above.
+\end{example_}
+
+\begin{solution}
+Build the three extra columns and total everything.
 \begin{table}[H]
-\begin{tabular}{c|c|c|c|c}
-$X$&$Y$&$XY$&$X^2$&$Y^2$\\
-\hline 42&31&&&\\
-84&83&&&\\50&42&&&\\42&60&&&\\33&28&&&\\50&63&&&\\69&59&&&\\81&92&&&\\50&73&&&\\35&10&&&\\
+\centering
+\begin{tabular}{rrrrr}
+$X$ & $Y$ & $XY$ & $X^2$ & $Y^2$\\
+\hline
+42 & 31 & 1302 & 1764 & 961\\
+84 & 83 & 6972 & 7056 & 6889\\
+50 & 42 & 2100 & 2500 & 1764\\
+42 & 60 & 2520 & 1764 & 3600\\
+33 & 28 & 924  & 1089 & 784\\
+50 & 63 & 3150 & 2500 & 3969\\
+69 & 59 & 4071 & 4761 & 3481\\
+81 & 92 & 7452 & 6561 & 8464\\
+80 & 73 & 5840 & 6400 & 5329\\
+35 & 40 & 1400 & 1225 & 1600\\
+\hline
+566 & 571 & 35731 & 35620 & 36841\\
 \end{tabular}
 \end{table}
+$$r=\frac{n\sum XY-\sum X\sum Y}
+{\sqrt{n\sum X^2-\left(\sum X\right)^2}\ \sqrt{n\sum Y^2-\left(\sum Y\right)^2}}
+=\frac{10(35731)-566(571)}{\sqrt{10(35620)-566^2}\ \sqrt{10(36841)-571^2}}=0.876.$$
+It is convenient to record the three quantities that every later formula needs:
+$$S_{XX}=3584.4,\qquad S_{YY}=4236.9,\qquad S_{XY}=3412.4,$$
+so that $r=S_{XY}/\sqrt{S_{XX}S_{YY}}$ and, below, $\widehat{b}=S_{XY}/S_{XX}$.
+\end{solution}
 
 
 
@@ -6104,19 +6133,35 @@ For a value of $X$ the value of $Y$. Predicting by the regression line is given 
 The difference between $Y$ and $\widehat{Y}$ is known as a residual, gives the value of $e$ for that point.\\ Each value of $\widehat{Y}-Y$ gives value of $e_i$ from a distribution which is $N(0,\sigma^2_{Y/X})$. The unbiased estimate$\widehat{S}_{Y/X}$ is given by $$\widehat{S}_{Y/X}=\sqrt{\frac{\sum (\widehat{Y}-Y)^2}{n-2}}$$ $n-2$ is the df, $\widehat{a}$, $\widehat{b}$ are calculated from the values of $X$ and $Y$.\\
 
 
-\textbf{Example}\\
-Obtain an estimate of $\sigma^2_{Y/X}$ from the previous example.
-$$\widehat{S}_{Y/X}=\sqrt{\frac{0.11784}{8}}\hspace{0.5cm}\implies\hspace{0.5cm} \widehat{S}_{Y/X}=0.121$$
-\begin{align*}
-P(Y>20|X=18) &=P\Bigg(\frac{20-8}{0.121}\Bigg)=P(16.53)\\\\ &=1-P(Z<16.53)
-\end{align*}
+\begin{example_}
+Obtain an estimate of $\sigma^2_{Y/X}$ for the examination marks above, and use it to find
+$P(Y>90 \mid X=80)$.
+\end{example_}
 
-\begin{align*}
-P(Y>19|X=18) &=P\Bigg(\frac{19-8}{0.121}\Bigg)=P(8.3)\\\\
-&=1-P(Z<8.3)=0.99\\
-&=0.00099\\
-&\approx 0\\
-\end{align*}
+\begin{solution}
+From $S_{XY}=3412.4$ and $S_{XX}=3584.4$,
+$$\widehat{b}=\frac{S_{XY}}{S_{XX}}=0.952,\qquad
+\widehat{a}=\overline{Y}-\widehat{b}\,\overline{X}=57.1-0.952(56.6)=3.22,$$
+so the fitted line is $\widehat{Y}=3.22+0.952X$.
+
+Summing the squared residuals gives $\sum(Y-\widehat{Y})^2=988.25$, so
+$$\widehat{S}_{Y/X}=\sqrt{\frac{\sum (Y-\widehat{Y})^2}{n-2}}=\sqrt{\frac{988.25}{8}}
+=\sqrt{123.53}=11.11.$$
+The divisor is $n-2$ because two parameters, $\widehat{a}$ and $\widehat{b}$, were
+estimated before the residuals could be formed.
+
+For a candidate scoring $X=80$ on Paper 1, the predicted Paper 2 mark is
+$$\widehat{Y}=3.22+0.952(80)=79.4,$$
+and the residuals are taken to be $N(0,\sigma^2_{Y/X})$. Hence
+$$P(Y>90 \mid X=80)=P\left(Z>\frac{90-79.4}{11.11}\right)=P(Z>0.95)=1-0.8289=0.171.$$
+So about $17\%$ of candidates scoring $80$ on Paper 1 would be expected to exceed $90$ on
+Paper 2.
+
+Note how much wider this is than the line alone suggests. The regression gives a single
+predicted value, $79.4$; the residual standard deviation of $11.11$ is what says how far an
+individual candidate may sit from it. A prediction without $\widehat{S}_{Y/X}$ beside it
+claims a precision the data do not support.
+\end{solution}
 
 \subsubsection{Confidence Limit For $\beta$}
 How accurate is the estimate $\widehat{b}$ which we have made of $\beta$? Here we want the limit of $\beta$ in terms $\sigma_{Y/X}$ the s.d. of the random error $e_i$.\\ we assume with a normal distribution with mean 0 and s.d. $\sigma_{Y/X}$.
@@ -6163,18 +6208,35 @@ Assuming the sampling distribution of $\widehat{b}$ is normal the $95\%$ C.I of 
 $$\beta =\widehat{b}\pm \frac{Z_{\alpha/2}\times \sigma_{Y/X}}{\sqrt{\sum (X-\overline{X})^2}}\hspace{0.5cm}\text{If}\hspace{0.3cm}\sigma_{Y/X}^2\hspace{0.3cm} \text{is known}.$$\\
 $$\beta =\widehat{b}\pm \frac{t_{n-2,\alpha/2}\times \widehat{S}_{Y/X}}{\sqrt{\sum (X-\overline{X})^2}}\hspace{1cm} \text{if}\hspace{0.3cm}\sigma^2_{Y/X}\hspace{0.3cm}\text{is estimated from}\hspace{0.3cm} \widehat{S}_{Y/X}$$\\
 
-\textbf{Example}\\
-To the example above calculate $95\%$ confidence limit for the estimate of $\beta$.
-\begin{align*}
-\widehat{S}_{Y/X} &=0.121\\
-\sum (X-\overline{X}) &=\sum X^2-\frac{\Bigg(\sum X\Bigg)^2}{n}\hspace{1cm}\implies\hspace{0.5cm} \sum (X-\overline{X})=0.825\\
-\end{align*}
+\begin{example_}
+For the examination marks above, calculate a $95\%$ confidence interval for $\beta$.
+\end{example_}
 
-$$t_{8,0.025}=2.31\hspace{1cm}\text{and}\hspace{1cm} \widehat{b}=6.08$$\\
-\begin{align*}
-\beta &=6.08\pm \frac{2.31\times 0.121}{\sqrt{0.825}}\hspace{0.5cm} \implies \hspace{0.5cm} \beta =6.08\pm 0.31\\
-\end{align*}
-$\therefore$ we are $95\%$ confident that the true $\beta$(slope) lies between $$6.08-0.31,\hspace{0.3cm}(5.97)\hspace{0.5cm}\text{and}\hspace{0.5cm} 6.08+0.31,\hspace{0.3cm} (6.39)$$
+\begin{solution}
+% The previous working had sum(X - Xbar) written without its square, and closed
+% with 6.08 - 0.31 = 5.97. It is 5.77. The figures it used also did not come
+% from any data in the chapter.
+$\sigma_{Y/X}$ is not known -- it has been estimated by $\widehat{S}_{Y/X}$ -- so the
+multiplier is $t$ with $n-2=8$ degrees of freedom:
+$$\beta=\widehat{b}\pm t_{n-2,\,\alpha/2}\times\frac{\widehat{S}_{Y/X}}{\sqrt{\sum (X-\overline{X})^2}}.$$
+Note the square in $\sum (X-\overline{X})^2$; this is $S_{XX}$, and $\sum(X-\overline{X})$
+would be zero.
+
+With $\widehat{b}=0.952$, $\widehat{S}_{Y/X}=11.11$, $S_{XX}=3584.4$ and
+$t_{8,\,0.025}=2.306$:
+$$SE(\widehat{b})=\frac{11.11}{\sqrt{3584.4}}=\frac{11.11}{59.87}=0.186,$$
+$$\beta=0.952\pm 2.306(0.186)=0.952\pm 0.428.$$
+So we are $95\%$ confident that the true slope lies between
+$$0.952-0.428=0.524 \qquad\text{and}\qquad 0.952+0.428=1.380.$$
+
+The interval excludes zero, so there is evidence of a real linear relationship -- the same
+conclusion the $t$-test reaches, since $t=0.952/0.186=5.13$ against a critical $2.306$.
+
+But the interval says more than the test does. A slope anywhere from $0.52$ to $1.38$ is
+consistent with these data: a mark on Paper 1 might be worth only half a mark on Paper 2,
+or nearly one and a half. Ten candidates simply cannot pin it down more tightly than that,
+and reporting only ``significant'' would conceal how wide the uncertainty remains.
+\end{solution}
 
 
 
