@@ -5101,25 +5101,77 @@ $X_{14}$ &-&-&$X_{44}$\\
 \end{tabular}
 \end{table}
 
-\textbf{Example}\\
-In a comparison of detergents 20, pieces of white cloth were soled with ink. The clothes were washed under controlled conditions with 5 pieces by each of the developer unfortunately 3 pieces went missing in the course of the experiment, whiteness readings are given below:
-
+\begin{example_}
+In a comparison of detergents, pieces of white cloth were soiled with ink and washed under
+controlled conditions, some pieces by each detergent. Several pieces were lost in the course
+of the experiment. The whiteness readings recorded were:
 \begin{table}[H]
 \centering
 \begin{tabular}{cccc}
-A&B&C&D\\ 
-77&74&73&76\\
-81&58&57&77\\
-76&-&69&64\\
-69&-&63&-\\
+A & B & C & D\\
+\hline
+77 & 74 & 73 & 76\\
+81 & 58 & 57 & 77\\
+76 & -- & 69 & 64\\
+69 & -- & 63 & --\\
+\end{tabular}
+\end{table}
+Test the hypothesis of no difference between the brands of detergent.
+\end{example_}
+
+\begin{solution}
+The groups now have unequal sizes -- $4, 2, 4$ and $3$, so $N=13$ readings in four groups.
+Unequal group sizes are no obstacle: the formulas below already divide each group's total by
+its own $n_j$, so nothing needs adjusting.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrrr}
+Detergent & A & B & C & D\\
+\hline
+$n_j$   & 4   & 2   & 4   & 3\\
+$T_j$   & 303 & 132 & 262 & 217\\
+Mean    & 75.75 & 66.00 & 65.50 & 72.33\\
 \end{tabular}
 \end{table}
 
+With $T=914$ and $\sum\sum x^2 = 64\,976$, the correction factor is
+$$CF=\frac{T^2}{N}=\frac{914^2}{13}=64\,261.23,$$
+$$SS_T=\sum\sum x^2-CF=64\,976-64\,261.23=714.77,$$
+$$SS_C=\sum_j \frac{T_j^2}{n_j}-CF
+=\frac{303^2}{4}+\frac{132^2}{2}+\frac{262^2}{4}+\frac{217^2}{3}-CF=260.35,$$
+$$SS_E=SS_T-SS_C=714.77-260.35=454.42.$$
 
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+Source & $SS$ & df & $MS$ & $F$\\
+\hline
+Between detergents & $260.35$ & $k-1=3$   & $86.78$ & $1.72$\\
+Within (error)     & $454.42$ & $N-k=9$   & $50.49$ & \\
+\hline
+Total              & $714.77$ & $N-1=12$  & & \\
+\end{tabular}
+\end{table}
+The degrees of freedom add, $3+9=12$, which is the check to make before going further.
 
-Test the hypothesis of no difference between the brands of detergents\\\\ 
-cf, SST, SSC, SSE\\\\
-ANOVA TABLE?\\\\
+Testing $H_0:\mu_A=\mu_B=\mu_C=\mu_D$, the critical value is $F_{3,9,\,0.05}=3.86$ and our
+$F=1.72$ falls well short; the $P$-value is $0.23$. We \textbf{fail to reject} $H_0$: there
+is no evidence of a difference between the brands.
+
+The means do differ on the face of it -- from $65.5$ to $75.75$ -- but readings within a
+single detergent range from $57$ to $81$. Against variation that large, and with only 13
+readings, a spread of ten points between group means is unremarkable.
+
+\begin{remark_}
+The missing pieces deserve a comment, because the analysis quietly assumes something about
+them. Dropping them is safe only if they went missing for reasons unconnected with
+whiteness. If pieces were lost \emph{because} they washed badly -- disintegrating, say --
+then the surviving readings overstate those detergents, and no amount of correct arithmetic
+afterwards repairs it. Missing data are a question about the experiment, not about the
+calculation.
+\end{remark_}
+\end{solution}
 
 
 \subsection{Randomised Block Design}
@@ -5142,74 +5194,87 @@ Test the hypothesis
 \item Between varieties\\
 \end{enumerate}
 
-\textbf{Solution}
-\begin{enumerate}
-\item Set up the hypothesis\\
-$H_0:$ There is no difference between blocks\\
-$H_1:$ At least two blocks are different\\
-\item Set $\alpha=1\%$
+\begin{solution}
+% The previous working computed the blocks sum of squares from the totals of
+% the five COLUMN POSITIONS (12, 11, 13, 12, 12). In a randomised block design
+% the treatments are deliberately in a different order in each block, so a
+% column position is not a treatment and its total means nothing. It also used
+% the wrong divisor, and the degrees of freedom in the table were 4, 4 and 6
+% rather than 2, 4 and 8.
+The first thing to get right is which totals matter. The \textbf{blocks} are the rows
+$R_1, R_2, R_3$; the \textbf{treatments} are the varieties $A$ to $E$. Because the
+varieties are randomised \emph{within} each block, they appear in a different order in each
+row -- so the total of a column position is not the total of a treatment, and means
+nothing at all. The treatment totals have to be gathered by label.
 
 \begin{table}[H]
 \centering
-\begin{tabular}{ccccccc}
-$R_1$&5&4&5&4&2&\\
-$R_2$&4&3&4&5&6&\\
-$R_3$&3&4&4&3&4&\\
-\hline &12&11&13&12&12&60\\
-\end{tabular}
-\end{table}
-\end{enumerate}
-$$Cf=\frac{g^2}{r\times c}=\frac{3600}{15}=240$$\\
-
-\begin{align*}
-\text{SST} &=\sum\sum X^2_{ij}-cf
-=
-\begin{bmatrix}
-5^2+4^2+5^2+4^2+2^2\\ 4^2+3^2+4^2+5^2+6^2\\ 3^2+4^2+4^2+3^2+4^2\\
-\end{bmatrix}
--240\\\\
-\implies\hspace{0.6cm}\text{SST}&=14\\
-\end{align*}
-
-\begin{align*}
-\text{SSB} &=\frac{1}{3}\sum c_i^2-cf= \frac{1}{3}(12^2+11^2+13^2+12^2+1^2)-240\\\\ \implies\hspace{0.6cm}\text{SSB} &=0.67\\
-\end{align*}
-
-\begin{table}[H]
-\centering
-\begin{tabular}{ccccc}
-A&B&C&D&E\\
-5&5&4&4&2\\
-6&4&5&3&4\\
-3&4&4&4&3\\
-\hline 14&13&13&11&9\\
-\end{tabular}
-\end{table}
-
-\begin{align*}
-\text{SS}_T &=\frac{1}{3}\sum \tau_i-cf=\frac{1}{3}\Big[14^2+13^2+13^2+11^2+9^2\Big]-240\\\\ \implies\hspace{0.6cm} \text{SS}_T &=5.3\\
-\end{align*}
-
-
-\begin{align*}
-\text{SSE} &=\text{SST}- \text{SSB}- \text{SS}_T\\
-&=14-0.67-5.3\\
-&=8.03\\
-\end{align*}
-
-
-\begin{table}[H]
-\centering
-\begin{tabular}{|c|c|c|c|c|c|}
-\hline Variation Due to & df & SS & MS & F & $F_{v_1,v_2,\alpha}$\\
-\hline &&&&&\\
-Blocks & 4 & 0.67 & 0.167 & $F_B=\dfrac{0.167}{1.326}$&\\
-Treatments & 4& 5.3 & 1.325& $F_B=\dfrac{1.325}{1.326}$&\\
-Error & 6 &8.03 & 1.326&&\\
-\hline SST & 14 &&&&\\
+\begin{tabular}{lrrrrrr}
+Block & \multicolumn{5}{c}{Readings} & Total\\
+\hline
+$R_1$ & $A$\,5 & $C$\,4 & $B$\,5 & $D$\,4 & $E$\,2 & 20\\
+$R_2$ & $B$\,4 & $D$\,3 & $E$\,4 & $C$\,5 & $A$\,6 & 22\\
+$R_3$ & $E$\,3 & $B$\,4 & $C$\,4 & $A$\,3 & $D$\,4 & 18\\
 \hline
 \end{tabular}
 \end{table}
+
+Collected by variety:
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrrrrr}
+Variety & $A$ & $B$ & $C$ & $D$ & $E$ & Total\\
+\hline
+Total $\tau_j$ & 14 & 13 & 13 & 11 & 9 & 60\\
+\end{tabular}
+\end{table}
+
+There are $r=3$ blocks and $c=5$ treatments, so $N=15$ and $T=60$.
+$$CF=\frac{T^2}{N}=\frac{3600}{15}=240,$$
+$$SS_{\text{Total}}=\sum\sum x_{ij}^2-CF=254-240=14,$$
+$$SS_{\text{Blocks}}=\frac{1}{c}\sum_i B_i^2-CF=\frac{20^2+22^2+18^2}{5}-240
+=\frac{1208}{5}-240=1.60,$$
+$$SS_{\text{Treatments}}=\frac{1}{r}\sum_j \tau_j^2-CF
+=\frac{14^2+13^2+13^2+11^2+9^2}{3}-240=\frac{736}{3}-240=5.33,$$
+$$SS_{\text{Error}}=14-1.60-5.33=7.07.$$
+Each total is divided by the number of observations that went into it: block totals by
+$c=5$, treatment totals by $r=3$.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+Variation due to & df & $SS$ & $MS$ & $F$\\
+\hline
+Blocks      & $r-1=2$        & $1.60$  & $0.80$ & $0.91$\\
+Treatments  & $c-1=4$        & $5.33$  & $1.33$ & $1.51$\\
+Error       & $(r-1)(c-1)=8$ & $7.07$  & $0.88$ & \\
+\hline
+Total       & $N-1=14$       & $14.00$ & & \\
+\end{tabular}
+\end{table}
+The degrees of freedom add: $2+4+8=14$. This is the check that catches the commonest
+mistake in a two-way table, and it is worth making every time.
+
+At $\alpha=0.01$:
+\begin{itemize}
+\item \textbf{Treatments.} $F=1.51$ against $F_{4,8,\,0.01}=7.01$. We fail to reject:
+there is no evidence of a difference between the varieties ($P=0.29$).
+\item \textbf{Blocks.} $F=0.91$ against $F_{2,8,\,0.01}=8.65$. We fail to reject: there is
+no evidence of a difference between blocks ($P=0.44$).
+\end{itemize}
+
+\begin{remark_}
+That the blocks show no difference is worth a thought rather than a shrug. Blocking is
+worth doing when the blocks genuinely differ -- grouping similar plots together removes
+that variation from the error term and makes the treatment comparison sharper. Here they
+barely differ, so the blocking bought little, and the degrees of freedom spent on it
+($2$, taken from the error term) were largely wasted.
+
+That is not a reason to avoid blocking. It has to be decided \emph{before} the experiment,
+when whether the plots differ is exactly what is not yet known, and the cost of blocking
+unnecessarily is small against the cost of failing to block when it mattered.
+\end{remark_}
+\end{solution}
 
 
 
