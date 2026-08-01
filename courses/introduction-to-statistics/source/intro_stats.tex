@@ -73,6 +73,22 @@
 \fancyfoot[C]{{Page} \thepage}
 
 
+% ---------------------------------------------------------------------------
+% Practice problems, as in the probability notes. These notes define no
+% theorem-like environments of their own, so amsthm is loaded here for them.
+% build.py collapses each solution into a <details> block on the web, so a
+% problem can be attempted before the answer is visible.
+% ---------------------------------------------------------------------------
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{problemx}{Problem}[section]
+\newenvironment{problem}[1]
+  {\begin{problemx}\textup{\small[#1]}\hspace{0.4em}\ignorespaces}
+  {\end{problemx}}
+\newenvironment{solution}
+  {\renewcommand{\qedsymbol}{}\begin{proof}[\textit{Solution}.]}
+  {\end{proof}}
+
 \begin{document}
 % Title page depersonalised for the web: no name, no university, no lecturer,
 % no course code. Same treatment as the probability notes - the material is not
@@ -2167,6 +2183,147 @@ Comment\\
 
 
 \pagebreak
+\subsection{Practice problems}
+
+Past tutorial-sheet questions on sampling and describing data. Try each one before
+opening the solution.
+
+\begin{problem}{Tutorial Sheet 1}
+Unaware that 45\% of the 20{,}000 voters in his constituency support him, a politician
+decides to estimate his political strength. A sample of 200 voters shows that 40\%
+support him.
+\begin{enumerate}
+\item[(a).] What is the population?
+\item[(b).] What is the sample?
+\item[(c).] What is the parameter of interest? State its value.
+\item[(d).] What is the statistic of interest? State its value.
+\item[(e).] Compare your answers in (c) and (d). Is it surprising that they differ? If the
+politician were to sample another 200 voters, which of the two numbers would be likely to
+change? Explain.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The population is all $20{,}000$ voters in the constituency -- every unit we
+want a conclusion about, not merely those we happened to ask.
+
+\textbf{(b).} The sample is the $200$ voters actually questioned.
+
+\textbf{(c).} The parameter is the proportion of \emph{all} voters in the constituency who
+support him: $p = 0.45$, or $45\%$.
+
+\textbf{(d).} The statistic is the proportion of the \emph{sample} who support him:
+$\hat{p} = 0.40$, or $40\%$.
+
+\textbf{(e).} It is not surprising. A parameter describes the population; a statistic
+describes a sample drawn from it. Because the sample is only $200$ of $20{,}000$ voters,
+it will rarely reproduce the population proportion exactly, and the gap here -- five
+percentage points -- is ordinary sampling variation rather than evidence of a mistake.
+
+If a fresh sample of $200$ were taken, the \textbf{statistic} would almost certainly
+change: a different $200$ people give a different count. The \textbf{parameter} would not.
+It is a fixed property of the constituency, $0.45$, whether or not anyone measures it.
+
+That asymmetry is the whole basis of what follows in this course. The parameter is fixed
+and unknown; the statistic is known and varies. Everything in estimation is an argument
+about how far the second can be trusted to say something about the first.
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 1}
+For the population $\{0,\ 1,\ 2,\ 3,\ 5,\ 7\}$:
+\begin{enumerate}
+\item[(a).] List all the simple random samples of size 5.
+\item[(b).] Give an example of a systematic sample of size 3, where the elements are listed
+in the order $0, 1, 2, 3, 5, 7$.
+\item[(c).] Give an example of a proportional stratified sample of size 3, where the strata
+are $\{0,1,2,3\}$ and $\{5,7\}$.
+\item[(d).] Give an example of a cluster sample of size 2, where the clusters are
+$\{0,1\}$, $\{2,3\}$ and $\{5,7\}$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} A simple random sample of size 5 is any subset of 5 of the 6 elements, so
+there are $\binom{6}{5} = 6$ of them -- one for each element left out:
+\[\{0,1,2,3,5\},\quad \{0,1,2,3,7\},\quad \{0,1,2,5,7\},\]
+\[\{0,1,3,5,7\},\quad \{0,2,3,5,7\},\quad \{1,2,3,5,7\}.\]
+
+\textbf{(b).} In a systematic sample we take every $k$th element of the ordered list. For a
+sample of 3 from 6, $k = 6/3 = 2$. Starting at the first element and taking every second
+one gives
+\[\{0,\ 2,\ 5\}.\]
+Starting at the second instead would give $\{1,3,7\}$; either is a valid answer, and the
+starting point should be chosen at random.
+
+\textbf{(c).} Proportional stratified sampling takes from each stratum in proportion to its
+size. The strata hold 4 and 2 of the 6 elements, so of a sample of 3 we take
+\[\frac{4}{6}\times 3 = 2 \text{ from } \{0,1,2,3\}, \qquad
+\frac{2}{6}\times 3 = 1 \text{ from } \{5,7\},\]
+choosing at random within each. For example $\{1,\ 3,\ 5\}$.
+
+\textbf{(d).} In cluster sampling we sample \emph{whole clusters}, not individuals. A
+sample of size 2 is therefore one entire cluster, for example
+\[\{2,\ 3\}.\]
+This is the point that separates it from stratified sampling: there, we take some units
+from \emph{every} stratum; here, we take \emph{all} units from a few clusters. Stratifying
+aims to represent every group; clustering is usually done because reaching a whole group at
+once is cheaper.
+\end{solution}
+
+\begin{problem}{Tutorial Sheet 1}
+The recovery times, in days, for 36 patients are:
+\begin{center}
+\begin{tabular}{cccccccccccc}
+8 & 7 & 6 & 9 & 4 & 5 & 3 & 7 & 8 & 10 & 7 & 7\\
+6 & 4 & 10 & 3 & 6 & 8 & 2 & 5 & 4 & 5 & 3 & 8\\
+7 & 4 & 6 & 3 & 7 & 12 & 4 & 3 & 6 & 6 & 9 & 4\\
+\end{tabular}
+\end{center}
+\begin{enumerate}
+\item[(a).] Construct a frequency distribution.
+\item[(b).] What percentage of recovery times are fewer than 6 days?
+\item[(c).] Find the mean and median number of days to recovery.
+\item[(d).] Find $P_{20}$ and the sample variance $s^{2}$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} Counting each distinct value:
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccccccccc}
+Days $x$      & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 12\\
+\hline
+Frequency $f$ & 1 & 5 & 6 & 3 & 6 & 6 & 4 & 2 & 2 & 1\\
+\end{tabular}
+\end{table}
+The frequencies total $36$, which is the first thing to check.
+
+\textbf{(b).} Fewer than 6 days means $x = 2,3,4,5$:
+\[1+5+6+3 = 15 \text{ patients}, \qquad \frac{15}{36}\times 100 = 41.67\%.\]
+
+\textbf{(c).} Using $\sum fx$ rather than adding 36 numbers separately:
+\[\sum fx = 216, \qquad \bar{x} = \frac{216}{36} = 6 \text{ days}.\]
+With $n = 36$ even, the median is the average of the 18th and 19th ordered values. The
+cumulative frequencies reach 15 by $x=5$ and 21 by $x=6$, so both the 18th and 19th values
+are 6:
+\[\text{median} = 6 \text{ days}.\]
+
+\textbf{(d).} $P_{20}$ sits at position $\dfrac{20 \times 36}{100} = 7.2$, that is between
+the 7th and 8th ordered values. Cumulatively, 6 observations are at most 3 days and 12 are
+at most 4, so the 7th and 8th values are both 4:
+\[P_{20} = 4 \text{ days}.\]
+For the sample variance, with $\bar{x} = 6$,
+\[s^{2} = \frac{\sum f(x-\bar{x})^{2}}{n-1} = \frac{196}{35} = 5.6,
+\qquad s = \sqrt{5.6} \approx 2.37 \text{ days}.\]
+Note the divisor $n-1$, not $n$: this is a \emph{sample} variance, and dividing by $n$
+would underestimate the spread of the population it came from.
+
+That the mean and median are both exactly 6 is a hint about shape -- the distribution is
+close to symmetric, which the frequency table bears out: the counts rise to a plateau
+around 4 to 7 and fall away on both sides, with one long right tail at 12.
+\end{solution}
+
 \section{Estimation and Sampling Distributions}
 
 \begin{align*}
