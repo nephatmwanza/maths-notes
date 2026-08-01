@@ -485,6 +485,38 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-01 (evening, later) — The five variance forms, presented properly
+
+User: the formulas after "…and it is exactly why the coded method exists" are
+unprofessionally presented. They were on the **Percentiles** page.
+
+Five alternative forms for the variance were typed as display maths hand-numbered
+`(1). (2). (3). (4). (5).` with `\hspace{2cm}` faking the alignment, and form (2)
+was not a formula at all but a five-line derivation wedged into the same list. So
+the list read as four formulas and one lump of algebra.
+
+Now a real `enumerate`, each form with a sentence saying **when you would use it**
+rather than just what it is, and the derivation lifted out into a `proof`
+environment after the list. A closing note points at the two steps that are
+usually got wrong: $\overline{X}$ is constant so it comes out of the sum, and
+$\sum X = n\overline{X}$ is what turns the middle term into $2n\overline{X}^2$.
+
+Searching for the same hand-numbering pattern across both courses found exactly
+one more instance, and it carried two real errors:
+
+- `\widehat{S}=\sqrt{\dfrac{\sum(X-\overline{X})^2}{n=1}}` — **`n=1` for `n-1`**;
+- `S=\dfrac{\sqrt{\sum(X-\overline{X})^2}}{n}` — the root covered only the
+  numerator, so it was not a standard deviation at all;
+- and it was labelled **(2)** while its own data ($n=13$) is part **(3)** of the
+  question, the thirteen ball bearings.
+
+That block had also spilled outside its `solution` environment; it now closes
+around the whole answer.
+
+> **Hand-numbered display maths is worth grepping for as a class.** `$$(1).` and
+> friends are a reliable marker for "this list was never really a list", and in
+> both instances found here the presentation problem sat on top of a maths error.
+
 ### 2026-08-01 (evening) — Median Example 1 rebuilt; two more boundary errors
 
 User flagged the median / interquartile-range Example 1 as poorly done. It was,
