@@ -92,6 +92,11 @@
   {\renewcommand{\qedsymbol}{}\begin{proof}[\textit{Solution}.]}
   {\end{proof}}
 
+% Table rows were padded out with empty '&&&\\' rows to fake vertical
+% space. Those render as blank rows on the web; set the spacing properly
+% once instead.
+\renewcommand{\arraystretch}{1.25}
+
 \begin{document}
 % Title page depersonalised for the web: no name, no university, no lecturer,
 % no course code. Same treatment as the probability notes - the material is not
@@ -1784,25 +1789,47 @@ This means we divide the ordered  data into 100 equal parts.
 
 
 
+% The table was printed with headings and every cell empty, so the worked
+% example could not be followed. Completed here, taking the assumed mean at the
+% middle class, a = 25, with class width h = 10.
+Take the assumed mean at the middle class, $a=25$, with class width $h=10$. Write
+$D=X-a$ and $U=\dfrac{X-a}{h}$.
 \begin{table}[H]
 \centering
-\begin{tabular}{|c|c|c|c|c|c|c|}
-\hline C-I & $f$& $X$ & $f D_X$ & $f D_X^2$ & $U=\frac{X-a}{h}$& $f U_X^2$\\
-&&&$X-a$&&$f U_X$ &\\
+\begin{tabular}{lrrrrrrrr}
+C-I & $f$ & $X$ & $D=X-a$ & $fD$ & $fD^2$ & $U$ & $fU$ & $fU^2$\\
 \hline
-$0-10$&5&5&&&&\\
-$10-20$&10&15&&&&\\
-$20-30$&15&25&&&&\\
-$30-40$&5&35&&&&\\
-$40-50$&5&45&&&&\\
+$0-10$  & 5  & 5  & $-20$ & $-100$ & 2000 & $-2$ & $-10$ & 20\\
+$10-20$ & 10 & 15 & $-10$ & $-100$ & 1000 & $-1$ & $-10$ & 10\\
+$20-30$ & 15 & 25 & 0     & 0      & 0    & 0    & 0     & 0\\
+$30-40$ & 5  & 35 & 10    & 50     & 500  & 1    & 5     & 5\\
+$40-50$ & 5  & 45 & 20    & 100    & 2000 & 2    & 10    & 20\\
 \hline
+Total   & 40 &    &       & $-50$  & 5500 &      & $-5$  & 55\\
 \end{tabular}
 \end{table}
 
+From the $D$ columns,
+$$\overline{X}=a+\frac{\sum fD}{\sum f}=25+\frac{-50}{40}=23.75,$$
+$$\sigma^2=\frac{\sum fD^2}{\sum f}-\left(\frac{\sum fD}{\sum f}\right)^{2}
+=\frac{5500}{40}-(-1.25)^2=137.5-1.5625=135.94,$$
+so $\sigma=\sqrt{135.94}=11.66$.
+
+The $U$ columns give the same answers with smaller numbers, which is the whole reason for
+the substitution:
+$$\overline{X}=a+h\,\frac{\sum fU}{\sum f}=25+10\left(\frac{-5}{40}\right)=23.75,$$
+$$\sigma^2=h^2\left[\frac{\sum fU^2}{\sum f}-\left(\frac{\sum fU}{\sum f}\right)^{2}\right]
+=100\left[\frac{55}{40}-\left(\frac{-5}{40}\right)^{2}\right]=100(1.359375)=135.94.$$
+Dividing by $h$ before squaring keeps the arithmetic to single digits; multiplying back by
+$h^2$ at the end restores the scale. With a hand calculation over many classes that is a
+real saving, and it is exactly why the coded method exists.
 
 
 
-$$(1).\hspace{3cm}\sigma^2=\frac{\sum (f(X-\overline{X}^2))}{\sum f}$$\\
+
+% The square sat on Xbar rather than on the bracket - the same slip as the
+% ANOVA identity had.
+$$(1).\hspace{2cm}\sigma^2=\frac{\sum f(X-\overline{X})^2}{\sum f}$$
 \begin{align*}
 (2).\hspace{1cm} \sigma^2 &= E(X-\overline{X})^2=\frac{1}{n}\sum (X-\overline{X})^2=\frac{1}{n}\sum (X^2-2X\overline{X}+\overline{X}^2)\\\\
 &=\frac{1}{n}\Bigg(\sum X^2-2\overline{X}\sum X +\sum \overline{X}^2\Bigg)=\frac{1}{n}\Bigg[\sum X^2-2n\overline{X}^2+n\overline{X}^2\Bigg]\\\\
@@ -2755,10 +2782,8 @@ $$S^2=\frac{\sum (X-\overline{X})^2}{n},\hspace{1cm} S^2=\frac{\sum (X-\overline
 \centering
 \begin{tabular}{|c|c|c|c|}
 \hline
-&&&\\
 Samples &$\overline{X}$&$S^2=\dfrac{\sum (X-\overline{X})^2}{n-1}$&$S^2=\dfrac{\sum (X-\overline{X})^2}{n}$\\
 \hline 
-&&&\\
 &&$S^2_1=\dfrac{(2-3)^2+(4-3)^2}{2-1}$&$S^2_1=\dfrac{(2-3)^2+(4-3)^2}{2}$\\
 \hline 
 2\,,\,4&3&&\\
@@ -2890,9 +2915,7 @@ Parameter & size & estimator & value &\\
 $\theta$ & $n$ & $\widehat{\theta}$ & $\widehat{\theta}$ & $\widehat{\theta}$\\
 \hline $\mu$ & $n$ & $\overline{X}$ & $\mu$ & $\sigma^2/n$\\
 $P$ & $n$ & $\widehat{P}=X/n$ & $P$ & $Pq /n$\\
-&&&&\\
 $\mu_1-\mu_2$ & $n_1\, \&\, n_2$ & $\overline{X}_1-\overline{X}_2$ & $\mu_1-\mu_2$& $\dfrac{\sigma^2_1}{n_1}+\dfrac{\sigma^2_2}{n_2}$\\
-&&&&\\
 $P_1-P_2$ & $n_1\,\&\, n_2$ & $\widehat{P}_1-\widehat{P}_2$ & $P_1-P_2$ & $\dfrac{P_1q_1}{n_1}+\dfrac{P_2q_2}{n_2}$\\
 \hline
 \end{tabular}
@@ -2973,7 +2996,6 @@ $\therefore$ The probability that the error of estimation is less than 0.03 is a
 \centering
 \begin{tabular}{|c|c|c|c|c|}
 \hline 
-&&&&\\
 $X$ & $f$ & $f(X)$ & $X-\overline{X}$ & $(X-\overline{X})^2$\\
 \hline 25.1&1&25.1& $-0.1$ & 0.01\\
 25.2& 2& 50.4&0&0\\
@@ -4240,10 +4262,8 @@ Test the hypothesis that vaccination is effective against the disease.\\\\
 Expected\hspace{1cm}
 \begin{tabular}{|c|c|}
 \hline 
-&\\
 $\dfrac{35\times 70}{100}$ & $\dfrac{65\times 70}{100}$\\
 \hline 
-&\\
 $\dfrac{35\times 30}{100}$ & $\dfrac{65\times 30}{100}$\\
 \hline
 \end{tabular}
@@ -4359,9 +4379,7 @@ ANOVA TABLE (one way variation)\\
 \hline
 Squares of Variance & SS & df & MS & F-statistics\\
 \hline
-&&&&\\
 Between Sample & $SS_B$ & $v_1=k-1$ & $\dfrac{SS_B}{k-1}=MS_B$ & $F-\dfrac{MS_B}{MS_{\varepsilon}}$\\
-&&&&\\
 Within Sample & $SS_{\varepsilon}$ & $v_2=n-k$ & $\dfrac{SS_{\varepsilon}}{n-k}=MS_{\varepsilon}$ &\\
 \hline
 Total & $SS_T$ & $n-1$ &&\\
@@ -4495,9 +4513,7 @@ ANOVA TABLE
 \hline
 Source of  Variation & df & SS & MS & F\\
 \hline
-&&&&\\
 Columns & $c-1=4=v_1$ & 82.3 & $MS=\dfrac{82.3}{4}=20.57$ & $F=\dfrac{MSC}{MSE}=\dfrac{20.57}{3.66}$\\
-&&&&\\
 Error & $(rc-1)-(c-1)$ & 73.2 & $MSE=\dfrac{73.2}{20}=3.60$ & $F=5.62$\\
 &$=24-4=20=v_2$&&&\\
 \hline
@@ -4548,11 +4564,8 @@ TWO WAY ANOVA\\
 \hline
 Source of Variation & df & SS & MS & F\\
 \hline
-&&&&\\
 Between Rows & $r-1=v_1=3$ & $SS_R$ & $\dfrac{SS_R}{r-1}=MS_R$ & $F_R=\dfrac{MS_R}{MSE}$\\
-&&&&\\
 Withing the Columns & $c-1=v_2=2$ & $SS_C$ & $\dfrac{SS_C}{c-1}=MS_C$ & $F_C=\dfrac{MS_C}{MSE}$\\
-&&&&\\
 Errors & $(rc-1)-(c-1)-(r-1)$ & $SSE$ & $\dfrac{SSE}{v_3}=MSE$ &\\
 \hline
 Total & $rc-1=v_3=6$&&&\\
@@ -4786,7 +4799,6 @@ A&B&C&D&E\\
 \hline Variation Due to & df & SS & MS & F & $F_{v_1,v_2,\alpha}$\\
 \hline &&&&&\\
 Blocks & 4 & 0.67 & 0.167 & $F_B=\dfrac{0.167}{1.326}$&\\
-&&&&&\\
 Treatments & 4& 5.3 & 1.325& $F_B=\dfrac{1.325}{1.326}$&\\
 Error & 6 &8.03 & 1.326&&\\
 \hline SST & 14 &&&&\\

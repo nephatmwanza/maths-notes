@@ -3,14 +3,33 @@
 <script>
 // Loads every built page in turn and reports any element whose content is wider
 // than its box - i.e. anything the reader would have to scroll sideways to see.
-const pages = [...Array(20).keys()].map(i => `intro_probse${i+1}.html`)
-  .concat(['intro_prob.html','intro_probli1.html','intro_probch1.html',
-           'intro_probch2.html','intro_probch3.html']);
-const base = '../courses/introduction-to-probability/build/';
+// Both courses. The list is built from each course's contents page, so new
+// sections are covered automatically rather than needing this file edited.
+const courses = [
+  '../courses/introduction-to-probability/build/',
+  '../courses/introduction-to-statistics/build/',
+];
+async function pagesFor(base) {
+  const idx = await fetch(base).then(r => r.text()).catch(() => '');
+  const names = [...idx.matchAll(/href="([^"]+\.html)"/g)].map(m => m[1]);
+  return [...new Set(names)];
+}
 const out = document.getElementById('out');
 const lines = [];
 (async () => {
-  for (const p of pages) {
+ try {
+  const only = new URLSearchParams(location.search).get('c');
+  const chosen = only ? courses.filter(c => c.includes(only)) : courses;
+  let all = [];
+  for (const base of chosen) {
+    for (const n of await pagesFor(base)) all.push([base, n]);
+  }
+  // Report progress as we go. A checker that dies silently and leaves "running"
+  // on screen looks identical to one that found nothing, which is worse than
+  // no checker at all.
+  out.textContent = `0 / ${all.length} pages...`;
+  let done = 0;
+  for (const [base, p] of all) {
     const fr = document.createElement('iframe');
     fr.style.cssText = 'width:1400px;height:900px;border:0;position:absolute;left:-9999px';
     fr.src = base + p;
@@ -48,8 +67,15 @@ const lines = [];
         lines.push(`${p}  *** PAGE scrolls horizontally +${b.scrollWidth-b.clientWidth}px`);
     }
     fr.remove();
+    done++;
+    out.textContent = `${done} / ${all.length} pages...` + (lines.length ? "\n"+lines.join("\n") : "");
   }
-  out.textContent = lines.length ? lines.join('\n') : 'CLEAN - nothing overflows';
+  out.textContent = (lines.length ? lines.join('\n') : 'CLEAN - nothing overflows')
+    + `\n\nchecked ${all.length} pages across ${courses.length} courses`;
   document.title = 'done';
+ } catch (e) {
+  document.getElementById('out').textContent = 'CHECKER FAILED: ' + (e && e.message ? e.message : e);
+  document.title = 'error';
+ }
 })();
 </script>
