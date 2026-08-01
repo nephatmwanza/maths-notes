@@ -98,6 +98,35 @@ def tag_theorems(html: str) -> str:
     return "".join(out)
 
 
+# Worked examples in these notes are marked with a bold word rather than a LaTeX
+# environment - \textbf{Example} and \textbf{Solution} - so tex4ht emits them
+# as an ordinary paragraph that happens to start in bold. They therefore get
+# none of the styling the theorem environments receive, and they carry no
+# numbers, which is most of why the older notes look less finished than the
+# newer ones.
+#
+# Rewriting 42 of them in the source is not safe: several sit inside unclosed
+# list environments, so the markup does not nest the way an environment would
+# need to. Tagging them here costs nothing and lets the stylesheet give them a
+# label, a number and a rule.
+MARKER_WORDS = ("Example", "Examples", "Solution", "Exercise", "Note", "Remark",
+                "Definition", "Theorem", "Proof")
+
+MARKER_RE = re.compile(
+    r"<p class='noindent'>\s*<span class='cm(?:bx|ti)[^']*'>\s*"
+    r"(" + "|".join(MARKER_WORDS) + r")\s*:?\s*</span>"
+)
+
+
+def tag_bold_markers(html: str) -> str:
+    """Give bold Example/Solution paragraphs a class the stylesheet can use."""
+    def repl(m):
+        word = m.group(1).lower().rstrip("s") if m.group(1) != "Examples" else "example"
+        return m.group(0).replace(
+            "<p class='noindent'>", f"<p class='noindent mk mk-{word}'>", 1)
+    return MARKER_RE.sub(repl, html)
+
+
 def collapse_solutions(html: str) -> str:
     """Hide practice-problem solutions behind a disclosure control.
 
@@ -308,6 +337,7 @@ def process(path: Path, items: list[dict], course_title: str,
         return False
 
     html = tag_theorems(html)
+    html = tag_bold_markers(html)
     html = collapse_solutions(html)
 
     # our stylesheet, after tex4ht's so it wins

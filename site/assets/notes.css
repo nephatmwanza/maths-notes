@@ -152,6 +152,37 @@ a:hover{color:var(--accent-deep)}
 /* the source nests proofs inside enumerate; claw back the double indent */
 .newtheorem ol .proof,.newtheorem ul .proof{margin-left:-.6rem}
 
+/* ---------- bold-word Example / Solution markers ----------
+   The older notes mark worked examples with \textbf{Example} rather than a LaTeX
+   environment, so tex4ht emits a plain paragraph that merely starts in bold.
+   build.py tags those; this gives them the label, number and rule an
+   environment would have carried, without touching the source. */
+.mk{
+  margin-top:2rem;padding-top:.9rem;border-top:1px solid var(--line);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+.mk > span:first-child{font-size:0}          /* hide the bare bold word ... */
+.mk::before{                                  /* ... and label it properly */
+  font-weight:680;letter-spacing:-.01em;margin-right:.5em;
+}
+/* Examples are numbered per page, which is what a reader can actually refer to. */
+.content .inner{counter-reset:mkex}
+.mk-example{counter-increment:mkex}
+.mk-example::before{content:"Example " counter(mkex) ".";color:var(--ex)}
+.mk-exercise::before{content:"Exercise.";color:var(--ex)}
+.mk-note::before{content:"Note.";color:var(--rem)}
+.mk-remark::before{content:"Remark.";color:var(--rem)}
+.mk-definition::before{content:"Definition.";color:var(--defn)}
+.mk-theorem::before{content:"Theorem.";color:var(--thm)}
+
+/* A solution continues its example rather than starting something new, so it
+   gets no rule above - just a quiet italic label. */
+.mk-solution,.mk-proof{
+  margin-top:1rem;padding-top:0;border-top:none;color:var(--soft);
+}
+.mk-solution::before{content:"Solution.";font-style:italic;font-weight:600;color:var(--soft)}
+.mk-proof::before{content:"Proof.";font-style:italic;font-weight:600;color:var(--soft)}
+
 /* ---------- practice problems ---------- */
 /* Deliberately not one of the theorem colours: a problem is a task, not
    something to read, and should look different from the exposition above it. */
