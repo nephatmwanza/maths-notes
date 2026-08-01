@@ -2926,16 +2926,63 @@ Z_{\alpha/2} &=\hspace{0.3cm}\text{degree of confidence table value with given}\
 
 
 \subsubsection{Properties of Confidence Intervals}
+
+Which multiplier to use, $Z$ or $t$, is decided by one question only: \textbf{is $\sigma$
+known?} It is \emph{not} decided by the sample size. The $t$-distribution exists because
+replacing $\sigma$ by an estimate $\widehat{S}$ adds a second source of uncertainty, and
+$t$ is wider than $Z$ to pay for it. If $\sigma$ is genuinely known there is nothing extra
+to pay for, so $Z$ is correct however small the sample.
+
+Sample size decides something different: whether the interval is trustworthy at all. For
+small $n$ these formulas need the population to be roughly normal; for large $n$ the
+Central Limit Theorem makes that assumption unnecessary.
+
 \begin{enumerate}
-\item For large sample size ($\sigma=$ known) our class interval$$\text{C.I is:}\hspace{0.5cm} \overline{X}\pm Z_{\alpha/2}\times \frac{\sigma}{\sqrt{n}}$$
-\item For large sample size ($\sigma=$ unknown) $$\text{C.I is}:\hspace{0.5cm} \overline{X}\pm Z_{\alpha/2}\times \frac{S}{\sqrt{n-1}}\hspace{0.5cm}\text{or}\hspace{0.5cm} \overline{X}\pm Z_{\alpha/2}\times \frac{\widehat{S}}{\sqrt{n}}$$
-\item C.I for small sample size ($\sigma=$ known) $$\overline{X}\pm t_{n-1,\alpha/2}\times \frac{\sigma}{\sqrt{n}}$$
-\item C.I for small sample size ($\sigma=$ unknown) $$\overline{X}\pm t_{n-1,\alpha/2}\times \frac{S}{\sqrt{n-1}}\hspace{0.5cm}\text{or}\hspace{0.5cm} \overline{X}\pm t_{n-1,\alpha/2}\times \frac{\widehat{S}}{\sqrt{n}}$$
-\item C.I of a proportion from large sample size $$P\pm Z_{\alpha/2}\times \sqrt{\frac{P(1-P)}{n}}$$
-\item C.I of a proportion for  small sample size $$\widehat{P}\pm t_{n-1,\alpha/2}\times \sqrt{\frac{\widehat{P}(1-\widehat{P})}{n}}$$
-\item C.I for the difference between two means: $$(\overline{X}_1-\overline{X}_2)\pm Z_{\alpha/2}\times \sqrt{\frac{\sigma_1^2}{n_1}+\frac{\sigma_2^2}{n_2}}$$
-\item $$(\widehat{P}_1-\widehat{P}_2)\pm Z_{\alpha/2}\times \sqrt{\frac{\widehat{P}_1(1-\widehat{P}_1)}{n_1}+\frac{\widehat{P}_2(1-\widehat{P}_2)}{n_2}}$$
-\item If you draw two samples from the same population, then $$(\overline{X}_1-\overline{X}_2)\pm Z_{\alpha/2}\times \text{SP}\sqrt{\frac{1}{n_1}+\frac{1}{n_2}}$$ where SP is called the Pooled variance $$\text{SP}=\sqrt{\frac{(n_1-1)S^2_1+(n_2-1)S^2_2}{n_1+n_2-2}}\hspace{0.5cm}\text{and}\hspace{0.5cm}0<\frac{S^2_1}{S^2_2}<2$$\\
+\item $\sigma$ known, any $n$ (population normal, or $n$ large):
+$$\overline{X}\pm Z_{\alpha/2}\times \frac{\sigma}{\sqrt{n}}$$
+
+\item $\sigma$ unknown, $n$ large:
+$$\overline{X}\pm Z_{\alpha/2}\times \frac{\widehat{S}}{\sqrt{n}}
+\hspace{0.5cm}\text{equivalently}\hspace{0.5cm}
+\overline{X}\pm Z_{\alpha/2}\times \frac{S}{\sqrt{n-1}}$$
+The two forms agree because $S$ is computed with divisor $n$ and $\widehat{S}$ with
+divisor $n-1$, so $\widehat{S}/\sqrt{n}=S/\sqrt{n-1}$. Strictly $t$ is correct here too,
+but for large $n$ the two are indistinguishable.
+
+\item $\sigma$ unknown, $n$ small (population normal):
+$$\overline{X}\pm t_{n-1,\,\alpha/2}\times \frac{\widehat{S}}{\sqrt{n}}
+\hspace{0.5cm}\text{equivalently}\hspace{0.5cm}
+\overline{X}\pm t_{n-1,\,\alpha/2}\times \frac{S}{\sqrt{n-1}}$$
+This is the only case that calls for $t$.
+
+\item C.I.\ for a proportion, $n$ large enough that $n\widehat{P}\geq 5$ and
+$n(1-\widehat{P})\geq 5$:
+$$\widehat{P}\pm Z_{\alpha/2}\times \sqrt{\frac{\widehat{P}(1-\widehat{P})}{n}}$$
+Note it is the \emph{sample} proportion $\widehat{P}$ throughout: if $P$ were known there
+would be nothing to estimate. When the sample is too small for that condition, $t$ does
+\textbf{not} rescue it -- a proportion is a count from a binomial, and there is no
+estimated variance for $t$ to correct. The proper remedies are the Wilson score interval
+or the exact Clopper--Pearson interval, both beyond this course.
+
+\item C.I.\ for the difference between two means, $\sigma_1$ and $\sigma_2$ known:
+$$(\overline{X}_1-\overline{X}_2)\pm Z_{\alpha/2}\times
+\sqrt{\frac{\sigma_1^2}{n_1}+\frac{\sigma_2^2}{n_2}}$$
+
+\item C.I.\ for the difference between two proportions:
+$$(\widehat{P}_1-\widehat{P}_2)\pm Z_{\alpha/2}\times
+\sqrt{\frac{\widehat{P}_1(1-\widehat{P}_1)}{n_1}+\frac{\widehat{P}_2(1-\widehat{P}_2)}{n_2}}$$
+
+\item C.I.\ for the difference between two means when $\sigma_1=\sigma_2$ but both are
+unknown. The two samples are pooled into a single estimate of the common standard
+deviation:
+$$(\overline{X}_1-\overline{X}_2)\pm t_{n_1+n_2-2,\,\alpha/2}\times
+S_p\sqrt{\frac{1}{n_1}+\frac{1}{n_2}}
+\hspace{0.4cm}\text{where}\hspace{0.4cm}
+S_p=\sqrt{\frac{(n_1-1)\widehat{S}^2_1+(n_2-1)\widehat{S}^2_2}{n_1+n_2-2}}$$
+The multiplier is $t$, not $Z$, because $\sigma$ is unknown -- the same rule as case 3 --
+and the degrees of freedom are $n_1+n_2-2$, one lost from each sample. Pooling is only
+reasonable if the two variances really are close; a common rough check is
+$$\frac{1}{2}<\frac{\widehat{S}^2_1}{\widehat{S}^2_2}<2.$$
 \end{enumerate}
 
 
