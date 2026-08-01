@@ -81,6 +81,9 @@
 % ---------------------------------------------------------------------------
 \usepackage{amsthm}
 \theoremstyle{definition}
+% a plain Definition environment - build.py colours it blue on the web, the
+% same as the probability notes
+\newtheorem{definition_}{Definition}[section]
 \newtheorem{problemx}{Problem}[section]
 \newenvironment{problem}[1]
   {\begin{problemx}\textup{\small[#1]}\hspace{0.4em}\ignorespaces}
@@ -3202,8 +3205,15 @@ $H_1:$ Alternative hypothesis
 
 $Z_{\alpha/2}$ undirected hypothesis tests, two tailed test $\alpha=5\%$.\\
 
-\textit{Interpretation}: If the statistic $Z$ lie in the C.R this means we reject $H_0$ and accept $H_1$. That means $H_1$ is true.\\
-If the statistic $Z$ lies in the acceptance region that means we accept $H_0$ and reject $H_1$. That means $H_0$ is true.\\
+\textit{Interpretation}: if the statistic $Z$ falls in the critical region we
+\textbf{reject} $H_0$ in favour of $H_1$. If it does not, we \textbf{fail to reject}
+$H_0$.
+
+Say it that way, and not ``$H_1$ is true'' or ``$H_0$ is true''. A test never establishes
+either hypothesis. Rejecting $H_0$ says the data would be unusual if $H_0$ held, which is
+evidence against it -- not proof of $H_1$. Failing to reject says only that the data are
+consistent with $H_0$; they may be consistent with a great many other values too,
+particularly when the sample is small. Absence of evidence is not evidence of absence.\\
 
 We can use the P-value for interpretation given statistic $\alpha=0.025$ \hspace{0.1cm},\hspace{0.2cm}$Z=2.13$
 
@@ -3235,9 +3245,65 @@ P(Z>2.13) &=1-P(Z\leq 2.13)=1-0.9834\\
 &=0.016
 \end{align*}
 
+Because the test is two-tailed, a result this far from the centre is equally surprising in
+either direction, so the $P$-value is \emph{both} tails together:
+$$P\text{-value} = 2\times P(Z>2.13) = 2\times 0.0166 = 0.033.$$
+Since $0.033 < \alpha = 0.05$, we reject $H_0$.
+
+\subsection{The $P$-value}
+
+\begin{definition_}
+The \textbf{$P$-value} is the probability of obtaining a result at least as extreme as the
+one observed, \emph{assuming the null hypothesis is true}.
+\end{definition_}
+
+Every word of that matters, and the last clause most of all. The $P$-value is computed in a
+world where $H_0$ holds. It answers ``if nothing were going on, how often would I see
+something this striking?'' -- a small value means the data sit awkwardly with $H_0$.
+
+\textbf{The decision rule.} Reject $H_0$ when
+$$P\text{-value} < \alpha.$$
+Always compare with $\alpha$ itself, never with $\alpha/2$. The halving belongs to the
+\emph{critical value} in a two-tailed test, where each tail gets $\alpha/2$. It is applied
+once, not twice:
+\begin{itemize}
+\item \textbf{One-tailed test:} $P = P(Z > z_{\text{obs}})$, the single tail beyond the
+statistic.
+\item \textbf{Two-tailed test:} $P = 2\times P(Z > |z_{\text{obs}}|)$ -- double it, because
+a departure of that size in the opposite direction would have been just as surprising.
+\end{itemize}
+Doubling the tail \emph{and} halving $\alpha$ would penalise the same two-sidedness twice.
+
+The two approaches always agree. The critical-value method asks whether the statistic is
+beyond the boundary; the $P$-value method asks how far beyond it is. The $P$-value carries
+more information -- $P = 0.049$ and $P = 0.001$ both ``reject at $5\%$'' while saying very
+different things about the strength of the evidence.
+
+\subsubsection{What the $P$-value does not mean}
+
+These misreadings are common enough to be worth stating plainly.
+
 \begin{enumerate}
-\item If the P-value is smaller than the level of significance $\alpha/2=0.025$. That means we reject $H_0$ and Accept $H_1$.
-\item If the P-value is grater than the level of significance we Accept $H_0$ and reject $H_1$.\\
+\item \textbf{It is not the probability that $H_0$ is true.} $H_0$ is either true or it is
+not; it has no probability. The $P$-value is a probability about \emph{the data}, computed
+assuming $H_0$ -- not a probability about the hypothesis.
+
+\item \textbf{It is not the probability that the result is due to chance.}
+
+\item \textbf{$1-P$ is not the probability that $H_1$ is true.} A $P$-value of $0.03$ does
+not make $H_1$ $97\%$ likely.
+
+\item \textbf{A large $P$-value does not show $H_0$ is true.} It shows the data are
+consistent with $H_0$. With a small sample, they would be consistent with much else
+besides.
+
+\item \textbf{Statistical significance is not practical importance.} A large enough sample
+will return a small $P$-value for a difference far too slight to matter. Always ask how
+big the effect is, not merely whether it is significant.
+
+\item \textbf{$\alpha=0.05$ is a convention, not a law of nature.} There is nothing
+qualitatively different between $P = 0.049$ and $P = 0.051$, and reporting the actual
+$P$-value is more honest than reporting only ``significant'' or ``not significant''.
 \end{enumerate}
 
 
@@ -3622,14 +3688,30 @@ Do the number of individuals or objects that fall in each category differ signif
 \item Simple random sampling
 \item Data frequencies\\
 \end{enumerate}
-$$\text{Test statistic}\hspace{0.4cm} \chi^2=\frac{\sum (O-E)^1}{E}$$
+% The exponent here read (O-E)^1, and the formula was then restated correctly
+% just below with a lower-case e. Squared, and the notation made consistent.
+$$\text{Test statistic}\hspace{0.4cm}
+\chi^2=\sum \frac{(O-E)^2}{E}$$
 Where:\\\\
-$O-$ Observed\\
-$E-$ Expected\\
-df - $n-1$\\
-$\chi^2-$ Statistic.\\
+$O-$ the observed frequency in a category\\
+$E-$ the expected frequency in that category, if $H_0$ were true\\
+$\chi^2-$ the test statistic.\\
 
-$\displaystyle{\chi^2=\frac{\sum (O-e)^2}{e}}$\\
+The differences are \emph{squared}, so that shortfalls and excesses both count against
+$H_0$ rather than cancelling, and each is divided by $E$ so that a discrepancy is judged
+against the size of the category it occurs in -- being 10 out on an expected 20 matters far
+more than being 10 out on an expected 2000.
+
+\textbf{Degrees of freedom.} These are not $n-1$, where $n$ is the sample size. They count
+the categories, not the observations:
+\begin{itemize}
+\item \textbf{Goodness of fit:} $\text{df} = k-1-m$, where $k$ is the number of categories
+and $m$ the number of parameters estimated from the data. The $-1$ appears because the
+expected frequencies are constrained to the same total as the observed ones, so once $k-1$
+of them are fixed the last is determined.
+\item \textbf{Test of independence:} $\text{df} = (r-1)(c-1)$ for an $r\times c$
+contingency table, since the row and column totals are fixed.
+\end{itemize}
 
 The $\chi^2$ - test should be used when the sampling distribution $\chi^2\approx \chi^2_c$ distribution.\\
 
