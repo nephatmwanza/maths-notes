@@ -485,6 +485,54 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-01 (later still) — Both courses now use the same environments
+
+User asked why examples were not uniform: `\begin{example} … \end{example}` and
+`\begin{solution} … \end{solution}`, the way the probability notes already did
+it. Correct, and my earlier reasoning against it was wrong.
+
+**Statistics was genuinely mixed** — 20 `example_` environments *and* 25 bare
+`\textbf{Example}`; 35 `solution` and 22 bare. So the same page could show a
+numbered, ruled example next to an unnumbered bold word.
+
+**All 63 bare markers converted.** Also renamed `example_`, `definition_`,
+`remark_`, `note_` to the unadorned names probability uses, with the same
+`thm`-based counter structure. Probability's 6 `\begin{proof}[\textbf{Solution}]`
+became `\begin{solution}`, and its 2 inline `\textbf{Note:}` became `note`.
+**Both courses are now at zero bare markers**, same environment names, same
+counters.
+
+`tag_bold_markers()` and the `.mk` CSS are deleted. What remains is the check,
+which now warns about *any* bold marker word that is not an environment.
+
+**One structural fix this required**: the grouped-data mode list opened a
+`\begin{enumerate}` that was closed only 42 lines later, after the worked example
+*and* its solution — so both sat inside a bullet list. This is the "unclosed list"
+I cited in a previous commit as the reason conversion was unsafe. It was one list,
+and closing it where it actually ends took two lines.
+
+**The boundary rule took two goes, and the first was quietly wrong.**
+
+> My first algorithm took the *largest* balanced end before the next heading.
+> Where a solution is followed by figures with no heading between, that swallows
+> them: one solution ran to **306 lines** and absorbed an entire subsection of
+> continuous-data figures, and **four `example` blocks swallowed their own
+> `solution`**, which should be siblings. The build did not care — the LaTeX was
+> still balanced, so it compiled and rendered without complaint.
+>
+> Caught by listing every block over 25 lines with its first and last substantive
+> line and reading the tails. A solution ending in "The mode is the most
+> frequently occurring value" is not a solution ending.
+>
+> Correct rule: end at the *first* point where the block balances **and** the
+> author left a topic break (three or more blank lines). Largest block is now 89
+> lines, no example contains a solution.
+
+> **Balanced is not the same as correct.** A structural check that passes tells
+> you the file compiles, not that the boundaries are where they belong. For
+> anything that infers extent from layout, list the results by size and read the
+> edges of the biggest ones.
+
 ### 2026-08-01 (later) — A marker after `\\` is silently not a marker
 
 User spotted an `Example` on the Moments page that had no label and no number,

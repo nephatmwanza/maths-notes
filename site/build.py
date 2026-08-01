@@ -98,72 +98,57 @@ def tag_theorems(html: str) -> str:
     return "".join(out)
 
 
-# Worked examples in these notes are marked with a bold word rather than a LaTeX
-# environment - \textbf{Example} and \textbf{Solution} - so tex4ht emits them
-# as an ordinary paragraph that happens to start in bold. They therefore get
-# none of the styling the theorem environments receive, and they carry no
-# numbers, which is most of why the older notes look less finished than the
-# newer ones.
+# Both courses now write every worked example as a real LaTeX environment -
+# \begin{example}, \begin{solution}, \begin{definition} and so on - so tex4ht
+# emits proper theorem markup and tag_theorems() styles and numbers it.
 #
-# Rewriting 42 of them in the source is not safe: several sit inside unclosed
-# list environments, so the markup does not nest the way an environment would
-# need to. Tagging them here costs nothing and lets the stylesheet give them a
-# label, a number and a rule.
+# It used to be otherwise. The statistics notes marked examples with a bold word,
+# \textbf{Example}, and this file gave those paragraphs a class so the stylesheet
+# could fake a label and a number. That worked until it silently did not: a marker
+# only becomes its own paragraph if a BLANK LINE precedes it, so after `\\` it
+# stayed inline, matched nothing, and lost its label, its rule and its number
+# while every other example on the page kept theirs. Nine markers were affected.
+#
+# The lesson is that a presentational convention enforced by a regex over
+# generated HTML has no way to fail loudly. An environment does: unbalanced
+# \begin/\end stops the build. So the markers were converted rather than
+# patched, and what remains here is only the check that they stay converted.
 MARKER_WORDS = ("Example", "Examples", "Solution", "Exercise", "Note", "Remark",
                 "Definition", "Theorem", "Proof")
 
-MARKER_RE = re.compile(
-    r"<p class='noindent'>\s*<span class='cm(?:bx|ti)[^']*'>\s*"
-    r"(" + "|".join(MARKER_WORDS) + r")\s*:?\s*</span>"
-)
-
-
-def tag_bold_markers(html: str) -> str:
-    """Give bold Example/Solution paragraphs a class the stylesheet can use."""
-    def repl(m):
-        word = m.group(1).lower().rstrip("s") if m.group(1) != "Examples" else "example"
-        return m.group(0).replace(
-            "<p class='noindent'>", f"<p class='noindent mk mk-{word}'>", 1)
-    return MARKER_RE.sub(repl, html)
-
-
-# A marker only starts a paragraph if a BLANK LINE precedes it in the .tex.
-# After `\\` it stays inside the running paragraph, tex4ht emits it as an
-# ordinary inline <span>, and MARKER_RE never sees it - so the example loses its
-# label, its rule and its number while every other example on the page keeps
-# theirs. That is invisible in the LaTeX and easy to miss in the HTML, so the
-# build reports it rather than waiting for a reader to notice.
-STRAY_MARKER_RE = re.compile(
-    r"(?<!<p class='noindent'>)<span class='cm(?:bx|ti)[^']*'>\s*"
+BOLD_MARKER_RE = re.compile(
+    r"<span class='cm(?:bx|ti)[^']*'>\s*"
     r"(" + "|".join(MARKER_WORDS) + r")\s*:?\s*</span>"
 )
 
 
 def report_stray_markers(html: str, page: str) -> int:
-    """Warn about Example/Solution headings that never became paragraphs.
+    """Warn about an Example/Solution heading not written as an environment.
 
     Ignores headings emitted by a real LaTeX environment - `\\begin{solution}`
-    and friends render inside `<span class='head'>` and are already styled by
-    tag_theorems(). The probability course is written entirely that way, and
-    without this exclusion every one of its 43 solutions reads as a defect.
+    and friends render inside `<span class='head'>`, which tag_theorems() has
+    already styled and numbered. Anything else matching a marker word is a bold
+    paragraph pretending to be a heading: unnumbered, unstyled, and invisible to
+    the counter, so every later example on that page is misnumbered too.
     """
     strays = []
-    for m in STRAY_MARKER_RE.finditer(html):
+    for m in BOLD_MARKER_RE.finditer(html):
         # Anchor to the enclosing paragraph rather than guessing a window size:
         # tex4ht pads its output with runs of whitespace hundreds of characters
         # long, so a fixed lookback silently misses the `head` span it is meant
         # to find and reports every environment heading as a defect.
         para = html.rfind("<p", 0, m.start())
         before = html[para:m.start()] if para != -1 else html[:m.start()]
-        if "mk mk-" in before or "class='head'" in before:
+        if "class='head'" in before:
             continue
         # `(Exercise)` and the like are deliberate inline labels, not headings.
         if before.rstrip().endswith("("):
             continue
         strays.append(m.group(1))
     for word in strays:
-        print(f"    WARNING {page}: '{word}' is inline, so it gets no label or "
-              f"number. Put a blank line before it in the .tex (not `\\\\`).")
+        print(f"    WARNING {page}: bold '{word}' is not an environment, so it "
+              f"gets no label or number. Use \\begin{{{word.lower().rstrip('s')}}} "
+              f"... \\end{{{word.lower().rstrip('s')}}} in the .tex.")
     return len(strays)
 
 
@@ -377,7 +362,6 @@ def process(path: Path, items: list[dict], course_title: str,
         return False
 
     html = tag_theorems(html)
-    html = tag_bold_markers(html)
     report_stray_markers(html, path.name)
     html = collapse_solutions(html)
 
