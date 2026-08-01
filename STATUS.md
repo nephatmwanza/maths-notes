@@ -433,6 +433,54 @@ interactive prompt, so the build does not fail — it waits, looking like a slow
 `make-course.sh` now runs `-interaction=nonstopmode` under a `timeout`, and greps for
 missing packages explicitly. The same fault now reports itself in seconds.
 
+## Introduction to Statistics — published 2026-08-01
+
+**Live.** 26 pages, 59 diagrams, 14 worked problems across all five chapters.
+
+**Source:** the user's own 2013 `.tex`, which maps onto the departmental syllabus exactly —
+five chapters, same five topics, same order. Departmental material
+(`~/LaTeX_Projects/Introduction to Statistics/Dept/`) used strictly as a coverage checklist
+per the standing rule; nothing copied.
+
+**Fourteen mathematical errors found and corrected.** These were real, not typographical,
+and several would have changed a student's answer:
+
+| Where | What |
+|---|---|
+| Confidence intervals | `t` used when σ is *known*; `t` used for a proportion; `z` used for the pooled two-sample case |
+| Hypothesis testing | "H₀ is true" / "H₁ is true"; P-value compared with α/2 |
+| Chi-square | statistic printed as `(O−E)¹`; df given as `n−1` |
+| ANOVA | MS_W divided by `n−1` against its own `n−k`; SS_B built from the grand total; the sum-of-squares identity false three ways |
+| Regression | least squares described as minimising the sum of errors, not squares |
+
+**A pattern worth remembering about this author's writing:** the notes repeatedly state
+something loosely and then correctly a few lines later — the χ² statistic, the ANOVA
+identity, and the least-squares description all do this. The loose version is what a reader
+meets first. When auditing the remaining courses, **read the first statement of every
+result, not the derivation.**
+
+**Three sections written** (missing entirely, all on the syllabus):
+1. **The four sampling distributions** — the largest gap. The notes *used* Z, t, χ² and F
+   throughout without ever introducing them. This is almost certainly why the z/t rule was
+   backwards: the rule had nothing to attach to.
+2. **P-values** — defined, decision rule, one- vs two-tailed, and what a P-value is *not*.
+3. **Inference for regression** — ANOVA table, R², t-test for slope, F-test, intervals for
+   slope and intercept. The chapter previously stopped after least squares.
+
+**Diagrams: 43 → 59.** Same defects as the probability notes — 22 TikZ `pattern=` fills
+tex4ht cannot convert (those figures rendered blank) and 39 pictures opened with
+`[=>stealth]`, which is invalid and silently produces no arrowheads. Both fixed, and the
+course now shares the probability house style.
+
+**Editorial pass** with `aspell --mode=tex`: 13 misspellings, grammar fixes, abbreviation
+stops regularised, and the `+ve`/`-ve` handwriting shorthand spelled out (11 instances — it
+was marked up as maths, so it rendered italic mid-sentence).
+
+**Verification method, worth repeating on the next course:** every numerical answer was
+computed before being written — exact rational arithmetic, symbolic integration, or
+`scipy` — and the ANOVA errors were caught by working a four-group example and finding the
+two sides of the identity did not balance.
+
 ## Status Log
 
 *(most recent first — append new entries, never rewrite old ones)*
