@@ -4844,7 +4844,13 @@ There is a $+ve$ fair correlation between the judges. So we have that $r_s=0.687
 
 Now we solve for the second part.\\
 Set the hypothesis\\
-$H_0$: The  is no correlation between the judges $r_s=0$\\ $H_1:$ There is an association $r_s\neq 0$\\\\ $|r_c|=$ critical value from the table, $n=7$, $|r_c|=0.75$\\ $$r_s=0.6875$$ We Accept $H_0$ since $r_s<|r_c|=0.75$.\\  Therefore, the judges are not in agreement.\\\\
+$H_0$: The  is no correlation between the judges $r_s=0$\\ $H_1:$ There is an association $r_s\neq 0$\\\\ $|r_c|=$ critical value from the table, $n=7$, $|r_c|=0.75$\\ $$r_s=0.6875$$ Since $r_s = 0.6875 < |r_c| = 0.75$, we \textbf{fail to reject} $H_0$ at this level.
+
+Be careful how that is reported. It does \emph{not} show the judges disagree. The observed
+$r_s = 0.6875$ is a fairly strong positive association -- it is simply not strong enough,
+\emph{with only 7 items}, to rule out chance at this significance level. A test on so few
+observations has little power, and the honest conclusion is that there is insufficient
+evidence of agreement, not evidence of its absence.\\\\
 
 
 
@@ -4884,7 +4890,7 @@ When $X$ and $Y$ are linearly related, we can draw a scatter diagram. We can sho
  
  
  
-$$Y_i=\alpha +\beta X_i+e_i,\hspace{1cm}\text{and}\hspace{1cm} e_i=Y_1-\alpha -\beta X_i$$
+$$Y_i=\alpha +\beta X_i+e_i,\hspace{1cm}\text{and}\hspace{1cm} e_i=Y_i-\alpha -\beta X_i$$
 where $\alpha +\beta X_i$ represents the linear relationship between $Y$ and $X_i$ and $e_i$ are a random errors.
 \begin{align*}
 \beta &=\hspace{0.3cm}\text{coefficient of regression of}\hspace{0.2cm}Y\hspace{0.2cm}\text{and}\hspace{0.2cm}X\\ X&=\hspace{0.3cm}\text{independent variable}\\ Y&=\hspace{0.3cm}\text{dependent variable}\\ \alpha &=\hspace{0.3cm}\text{constant}
@@ -4896,9 +4902,9 @@ We assume that there's independent of $X_i$ and normally distributed with mean 0
 
 
 \subsubsection{The Method of Least Squares}
-The parameters $\alpha$ and $\beta$ are estimated by the method of least squares so called because estimates $\widehat{a}$ and $\widehat{b}$ of $\alpha$ and $\beta$ respectively are chosen so as to minimize $\sum\limits_i^ne_i's$ ($n$ is the number of points on the scatter diagram).
+The parameters $\alpha$ and $\beta$ are estimated by the method of least squares so called because estimates $\widehat{a}$ and $\widehat{b}$ of $\alpha$ and $\beta$ respectively are chosen so as to minimize $\sum\limits_{i=1}^{n}e_i^2$, the sum of the \emph{squared} errors ($n$ is the number of points on the scatter diagram).
 \begin{align*}
-Y_i &=\alpha +\beta X_i+e_i\\e_i&=Y_i-\alpha -\beta X_i\\ \sum^n_i e^2_is &=\sum^n_{i=1}(Y_i-\alpha -\beta X_i)^2
+Y_i &=\alpha +\beta X_i+e_i\\e_i&=Y_i-\alpha -\beta X_i\\ \sum^n_{i=1} e^2_i &=\sum^n_{i=1}(Y_i-\alpha -\beta X_i)^2
 \end{align*}
 This expression can be varied by varying $\alpha$ and $\beta$, $\widehat{a}$ and $\widehat{b}$ estimates of $\alpha$ and $\beta$. We choose these $\alpha$ and $\beta$ so that $\sum e^2$ are minimized.\\\\
 The appropriate values of $\widehat{a}$ and $\widehat{b}$ are found by partial derivatives. $$Y'=0\hspace{0.5cm}\text{stationary point}$$
@@ -4926,7 +4932,90 @@ $$\sum^n_ie_i^2=\sum^n_i(Y-\alpha -\beta X)^2\hspace{0.2cm}\text{estimate}\hspac
 \widehat{b}\Bigg[\frac{1}{n}\Bigg(\sum^n_iX\Bigg)^2-\sum^n_iX^2\Bigg]&=\frac{1}{n}\sum^n_iX\sum^n_iY-\sum^n_iXY\\\\ \widehat{b}&=\frac{\dfrac{1}{n}\sum\limits^n_iX\sum\limits^n_iY-\sum\limits^n_iXY}{\dfrac{1}{n}\Bigg(\sum\limits^n_iX\Bigg)^2-\sum\limits^n_iX^2}\\\\ \widehat{b}&=\frac{\sum X\sum Y-n\sum XY}{\Bigg(\sum X\Bigg)^2-n\sum X^2}\\\\ \implies\hspace{0.5cm} \widehat{b}=\frac{n\sum XY-\sum X\sum Y}{n\sum X^2-\Bigg(\sum X\Bigg)^2}\\
 \end{align*}
 
-Therefore, the relationship between $X$ and $Y$ is given by \hspace{0.1cm}$Y=\widehat{a}+\widehat{b}X\hspace{0.1cm}$ and this is called the Regression line of $Y$ on $X$.\\\\ The regression line will pass through the point $(\overline{X},\overline{Y})$.
+Therefore, the relationship between $X$ and $Y$ is given by \hspace{0.1cm}$Y=\widehat{a}+\widehat{b}X\hspace{0.1cm}$ and this is called the Regression line of $Y$ on $X$.
+
+\subsection{Inference for the Regression Line}
+
+Fitting a line is only half the work. Least squares will happily draw a line through points
+with no relationship whatever, so the next question is whether the slope we obtained is
+real or could plausibly have arisen by chance.
+
+\subsubsection{Partitioning the variation}
+
+Exactly as in the analysis of variance, the total variation in $Y$ splits into a part the
+line explains and a part it does not:
+$$\underbrace{\sum(Y_i-\overline{Y})^2}_{SS_T}
+=\underbrace{\sum(\widehat{Y}_i-\overline{Y})^2}_{SS_R\ \text{(regression)}}
++\underbrace{\sum(Y_i-\widehat{Y}_i)^2}_{SS_E\ \text{(error)}}$$
+where $\widehat{Y}_i=\widehat{a}+\widehat{b}X_i$ is the value the line predicts. $SS_E$ is
+the sum of squared \textbf{residuals} -- the vertical gaps between the points and the line,
+which is precisely the quantity least squares chose $\widehat{a}$ and $\widehat{b}$ to make
+as small as possible.
+
+\subsubsection{The coefficient of determination}
+
+\begin{definition_}
+The \textbf{coefficient of determination} is
+$$R^2=\frac{SS_R}{SS_T}=1-\frac{SS_E}{SS_T},$$
+the proportion of the variation in $Y$ that the regression line accounts for.
+\end{definition_}
+
+$R^2$ lies between 0 and 1, and in simple linear regression it is exactly the square of the
+correlation coefficient, $R^2=r^2$. An $R^2$ of $0.81$ says the line accounts for $81\%$ of
+the variation in $Y$; the remaining $19\%$ is unexplained.
+
+Two warnings. A high $R^2$ does not mean the straight-line model is right -- data curving
+in a smooth arc can produce a large $R^2$ while a straight line is plainly the wrong shape,
+which is why the residuals should always be plotted. And $R^2$ says nothing about
+causation: $X$ may predict $Y$ well without influencing it at all.
+
+\subsubsection{The ANOVA table for regression}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+Source & $SS$ & df & $MS$ & $F$\\
+\hline
+Regression & $SS_R$ & $1$ & $MS_R=\dfrac{SS_R}{1}$ & $\dfrac{MS_R}{MS_E}$\\[6pt]
+Error      & $SS_E$ & $n-2$ & $MS_E=\dfrac{SS_E}{n-2}$ & \\[4pt]
+\hline
+Total      & $SS_T$ & $n-1$ & & \\
+\end{tabular}
+\end{table}
+The degrees of freedom are worth reading rather than memorising. The total carries $n-1$,
+one lost to estimating $\overline{Y}$. The regression carries $1$, because a straight line
+has one slope. The error carries $n-2$, since fitting the line used up two estimates,
+$\widehat{a}$ and $\widehat{b}$ -- and $1+(n-2)=n-1$, so the table balances.
+
+Under $H_0:\beta=0$ the ratio $F=MS_R/MS_E$ follows an $F$ distribution with $1$ and $n-2$
+degrees of freedom. A large $F$ is evidence that the line explains more than chance would.
+
+\subsubsection{Testing and estimating the slope}
+
+The quantity $MS_E$ estimates $\sigma^2$, the variance of the errors about the line, and
+its square root $s=\sqrt{MS_E}$ is the standard error of the estimate. The standard error
+of the slope is
+$$SE(\widehat{b})=\frac{s}{\sqrt{\sum(X_i-\overline{X})^2}}.$$
+The denominator carries a useful message: the more spread out the $X$ values, the smaller
+the standard error. A line is pinned down more firmly by observations taken over a wide
+range of $X$ than by the same number bunched together.
+
+To test $H_0:\beta=0$ against $H_1:\beta\neq 0$, use
+$$t=\frac{\widehat{b}-0}{SE(\widehat{b})}, \qquad \text{df}=n-2,$$
+and reject when the $P$-value is below $\alpha$. In simple linear regression this $t$-test
+and the $F$-test above always agree, because $t^2=F$ -- they are the same test written two
+ways.
+
+A confidence interval for the slope is
+$$\widehat{b}\pm t_{n-2,\,\alpha/2}\times SE(\widehat{b}),$$
+and for the intercept
+$$\widehat{a}\pm t_{n-2,\,\alpha/2}\times s\sqrt{\frac{1}{n}+\frac{\overline{X}^2}{\sum(X_i-\overline{X})^2}}.$$
+Both use $t$ with $n-2$ degrees of freedom, by the rule from the previous chapter: $\sigma$
+is unknown and has been estimated from the data.
+
+The interval for the slope is often more informative than the test. If it excludes zero we
+would reject $H_0$ at that level anyway -- but the interval also shows \emph{how large} the
+effect might plausibly be, which a $P$-value alone never does.\\\\ The regression line will pass through the point $(\overline{X},\overline{Y})$.
 
 
 
