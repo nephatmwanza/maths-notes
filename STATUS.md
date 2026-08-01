@@ -389,6 +389,50 @@ subdomain chosen at goatcounter.com to switch it on.
 sheets (2020 exams, Feb–March 2026 tutorial sheets — last semester's). Worth a final check
 that none are current assessed coursework.
 
+## Introduction to Statistics — started 2026-08-01
+
+**Second-year course** (the user corrected this; the departmental code MAT2602 agrees).
+Course codes still do not appear on the site.
+
+**Sources**, in `~/LaTeX_Projects/Introduction to Statistics/`:
+- `Introduction To Statistics.tex` — the user's own notes, dated 2013. **This is the draft.**
+- `Dept/Lecturer_Notes.pdf` (89 pp) — departmental notes, the **coverage checklist**, never
+  copied.
+- `Dept/Introduction_to_Statistics_Course_Content.pdf` — the syllabus.
+- `Dept/Tutorial_Sheet_1.pdf` (May 2026), `Tutorial_Sheet_2.pdf` (June 2026) — last
+  semester's, so the same status as the probability sheets. Transcribe problems with
+  original solutions; do not republish the sheets.
+
+**The user's notes match the syllabus exactly** — five chapters, five syllabus topics, same
+order, and every named sub-topic present. So the draft needs filling out, not restructuring.
+
+**Four topics appear only once in the .tex** and may be mentioned rather than taught. Check
+these against the departmental notes for depth: goodness of fit, tests of independence,
+completely randomised design, ratio of variances.
+
+**Done:** converted (19 pages, 43 diagrams), title page depersonalised, headings set in
+title case, tally marks reimplemented, sidebar fixed, first editorial pass.
+
+**Not done:** practice problems (none yet, against 77 in probability), the depth check
+above, and a full editorial read. **The catalogue still lists it as "In preparation" and
+should stay that way until it has problems** — publishing a course with none, next to one
+with 77, sets the wrong expectation.
+
+**Two things this course taught the pipeline:**
+
+1. **`\StrokeOne`..`\StrokeFive` come from `ifsym`**, which is not installed here. They are
+   tally marks, and they carry the frequency-table teaching — how raw observations become
+   counts. Reimplemented in TikZ rather than adding a dependency. *I removed the package
+   first without checking what it provided, having only grepped for `circledR`.*
+2. **An `article`-class document gives subsections their own pages.** `read_toc` matched
+   only `chN`/`seN`, so ten of nineteen pages were missing from the sidebar. Fixed, and
+   sections are promoted to headings when a document has no chapters.
+
+**Build hardening, prompted by a ten-minute hang:** a missing `.sty` leaves `htlatex` at an
+interactive prompt, so the build does not fail — it waits, looking like a slow conversion.
+`make-course.sh` now runs `-interaction=nonstopmode` under a `timeout`, and greps for
+missing packages explicitly. The same fault now reports itself in seconds.
+
 ## Status Log
 
 *(most recent first — append new entries, never rewrite old ones)*
