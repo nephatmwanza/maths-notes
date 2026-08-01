@@ -485,6 +485,40 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-01 (late) — Two centred headings; the P_s section rewritten
+
+User: 2.1.7 Properties of Estimation and 2.1.8 An Unbiased Estimation of
+Population Proportion sit centred instead of left like every other heading; put
+$P_s=X/n$ in a fraction; the $E(P_s)$ computation should be one line.
+
+Both headings were wrapped in `\begin{center}` — the only two in the file, which
+is why they alone looked different. Unwrapped. The first also carried stray double
+braces, `{{Properties of Estimation}}`.
+
+$P_s=\dfrac{X}{n}$ now, and the same in the estimators table where `\hat{P}=X/n`
+and `Pq/n` were set with slashes while the rows directly below them used `\dfrac`
+— inconsistent inside one table.
+
+$E(P_s)$ was three `align*` lines for a single chain; now one line, and
+$\operatorname{var}(P_s)$ collapsed to match.
+
+**Two real errors in the sentence that followed**, which is what the tidy-up
+exposed. It read that the sampling distribution of $P_s$ "tends to $N(0,1)$ with
+mean $X/n$". $N(0,1)$ is the *standardised* version, not the distribution of
+$P_s$; and the mean is $P$, not the estimate $X/n$. Now
+$P_s\ \dot\sim\ N(P, P(1-P)/n)$, with the standardising step added so the
+$N(0,1)$ a student expects still appears, in its right place.
+
+One more in the same table: the symbol row read $\theta \mid n \mid
+\hat{\theta} \mid \hat{\theta} \mid \hat{\theta}$ — the same $\hat{\theta}$ under
+both *Expected value* and *Variance*, saying nothing. Now $E(\hat{\theta})$ and
+$\operatorname{var}(\hat{\theta})$.
+
+**Tooling note.** A Monitor watching for build completion fired early because its
+pattern included `rror`, which matched the phrase "standard error" in the source
+being echoed. **Watch patterns need to be anchored to the tool's own output**, not
+to substrings that can occur in the content passing through it.
+
 ### 2026-08-01 (night, after) — \hat for single symbols, \widehat only when wide
 
 User, on Estimation and Sampling Distributions: "we still have the `\widehat`."
