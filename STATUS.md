@@ -485,6 +485,163 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-01 (night, final) — Rest of the tall tables laid across
+
+User pointed at Table 2 and Table 3. Table 3 was already transposed in the local
+build — they were reading the deployed site, which was behind. Worth remembering
+when a report does not match what is on disk: **check whether the fix has shipped
+before re-investigating it.**
+
+Transposed the rest of the same family on that page and its neighbours: Table 2
+(ungrouped distribution), Table 5 (cumulative frequencies with class boundaries),
+Table 6 (scores of 50 students), the five-class travel-time distribution which
+recurs **five times** across the median, quartile and mode examples, and the
+heights problem. Cumulative-frequency columns re-derived and checked in each.
+
+**Deliberately not transposed**, and the reason matters: tables whose first column
+is long text (the distributions reference table, "Question / Distribution /
+Degrees of freedom"), the tally-mark tables, and the relative-frequency tables
+whose cells hold text like "3/20 or 0.15". Laid across, those exceed a phone's
+width — which is precisely what `.viewport/check-overflow.sh` exists to catch. A
+table that is tall on a desktop is a cosmetic complaint; one that is too wide on a
+phone is a broken page.
+
+> **Transposing is not free.** It trades vertical space for horizontal, and
+> horizontal is the axis that has a hard limit. Run the overflow check after any
+> batch of them.
+
+### 2026-08-01 (night, end) — Central Limit Theorem stated properly; wide tables
+
+User asked whether the Central Limit Theorem had been stated. It had, in both
+courses, and badly in both.
+
+- **Probability** had one clause: "the sample mean has a normal distribution if
+  the sample size is large." No finite-variance condition, no statement of the
+  mean and variance, never a theorem — for the result the whole normal
+  distribution section rests on.
+- **Statistics** had prose under a subsubsection, writing
+  $Z=\frac{\overline{X}-\mu}{\sigma/\sqrt{n}}\sim N(0,1)$ — the *exact*
+  distribution symbol for a relation that is approximate and only in the limit.
+  The finite-variance condition was missing there too.
+
+Both are now `\begin{thm}[\textbf{Central Limit Theorem}]`, numbered, with the
+condition stated and the convergence written as convergence. Statistics renders
+it as **Theorem 2.1**. Each is followed by the points a student actually needs:
+the population's shape is irrelevant, the variance must be finite, and the
+conclusion is about $\overline{X}$ and not about the observations.
+
+**Tall narrow tables laid across.** User: Example 1.45's table leaves a lot of
+space. It was 3 columns by 7 rows; transposed it is 8 by 3 and uses the width.
+Applied to three more of the same shape (the median example's grouped table and
+cumulative-frequency table, the nine-samples table). The distributions reference
+table was left alone — its first column is long text, which does not transpose.
+Overflow checked afterwards, since wider tables are exactly what would break the
+mobile layout: 41 pages, none overflowing.
+
+That sweep turned up **another right-answer-wrong-working**: the sampling
+distribution mean printed $(2+3+4+3+5+5+4+6)/9$ — eight terms for nine samples,
+totalling $32$, which gives $3.56$. The printed answer $4$ requires the correct
+sum $36$.
+
+**Build timeout raised, 600s to 1800s.** The probability notes run to ~300 pages
+and take about seven minutes alone; built straight after the statistics course
+they went past ten minutes and `timeout` killed make4ht mid-conversion, leaving
+zero HTML files and a log with no errors in it. Nothing was wrong with the
+document. A backstop meant to catch a hang should not be tight enough to cut off
+a legitimate build — and when it does, the failure looks like a mystery rather
+than a timeout.
+
+### 2026-08-01 (night, last) — Ellipses typed as literal dots
+
+User: replace the manually typed dots with `\cdots`. Seven in the statistics
+notes, run lengths from 7 to 15 dots — `+.............+`, `+...............+`.
+A literal run sets at the baseline with no spacing around it, so it sits low and
+crowds whatever it joins.
+
+Applied the standard distinction rather than one command everywhere:
+
+- **`\cdots`** between operators or terms — `X_1 + X_2 + \cdots + X_n`;
+- **`\ldots`** after a comma — `\mu_1, \mu_2, \ldots, \mu_k`.
+
+`\cdots` in a comma list would sit the dots too high, which is the same kind of
+fault as the literal ones.
+
+**Probability's 7 were deliberately left alone.** They are `samples at={0,1,...,15}`
+in pgfplots options and one code comment — not maths, and rewriting them would
+break the plots. Worth remembering before running this as a blanket substitution.
+
+One error surfaced while checking a converted line: "The $k$ parent population …
+with respective means $\mu_1, \mu_2, \ldots, \mu_n$" — with $k$ populations the
+last mean is $\mu_k$. Fixed, and "population" made plural.
+
+### 2026-08-01 (night, later) — Tables with columns nobody filled in
+
+Continuing the sweep for the presentation faults the user has been naming.
+Wrote a check that reports any `tabular` column empty in every data row.
+
+**One real hit**, and it is the "tables without the missing values filled in"
+complaint exactly: the goodness-of-fit table for the coin data had **both**
+right-hand columns — $(O-e)^2$ and $(O-e)^2/e$ — blank on all five rows, while the
+total row confidently printed $\chi^2=4.625$. The total is correct; the work
+behind it was simply never written down. All five rows are now filled
+($25, 36, 36, 25, 0$ and $2.500, 0.900, 0.600, 0.625, 0$), the $e$ column made
+consistent (three rows read `= 60` with no $160\times P(x)$ prefix), and a proper
+total row added.
+
+**One more missing square**, of the same family as the $\mu_2$ and ANOVA ones:
+$$\sigma=\sqrt{\frac{\sum f(X-\overline{X})}{\sum f}}$$
+with no square on the deviation. As printed the numerator is identically zero.
+Its own table column is headed $f(X-\overline{X})^2$ and sums to $8.90$, which the
+line then uses — so again the answer came from the right quantity and the printed
+formula from the wrong one.
+
+The one other flagged column was a false positive: a stem-and-leaf plot has
+ragged rows by nature. Checked its 23 leaves against the source data; correct.
+
+> **Column-completeness is worth checking mechanically.** A blank column reads as
+> deliberate white space, and the total underneath makes the table look finished.
+
+### 2026-08-01 (night) — Headings that were not headings; a broken chi-square test
+
+Following the same thread as the variance formulas: swept both courses for the
+rest of the "typed to look like structure" pattern.
+
+**Twelve bold pseudo-headings** in the statistics notes — `\textbf{Quartiles}`,
+`\textbf{Chi-Square Tests}`, `\textbf{Stem-and-Leaf Plots}` and so on. None was
+numbered, none appeared in the sidebar, so a reader could not navigate to any of
+them. Ten are now `\subsubsection`. The two left are genuine labels, not headings.
+
+**Three of them could not be promoted until a structural fault was fixed.**
+`\subsection{Measures Of Central Tendencies}` wrapped Mean, Median and Mode as
+three `\item`s of a **614-line enumerate**. That is why they were bold text
+instead of headings: a section cannot open inside a list item. They are now
+`\subsubsection`s and the enumerate is gone. Neither course now has any list
+longer than 150 lines.
+
+`\textbf{Quartiles}` was renamed to "Quartiles for grouped data" — promoting it
+verbatim would have put two identical entries in the sidebar, since a full
+`\subsection{Quartiles}` follows later.
+
+**The contingency-table test was wrong in every number.** It was loose exposition
+with no example or solution wrapper, and:
+
+| printed | correct |
+|---|---|
+| Kabwata row total 2556 | 2558 ($703+994+861$) |
+| $\chi^2 = 33.48$ | $\chi^2 = 103.96$ |
+| $\chi^2_{4,0.05}=$ *(blank)* | $9.488$ |
+| "F Value = 0.01" | there is no $F$ here; it is a $\chi^2$ test |
+| "P-value of 0.01" | $\approx 1.4\times 10^{-21}$ |
+
+The conclusion — reject $H_0$ — was right, and every number supporting it was
+wrong. Now an example with a full solution: expected-frequency table, the
+statistic, the critical value, and a closing paragraph reading off *where* the
+association lies (three cells contribute $82.9$ of the $103.96$; the compounds
+differ in the balance of detached houses against flats, not across the board).
+
+> **A right conclusion is not evidence of right working.** This block would pass
+> any reading that checks only whether the verdict looks sensible.
+
 ### 2026-08-01 (evening, later) — The five variance forms, presented properly
 
 User: the formulas after "…and it is exactly why the coded method exists" are

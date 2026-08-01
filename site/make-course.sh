@@ -30,11 +30,17 @@ cd "$course/build"
 # something kills it - ten minutes of apparently "still converting" for what is
 # really a one-line error. The timeout is the backstop for anything else that
 # blocks. The 5th positional argument is passed through to latex.
-timeout 600 make4ht -u -a debug "$name" "mathjax,3" "" "" "-interaction=nonstopmode" \
+#
+# 600s was too tight and silently truncated real builds. The probability notes
+# run to ~300 pages and take around seven minutes alone; on a loaded machine, or
+# straight after another course has been built, they went past ten minutes and
+# were killed mid-conversion. Nothing was wrong with them. The timeout is meant
+# to catch a hang, so it is set well clear of any legitimate build.
+timeout 1800 make4ht -u -a debug "$name" "mathjax,3" "" "" "-interaction=nonstopmode" \
   > "$course/build/make4ht.log" 2>&1
 status=$?
 if [ $status -eq 124 ]; then
-  echo "conversion timed out after 10 minutes - see $course/build/make4ht.log" >&2
+  echo "conversion timed out after 30 minutes - see $course/build/make4ht.log" >&2
   exit 1
 fi
 
