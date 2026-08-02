@@ -6415,30 +6415,25 @@ are \emph{if $H_0$ is true}, so every quantity in it is computed under $H_0$.
 \end{solution}
 
 \begin{problem}{Exercises on Hypothesis Testing}
-In a random sample of people in Lusaka, $270$ are men of whom $160$ are smokers, and $200$
-are women of whom $110$ are smokers. Is there evidence that the men of Lusaka are more likely
-to smoke than the women?
+In a random sample of $500$ people in Lusaka, $270$ are men of whom $160$ are smokers, and
+$230$ are women of whom $110$ are smokers. Is there evidence that the men of Lusaka are more
+likely to smoke than the women?
 \end{problem}
 
 \begin{solution}
-% The question says "a random sample of 500 people" but 270 + 200 = 470. The
-% counts are the data, so the working uses 470.
-The question describes a sample of $500$, but $270+200=470$. The counts given are the data,
-so the working uses them.
-
 \begin{enumerate}
 \item $H_0:\ P_1=P_2$ (men and women are equally likely to smoke); $H_1:\ P_1>P_2$,
 one-tailed.
 \item $\alpha=5\%$.
-\item $\hat{P}_1=\frac{160}{270}=0.593$ and $\hat{P}_2=\frac{110}{200}=0.550$. Under $H_0$
+\item $\hat{P}_1=\frac{160}{270}=0.593$ and $\hat{P}_2=\frac{110}{230}=0.478$. Under $H_0$
 the two proportions are equal, so the best estimate of that common value pools both samples:
-$$\hat{P}=\frac{160+110}{270+200}=\frac{270}{470}=0.5745$$
+$$\hat{P}=\frac{160+110}{270+230}=\frac{270}{500}=0.540$$
 $$\text{S.E}=\sqrt{\hat{P}(1-\hat{P})\left(\frac{1}{n_1}+\frac{1}{n_2}\right)}
-=\sqrt{0.5745(0.4255)\left(\frac{1}{270}+\frac{1}{200}\right)}=0.0461$$
-$$Z=\frac{0.593-0.550}{0.0461}=0.92.$$
+=\sqrt{0.540(0.460)\left(\frac{1}{270}+\frac{1}{230}\right)}=0.0447$$
+$$Z=\frac{0.593-0.478}{0.0447}=2.56.$$
 \item Critical region: $z_{0.05}=1.645$.
-\item $0.92<1.645$, so we \textbf{fail to reject} $H_0$. There is no evidence that men in
-Lusaka are more likely to smoke than women.
+\item $2.56>1.645$, so we \textbf{reject} $H_0$. There is evidence, at the $5\%$ level, that
+men in Lusaka are more likely to smoke than women ($P=0.005$).
 \end{enumerate}
 
 The pooling is the point of this question. Since $H_0$ asserts the two proportions are
@@ -6446,6 +6441,125 @@ equal, the standard error must be built from a single pooled estimate of that sh
 proportion --- not from $\hat{P}_1$ and $\hat{P}_2$ separately, which is what a
 \emph{confidence interval} for the difference would use. The two calculations look similar
 and answer different questions.
+\end{solution}
+
+\begin{problem}{Test}
+\begin{enumerate}
+\item[(a).] Explain why the $\chi^2$ statistic from a $2\times 2$ contingency table has only
+one degree of freedom.
+\item[(b).] State what is meant by a Type I and a Type II error.
+\item[(c).] The mass of packs of \emph{unwrapped} chocolates is normal with mean $508$\,g and
+standard deviation $4$\,g. A pack weighs $520$\,g and you are not told whether the chocolates
+are wrapped. Carry out a significance test to show there is evidence that they are wrapped.
+\item[(d).] For a test of $H_0:\mu=\mu_0$ on a sample of $n$ observations from a normal
+distribution, state how your decision to use the $t$-distribution would be influenced by
+(i) the value of $n$, (ii) whether $\sigma$ is known.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a)} The row and column totals are treated as fixed. Once \emph{one} cell of a
+$2\times 2$ table is chosen, the other three follow by subtraction --- the rest of the first
+row, the rest of the first column, and then the last cell twice over. Only one number is free
+to vary, so $v=1$. The general formula says the same thing:
+$$v=(r-1)(c-1)=(2-1)(2-1)=1.$$
+
+\textbf{(b)} A \textbf{Type I} error is rejecting $H_0$ when it is true; its probability is
+$\alpha$, the significance level, which the experimenter chooses. A \textbf{Type II} error is
+failing to reject $H_0$ when it is false; its probability is $\beta$, which depends on how far
+the truth lies from $H_0$ and is not chosen directly. The power of the test is $1-\beta$.
+
+\textbf{(c)}
+\begin{enumerate}
+\item $H_0:$ the chocolates are unwrapped, so $\mu=508$; $H_1:$ they are wrapped, so
+$\mu>508$. Wrapping can only add mass, so the test is one-tailed.
+\item $\alpha=5\%$.
+\item $$Z=\frac{520-508}{4}=3.0.$$
+\item Critical region: $Z>1.645$.
+\item $3.0>1.645$, so we \textbf{reject} $H_0$. There is evidence that the chocolates are
+wrapped.
+\end{enumerate}
+Note the standard deviation used is $\sigma=4$, not $\sigma/\sqrt{n}$: this is a single pack,
+not the mean of a sample. A pack this heavy would occur in only about one unwrapped pack in
+$740$, so the conclusion is not marginal.
+
+\textbf{(d)} Both conditions matter, and they interact.
+\begin{enumerate}
+\item[(i).] $n$ enters through the degrees of freedom, $n-1$. For small $n$ the $t$
+distribution is appreciably wider than the normal; by about $n=30$ the two are close enough
+that $Z$ is used instead.
+\item[(ii).] This is the deciding condition. If $\sigma$ is \emph{known}, use $Z$ whatever
+$n$ is, because the population is normal and no estimation is involved. If $\sigma$ is
+\emph{unknown} and must be estimated by $\widehat{S}$, that estimate carries its own
+uncertainty and $t$ is the correct distribution.
+\end{enumerate}
+So: $\sigma$ known $\Rightarrow$ $Z$; $\sigma$ unknown and $n$ small $\Rightarrow$ $t$;
+$\sigma$ unknown and $n$ large $\Rightarrow$ $t$ strictly, but $Z$ is an acceptable
+approximation.
+\end{solution}
+
+\begin{problem}{Test}
+\begin{enumerate}
+\item[(a).] Explain the difference between a completely randomised design and a randomised
+block design.
+\item[(b).] Explain briefly how a scatter diagram can show whether there is correlation
+between two quantities. For the data below, calculate a coefficient of rank correlation and
+comment.
+\end{enumerate}
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|}
+\hline
+$x$ & 29 & 81 & 60 & 88 & 91 & 91 & 86 & 99 & 72 & 42\\
+\hline
+$y$ & 74 & 86 & 63 & 74 & 70 & 63 & 41 & 81 & 29 & 56\\
+\hline
+\end{tabular}
+\end{table}
+\end{problem}
+
+\begin{solution}
+\textbf{(a)} In a \textbf{completely randomised design} the treatments are allocated to
+experimental units entirely at random, and every difference not due to treatment falls into
+one undifferentiated error term. It is the simplest design and it is the right one when the
+units are genuinely alike.
+
+In a \textbf{randomised block design} the units are first sorted into blocks of similar
+units --- the same subject, the same field, the same day --- and the treatments are then
+randomised \emph{within} each block. Every treatment appears once in every block. The
+block-to-block variation is then measured and removed from the error term, so the comparison
+between treatments is made on a smaller residual and the test is more sensitive.
+
+The cost is degrees of freedom: with $b$ blocks, $b-1$ of them leave the error term. Blocking
+pays when the blocks genuinely differ and wastes those degrees of freedom when they do not.
+
+\textbf{(b)} A scatter diagram plots one variable against the other, one point per pair. If
+the points cluster about a rising line the correlation is positive; about a falling line,
+negative; if they fill the plot with no pattern, there is little or none. The tighter the
+points lie to a line, the stronger the correlation. The diagram also shows what a coefficient
+cannot: a curved relationship, or a single outlier that is driving the whole result.
+
+Ranking each variable, and sharing ranks between the two $91$s and the two $63$s:
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|}
+\hline
+Rank $x$ & 1 & 5 & 3 & 7 & 8.5 & 8.5 & 6 & 10 & 4 & 2\\
+Rank $y$ & 7.5 & 10 & 4.5 & 7.5 & 6 & 4.5 & 2 & 9 & 1 & 3\\
+$d$ & $-6.5$ & $-5$ & $-1.5$ & $-0.5$ & 2.5 & 4 & 4 & 1 & 3 & $-1$\\
+$d^2$ & 42.25 & 25 & 2.25 & 0.25 & 6.25 & 16 & 16 & 1 & 9 & 1\\
+\hline
+\end{tabular}
+\caption{Ranks and differences. Tied values share the average of the ranks they occupy.}
+\end{table}
+With $\sum d^2=119$ and $n=10$,
+$$r_s=1-\frac{6(119)}{10(99)}=1-0.721=0.279.$$
+
+\textbf{Comment.} At $0.279$, against a critical value of $0.648$ for $n=10$ at the $5\%$
+level, this is \textbf{not significant}. There is no evidence of any monotonic relationship
+between $x$ and $y$. The product-moment coefficient agrees, at $r=0.113$. A scatter diagram
+of these points would show a shapeless cloud, which is exactly what such coefficients
+describe.
 \end{solution}
 
 \begin{problem}{Assignment}
