@@ -485,6 +485,47 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-02 — MAT1110 finished at ten chapters, not nine; Tutorial Sheet 1 worked
+
+**The course is ten chapters, not nine.** The contents page of Dr Mbaale's notes lists
+Chapter 10 Probability after Descriptive Statistics. Earlier sessions had planned for
+nine. All of 8 (Integral Calculus), 9 (Descriptive Statistics) and 10 (Probability) are
+now written, so the syllabus is covered end to end.
+
+**Chapter 7 had real gaps.** Section 7.2 Continuity is on the departmental contents
+page and had been skipped outright. Cross-checking the eleven tutorial sheets against
+the notes showed students could not attempt sheets 8, 9 or 10 from what was written.
+Added: the properties of limits, piecewise limits and existence, indeterminate forms,
+limits at infinity, Continuity as its own section, the second derivative as a topic,
+the normal to a curve, critical values with a sign table, points of inflexion, greatest
+and least values on a closed interval, and optimisation.
+
+**Five worked examples were tutorial questions verbatim.** (2x+1)/(2x-1), sin^3(2x+5),
+x^2 e^(-2x) and 2x+3y^2+3x^2y+12=0 are sheet 10 Q1(c), Q1(b), Q1(f) and Q2(f); the
+limit of (x^2-x-2)/(x-2) is sheet 9 Q1(f). Two more found later: the second derivative
+of (x+1)/(x-1) is sheet 8 Q1(a)(iv), and 2x^3-3x^2-12x is the departmental notes' own
+example 7.6.2. All seven replaced. **A worked example must not be an unsolved tutorial
+question with the answer attached** — check new examples against the sheets before
+writing them.
+
+**Read tutorial-sheet PDFs as images, not text.** `pdftotext` mangles fractions,
+overlines and conjugate bars in these files. On sheet 1 alone the text layer hid that
+three of the Q8(a) decimals are recurring rather than terminating, that Q8(b)(vi) is
+3sqrt(28)/(2sqrt(175)) and not its reverse, and that all three parts of Q9(c) contain a
+conjugate. Use `pdftoppm -r 130 -png` and read the page.
+
+**Tutorial sheets: 1 of 11 done.** Sheet 1 is complete, split across chapters 1 and 2 as
+`\subsection{Practice problems}` blocks, matching how the statistics course does it.
+Roughly 430 leaf questions remain across sheets 2-11. Mapping: 2 and 3 to Functions,
+3-5 to Polynomial Functions, 6 to Exponential and Logarithmic, 7 to Trigonometry, 8-10
+to Differentiation, 11 to Integral Calculus. There are no tutorial sheets for chapters
+9 or 10.
+
+**Foundation Mathematics is still not on the site catalogue.** Deliberate — add it once
+the tutorial sheets are further along.
+
+Current build: 69 pages, 25 diagrams, none missing.
+
 ### 2026-08-02 (late) — Two diagrams were never being produced, and the build said fine
 
 User: Figures 31 and 32 are not showing. Both were missing entirely.
