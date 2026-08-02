@@ -5122,6 +5122,208 @@ $P(1-P)$ is largest there and that gives the sample size that is safe whatever $
 to be --- here that would be $601$.
 \end{solution}
 
+\begin{problem}{Assignment}
+Let $y_1, y_2, \ldots, y_n$ be a random sample with $E(Y)=\mu$ and
+$\operatorname{var}(Y)=\sigma^2$. Show that $s^2=\frac{1}{n}\sum(y-\overline{y})^2$ is an
+estimator of $\sigma^2$, and say whether it is unbiased.
+\end{problem}
+
+\begin{solution}
+Using the identity $\sum(y-\overline{y})^2=\sum y^2-n\overline{y}^2$,
+$$E(s^2)=\frac{1}{n}\left[\sum E(y^2)-nE(\overline{y}^2)\right].$$
+For each observation $E(y^2)=\operatorname{var}(Y)+[E(Y)]^2=\sigma^2+\mu^2$, and for the
+sample mean $E(\overline{y}^2)=\operatorname{var}(\overline{y})+\mu^2=\frac{\sigma^2}{n}+\mu^2$.
+Substituting,
+\begin{align*}
+E(s^2)&=\frac{1}{n}\left[n(\sigma^2+\mu^2)-n\left(\frac{\sigma^2}{n}+\mu^2\right)\right]\\
+&=\frac{1}{n}\left[n\sigma^2+n\mu^2-\sigma^2-n\mu^2\right]\\
+&=\frac{n-1}{n}\,\sigma^2.
+\end{align*}
+So $s^2$ is an estimator of $\sigma^2$, but a \textbf{biased} one: on average it falls short
+by a factor $\frac{n-1}{n}$. The bias is $-\frac{\sigma^2}{n}$, which vanishes as $n$ grows,
+so $s^2$ is \emph{asymptotically} unbiased.
+
+Multiplying through by $\frac{n}{n-1}$ removes the bias entirely and gives
+$$\widehat{S}^2=\frac{\sum(y-\overline{y})^2}{n-1},$$
+which is why the divisor $n-1$ appears wherever a variance is estimated from a sample. The
+reason it must be smaller than $n$: the deviations are measured from $\overline{y}$, which
+was itself computed from the same data and therefore sits closer to the observations than
+the true $\mu$ does.
+\end{solution}
+
+\begin{problem}{Assignment}
+A random sample of $n=64$ customers at a supermarket shows an average shopping time of $33$
+minutes with sample variance $256$. Estimate the true average shopping time per customer
+with a confidence coefficient of $0.90$.
+\end{problem}
+
+\begin{solution}
+The sample variance is $256$, so $s=16$, and $n=64$ is large, so a $Z$ interval serves.
+$$\text{S.E}=\frac{s}{\sqrt{n}}=\frac{16}{8}=2,\qquad z_{0.05}=1.645$$
+$$33\pm 1.645(2)=33\pm 3.29\quad\implies\quad (29.71,\ 36.29)\ \text{minutes}.$$
+\end{solution}
+
+\begin{problem}{Assignment}
+Two brands of refrigerator, A and B, are each guaranteed for one year. Of $50$ brand A
+refrigerators, $12$ failed within the guarantee period; of $60$ brand B, $12$ failed.
+Estimate the true difference between the proportions of failures, $P_1-P_2$, with confidence
+coefficient $0.98$.
+\end{problem}
+
+\begin{solution}
+$$\hat{P}_1=\frac{12}{50}=0.24,\qquad \hat{P}_2=\frac{12}{60}=0.20,\qquad \hat{P}_1-\hat{P}_2=0.04.$$
+For a difference of proportions the variances add:
+$$\text{S.E}=\sqrt{\frac{\hat{P}_1(1-\hat{P}_1)}{n_1}+\frac{\hat{P}_2(1-\hat{P}_2)}{n_2}}
+=\sqrt{\frac{0.24(0.76)}{50}+\frac{0.20(0.80)}{60}}=0.0795.$$
+With $z_{0.01}=2.33$,
+$$0.04\pm 2.33(0.0795)=0.04\pm 0.185\quad\implies\quad (-0.145,\ 0.225).$$
+
+The interval \textbf{contains zero}, so at this level of confidence the data give no
+evidence that the two brands differ in reliability. The observed gap of four percentage
+points is comfortably within what sampling variation alone would produce from samples this
+size.
+\end{solution}
+
+\begin{problem}{Assignment}
+An experimenter wishes to estimate the probability $P$ that a person reacts in form A. How
+many people must be included if the error of estimation is to be less than $0.04$ with
+probability $0.90$, given that $P$ is expected to lie near $0.6$?
+\end{problem}
+
+\begin{solution}
+"Error less than $0.04$ with probability $0.90$" sets $E=0.04$ at $90\%$ confidence, so
+$z_{0.05}=1.645$:
+$$n=\left(\frac{z_{\alpha/2}}{E}\right)^2 P(1-P)
+=\left(\frac{1.645}{0.04}\right)^2(0.6)(0.4)=405.8\quad\implies\quad n=406.$$
+
+Using the prior guess $P\approx 0.6$ is what makes this smaller than it would otherwise be.
+With no information at all, $P=0.5$ would be assumed, since $P(1-P)$ is largest there,
+giving $n=423$ --- the sample size that is safe whatever $P$ turns out to be.
+\end{solution}
+
+\begin{problem}{Assignment}
+A new gunpowder was tested in eight shells, giving muzzle velocities in m/s of
+$$3005,\quad 2925,\quad 2935,\quad 2965,\quad 2995,\quad 3005,\quad 2935,\quad 2905.$$
+Find a $95\%$ confidence interval for the true average velocity $\mu$.
+\end{problem}
+
+\begin{solution}
+From the eight readings, $\overline{X}=2958.75$ and $\widehat{S}=39.26$.
+
+The sample is small and $\sigma$ unknown, so this is a $t$ interval with $v=7$ and
+$t_{7,\,0.025}=2.365$:
+$$2958.75\pm 2.365\times\frac{39.26}{\sqrt{8}}=2958.75\pm 32.82$$
+$$\implies\quad (2925.93,\ 2991.57)\ \text{m/s}.$$
+\end{solution}
+
+\begin{problem}{Assignment}
+The profit per new car sold (in hundreds of Kwacha) for the past week was
+$$2.1,\quad 3.0,\quad 1.2,\quad 6.2,\quad 4.5,\quad 5.1.$$
+Find a $90\%$ confidence interval for the mean profit per sale.
+\end{problem}
+
+\begin{solution}
+Here $n=6$, $\overline{X}=3.683$ and $\widehat{S}=1.905$. With $v=5$ and
+$t_{5,\,0.05}=2.015$:
+$$3.683\pm 2.015\times\frac{1.905}{\sqrt{6}}=3.683\pm 1.567$$
+$$\implies\quad (2.12,\ 5.25)\ \text{hundred Kwacha}.$$
+
+The interval is very wide --- it spans more than three hundred Kwacha --- because six
+observations with this much scatter simply cannot pin the mean down. That width is
+information, not a failure of the method.
+\end{solution}
+
+\begin{problem}{Assignment}
+Two random samples, each of $11$ measurements, were drawn from normal populations with means
+$\mu_1$ and $\mu_2$ and a common variance $\sigma^2$:
+$$\overline{y}_1=60.4,\quad s_1^2=31.4;\qquad \overline{y}_2=65.3,\quad s_2^2=44.8.$$
+Find a $99\%$ confidence interval for $\mu_1-\mu_2$.
+\end{problem}
+
+\begin{solution}
+A \emph{common} variance is assumed, so the two sample variances are pooled into one
+estimate:
+$$S_p^2=\frac{(n_1-1)s_1^2+(n_2-1)s_2^2}{n_1+n_2-2}
+=\frac{10(31.4)+10(44.8)}{20}=\frac{762}{20}=38.1$$
+$$\implies\quad S_p=6.17.$$
+The pooled estimate carries $n_1+n_2-2=20$ degrees of freedom, and $t_{20,\,0.005}=2.845$:
+$$\text{S.E}=S_p\sqrt{\frac{1}{n_1}+\frac{1}{n_2}}=6.17\sqrt{\frac{2}{11}}=2.632$$
+$$(60.4-65.3)\pm 2.845(2.632)=-4.9\pm 7.49
+\quad\implies\quad (-12.39,\ 2.59).$$
+
+Again the interval contains zero, so there is no evidence at the $1\%$ level that the two
+population means differ --- despite the sample means being nearly five apart. Eleven
+observations each, with variances of this size, is not enough to resolve a gap that small.
+\end{solution}
+
+\begin{problem}{Assignment}
+The number of days each of five employees was absent during a year:
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+Employee & A & B & C & D & E\\
+\hline
+Days absent & 10 & 6 & 0 & 4 & 0\\
+\hline
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item[(a).] Calculate the mean and variance of the number of days absent.
+\item[(b).] Three employees are selected at random \emph{without} replacement, and
+$\overline{X}$ denotes their mean days absent.
+\begin{enumerate}
+\item[(i).] Determine the sampling distribution of $\overline{X}$ and display it in a table.
+\item[(ii).] Determine whether $\overline{X}$ is an unbiased estimator of $\mu$.
+\item[(iii).] Find $\operatorname{var}(\overline{X})$ and verify that it equals one half of
+the variance of the sample mean when the three are chosen \emph{with} replacement.
+\end{enumerate}
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a)} This is a whole population of five, so divide by $N$ and not by $N-1$:
+$$\mu=\frac{10+6+0+4+0}{5}=\frac{20}{5}=4\ \text{days}$$
+$$\sigma^2=\frac{(10-4)^2+(6-4)^2+(0-4)^2+(4-4)^2+(0-4)^2}{5}=\frac{36+4+16+0+16}{5}=\frac{72}{5}=14.4.$$
+
+\textbf{(b)(i)} There are $\binom{5}{3}=10$ equally likely samples. Listing their totals and
+means:
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+$\overline{X}$ & $4/3$ & $2$ & $10/3$ & $14/3$ & $16/3$ & $20/3$\\
+\hline
+Frequency & 1 & 1 & 3 & 2 & 2 & 1\\
+$P(\overline{X})$ & $1/10$ & $1/10$ & $3/10$ & $2/10$ & $2/10$ & $1/10$\\
+\hline
+\end{tabular}
+\caption{Sampling distribution of $\overline{X}$ for samples of 3 drawn without replacement.}
+\end{table}
+The probabilities total $1$, which is the check.
+
+\textbf{(b)(ii)}
+$$E(\overline{X})=\sum \overline{X}\,P(\overline{X})
+=\frac{1}{10}\left(\frac{4}{3}\right)+\frac{1}{10}(2)+\frac{3}{10}\left(\frac{10}{3}\right)
++\frac{2}{10}\left(\frac{14}{3}\right)+\frac{2}{10}\left(\frac{16}{3}\right)+\frac{1}{10}\left(\frac{20}{3}\right)=4.$$
+Since $E(\overline{X})=\mu=4$, the sample mean \textbf{is} an unbiased estimator --- and
+note that this holds even though the sampling is without replacement.
+
+\textbf{(b)(iii)}
+$$\operatorname{var}(\overline{X})=\sum\left(\overline{X}-4\right)^2 P(\overline{X})=\frac{12}{5}=2.4.$$
+With replacement the variance would be
+$$\frac{\sigma^2}{n}=\frac{14.4}{3}=4.8,$$
+and indeed $2.4=\tfrac{1}{2}(4.8)$, as the question claims.
+
+The factor of one half is not a coincidence. Sampling without replacement from a finite
+population multiplies the variance by the \textbf{finite population correction}
+$$\frac{N-n}{N-1}=\frac{5-3}{5-1}=\frac{2}{4}=\frac{1}{2},$$
+and $4.8\times\frac{1}{2}=2.4$. Drawing three of only five employees uses up a large part of
+the population, so the sample mean varies less than it would if the same employee could be
+picked twice.
+\end{solution}
+
+
 % THE END
 
 
@@ -6136,6 +6338,116 @@ to the pesticide. A sound design would assign treatment to \emph{individual tree
 within both orchards}, which is exactly what the next chapter's randomised block design
 sets out to do.
 \end{solution}
+
+\begin{problem}{Exercises on Hypothesis Testing}
+The table gives the times taken, in minutes, by eight typists to type the same number of
+words on two different typewriters. Do the data indicate any difference in speed between the
+two machines?
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccccccc}
+Typist & A & B & C & D & E & F & G & H\\
+\hline
+$X$ --- Typewriter 1 & 6.3 & 4.5 & 7.1 & 8.4 & 3.7 & 3.9 & 4.7 & 5.2\\
+$Y$ --- Typewriter 2 & 5.1 & 4.4 & 6.2 & 7.3 & 4.5 & 4.0 & 3.6 & 5.1\\
+\end{tabular}
+\end{table}
+\end{problem}
+
+\begin{solution}
+The first decision matters more than the arithmetic: \textbf{the same eight typists used
+both machines}, so the two rows are not independent samples. They are eight \emph{pairs}, and
+the test must be applied to the differences.
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccccccc}
+Typist & A & B & C & D & E & F & G & H\\
+\hline
+$d=X-Y$ & 1.2 & 0.1 & 0.9 & 1.1 & $-0.8$ & $-0.1$ & 1.1 & 0.1\\
+\end{tabular}
+\caption{Differences in typing time, machine 1 minus machine 2.}
+\end{table}
+
+\begin{enumerate}
+\item $H_0:\ \mu_d=0$ (no difference between the machines); $H_1:\ \mu_d\neq 0$.
+\item $\alpha=5\%$, two-tailed.
+\item From the differences, $\overline{d}=0.45$ and $\widehat{S}_d=0.729$, so
+$$t=\frac{\overline{d}}{\widehat{S}_d/\sqrt{n}}=\frac{0.45}{0.729/\sqrt{8}}=\frac{0.45}{0.2577}=1.75$$
+on $n-1=7$ degrees of freedom.
+\item Critical region: $t_{7,\,0.025}=2.365$, so reject if $|t|>2.365$.
+\item $1.75<2.365$, so we \textbf{fail to reject} $H_0$. There is no evidence of a
+difference in speed between the two typewriters.
+\end{enumerate}
+
+Why the pairing matters. The typists differ enormously among themselves --- D takes over
+twice as long as E --- and that variation has nothing to do with the machines. Pairing
+removes it: only the eight differences are used, and the typist-to-typist spread cancels.
+Had the data been treated as two independent samples of eight, the test statistic would have
+been $t=0.62$ rather than $1.75$, because the between-typist variation would have been left
+in the error term, swamping the effect being looked for.
+\end{solution}
+
+\begin{problem}{Exercises on Hypothesis Testing}
+Nationally the success rate for people taking their driving test for the first time is
+$40\%$. A driving instructor claims his record is superior because, of his $50$ pupils who
+took the test for the first time last year, $25$ passed. Is his claim justified?
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item $H_0:\ P=0.40$ (the instructor's pupils are no different from the national rate);
+$H_1:\ P>0.40$. The claim is that he is \emph{better}, so the test is one-tailed.
+\item $\alpha=5\%$.
+\item $\hat{P}=\frac{25}{50}=0.5$. Under $H_0$ the standard error uses the hypothesised
+$P$, not the observed one:
+$$\text{S.E}=\sqrt{\frac{P_0(1-P_0)}{n}}=\sqrt{\frac{0.4(0.6)}{50}}=0.0693$$
+$$Z=\frac{0.5-0.4}{0.0693}=1.44.$$
+\item Critical region: $z_{0.05}=1.645$, so reject if $Z>1.645$.
+\item $1.44<1.645$, so we \textbf{fail to reject} $H_0$. His claim is \textbf{not justified}
+at the $5\%$ level.
+\end{enumerate}
+
+A pass rate of $50\%$ against a national $40\%$ looks convincing until the sample size is
+taken into account. With only $50$ pupils, a run of that size happens about $7$ times in
+$100$ by chance alone even for an average instructor. Note also that the standard error is
+computed from $P_0=0.4$ and not from $\hat{P}=0.5$: the test asks how surprising the data
+are \emph{if $H_0$ is true}, so every quantity in it is computed under $H_0$.
+\end{solution}
+
+\begin{problem}{Exercises on Hypothesis Testing}
+In a random sample of people in Lusaka, $270$ are men of whom $160$ are smokers, and $200$
+are women of whom $110$ are smokers. Is there evidence that the men of Lusaka are more likely
+to smoke than the women?
+\end{problem}
+
+\begin{solution}
+% The question says "a random sample of 500 people" but 270 + 200 = 470. The
+% counts are the data, so the working uses 470.
+The question describes a sample of $500$, but $270+200=470$. The counts given are the data,
+so the working uses them.
+
+\begin{enumerate}
+\item $H_0:\ P_1=P_2$ (men and women are equally likely to smoke); $H_1:\ P_1>P_2$,
+one-tailed.
+\item $\alpha=5\%$.
+\item $\hat{P}_1=\frac{160}{270}=0.593$ and $\hat{P}_2=\frac{110}{200}=0.550$. Under $H_0$
+the two proportions are equal, so the best estimate of that common value pools both samples:
+$$\hat{P}=\frac{160+110}{270+200}=\frac{270}{470}=0.5745$$
+$$\text{S.E}=\sqrt{\hat{P}(1-\hat{P})\left(\frac{1}{n_1}+\frac{1}{n_2}\right)}
+=\sqrt{0.5745(0.4255)\left(\frac{1}{270}+\frac{1}{200}\right)}=0.0461$$
+$$Z=\frac{0.593-0.550}{0.0461}=0.92.$$
+\item Critical region: $z_{0.05}=1.645$.
+\item $0.92<1.645$, so we \textbf{fail to reject} $H_0$. There is no evidence that men in
+Lusaka are more likely to smoke than women.
+\end{enumerate}
+
+The pooling is the point of this question. Since $H_0$ asserts the two proportions are
+equal, the standard error must be built from a single pooled estimate of that shared
+proportion --- not from $\hat{P}_1$ and $\hat{P}_2$ separately, which is what a
+\emph{confidence interval} for the difference would use. The two calculations look similar
+and answer different questions.
+\end{solution}
+
 
 \section{Analysis of Variance}
 \subsection{Contingency Table }
