@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import re
 import sys
-from html import unescape
+from html import escape, unescape
 from pathlib import Path
 
 # Recognised theorem-like environments, in the order we test for them.
@@ -309,7 +309,13 @@ def page_nav(html: str) -> str:
     return f'<nav class="pagenav">{"".join(parts)}</nav>' if parts else ""
 
 
-def discussion_term(course_title: str, section_title: str) -> str:
+def slug(s: str) -> str:
+    s = unescape(re.sub(r"<[^>]+>", " ", s)).lower()
+    s = re.sub(r"[^a-z0-9]+", "-", s)
+    return re.sub(r"^-+|-+$", "", s)[:70]
+
+
+def discussion_term(course_slug: str, section_title: str) -> str:
     """A stable, readable key for the discussion thread behind a page.
 
     giscus offers `pathname` or a page-stem term. Both are fragile here:
@@ -319,12 +325,14 @@ def discussion_term(course_title: str, section_title: str) -> str:
     Discussions tab lists something legible - "counting-techniques" rather than
     "intro_probse5" - so it is possible to see at a glance which topics readers
     are actually stuck on.
+
+    The course half of the key is the *directory* name, deliberately not the
+    display title. Display titles get reworded, and if the key tracked the
+    wording then every thread on a course would orphan the moment someone
+    improved its title. The directory name is the one identifier nobody edits
+    for cosmetic reasons.
     """
-    def slug(s: str) -> str:
-        s = unescape(re.sub(r"<[^>]+>", " ", s)).lower()
-        s = re.sub(r"[^a-z0-9]+", "-", s)
-        return re.sub(r"^-+|-+$", "", s)[:70]
-    return f"{slug(course_title)}/{slug(section_title)}"
+    return f"{course_slug}/{slug(section_title)}"
 
 
 def qa_block(page_id: str) -> str:
@@ -352,7 +360,7 @@ def qa_block(page_id: str) -> str:
 MARKER = "<!-- built by site/build.py -->"
 
 
-def process(path: Path, items: list[dict], course_title: str,
+def process(path: Path, items: list[dict], course_title: str, course_slug: str,
             numbering: tuple[int, int] | None = None) -> bool:
     html = path.read_text(encoding="utf-8", errors="replace")
 
@@ -406,6 +414,31 @@ def process(path: Path, items: list[dict], course_title: str,
     section_title = (unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", m.group(1)))).strip()
                      if m else path.stem)
 
+    # tex4ht leaves <title> empty on the title page and, on every other page,
+    # fills it with the bare section name. Both are poor: a browser tab reading
+    # "Introduction" says nothing about which course it belongs to, several
+    # sections across the site share that name, and the landing page - the one
+    # the catalogue links to - had no title at all, so it showed as untitled in
+    # tabs, bookmarks and search results.
+    #
+    # Whether a page gets a heading in its title is decided by whether it *has*
+    # a heading, not by its filename. A filename test would have to enumerate
+    # tex4ht's stem conventions (se, su, li, ch, ...) and would silently
+    # mistreat any it did not know about.
+    #
+    # Match every heading class tex4ht emits, not just sectionHead. The six in
+    # use across these courses are chapterHead, sectionHead, subsectionHead,
+    # subsubsectionHead and the "like" variants of the first two - and the
+    # subsection pages are the bulk of the site, so matching only sectionHead
+    # left 99 of 139 pages titled with the bare course name.
+    head = re.search(r"class='(?:like)?(?:chapter|(?:sub){0,2}section)Head'>(.*?)</h\d>",
+                     html, re.S)
+    heading = (unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", head.group(1)))).strip()
+               if head else "")
+    page_title = escape(f"{heading} — {course_title}" if heading else course_title)
+    html = re.sub(r"<title>.*?</title>", f"<title>{page_title}</title>",
+                  html, count=1, flags=re.S)
+
     nav = page_nav(html)
     body = re.search(r"<body>(.*)</body>", html, re.S)
     if not body:
@@ -421,7 +454,7 @@ def process(path: Path, items: list[dict], course_title: str,
         # Only section pages get a question box. The title page, the chapter
         # landings and the contents page have no topic to ask about, and an
         # empty thread on each would just look abandoned.
-        + (qa_block(discussion_term(course_title, section_title))
+        + (qa_block(discussion_term(course_slug, section_title))
            if re.search(r"se\d+$", path.stem) else "")
         + "</div></main></div>"
         + '<button class="sb-toggle" onclick="document.getElementById(\'sidebar\')'
@@ -442,7 +475,13 @@ def main() -> int:
         print(f"no build directory at {build}", file=sys.stderr)
         return 1
 
-    title = course.name.replace("-", " ").title()
+    # Display title. Derived from the directory name only as a fallback:
+    # .title() mangles real titles - it produced "Introduction To Probability"
+    # and, after the course directory was renamed, "Foundation Maths Social
+    # Sciences". A one-line title.txt in the course directory overrides it.
+    title_file = course / "title.txt"
+    title = (title_file.read_text(encoding="utf-8").strip() if title_file.is_file()
+             else course.name.replace("-", " ").title())
     items = read_toc(build)
     if not items:
         print("warning: no contents entries found — sidebar will be empty",
@@ -453,7 +492,8 @@ def main() -> int:
     eqnums = equation_numbering(build, items)
 
     pages = sorted(build.glob("*.html"))
-    done = sum(process(p, items, title, eqnums.get(p.name)) for p in pages)
+    done = sum(process(p, items, title, course.name, eqnums.get(p.name))
+               for p in pages)
     skipped = len(pages) - done
     print(f"processed {done} pages, {len(items)} sidebar entries")
     if skipped:
