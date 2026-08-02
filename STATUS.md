@@ -485,6 +485,55 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-02 (later) — All eleven MAT1110 tutorial sheets worked
+
+**Course identity settled.** This is MAT1110, *Foundation Mathematics and Statistics for
+Social Sciences*. There is a **separate MAT1100, Foundation Mathematics, for Natural
+Sciences** — its material is in `LaTeX_Projects/Foundation Mathematics`, a past-papers
+document (tests and exams by year, 2013–2020). Do not confuse them. The web-app
+directory was therefore renamed `courses/foundation-mathematics` →
+`courses/foundation-maths-social-sciences`, free to do because the course was not yet on
+the catalogue. Title page now reads "Foundation Mathematics and Statistics for the
+Social Sciences".
+
+**All 11 tutorial sheets are done**, mapped to chapters as: 1 → ch 1 and 2; 2 → ch 3;
+3, 4, 5 → ch 4; 6 → ch 6; 7 → ch 5; 8, 9, 10 → ch 7; 11 → ch 8. Each sits in a
+`\subsection{Practice problems}` block at the end of its chapter, matching the
+statistics course. There are no tutorial sheets for chapters 9 or 10.
+
+**Sheet 5 is an earlier version of Sheets 3 and 4** (April 2023). Its Q3, Q4(a)-(e),
+Q6, Q7(b)-(e) and Q8 duplicate them word for word. The overlap is stated as a map at
+the top and only the new material worked — chiefly Q9, eleven partial fractions.
+
+**Misprints found in the sheets**, all confirmed by reading the rendered page:
+- Sheet 3 Q6(c)(vi) / Sheet 5 Q3(f): `x^4-6x^3-11x^2+24x-28` does not factorise; should
+  be `+28`, which is the same polynomial as Sheet 3 Q7(e).
+- Sheet 3 Q7(c) / Sheet 5 Q4(c): `x^3+6x^2+5x-2=0` has no rational roots; likely `-12`.
+- Sheet 3 Q2(a): empty — "solve by completing the square" then nothing.
+- Sheet 7 Q9(e): `2cos^2x + cos x = sin^2 x` gives `cos x = (-1±√13)/6`, not doable
+  without a calculator; likely `2cos^2x + cos x - 1 = 0`.
+- Sheet 11 Q5(f): denominator printed `(3x+2x)(2-x)^2`; should be `(3x+2)`. The part is
+  also labelled "(b)" a second time.
+- Sheet 11 Q6: carries a stray "using by parts formular" left over from Q4.
+- Sheet 11 Q1: skips from (b) to (d).
+
+Every one is worked as printed *and* in its intended form where that is clear.
+
+**Method that must not be skipped: read these PDFs as images.** `pdftotext` mangles
+fractions, overlines and conjugate bars. Use `pdftoppm -r 130 -png`, and higher with
+`-x -y -W -H` to crop when a symbol is doubtful.
+
+**Verification**: every numerical answer was computed independently in Python/sympy
+before being written — set operations with real Python sets, inclusion–exclusion checked
+by reconstructing all eight Venn regions, every division checked by multiplying
+`Q(x)D(x)+R(x)` back, every partial fraction against `apart`, every identity simplified
+to zero, every integral differentiated back.
+
+Current build: **74 pages, 39 diagrams, none missing.**
+
+**Still to do**: add the course to the site catalogue (deliberately withheld so far);
+the probability course has still never had the systematic recompute-every-answer audit.
+
 ### 2026-08-02 — MAT1110 finished at ten chapters, not nine; Tutorial Sheet 1 worked
 
 **The course is ten chapters, not nine.** The contents page of Dr Mbaale's notes lists
