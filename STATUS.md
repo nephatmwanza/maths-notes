@@ -485,6 +485,39 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-02 (late) — Two diagrams were never being produced, and the build said fine
+
+User: Figures 31 and 32 are not showing. Both were missing entirely.
+
+**Cause.** Both used `\path[pattern = north west lines, …]` to shade the $F$
+distribution's tail. tex4ht cannot convert TikZ pattern fills; it emits no SVG at
+all, so the HTML pointed at `intro_stats49x.svg` and `intro_stats50x.svg` which
+were never written. Every other shaded tail in these notes uses `fill=blue!25` ---
+22 were converted in an earlier pass and these two survived it. Neither course now
+contains a `pattern=` fill.
+
+**Why I never noticed, which is the part worth keeping.** `make-course.sh` printed
+`59 diagrams` --- a count of SVG files *produced*. The HTML referenced **61**. A
+failed diagram does not raise that number or colour it red; it just makes it
+smaller, which reads like a shorter document. I quoted "59 diagrams" as evidence of
+a clean build for an entire session, and it was two short throughout.
+
+The build now compares produced against referenced and names anything missing.
+Verified by deleting a third SVG deliberately --- it reported all three:
+
+    WARNING missing diagram intro_stats10x.svg - referenced by the HTML but never produced…
+    ==> 42 pages, 58 diagrams, 3 MISSING
+
+> **A count of what succeeded is not a check.** It has to be measured against what
+> was required. This is the third time the same lesson has come up here --- the
+> overflow checker that reported clean after dumping early, the marker checker that
+> matched nothing and said nothing, and now a diagram count that could only ever go
+> down. Each time the fix was the same: compare against the requirement, and prove
+> the check fails on a known-bad input before trusting it.
+
+Both courses now report referenced == present: statistics 61, probability 41.
+
+
 ### 2026-08-02 (later) — Choosing the number of classes: a section neither source had
 
 User pointed out a real gap: neither these notes nor the departmental notes say how

@@ -62,4 +62,23 @@ echo "==> post-processing"
 cd "$root"
 python3 site/build.py "$course"
 
-echo "==> $(ls "$course"/build/*.html | wc -l) pages, $(ls "$course"/build/*.svg 2>/dev/null | wc -l) diagrams"
+# A diagram that fails to convert leaves an <img> pointing at an .svg that was
+# never written, so the page shows a broken image and nothing else complains.
+# Counting the files produced does not catch it - the count simply comes out
+# lower, and looks like a smaller document. Compare against what the HTML asks
+# for instead. (Two F-distribution figures were missing this way for some time:
+# tex4ht cannot convert TikZ `pattern=` fills, and those two still used one.)
+python3 - "$course" <<'PYCHK'
+import glob, os, re, sys
+b = os.path.join(sys.argv[1], "build")
+refs = set()
+for f in glob.glob(os.path.join(b, "*.html")):
+    refs |= set(re.findall(r"src='([^']+\.svg)'", open(f, encoding="utf-8").read()))
+have = {os.path.basename(x) for x in glob.glob(os.path.join(b, "*.svg"))}
+missing = sorted(refs - have)
+for m in missing:
+    print(f"    WARNING missing diagram {m} - referenced by the HTML but never "
+          f"produced. A TikZ `pattern=` fill is the usual cause.")
+print(f"==> {len(glob.glob(os.path.join(b,'*.html')))} pages, "
+      f"{len(have)} diagrams" + (f", {len(missing)} MISSING" if missing else ""))
+PYCHK
