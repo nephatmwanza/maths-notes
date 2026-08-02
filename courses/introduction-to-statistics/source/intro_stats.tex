@@ -102,6 +102,16 @@
 % once instead.
 \renewcommand{\arraystretch}{1.25}
 
+% tex4ht expands amssymb's \checkmark when it is used in TEXT mode, so instead of
+% a tick the reader gets the raw internals - \m@th \mathchar"458 - handed to
+% MathJax, which cannot parse them either. In MATHS mode the token survives and
+% MathJax renders it properly. Nine of the 33 ticks across these notes were
+% text-mode and were leaking. \ensuremath forces maths mode everywhere and is a
+% no-op where the tick is already inside $...$, so it fixes every call site at
+% once and stops the bug coming back.
+\let\amscheckmark\checkmark
+\renewcommand{\checkmark}{\ensuremath{\amscheckmark}}
+
 \begin{document}
 % Title page depersonalised for the web: no name, no university, no lecturer,
 % no course code. Same treatment as the probability notes - the material is not

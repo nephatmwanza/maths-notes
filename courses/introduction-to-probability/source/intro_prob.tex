@@ -236,6 +236,16 @@
 \newcommand{\bpf}{\noindent {\ttfamily  PROOF}. $\mbox{}$}
 \newcommand{\epf}{\hfill \hbox{\raisebox{.5ex}{$\blacksquare$}$\phantom{.}$}}
 %-----------------------------------------------------------------------------
+% tex4ht expands amssymb's \checkmark when it is used in TEXT mode, so instead of
+% a tick the reader gets the raw internals - \m@th \mathchar"458 - handed to
+% MathJax, which cannot parse them either. In MATHS mode the token survives and
+% MathJax renders it properly. Nine of the 33 ticks across these notes were
+% text-mode and were leaking. \ensuremath forces maths mode everywhere and is a
+% no-op where the tick is already inside $...$, so it fixes every call site at
+% once and stops the bug coming back.
+\let\amscheckmark\checkmark
+\renewcommand{\checkmark}{\ensuremath{\amscheckmark}}
+
 \begin{document}
 \pagenumbering{roman}
 \begin{titlepage}
@@ -256,8 +266,6 @@
 \vfill
 {\large Foundations, random variables, and distributions}
 
-\vfill
-\textbf{\large 2026}
 \end{center}
 \clearpage
 

@@ -102,6 +102,16 @@
 % once instead.
 \renewcommand{\arraystretch}{1.25}
 
+% tex4ht expands amssymb's \checkmark when it is used in TEXT mode, so instead of
+% a tick the reader gets the raw internals - \m@th \mathchar"458 - handed to
+% MathJax, which cannot parse them either. In MATHS mode the token survives and
+% MathJax renders it properly. Nine of the 33 ticks across these notes were
+% text-mode and were leaking. \ensuremath forces maths mode everywhere and is a
+% no-op where the tick is already inside $...$, so it fixes every call site at
+% once and stops the bug coming back.
+\let\amscheckmark\checkmark
+\renewcommand{\checkmark}{\ensuremath{\amscheckmark}}
+
 \begin{document}
 % Same treatment as the other courses: no name, no university, no lecturer, no
 % course code. The material is not specific to one institution.
@@ -5132,6 +5142,55 @@ IV & $270^\circ<\theta<360^\circ$ & $\alpha=360^\circ-\theta$\\
 \end{tabular}
 \caption{Reducing any angle to an acute one.}
 \end{table}
+
+\subsubsection{The exact values}
+
+Reducing an angle to an acute one only helps if the acute values are known. At the five
+angles below they are exact, and they are worth being able to write down without
+hesitating.
+
+There is no need to memorise ten separate surds. Write $0,1,2,3,4$ under the five
+angles and take $\sqrt{\frac{n}{4}}$ --- that is the sine. The cosine is the same list
+read backwards.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+$\theta$ & $0^\circ$ & $30^\circ$ & $45^\circ$ & $60^\circ$ & $90^\circ$\\
+\hline
+$n$ & $0$ & $1$ & $2$ & $3$ & $4$\\
+\hline
+$\sin\theta=\sqrt{\frac{n}{4}}$ & $\sqrt{\frac{0}{4}}$ & $\sqrt{\frac{1}{4}}$
+ & $\sqrt{\frac{2}{4}}$ & $\sqrt{\frac{3}{4}}$ & $\sqrt{\frac{4}{4}}$\\
+ & $0$ & $\frac{1}{2}$ & $\frac{\sqrt{2}}{2}$ & $\frac{\sqrt{3}}{2}$ & $1$\\
+\hline
+$\cos\theta=\sqrt{\frac{4-n}{4}}$ & $1$ & $\frac{\sqrt{3}}{2}$ & $\frac{\sqrt{2}}{2}$
+ & $\frac{1}{2}$ & $0$\\
+\hline
+$\tan\theta=\frac{\sin\theta}{\cos\theta}$ & $0$ & $\frac{\sqrt{3}}{3}$ & $1$
+ & $\sqrt{3}$ & undefined\\
+\hline
+\end{tabular}
+\caption{Exact values at the five special angles. The sine row is $\sqrt{\frac{n}{4}}$ for $n=0,1,2,3,4$; the cosine row is the same five numbers in reverse.}
+\end{table}
+
+\begin{note}
+The tangent row is not a third thing to learn --- it is the first row divided by the
+second. At $30^\circ$,
+$$\tan 30^\circ=\frac{\sin 30^\circ}{\cos 30^\circ}
+=\frac{\frac{1}{2}}{\frac{\sqrt{3}}{2}}=\frac{1}{\sqrt{3}}=\frac{\sqrt{3}}{3},$$
+rationalising at the end. At $90^\circ$ the cosine is zero, so the division cannot be
+carried out and $\tan 90^\circ$ does not exist.
+\end{note}
+
+\begin{note}
+That the cosine row is the sine row reversed is not a coincidence. The angles pair off
+from the ends inwards --- $0^\circ$ with $90^\circ$, $30^\circ$ with $60^\circ$ ---
+and each pair adds to $90^\circ$, because
+$$\cos\theta=\sin\left(90^\circ-\theta\right).$$
+So $\cos 30^\circ=\sin 60^\circ=\frac{\sqrt{3}}{2}$. Knowing one row gives the other.
+\end{note}
 
 \begin{example}
 Without a calculator, find $\cos 210^\circ$ and $\sin 300^\circ$.
