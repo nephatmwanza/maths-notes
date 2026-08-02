@@ -485,6 +485,46 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-02 (later) — Choosing the number of classes: a section neither source had
+
+User pointed out a real gap: neither these notes nor the departmental notes say how
+to decide the **number of class intervals** when $N$ gets large. They cited
+ISBN 978-81-317-3403-2 — verified as **J.K. Sharma, *Business Statistics*,
+Pearson** — and asked for a section with an example or two.
+
+Now §1.2.2, "How many classes? The $2^k$ rule and Sturges' formula".
+
+**The point worth making, and the reason the section is short.** The two rules are
+the *same* rule. $3.322$ is not an arbitrary constant:
+$$\frac{1}{\log_{10}2}=3.3219\ldots$$
+so $3.322\log_{10}N=\log_2 N$, making Sturges $k=1+\log_2 N$ while the $2^k$ rule
+is $k=\lceil\log_2 N\rceil$. They differ by about one class, always. Taught as two
+competing formulas they look like something to memorise; shown as one idea there is
+nothing to memorise.
+
+Second point: $k$ grows like $\log_2 N$, so **doubling the data adds one class**.
+From $50$ observations to $5000$ takes $k$ only from $6$ to $13$.
+
+Two worked examples, every figure checked:
+- $N=50$ antibody concentrations — data already in the notes, so it connects to
+  existing content. The division comes out exactly, putting the maximum on the
+  final boundary, so the last class must be closed at both ends. Shown rather than
+  dodged by choosing friendlier numbers.
+- $N=850$ household incomes, where range$/k = 940$ and rounding **down** to $900$
+  would leave the highest earner outside every class. That is what makes "round the
+  width up" bite.
+
+One caveat included briefly: Sturges' formula is derived by matching a histogram to
+binomial coefficients of a normal distribution, so it assumes roughly normal,
+moderate-sized data and is known to give too few classes for large or skewed
+samples. Framed as "the rule saves you an arbitrary choice; it does not excuse you
+from looking at the result".
+
+> **Checked the rules against independent sources rather than writing them from
+> memory**, and confirmed the ISBN before attributing anything to it. Both were
+> things I could have got approximately right and been wrong about in detail.
+
+
 ### 2026-08-02 — Every tutorial and exam question added: 85 problems
 
 User: add the exam questions, and make sure all the tutorial questions are in —

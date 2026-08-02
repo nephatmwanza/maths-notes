@@ -607,6 +607,118 @@ $26-30$ & \StrokeOne   & 1 &$25.5-30.5$\\
 \vspace{0.6cm}
 
 \subsubsection{Choice Of Class Interval}
+
+\subsubsection{How many classes? The $2^k$ rule and Sturges' formula}
+
+The paragraph above says a class interval should be neither too wide nor too narrow, which
+is true and not much help. With a handful of observations the choice can be made by eye. Once
+$N$ runs into the hundreds it cannot, and guessing wastes time and produces tables that
+disagree with each other for no reason.
+
+Two rules settle the question. Both fix the \emph{number of classes} $k$ first, and let the
+class width follow.
+
+\textbf{The $2^k$ rule.} Choose the smallest whole number $k$ for which
+$$2^k\geq N.$$
+The reasoning is a counting one: with $k$ classes there are $2^k$ possible patterns of
+"in or out", and we want at least as many as there are observations, so that the classes are
+capable of separating them.
+
+\textbf{Sturges' formula.} Take
+$$k=1+3.322\log_{10}N.$$
+
+\textbf{The two are the same rule.} That $3.322$ is not arbitrary:
+$$\frac{1}{\log_{10}2}=3.3219\ldots$$
+so $3.322\log_{10}N=\log_2 N$, and Sturges' formula is simply
+$$k=1+\log_2 N,$$
+while the $2^k$ rule gives $k=\lceil \log_2 N\rceil$. Sturges therefore returns about one
+class more than the $2^k$ rule --- never a wildly different answer, and either is defensible.
+
+\textbf{Then the width.} With $k$ decided,
+$$i=\frac{\text{range}}{k}=\frac{\text{largest}-\text{smallest}}{k}$$
+\emph{rounded up} to a convenient number. Round up, not down: rounding down can leave the
+largest observation outside the last class. And choose something a reader can hold in their
+head --- $5$, $10$, $2.5$ --- rather than the raw $2.333$ the division happens to give.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+\hline
+$N$ & 20 & 30 & 50 & 100 & 200 & 500 & 1000 & 5000\\
+\hline
+$2^k\geq N$ & 5 & 5 & 6 & 7 & 8 & 9 & 10 & 13\\
+Sturges & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 13\\
+\hline
+\end{tabular}
+\caption{Number of classes given by each rule. Both grow like $\log_2 N$, so doubling the data adds one class --- not two, and certainly not double.}
+\end{table}
+
+The slow growth in that table is the useful part. Going from $50$ observations to $5000$ ---
+a hundredfold increase --- takes the number of classes only from $6$ to $13$. A reader who
+expects a thousand observations to need dozens of classes is expecting the wrong thing.
+
+\begin{example}
+Fifty measurements of antibody concentration range from $5.2$ to $19.2$ g/l. How many classes
+should the frequency distribution have, and how wide?
+\end{example}
+
+\begin{solution}
+\textbf{By the $2^k$ rule.} $2^5=32<50$ and $2^6=64\geq 50$, so $k=6$.
+
+\textbf{By Sturges' formula.}
+$$k=1+3.322\log_{10}50=1+3.322(1.699)=1+5.644=6.64\approx 7.$$
+
+The two differ by one, as they generally do. Taking $k=7$:
+$$i=\frac{19.2-5.2}{7}=\frac{14.0}{7}=2.0,$$
+so seven classes of width $2$, starting at $5.2$: $5.2-7.2$, $7.2-9.2$, and so on up to
+$17.2-19.2$.
+
+Notice that the division came out exactly, so the largest observation, $19.2$, sits precisely
+on the upper boundary of the last class. The last class must therefore be closed at both ends
+--- written $[17.2,\,19.2]$ while the others are $[a,\,b)$ --- or $19.2$ belongs to no class
+at all. The alternative is to round the width up slightly anyway, to $2.5$, and accept a
+little spare room at the top.
+
+Taking $k=6$ instead gives $i=14.0/6=2.33$, rounded up to $2.5$, and the question does not
+arise.
+
+Either is a reasonable table. What the rules have done is narrow an unlimited choice to two
+sensible candidates, in a few seconds, with a defensible reason.
+\end{solution}
+
+\begin{example}
+A survey records the monthly income of $850$ households, the lowest being K$400$ and the
+highest K$9\,800$. Construct a suitable class structure.
+\end{example}
+
+\begin{solution}
+\textbf{Number of classes.} $2^9=512<850$ and $2^{10}=1024\geq 850$, so the $2^k$ rule gives
+$k=10$. Sturges gives
+$$k=1+3.322\log_{10}850=1+3.322(2.929)=1+9.73=10.7\approx 11.$$
+
+\textbf{Width.} The range is $9800-400=9400$, so with $k=10$
+$$i=\frac{9400}{10}=940.$$
+Nobody wants classes of width $940$. Round up to $1000$, which is both convenient and
+slightly generous:
+$$400-1400,\quad 1400-2400,\quad \ldots,\quad 9400-10400.$$
+That is ten classes covering $400$ to $10\,400$, comfortably containing the largest value.
+
+Rounding the width \emph{up} is what makes the coverage work. Had $900$ been chosen instead,
+ten classes would reach only $400+9000=9400$ and the household earning K$9\,800$ would have
+nowhere to go.
+\end{solution}
+
+\begin{remark}
+Both rules are starting points, not verdicts. Sturges' formula is derived by matching a
+histogram to the binomial coefficients of a normal distribution, so it assumes the data are
+roughly normal and moderate in number. For very large samples, or for strongly skewed data,
+it is known to give too \emph{few} classes and so to smooth away detail that is really there.
+If the resulting histogram looks suspiciously featureless, try more classes and see whether
+structure appears. The rule saves you from an arbitrary choice; it does not excuse you from
+looking at the result.
+\end{remark}
+
+
 It is important that the class interval in chosen so that the graph gives a clear representation of the Data. Choice of too large a class interval will lead to loss of details on the other hand too small a class  interval would destroy the originality of the Data. A Convenient rule of thumb is to choose a class  interval so that the Average frequency is about 5.\hspace{0.2cm}\\ i.e. Number of classes = $\frac{1}{5}\times$ Total frequency.
 
 
