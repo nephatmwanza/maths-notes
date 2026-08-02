@@ -4355,53 +4355,106 @@ If all possible random samples, size $n$ are drawn (with replacement) from a pop
 \pagebreak
 
 \begin{proof}
-We know that $E(X)=\mu$ and $E(X)$ is the mean of the sampling distribution of the mean. Therefore, the variance of sampling distribution is var$(\overline{X})$.
+Write $X_1,\ldots,X_n$ for the sample. Each has mean $\mu$ and variance $\sigma^2$, and they
+are independent because the sampling is with replacement.
+
+\textbf{The mean.} Expectation is linear, so
+$$E(\overline{X})=E\!\left(\frac{\sum X}{n}\right)=\frac{1}{n}\sum E(X_i)=\frac{1}{n}(n\mu)=\mu.$$
+
+\textbf{The variance.} A constant multiplier comes out of a variance squared, and the
+variances of independent variables add:
 \begin{align*}
-\text{var}(\overline{X}) &=\text{var}\Bigg\{\frac{\sum X}{n}\Bigg\}=\frac{1}{n^2}\,\,\text{var}\Bigg\{\sum X \Bigg\}\\
-&=\frac{1}{n^2}\,\{\text{var}(X_1)+\text{var}(X_2)+\cdots +\text{var}(X_n)\}
-=\frac{1}{n^2}\hspace{0.1cm}\cdot\hspace{0.1cm}n\sigma^2\\
-&=\frac{\sigma^2}{n}.
+\operatorname{var}(\overline{X})
+ &=\operatorname{var}\!\left(\frac{\sum X}{n}\right)=\frac{1}{n^2}\operatorname{var}\!\left(\sum X\right)\\
+ &=\frac{1}{n^2}\Big\{\operatorname{var}(X_1)+\operatorname{var}(X_2)+\cdots+\operatorname{var}(X_n)\Big\}\\
+ &=\frac{1}{n^2}\cdot n\sigma^2=\frac{\sigma^2}{n}. \qedhere
 \end{align*}
+\end{proof}
+
 \begin{equation}\label{eq:var-xbar}
-\operatorname{var}(\overline{X})=\frac{\sigma^2}{n}
+\operatorname{var}(\overline{X})=\frac{\sigma^2}{n},\qquad
+\text{s.e}(\overline{X})=\frac{\sigma}{\sqrt{n}}
 \end{equation}
-$$\text{The s.e}=\frac{\sigma}{\sqrt{n}}\hspace{0.3cm}\text{of the sampling distribution of means.}$$
-If the sampling is without replacement from a population of size $N$, the variance acquires
-a \textbf{finite population correction}:
-% This read (N-n)/(N-n), which is 1 and so corrects nothing. The correction
-% factor is (N-n)/(N-1).
+
+Independence is the step that needs the "with replacement". Without it the draws are not
+independent and the variances do not simply add.
+
+\begin{remark}[\textbf{Sampling without replacement}]
+If the sampling is without replacement from a population of size $N$, the variance acquires a
+\textbf{finite population correction}:
+% This read (N-n)/(N-n), which is 1 and so corrects nothing. The factor is (N-n)/(N-1).
 \begin{equation}\label{eq:var-xbar-fpc}
 \operatorname{var}(\overline{X})=\frac{\sigma^2}{n}\left(\frac{N-n}{N-1}\right)
 \end{equation}
-The factor is less than 1, so sampling without replacement gives a \emph{more} precise mean
-than sampling with replacement -- each observation drawn is one that cannot be drawn again,
-so the sample carries more information about the population. If $n$ is very much smaller
-than $N$ the factor is close to 1 and \eqref{eq:var-xbar-fpc} gives approximately
-\eqref{eq:var-xbar}. In the extreme case $n=N$ the whole population has been measured, the
-factor is 0, and there is no sampling error at all -- which is exactly as it should be.\\ Whether the sampling is with or without replacement var$(\overline{X})$ decreases as the sample size increases.\\ That means the lager the sample size the closer the sample mean is likely to the population mean
-% These were both written as E(S^2) = ..., but they are definitions of the
-% estimator, not its expectation.
-$$S^2=\frac{\sum (X-\mu)^2}{n}\hspace{1cm}\text{(unbiased, but needs }\mu\text{)}$$
-$$S^2=\frac{\sum (X-\overline{X})^2}{n}\hspace{1cm}\text{(biased)}$$
+The factor is less than $1$, so sampling without replacement gives a \emph{more} precise mean
+--- each observation drawn is one that cannot be drawn again, so the sample carries more
+information about the population. If $n$ is very much smaller than $N$ the factor is close to
+$1$ and \eqref{eq:var-xbar-fpc} reduces to \eqref{eq:var-xbar}. In the extreme case $n=N$ the
+whole population has been measured, the factor is $0$, and there is no sampling error at all
+--- exactly as it should be.
 
-However, $S^2=\frac{\sum (X-\overline{X})^2}{n}$ is not an unbiased estimator of population variance.\\\\ We want to find an unbiased estimator of $\sigma^2$
+Either way $\operatorname{var}(\overline{X})$ falls as $n$ rises: the larger the sample, the
+closer its mean is likely to lie to $\mu$.
+\end{remark}
+
+\subsubsection{Estimating the population variance}
+
+Two candidates suggest themselves for estimating $\sigma^2$:
+% Both were written as E(S^2) = ..., but they are definitions of the estimator,
+% not statements about its expectation.
+$$\frac{\sum (X-\mu)^2}{n}\hspace{1cm}\text{(unbiased, but needs }\mu\text{)}$$
+$$S^2=\frac{\sum (X-\overline{X})^2}{n}\hspace{1cm}\text{(computable, but biased)}$$
+The first is unaffected by the problem below, but it requires $\mu$, which is exactly what is
+unknown. The second uses $\overline{X}$ in its place --- and that substitution costs
+something.
+
+\begin{thm}
+$S^2=\frac{\sum(X-\overline{X})^2}{n}$ is a biased estimator of $\sigma^2$, with
+$$E(S^2)=\frac{n-1}{n}\,\sigma^2,$$
+so that $\hat{S}^2=\frac{\sum(X-\overline{X})^2}{n-1}$ is unbiased.
+\end{thm}
+
+\begin{proof}
+Start from the definition of $\sigma^2$ and insert $\overline{X}$:
 \begin{align*}
-\sigma^2 &=E\Bigg[\frac{\sum (X-\mu)^2}{n}\Bigg]=E\Bigg[\frac{\sum\Big\{(X-\overline{X})-(\mu -\overline{X)}\Big\}^2}{n}\Bigg]\\\\
-&=E\Bigg[\frac{\sum [(X-\overline{X})^2-2(X-\overline{X})(\mu-\overline{X})+(\mu -\overline{X})^2]}{n}\Bigg]\\\\
-&=E\Bigg[\frac{\sum (X-\overline{X})^2}{n}-\frac{2(\mu-\overline{X})\sum (X-\overline{X})}{n}+\frac{\sum (\mu-\overline{X})^2}{n}\Bigg]\\\\
-&=E\Bigg[\frac{\sum (X-\overline{X})^2}{n}\Bigg]+E(\mu-\overline{X})^2\\\\ \implies\hspace{0.5cm} \sigma^2 &=E(S^2)+E(\mu-\overline{X})^2\\
+\sigma^2 &=E\!\left[\frac{\sum (X-\mu)^2}{n}\right]
+          =E\!\left[\frac{\sum\big\{(X-\overline{X})-(\mu-\overline{X})\big\}^2}{n}\right]\\
+ &=E\!\left[\frac{\sum\big[(X-\overline{X})^2-2(X-\overline{X})(\mu-\overline{X})+(\mu-\overline{X})^2\big]}{n}\right]\\
+ &=E\!\left[\frac{\sum (X-\overline{X})^2}{n}
+   -\frac{2(\mu-\overline{X})\sum (X-\overline{X})}{n}
+   +\frac{\sum(\mu-\overline{X})^2}{n}\right].
 \end{align*}
-The second term $E(\mu-\overline{X})^2$ is var$(\overline{X})$. i.e. var$(\overline{X})=\frac{\sigma^2}{n}.$
+The middle term vanishes, because $\sum(X-\overline{X})=0$. The last is $n$ copies of a
+quantity not depending on the summation index, so it is just $(\mu-\overline{X})^2$. Hence
+$$\sigma^2=E(S^2)+E\big(\mu-\overline{X}\big)^2.$$
 
+Now $E(\mu-\overline{X})^2$ is precisely $\operatorname{var}(\overline{X})$, which
+\eqref{eq:var-xbar} gives as $\sigma^2/n$. Therefore
 \begin{align*}
-\sigma^2 &=E(S^2)+\frac{\sigma^2}{n}\hspace{0.5cm}\implies\hspace{0.5cm} \sigma^2-\frac{\sigma^2}{n}=E(S^2)\\\\
-\sigma^2\frac{(n-1)}{n}&=E(S^2)\hspace{0.5cm}\implies\hspace{0.5cm} \sigma^2=\frac{n}{n-1}E(S^2)\\\\
-\sigma^2 &=\frac{n}{n-1}(E(S^2))\\\\ \sigma^2 &=\frac{n}{n-1}\Bigg(\frac{\sum (X-\overline{X})^2}{n}\Bigg)\\\\ \sigma^2 &=E\Bigg(\frac{\sum (X-\overline{X})^2}{n-1}\Bigg)\\\\ \implies\hspace{0.5cm} \sigma^2&=E(\hat{S}^2)\\
+\sigma^2 &=E(S^2)+\frac{\sigma^2}{n}\\
+\sigma^2-\frac{\sigma^2}{n} &=E(S^2)\\
+\frac{n-1}{n}\,\sigma^2 &=E(S^2),
 \end{align*}
-This gives us unbiased estimator of variance, it is denoted by $\hat{S}^2$ $$\therefore\hspace{0.3cm} \hat{S}^2=\frac{\sum (X-\overline{X})^2}{n-1}$$ and $\hat{S}^2$ and $S$ are related by \hspace{0.2cm}$\displaystyle{\hat{S}^2=\frac{n}{n-1}S^2,\hspace{1cm} \sigma^2=\hat{S}^2}$\\
-
-The term $n-1$ is called the degree of freedom an its symbol is $v$. Degrees of freedom means if we know $\mu$, then the variance can be calculated from $n$ independent deviation using $\frac{\sum (X-\mu)^2}{N}$\,, if instead we measure the deviation from $\overline{X}$, then we have only $n-1$ independent deviations can be deduced from the fact that $\sum (X-\overline{X})=0$. One d.f has to be lost since only $n-1$ of the deviation can be varied independently.\\
+which is the stated bias. Rearranging,
+$$\sigma^2=\frac{n}{n-1}E(S^2)=E\!\left[\frac{n}{n-1}\cdot\frac{\sum(X-\overline{X})^2}{n}\right]
+=E\!\left[\frac{\sum(X-\overline{X})^2}{n-1}\right]=E(\hat{S}^2). \qedhere$$
 \end{proof}
+
+So $\hat{S}^2$ is the unbiased estimator, and the two are related by
+$$\hat{S}^2=\frac{n}{n-1}\,S^2.$$
+Note what is and is not being claimed: $E(\hat{S}^2)=\sigma^2$, not $\hat{S}^2=\sigma^2$. The
+estimator is right \emph{on average} over all possible samples; any particular sample will
+give something near $\sigma^2$, not equal to it.
+
+\begin{remark}[\textbf{Degrees of freedom}]
+The divisor $n-1$ is called the \textbf{degrees of freedom}, written $v$. If $\mu$ were known,
+the variance could be computed from $n$ independent deviations $X-\mu$. Measuring instead from
+$\overline{X}$ leaves only $n-1$ that are free, because the deviations must satisfy
+$$\sum (X-\overline{X})=0.$$
+Fix any $n-1$ of them and the last is determined. One degree of freedom is spent estimating
+the mean, and the divisor records that.
+\end{remark}
+
 
 
 
@@ -4416,19 +4469,46 @@ The term $n-1$ is called the degree of freedom an its symbol is $v$. Degrees of 
 
 
 \subsubsection{An Unbiased Estimation of Population Proportion}
-If the probability that a member of a population posses an attributes $P$, then we know that $X$ the number of members of sample size $n$ which possess this attribute is Binomially distributed $B(n,P)$, we expect $P_s=\frac{X}{n}$.\\ The proportion in the sample which shows the attribute to be an unbiased estimator of $P$ and we can show it as;
-$$E(P_s)=E\!\left(\frac{X}{n}\right)=\frac{1}{n}E(X)=\frac{1}{n}\cdot nP=P.$$
-$E(P_s)=P\implies P_s$ is an unbiased estimator of the population proportion $P$.\\\\ We can also find the value of the sampling distribution of $P_s$ since
+
+Suppose each member of a population either has some attribute or does not, and the proportion
+having it is $P$. In a sample of $n$, the number $X$ that have it is binomial, $X\sim B(n,P)$,
+with $E(X)=nP$ and $\operatorname{var}(X)=nP(1-P)$. The natural estimator of $P$ is the
+\textbf{sample proportion}
+$$P_s=\frac{X}{n}.$$
+
+\begin{thm}
+For the sample proportion $P_s=\frac{X}{n}$,
+$$E(P_s)=P,\qquad \operatorname{var}(P_s)=\frac{P(1-P)}{n},$$
+so $P_s$ is an unbiased estimator of $P$ with standard error
+$\sqrt{\dfrac{P(1-P)}{n}}$.
+\end{thm}
+
+\begin{proof}
+Both follow from the binomial moments, taking $\frac{1}{n}$ outside --- squared, in the case
+of the variance:
+$$E(P_s)=E\!\left(\frac{X}{n}\right)=\frac{1}{n}E(X)=\frac{1}{n}\cdot nP=P$$
 $$\operatorname{var}(P_s)=\operatorname{var}\!\left(\frac{X}{n}\right)=\frac{1}{n^2}\operatorname{var}(X)
-=\frac{1}{n^2}\cdot nP(1-P)=\frac{P(1-P)}{n}.$$
-when $n$ is large the sampling distribution of $X$ tends to a normal distribution. Thus for
-large $n$
-$$P_s\ \text{is approximately}\ N\!\left(P,\ \frac{P(1-P)}{n}\right),$$
+=\frac{1}{n^2}\cdot nP(1-P)=\frac{P(1-P)}{n}. \qedhere$$
+\end{proof}
+
+For large $n$ the binomial distribution of $X$ is approximately normal, and therefore so is
+$P_s$:
 % This read "tends to N(0,1) with mean X/n". N(0,1) is the standardised version,
 % not the distribution of P_s; and the mean is P, not the estimate X/n.
-with standard error of the proportion
-$\sqrt{\frac{P(1-P)}{n}}$. Standardising gives
-$Z=\frac{P_s-P}{\sqrt{P(1-P)/n}}\sim N(0,1)$, which is where the $N(0,1)$ comes in.\\\\\\
+$$P_s\ \text{is approximately}\ N\!\left(P,\ \frac{P(1-P)}{n}\right),\qquad\text{so}\qquad
+Z=\frac{P_s-P}{\sqrt{P(1-P)/n}}\ \text{is approximately}\ N(0,1).$$
+It is the \emph{standardised} quantity that is $N(0,1)$, not $P_s$ itself, and the mean of
+$P_s$ is $P$ --- not the estimate $\frac{X}{n}$ obtained from one particular sample.
+
+\begin{remark}
+The standard error contains $P$, which is exactly what is unknown. In practice $P_s$ is
+substituted for it, giving the estimated standard error $\sqrt{P_sq_s/n}$; with $n$ large
+enough for the normal approximation to hold, the substitution costs little. Notice also that
+$P(1-P)$ is largest at $P=\tfrac{1}{2}$, so a proportion near a half is the hardest to
+estimate precisely --- which is why sample-size calculations use $P=0.5$ when nothing is known
+in advance.
+\end{remark}
+
 
 
 
@@ -4511,49 +4591,62 @@ The probability distribution of an estimator $\hat{\theta}$, whether we know the
 
 
 \begin{solution}
-\begin{enumerate}
-\item This is a proportion question and we want to estimate $P$. \hspace{0.2cm}$P_s=Y/n$\, we use $P_s$ to estimate.\\
+\textbf{(1) The voters.} This is a proportion, so the estimator is
+$$P_s=\frac{Y}{n}=\frac{560}{1000}=0.56.$$
+$P_s$ is unbiased for $P$, so $0.56$ is the estimate of the fraction supporting candidate $A$.
 
-$\therefore$ The estimate of $P$ i.e. fraction of voters following candidate $A$ is $$P_s=Y/n=\frac{560}{1000}=0.56$$ $56\%$ of the population favored candidate $A$.\\ 
-The probability distribution of $P_s$ will be approximated by the normal distribution because $n=1000$. Large or small is $n=30$. If $n\geq 30$, it is assumed $N(0,1)$ large sample size.\\ 
+For the error bound, $n=1000$ is large, so $P_s$ is approximately normal and about $95\%$ of
+its distribution lies within two standard errors of $P$. The standard error of a proportion is
+$\sqrt{Pq/n}$, and $P$ is unknown, so the estimate $P_s$ is used in its place:
+% The notes had b = 2 sqrt(Pq/sigma). The denominator is n.
+$$b=2\sqrt{\frac{P_sq_s}{n}}=2\sqrt{\frac{(0.56)(0.44)}{1000}}=2(0.0157)=0.031\approx 0.03.$$
 
-If $n<30$ - small sample size. $P_s=P$ because $P_s$ is an unbiased estimator.\\ 
+So the estimate is $0.56$ with a bound on the error of estimation of about $0.03$: we are
+roughly $95\%$ confident that the true fraction lies within $0.03$ of $0.56$.
 
-$\therefore$ we want $b=2\sqrt{\hat{\theta}}\hspace{0.6cm}\implies b=2\sqrt{\frac{Pq}{\sigma}}$.\\ 
-
-Binomial distribution  s.e $=\sqrt{\frac{Pq}{n}}$. $$b=2\sqrt{\frac{(0.56)(0.44)}{1000}}=0.03$$
-$\therefore$ The probability that the error of estimation is less than 0.03 is approximately 0.95, we are confident that our estimate of 0.56 is within 0.03 of the population value of $P$. \,$(95\%\hspace{0.3cm}\text{confident})$,$$0.56-0.03<P<0.56+0.03$$\\
-
+\textbf{(2) The titrations.} The five volumes are $25.1$, $25.2$, $25.2$, $25.0$ and $25.5$
+cm$^3$.
 \begin{table}[H]
-(2)$\hspace{3cm}$
 \centering
 \begin{tabular}{|c|c|c|c|c|}
-\hline 
-$X$ & $f$ & $f(X)$ & $X-\overline{X}$ & $(X-\overline{X})^2$\\
-\hline 25.1&1&25.1& $-0.1$ & 0.01\\
-25.2& 2& 50.4&0&0\\
-25.0 &1& 25.0& $-0.2$& 0.04\\
-25.5&1&25.5&0.3&0.09\\
-\hline &5&126.0&&0.14\\
+\hline
+$X$ & $f$ & $fX$ & $X-\overline{X}$ & $f(X-\overline{X})^2$\\
+\hline
+25.0 & 1 & 25.0 & $-0.2$ & 0.04\\
+25.1 & 1 & 25.1 & $-0.1$ & 0.01\\
+25.2 & 2 & 50.4 & 0.0 & 0.00\\
+25.5 & 1 & 25.5 & 0.3 & 0.09\\
+\hline
+Total & 5 & 126.0 & & 0.14\\
 \hline
 \end{tabular}
+\caption{Working for the titration volumes. The last column is weighted by $f$, so it totals $\sum f(X-\overline{X})^2$.}
 \end{table}
 
+$$\overline{X}=\frac{\sum fX}{\sum f}=\frac{126.0}{5}=25.2\ \text{cm}^3.$$
+$\overline{X}$ is an unbiased estimator of $\mu$, so $25.2$ cm$^3$ is the estimate of the true
+volume.
 
+For the spread, $\sigma$ is unknown and must be estimated from the sample, using the divisor
+$n-1$:
+$$\hat{S}^2=\frac{\sum f(X-\overline{X})^2}{n-1}=\frac{0.14}{4}=0.035
+\quad\implies\quad \hat{S}=\sqrt{0.035}=0.187\ \text{cm}^3.$$
 
-\begin{align*}
-\overline{X} &=\frac{\sum f(X)}{\sum f}=\frac{126}{5}\\ &=25.2\hspace{0.2cm}\text{cm}^2\\\\
-\therefore \hspace{0.5cm} E(\overline{X})&=\mu=25.2\text{cm}^2\\
-\end{align*}
-$E(\overline{X})$ is an unbiased estimator of population mean, $E(\overline{X})=\mu$.\\
-$$S^2=\frac{\sum (X-\overline{X})^2}{n}\hspace{1cm}\text{or}\hspace{1cm} \hat{S}^2=\frac{\sum (X-\overline{X})^2}{n-1}$$
-\begin{align*}
-\hat{S}^2 &=\frac{0.14}{4}=0.035\hspace{1cm}\implies \hat{S}=\sqrt{0.035}\\\\
-E(\hat{S}) &=\frac{\hat{S}}{\sqrt{n}}=\frac{\sqrt{0.035}}{\sqrt{5}}=0.083666002\approx 0.084\\
-\end{align*}
-The other formula $E(\hat{S})=\frac{S}{\sqrt{n-1}}$\\ $$\epsilon \hspace{0.5cm} \text{at}\hspace{0.5cm} b=2\times \sqrt{\frac{0.035}{5}}$$\\
-\end{enumerate}
+The estimated standard error of the mean is then
+$$\text{s.e}(\overline{X})=\frac{\hat{S}}{\sqrt{n}}=\frac{0.187}{\sqrt{5}}=0.0837\ \text{cm}^3,$$
+giving a bound on the error of estimation of
+$$b=2\,\text{s.e}(\overline{X})=2(0.0837)=0.167\approx 0.17\ \text{cm}^3.$$
+
+So the volume is estimated as $25.2$ cm$^3$, with the error unlikely to exceed about
+$0.17$ cm$^3$.
+
+Two distinctions worth keeping straight here. $\hat{S}=0.187$ measures how much the
+\emph{individual} titrations vary; $\text{s.e}(\overline{X})=0.084$ measures how much their
+\emph{mean} would vary from one set of five to another, and is smaller by $\sqrt{5}$. And
+$\overline{X}$ is the estimator while $\mu$ is what it estimates --- writing $\mu=25.2$ would
+claim to know the very thing being estimated.
 \end{solution}
+
 
 
 
