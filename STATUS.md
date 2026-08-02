@@ -485,6 +485,73 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-02 — Every tutorial and exam question added: 85 problems
+
+User: add the exam questions, and make sure all the tutorial questions are in —
+"those are the ones students will be looking for". Both are now complete.
+
+**Tutorial sheets: 22 of 22.** Sheet 1 had 3 of 6; Sheet 2 had none of its 16.
+Sheet 2 now forms a new practice section at the end of Estimation and Sampling
+Distributions.
+
+**Exam file: 66 of 66**, across all eleven sections. Statistics went from 14
+problems to **85**, every one with a collapsed worked solution.
+
+Every numerical answer was computed and checked before being written, using table
+values so the arithmetic matches what a student gets from their own tables.
+
+**Six defects in the source questions**, each stated in the solution rather than
+quietly patched:
+
+| Question | Defect |
+|---|---|
+| Lamp lives | says 50 lamps, lists 49 values |
+| Two mark distributions | totals printed 34 and 34; rows sum to 40 and 45 |
+| Smoking | 200 women in one copy, 230 in another — see below |
+| Mosi consumption | 2000 value reads 3.5 among values of 35–62 |
+| Training/performance | gives `sum(y-ybar) = 62`, which is identically zero |
+| Training/performance | never supplies ybar, so the intercept has no number |
+
+> **The smoking question reversed a published conclusion.** It appears twice. The
+> Exercises copy reads 200 women; the Test 2 copy reads 230, and 270+230 = 500
+> matches the stated total. With 200 the test gives Z = 0.92 and fails to reject;
+> with 230 it gives Z = 2.56 and rejects. I had shipped the wrong verdict.
+>
+> The failure was not missing the inconsistency — I flagged it — but resolving it
+> by assuming the counts were right and the total wrong. **When a source
+> contradicts itself, check whether the question appears elsewhere in the same
+> document before deciding which figure to trust.**
+
+Two overlaps proved useful rather than redundant: the smoking duplicate settled
+that typo, and the Final's spring data (32.5, 37.1, 35.5, …) is essentially the
+Mosi series, independently confirming the dropped digit.
+
+**Three arithmetic slips of my own**, all caught by recomputing before building,
+none of which changed an answer: the Latin square counterfactual (53.1 and 3.93,
+not 47.4 and 4.4), the heights sum of squares (6866.7, not 6866.2), and the
+employee times (40,272.4, not 40,268.7). All three were numbers written from an
+intermediate step rather than read off the final calculation.
+
+**Teaching points the questions turn on, now made explicit.** Pairing is the big
+one and appears twice. For the typists, paired t = 1.75 against unpaired 0.62 —
+same verdict, different reasoning. For the car tune-ups, **paired t = 2.89 rejects
+while unpaired t = 0.61 does not**: there the mistake reverses the conclusion,
+because car-to-car consumption runs 7 to 31 km/l and buries an effect of 1.9.
+
+Others: frequency density when class widths differ (the tyre data's last class
+stands at 12 on frequency and 6 on density); the finite population correction,
+which halves a variance in one question and cuts a standard error by 17% in
+another; sample sizes always rounded up; interval **width** being twice the margin
+(misreading it gives n = 62 instead of 246); and pooling the standard error for a
+two-proportion *test* but not for a confidence interval.
+
+**Also this session**: all 246 `\dfrac` replaced with `\frac` across both courses
+at the user's request. `\tfrac` left alone, not having been mentioned.
+
+Build clean: 42 pages, 59 diagrams, 85 problems, 85 collapsed solutions, no
+warnings, no overflow, zero `\dfrac` in either built site.
+
+
 ### 2026-08-01 (late) — Two centred headings; the P_s section rewritten
 
 User: 2.1.7 Properties of Estimation and 2.1.8 An Unbiased Estimation of
