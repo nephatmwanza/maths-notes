@@ -6715,36 +6715,44 @@ the true mean is in fact $\mu=26$.\\
 \end{example}
 
 \begin{solution}
-we are given $\sigma^2=10 000$, $n=100$ $$\sigma^2_{\overline{X}}=\frac{\sigma^2}{n}=\frac{10 000}{100}$$\\ $$\implies\hspace{0.5cm}\sigma_{\overline{X}}=\frac{\sigma}{\sqrt{n}}=10$$
-What we want is to calculate $\beta$ conditional on particular value of $\mu$. Let $\mu =26$ and $\alpha =5\%$\\\\
-We know:
-\begin{enumerate}
-\item This is a one tailed test (left).
-\item We will fail to reject $H_0$ if we get a statistic greater than $-Z_{0.05}$.
-\item C.V is $-1.64$. This corresponds to $\overline{X}$ value.\\
-\end{enumerate}
+The population standard deviation is $\sigma=\sqrt{10\,000}=100$, so the standard error of
+the mean is
+$$\sigma_{\overline{X}}=\frac{\sigma}{\sqrt{n}}=\frac{100}{\sqrt{100}}=10.$$
 
-$$P(Z-\text{statistic} \geq -1.64)=P\Big(\overline{X}>\overline{X}_c\,\big|\,\mu =30,\hspace{0.2cm} \sigma_{\overline{X}}=10\Big)=0.95$$
+A Type II error is failing to reject $H_0$ when it is false, so $\beta$ can only be computed
+against a stated alternative value of $\mu$ --- here $\mu=26$. The calculation runs in two
+stages: first find the sample mean at which the decision changes, then find how often the
+true distribution lands on the wrong side of it.
 
+\textbf{Stage 1: the decision boundary.} The test is one-tailed to the left, so $H_0$ is
+rejected for small $\overline{X}$, and the critical value is $-Z_{0.05}=-1.64$. Converting
+that back to a sample mean, under $H_0$ with $\mu=30$:
+$$Z_c=\frac{\overline{X}_c-\mu}{\sigma_{\overline{X}}}
+\implies -1.64=\frac{\overline{X}_c-30}{10}
+\implies \overline{X}_c=30-16.4=13.6.$$
+So $H_0$ is rejected when $\overline{X}<13.6$, and retained when $\overline{X}>13.6$.
+
+\textbf{Stage 2: the probability of landing in the wrong region.} If the truth is $\mu=26$,
+$H_0$ is false, and a Type II error occurs whenever the sample mean nonetheless exceeds
+$13.6$:
 \begin{align*}
-Z_c &=\frac{\overline{X}_c-\mu}{\sigma_{\overline{X}}}\hspace{0.6cm}\implies\hspace{0.5cm} -1.64=\frac{\overline{X}_c-30}{10}\\\\
-\implies\hspace{0.6cm}\overline{X}_c &=13.6\\
+\beta &=P\big(\overline{X}>13.6 \mid \mu=26,\ \sigma_{\overline{X}}=10\big)\\
+      &=P\!\left(Z>\frac{13.6-26}{10}\right)\\
+      &=P(Z>-1.24)\\
+      &=0.8925.
 \end{align*}
+The power of the test is therefore
+$$1-\beta=1-0.8925=0.1075.$$
 
-So we will incorrectly fail to reject $H_0$ as long as a draw of sample mean is greater than 13.6.\\\\
-So we calculate the probability of drawing a sample mean greater than 13.6, $\mu =26$, $\sigma_{\overline{X}}=10$\\\\ Probability of $\beta$ is
-\begin{align*}
-P\Big(\overline{X}>13.6|\mu =26,\hspace{0.2cm}\sigma_{\overline{X}=10}\Big) &=P\Bigg(Z>\frac{13.6-26}{10}\Bigg)\\\\
-&=P(Z>-1.24)\\
-&=0.8925=\beta\\
-\end{align*}
-so $\beta=0.8925$ and the power is $1-\beta=0.1075$.\\
+That power is dismal, and it is worth seeing why. With $\sigma=100$, the shift from $\mu=30$
+to $\mu=26$ is only $0.4$ of a standard error. A test at $\alpha=5\%$ has almost no chance of
+catching a difference that small: close to nine times in ten it will fail to reject a null
+hypothesis that is false. Increasing $n$ is the usual remedy, since it shrinks
+$\sigma_{\overline{X}}$ and moves the two distributions apart in standard-error terms.
 
-That power is dismal, and it is worth seeing why. The standard deviation is
-$\sigma=100$, so a shift of the mean from $30$ down to $26$ is a movement of well under
-one standard error. A test at $\alpha=5\%$ has almost no chance of catching a difference
-that small: nearly nine times out of ten it will fail to reject a null hypothesis that is
-false. Increasing $n$ is the usual remedy, because it shrinks $\sigma_{\overline{X}}$.\\\\
+Note also that $\alpha$ and $\beta$ pull against each other. Lowering $\alpha$ to $1\%$ would
+move $\overline{X}_c$ further left, making a Type I error rarer and a Type II error still more
+likely. Only a larger sample improves both at once.
 \end{solution}
 
 
