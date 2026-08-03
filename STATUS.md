@@ -319,6 +319,38 @@ is exactly the Paul's-Notes structure, for free, out of the tool.
    client-side quiz component (question/answer data in JSON, no backend) for the engine
    side. Not committed — worth confirming before building the real site shell.
 
+## What makes a source fast or slow to work from — observed 2026-08-03
+
+The user noticed that recently-written material moves quickly and older material does not.
+The cause is the **format**, not the age, and it is worth knowing before handing over a
+new source.
+
+**Fast: a `.tex` file.** It can be grepped, spliced and rebuilt directly. Adding the
+Assignment 3 problems to a chapter took one splice and one build.
+
+**Slow: a CamScanner PDF.** These have no usable text layer at all — measured on the two
+in this project, `Assignment_1_3_others.pdf` returns nothing for every page across 120
+pages, and `Lecture note Math_Stastics-1.pdf` returns 7,040 characters across 88, almost
+all of it the title page. So every page must be *looked at*: render the whole document
+small (`pdftoppm -r 38`), montage it into a contact sheet to find the pages that matter,
+re-render those at `-r 150`, and read them as images. Finding five exercise blocks in the
+88-page file took three rounds of this.
+
+**Slower still: a scan whose provenance is unclear.** Old folders mix the user's own work
+with other people's. Establishing that `Lecture note Math_Stastics-1.pdf` was Dr Naif's
+and not the user's had to happen *before* any of its content could be used.
+
+**What removes the cost, in order of value:**
+1. The original `.tex`, if it still exists anywhere. This collapses hours into minutes.
+2. Failing that, say which pages matter — it skips the whole search stage.
+3. Say up front whose document it is. Provenance decides whether the content can be used
+   at all, so it is cheapest to settle first.
+
+Accumulated misprints are the other tax on old material and cannot be removed by better
+formats: nine found and corrected so far across MAT1110 and Mathematical Statistics. Each
+one has to be caught by independent recomputation, which is why every stated number is
+recomputed before it is written.
+
 ## How to resume this project cold
 
 1. Read this file top to bottom.
