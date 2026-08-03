@@ -557,6 +557,45 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-03 (end of day) — Domain paused at payment; Probability audit ch.1 clean
+
+**STOPPING POINT. Two things are half-done — read both before starting tomorrow.**
+
+**1. Domain: chosen, not bought.** Registrar decided — **Porkbun** (`.com` around $11–12/yr,
+free WHOIS privacy, no renewal trap; GoDaddy rejected for the opposite reasons). Advice
+given: buy **2 years**, because the fragile part is the payment rail, not the price — a
+silently failed auto-renew a year out kills every link already handed to students.
+
+Blocked at checkout: the card needs international online transactions enabled. **The user
+is going to the bank tomorrow to clear it once and for all.** Nothing is lost — the domain
+is not reserved, but not gone either.
+
+When the name exists, one command does everything:
+
+    site/set-domain.sh <domain> --confirm
+
+**2. Probability audit — chapter 1 done, nothing wrong with it.** Every worked example in
+"Definitions and Axioms", "Independent Events, Conditional Probability and Bayes" and
+"Counting Techniques" recomputed independently: set algebra, the total-probability and
+Bayes examples, the rare-disease false-positive case, the randomised-response cannabis
+estimate, and every permutation and combination count. The 24-entry permutation table was
+checked character by character against the real permutations of `pqrs` — complete and
+correct. The seating distribution $(5-x)/15$ was brute-forced over all position pairs.
+
+**Result: no errors in chapter 1.** Remaining: chapter 2 (random variables and
+distributions, lines 1894–6898 — the largest) and chapter 3 (joint distributions,
+6899–8461).
+
+**My mistake worth recording: I published a CNAME by testing a script.** `set-domain.sh`
+writes, commits and pushes; I ran it with a real argument to check the hostname validation
+and it deployed a custom domain nobody owns, which takes Pages **off the air** rather than
+merely doing nothing. Caught and reverted within minutes; the live site was verified back
+at HTTP 200 with no redirect, and the window may have closed before any deploy completed.
+
+The script now requires `--confirm` and is a dry run by default. **The general rule: a
+script whose dry run is its live run is a trap, and the moment to add the flag is before
+the first test, not after.**
+
 ### 2026-08-03 (last) — Limit theorems written from scratch; a third-party source
 ### assessed and deliberately not republished
 
