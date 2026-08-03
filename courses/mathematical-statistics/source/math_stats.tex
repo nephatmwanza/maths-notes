@@ -4,6 +4,13 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+% enumitem is loaded for the web build, not for the page layout. Without it
+% tex4ht throws away the optional label on \item[(a).] and numbers the list
+% 1, 2, 3 itself - so a question whose parts are (i), (ii), (iii) came out
+% lettered a, b, c, and prose saying "the test in (a)" pointed at an item
+% labelled "1.". With enumitem loaded the label survives verbatim, at every
+% depth, and print and web finally agree.
+\usepackage{enumitem}
 \usepackage{amsfonts}
 \usepackage{array}
 \usepackage{longtable}
@@ -1747,6 +1754,285 @@ f_Y(y) & =  \frac{1}{\sqrt{2\pi}\, 2^{\frac{m}{2}}\, \Gamma \left(\frac{m}{2}\ri
 
 % Estimation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Practice problems}
+
+Past assignment questions on moments, joint distributions and transformations.
+Work each one before opening the solution.
+
+\begin{problem}{Assignment 1}
+Prove that
+$$E\left(X^{(j)}\right)=(-k)^{(j)}\left(\frac{p-1}{p}\right)^j,\qquad j=1,2,3,\ldots$$
+if $X\sim NB(k,p)$ with probability function
+$$f(x)=\binom{-k}{x}p^k(-q)^x,\qquad x=0,1,2,\ldots$$
+and hence find $\text{Var}(X)$.
+\end{problem}
+
+\begin{solution}
+Throughout, $a^{(j)}$ is the falling factorial $a(a-1)\cdots(a-j+1)$, so
+$X^{(j)}=X(X-1)\cdots(X-j+1)$ and $E\left(X^{(j)}\right)$ is the $j$th
+\emph{factorial} moment. Note also that $q=1-p$, so $-q=p-1$.
+
+Start from the negative binomial series, valid for $|z|<1$:
+$$\sum_{x=0}^\infty\binom{-k}{x}z^x=(1+z)^{-k}.$$
+Differentiating $j$ times term by term,
+$$\sum_{x=0}^\infty x^{(j)}\binom{-k}{x}z^{x-j}
+=\frac{d^j}{dz^j}(1+z)^{-k}
+=(-k)(-k-1)\cdots(-k-j+1)(1+z)^{-k-j}
+=(-k)^{(j)}(1+z)^{-k-j},$$
+and multiplying through by $z^j$,
+$$\sum_{x=0}^\infty x^{(j)}\binom{-k}{x}z^x=(-k)^{(j)}z^j(1+z)^{-k-j}.$$
+Now put $z=-q$ and multiply by $p^k$, which is exactly the expectation asked for:
+$$E\left(X^{(j)}\right)=p^k(-k)^{(j)}(-q)^j(1-q)^{-k-j}
+=p^k(-k)^{(j)}(-q)^jp^{-k-j}
+=(-k)^{(j)}\left(\frac{-q}{p}\right)^j
+=(-k)^{(j)}\left(\frac{p-1}{p}\right)^j.\qquad\blacksquare$$
+(Taking $j=0$ gives $p^kp^{-k}=1$, so the probabilities do sum to one.)
+
+For the variance, read off the first two factorial moments:
+$$E(X)=(-k)\left(\frac{-q}{p}\right)=\frac{kq}{p},\qquad
+E\left[X(X-1)\right]=(-k)(-k-1)\left(\frac{-q}{p}\right)^2
+=\frac{k(k+1)q^2}{p^2}.$$
+Since $E\left(X^2\right)=E\left[X(X-1)\right]+E(X)$,
+$$\text{Var}(X)=\frac{k(k+1)q^2}{p^2}+\frac{kq}{p}-\frac{k^2q^2}{p^2}
+=\frac{kq^2}{p^2}+\frac{kq}{p}
+=\frac{kq}{p^2}\left(q+p\right)
+$$
+$$\therefore\quad\text{Var}(X)=\frac{kq}{p^2}.$$
+
+\begin{note}
+Factorial moments exist because $E\left[X(X-1)\cdots\right]$ is easier to sum than
+$E\left(X^j\right)$ for the discrete distributions: the falling factorial cancels
+against the factorials inside the probability function. Converting back is
+mechanical --- $E\left(X^2\right)=E\left[X(X-1)\right]+E(X)$, and so on.
+
+The second half of this assignment question asks for the corresponding gamma
+result, $E\left(X^k\right)=\beta^k(k+\alpha-1)^{(k)}$. It was set again as
+Question 1(b) of the 2013 examination and is worked in section 4.1, so it is not
+repeated here.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 1}
+Let $X$ and $Y$ be continuous random variables with joint p.d.f.
+$$f(x,y)=k(x+y),\qquad 0\leq x\leq y\leq1.$$
+Find the
+\begin{enumerate}
+\item[(a).] value of the constant $k$;
+\item[(b).] joint c.d.f. of $X$ and $Y$, $F(x,y)$;
+\item[(c).] marginal c.d.f. of $X$ and marginal c.d.f. of $Y$;
+\item[(d).] marginal p.d.f. of $X$ and marginal p.d.f. of $Y$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+The support is the triangle $0\leq x\leq y\leq1$ --- \emph{not} the unit square.
+Every integral below has to respect that, and it is where most of the marks are.
+
+\textbf{(a).} Integrating $x$ from $0$ to $y$, then $y$ from $0$ to $1$,
+$$1=k\int_0^1\!\!\int_0^y(x+y)\,dx\,dy
+=k\int_0^1\left[\frac{x^2}{2}+xy\right]_0^y dy
+=k\int_0^1\frac{3y^2}{2}\,dy
+=\frac{k}{2},$$
+$$\therefore\quad k=2.$$
+
+\textbf{(b).} The joint c.d.f. splits into cases according to whether the corner
+$(x,y)$ lies above or below the line $u=v$.
+
+For $0\leq x\leq y\leq1$ the region $\{U\leq x,\ V\leq y\}$ meets the support in
+$\{0\leq u\leq x,\ u\leq v\leq y\}$, so
+$$F(x,y)=\int_0^x\!\!\int_u^y2(u+v)\,dv\,du
+=\int_0^x\left[2uv+v^2\right]_u^y du
+=\int_0^x\left(2uy+y^2-3u^2\right)du,$$
+$$F(x,y)=x^2y+xy^2-x^3.$$
+
+For $0\leq y\leq x$ with $y\leq1$ the constraint $U\leq x$ is not binding, because
+the support already forces $U\leq V\leq y\leq x$. So $F(x,y)=P(V\leq y)=y^3$.
+Collecting the cases,
+$$F(x,y)=\begin{cases}
+0, & x<0\ \text{or}\ y<0,\\[2pt]
+x^2y+xy^2-x^3, & 0\leq x\leq y\leq1,\\[2pt]
+y^3, & 0\leq y\leq x,\ y\leq1,\\[2pt]
+x^2+x-x^3, & 0\leq x\leq1,\ y>1,\\[2pt]
+1, & x>1,\ y>1.
+\end{cases}$$
+The two middle rows agree on $x=y$, where both give $y^3$, so $F$ is continuous
+across the diagonal --- worth checking, because a mistake in the limits almost
+always shows up as a jump there.
+
+\textbf{(c).} Let $y\to1$ and $x\to1$ in turn:
+$$F_X(x)=F(x,1)=x^2+x-x^3,\quad 0\leq x\leq1;\qquad
+F_Y(y)=F(1,y)=y^3,\quad 0\leq y\leq1,$$
+each $0$ below its range and $1$ above.
+
+\textbf{(d).} Differentiating the marginal c.d.f.s,
+$$f_X(x)=2x+1-3x^2,\quad 0\leq x\leq1;\qquad f_Y(y)=3y^2,\quad 0\leq y\leq1.$$
+The same answers come from integrating the joint density directly,
+$$f_X(x)=\int_x^12(x+y)\,dy=2x+1-3x^2,\qquad
+f_Y(y)=\int_0^y2(x+y)\,dx=3y^2,$$
+and both integrate to $1$ over $[0,1]$.
+
+\begin{note}
+The limits are the whole question. $f_X$ integrates $y$ from $x$ to $1$, not $0$
+to $1$, because on the support $Y$ is never below $X$; $f_Y$ integrates $x$ from
+$0$ to $y$ for the same reason. Sketch the triangle before writing anything down.
+
+Note also that $X$ and $Y$ are \emph{not} independent here: $f_X(x)f_Y(y)$ is not
+$2(x+y)$, and in any case a triangular support rules independence out on its own.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 1}
+Given that $X$ is a continuous random variable with p.d.f.
+$$f(x)=kx^{-(\theta+1)},\qquad x>\alpha;\ \theta>0,\ \alpha>0,$$
+find the
+\begin{enumerate}
+\item[(a).] value of the constant $k$;
+\item[(b).] p.d.f. of $Y=\theta\ln\left(\frac{X}{\alpha}\right)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} Since $\theta>0$ the integral converges at infinity:
+$$1=\int_\alpha^\infty kx^{-(\theta+1)}dx
+=k\left[\frac{x^{-\theta}}{-\theta}\right]_\alpha^\infty
+=\frac{k\alpha^{-\theta}}{\theta}
+\qquad\implies\qquad k=\theta\alpha^\theta.$$
+This is the Pareto distribution with scale $\alpha$ and shape $\theta$.
+
+\textbf{(b).} The transformation $y=\theta\ln\left(\frac{x}{\alpha}\right)$ is
+strictly increasing, mapping $x>\alpha$ onto $y>0$, with inverse and derivative
+$$x=\alpha e^{\frac{y}{\theta}},\qquad
+\frac{dx}{dy}=\frac{\alpha}{\theta}e^{\frac{y}{\theta}}.$$
+Hence
+$$f_Y(y)=f_X\!\left(\alpha e^{\frac{y}{\theta}}\right)\left|\frac{dx}{dy}\right|
+=\theta\alpha^\theta\left(\alpha e^{\frac{y}{\theta}}\right)^{-(\theta+1)}
+\cdot\frac{\alpha}{\theta}e^{\frac{y}{\theta}}
+=\alpha^{\theta-\theta-1+1}\,
+e^{-\frac{(\theta+1)y}{\theta}+\frac{y}{\theta}}
+=e^{-y},$$
+$$\therefore\quad Y\sim\text{EXP}(1),\qquad y>0.$$
+
+\begin{note}
+Every power of $\alpha$ and $\theta$ cancels: the answer does not depend on either
+parameter. That is the point of the question. A Pareto variable is an exponential
+one in disguise, which is why $\ln X$ turns Pareto data into something a
+$t$-test or a regression can handle.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 1}
+\begin{enumerate}
+\item[(a).] Let $X$ have p.d.f. $f(x)=\frac{x^2}{9}$, $0<x<3$. Find the p.d.f. of
+$Y=X^3$.
+\item[(b).] Let $X\sim\text{UNIF}(0,1)$. Find the p.d.f. of
+(i) $Y=e^{-X}$ and (ii) $V=X(1-X)$.
+\item[(c).] Let $X$ have p.d.f. $f(x)=\frac{1}{24}x^2$, $-2<x<4$. Find the p.d.f.
+of $Y=X^2$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} $y=x^3$ is increasing, taking $0<x<3$ onto $0<y<27$, with
+$x=y^{\frac13}$ and $\frac{dx}{dy}=\frac13y^{-\frac23}$. So
+$$f_Y(y)=\frac{\left(y^{\frac13}\right)^2}{9}\cdot\frac{1}{3}y^{-\frac23}
+=\frac{y^{\frac23}}{9}\cdot\frac{y^{-\frac23}}{3}=\frac{1}{27},
+\qquad 0<y<27,$$
+$$\therefore\quad Y\sim\text{UNIF}(0,27).$$
+
+\textbf{(b)(i).} $y=e^{-x}$ is \emph{decreasing}, taking $0<x<1$ onto
+$e^{-1}<y<1$, with $x=-\ln y$ and $\left|\frac{dx}{dy}\right|=\frac{1}{y}$. Since
+$f_X\equiv1$,
+$$f_Y(y)=\frac{1}{y},\qquad \frac{1}{e}<y<1,$$
+and $\int_{1/e}^1\frac{dy}{y}=\ln1-\ln e^{-1}=1$, as it must.
+
+\textbf{(ii).} Here $v=x(1-x)$ is \textbf{not} monotone on $(0,1)$: it rises to
+$\frac14$ at $x=\frac12$ and falls back. The change-of-variable formula does not
+apply directly, so work with the distribution function.
+
+Solving $x^2-x+v=0$ gives the two roots $x=\frac{1\pm\sqrt{1-4v}}{2}$, and
+$X(1-X)\leq v$ holds outside them:
+$$F_V(v)=P\left(X\leq\frac{1-\sqrt{1-4v}}{2}\right)
++P\left(X\geq\frac{1+\sqrt{1-4v}}{2}\right).$$
+As $X$ is uniform on $(0,1)$ these probabilities are the lengths themselves:
+$$F_V(v)=\frac{1-\sqrt{1-4v}}{2}+1-\frac{1+\sqrt{1-4v}}{2}=1-\sqrt{1-4v}.$$
+Differentiating,
+$$f_V(v)=\frac{2}{\sqrt{1-4v}},\qquad 0<v<\frac14,$$
+which integrates to $\left[-\sqrt{1-4v}\right]_0^{1/4}=1$.
+
+\textbf{(c).} Again $y=x^2$ is not monotone on $(-2,4)$, and this time the two
+branches cover \emph{different} ranges. For $0<y<4$ both $x=\pm\sqrt y$ lie in
+$(-2,4)$; for $4<y<16$ only $x=+\sqrt y$ does, since $-\sqrt y<-2$. With
+$f_X(x)=\frac{x^2}{24}$ and $\left|\frac{dx}{dy}\right|=\frac{1}{2\sqrt y}$,
+$$f_Y(y)=\begin{cases}
+\dfrac{2\cdot\frac{y}{24}}{2\sqrt y}=\dfrac{\sqrt y}{24}, & 0<y<4,\\[10pt]
+\dfrac{\frac{y}{24}}{2\sqrt y}=\dfrac{\sqrt y}{48}, & 4<y<16.
+\end{cases}$$
+As a check,
+$$\int_0^4\frac{\sqrt y}{24}\,dy+\int_4^{16}\frac{\sqrt y}{48}\,dy
+=\frac{16}{72}+\frac{112}{144}=\frac{2}{9}+\frac{7}{9}=1.$$
+
+\begin{note}
+Parts (b)(ii) and (c) are the whole reason this question is set. A transformation
+that is not one-to-one has to go through the distribution function, and the
+support of $Y$ has to be worked out branch by branch --- in (c) the density
+\emph{halves} at $y=4$, because above that point only one branch survives.
+Writing $f_Y(y)=\frac{\sqrt y}{24}$ across the whole of $0<y<16$ is the standard
+mistake, and it integrates to $\frac{16}{9}$, not $1$.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 1}
+\begin{enumerate}
+\item[(a).] Let $X$ have the binomial p.f.
+$f(x)=\binom{3}{x}\left(\frac23\right)^x\left(\frac13\right)^{3-x}$, $x=0,1,2,3$.
+Find the p.f. of $Y=X^2$.
+\item[(b).] Let $X$ have p.f. $f(x)=\frac13$, $x=1,2,3$. Find the p.f. of
+$Y=2X+1$.
+\item[(c).] Suppose $X$ has p.f. $f(x)=\left(\frac12\right)^x$, $x=1,2,3,\ldots$
+Find the p.f. of $Y=X^3$.
+\item[(d).] If $X\sim BIN(n,p)$, find the p.f. of $Y=n-X$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+For a discrete variable there is no Jacobian. When the map is one-to-one the
+probabilities simply move with the values: $f_Y(y)=f_X\left(w(y)\right)$, where
+$w$ is the inverse.
+
+\textbf{(a).} On $x=0,1,2,3$ the map $y=x^2$ is one-to-one (no negative values to
+collide), so $Y$ takes $0,1,4,9$ with $x=\sqrt y$:
+$$f_Y(y)=\binom{3}{\sqrt y}\left(\frac23\right)^{\sqrt y}
+\left(\frac13\right)^{3-\sqrt y},\qquad y=0,1,4,9,$$
+that is
+$$f_Y(0)=\frac{1}{27},\quad f_Y(1)=\frac{6}{27},\quad
+f_Y(4)=\frac{12}{27},\quad f_Y(9)=\frac{8}{27},$$
+which total $\frac{27}{27}=1$.
+
+\textbf{(b).} $y=2x+1$ carries $x=1,2,3$ to $y=3,5,7$, and the probabilities go
+with them:
+$$f_Y(y)=\frac13,\qquad y=3,5,7.$$
+
+\textbf{(c).} $y=x^3$ carries $x=1,2,3,\ldots$ to the cubes $y=1,8,27,\ldots$,
+with $x=y^{\frac13}$:
+$$f_Y(y)=\left(\frac12\right)^{y^{1/3}},\qquad y=1,8,27,64,\ldots$$
+
+\textbf{(d).} $Y=n-X$ takes the values $y=0,1,\ldots,n$, and
+$$f_Y(y)=P(X=n-y)=\binom{n}{n-y}p^{n-y}q^{y}=\binom{n}{y}q^{y}p^{n-y},$$
+using $\binom{n}{n-y}=\binom{n}{y}$.
+$$\therefore\quad Y\sim BIN(n,q)=BIN(n,1-p).$$
+This is obvious once stated: if $X$ counts the successes in $n$ trials then
+$n-X$ counts the failures, and a failure has probability $q$.
+
+\begin{note}
+Part (c) is printed with the support $x=1,2,3$, which cannot be right:
+$\frac12+\frac14+\frac18=\frac78$, not $1$. The intended support is
+$x=1,2,3,\ldots$, and it is taken that way above. Part (b) is genuinely finite,
+since $\frac13$ three times does sum to $1$ --- which is presumably how the
+misprint survived.
+\end{note}
+\end{solution}
+
 \chapter{Estimation}
 
 \section{Introduction}
@@ -2881,7 +3167,8 @@ Therefore, $T$ is a consistent estimator for $\sigma^2$.
 
 \section{Practice problems}
 
-Past assignment questions on estimation. Work each one before opening the solution.
+Past assignment and quiz questions on estimation. Work each one before opening
+the solution.
 
 \begin{problem}{Assignment 2}
 Let $X_1,X_2,\ldots,X_n$ be a random sample from
@@ -3437,6 +3724,120 @@ so $Y\sim\text{EXP}(\theta)$ with $E(Y)=\frac{1}{\theta}$. That is why the
 sufficient statistic is a sum of logarithms, and it confirms the score has mean
 zero: $E\!\left[\frac{1}{\theta}-\ln(1+X)\right]=\frac{1}{\theta}-\frac{1}{\theta}=0$,
 as it must.
+\end{note}
+\end{solution}
+
+
+\begin{problem}{Quiz, February 2014}
+Let $X_1,X_2,\ldots,X_n$ be a random sample from
+$$f(x,\theta)=\theta^x(1-\theta)^{1-x},\qquad x=0,1.$$
+\begin{enumerate}
+\item[(a).] Find a sufficient statistic for $\theta$.
+\item[(b).] Find the maximum likelihood estimator of $\theta$.
+\item[(c).] Determine whether the estimator $T=\bar X$ is a U.M.V.U.E. for
+$\theta$.
+\item[(d).] Determine whether $T_1=\bar X^2$ is a consistent estimator for
+$\tau(\theta)=\theta^2$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+This is the Bernoulli distribution, $E(X)=\theta$ and
+$\text{Var}(X)=\theta(1-\theta)$.
+
+\textbf{(a).} The likelihood factorises as
+$$L(\theta)=\prod_{i=1}^n\theta^{x_i}(1-\theta)^{1-x_i}
+=\theta^{\sum x_i}(1-\theta)^{n-\sum x_i}
+=\underbrace{\left(\frac{\theta}{1-\theta}\right)^{\sum x_i}
+(1-\theta)^n}_{g\left(\sum x_i,\ \theta\right)}\cdot\underbrace{1}_{h(\underline{x})},$$
+so by the factorisation criterion
+$$S=\sum_{i=1}^nX_i$$
+is sufficient for $\theta$.
+
+\textbf{(b).} Taking logarithms,
+$$\ell(\theta)=\left(\sum x_i\right)\ln\theta
++\left(n-\sum x_i\right)\ln(1-\theta),$$
+$$\ell'(\theta)=\frac{\sum x_i}{\theta}-\frac{n-\sum x_i}{1-\theta}=0
+\quad\implies\quad(1-\theta)\sum x_i=\theta\left(n-\sum x_i\right),$$
+which gives $\sum x_i=n\theta$ and hence
+$$\hat\theta=\frac{\sum x_i}{n}=\bar X,$$
+with $\ell''(\theta)<0$ throughout, confirming a maximum.
+
+\textbf{(c).} Written in exponential family form,
+$$f(x,\theta)=(1-\theta)\exp\left[x\ln\frac{\theta}{1-\theta}\right],$$
+so $S=\sum X_i$ is a \emph{complete} sufficient statistic. Now $\bar X=S/n$ is a
+function of $S$ alone and is unbiased,
+$E\left(\bar X\right)=\frac{1}{n}\cdot n\theta=\theta$. By the
+Lehmann--Scheff\'e theorem,
+$$\therefore\quad T=\bar X\ \textbf{is the UMVUE of }\theta.$$
+
+\textbf{(d).} $\bar X\stackrel{p}{\longrightarrow}\theta$ by the weak law of
+large numbers, and squaring is a continuous function, so
+$\bar X^2\stackrel{p}{\longrightarrow}\theta^2$. Directly:
+$$E\left(\bar X^2\right)=\text{Var}\left(\bar X\right)+\left[E\bar X\right]^2
+=\frac{\theta(1-\theta)}{n}+\theta^2\ \longrightarrow\ \theta^2,$$
+and the variance of $\bar X^2$ tends to $0$ as well, so the mean square error
+vanishes.
+$$\therefore\quad T_1=\bar X^2\ \textbf{is consistent for }\theta^2.$$
+
+\begin{note}
+$T_1$ is consistent but \emph{biased} at every finite $n$, by exactly
+$\frac{\theta(1-\theta)}{n}$. Squaring an unbiased estimator does not give an
+unbiased estimator of the square --- the gap is the variance, and it is only
+consistency that survives.
+\end{note}
+\end{solution}
+
+\begin{problem}{Quiz, February 2014}
+Let $X_1,X_2,\ldots,X_n$ be a random sample from
+$$f(x;\theta)=e^{-(x-\theta)},\qquad x>\theta.$$
+\begin{enumerate}
+\item[(a).] Find the method of moments estimator of $\theta$.
+\item[(b).] Find the maximum likelihood estimator of $\theta$.
+\item[(c).] Determine whether $T=\frac{nX_{(1)}-2}{n}$ is an asymptotically
+unbiased estimator of $\theta$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+This is the exponential distribution shifted to start at $\theta$: if
+$Z\sim\text{EXP}(1)$ then $X=\theta+Z$.
+
+\textbf{(a).} $E(X)=\theta+E(Z)=\theta+1$. Equating to the first sample moment,
+$$\bar X=\theta+1\qquad\implies\qquad\tilde\theta=\bar X-1.$$
+
+\textbf{(b).} The likelihood needs care, because $\theta$ appears in the
+\emph{support}:
+$$L(\theta)=\prod_{i=1}^ne^{-(x_i-\theta)}=e^{-\sum x_i}e^{n\theta}
+\qquad\text{provided }x_i>\theta\ \text{for every }i.$$
+As a function of $\theta$ this is strictly increasing, so it is made as large as
+possible by taking $\theta$ as large as the constraint allows. The constraint is
+$\theta<\min_ix_i$, hence
+$$\hat\theta=X_{(1)}=\min\left(X_1,\ldots,X_n\right).$$
+Differentiating would have given $\ell'(\theta)=n\neq0$ and no solution at all ---
+the maximum is at the boundary, not at a turning point.
+
+\textbf{(c).} First find $E\left(X_{(1)}\right)$. The minimum exceeds $m$ only if
+every observation does, so for $m>\theta$
+$$P\left(X_{(1)}>m\right)=\left[e^{-(m-\theta)}\right]^n=e^{-n(m-\theta)},
+\qquad f_{X_{(1)}}(m)=ne^{-n(m-\theta)}.$$
+So $X_{(1)}$ is itself shifted exponential, with mean $\frac1n$ above $\theta$:
+$$E\left(X_{(1)}\right)=\int_\theta^\infty m\,ne^{-n(m-\theta)}dm
+=\theta+\frac{1}{n}.$$
+Therefore
+$$E(T)=E\left(X_{(1)}-\frac{2}{n}\right)=\theta+\frac{1}{n}-\frac{2}{n}
+=\theta-\frac{1}{n},$$
+$$\lim_{n\to\infty}E(T)=\theta,$$
+$$\therefore\quad T\ \textbf{is asymptotically unbiased for }\theta,$$
+though it is biased by $-\frac1n$ at every finite $n$.
+
+\begin{note}
+The maximum likelihood estimator $X_{(1)}$ overshoots by $\frac1n$, so
+$X_{(1)}-\frac1n$ is \emph{exactly} unbiased. The estimator in the question
+subtracts $\frac2n$ — twice as much — which overcorrects and leaves a bias of
+$-\frac1n$. Both are asymptotically unbiased, so the property is a weak one: it
+says nothing about how good the estimator is at the sample size you actually
+have.
 \end{note}
 \end{solution}
 

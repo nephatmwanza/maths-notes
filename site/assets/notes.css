@@ -150,7 +150,8 @@ a:hover{color:var(--accent-deep)}
 }
 .proof p:last-child{margin-bottom:0}
 /* the source nests proofs inside enumerate; claw back the double indent */
-.newtheorem ol .proof,.newtheorem ul .proof{margin-left:-.6rem}
+.newtheorem ol .proof,.newtheorem ul .proof,
+.newtheorem dl .proof{margin-left:-.6rem}
 
 /* The bold-word marker rules that used to sit here are gone. Both courses now
    write examples as real LaTeX environments, so tex4ht emits theorem markup and
@@ -169,17 +170,27 @@ a:hover{color:var(--accent-deep)}
 /* the "[Examination]" provenance tag */
 .nt-problem .head + .small,.newtheorem .head ~ .small{color:var(--mute)}
 
-/* tex4ht discards the optional label on \item[(a).] and lets the browser number
-   the list 1, 2, 3 instead. Harmless in the notes, but these problems are past
-   examination questions and students recognise them by their (a)/(b)/(c) parts,
-   so restore that lettering here. The LaTeX source already carries the same
-   labels, so print and web agree. */
-.nt-problem ol.enumerate1{list-style:none;counter-reset:part;padding-left:2rem}
-.nt-problem ol.enumerate1 > li{counter-increment:part;position:relative}
-.nt-problem ol.enumerate1 > li::before{
-  content:"(" counter(part,lower-alpha) ").";
-  position:absolute;left:-1.9rem;width:1.7rem;text-align:left;color:var(--soft);
+/* Numbered lists come through as <dl> because the sources load enumitem - see
+   the note in each .tex preamble. That is what keeps the author's own
+   \item[(a).] label instead of letting the browser count 1, 2, 3.
+     Laid out as a two-column grid so the label sits in its own column and the
+   content aligns down the page whatever the label's width - "(a)." and "(iii)."
+   line up, which a plain <dl> will not do.
+     This replaces a counter() rule that faked "(a)." on every problem list.
+   That rule could only guess one style, so a question whose parts were
+   (i), (ii), (iii) in the source still came out lettered a, b, c - and it did
+   nothing at all for lists outside a problem. */
+dl.enumerate-enumitem{
+  display:grid;grid-template-columns:max-content 1fr;
+  column-gap:.55rem;row-gap:.4rem;
+  margin:0 0 1.15rem;padding-left:.3rem;
 }
+dl.enumerate-enumitem > dt{grid-column:1;color:var(--soft);white-space:nowrap}
+dl.enumerate-enumitem > dd{grid-column:2;margin:0;min-width:0}
+dl.enumerate-enumitem > dd > p:first-child{margin-top:0}
+dl.enumerate-enumitem > dd > p:last-child{margin-bottom:0}
+/* a nested list needs air above it but not the full paragraph gap below */
+dl.enumerate-enumitem dl.enumerate-enumitem{margin:.45rem 0 .25rem}
 
 details.solution{
   margin:-.6rem 0 1.8rem;border-left:2px solid var(--line);padding-left:1.1rem;
@@ -279,6 +290,8 @@ figcaption .id,.caption .id{font-weight:650;color:var(--soft)}
 
 /* ---------- lists ---------- */
 .content ol,.content ul{margin:0 0 1.15rem;padding-left:1.4rem}
+/* dl lists set their own padding in the grid rule above */
+.content dl.enumerate-enumitem{padding-left:.3rem}
 .content li{margin-bottom:.4rem}
 
 /* ---------- page nav (replaces tex4ht's bare [next][prev] links) ---------- */
@@ -320,6 +333,11 @@ figcaption .id,.caption .id{font-weight:650;color:var(--soft)}
   .newtheorem{padding:.85rem .9rem}
   .proof{padding-left:.85rem}
   .newtheorem ol,.newtheorem ul{padding-left:1.1rem}
+  /* narrow screens: let the label sit above its content rather than
+     squeezing the text into a sliver of a second column */
+  dl.enumerate-enumitem{grid-template-columns:1fr;row-gap:.1rem}
+  dl.enumerate-enumitem > dt{grid-column:1;margin-top:.45rem}
+  dl.enumerate-enumitem > dd{grid-column:1;padding-left:1.1rem}
   .sidebar{
     position:fixed;left:0;top:0;z-index:35;transform:translateX(-100%);
     transition:transform .22s ease;box-shadow:0 0 24px rgba(0,0,0,.15);
