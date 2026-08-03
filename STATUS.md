@@ -485,6 +485,41 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-03 — Every "sketch" tutorial question now has its curve drawn
+
+Diagrams went 39 -> 122. Every tutorial question that tells a learner to sketch,
+draw or illustrate now shows the answer, including the Venn diagram for Sheet 1
+Q1(b) (which said "draw a Venn diagram" and got a table) and De Morgan's laws on
+the number line.
+
+**Panels are generated, not hand-written** — `scratchpad/panel2.py`, from the same
+sympy expressions the solutions were checked against, so a curve cannot drift from
+the answer printed beside it. The generator refuses to emit a panel whose curve
+leaves its own box; that caught five bad domains.
+
+**Three TikZ traps, all worth remembering:**
+- Do **not** use `xscale`/`yscale` anisotropically. It turns circle markers into
+  ellipses and lets bounding boxes wander — eleven panels meant to be identical
+  came out between 109pt and 729pt tall. Normalise the *data* into a fixed
+  centimetre box and leave the canvas alone.
+- A y-range of a few hundred drives `yscale` to ~0.008 and **overflows pgf**:
+  the build dies with `Dimension too large`. Normalising removes the cause.
+- **pgfmath computes `a^b` as `exp(b ln a)`**, which is wrong for negative `a`, so
+  `\t^4` misbehaves silently once a domain crosses zero. Expand powers into
+  repeated multiplication.
+
+**Two process lessons:**
+- When splitting generated blocks apart, anchor on the opening token
+  (`\begin{tikzpicture}`), not on a separator. Anchoring on the separator left
+  the generator's group names (`S8A`, `S4Q3`, ...) printed as literal text in
+  five figures — and that shipped in one commit before being noticed.
+- **Counting `\begin`/`\end` pairs is not a structural check.** A bad repair left
+  273/273 notes with the structure still wrong. The stack-based nesting checker
+  caught it ("end solution closes begin note"); a separate check that no figure
+  sits inside a note is now run too.
+
+Current build: 75 pages, 122 diagrams, none missing, no LaTeX errors.
+
 ### 2026-08-02 (later) — All eleven MAT1110 tutorial sheets worked
 
 **Course identity settled.** This is MAT1110, *Foundation Mathematics and Statistics for
