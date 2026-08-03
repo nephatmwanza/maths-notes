@@ -3313,6 +3313,133 @@ solve, the moment estimator makes a good starting value for the iteration.
 \end{note}
 \end{solution}
 
+
+\begin{problem}{Assignment 2.2}
+Let $X_1,\ldots,X_n$ be a random sample from
+$$f_X(x;\alpha,\lambda)=\lambda\frac{(\lambda x)^{\alpha-1}e^{-\lambda x}}
+{\Gamma(\alpha)},\qquad \alpha>0,\ \lambda>0,\ x>0.$$
+Find (i) joint sufficient statistics for $\theta=(\alpha,\lambda)$, (ii) the MLE
+for $\lambda$ if $\alpha=4$, (iii) the Cram\'er--Rao lower bound for $\lambda$ if
+$\alpha=4$, (iv) the UMVUE for $\lambda$ if it exists when $\alpha=4$.
+\end{problem}
+
+\begin{solution}
+\textbf{(i).} The likelihood is
+$$L=\frac{\lambda^{n\alpha}}{\Gamma(\alpha)^n}
+\left(\prod x_i\right)^{\alpha-1}e^{-\lambda\sum x_i}.$$
+Both $\prod x_i$ and $\sum x_i$ appear, and neither can be dispensed with while
+$\alpha$ is unknown, so
+$$T=\left(\sum_{i=1}^nX_i,\ \prod_{i=1}^nX_i\right)
+\quad\text{--- equivalently }\left(\sum X_i,\ \sum\ln X_i\right)\text{ ---}$$
+is jointly sufficient for $(\alpha,\lambda)$.
+
+\textbf{(ii).} With $\alpha=4$ the density is
+$f(x)=\frac{\lambda^4x^3e^{-\lambda x}}{6}$, so
+$$\ell(\lambda)=4n\ln\lambda+3\sum\ln x_i-\lambda\sum x_i-n\ln 6,$$
+$$\frac{d\ell}{d\lambda}=\frac{4n}{\lambda}-\sum x_i=0
+\quad\implies\quad \hat\lambda=\frac{4n}{\sum X_i}=\frac{4}{\bar X}.$$
+
+\textbf{(iii).} From $\ln f=4\ln\lambda+3\ln x-\lambda x-\ln 6$,
+$$\frac{\partial^2\ln f}{\partial\lambda^2}=-\frac{4}{\lambda^2},\qquad
+I_1(\lambda)=\frac{4}{\lambda^2},\qquad
+\text{CRLB}=\frac{1}{nI_1(\lambda)}=\frac{\lambda^2}{4n}.$$
+
+\textbf{(iv).} With $\alpha$ known, this is a one-parameter exponential family and
+$T=\sum X_i$ is a \emph{complete} sufficient statistic. Since each
+$X_i\sim\text{GAM}(4,\lambda)$, we have $T\sim\text{GAM}(4n,\lambda)$, and
+$$E\!\left(\frac{1}{T}\right)
+=\int_0^\infty\frac{1}{t}\cdot\frac{\lambda^{4n}t^{4n-1}e^{-\lambda t}}
+{\Gamma(4n)}\,dt=\frac{\lambda\,\Gamma(4n-1)}{\Gamma(4n)}=\frac{\lambda}{4n-1}.$$
+So the MLE $\frac{4n}{T}$ is \emph{biased}, with
+$E\!\left(\frac{4n}{T}\right)=\frac{4n\lambda}{4n-1}$. Correcting the constant,
+$$E\!\left(\frac{4n-1}{T}\right)=\lambda,$$
+and $\frac{4n-1}{T}$ is a function of the complete sufficient statistic alone. By
+the Lehmann--Scheff\'e theorem,
+$$\text{UMVUE of }\lambda\ =\ \frac{4n-1}{\sum_{i=1}^nX_i}.$$
+
+\begin{note}
+The UMVUE does \emph{not} attain the Cram\'er--Rao bound here. Using
+$E\!\left(\frac{1}{T^2}\right)=\frac{\lambda^2}{(4n-1)(4n-2)}$,
+$$\text{Var}\!\left(\frac{4n-1}{T}\right)=\frac{\lambda^2}{4n-2}
+\quad>\quad \frac{\lambda^2}{4n}=\text{CRLB},$$
+the gap being $\frac{\lambda^2}{4n(2n-1)}$. So ``minimum variance among unbiased
+estimators'' and ``attains the CRLB'' are not the same statement --- the bound is
+simply not always achievable, and an estimator can be the best there is without
+reaching it.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 2.2}
+Let $X_1,\ldots,X_n$ be a random sample from
+$f_X(x;\lambda)=\frac{\lambda^xe^{-\lambda}}{x!}$, $x=0,1,2,\ldots$
+Find (i) a sufficient statistic for $\lambda$, (ii) the efficiency of the MLE for
+$\lambda$, (iii) the relative efficiency of the MLE to $W=X_1$.
+\end{problem}
+
+\begin{solution}
+\textbf{(i).} The likelihood is
+$$L=\frac{\lambda^{\sum x_i}e^{-n\lambda}}{\prod x_i!}
+=\underbrace{\lambda^{\sum x_i}e^{-n\lambda}}_{g\left(\sum x_i;\lambda\right)}
+\cdot\underbrace{\frac{1}{\prod x_i!}}_{h(\mathbf{x})},$$
+so $T=\sum_{i=1}^nX_i$ is sufficient for $\lambda$.
+
+\textbf{(ii).} The MLE is $\hat\lambda=\bar X$, with
+$\text{Var}\left(\bar X\right)=\frac{\lambda}{n}$. From
+$\frac{\partial^2\ln f}{\partial\lambda^2}=-\frac{x}{\lambda^2}$ we get
+$I_1(\lambda)=\frac{1}{\lambda}$ and $\text{CRLB}=\frac{\lambda}{n}$. Hence
+$$\text{eff}\left(\hat\lambda\right)
+=\frac{\text{CRLB}}{\text{Var}\left(\bar X\right)}
+=\frac{\lambda/n}{\lambda/n}=1.$$
+The MLE is \textbf{efficient} --- it attains the bound exactly.
+
+\textbf{(iii).} $W=X_1$ is also unbiased for $\lambda$, since $E(X_1)=\lambda$, but
+it throws away $n-1$ of the observations. With $\text{Var}(W)=\lambda$,
+$$\text{RE}\left(\hat\lambda,W\right)
+=\frac{\text{Var}(W)}{\text{Var}\left(\hat\lambda\right)}
+=\frac{\lambda}{\lambda/n}=n.$$
+The sample mean is $n$ times as efficient as a single observation.
+
+\begin{note}
+Contrast this with the previous question. There the UMVUE fell short of the bound;
+here the MLE meets it exactly. The Poisson mean is one of the cases where the
+score function factors as $I(\lambda)\left(\bar x-\lambda\right)$, and that
+proportionality is precisely the condition for equality in the Cram\'er--Rao
+inequality.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 2.2}
+Let $X_1,\ldots,X_n$ be a random sample from
+$$f_X(x;\theta)=\frac{\theta}{(1+x)^{\theta+1}},\qquad x>0,\ \theta>0.$$
+Find (i) a sufficient statistic for $\theta$, (ii) the Cram\'er--Rao lower bound
+for $\theta$.
+\end{problem}
+
+\begin{solution}
+\textbf{(i).} Write the likelihood with the product in the exponent:
+$$L=\frac{\theta^n}{\prod(1+x_i)^{\theta+1}}
+=\theta^n\exp\!\left(-(\theta+1)\sum\ln(1+x_i)\right).$$
+This depends on the sample only through $\sum\ln(1+x_i)$, so
+$$T=\sum_{i=1}^n\ln\left(1+X_i\right)\ \text{ is sufficient for }\theta.$$
+
+\textbf{(ii).} From $\ln f=\ln\theta-(\theta+1)\ln(1+x)$,
+$$\frac{\partial\ln f}{\partial\theta}=\frac{1}{\theta}-\ln(1+x),\qquad
+\frac{\partial^2\ln f}{\partial\theta^2}=-\frac{1}{\theta^2}.$$
+The second derivative is free of $x$, so
+$$I_1(\theta)=\frac{1}{\theta^2},\qquad
+\text{CRLB}=\frac{1}{nI_1(\theta)}=\frac{\theta^2}{n}.$$
+
+\begin{note}
+The substitution $Y=\ln(1+X)$ makes this transparent. Since
+$P(X>x)=(1+x)^{-\theta}$,
+$$P(Y>y)=P\!\left(X>e^y-1\right)=e^{-\theta y},$$
+so $Y\sim\text{EXP}(\theta)$ with $E(Y)=\frac{1}{\theta}$. That is why the
+sufficient statistic is a sum of logarithms, and it confirms the score has mean
+zero: $E\!\left[\frac{1}{\theta}-\ln(1+X)\right]=\frac{1}{\theta}-\frac{1}{\theta}=0$,
+as it must.
+\end{note}
+\end{solution}
+
 \chapter{Hypothesis Testing}
 
 \section{Introduction}
