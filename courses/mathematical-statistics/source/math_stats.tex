@@ -4459,4 +4459,308 @@ Therefore \[R = \left\{(x_1, \cdots , x_n):\, \sum^n_{i = 1} x_i \leq \frac{\the
 
 
 
+
+\section{Practice problems}
+
+Past assignment questions on hypothesis testing. Work each one before opening the
+solution.
+
+\begin{problem}{Assignment 3}
+Consider a distribution with p.d.f. $f(x;\theta)=\theta x^{\theta-1}$, $0<x<1$.
+\begin{enumerate}
+\item[(a).] Based on a random sample of size $n=1$, find the most powerful test of
+$H_0:\theta=1$ against $H_1:\theta=2$ with $\alpha=0.05$.
+\item[(b).] Compute the power of the test in (a) for the alternative $\theta=2$.
+\item[(c).] Derive the most powerful test for the hypotheses of (a) based on a
+random sample of size $n$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} Under $H_0$ the density is $f_0(x)=1$ --- the uniform on $(0,1)$ ---
+and under $H_1$ it is $f_1(x)=2x$. By the Neyman--Pearson lemma the most powerful
+test rejects when the ratio is small:
+$$\frac{f_0(x)}{f_1(x)}=\frac{1}{2x}\leq k.$$
+Since $\frac{1}{2x}$ \emph{decreases} in $x$, this is equivalent to $x\geq c$ for
+some $c$. Fixing the size,
+$$\alpha=P(X\geq c\mid\theta=1)=\int_c^1 1\,dx=1-c=0.05
+\quad\implies\quad c=0.95.$$
+$$\therefore\quad \text{reject } H_0 \text{ when } X\geq 0.95.$$
+
+\textbf{(b).} The power is the same probability computed under the alternative:
+$$\text{power}=P(X\geq 0.95\mid\theta=2)=\int_{0.95}^1 2x\,dx
+=\left[x^2\right]_{0.95}^1=1-0.9025=0.0975.$$
+
+\begin{note}
+A power of $0.0975$ against a size of $0.05$ is dreadful --- barely better than
+tossing a coin weighted $1:19$. That is not a flaw in the test; it is the most
+powerful test there is at this size. One observation simply cannot distinguish
+$\theta=1$ from $\theta=2$, which is exactly why part (c) asks for $n$.
+\end{note}
+
+\textbf{(c).} For a sample of size $n$,
+$$\frac{L(1)}{L(2)}=\frac{1}{2^n\prod x_i}\leq k
+\quad\Longleftrightarrow\quad \prod_{i=1}^n x_i\geq c.$$
+Taking logarithms and reversing the inequality (the logarithms are negative),
+$$-\sum_{i=1}^n\ln x_i\leq c'.$$
+Under $H_0$, $X_i\sim\text{UNIF}(0,1)$, so $-\ln X_i\sim\text{EXP}(1)$ and
+$$-\sum_{i=1}^n\ln X_i\sim\text{GAM}(n,1),\qquad\text{equivalently}\qquad
+-2\sum_{i=1}^n\ln X_i\sim\chi^2(2n).$$
+$$\therefore\quad\text{reject } H_0 \text{ when }
+-2\sum_{i=1}^n\ln X_i\leq\chi^2_{1-\alpha}(2n),$$
+the lower tail, because large values of $\prod x_i$ favour the alternative.
+\end{solution}
+
+\begin{problem}{Assignment 3}
+Suppose that $X\sim\text{POI}(\theta)$.
+\begin{enumerate}
+\item[(a).] Derive the size $\alpha$ MP test of $H_0:\theta=\theta_0$ versus
+$H_1:\theta=\theta_1$ $(\theta_1>\theta_0)$ based on an observed value of $X$.
+\item[(b).] Rework (a) based on a random sample of size $n$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The Neyman--Pearson ratio is
+$$\frac{f_0(x)}{f_1(x)}
+=\frac{e^{-\theta_0}\theta_0^x/x!}{e^{-\theta_1}\theta_1^x/x!}
+=e^{\theta_1-\theta_0}\left(\frac{\theta_0}{\theta_1}\right)^x.$$
+Because $\theta_1>\theta_0$ the base $\frac{\theta_0}{\theta_1}$ is less than $1$,
+so the ratio decreases in $x$ and ``ratio small'' means ``$x$ large''. The test is
+$$\text{reject } H_0 \text{ when } X\geq c,\qquad\text{where }
+P\left(X\geq c\mid\theta_0\right)=\alpha.$$
+
+\textbf{(b).} For a sample, $\sum X_i$ is sufficient and
+$\sum_{i=1}^nX_i\sim\text{POI}(n\theta)$. The ratio becomes
+$$\frac{L(\theta_0)}{L(\theta_1)}=e^{n(\theta_1-\theta_0)}
+\left(\frac{\theta_0}{\theta_1}\right)^{\sum x_i},$$
+decreasing in $\sum x_i$ by the same argument, so
+$$\text{reject } H_0 \text{ when } \sum_{i=1}^nX_i\geq c,\qquad
+P\left(\sum X_i\geq c\ \Big|\ n\theta_0\right)=\alpha.$$
+
+\begin{note}
+Because $X$ is discrete, a $c$ giving \emph{exactly} size $\alpha$ usually does not
+exist --- the attainable sizes are the jumps of the distribution. In practice one
+takes the smallest $c$ with $P(X\geq c\mid\theta_0)\leq\alpha$, giving a
+conservative test, or randomises at the boundary to hit $\alpha$ exactly.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 3}
+Let $X\sim NB(k,0.5)$ with $f(x)=\binom{x-1}{k-1}0.5^k0.5^{x-k}$,
+$x=k,k+1,\ldots$
+\begin{enumerate}
+\item[(a).] Derive the MP test of size $\alpha=0.125$ of $H_0:k=1$ against
+$H_1:k=2$ based on an observed value of $X$.
+\item[(b).] Compute the power of the test in (a) for the alternative $k=2$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Note first that $0.5^k0.5^{x-k}=0.5^x$ whatever $k$ is, so
+$$f(x)=\binom{x-1}{k-1}(0.5)^x.$$
+Under $H_0$ $(k=1)$: $f_0(x)=(0.5)^x$ for $x=1,2,\ldots$
+Under $H_1$ $(k=2)$: $f_1(x)=(x-1)(0.5)^x$ for $x=2,3,\ldots$
+
+\textbf{(a).} The ratio is
+$$\frac{f_0(x)}{f_1(x)}=\frac{1}{x-1},$$
+which decreases in $x$, so the most powerful test rejects for large $X$. For the
+size, the $H_0$ tail sums as a geometric series:
+$$P(X\geq c\mid k=1)=\sum_{x=c}^{\infty}(0.5)^x=(0.5)^{c-1}.$$
+Setting this equal to $0.125=(0.5)^3$ gives $c-1=3$, so
+$$\boxed{\ \text{reject } H_0 \text{ when } X\geq 4\ }$$
+and the size is exactly $0.125$ --- one of the rare discrete cases where $\alpha$
+is attained on the nose.
+
+\textbf{(b).} The power is
+$$P(X\geq 4\mid k=2)=1-P(X=2)-P(X=3)
+=1-(1)(0.5)^2-(2)(0.5)^3=1-0.25-0.25=0.5.$$
+
+\begin{note}
+The size came out exact because $0.125$ is itself a power of $\frac12$. Ask for
+$\alpha=0.10$ instead and no critical value gives it: the choices are $0.125$ at
+$c=4$ and $0.0625$ at $c=5$, and nothing in between.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 3}
+Consider a random sample of size $n$ from a distribution with pdf
+$$f(x;\theta)=\frac{3x^2}{\theta}e^{-\frac{x^3}{\theta}},\qquad x>0.$$
+Derive the form of the critical region for a uniformly most powerful test of size
+$\alpha$ of $H_0:\theta=\theta_0$ versus $H_1:\theta>\theta_0$.
+\end{problem}
+
+\begin{solution}
+For any $\theta_1>\theta_0$,
+$$\frac{L(\theta_1)}{L(\theta_0)}
+=\left(\frac{\theta_0}{\theta_1}\right)^n
+\exp\!\left[-\sum x_i^3\left(\frac{1}{\theta_1}-\frac{1}{\theta_0}\right)\right]
+=\left(\frac{\theta_0}{\theta_1}\right)^n
+\exp\!\left[\sum x_i^3\left(\frac{1}{\theta_0}-\frac{1}{\theta_1}\right)\right].$$
+Since $\theta_1>\theta_0$ we have $\frac{1}{\theta_0}-\frac{1}{\theta_1}>0$, so the
+ratio is an \emph{increasing} function of
+$$T=\sum_{i=1}^nX_i^3,$$
+and it depends on the sample only through $T$. The family therefore has a monotone
+likelihood ratio in $T$, and the critical region is free of $\theta_1$ --- which is
+what makes one test uniformly most powerful for the whole composite alternative:
+$$\text{reject } H_0 \text{ when } T=\sum_{i=1}^nX_i^3\geq c.$$
+
+To find $c$, substitute $Y=X^3$. Then $Y\sim\text{EXP}(\text{mean }\theta)$, so
+under $H_0$
+$$T\sim\text{GAM}(n,\theta_0)\qquad\text{and}\qquad
+\frac{2T}{\theta_0}\sim\chi^2(2n).$$
+$$\therefore\quad\text{reject } H_0 \text{ when }
+\frac{2}{\theta_0}\sum_{i=1}^nX_i^3\geq\chi^2_{\alpha}(2n).$$
+
+\begin{note}
+The whole argument turns on the ratio depending on $\theta_1$ only through a
+constant multiplier, never through the statistic. That is precisely the monotone
+likelihood ratio property, and it is why a single critical region works against
+every $\theta_1>\theta_0$ at once.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 3}
+Consider a random sample $X_1,\ldots,X_n$ from a p.f.
+$$f(x;\theta)=\frac{1}{\theta+1}\left(\frac{\theta}{\theta+1}\right)^x,
+\qquad x=0,1,2,\ldots$$
+where $\theta>0$. Find a UMP test of $H_0:\theta=\theta_0$ versus
+$H_1:\theta>\theta_0$.
+\end{problem}
+
+\begin{solution}
+This is the geometric distribution with success probability
+$p=\frac{1}{\theta+1}$, counted as the number of failures, so $E(X)=\theta$. The
+likelihood is
+$$L(\theta)=\frac{1}{(\theta+1)^n}\left(\frac{\theta}{\theta+1}\right)^{\sum x_i}.$$
+For $\theta_1>\theta_0$,
+$$\frac{L(\theta_1)}{L(\theta_0)}
+=\left(\frac{\theta_0+1}{\theta_1+1}\right)^{n}
+\left[\frac{\theta_1(\theta_0+1)}{\theta_0(\theta_1+1)}\right]^{\sum x_i}.$$
+Compare the two products inside the bracket:
+$$\theta_1(\theta_0+1)=\theta_0\theta_1+\theta_1,\qquad
+\theta_0(\theta_1+1)=\theta_0\theta_1+\theta_0,$$
+and since $\theta_1>\theta_0$ the first exceeds the second, so the bracket is
+greater than $1$. The ratio is therefore increasing in $\sum x_i$: a monotone
+likelihood ratio in $T=\sum X_i$. Hence
+$$\text{reject } H_0 \text{ when } T=\sum_{i=1}^nX_i\geq c,\qquad
+P\left(T\geq c\mid\theta_0\right)=\alpha,$$
+and this same region is most powerful against every $\theta_1>\theta_0$, so the
+test is UMP. Under $H_0$, $T$ is negative binomial --- the sum of $n$ independent
+geometrics --- which fixes $c$.
+
+\begin{note}
+The step worth copying is comparing $\theta_1(\theta_0+1)$ with
+$\theta_0(\theta_1+1)$ directly rather than trying to simplify the fraction. The
+common term $\theta_0\theta_1$ cancels and the comparison reduces to
+$\theta_1>\theta_0$, which is given.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 3}
+Let $X_1,\ldots,X_n$ be a random sample from $X_i\sim\text{GAM}(\beta,\theta)$ with
+$$f(x)=\frac{1}{\theta^\beta\Gamma(\beta)}x^{\beta-1}e^{-\frac{x}{\theta}},
+\qquad x>0.$$
+\begin{enumerate}
+\item[(a).] If $\beta$ is known: (i) show that $f(x_1,\ldots,x_n;\theta)$ has a
+monotone likelihood ratio; (ii) derive a UMP size $\alpha$ test of
+$H_0:\theta\leq\theta_0$ versus $H_1:\theta>\theta_0$; (iii) sketch the power
+function of the test in (ii).
+\item[(b).] If $\theta$ is known, derive a UMP size $\alpha$ test of
+$H_0:\beta\leq\beta_0$ against $H_1:\beta>\beta_0$. Sketch the power function.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a)(i).} With $\beta$ known,
+$$L(\theta)=\frac{1}{\theta^{n\beta}\Gamma(\beta)^n}
+\left(\prod x_i\right)^{\beta-1}e^{-\frac{1}{\theta}\sum x_i},$$
+so for $\theta_1>\theta_0$
+$$\frac{L(\theta_1)}{L(\theta_0)}
+=\left(\frac{\theta_0}{\theta_1}\right)^{n\beta}
+\exp\!\left[\sum x_i\left(\frac{1}{\theta_0}-\frac{1}{\theta_1}\right)\right].$$
+The exponent's coefficient is positive, so the ratio increases in
+$T=\sum X_i$: the family has a \textbf{monotone likelihood ratio} in $T$.
+
+\textbf{(ii).} By the Karlin--Rubin theorem, a family with MLR in $T$ gives a UMP
+test of $H_0:\theta\leq\theta_0$ against $H_1:\theta>\theta_0$ that rejects for
+large $T$. Under $\theta=\theta_0$,
+$$T\sim\text{GAM}(n\beta,\theta_0)\qquad\text{so}\qquad
+\frac{2T}{\theta_0}\sim\chi^2(2n\beta),$$
+$$\therefore\quad\text{reject } H_0 \text{ when }
+\frac{2}{\theta_0}\sum_{i=1}^nX_i\geq\chi^2_\alpha(2n\beta).$$
+
+\textbf{(iii).} The power function
+$$\pi(\theta)=P\!\left(\frac{2T}{\theta_0}\geq\chi^2_\alpha(2n\beta)\ \Big|\
+\theta\right)$$
+increases in $\theta$: it is below $\alpha$ throughout $\theta<\theta_0$, equals
+$\alpha$ exactly at $\theta=\theta_0$, and rises towards $1$ as $\theta$ grows.
+That the maximum over $H_0$ is attained at the boundary $\theta=\theta_0$ is what
+makes the size of the composite null equal to $\alpha$.
+
+\textbf{(b).} With $\theta$ known and $\beta$ unknown, collect the terms in
+$\beta$:
+$$L(\beta)=\frac{\left(\prod x_i\right)^{\beta-1}}
+{\theta^{n\beta}\Gamma(\beta)^n}e^{-\frac{1}{\theta}\sum x_i},$$
+$$\frac{L(\beta_1)}{L(\beta_0)}
+=\left[\frac{\Gamma(\beta_0)}{\Gamma(\beta_1)}\right]^n
+\theta^{-n(\beta_1-\beta_0)}
+\left(\prod x_i\right)^{\beta_1-\beta_0}.$$
+For $\beta_1>\beta_0$ the exponent $\beta_1-\beta_0$ is positive, so the ratio
+increases in $\prod x_i$, equivalently in
+$$T=\sum_{i=1}^n\ln X_i.$$
+By Karlin--Rubin again,
+$$\text{reject } H_0 \text{ when } \sum_{i=1}^n\ln X_i\geq c,\qquad
+P\left(T\geq c\mid\beta_0\right)=\alpha,$$
+and the power function increases in $\beta$ with the same shape as in (iii),
+crossing $\alpha$ at $\beta=\beta_0$.
+
+\begin{note}
+The two halves show how the sufficient statistic follows the parameter, not the
+distribution. Unknown scale puts the information in $\sum X_i$; unknown shape puts
+it in $\sum\ln X_i$. The same gamma sample supports two quite different tests
+depending on which parameter is in question.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 3}
+Let $X_1,\ldots,X_n$ be a random sample from $X_i\sim\text{EXP}(\theta)$ with pdf
+$f_\theta(x)=\frac{e^{-\frac{x}{\theta}}}{\theta}$, $x>0$. Derive the generalised
+likelihood ratio (GLR) test of $H_0:\theta=\theta_0$ versus
+$H_1:\theta\neq\theta_0$.
+\end{problem}
+
+\begin{solution}
+The likelihood is $L(\theta)=\theta^{-n}e^{-\frac{1}{\theta}\sum x_i}$, and the
+unrestricted maximum is at $\hat\theta=\bar x$. The GLR statistic is
+$$\lambda=\frac{L(\theta_0)}{L\left(\hat\theta\right)}
+=\frac{\theta_0^{-n}e^{-\frac{\sum x_i}{\theta_0}}}
+{\bar x^{-n}e^{-\frac{\sum x_i}{\bar x}}}.$$
+Since $\frac{\sum x_i}{\bar x}=n$, this simplifies to
+$$\lambda=\left(\frac{\bar x}{\theta_0}\right)^n
+e^{\,n-\frac{n\bar x}{\theta_0}}.$$
+Writing $u=\frac{\bar x}{\theta_0}$,
+$$\lambda=u^ne^{n(1-u)}=\left(ue^{1-u}\right)^n.$$
+
+Now examine $h(u)=ue^{1-u}$. Its derivative is
+$$h'(u)=(1-u)e^{1-u},$$
+which is positive for $u<1$ and negative for $u>1$, so $h$ rises to a single
+maximum $h(1)=1$ and falls away on both sides. Consequently
+$$\lambda\leq c\quad\Longleftrightarrow\quad u\leq c_1\ \text{ or }\ u\geq c_2,$$
+that is, the critical region is \textbf{two-sided} in $\bar X$ --- as it must be
+against a two-sided alternative. Equivalently, in terms of the sum,
+$$\text{reject } H_0 \text{ when }
+\frac{2}{\theta_0}\sum_{i=1}^nX_i\leq\chi^2_{1-\frac{\alpha}{2}}(2n)
+\quad\text{or}\quad
+\frac{2}{\theta_0}\sum_{i=1}^nX_i\geq\chi^2_{\frac{\alpha}{2}}(2n),$$
+using $\frac{2}{\theta_0}\sum X_i\sim\chi^2(2n)$ under $H_0$.
+
+\begin{note}
+The generalised ratio produces the two-sided region automatically. Nobody has to
+decide in advance that the test should have two tails --- it falls out of
+$ue^{1-u}$ having a single interior maximum, which is the same reason a one-sided
+alternative in the earlier questions produced a one-sided region.
+\end{note}
+\end{solution}
+
 \end{document}
