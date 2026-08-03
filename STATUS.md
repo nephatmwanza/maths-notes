@@ -567,8 +567,17 @@ moment generating function — the two agree to 1.4e-17.
 | Mathematical Statistics | 26 | 9 | **20** |
 
 Site total 46 → 149 question boxes, all 149 keys unique, no LaTeX errors, no missing
-diagrams, no empty titles. `scratchpad/verify_site.py` runs the whole check in one go and
-compares against a snapshot of the keys taken before the change.
+diagrams, no empty titles.
+
+**`site/check-site.py` is new and should be run after every rebuild.** It covers the
+failures that produce no error and no visible difference: empty titles, unbalanced divs,
+tex4ht internals leaking into prose, generator group names printed as text, a page that
+has a heading but no question box, and duplicate thread keys. It also compares against
+`site/discussion-keys.txt`, the committed list of all 149 live keys — because a retitled
+section silently orphans its discussion, and the only way to notice is to have written the
+keys down. Rewrite a heading deliberately and update the file in the same commit;
+see a key disappear without meaning it, and put the heading back. Tested against a
+doctored snapshot to confirm it actually reports the orphan rather than passing quietly.
 
 ### 2026-08-03 — Every "sketch" tutorial question now has its curve drawn
 
