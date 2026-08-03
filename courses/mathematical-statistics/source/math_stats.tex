@@ -2878,6 +2878,132 @@ Therefore, $T$ is a consistent estimator for $\sigma^2$.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Practice problems}
+
+Past assignment questions on estimation. Work each one before opening the solution.
+
+\begin{problem}{Assignment 2}
+Let $X_1,X_2,\ldots,X_n$ be a random sample from
+$$f(x;\theta)=\theta^2xe^{-\theta x},\qquad x>0,\ \theta>0.$$
+Find (a) the method of moments estimator for $\theta$, (b) a sufficient statistic
+for $\theta$, (c) the maximum likelihood estimator for $\theta$, (d) the information
+function for $\theta$.
+\end{problem}
+
+\begin{solution}
+Recognise the density first: it is $\text{GAM}(\alpha=2,\ \text{rate }\theta)$, which
+saves deriving moments from scratch.
+
+\textbf{(a) Method of moments.} The first population moment is
+$$E(X)=\int_0^\infty x\cdot\theta^2xe^{-\theta x}\,dx
+=\theta^2\int_0^\infty x^2e^{-\theta x}\,dx=\theta^2\cdot\frac{2}{\theta^3}
+=\frac{2}{\theta}.$$
+Equating it to the first sample moment $\bar X$,
+$$\frac{2}{\theta}=\bar X\quad\implies\quad \tilde\theta=\frac{2}{\bar X}
+=\frac{2n}{\sum_{i=1}^n X_i}.$$
+
+\textbf{(b) Sufficient statistic.} The likelihood is
+$$L(\theta)=\prod_{i=1}^n\theta^2x_ie^{-\theta x_i}
+=\theta^{2n}e^{-\theta\sum x_i}\cdot\prod_{i=1}^n x_i.$$
+This is already in the factorisation form $g\!\left(\sum x_i;\theta\right)h(\mathbf{x})$,
+with
+$$g\!\left(\textstyle\sum x_i;\theta\right)=\theta^{2n}e^{-\theta\sum x_i},
+\qquad h(\mathbf{x})=\prod x_i,$$
+and $h$ free of $\theta$. By the factorisation criterion
+$$T=\sum_{i=1}^n X_i\ \text{ is sufficient for }\theta.$$
+
+\textbf{(c) Maximum likelihood.} Take logarithms:
+$$\ell(\theta)=2n\ln\theta+\sum\ln x_i-\theta\sum x_i.$$
+$$\frac{d\ell}{d\theta}=\frac{2n}{\theta}-\sum x_i=0
+\quad\implies\quad \hat\theta=\frac{2n}{\sum x_i}=\frac{2}{\bar X}.$$
+It is a maximum because
+$$\frac{d^2\ell}{d\theta^2}=-\frac{2n}{\theta^2}<0\quad\text{for every }\theta>0.$$
+
+\textbf{(d) Information function.} For a single observation,
+$$\ln f=2\ln\theta+\ln x-\theta x,\qquad
+\frac{\partial\ln f}{\partial\theta}=\frac{2}{\theta}-x,\qquad
+\frac{\partial^2\ln f}{\partial\theta^2}=-\frac{2}{\theta^2}.$$
+The second derivative is already free of $x$, so taking the expectation changes
+nothing:
+$$I_1(\theta)=-E\!\left[\frac{\partial^2\ln f}{\partial\theta^2}\right]
+=\frac{2}{\theta^2},\qquad\text{and for the sample}\qquad
+I_n(\theta)=\frac{2n}{\theta^2}.$$
+
+\begin{note}
+The moment estimator and the maximum likelihood estimator coincide here. That is
+not a general rule --- it happens because $E(X)$ is a one-to-one function of
+$\theta$ and the likelihood equation reduces to the same relation. When they
+disagree, it is the maximum likelihood estimator that inherits the good
+large-sample properties.
+\end{note}
+
+\begin{note}
+Part (d) is unusually quick because $\frac{\partial^2\ln f}{\partial\theta^2}$
+contains no $x$. In general it does, and the expectation has to be evaluated ---
+as it does in the next question.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 2}
+Let $X_1,X_2,\ldots,X_n$ be a random sample from
+$$f(x;\theta)=\binom{x-1}{2}\theta^3(1-\theta)^{x-3},\qquad x=3,4,5,\ldots$$
+Find (a) the MME for $\theta$, (b) a sufficient statistic for $\theta$, (c) the MLE
+for $\theta$, (d) the Fisher information function.
+\end{problem}
+
+\begin{solution}
+This is the negative binomial in its ``trials until the third success'' form: $X$
+counts the trials needed to obtain $3$ successes, each of probability $\theta$. Its
+mean is therefore
+$$E(X)=\frac{3}{\theta}.$$
+
+\textbf{(a) Method of moments.}
+$$\frac{3}{\theta}=\bar X\quad\implies\quad \tilde\theta=\frac{3}{\bar X}
+=\frac{3n}{\sum X_i}.$$
+
+\textbf{(b) Sufficient statistic.} The likelihood is
+$$L(\theta)=\prod_{i=1}^n\binom{x_i-1}{2}\theta^3(1-\theta)^{x_i-3}
+=\underbrace{\theta^{3n}(1-\theta)^{\sum x_i-3n}}_{g\left(\sum x_i;\theta\right)}
+\cdot\underbrace{\prod_{i=1}^n\binom{x_i-1}{2}}_{h(\mathbf{x})}.$$
+By the factorisation criterion,
+$$T=\sum_{i=1}^n X_i\ \text{ is sufficient for }\theta.$$
+
+\textbf{(c) Maximum likelihood.}
+$$\ell(\theta)=\sum\ln\binom{x_i-1}{2}+3n\ln\theta+\left(\sum x_i-3n\right)\ln(1-\theta),$$
+$$\frac{d\ell}{d\theta}=\frac{3n}{\theta}-\frac{\sum x_i-3n}{1-\theta}=0.$$
+Multiplying through by $\theta(1-\theta)$,
+$$3n(1-\theta)=\theta\left(\sum x_i-3n\right)
+\ \implies\ 3n-3n\theta=\theta\sum x_i-3n\theta
+\ \implies\ 3n=\theta\sum x_i,$$
+the $3n\theta$ terms cancelling on both sides, so
+$$\hat\theta=\frac{3n}{\sum x_i}=\frac{3}{\bar X}.$$
+
+\textbf{(d) Fisher information.} For one observation the terms in $\theta$ are
+$$\ln f=\text{constant}+3\ln\theta+(x-3)\ln(1-\theta),$$
+$$\frac{\partial\ln f}{\partial\theta}=\frac{3}{\theta}-\frac{x-3}{1-\theta},
+\qquad
+\frac{\partial^2\ln f}{\partial\theta^2}=-\frac{3}{\theta^2}-\frac{x-3}{(1-\theta)^2}.$$
+Now the second derivative \emph{does} involve $x$, so the expectation must be taken.
+Since $E(X)=\frac{3}{\theta}$,
+$$E(X-3)=\frac{3}{\theta}-3=\frac{3(1-\theta)}{\theta},$$
+and therefore
+$$I_1(\theta)=-E\!\left[\frac{\partial^2\ln f}{\partial\theta^2}\right]
+=\frac{3}{\theta^2}+\frac{1}{(1-\theta)^2}\cdot\frac{3(1-\theta)}{\theta}
+=\frac{3}{\theta^2}+\frac{3}{\theta(1-\theta)}.$$
+Over the common denominator $\theta^2(1-\theta)$,
+$$I_1(\theta)=\frac{3(1-\theta)+3\theta}{\theta^2(1-\theta)}
+=\frac{3}{\theta^2(1-\theta)},\qquad
+I_n(\theta)=\frac{3n}{\theta^2(1-\theta)}.$$
+
+\begin{note}
+The $3n\theta$ terms cancelling in (c) is what makes the likelihood equation
+solvable in closed form. Notice also that the answer is $\frac{3}{\bar X}$, again
+matching the moment estimator, and that both are just ``three successes divided by
+the average number of trials'' --- which is what one would have guessed.
+\end{note}
+\end{solution}
+
 \chapter{Hypothesis Testing}
 
 \section{Introduction}
