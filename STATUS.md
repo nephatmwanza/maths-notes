@@ -353,9 +353,21 @@ Consequences already applied, and worth preserving:
   card says it without making a promise about timing.
 - Footer colophon credits LaTeX, tex4ht, MathJax and Claude.
 
-**No course codes anywhere on the site — settled 2026-07-31.** Not MAT2901, not MAT1110,
-not in the hidden search keywords. They are a local UNZA label and would confuse a learner
-from another school. Courses are identified by name only: "Introduction to Probability".
+**No course codes anywhere on the site — settled 2026-07-31, narrowed 2026-08-03.** Not
+MAT2901, not MAT1110, not in the hidden search keywords. They are a local UNZA label and
+would confuse a learner from another school. Courses are identified by name only:
+"Introduction to Probability".
+
+*Narrowed 2026-08-03, on the user's instruction:* the rule governs how a **course** is
+labelled, and it still does everywhere except one place — **examination papers**. A
+worked past paper is attributed in full ("the University of Zambia's MAT3601 Mathematical
+Statistics final examination of 2013") because provenance is what makes a past paper
+worth trusting. The user's reasoning for allowing it: *"we've added a lot to make the
+notes owned."*
+
+**This applies to exam papers only** — explicitly, on the user's instruction. Assignments,
+quizzes and tutorial sheets carry no institution and no code; their section introductions
+just say "past assignment questions". Do not spread the attribution to them.
 The same reasoning removed "written for the Zambian curriculum" from the front page — the
 audience starts Zambian but the material is not Zambia-specific, and nothing on the site
 should imply otherwise.
@@ -512,6 +524,49 @@ two sides of the identity did not balance.
 ## Status Log
 
 *(most recent first — append new entries, never rewrite old ones)*
+
+### 2026-08-03 (last) — Limit theorems written from scratch; a third-party source
+### assessed and deliberately not republished
+
+**A second source was offered and turned down for republication.** `Lecture note
+Math_Stastics-1.pdf` in the `Mathematical Statistics Notes` folder is **not the user's
+work** — it is by Dr Mustafa I. Naif, Department of Mathematics, University of Anbar, and
+cites Hogg & Craig, Ramachandran & Tsokos and Sahoo as its own sources. It contains five
+exercise sets, 26 questions in all, and the user initially asked for them.
+
+Raised it, and the user chose **"coverage only, original problems"**: read it to see what
+it drills, then write fresh problems. That is the standing scope rule, and it is also the
+thing the user objected to in others — *"these people don't change the material, they keep
+reusing them."* **All 26 topics are covered; not one of his questions is reproduced.**
+
+Reading it for coverage found a real gap, which the user asked to fill: this course had
+**no convergence theory at all** — no Chebyshev, no law of large numbers, no limiting
+distributions, no central limit theorem. Chapter 2 used convergence in probability to
+define consistency without the chapter-1 material to support it.
+
+**New in chapter 1:**
+- **§1.4 Convergence and Limit Theorems** — Chebyshev with proof, convergence in
+  probability, the weak law with proof, convergence in distribution, the continuity
+  theorem, the CLT with an mgf sketch, and continuity-corrected normal approximations.
+- **§1.5 Practice problems: distributions and transformations** — the five Assignment 1
+  problems plus fourteen written for these notes.
+- **§1.6 Practice problems: limit theorems** — eight more.
+
+Chapter 1 goes from no problems to twenty-seven; the course now has **53 worked
+problems**.
+
+**Two numbers I had to correct before shipping.** I quoted Monte Carlo estimates as
+"exact" for the $\chi^2$ and gamma sample-mean problems. The real exact values are
+$0.7367$ (not $0.7369$) and $0.94125$ (not $0.9416$). The gamma one is the more
+interesting: exact and normal-approximation agree to *five* decimal places, because a
+gamma with shape $128$ is normal for practical purposes — a better teaching point than
+the wrong number was. **A simulation is a check on an exact value, never a substitute
+for one.**
+
+**Attribution changed, on the user's instruction** — see "Identity and hosting". Exam
+papers are now named in full ("the University of Zambia's MAT3601 ... final examination
+of 2013"). Assignments, quizzes and tutorial sheets are *not*; that was asked for
+explicitly and should not spread.
 
 ### 2026-08-03 (later) — Mathematical Statistics published; the question box was
 ### missing from 97 of the site's content pages

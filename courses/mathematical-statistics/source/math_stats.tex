@@ -1755,7 +1755,284 @@ f_Y(y) & =  \frac{1}{\sqrt{2\pi}\, 2^{\frac{m}{2}}\, \Gamma \left(\frac{m}{2}\ri
 % Estimation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Practice problems}
+
+\section{Convergence and Limit Theorems}
+
+Everything so far has been exact. Given the distribution of $X$ we found the exact
+distribution of $Y=g(X)$, of a sum, of an order statistic. That is the right
+ambition, and it works often enough to be worth the effort --- but not always. The
+exact distribution of $\bar X$ for a sample from a beta distribution has no
+tractable closed form, and neither does the exact distribution of most statistics
+anyone actually computes.
+
+What rescues the situation is that these quantities become \emph{predictable} as
+the sample grows. The sample mean settles onto the population mean, and the way it
+scatters around that mean settles onto a normal shape --- whatever the population
+was. This section makes both statements precise. They are the bridge between the
+distribution theory of this chapter and the estimation theory of the next: an
+estimator is judged by what it does as $n$ grows, so we need the language for
+that first.
+
+\subsection{Chebyshev's Inequality}
+
+Everything in this section rests on one inequality, and it is worth seeing how
+little it assumes.
+
+\begin{thm}[Chebyshev's inequality]
+Let $X$ be a random variable with mean $\mu$ and finite variance $\sigma^2$. Then
+for every $\varepsilon>0$,
+$$P\left(\left|X-\mu\right|\geq\varepsilon\right)\leq
+\frac{\sigma^2}{\varepsilon^2}.$$
+Equivalently, writing $\varepsilon=k\sigma$,
+$$P\left(\left|X-\mu\right|\geq k\sigma\right)\leq\frac{1}{k^2}.$$
+\end{thm}
+
+\begin{proof}
+Take the continuous case; the discrete case replaces every integral by a sum.
+By definition
+$$\sigma^2=\int_{-\infty}^{\infty}(x-\mu)^2f(x)\,dx
+\geq\int_{\left|x-\mu\right|\geq\varepsilon}(x-\mu)^2f(x)\,dx,$$
+because the discarded region contributes a non-negative amount. On the region that
+remains, $(x-\mu)^2\geq\varepsilon^2$, so
+$$\sigma^2\geq\varepsilon^2\int_{\left|x-\mu\right|\geq\varepsilon}f(x)\,dx
+=\varepsilon^2\,P\left(\left|X-\mu\right|\geq\varepsilon\right).$$
+Dividing by $\varepsilon^2$ gives the result.
+\end{proof}
+
+\begin{note}
+Notice what was \emph{not} assumed: no shape, no symmetry, no named distribution
+--- only that the variance exists. That is the inequality's whole point, and also
+why it is so loose. It says at most $\frac14$ of any distribution lies beyond two
+standard deviations; for a normal distribution the true figure is about $0.046$.
+A bound that holds for every distribution cannot be tight for any particular one.
+\end{note}
+
+\begin{example}
+A production process has mean weight $\mu=500$\,g and standard deviation
+$\sigma=8$\,g, and nothing further is known about the distribution. What can be
+said about the proportion of items weighing between $480$\,g and $520$\,g?
+\end{example}
+
+\begin{solution}
+The interval is $\mu\pm20$, that is $\mu\pm k\sigma$ with
+$k=\frac{20}{8}=2.5$. Chebyshev gives
+$$P\left(\left|X-500\right|\geq20\right)\leq\frac{1}{2.5^2}=0.16,$$
+$$\therefore\quad P\left(480<X<520\right)\geq1-0.16=0.84.$$
+At least $84\%$ of items are within the stated range --- guaranteed, whatever the
+shape of the distribution. If the weights were known to be normal the answer would
+be $0.9876$, but that would be an extra assumption, and the whole value of the
+bound here is that it needs none.
+\end{solution}
+
+\subsection{Convergence in Probability}
+
+\begin{definition}
+A sequence of random variables $X_1,X_2,\ldots$ \emph{converges in probability} to
+a constant $c$, written $X_n\overset{P}{\longrightarrow}c$, if for every
+$\varepsilon>0$
+$$\lim_{n\to\infty}P\left(\left|X_n-c\right|\geq\varepsilon\right)=0,
+\qquad\text{equivalently}\qquad
+\lim_{n\to\infty}P\left(\left|X_n-c\right|<\varepsilon\right)=1.$$
+\end{definition}
+
+Read it as: fix any tolerance you like, however small; eventually it becomes
+overwhelmingly likely that $X_n$ is within that tolerance of $c$. It does
+\emph{not} say $X_n$ is ever equal to $c$, and it does not say the sequence stops
+moving.
+
+Chebyshev turns this into something checkable. If $E(X_n)\to c$ and
+$\text{Var}(X_n)\to0$, then
+$$P\left(\left|X_n-c\right|\geq\varepsilon\right)
+\leq\frac{E\left[(X_n-c)^2\right]}{\varepsilon^2}\longrightarrow0,$$
+so $X_n\overset{P}{\longrightarrow}c$. That is the standard route, and the one
+used throughout the next chapter: an estimator whose mean square error tends to
+zero is \textbf{consistent}, which is exactly this definition applied to
+$T_n$ and $\tau(\theta)$ --- see section 2.5.
+
+\subsection{The Weak Law of Large Numbers}
+
+\begin{thm}[Weak law of large numbers]
+Let $X_1,X_2,\ldots,X_n$ be independent and identically distributed with mean
+$\mu$ and finite variance $\sigma^2$. Then
+$$\bar X_n=\frac{1}{n}\sum_{i=1}^nX_i\ \overset{P}{\longrightarrow}\ \mu.$$
+\end{thm}
+
+\begin{proof}
+$E\left(\bar X_n\right)=\mu$ and
+$\text{Var}\left(\bar X_n\right)=\frac{\sigma^2}{n}$. By Chebyshev, for any
+$\varepsilon>0$,
+$$P\left(\left|\bar X_n-\mu\right|\geq\varepsilon\right)
+\leq\frac{\sigma^2}{n\varepsilon^2}\ \longrightarrow\ 0
+\quad\text{as }n\to\infty.$$
+\end{proof}
+
+\begin{note}
+The law says the sample mean approaches the population mean. It does not say the
+\emph{sum} approaches $n\mu$ --- $\sum X_i$ has standard deviation
+$\sigma\sqrt n$, which grows without bound. Dividing by $n$ is what makes the
+scatter shrink, and it shrinks like $\frac{\sigma}{\sqrt n}$: to halve the
+uncertainty you need four times the data. That single fact governs the cost of
+nearly every survey ever designed.
+\end{note}
+
+\subsection{Convergence in Distribution}
+
+The law of large numbers says where $\bar X_n$ ends up. It says nothing about the
+\emph{shape} of its scatter on the way, and that is what the rest of this section
+is for. A different kind of convergence is needed, because the limit is a
+distribution rather than a number.
+
+\begin{definition}
+A sequence $Y_1,Y_2,\ldots$ with distribution functions $F_n$ \emph{converges in
+distribution} to a random variable $Y$ with distribution function $F$, written
+$Y_n\overset{d}{\longrightarrow}Y$, if
+$$\lim_{n\to\infty}F_n(y)=F(y)$$
+at every point $y$ where $F$ is continuous. $F$ is then called the \emph{limiting
+distribution} of the sequence.
+\end{definition}
+
+Convergence in probability to a constant implies convergence in distribution to
+that constant; the reverse fails, since a limiting \emph{shape} says nothing about
+where any particular $Y_n$ has landed.
+
+\subsection{Finding a Limiting Distribution by Moment Generating Functions}
+
+Distribution functions are awkward to take limits of. Moment generating functions
+are not, and they determine the distribution, so the following is the practical
+tool.
+
+\begin{thm}[Continuity theorem]
+Let $Y_n$ have moment generating function $M_n(t)$, defined for $|t|<h$ for every
+$n$. If
+$$\lim_{n\to\infty}M_n(t)=M(t)\qquad\text{for all }|t|<h,$$
+and $M(t)$ is the moment generating function of a random variable $Y$, then
+$Y_n\overset{d}{\longrightarrow}Y$.
+\end{thm}
+
+So a limiting distribution is found by taking the limit of a moment generating
+function and recognising the answer. Two limits do most of the work:
+$$\lim_{n\to\infty}\left(1+\frac{x}{n}\right)^n=e^x,\qquad
+\lim_{n\to\infty}\left(1+\frac{x}{n}+\frac{\varphi(n)}{n}\right)^n=e^x
+\quad\text{whenever }\varphi(n)\to0.$$
+The second is the one that matters in practice: a Taylor expansion always leaves a
+remainder, and this says a remainder that dies faster than $\frac1n$ may be
+discarded.
+
+\begin{example}
+Let $Z_n\sim\text{POI}(n)$. Find the limiting distribution of
+$$Y_n=\frac{Z_n-n}{\sqrt n}.$$
+\end{example}
+
+\begin{solution}
+A Poisson variable with mean $n$ has $M_{Z_n}(t)=e^{n\left(e^t-1\right)}$, so
+$$M_{Y_n}(t)=E\left[e^{t\frac{Z_n-n}{\sqrt n}}\right]
+=e^{-t\sqrt n}\,M_{Z_n}\!\left(\frac{t}{\sqrt n}\right)
+=\exp\left[-t\sqrt n+n\left(e^{\frac{t}{\sqrt n}}-1\right)\right].$$
+Expand the exponential inside:
+$$e^{\frac{t}{\sqrt n}}-1=\frac{t}{\sqrt n}+\frac{t^2}{2n}
++\frac{t^3}{6n^{\frac32}}+\cdots,$$
+so
+$$n\left(e^{\frac{t}{\sqrt n}}-1\right)=t\sqrt n+\frac{t^2}{2}
++\frac{t^3}{6\sqrt n}+\cdots$$
+The $t\sqrt n$ cancels against $-t\sqrt n$, and every remaining term after
+$\frac{t^2}{2}$ carries a power of $\frac{1}{\sqrt n}$:
+$$\ln M_{Y_n}(t)=\frac{t^2}{2}+O\!\left(\frac{1}{\sqrt n}\right)
+\ \longrightarrow\ \frac{t^2}{2},$$
+$$\therefore\quad M_{Y_n}(t)\longrightarrow e^{\frac{t^2}{2}},$$
+which is the moment generating function of the standard normal. Hence
+$$\frac{Z_n-n}{\sqrt n}\ \overset{d}{\longrightarrow}\ N(0,1).$$
+\end{solution}
+
+\begin{note}
+The cancellation of $t\sqrt n$ is not a lucky accident --- it is what subtracting
+the mean is for. Dividing by $\sqrt n$ then leaves the $t^2$ term at exactly order
+one. Centre by the mean, scale by the standard deviation, and a normal limit is
+what falls out; that is the pattern of the next result, in general.
+\end{note}
+
+\subsection{The Central Limit Theorem}
+
+\begin{thm}[Central limit theorem]
+Let $X_1,X_2,\ldots,X_n$ be independent and identically distributed with mean
+$\mu$ and finite variance $\sigma^2>0$. Then
+$$Z_n=\frac{\bar X_n-\mu}{\frac{\sigma}{\sqrt n}}
+=\frac{\sum_{i=1}^nX_i-n\mu}{\sigma\sqrt n}
+\ \overset{d}{\longrightarrow}\ N(0,1).$$
+\end{thm}
+
+\begin{proof}[\textit{Sketch}.]
+Write $W_i=\frac{X_i-\mu}{\sigma}$, so the $W_i$ are independent with mean $0$ and
+variance $1$, and $Z_n=\frac{1}{\sqrt n}\sum W_i$. If $W$ has moment generating
+function $m(t)$ then $m(0)=1$, $m'(0)=0$ and $m''(0)=1$, so
+$$m(t)=1+\frac{t^2}{2}+\varphi(t),\qquad
+\frac{\varphi(t)}{t^2}\to0\ \text{ as }t\to0.$$
+By independence,
+$$M_{Z_n}(t)=\left[m\!\left(\frac{t}{\sqrt n}\right)\right]^n
+=\left[1+\frac{t^2}{2n}+\varphi\!\left(\frac{t}{\sqrt n}\right)\right]^n,$$
+and the remainder is of smaller order than $\frac1n$, so the second limit quoted
+above applies:
+$$M_{Z_n}(t)\longrightarrow e^{\frac{t^2}{2}}.$$
+\end{proof}
+
+\begin{note}
+Three things the theorem does \emph{not} say, each a common misreading.
+
+It is not a statement about the observations. The $X_i$ do not become normal, and
+never do; a sample from a skewed population stays skewed however large it is. It
+is $\bar X$ whose distribution becomes normal.
+
+It is not a statement about any fixed $n$. ``$n\geq30$'' is a rule of thumb, not
+part of the theorem. Thirty is generous for a symmetric population and nowhere
+near enough for a badly skewed one.
+
+It needs a finite variance. Average a sample from a Cauchy distribution and
+$\bar X$ has exactly the same Cauchy distribution as a single observation, no
+matter how large $n$ is --- averaging buys nothing at all, because the variance
+does not exist.
+\end{note}
+
+\subsection{Normal Approximations in Practice}
+
+For a discrete variable the approximating normal density is continuous, so a
+probability at a single point would come out as zero. The repair is the
+\textbf{continuity correction}: give each integer the unit interval around it,
+replacing $P(Y=k)$ by $P\left(k-\frac12<Y<k+\frac12\right)$ and
+$P(Y\leq k)$ by $P\left(Y<k+\frac12\right)$.
+
+\begin{example}
+Let $Y\sim BIN(80,0.4)$. Use a normal approximation to find (a) $P(Y=32)$ and
+(b) $P(Y\leq30)$.
+\end{example}
+
+\begin{solution}
+Here $\mu=np=32$ and $\sigma^2=np(1-p)=80(0.4)(0.6)=19.2$, so
+$\sigma=4.3818$.
+
+\textbf{(a).} With the continuity correction,
+$$P(Y=32)\approx P\left(31.5<Y<32.5\right)
+=P\left(\frac{-0.5}{4.3818}<Z<\frac{0.5}{4.3818}\right)
+=P(-0.114<Z<0.114),$$
+$$P(Y=32)\approx0.5454-0.4546=0.0908,$$
+against an exact binomial probability of $0.0908$.
+
+Keep the third decimal place in $z$ here. Rounding to $z=\pm0.11$ gives $0.0876$,
+which is out by nearly $4\%$ --- the interval is so narrow that its width, and so
+the answer, is proportional to $z$ itself.
+
+\textbf{(b).}
+$$P(Y\leq30)\approx P\left(Y<30.5\right)
+=P\left(Z<\frac{30.5-32}{4.3818}\right)=P(Z<-0.34)=0.3669,$$
+against an exact value of $0.3687$.
+\end{solution}
+
+\begin{note}
+Without the correction, (a) would have given $P(Y=32)\approx0$ and (b)
+$P\left(Z<\frac{30-32}{4.3818}\right)=P(Z<-0.46)=0.3228$ --- an error of nearly
+five percentage points on a probability of about $0.37$. The correction costs one
+line and is worth it every time the variable is discrete.
+\end{note}
+
+\section{Practice problems: distributions and transformations}
 
 Past assignment questions on moments, joint distributions and transformations.
 Work each one before opening the solution.
@@ -2030,6 +2307,682 @@ $\frac12+\frac14+\frac18=\frac78$, not $1$. The intended support is
 $x=1,2,3,\ldots$, and it is taken that way above. Part (b) is genuinely finite,
 since $\frac13$ three times does sum to $1$ --- which is presumably how the
 misprint survived.
+\end{note}
+\end{solution}
+
+
+\subsection{Further exercises}
+
+The remaining problems are written for these notes rather than taken from a past
+paper. They cover the same ground: transformations, sums and ratios, sampling
+distributions and order statistics.
+
+\begin{problem}{Exercise}
+\begin{enumerate}
+\item[(a).] Let $X$ and $Y$ be independent $\text{EXP}(1)$ variables. Find the
+p.d.f. of $U=\frac{X}{Y}$.
+\item[(b).] Let $X$ and $Y$ be independent $N\left(0,\sigma^2\right)$ variables.
+Show that $T=\frac{X}{Y}$ has the Cauchy density
+$f_T(t)=\frac{1}{\pi\left(1+t^2\right)}$, whatever the value of $\sigma$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} Put $U=\frac{X}{Y}$ and $V=Y$, so $x=uv$, $y=v$ and
+$$|J|=\left|\begin{matrix}v & u\\0 & 1\end{matrix}\right|=v.$$
+Then for $u>0$, $v>0$,
+$$f_{U,V}(u,v)=e^{-uv}e^{-v}\cdot v=v\,e^{-v(1+u)},$$
+$$f_U(u)=\int_0^\infty v\,e^{-v(1+u)}dv=\frac{1}{(1+u)^2},\qquad u>0,$$
+the integral being a gamma integral with shape $2$ and scale $\frac{1}{1+u}$.
+As a check, $\int_0^\infty(1+u)^{-2}du=1$.
+
+\textbf{(b).} By symmetry it is enough to work with the density directly. With
+$T=\frac{X}{Y}$ and $V=Y$ the same Jacobian gives $|J|=|v|$, and
+$$f_{T,V}(t,v)=\frac{1}{2\pi\sigma^2}
+\exp\left[-\frac{(tv)^2+v^2}{2\sigma^2}\right]|v|,$$
+so, using the symmetry in $v$ to fold the integral onto $v>0$,
+$$f_T(t)=2\int_0^\infty\frac{v}{2\pi\sigma^2}
+\exp\left[-\frac{v^2\left(1+t^2\right)}{2\sigma^2}\right]dv.$$
+Substituting $w=v^2$, $dw=2v\,dv$,
+$$f_T(t)=\frac{1}{2\pi\sigma^2}\int_0^\infty
+\exp\left[-\frac{w\left(1+t^2\right)}{2\sigma^2}\right]dw
+=\frac{1}{2\pi\sigma^2}\cdot\frac{2\sigma^2}{1+t^2}
+=\frac{1}{\pi\left(1+t^2\right)}.$$
+Every $\sigma$ has cancelled.
+
+\begin{note}
+The Cauchy distribution has no mean, so it has no variance either --- the
+integral $\int t\,f_T(t)\,dt$ diverges at both ends. It is the standard warning
+that a ratio of well-behaved variables need not be well behaved: both $X$ and $Y$
+have every moment, and their ratio has none.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X$ and $Y$ be independent $\text{UNIF}(0,1)$ variables. Find the p.d.f. of
+their product $V=XY$.
+\end{problem}
+
+\begin{solution}
+Put $U=X$ and $V=XY$, so $x=u$, $y=\frac{v}{u}$ and $|J|=\frac{1}{u}$. Both
+original variables lie in $(0,1)$, so the image is $0<v<u<1$, and there
+$$f_{U,V}(u,v)=1\cdot\frac{1}{u}=\frac{1}{u}.$$
+Integrating $u$ out over $v<u<1$,
+$$f_V(v)=\int_v^1\frac{du}{u}=\left[\ln u\right]_v^1=-\ln v,\qquad 0<v<1.$$
+As a check, $\int_0^1(-\ln v)\,dv=\left[v-v\ln v\right]_0^1=1$.
+
+\begin{note}
+The density is unbounded as $v\to0^+$, yet integrates to $1$. A density may be
+infinite at a point without anything going wrong --- it is the area that must be
+finite, not the height. Note also the shape: multiplying two numbers below $1$
+usually gives something much smaller than either, which is why the mass piles up
+near zero.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X\sim\text{GAM}(\alpha,1)$ and $Y\sim\text{GAM}(\beta,1)$ be independent.
+Define
+$$U=X+Y,\qquad V=\frac{X}{X+Y}.$$
+Show that $U\sim\text{GAM}(\alpha+\beta,1)$, that $V\sim\text{BETA}
+(\alpha,\beta)$, and that $U$ and $V$ are independent.
+\end{problem}
+
+\begin{solution}
+Inverting, $x=uv$ and $y=u(1-v)$, with
+$$|J|=\left|\begin{matrix}v & u\\ 1-v & -u\end{matrix}\right|
+=\left|-uv-u(1-v)\right|=u.$$
+The image of $\{x>0,y>0\}$ is $\{u>0,\ 0<v<1\}$. Substituting,
+$$f_{U,V}(u,v)=\frac{(uv)^{\alpha-1}e^{-uv}}{\Gamma(\alpha)}\cdot
+\frac{\left[u(1-v)\right]^{\beta-1}e^{-u(1-v)}}{\Gamma(\beta)}\cdot u
+=\frac{u^{\alpha+\beta-1}e^{-u}\,v^{\alpha-1}(1-v)^{\beta-1}}
+{\Gamma(\alpha)\Gamma(\beta)}.$$
+Multiply and divide by $\Gamma(\alpha+\beta)$ to split it:
+$$f_{U,V}(u,v)=
+\underbrace{\frac{u^{\alpha+\beta-1}e^{-u}}{\Gamma(\alpha+\beta)}}
+_{\text{GAM}(\alpha+\beta,\,1)}\cdot
+\underbrace{\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}
+v^{\alpha-1}(1-v)^{\beta-1}}_{\text{BETA}(\alpha,\,\beta)}.$$
+The joint density is a function of $u$ alone times a function of $v$ alone, over a
+rectangular region, so $U$ and $V$ are independent with the stated marginals.
+$\blacksquare$
+
+\begin{note}
+Independence here is genuinely surprising: $V$ is built out of $X$ and $U$, so it
+is not obvious that knowing the total tells you nothing about the split. It is
+particular to the gamma family, and it is the reason the beta distribution turns
+up wherever proportions of exponential or gamma quantities are modelled.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+\begin{enumerate}
+\item[(a).] Let $X\sim\text{GAM}(\alpha,\beta)$. Show that
+$Y=\frac{2X}{\beta}\sim\chi^2(2\alpha)$.
+\item[(b).] Let $X_1,\ldots,X_n$ be independent $\text{EXP}(\lambda)$ variables,
+each with mean $\lambda$. Use moment generating functions to find the distribution
+of $\sum_{i=1}^nX_i$, and write down its mean and variance.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The map is increasing with $x=\frac{\beta y}{2}$ and
+$\frac{dx}{dy}=\frac{\beta}{2}$, so
+$$f_Y(y)=\frac{1}{\Gamma(\alpha)\beta^\alpha}
+\left(\frac{\beta y}{2}\right)^{\alpha-1}e^{-\frac{y}{2}}\cdot\frac{\beta}{2}
+=\frac{1}{2^{\alpha}\Gamma(\alpha)}y^{\alpha-1}e^{-\frac{y}{2}},\qquad y>0.$$
+This is the $\chi^2$ density with $2\alpha$ degrees of freedom, since
+$\frac{2\alpha}{2}=\alpha$. $\blacksquare$
+
+\textbf{(b).} Each $X_i$ has $M(t)=(1-\lambda t)^{-1}$ for $t<\frac1\lambda$, so
+by independence
+$$M_{\sum X_i}(t)=\prod_{i=1}^n(1-\lambda t)^{-1}=(1-\lambda t)^{-n},$$
+which is the moment generating function of $\text{GAM}(n,\lambda)$. Hence
+$$\sum_{i=1}^nX_i\sim\text{GAM}(n,\lambda),\qquad
+E\left(\sum X_i\right)=n\lambda,\qquad
+\text{Var}\left(\sum X_i\right)=n\lambda^2.$$
+
+\begin{note}
+Part (a) is used constantly in chapter 3. Every exponential or gamma sum there is
+converted to a chi-square so that a critical value can be read from a table ---
+$\frac{2}{\theta_0}\sum X_i\sim\chi^2(2n)$ is exactly (a) applied to the
+$\text{GAM}(n,\theta_0)$ of (b).
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $Y_1$ and $Y_2$ be independent $N\left(\mu,\sigma^2\right)$ variables. Find
+the distribution of
+$$U=\frac{Y_1-3Y_2}{2}.$$
+\end{problem}
+
+\begin{solution}
+A linear combination of independent normal variables is normal, so only the mean
+and variance are needed:
+$$E(U)=\frac{\mu-3\mu}{2}=-\mu,$$
+$$\text{Var}(U)=\frac{1}{4}\left[\text{Var}(Y_1)+9\,\text{Var}(Y_2)\right]
+=\frac{1}{4}\left(\sigma^2+9\sigma^2\right)=\frac{5\sigma^2}{2}.$$
+$$\therefore\quad U\sim N\!\left(-\mu,\ \frac{5\sigma^2}{2}\right).$$
+Formally, $M_U(t)=M_{Y_1}\!\left(\frac{t}{2}\right)
+M_{Y_2}\!\left(-\frac{3t}{2}\right)$, and multiplying the two normal moment
+generating functions gives
+$\exp\left(-\mu t+\frac{5\sigma^2t^2}{4}\right)$, as stated.
+
+\begin{note}
+The coefficients are squared in the variance but not in the mean, and the minus
+sign disappears there. Subtracting increases the spread just as adding does ---
+variances of independent variables always accumulate.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X$ and $Y$ be independent, each $\text{EXP}(\theta)$ with density
+$\frac{1}{\theta}e^{-\frac{x}{\theta}}$ on $x>0$. Find the p.d.f. of $U=X-Y$.
+\end{problem}
+
+\begin{solution}
+Use the convolution formula, taking care with the support. For $u>0$ the
+constraint $y>0$ and $x=u+y>0$ reduces to $y>0$:
+$$f_U(u)=\int_0^\infty f_X(u+y)f_Y(y)\,dy
+=\frac{1}{\theta^2}\int_0^\infty e^{-\frac{u+y}{\theta}}e^{-\frac{y}{\theta}}dy
+=\frac{e^{-\frac{u}{\theta}}}{\theta^2}\int_0^\infty e^{-\frac{2y}{\theta}}dy
+=\frac{e^{-\frac{u}{\theta}}}{2\theta}.$$
+For $u<0$ the roles of $X$ and $Y$ swap, and since they are identically
+distributed the answer is the mirror image. Combining,
+$$f_U(u)=\frac{1}{2\theta}e^{-\frac{|u|}{\theta}},\qquad-\infty<u<\infty,$$
+the \textbf{Laplace} (double exponential) distribution. It integrates to
+$2\cdot\frac{1}{2\theta}\cdot\theta=1$.
+
+\begin{note}
+Do the $u>0$ case and then invoke symmetry --- do not attempt both integrals.
+The symmetry is exact because $X-Y$ and $Y-X$ have the same distribution when $X$
+and $Y$ are independent and identically distributed, and that single observation
+halves the work.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X$ and $Y$ be independent $N\left(0,\sigma^2\right)$ variables. Find the
+distribution of $W=X^2+Y^2$.
+\end{problem}
+
+\begin{solution}
+Standardise first: $\frac{X}{\sigma}$ and $\frac{Y}{\sigma}$ are independent
+$N(0,1)$, so
+$$\frac{W}{\sigma^2}=\left(\frac{X}{\sigma}\right)^2
++\left(\frac{Y}{\sigma}\right)^2\sim\chi^2(2),$$
+being a sum of two independent squared standard normals. Since
+$\chi^2(2)=\text{GAM}(1,2)$ is the exponential distribution with mean $2$,
+$$W\sim\text{EXP}\left(\text{mean }2\sigma^2\right),\qquad
+f_W(w)=\frac{1}{2\sigma^2}e^{-\frac{w}{2\sigma^2}},\quad w>0.$$
+
+\begin{note}
+$W$ is the squared distance from the origin of a point scattered symmetrically in
+the plane, and the result says that squared distance is exponential. It is the
+reason a two-dimensional Gaussian target produces exponentially distributed miss
+distances squared --- and, read backwards, it is how normal random numbers are
+generated from uniform ones.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X_1,\ldots,X_n$ be a random sample from $N\left(\mu,\sigma^2\right)$.
+\begin{enumerate}
+\item[(a).] Use moment generating functions to find the distribution of $\bar X$,
+and state its mean and variance.
+\item[(b).] Show that
+$\frac{\bar X-\mu}{\frac{\sigma}{\sqrt n}}\sim N(0,1)$, that
+$\left(\frac{\bar X-\mu}{\frac{\sigma}{\sqrt n}}\right)^2\sim\chi^2(1)$, and that
+$\sum_{i=1}^n\left(\frac{X_i-\mu}{\sigma}\right)^2\sim\chi^2(n)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} Each $X_i$ has $M(t)=\exp\left(\mu t+\frac{\sigma^2t^2}{2}\right)$.
+By independence,
+$$M_{\bar X}(t)=E\left[e^{\frac{t}{n}\sum X_i}\right]
+=\left[M\!\left(\frac{t}{n}\right)\right]^n
+=\left[\exp\left(\frac{\mu t}{n}+\frac{\sigma^2t^2}{2n^2}\right)\right]^n
+=\exp\left(\mu t+\frac{\left(\frac{\sigma^2}{n}\right)t^2}{2}\right),$$
+which is the moment generating function of a normal distribution with mean $\mu$
+and variance $\frac{\sigma^2}{n}$:
+$$\bar X\sim N\!\left(\mu,\ \frac{\sigma^2}{n}\right),\qquad
+E\left(\bar X\right)=\mu,\qquad
+\text{Var}\left(\bar X\right)=\frac{\sigma^2}{n}.$$
+
+\textbf{(b).} Standardising a normal variable gives a standard normal, and by (a)
+the standard deviation of $\bar X$ is $\frac{\sigma}{\sqrt n}$, so the first
+statement is immediate. The square of a standard normal is $\chi^2(1)$ by
+definition, giving the second. For the third, each
+$\frac{X_i-\mu}{\sigma}\sim N(0,1)$ and they are independent, so the sum of their
+squares is a sum of $n$ independent $\chi^2(1)$ variables, which is $\chi^2(n)$
+because degrees of freedom add.
+
+\begin{note}
+Only $\mu$ is used here, not $\bar X$, in the third part. Replacing $\mu$ by
+$\bar X$ costs one degree of freedom and gives
+$\frac{(n-1)S^2}{\sigma^2}\sim\chi^2(n-1)$ --- the extra estimated quantity is
+paid for exactly once.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X_1,\ldots,X_n$ be a random sample from $\text{GAM}(\alpha,\beta)$. Find the
+distribution of $\bar X$, together with its mean, variance and moment generating
+function.
+\end{problem}
+
+\begin{solution}
+Each $X_i$ has $M(t)=(1-\beta t)^{-\alpha}$, so
+$$M_{\bar X}(t)=\left[M\!\left(\frac{t}{n}\right)\right]^n
+=\left(1-\frac{\beta t}{n}\right)^{-n\alpha},$$
+which is the moment generating function of a gamma distribution with shape
+$n\alpha$ and scale $\frac{\beta}{n}$:
+$$\bar X\sim\text{GAM}\!\left(n\alpha,\ \frac{\beta}{n}\right),\qquad
+f_{\bar X}(w)=\frac{w^{n\alpha-1}e^{-\frac{nw}{\beta}}}
+{\Gamma(n\alpha)\left(\frac{\beta}{n}\right)^{n\alpha}},\quad w>0.$$
+Its moments follow from the gamma formulas $E=\text{shape}\times\text{scale}$ and
+$\text{Var}=\text{shape}\times\text{scale}^2$:
+$$E\left(\bar X\right)=n\alpha\cdot\frac{\beta}{n}=\alpha\beta,\qquad
+\text{Var}\left(\bar X\right)=n\alpha\left(\frac{\beta}{n}\right)^2
+=\frac{\alpha\beta^2}{n}.$$
+
+\begin{note}
+The mean is unchanged and the variance is divided by $n$, exactly as for the
+normal case --- but here the \emph{shape} of $\bar X$ changes with $n$ as well.
+As $n$ grows the shape parameter $n\alpha$ grows, and a gamma distribution with
+large shape looks increasingly normal. That is the central limit theorem visible
+in a single formula.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X_1,\ldots,X_6$ be a random sample from $\text{UNIF}(0,1)$, with order
+statistics $Y_1<Y_2<\cdots<Y_6$. Find the joint p.d.f. of $Y_2$ and $Y_5$.
+\end{problem}
+
+\begin{solution}
+For $i<j$ the joint density of $Y_i$ and $Y_j$ is
+$$f(y_i,y_j)=\frac{n!}{(i-1)!\,(j-i-1)!\,(n-j)!}
+\left[F(y_i)\right]^{i-1}
+\left[F(y_j)-F(y_i)\right]^{j-i-1}
+\left[1-F(y_j)\right]^{n-j}f(y_i)f(y_j),$$
+the multinomial count of the ways to place $i-1$ observations below $y_i$, one
+at $y_i$, $j-i-1$ between, one at $y_j$ and $n-j$ above.
+
+Here $n=6$, $i=2$, $j=5$, and for the uniform distribution $F(y)=y$ and
+$f(y)=1$ on $(0,1)$. The constant is
+$$\frac{6!}{1!\,2!\,1!}=\frac{720}{2}=360,$$
+$$\therefore\quad f(y_2,y_5)=360\,y_2\left(y_5-y_2\right)^2\left(1-y_5\right),
+\qquad 0<y_2<y_5<1.$$
+Integrating over the triangle confirms a total mass of $1$.
+
+\begin{note}
+Each factor is doing visible work: $y_2$ is the chance one observation falls
+below $Y_2$, $(y_5-y_2)^2$ that two fall in the middle, $(1-y_5)$ that one falls
+above. Write the picture down first and the formula assembles itself.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X_1,\ldots,X_n$ be a random sample from the exponential distribution with
+mean $\theta$.
+\begin{enumerate}
+\item[(a).] Show that $Y_1=\min\left(X_1,\ldots,X_n\right)$ is exponential with
+mean $\frac{\theta}{n}$.
+\item[(b).] Find the p.d.f. of $Y_n=\max\left(X_1,\ldots,X_n\right)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Here $F(x)=1-e^{-\frac{x}{\theta}}$ for $x>0$.
+
+\textbf{(a).} The minimum exceeds $y$ exactly when all $n$ observations do:
+$$P\left(Y_1>y\right)=\left[1-F(y)\right]^n
+=\left[e^{-\frac{y}{\theta}}\right]^n=e^{-\frac{ny}{\theta}},$$
+which is the survival function of an exponential distribution with mean
+$\frac{\theta}{n}$. Differentiating $F_{Y_1}(y)=1-e^{-\frac{ny}{\theta}}$,
+$$f_{Y_1}(y)=\frac{n}{\theta}e^{-\frac{ny}{\theta}},\qquad y>0.$$
+
+\textbf{(b).} The maximum is at most $y$ exactly when all $n$ are:
+$$F_{Y_n}(y)=\left[1-e^{-\frac{y}{\theta}}\right]^n,\qquad
+f_{Y_n}(y)=\frac{n}{\theta}\left(1-e^{-\frac{y}{\theta}}\right)^{n-1}
+e^{-\frac{y}{\theta}},\quad y>0.$$
+
+\begin{note}
+The minimum stays exponential and simply speeds up by a factor of $n$ --- a
+consequence of the memoryless property, and the reason the first failure in a
+system of $n$ components arrives $n$ times sooner than a single one. The maximum
+is not exponential at all, and has no such tidy description.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X_1,\ldots,X_n$ be a random sample from $\text{UNIF}(0,a)$. Find the p.d.f.
+of the range $R=X_{(n)}-X_{(1)}$.
+\end{problem}
+
+\begin{solution}
+On $(0,a)$ we have $f(x)=\frac1a$ and $F(x)=\frac{x}{a}$. The joint density of the
+minimum and maximum is
+$$f\left(y_1,y_n\right)=n(n-1)\left[F(y_n)-F(y_1)\right]^{n-2}f(y_1)f(y_n)
+=\frac{n(n-1)\left(y_n-y_1\right)^{n-2}}{a^n},\qquad 0<y_1<y_n<a.$$
+Put $R=Y_n-Y_1$ and $S=Y_1$; then $y_1=s$, $y_n=s+r$, the Jacobian is $1$, and
+the region becomes $0<r<a$, $0<s<a-r$. So
+$$f_R(r)=\int_0^{a-r}\frac{n(n-1)r^{n-2}}{a^n}\,ds
+=\frac{n(n-1)r^{n-2}(a-r)}{a^n},\qquad 0<r<a.$$
+It integrates to $1$, since
+$$\frac{n(n-1)}{a^n}\left[\frac{a\,r^{n-1}}{n-1}-\frac{r^n}{n}\right]_0^a
+=n(n-1)\left(\frac{1}{n-1}-\frac{1}{n}\right)=1.$$
+
+\begin{note}
+Writing $R=\frac{r}{a}$ shows the range is $a$ times a $\text{BETA}(n-1,2)$
+variable, whose mean is $\frac{n-1}{n+1}$. So the sample range covers a fraction
+$\frac{n-1}{n+1}$ of the interval on average --- $\frac13$ of it for $n=2$, but
+over $90\%$ once $n=20$. It is a usable estimator of $a$, and the factor
+$\frac{n+1}{n-1}$ is what corrects its bias.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X_1,\ldots,X_n$ be a random sample from the $\text{BETA}(2,3)$ distribution,
+with density $f(x)=12x(1-x)^2$ on $0<x<1$. Find the joint p.d.f. of $Y_1$ and
+$Y_n$.
+\end{problem}
+
+\begin{solution}
+First the distribution function:
+$$F(x)=\int_0^x12w(1-w)^2dw
+=12\int_0^x\left(w-2w^2+w^3\right)dw
+=12\left[\frac{x^2}{2}-\frac{2x^3}{3}+\frac{x^4}{4}\right],$$
+$$F(x)=6x^2-8x^3+3x^4=x^2\left(3x^2-8x+6\right),\qquad 0<x<1,$$
+and $F(1)=6-8+3=1$, as it must be.
+
+The joint density of the extremes is the general formula with $i=1$, $j=n$:
+$$f\left(y_1,y_n\right)=n(n-1)\left[F(y_n)-F(y_1)\right]^{n-2}f(y_1)f(y_n),$$
+$$\therefore\quad f\left(y_1,y_n\right)=
+144\,n(n-1)\,y_1\left(1-y_1\right)^2y_n\left(1-y_n\right)^2
+\left[y_n^2\left(3y_n^2-8y_n+6\right)-y_1^2\left(3y_1^2-8y_1+6\right)\right]^{n-2}$$
+for $0<y_1<y_n<1$, the $144$ being $12\times12$ from the two densities.
+
+\begin{note}
+Nothing here depends on the distribution being beta. The formula for the extremes
+is the same for every continuous population; only $F$ and $f$ change. Getting $F$
+right is the whole job, which is why it is worth the check $F(1)=1$.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X_1,X_2$ be a random sample of size $2$ from the distribution with density
+$f(x)=2x$, $0<x<1$, and let $Y_1<Y_2$ be the order statistics. Show that
+$$U=\frac{Y_1}{Y_2}\qquad\text{and}\qquad V=Y_2$$
+are independent, and identify their distributions.
+\end{problem}
+
+\begin{solution}
+The joint density of the order statistics from a sample of size $2$ is
+$2!\,f(y_1)f(y_2)$ on $y_1<y_2$:
+$$f\left(y_1,y_2\right)=2\left(2y_1\right)\left(2y_2\right)=8y_1y_2,
+\qquad 0<y_1<y_2<1.$$
+With $u=\frac{y_1}{y_2}$ and $v=y_2$ the inverse is $y_1=uv$, $y_2=v$, so
+$$|J|=\left|\begin{matrix}v & u\\0 & 1\end{matrix}\right|=v,$$
+and the region $0<y_1<y_2<1$ becomes the rectangle $0<u<1$, $0<v<1$. Hence
+$$f_{U,V}(u,v)=8(uv)(v)\cdot v=8uv^3
+=\underbrace{\left(2u\right)}_{0<u<1}\cdot
+\underbrace{\left(4v^3\right)}_{0<v<1}.$$
+The joint density factorises over a rectangle, so $U$ and $V$ are independent,
+with
+$$f_U(u)=2u\quad(0<u<1),\qquad f_V(v)=4v^3\quad(0<v<1),$$
+each integrating to $1$.
+
+\begin{note}
+The rectangle matters as much as the factorisation. Had the region stayed
+triangular, no amount of algebra would give independence, because the range of one
+variable would still depend on the other. Choosing $U$ as a \emph{ratio} is what
+straightens the region out.
+\end{note}
+\end{solution}
+
+
+\section{Practice problems: limit theorems}
+
+Problems on Chebyshev's inequality, limiting distributions and the central limit
+theorem, written for these notes. Normal probabilities are quoted to four decimal
+places from the standard table.
+
+\begin{problem}{Exercise}
+The number of litres of fuel sold at a filling station in a day has mean $4200$
+and standard deviation $300$. Nothing else is known about the distribution.
+\begin{enumerate}
+\item[(a).] Give a lower bound for the probability that a day's sales fall between
+$3600$ and $4800$ litres.
+\item[(b).] Sales are now known to be approximately normal. Compare.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The interval is $4200\pm600$, and
+$600=k\sigma$ with $k=\frac{600}{300}=2$. Chebyshev's inequality gives
+$$P\left(\left|X-4200\right|\geq600\right)\leq\frac{1}{2^2}=0.25,$$
+$$\therefore\quad P\left(3600<X<4800\right)\geq1-0.25=0.75.$$
+
+\textbf{(b).} If $X\sim N\left(4200,300^2\right)$ then
+$$P\left(3600<X<4800\right)=P(-2<Z<2)=0.9772-0.0228=0.9544.$$
+
+\begin{note}
+$0.75$ against $0.9544$: the bound is correct but weak, and deliberately so. It
+holds for \emph{every} distribution with that mean and variance, including some
+very lopsided ones, so it cannot be tight for the normal in particular. Use
+Chebyshev when the shape is unknown, and a table when it is not.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $Z_n\sim BIN(n,p)$ with $0<p<1$ fixed. Use moment generating functions to
+find the limiting distribution of
+$$Y_n=\frac{Z_n-np}{\sqrt{np(1-p)}}.$$
+\end{problem}
+
+\begin{solution}
+Write $q=1-p$ and $\sigma_n=\sqrt{npq}$. Since
+$M_{Z_n}(t)=\left(q+pe^t\right)^n$,
+$$M_{Y_n}(t)=e^{-\frac{npt}{\sigma_n}}
+\left(q+pe^{\frac{t}{\sigma_n}}\right)^n,\qquad\text{so}\qquad
+\ln M_{Y_n}(t)=-\frac{npt}{\sigma_n}
++n\ln\left(q+pe^{\frac{t}{\sigma_n}}\right).$$
+Expand the exponential, writing $s=\frac{t}{\sigma_n}\to0$:
+$$q+pe^{s}=q+p\left(1+s+\frac{s^2}{2}+\cdots\right)
+=1+ps+\frac{ps^2}{2}+\cdots,$$
+since $q+p=1$. Now use $\ln(1+w)=w-\frac{w^2}{2}+\cdots$ with
+$w=ps+\frac{ps^2}{2}+\cdots$:
+$$\ln\left(q+pe^{s}\right)=ps+\frac{ps^2}{2}-\frac{p^2s^2}{2}+O\left(s^3\right)
+=ps+\frac{pq\,s^2}{2}+O\left(s^3\right),$$
+because $\frac{p}{2}-\frac{p^2}{2}=\frac{p(1-p)}{2}=\frac{pq}{2}$. Therefore
+$$\ln M_{Y_n}(t)=-\frac{npt}{\sigma_n}+n\left[\frac{pt}{\sigma_n}
++\frac{pq\,t^2}{2\sigma_n^2}+O\!\left(\frac{1}{n^{\frac32}}\right)\right]
+=\frac{npq\,t^2}{2npq}+O\!\left(\frac{1}{\sqrt n}\right)
+\ \longrightarrow\ \frac{t^2}{2}.$$
+$$\therefore\quad M_{Y_n}(t)\longrightarrow e^{\frac{t^2}{2}},
+\qquad\text{so}\qquad
+\frac{Z_n-np}{\sqrt{np(1-p)}}\ \overset{d}{\longrightarrow}\ N(0,1).$$
+
+\begin{note}
+This is the central limit theorem in the one case where it can be checked by hand
+from the moment generating function alone: $Z_n$ is a sum of $n$ independent
+Bernoulli variables, so the general theorem covers it. Doing it directly shows
+where the $\frac{t^2}{2}$ comes from --- the linear term always cancels against
+the centring, and the quadratic term always survives at exactly order one.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $X_1,\ldots,X_n$ be a random sample from $\text{POI}(1)$, and let
+$$Y_n=\frac{\sqrt n\left(\bar X-\mu\right)}{\sigma}.$$
+\begin{enumerate}
+\item[(a).] Show that $Y_n=\sqrt n\left(\bar X-1\right)$ and that its moment
+generating function is
+$\exp\left[-t\sqrt n+n\left(e^{\frac{t}{\sqrt n}}-1\right)\right]$.
+\item[(b).] Deduce the limiting distribution of $Y_n$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} For $\text{POI}(1)$ both the mean and the variance are $1$, so
+$\mu=1$, $\sigma=1$, and $Y_n=\sqrt n\left(\bar X-1\right)$ immediately.
+
+A sum of independent Poisson variables is Poisson with the means added, so
+$S=\sum_{i=1}^nX_i\sim\text{POI}(n)$ and $M_S(t)=e^{n\left(e^t-1\right)}$. Now
+$$Y_n=\sqrt n\left(\frac{S}{n}-1\right)=\frac{S-n}{\sqrt n},$$
+so
+$$M_{Y_n}(t)=E\left[e^{\frac{t(S-n)}{\sqrt n}}\right]
+=e^{-t\sqrt n}\,M_S\!\left(\frac{t}{\sqrt n}\right)
+=\exp\left[-t\sqrt n+n\left(e^{\frac{t}{\sqrt n}}-1\right)\right].
+\qquad\blacksquare$$
+
+\textbf{(b).} This is exactly the moment generating function computed in the
+worked example of section 1.4, where $Z_n\sim\text{POI}(n)$ and
+$Y_n=\frac{Z_n-n}{\sqrt n}$ --- and indeed $S$ here \emph{is} such a $Z_n$.
+Expanding as there,
+$$\ln M_{Y_n}(t)=\frac{t^2}{2}+O\!\left(\frac{1}{\sqrt n}\right)
+\ \longrightarrow\ \frac{t^2}{2},$$
+$$\therefore\quad Y_n\ \overset{d}{\longrightarrow}\ N(0,1).$$
+
+\begin{note}
+Part (a) is the whole point of the question. Recognising that a sample mean from
+$\text{POI}(1)$ is a rescaled $\text{POI}(n)$ turns a question about $n$ variables
+into a question about one, and the limit is then something already done. Look for
+this reduction before starting any expansion.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+A random sample of size $20$ is taken from the distribution with density
+$f(x)=2x$, $0<x<1$. Use the central limit theorem to approximate
+$P\left(0.60<\bar X<0.75\right)$.
+\end{problem}
+
+\begin{solution}
+First the population mean and variance:
+$$\mu=\int_0^12x^2dx=\frac23,\qquad
+E\left(X^2\right)=\int_0^12x^3dx=\frac12,$$
+$$\sigma^2=\frac12-\left(\frac23\right)^2=\frac12-\frac49=\frac{1}{18}.$$
+So $\bar X$ has mean $\frac23=0.6667$ and variance
+$\frac{1}{18\times20}=\frac{1}{360}$, giving
+$$\sigma_{\bar X}=\frac{1}{\sqrt{360}}=0.0527.$$
+By the central limit theorem $\bar X$ is approximately normal, so
+$$P\left(0.60<\bar X<0.75\right)
+\approx P\!\left(\frac{0.60-0.6667}{0.0527}<Z<\frac{0.75-0.6667}{0.0527}\right)
+=P(-1.26<Z<1.58),$$
+$$P\left(0.60<\bar X<0.75\right)\approx0.9429-0.1038=0.8391.$$
+
+\begin{note}
+Simulation puts the true value at about $0.842$, so the approximation is good to
+about three parts in a thousand at $n=20$. The population here is only mildly
+skewed, which is why so small a sample suffices; the same $n$ against a heavily
+skewed population would do far worse.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $Y\sim BIN(150,0.3)$. Use a normal approximation, with a continuity
+correction, to find (a) $P(Y\geq50)$ and (b) $P(Y=45)$.
+\end{problem}
+
+\begin{solution}
+Here $\mu=np=45$ and $\sigma^2=np(1-p)=150(0.3)(0.7)=31.5$, so
+$\sigma=5.6125$.
+
+\textbf{(a).} The event $Y\geq50$ becomes $Y>49.5$:
+$$P(Y\geq50)\approx P\!\left(Z>\frac{49.5-45}{5.6125}\right)=P(Z>0.80)
+=1-0.7881=0.2119.$$
+The exact binomial value is $0.2101$.
+
+\textbf{(b).}
+$$P(Y=45)\approx P\left(44.5<Y<45.5\right)
+=P\!\left(\frac{-0.5}{5.6125}<Z<\frac{0.5}{5.6125}\right)=P(-0.089<Z<0.089),$$
+$$P(Y=45)\approx0.5355-0.4645=0.0710,$$
+against an exact value of $0.0709$.
+
+\begin{note}
+$np=45$ and $n(1-p)=105$ are both comfortably above $5$, which is the usual
+condition for this approximation to be trustworthy. It is a statement about the
+smaller of the two expected counts, not about $n$: a sample of $10\,000$ with
+$p=0.0002$ fails it, and no amount of extra data repairs that.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $\bar X$ be the mean of a random sample of size $50$ from a $\chi^2(20)$
+distribution. Find an approximate value for $P\left(19<\bar X<21\right)$.
+\end{problem}
+
+\begin{solution}
+A $\chi^2(k)$ distribution has mean $k$ and variance $2k$, so here
+$\mu=20$ and $\sigma^2=40$. Then
+$$\text{Var}\left(\bar X\right)=\frac{40}{50}=0.8,\qquad
+\sigma_{\bar X}=\sqrt{0.8}=0.8944.$$
+By the central limit theorem,
+$$P\left(19<\bar X<21\right)
+\approx P\!\left(\frac{19-20}{0.8944}<Z<\frac{21-20}{0.8944}\right)
+=P(-1.12<Z<1.12),$$
+$$P\left(19<\bar X<21\right)\approx0.8686-0.1314=0.7372.$$
+
+\begin{note}
+No approximation was really needed: a sum of independent chi-squares is chi-square,
+so $50\bar X\sim\chi^2(1000)$ exactly, and the exact answer is $0.7367$. The normal
+approximation is doing well here precisely because $\chi^2(1000)$ is itself nearly
+normal --- which is the central limit theorem again, since a $\chi^2(1000)$ variable
+\emph{is} a sum of a thousand independent pieces.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Let $\bar X$ be the mean of a random sample of size $64$ from
+$\text{GAM}(2,3)$. Find an approximate value for $P\left(5<\bar X<7\right)$.
+\end{problem}
+
+\begin{solution}
+For $\text{GAM}(\alpha,\beta)$ with $\alpha=2$ and $\beta=3$,
+$$\mu=\alpha\beta=6,\qquad\sigma^2=\alpha\beta^2=18.$$
+So $\text{Var}\left(\bar X\right)=\frac{18}{64}=0.2813$ and
+$\sigma_{\bar X}=0.5303$. Then
+$$P\left(5<\bar X<7\right)
+\approx P\!\left(\frac{5-6}{0.5303}<Z<\frac{7-6}{0.5303}\right)
+=P(-1.89<Z<1.89),$$
+$$P\left(5<\bar X<7\right)\approx0.9706-0.0294=0.9412.$$
+
+\begin{note}
+Exactly, $\bar X\sim\text{GAM}\!\left(128,\frac{3}{64}\right)$ by the earlier
+exercise on the sampling distribution of a gamma mean. That gives $0.94125$,
+against $0.94124$ from the normal approximation --- agreement to five decimal
+places. A gamma distribution with shape $128$ is for practical purposes normal
+already, so there was nothing left for the approximation to get wrong.
+\end{note}
+\end{solution}
+
+\begin{problem}{Exercise}
+Independent random samples of size $36$ are taken from $N(10,25)$ and $N(8,16)$,
+with means $\bar X$ and $\bar Y$ respectively. Find $P\left(\bar X>\bar Y\right)$.
+\end{problem}
+
+\begin{solution}
+The two sample means are normal and independent:
+$$\bar X\sim N\!\left(10,\frac{25}{36}\right),\qquad
+\bar Y\sim N\!\left(8,\frac{16}{36}\right).$$
+A difference of independent normal variables is normal, with the means subtracted
+and the variances \emph{added}:
+$$\bar X-\bar Y\sim N\!\left(2,\ \frac{25}{36}+\frac{16}{36}\right)
+=N\!\left(2,\ \frac{41}{36}\right),\qquad
+\text{sd}=\sqrt{\frac{41}{36}}=1.0672.$$
+Therefore
+$$P\left(\bar X>\bar Y\right)=P\left(\bar X-\bar Y>0\right)
+=P\!\left(Z>\frac{0-2}{1.0672}\right)=P(Z>-1.87)=0.9693.$$
+
+\begin{note}
+No approximation is involved --- both populations are normal, so the difference of
+the means is exactly normal at any sample size. The central limit theorem would
+give the same answer for non-normal populations at this $n$, but here it is not
+needed, and saying so is part of the answer.
 \end{note}
 \end{solution}
 
@@ -5167,9 +6120,10 @@ alternative in the earlier questions produced a one-sided region.
 
 \chapter{Past examination paper}
 
-What follows is the 2013 final examination in Mathematical Statistics, worked in
-full. Six questions were set and candidates answered any five, in three hours ---
-so a little over half an hour a question, which is worth knowing before you start.
+What follows is the University of Zambia's MAT3601 Mathematical Statistics final
+examination of 2013, worked in full. Six questions were set and candidates
+answered any five, in three hours --- so a little over half an hour a question,
+which is worth knowing before you start.
 
 Read each question, put the notes away, and write your own answer before opening
 the solution. A worked paper read passively teaches almost nothing; the same paper
