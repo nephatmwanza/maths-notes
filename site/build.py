@@ -404,11 +404,18 @@ def process(path: Path, items: list[dict], course_title: str, course_slug: str,
             "} }, };",
         )
 
-    # The page's section heading keys its discussion thread. Use the *numbered*
+    # The page's own heading keys its discussion thread. Use the *numbered*
     # heading ("1.1 Introduction"), not the bare <title>: two sections in this
     # document are both called "Introduction", and without the number they would
     # share a single thread.
-    m = re.search(r"class='sectionHead'>(.*?)</h\d>", html, re.S)
+    #
+    # Subsection heads count, not just section heads. Where a course splits at
+    # subsection level the subsection page *is* the content page, and keying it
+    # off <title> would have collapsed every "Introduction" in the course onto
+    # one thread. Section pages are unaffected: a section head always precedes
+    # its own subsections, so re.search still finds it first and the keys minted
+    # before this change keep pointing at the same threads.
+    m = re.search(r"class='(?:sub){0,2}sectionHead'>(.*?)</h\d>", html, re.S)
     if not m:
         m = re.search(r"<title>(.*?)</title>", html, re.S)
     section_title = (unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", m.group(1)))).strip()
@@ -451,11 +458,21 @@ def process(path: Path, items: list[dict], course_title: str, course_slug: str,
         + '<main class="content"><div class="inner">'
         + inner
         + nav
-        # Only section pages get a question box. The title page, the chapter
-        # landings and the contents page have no topic to ask about, and an
-        # empty thread on each would just look abandoned.
+        # A page gets a question box if it has a topic to ask about - that is,
+        # if it carries a section or subsection heading of its own. The title
+        # page, the chapter landings and the contents page do not, and an empty
+        # thread on each would just look abandoned.
+        #
+        # This used to test the filename for tex4ht's "se" stem, which quietly
+        # assumed every course splits at section level. Two of them do not:
+        # Foundation Maths and Introduction to Statistics use \section for what
+        # a reader calls a chapter, so their real content pages carry the "su"
+        # stem and 97 of 117 of them were shipping with nowhere to ask a
+        # question - exactly the pages a learner is stuck on. Asking what the
+        # page contains rather than what it is called cannot drift that way
+        # again when a course is structured differently.
         + (qa_block(discussion_term(course_slug, section_title))
-           if re.search(r"se\d+$", path.stem) else "")
+           if re.search(r"class='(?:sub){0,2}sectionHead'", html) else "")
         + "</div></main></div>"
         + '<button class="sb-toggle" onclick="document.getElementById(\'sidebar\')'
           '.classList.toggle(\'open\')">Contents</button>'

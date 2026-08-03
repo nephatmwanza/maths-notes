@@ -369,11 +369,15 @@ is too big to hide." The existing GitHub account and commit identity stay as the
 there is no history rewrite and nothing is blocked. WJ Maths is a brand name over open
 authorship, not a disguise.
 
-**Hosting: GitHub Pages from `main`, folder `/` (root).** No Actions workflow — every path
-in the project is already relative and correct when served from the root, so the only
-addition is a root `index.html` that redirects to `site/index.html`. Fewer moving parts,
-nothing to break on a rebuild. Verified locally by serving the repo root: catalogue,
-course pages, stylesheet and MathJax all resolve.
+**Hosting: GitHub Pages from `main`, folder `/` (root).** Every path in the project is
+already relative and correct when served from the root, so the only addition is a root
+`index.html` that redirects to `site/index.html`. Verified locally by serving the repo
+root: catalogue, course pages, stylesheet and MathJax all resolve.
+
+*Superseded 2026-08-01:* this section originally said "no Actions workflow". There is one
+now — `.github/workflows/pages.yml`. The branch option runs jekyll-build-pages over the
+repository and failed on every push; the workflow skips the build step and uploads the
+repo as static files instead. Its own header comment carries the full reasoning.
 
 **Still gated on the user (three clicks in GitHub settings):**
 1. Make the repo **public** — required for both Pages on a free account and for giscus.
@@ -388,6 +392,30 @@ subdomain chosen at goatcounter.com to switch it on.
 **Note before making the repo public:** it contains past-paper questions and tutorial
 sheets (2020 exams, Feb–March 2026 tutorial sheets — last semester's). Worth a final check
 that none are current assessed coursework.
+
+## Custom domain — prepared 2026-08-03, not yet bought
+
+The user intends to buy a domain (`wjmaths.com` or similar, roughly $10–15/yr). Everything
+on this side is ready; three things to do when it exists, in this order:
+
+1. **A `CNAME` file at the repository root** containing the bare domain and nothing else
+   (e.g. `wjmaths.com`). The workflow uploads the repo root as the artifact, so a root
+   `CNAME` is picked up with no other change. Committing it also sets the domain in
+   Settings → Pages, so do not type it there as well — GitHub will fight itself.
+2. **DNS at the registrar.** Apex domain: four `A` records to `185.199.108.153`,
+   `185.199.109.153`, `185.199.110.153`, `185.199.111.153` (and the matching `AAAA`
+   records if the registrar supports them). A `www` subdomain: one `CNAME` to
+   `nephatmwanza.github.io`. Propagation is usually minutes, occasionally a day.
+3. **Enforce HTTPS** in Settings → Pages once the certificate is issued. The box is greyed
+   out until GitHub has provisioned it; that can take up to an hour after DNS resolves.
+
+Two things that do *not* need changing: every internal path is relative, so nothing breaks
+on a domain move, and the giscus thread keys are keyed to course directory and section
+title, not to URL — so no discussion orphans when the address changes. GoatCounter will
+start a fresh path history under the new host; the old one stays readable in its dashboard.
+
+**Do not retire the `github.io` address.** GitHub redirects it automatically, and links
+handed to learners this year keep working.
 
 ## Introduction to Statistics — started 2026-08-01
 
@@ -484,6 +512,63 @@ two sides of the identity did not balance.
 ## Status Log
 
 *(most recent first — append new entries, never rewrite old ones)*
+
+### 2026-08-03 (later) — Mathematical Statistics published; the question box was
+### missing from 97 of the site's content pages
+
+**Mathematical Statistics is live** and listed in the catalogue, taking the count
+to four. It was deliberately held back until chapter 3 had practice problems, so
+it would not launch with two chapters equipped and one bare.
+
+Sources: the user's own `Mathematical Statistics.tex`, with *questions only* taken
+from the `Mathematical Statistics Notes` folder — Assignment 2 and 2.2
+(estimation), Assignment 3 (hypothesis testing), and the MAT3601 2013 final
+examination, all worked in full.
+
+**A defect found during the clean-up pass, worth reading before touching
+`build.py`.** The giscus question box was gated on the page *filename* matching
+tex4ht's `se\d+` stem. That silently assumed every course splits at section
+level. Two do not: Foundation Maths and Introduction to Statistics use `\section`
+for what a reader calls a chapter, so their content pages carry the `su` stem and
+were shipping with **nowhere to ask a question** — 97 pages of the 117 in those
+two courses, and precisely the pages a learner is stuck on. The ten boxes that did
+exist sat on chapter landing pages, which have nothing to ask about.
+
+Now gated on whether the page *carries* a section or subsection heading, so it
+cannot drift again when a course is structured differently. The thread key was
+extended the same way (`(?:sub){0,2}sectionHead`); a section head always precedes
+its own subsections, so `re.search` still finds it first and **every key minted
+before the change still points at the same thread** — verified against a snapshot
+of all 46, none lost, none renamed.
+
+**Lesson, same shape as several earlier ones:** ask what a page *contains*, not
+what it is *called*. The filename test looked precise and was wrong in a way that
+produced no error, no warning and no visible difference — only silence where a
+learner should have been able to ask.
+
+**Two source misprints corrected in place**, both flagged to the reader:
+- Assignment 3 is clean, but the 2013 paper's Q3(c) gives the geometric support as
+  $x=0,1,2,\ldots$ against $\theta(1-\theta)^{x-1}$, which sums to
+  $\frac{1}{1-\theta}$. Intended support is $x=1,2,3,\ldots$
+- Sizes that look wrong and are not: the $n=1$ test in Assignment 3 Q1 has power
+  0.0975 against size 0.05, and it *is* the most powerful test at that size.
+
+Every stated number was recomputed in sympy before being written, as before. The negative
+binomial closure in the 2013 paper's Q1(c) was checked by direct convolution as well as by
+moment generating function — the two agree to 1.4e-17.
+
+**Build after all four courses were rebuilt:**
+
+| Course | Pages | Diagrams | Question boxes |
+|---|---|---|---|
+| Foundation Maths and Statistics for the Social Sciences | 75 | 122 | 10 → **73** |
+| Introduction to Probability | 22 | 41 | 17 |
+| Introduction to Statistics | 42 | 61 | 5 → **39** |
+| Mathematical Statistics | 26 | 9 | **20** |
+
+Site total 46 → 149 question boxes, all 149 keys unique, no LaTeX errors, no missing
+diagrams, no empty titles. `scratchpad/verify_site.py` runs the whole check in one go and
+compares against a snapshot of the keys taken before the change.
 
 ### 2026-08-03 — Every "sketch" tutorial question now has its curve drawn
 
