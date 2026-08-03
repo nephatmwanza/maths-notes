@@ -3004,6 +3004,315 @@ the average number of trials'' --- which is what one would have guessed.
 \end{note}
 \end{solution}
 
+
+\begin{problem}{Assignment 2}
+Let $Y_1,\ldots,Y_n$ be a random sample from
+$$f(y;\mu,\sigma^2)=\frac{1}{y\sqrt{2\pi\sigma^2}}
+e^{-\frac{1}{2\sigma^2}(\log y-\mu)^2},\qquad y>0.$$
+With $\theta=(\mu,\sigma^2)$, find (a) the sufficient statistic for $\theta$, (b) the
+MLE for $\theta$, (c) the information matrix for $\theta$, (d) the MLE for $E(Y)$.
+\end{problem}
+
+\begin{solution}
+This is the lognormal density. The one observation worth making before any algebra
+is that $W=\log Y\sim N(\mu,\sigma^2)$: everything then follows from the normal case.
+
+\textbf{(a) Sufficient statistic.} Writing $w_i=\log y_i$,
+$$L(\theta)=\left(2\pi\sigma^2\right)^{-n/2}\left(\prod y_i\right)^{-1}
+\exp\!\left(-\frac{1}{2\sigma^2}\sum(w_i-\mu)^2\right).$$
+Expanding the square, $\sum(w_i-\mu)^2=\sum w_i^2-2\mu\sum w_i+n\mu^2$, so
+$$L(\theta)=\underbrace{\left(2\pi\sigma^2\right)^{-n/2}
+\exp\!\left(-\frac{\sum w_i^2-2\mu\sum w_i+n\mu^2}{2\sigma^2}\right)}
+_{g\left(\sum w_i,\ \sum w_i^2;\ \theta\right)}
+\cdot\underbrace{\left(\prod y_i\right)^{-1}}_{h(\mathbf{y})}.$$
+$$\therefore\quad T=\left(\sum_{i=1}^n\log Y_i,\ \sum_{i=1}^n(\log Y_i)^2\right)
+\text{ is jointly sufficient for }\theta.$$
+
+\textbf{(b) Maximum likelihood.} These are the normal estimators applied to the
+$w_i$:
+$$\hat\mu=\frac{1}{n}\sum_{i=1}^n\log Y_i,\qquad
+\hat\sigma^2=\frac{1}{n}\sum_{i=1}^n\left(\log Y_i-\hat\mu\right)^2.$$
+
+\textbf{(c) Information matrix.} Again as for the normal in $w$,
+$$I(\theta)=n\begin{pmatrix}\frac{1}{\sigma^2} & 0\\[3pt]
+0 & \frac{1}{2\sigma^4}\end{pmatrix}.$$
+The off-diagonal entries are zero, so $\hat\mu$ and $\hat\sigma^2$ are
+asymptotically independent.
+
+\textbf{(d) MLE of $E(Y)$.} For the lognormal,
+$$E(Y)=e^{\mu+\frac{\sigma^2}{2}}.$$
+By the invariance property of maximum likelihood --- the MLE of $\tau(\theta)$ is
+$\tau$ evaluated at the MLE ---
+$$\widehat{E(Y)}=e^{\hat\mu+\frac{\hat\sigma^2}{2}}.$$
+
+\begin{note}
+Note what $E(Y)$ is \emph{not}: it is not $e^{\hat\mu}$. The $\frac{\sigma^2}{2}$
+term is the whole difference between the median of a lognormal, $e^{\mu}$, and its
+mean. Reporting $e^{\hat\mu}$ as the estimated mean understates it, and by more the
+larger the variance.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 2}
+Let $X_1,\ldots,X_n$ be a random sample from $X\sim\text{UNIF}(0,\theta)$. Let
+$T_1=X_{(n)}$ and let $T_2$ be the MME for $\theta$.
+\begin{enumerate}
+\item[(a).] Find $T_2$. Is it an unbiased estimator of $\theta$?
+\item[(b).] Is $T_1$ asymptotically unbiased for $\theta$?
+\item[(c).] Show that $T_1$ is a consistent estimator of $\theta$.
+\item[(d).] Find the MSE of $T_1$. \quad (e) Find the MSE of $T_2$.
+\quad (f) Find $e(T_1,T_2)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} $E(X)=\frac{\theta}{2}$, so equating to $\bar X$ gives
+$$T_2=2\bar X,\qquad E(T_2)=2\cdot\frac{\theta}{2}=\theta.$$
+So $T_2$ is \textbf{unbiased}.
+
+\textbf{(b).} The largest order statistic has density
+$$g(x)=\frac{nx^{n-1}}{\theta^n},\qquad 0<x<\theta,$$
+so
+$$E(T_1)=\int_0^\theta x\cdot\frac{nx^{n-1}}{\theta^n}\,dx=\frac{n\theta}{n+1}
+\ \longrightarrow\ \theta\quad\text{as }n\to\infty.$$
+It is biased for every finite $n$ --- always \emph{under}-estimating, as it must,
+since the largest observation cannot exceed $\theta$ --- but
+\textbf{asymptotically unbiased}.
+
+\textbf{(c).} Also
+$$E\left(T_1^2\right)=\int_0^\theta x^2\cdot\frac{nx^{n-1}}{\theta^n}\,dx
+=\frac{n\theta^2}{n+2},$$
+so, using the result of (d) below,
+$$\text{MSE}(T_1)=\frac{2\theta^2}{(n+1)(n+2)}\ \longrightarrow\ 0
+\quad\text{as }n\to\infty.$$
+An estimator whose mean squared error tends to zero converges in probability to
+$\theta$, so $T_1$ is \textbf{consistent}.
+
+\textbf{(d).} Since $T_1$ is biased, use $\text{MSE}=E\left(T_1^2\right)-2\theta
+E(T_1)+\theta^2$:
+$$\text{MSE}(T_1)=\frac{n\theta^2}{n+2}-\frac{2n\theta^2}{n+1}+\theta^2
+=\theta^2\cdot\frac{n(n+1)-2n(n+2)+(n+1)(n+2)}{(n+1)(n+2)}.$$
+The numerator is
+$$\left(n^2+n\right)-\left(2n^2+4n\right)+\left(n^2+3n+2\right)=2,$$
+the $n^2$ and $n$ terms cancelling completely, so
+$$\text{MSE}(T_1)=\frac{2\theta^2}{(n+1)(n+2)}.$$
+
+\textbf{(e).} $T_2$ is unbiased, so its MSE is its variance. With
+$\text{Var}(X)=\frac{\theta^2}{12}$,
+$$\text{MSE}(T_2)=\text{Var}\left(2\bar X\right)=4\cdot\frac{\theta^2}{12n}
+=\frac{\theta^2}{3n}.$$
+
+\textbf{(f).}
+$$e(T_1,T_2)=\frac{\text{MSE}(T_2)}{\text{MSE}(T_1)}
+=\frac{\frac{\theta^2}{3n}}{\frac{2\theta^2}{(n+1)(n+2)}}
+=\frac{(n+1)(n+2)}{6n}.$$
+
+\begin{note}
+This is the standard cautionary example. $T_2$ is unbiased and $T_1$ is not, yet
+$T_1$ is enormously better: its MSE falls like $\frac{1}{n^2}$ while $T_2$'s falls
+only like $\frac{1}{n}$, and the efficiency ratio grows without bound. Unbiasedness
+on its own is not a reason to prefer an estimator.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 2}
+Let $X_1,\ldots,X_n$ be a random sample from $f(x;\theta)=\frac{2\theta^2}{x^3}$,
+$x>\theta$. Let $T_1$ be the MME and $T_2$ the MLE for $\theta$.
+\begin{enumerate}
+\item[(a).] Find $T_1$. Is it unbiased for $\theta$? \quad (b) Find $T_2$.
+\item[(c).] Show that $T_2$ is asymptotically unbiased.
+\item[(d).] Show that $T_2$ is a consistent estimator.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).}
+$$E(X)=\int_\theta^\infty x\cdot\frac{2\theta^2}{x^3}\,dx
+=2\theta^2\int_\theta^\infty x^{-2}dx=2\theta^2\cdot\frac{1}{\theta}=2\theta.$$
+Setting $2\theta=\bar X$,
+$$T_1=\frac{\bar X}{2},\qquad E(T_1)=\frac{2\theta}{2}=\theta,$$
+so $T_1$ is \textbf{unbiased}.
+
+\textbf{(b).} The likelihood is
+$$L(\theta)=\frac{2^n\theta^{2n}}{\prod x_i^3},\qquad\text{valid only while }
+\theta<x_i\text{ for every }i.$$
+Differentiating is useless here: $L$ is \emph{increasing} in $\theta$, so it is made
+as large as the constraint permits. The binding constraint is
+$\theta\leq\min_i x_i$, hence
+$$T_2=X_{(1)}=\min_i X_i.$$
+
+\textbf{(c).} The smallest order statistic has density
+$$g(x)=n\left[1-F(x)\right]^{n-1}f(x)
+=n\left(\frac{\theta^2}{x^2}\right)^{n-1}\cdot\frac{2\theta^2}{x^3}
+=\frac{2n\theta^{2n}}{x^{2n+1}},\qquad x>\theta,$$
+using $F(x)=1-\frac{\theta^2}{x^2}$. Then
+$$E(T_2)=\int_\theta^\infty x\cdot\frac{2n\theta^{2n}}{x^{2n+1}}\,dx
+=2n\theta^{2n}\int_\theta^\infty x^{-2n}dx
+=2n\theta^{2n}\cdot\frac{\theta^{1-2n}}{2n-1}=\frac{2n\theta}{2n-1}.$$
+As $n\to\infty$ this tends to $\theta$, so $T_2$ is \textbf{asymptotically
+unbiased}. Note it over-estimates, the mirror image of the uniform case, because
+the smallest observation must exceed $\theta$.
+
+\textbf{(d).} By the same integral with $x^2$,
+$$E\left(T_2^2\right)=2n\theta^{2n}\int_\theta^\infty x^{1-2n}dx
+=\frac{2n\theta^2}{2n-2}=\frac{n\theta^2}{n-1}.$$
+Hence
+$$\text{MSE}(T_2)=\frac{n\theta^2}{n-1}-\frac{4n\theta^2}{2n-1}+\theta^2
+=\frac{\theta^2}{(n-1)(2n-1)}\ \longrightarrow\ 0,$$
+so $T_2$ is \textbf{consistent}.
+
+\begin{note}
+Part (b) is the one to be careful with. Setting $\frac{d\ell}{d\theta}=0$ finds
+nothing, because the likelihood has no interior stationary point --- the maximum is
+at the boundary of the parameter space. Whenever the range of $x$ depends on
+$\theta$, look at the constraint before differentiating.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 2}
+Let $X_1,\ldots,X_n$ be a random sample from $f(x;\theta)=\theta e^{-\theta x}$,
+$x>0$.
+\begin{enumerate}
+\item[(a).] Find the MLE of $\theta$.
+\item[(b).] Find the MLE of $\frac{1}{\theta}$. Is it unbiased?
+\item[(c).] Is the MLE of $\frac{1}{\theta}$ a U.M.V.U.E.?
+\item[(d).] Is the MLE of $\theta$ consistent? \quad (e) Is the MLE of
+$\frac{1}{\theta}$ consistent?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} $\ell(\theta)=n\ln\theta-\theta\sum x_i$, so
+$$\frac{d\ell}{d\theta}=\frac{n}{\theta}-\sum x_i=0\quad\implies\quad
+\hat\theta=\frac{n}{\sum X_i}=\frac{1}{\bar X},$$
+a maximum since $\frac{d^2\ell}{d\theta^2}=-\frac{n}{\theta^2}<0$.
+
+\textbf{(b).} By invariance, the MLE of $\frac{1}{\theta}$ is
+$\frac{1}{\hat\theta}=\bar X$. Since $E(X)=\frac{1}{\theta}$,
+$$E\left(\bar X\right)=\frac{1}{\theta},$$
+so it is \textbf{unbiased}.
+
+\textbf{(c).} The exponential family here has $T=\sum X_i$ as a complete sufficient
+statistic for $\theta$. Now $\bar X=\frac{T}{n}$ is a function of $T$ alone and is
+unbiased for $\frac{1}{\theta}$. By the Lehmann--Scheff\'e theorem an unbiased
+function of a complete sufficient statistic is the unique UMVUE, so
+$$\bar X\ \text{ is the U.M.V.U.E. of }\ \frac{1}{\theta}.$$
+
+\textbf{(d) and (e).} By the weak law of large numbers $\bar X\xrightarrow{P}
+E(X)=\frac{1}{\theta}$, so the estimator in (b) is \textbf{consistent}. Since
+$g(u)=\frac{1}{u}$ is continuous at $u=\frac{1}{\theta}\neq 0$, the continuous
+mapping theorem gives
+$$\hat\theta=\frac{1}{\bar X}\xrightarrow{P}\theta,$$
+so the estimator in (a) is \textbf{consistent} as well.
+
+\begin{note}
+Invariance transfers straight through maximum likelihood but \emph{not} through
+unbiasedness. Here $\bar X$ is unbiased for $\frac{1}{\theta}$ while
+$\frac{1}{\bar X}$ is \emph{not} unbiased for $\theta$ --- in fact
+$E\left(\frac{1}{\bar X}\right)=\frac{n\theta}{n-1}$. Consistency, by contrast,
+does transfer, which is what (d) uses.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 2}
+Let $X_1,\ldots,X_n$ be a random sample from
+$f(x;\theta)=\frac{e^{-\theta}\theta^x}{x!}$, $x=0,1,2,\ldots$
+\begin{enumerate}
+\item[(a).] Find the MLE of $\theta$.
+\item[(b).] Find the CRLB for the variances of unbiased estimators of $\theta$.
+\item[(c).] Is the MLE of $\theta$ a U.M.V.U.E.?
+\item[(d).] Find the CRLB for variances of unbiased estimators of $e^{-\theta}$.
+\item[(e).] Show that $T=\left(\frac{n-1}{n}\right)^{\sum_{i=1}^nX_i}$ is unbiased
+for $e^{-\theta}$. \quad (f) Find the efficiency of $T$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} $\ell(\theta)=-n\theta+\ln\theta\sum x_i-\sum\ln x_i!$, so
+$$\frac{d\ell}{d\theta}=-n+\frac{\sum x_i}{\theta}=0\quad\implies\quad
+\hat\theta=\bar X.$$
+
+\textbf{(b).} From $\ln f=-\theta+x\ln\theta-\ln x!$,
+$$\frac{\partial^2\ln f}{\partial\theta^2}=-\frac{x}{\theta^2},\qquad
+I_1(\theta)=-E\!\left[-\frac{X}{\theta^2}\right]=\frac{\theta}{\theta^2}
+=\frac{1}{\theta}.$$
+$$\therefore\quad \text{CRLB}=\frac{1}{nI_1(\theta)}=\frac{\theta}{n}.$$
+
+\textbf{(c).} $\bar X$ is unbiased for $\theta$ and
+$\text{Var}\left(\bar X\right)=\frac{\theta}{n}$, which \emph{equals} the bound. An
+unbiased estimator attaining the CRLB has the smallest possible variance, so
+$\bar X$ is the \textbf{U.M.V.U.E.} of $\theta$.
+
+\textbf{(d).} For $\tau(\theta)=e^{-\theta}$ we have
+$\tau'(\theta)=-e^{-\theta}$, and the bound for a function of $\theta$ is
+$$\text{CRLB}=\frac{\left[\tau'(\theta)\right]^2}{nI_1(\theta)}
+=\frac{e^{-2\theta}}{\frac{n}{\theta}}=\frac{\theta e^{-2\theta}}{n}.$$
+
+\textbf{(e).} Since $\sum X_i\sim\text{POI}(n\theta)$, its probability generating
+function is $E\left(s^{\sum X_i}\right)=e^{n\theta(s-1)}$. Putting
+$s=\frac{n-1}{n}$,
+$$E(T)=e^{n\theta\left(\frac{n-1}{n}-1\right)}
+=e^{n\theta\left(-\frac{1}{n}\right)}=e^{-\theta},$$
+so $T$ is \textbf{unbiased} for $e^{-\theta}$.
+
+\textbf{(f).} Using the same generating function with $s^2$,
+$$E\left(T^2\right)=e^{n\theta\left(\left(\frac{n-1}{n}\right)^2-1\right)}
+=e^{n\theta\cdot\frac{1-2n}{n^2}}=e^{-2\theta+\frac{\theta}{n}},$$
+$$\text{Var}(T)=e^{-2\theta+\frac{\theta}{n}}-e^{-2\theta}
+=e^{-2\theta}\left(e^{\theta/n}-1\right).$$
+Therefore
+$$\text{eff}(T)=\frac{\text{CRLB}}{\text{Var}(T)}
+=\frac{\frac{\theta e^{-2\theta}}{n}}{e^{-2\theta}\left(e^{\theta/n}-1\right)}
+=\frac{\theta}{n\left(e^{\theta/n}-1\right)}.$$
+
+\begin{note}
+$T$ does not attain the bound, so it is not efficient for any finite $n$. But for
+large $n$ the exponent $\frac{\theta}{n}$ is small and
+$e^{\theta/n}-1\approx\frac{\theta}{n}$, which makes the efficiency tend to $1$:
+$T$ is \emph{asymptotically} efficient.
+\end{note}
+\end{solution}
+
+\begin{problem}{Assignment 2}
+Let $X_1,\ldots,X_n$ be a random sample from
+$$f(x;\theta)=\frac{1}{2^\theta\Gamma(\theta)}x^{\theta-1}e^{-\frac{x}{2}},
+\qquad x>0.$$
+Let $T_1$ be the MME and $T_2$ the MLE for $\theta$. Find (a) $T_1$, (b) $T_2$,
+(c) the MSE of $T_1$.
+\end{problem}
+
+\begin{solution}
+This is $\text{GAM}(\alpha=\theta,\ \beta=2)$: shape unknown, scale known and equal
+to $2$. So $E(X)=2\theta$ and $\text{Var}(X)=4\theta$.
+
+\textbf{(a).} Equating $E(X)=2\theta$ to $\bar X$,
+$$T_1=\frac{\bar X}{2}.$$
+
+\textbf{(b).} The log-likelihood is
+$$\ell(\theta)=-n\theta\ln 2-n\ln\Gamma(\theta)+(\theta-1)\sum\ln x_i
+-\frac{1}{2}\sum x_i,$$
+$$\frac{d\ell}{d\theta}=-n\ln 2-n\psi(\theta)+\sum\ln x_i=0,$$
+where $\psi=\frac{\Gamma'}{\Gamma}$ is the digamma function. So $T_2$ solves
+$$\psi(\theta)=\frac{1}{n}\sum_{i=1}^n\ln x_i-\ln 2.$$
+There is no closed form: $\psi$ cannot be inverted in elementary functions, so
+$T_2$ must be obtained numerically --- by Newton's method, as in Section 2.4.
+
+\textbf{(c).} $T_1$ is unbiased, since
+$E\left(\frac{\bar X}{2}\right)=\frac{2\theta}{2}=\theta$, so its MSE is its
+variance:
+$$\text{MSE}(T_1)=\text{Var}\!\left(\frac{\bar X}{2}\right)
+=\frac{1}{4}\cdot\frac{\text{Var}(X)}{n}=\frac{1}{4}\cdot\frac{4\theta}{n}
+=\frac{\theta}{n}.$$
+
+\begin{note}
+This is the standard case where the two methods genuinely part company. The moment
+estimator is immediate and has a clean MSE; the likelihood estimator has no closed
+form at all. That is the usual trade --- moments are easy to write down, maximum
+likelihood is usually better behaved, and when the likelihood equation will not
+solve, the moment estimator makes a good starting value for the iteration.
+\end{note}
+\end{solution}
+
 \chapter{Hypothesis Testing}
 
 \section{Introduction}
