@@ -212,8 +212,14 @@ def read_toc(build: Path) -> list[dict]:
     # \section at the top, so subsections get pages of their own (suN) - and
     # matching only ch/se left ten of nineteen pages reachable by next/prev
     # alone, absent from the sidebar entirely.
+    # Both quote styles are accepted. tex4ht is not consistent about it: it
+    # single-quotes attributes on some documents and double-quotes them on
+    # others, and it will do both within one course. Matching only ' left the
+    # complex variables contents page with zero entries parsed, so every page
+    # of that course shipped with an empty sidebar - the document was fine and
+    # the reader simply had no way to navigate it.
     for m in re.finditer(
-        r"href='([^']*?(?:ch|se|su)\d+\.html)#[^']*'>([^<]+)", html
+        r"href=['\"]([^'\"]*?(?:ch|se|su)\d+\.html)#[^'\"]*['\"]>([^<]+)", html
     ):
         href, label = m.group(1), unescape(m.group(2)).strip()
         stem = Path(href).stem
@@ -297,7 +303,11 @@ def sidebar(items: list[dict], current: str, course_title: str) -> str:
 
 def page_nav(html: str) -> str:
     """Turn tex4ht's `[next] [prev] [up]` row into a styled footer nav."""
-    links = dict(re.findall(r"<a href='([^']+)'>(next|prev|up)</a>", html))
+    # Quote style and the stray space before '>' both vary between documents;
+    # see the note in read_toc. Tolerating them costs nothing and the failure
+    # mode - a page with no way forward or back - is silent.
+    links = dict(re.findall(
+        r"<a href=['\"]([^'\"]+)['\"]\s*>(next|prev|up)</a>", html))
     inv = {v: k for k, v in links.items()}
     parts = []
     if "prev" in inv:
@@ -453,7 +463,14 @@ def process(path: Path, items: list[dict], course_title: str, course_slug: str,
                   html, count=1, flags=re.S)
 
     nav = page_nav(html)
-    body = re.search(r"<body>(.*)</body>", html, re.S)
+    # tex4ht writes the opening tag as `<body>` on some documents and as
+    # `<body \n>` - attribute-less but padded - on others. Matching the bare
+    # form made process() return False for any page carrying the padded one,
+    # and a page that returns False here is emitted raw: no sidebar, no
+    # question box, no stylesheet wrapper, and an empty <title>. Three pages of
+    # the complex variables course shipped that way, one of them ordinary
+    # content. Nothing reported it; the page count simply came out lower.
+    body = re.search(r"<body[^>]*>(.*)</body>", html, re.S)
     if not body:
         return False
     inner = body.group(1)

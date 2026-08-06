@@ -73,7 +73,8 @@ import glob, os, re, sys
 b = os.path.join(sys.argv[1], "build")
 refs = set()
 for f in glob.glob(os.path.join(b, "*.html")):
-    refs |= set(re.findall(r"src='([^']+\.svg)'", open(f, encoding="utf-8").read()))
+    refs |= set(re.findall(r"src=['\"]([^'\"]+\.svg)['\"]",
+                           open(f, encoding="utf-8").read()))
 have = {os.path.basename(x) for x in glob.glob(os.path.join(b, "*.svg"))}
 missing = sorted(refs - have)
 for m in missing:
