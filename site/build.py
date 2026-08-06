@@ -443,7 +443,13 @@ def process(path: Path, items: list[dict], course_title: str, course_slug: str,
     heading = (unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", head.group(1)))).strip()
                if head else "")
     page_title = escape(f"{heading} — {course_title}" if heading else course_title)
-    html = re.sub(r"<title>.*?</title>", f"<title>{page_title}</title>",
+    # The replacement is passed as a function, not a string. As a string, re.sub
+    # reads backslash sequences in it as group references and escapes - and a
+    # heading can contain a backslash, because MathJax keeps the maths as source
+    # text. "Elementary Point Set Topology of \mathbb{C}" made re.sub raise
+    # "bad escape \m" and the whole course failed to build. A function is
+    # substituted verbatim, so no heading can be read as a regex again.
+    html = re.sub(r"<title>.*?</title>", lambda _: f"<title>{page_title}</title>",
                   html, count=1, flags=re.S)
 
     nav = page_nav(html)
