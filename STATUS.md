@@ -557,6 +557,42 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-06 — Catalogue widened to all four years; deploy stuck in `waiting`
+
+Eight courses added to the "in preparation" list, so the catalogue now shows
+4 live and 10 planned and no year of study is empty. Fourth year previously had
+nothing at all. Topic lists were read out of the notes on disk, not written from
+a syllabus, so nothing is advertised that does not exist:
+
+    first   Mathematical Methods
+    second  Linear Algebra
+    third   Multivariate Calculus, Real Analysis,
+            Linear Models and Design of Experiments
+    fourth  Time Series Analysis, Methods of Non-Parametric Statistics,
+            Multivariate Statistical Analysis
+
+**Advanced Calculus has been renamed Multivariate Calculus** by the department;
+the catalogue uses the new name. Its notes (`ADVANCED CALCULUS/`, 10,306 lines)
+also carry systems of ODEs, Laplace transforms, Frobenius series and Fourier
+series in the closing third — left out of the description until it is known
+whether that belongs to this course or a neighbouring one.
+
+**The site's repository is `nephatmwanza/maths-notes`, not `LaTeX_WebApp`.**
+The local directory name is not the repository name, and testing
+`nephatmwanza.github.io/LaTeX_WebApp/` produces a 404 that looks like a broken
+redirect but is only the wrong path. The real old address,
+`nephatmwanza.github.io/maths-notes/`, redirects to `wjmaths.com` correctly —
+**links shared with students before the move still work.**
+
+**Unresolved:** commit `37a42bd` pushed at 16:42 UTC and the Pages workflow sat
+in status `waiting` for over 35 minutes without starting. Checked and ruled out:
+the environment's branch policy does allow `main`; there are no required
+reviewers (the only protection rule is `branch_policy`); the previous run for
+`6cc58d4` succeeded that morning. It appears to be a queue stall on GitHub's
+side. Fix is to open the Actions tab and re-run the workflow — it is set up for
+that deliberately (`workflow_dispatch`), so no empty commit is needed. **The
+change is committed and pushed but not yet live.**
+
 ### 2026-08-06 — Live at wjmaths.com
 
 Domain bought and serving. `https://wjmaths.com` returns the catalogue and all
