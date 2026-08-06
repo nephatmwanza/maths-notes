@@ -941,6 +941,32 @@ Decision: failed to reject $H_0$.\\\\
 \textbf{Large Sample Approximation}\\
 For $n\geq 25$, $T_+$ is often standardised and normal approximation is used to obtain $P$-values and C.I for standardised test statistics e.g when $H_0$ is true the expected value and the variance of $T_+$ can be shown that$$E(T_+)=\frac{n(n+1)}{4};\hspace{1cm} \text{var}(T_+)=\frac{n(n+1)(2n+1)}{24}$$ It can be shown that the random quantity is $$T^{*}=\frac{T_+-E(T_+)}{\sqrt{\text{var}(T_+)}}=\frac{T_+-\dfrac{n(n+1)}{4}}{\sqrt{\dfrac{n(n+1)(2n+1)}{24}}}\thicksim N(0,1)$$ \\\\
 
+\begin{center}
+\textbf{Zeros and Ties in the Signed-Rank Test}
+\end{center}
+Two things can go wrong with the data before the statistic is even formed, and
+the variance above assumes neither has happened.
+
+\textbf{Zeros.} A difference of exactly $0$ has no sign, so it cannot be ranked.
+The usual treatment is to discard such pairs and reduce $n$ accordingly, so that
+$n$ in every formula means the number of \emph{non-zero} differences, not the
+number of pairs collected. Reporting the original sample size after discarding
+zeros overstates the evidence.
+
+\textbf{Ties.} Tied absolute differences are given the average of the ranks they
+would otherwise have occupied. Averaging leaves $E(T_+)$ unchanged but
+\emph{reduces} the variance, and the correct expression is
+$$\operatorname{var}(T_+) = \dfrac{1}{24}\left[
+n(n+1)(2n+1) - \dfrac{1}{2}\sum_{p}\left(t_p^{3} - t_p\right)\right],$$
+the sum running over the groups of tied absolute differences with $t_p$ the size
+of the $p$-th group. With no ties every $t_p = 1$, each term vanishes, and the
+expression returns to $\dfrac{n(n+1)(2n+1)}{24}$.
+
+Using the uncorrected variance when ties are present overstates the denominator,
+shrinks $\left|T^{*}\right|$, and so makes the test conservative --- it will fail
+to detect real shifts. The error is in the safe direction, which is precisely why
+it goes unnoticed.
+
 
 
 
@@ -1500,6 +1526,29 @@ E(U/H_0) &=\frac{mn}{2}\\\\
 \therefore \hspace{0.4cm} Z &=\frac{U-\dfrac{mn}{2}}{\sqrt{\dfrac{mn(m+n+1)}{12}}}\thicksim N(0,1)
 \end{align*}
 
+\begin{center}
+\textbf{Ties in the Rank-Sum Test}
+\end{center}
+As with the signed-rank test, tied observations are given average ranks and the
+variance must be reduced to match. Writing $N = m + n$ for the combined sample
+size,
+$$\operatorname{var}(U) = \dfrac{mn}{12}\left[
+(N + 1) - \dfrac{\sum_{p}\left(t_p^{3} - t_p\right)}{N(N-1)}\right],$$
+where $t_p$ is the size of the $p$-th group of tied values in the \emph{combined}
+sample --- both groups pooled, since ranking is done on the pooled data. With no
+ties the subtracted term is zero and the variance returns to
+$\dfrac{mn(N+1)}{12}$.
+
+A continuity correction of $0.5$ may also be applied, replacing $U$ by
+$U \pm 0.5$ in the direction that moves $Z$ towards zero.
+
+\begin{note}
+Ties are not a rare nuisance. Any measurement recorded to a coarse scale --- whole
+kilograms, whole years, a Likert scale --- will produce them in quantity, and it is
+exactly such data that non-parametric methods are chosen for in the first place.
+The tie correction is the normal case here, not the exception.
+\end{note}
+
 
 
 Since $U$ assumes only integer values, a continuity correction of $0.5$ may be used alternatively the Wilcoxon-Mann-Whitney statistic is computed as follows.\\ 
@@ -1890,6 +1939,23 @@ r_s &=\frac{\sum R(X_i)R(Y_i)-\dfrac{n(n+1)^2}{4}}{\Bigg\{\Bigg[\sum R(X_i)^2-\d
     &=\frac{12\sum R(X_i)R(Y_i)}{n^3-n}-\frac{3(n+1)}{n-1}\\
 \end{align*}
 Alternatively, the difference $d_i$, for each pair of ranks may be obtained. The following equation is used $$r_s=1-\frac{6\sum d_i^2}{n^3-n}$$
+
+\begin{note}
+\textbf{This last formula is valid only when there are no ties.} It is the one
+almost everybody remembers, and it is the one most often misapplied.
+
+The derivation above replaced $\sum R(X_i)^2$ and $\sum R(Y_i)^2$ by
+$\dfrac{n(n+1)(2n+1)}{6}$. That substitution is the sum of the squares of the
+integers $1, 2, \ldots, n$, and it holds only if the ranks actually \emph{are}
+those integers. Average ranks such as $3.5,\ 3.5$ in place of $3,\ 4$ have the
+same sum but a \emph{smaller} sum of squares, so the substitution fails and every
+line that follows from it fails with it.
+
+With ties, either use the corrected expression given below, or --- equivalently and
+more simply --- compute Pearson's correlation coefficient directly on the average
+ranks. The two agree exactly, and the second needs nothing memorised beyond
+Pearson's formula.
+\end{note}
 Using sum of the ranks for each pair \hspace{0.2cm}$\displaystyle{r_s=\frac{6\sum S^2_i}{n^3-n}-\frac{7n+5}{n-1}}\hspace{0.2cm}$ where \hspace{0.2cm}$S_i=R(X_i)+R(Y_i).$\\
 
 \textit{Note:}
@@ -1920,7 +1986,61 @@ where $\hspace{0.2cm}\displaystyle{\sum t_X=\frac{\sum(t^3_i-t_i)}{12}\hspace{0.
 
 $t_i$ is the number of tied ranks/ values of $X$ or $Y$ in a group of ties.\\ 
 
-$r_s$ for tide and non-tide data are noticeably different if only there are many tides.\\
+$r_s$ computed with and without the tie correction differs noticeably only when
+ties are numerous.\\
+
+\begin{center}
+\textbf{Kendall's Tau}
+\end{center}
+Spearman's coefficient is Pearson's applied to ranks. Kendall's is built on a
+different idea altogether, and where the two disagree it is usually Kendall's that
+is easier to defend.
+
+Take the $n$ pairs $(X_i, Y_i)$ and compare them two at a time. A pair of pairs
+$\left\{(X_i,Y_i),(X_j,Y_j)\right\}$ is
+\begin{enumerate}
+\item[-] \emph{concordant} if $X$ and $Y$ move the same way, that is if
+$(X_j - X_i)(Y_j - Y_i) > 0$;
+\item[-] \emph{discordant} if they move oppositely, $(X_j - X_i)(Y_j - Y_i) < 0$;
+\item[-] \emph{tied} if either difference is zero.
+\end{enumerate}
+Write $C$ for the number of concordant and $D$ for the number of discordant
+pairs. With no ties,
+$$\tau_a = \dfrac{C - D}{\binom{n}{2}} = \dfrac{2(C - D)}{n(n-1)} .$$
+
+The denominator is the total number of pairs, so $\tau_a$ is bounded by $\pm 1$:
+it reaches $+1$ when every pair is concordant and $-1$ when every pair is
+discordant.
+
+\textbf{With ties} the denominator must be reduced, since tied pairs can be
+neither concordant nor discordant. The usual form is $\tau_b$:
+$$\tau_b = \dfrac{C - D}{\sqrt{\left(\binom{n}{2} - T_X\right)
+\left(\binom{n}{2} - T_Y\right)}},
+\hspace{0.8cm} T_X = \sum_{p}\dfrac{t_p(t_p - 1)}{2},$$
+with $T_X$ summing over groups of tied $X$ values and $T_Y$ likewise for $Y$.
+Without ties $T_X = T_Y = 0$ and $\tau_b = \tau_a$.
+
+\textbf{Testing $H_0$: no association.} Under the null every ordering is equally
+likely, and for $n \geq 10$
+$$E(\tau) = 0, \hspace{0.6cm}
+\operatorname{var}(\tau) = \dfrac{2(2n+5)}{9n(n-1)},
+\hspace{0.6cm} Z = \dfrac{\tau}{\sqrt{\operatorname{var}(\tau)}}
+\ \thicksim\ N(0,1).$$
+
+\textbf{Which to use.} Kendall's $\tau$ and Spearman's $r_s$ test the same null
+hypothesis and almost always agree on whether to reject it. They differ in what
+the number \emph{means}: $\tau$ is a probability statement --- the chance that a
+randomly chosen pair is concordant, less the chance it is discordant --- whereas
+$r_s$ has no equally direct reading. For that reason $\tau$ is generally smaller
+in magnitude than $r_s$ on the same data, and the two should never be compared
+with each other as though they were on one scale. Kendall's is also the more
+stable of the two in small samples and under ties.
+
+\begin{note}
+$\tau$ is the same quantity that underlies the Mann--Kendall trend test of
+Chapter 5: setting $X_i = t_i$, the time index, makes $C - D$ exactly the
+statistic $S$. The trend test is Kendall's tau between the observations and time.
+\end{note}
 
 
 
@@ -2214,6 +2334,149 @@ Note that $n=8$
 
 
 
+
+
+\pagebreak
+\section{\textbf{THREE FURTHER TESTS}}
+
+Three tests complete the standard toolkit. The first asks a question none of the
+earlier ones do; the other two extend tests already met to situations they cannot
+handle as they stand.
+
+\begin{center}
+\textbf{The Runs Test for Randomness}
+\end{center}
+
+Every test so far has assumed the observations are independent. The runs test,
+due to Wald and Wolfowitz, is how that assumption is checked.
+
+Reduce the sequence to two symbols --- above and below the median, success and
+failure, $+$ and $-$ --- and count the \emph{runs}: maximal blocks of like symbols.
+The sequence
+$$+\ +\ -\ -\ -\ +\ -\ +\ +$$
+has runs $\{++\}, \{---\}, \{+\}, \{-\}, \{++\}$, so $R = 5$.
+
+Both extremes are evidence against randomness, and this is the point of the
+test. \emph{Too few} runs means the symbols cluster --- successive observations
+resemble one another, which is positive serial correlation. \emph{Too many} means
+they alternate more than chance allows, which is negative serial correlation. A
+one-sided test would miss half the ways randomness can fail.
+
+With $n_1$ symbols of one kind and $n_2$ of the other, $N = n_1 + n_2$, under
+$H_0$ that the arrangement is random:
+$$E(R) = \dfrac{2n_1n_2}{N} + 1, \hspace{0.8cm}
+\operatorname{var}(R) = \dfrac{2n_1n_2\left(2n_1n_2 - N\right)}{N^{2}(N-1)},$$
+and for $n_1, n_2 > 10$
+$$Z = \dfrac{R - E(R)}{\sqrt{\operatorname{var}(R)}}\ \thicksim\ N(0,1),$$
+with a continuity correction of $0.5$ applied towards the mean. For smaller
+samples exact tables of $R$ are used.
+
+\begin{note}
+This test is the natural companion to Chapter 5. Mann--Kendall assumes
+independence; the runs test is one way to find out whether that assumption is
+tenable before the Hamed--Rao correction is reached for.
+\end{note}
+
+\begin{center}
+\textbf{The Median Test}
+\end{center}
+
+The median test compares $k$ samples by asking a single question of each
+observation: is it above the combined median, or not?
+
+Pool all $N$ observations and find their median $M$. For each sample count how
+many observations exceed $M$ and how many do not, giving a $2 \times k$
+contingency table. Under $H_0$ that all $k$ samples come from populations with
+the same median, each sample should split in the same proportion, and the table
+is tested with the usual statistic
+$$\chi^{2} = \sum \dfrac{(O - E)^{2}}{E},
+\hspace{0.8cm} E_{ij} = \dfrac{(\text{row total})(\text{column total})}{N},$$
+on $(k-1)$ degrees of freedom. For $k = 2$ and small samples, Fisher's exact test
+replaces the approximation.
+
+Its virtue is that it needs almost nothing of the data --- only a comparison
+against one number --- so it survives censoring, coarse recording, and ordinal
+scales. Its vice is the same fact: discarding everything except above-or-below
+throws away most of the information, and the median test is markedly less
+powerful than Kruskal--Wallis when both apply. Prefer Kruskal--Wallis unless the
+data will not support it.
+
+\begin{center}
+\textbf{The Friedman Test}
+\end{center}
+
+Kruskal--Wallis compares $k$ \emph{independent} samples. When the samples are
+\emph{related} --- the same subjects measured under $k$ conditions, or $k$
+treatments applied within each of $b$ blocks --- independence fails and
+Kruskal--Wallis is not available. Friedman's test is the replacement, and it
+stands to the two-way analysis of variance as Kruskal--Wallis stands to the
+one-way.
+
+The essential step is that ranking happens \emph{within each block}, not across
+the whole data set. Each block of $k$ observations is ranked $1$ to $k$
+separately, which removes the block effect entirely: a consistently generous
+judge or a consistently fertile plot contributes the same set of ranks as any
+other and cannot influence the comparison between treatments.
+
+Let $R_j$ be the sum of ranks for treatment $j$ across the $b$ blocks. Then
+$$\chi^{2}_{F} = \dfrac{12}{bk(k+1)}\sum^{k}_{j=1} R_j^{2} - 3b(k+1),$$
+distributed approximately as $\chi^{2}$ on $k - 1$ degrees of freedom when $b$ is
+reasonably large. Under $H_0$ each treatment is equally likely to receive any
+rank within a block, so every $R_j$ should be near $b(k+1)/2$.
+
+\textbf{With ties} within a block, average ranks are used and the statistic is
+divided by
+$$1 - \dfrac{\sum\left(t_p^{3} - t_p\right)}{b\left(k^{3} - k\right)},$$
+the sum running over all groups of tied ranks in all blocks --- the same shape of
+correction as for Kruskal--Wallis.
+
+For $k = 2$ the Friedman test reduces to the sign test of Chapter 2, which is a
+useful check on both.
+
+\begin{center}
+\textbf{Practice problems}
+\end{center}
+
+\begin{problem}
+A machine produces items recorded as conforming ($+$) or not ($-$) in the order
+$$+\ +\ -\ +\ -\ -\ -\ +\ +\ +\ -\ +\ -\ -\ +\ +\ -\ -\ +\ + .$$
+Count $n_1$, $n_2$ and $R$. Compute $E(R)$ and $\operatorname{var}(R)$ and test
+for randomness at the $5\%$ level.
+\end{problem}
+
+\begin{problem}
+Explain why the runs test must be two-sided, giving a concrete sequence that has
+far too few runs and one that has far too many, each with $n_1 = n_2 = 6$.
+\end{problem}
+
+\begin{problem}
+Three fertilisers are applied within each of eight fields, giving one yield per
+fertiliser per field. Explain why Kruskal--Wallis is not appropriate, state which
+test is, and say precisely what is ranked and within what.
+\end{problem}
+
+\begin{problem}
+Four judges each rank the same three wines. Write down the smallest and largest
+possible values of $\sum R_j^{2}$, and hence the range of $\chi^{2}_{F}$. What
+arrangement of ranks produces the maximum?
+\end{problem}
+
+\begin{problem}
+Show that when $k = 2$ the Friedman statistic is equivalent to the sign test
+applied to the $b$ within-block differences.
+\end{problem}
+
+\begin{problem}
+Two samples of sizes $12$ and $15$ give, respectively, $9$ and $4$ observations
+above the pooled median. Construct the $2\times 2$ table and carry out the median
+test. Would Kruskal--Wallis on the same data be more or less powerful, and why?
+\end{problem}
+
+\begin{problem}
+A series of $60$ observations is to be tested for trend by Mann--Kendall. Describe
+how you would use the runs test first, and say what you would do differently
+depending on its outcome.
+\end{problem}
 
 
 \pagebreak
