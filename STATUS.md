@@ -557,6 +557,34 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-06 — Live at wjmaths.com
+
+Domain bought and serving. `https://wjmaths.com` returns the catalogue and all
+four courses; stylesheets and diagrams resolve.
+
+**A correction to what this file previously said.** The "Custom domain" box in
+Settings → Pages had to be filled in by hand. The earlier note here said not to,
+on the grounds that a committed `CNAME` sets it — that is true for the classic
+*deploy from a branch* method, and this repo deploys via **GitHub Actions**,
+where the `CNAME` in the uploaded artifact does **not** register the domain.
+With Actions-based deployment you need both: the file in the repo and the
+setting in the UI. Until the setting was entered, the domain returned
+"Site not found".
+
+DNS at the registrar (Cloudflare-backed), five records, TTL 600:
+
+    A      (host left BLANK)  185.199.108.153 / .109 / .110 / .111
+    CNAME  www                nephatmwanza.github.io
+
+The host field wanted **blank** for the root domain, not `@` — the panel
+appends the domain to whatever is typed, so `@` would have produced
+`@.wjmaths.com`. Registrars differ here; read the hint above the field.
+
+**Known transient state at time of writing:** HTTPS serves, HTTP returns 404,
+and github.io redirects to the HTTP address — so previously shared links are
+briefly broken. This clears when GitHub finishes issuing the certificate and
+*Enforce HTTPS* is enabled. **Do not announce the site until HTTP resolves.**
+
 ### 2026-08-03 (end of day) — Domain paused at payment; Probability audit ch.1 clean
 
 **STOPPING POINT. Two things are half-done — read both before starting tomorrow.**
