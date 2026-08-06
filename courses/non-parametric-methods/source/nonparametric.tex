@@ -11,6 +11,27 @@
 \usepackage{color}
 \usepackage{xcolor}
 
+% ---------------------------------------------------------------------------
+% Additions for the web build; nothing here changes the printed page.
+% enumitem preserves the optional label on \item[(a).], which tex4ht otherwise
+% discards and renumbers.
+% ---------------------------------------------------------------------------
+\usepackage{enumitem}
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{definition}[thm]{Definition}
+\newtheorem{example}[thm]{Example}
+\newtheorem{note}[thm]{Note}
+\newtheorem{remark}[thm]{Remark}
+% No provenance label on problems: these are practice problems, not a
+% reproduction of any one course's assessment.
+\newtheorem{problemx}{Problem}[section]
+\newenvironment{problem}{\begin{problemx}}{\end{problemx}}
+\newenvironment{solution}
+  {\renewcommand{\qedsymbol}{}\begin{proof}[\textit{Solution}.]}
+  {\end{proof}}
+
 
 
 
@@ -2196,6 +2217,266 @@ Note that $n=8$
 
 
 \pagebreak
+\section{\textbf{NON-PARAMETRIC METHODS FOR TREND}}
+
+Everything so far has compared groups. This chapter asks a different question:
+does a single series measured through time drift steadily up or down? The
+question matters in hydrology, climate, water quality, epidemiology and
+economics, and it is one where the non-parametric answer has largely displaced
+the parametric one in practice.
+
+Ordinary least-squares regression on time will answer it, but only under
+assumptions that environmental series routinely break: normal errors, constant
+variance, no outliers, and a trend that is genuinely straight. The methods below
+assume only that the observations are independent and that the trend, if any, is
+\emph{monotonic} --- consistently in one direction, not necessarily linear. That
+is a much weaker requirement, and it buys robustness to outliers and to
+skewness, both of which rainfall and streamflow have in abundance.
+
+\begin{center}
+\textbf{The Mann--Kendall Test}
+\end{center}
+
+Let $x_1, x_2, \ldots, x_n$ be observations in time order. Compare every pair and
+count how often the later value exceeds the earlier one.
+
+$$S = \sum^{n-1}_{i=1}\sum^{n}_{j=i+1}\operatorname{sgn}\left(x_j - x_i\right),
+\hspace{0.8cm}
+\operatorname{sgn}(u) = \begin{cases}
++1 & u > 0,\\
+\ 0 & u = 0,\\
+-1 & u < 0.
+\end{cases}$$
+
+A large positive $S$ says later observations tend to exceed earlier ones: an
+upward trend. A large negative $S$ says the reverse. Under
+$$H_0: \text{the observations are independent and identically distributed}$$
+every ordering of the data is equally likely, so $S$ is symmetric about zero and
+$E(S) = 0$.
+
+Notice what $S$ does \emph{not} use: the sizes of the differences, only their
+signs. This is exactly why an outlier cannot drag the result --- one absurd value
+contributes at most $n-1$ to a sum that ranges over $\binom{n}{2}$ pairs, whereas
+in least squares it would move the fitted slope by an unbounded amount.
+
+\begin{center}
+\textbf{The Variance of $S$, With Ties}
+\end{center}
+
+For $n \geq 8$ the distribution of $S$ is well approximated by a normal
+distribution with
+
+$$\operatorname{var}(S) = \dfrac{1}{18}\left[
+n(n-1)(2n+5) - \sum_{p} t_p\left(t_p - 1\right)\left(2t_p + 5\right)\right],$$
+
+where the sum runs over the groups of tied values and $t_p$ is the size of the
+$p$-th tied group. With no ties every $t_p = 1$, each term vanishes, and the
+variance reduces to $\dfrac{n(n-1)(2n+5)}{18}$.
+
+The test statistic uses a continuity correction, and the direction of that
+correction depends on the sign of $S$:
+
+$$Z = \begin{cases}
+\dfrac{S - 1}{\sqrt{\operatorname{var}(S)}} & S > 0,\\[10pt]
+\ \ 0 & S = 0,\\[6pt]
+\dfrac{S + 1}{\sqrt{\operatorname{var}(S)}} & S < 0.
+\end{cases}$$
+
+Subtracting $1$ when $S > 0$ and adding $1$ when $S < 0$ both move $Z$
+\emph{towards} zero. The correction is conservative by construction: it can only
+ever make a trend harder to declare, never easier. Reject $H_0$ at level $\alpha$
+against a two-sided alternative when
+$\left|Z\right| > Z_{\alpha/2}$.
+
+\begin{center}
+\textbf{The Theil--Sen Slope}
+\end{center}
+
+Mann--Kendall says whether there is a trend. It does not say how big it is. The
+matching estimator is due to Theil and Sen: take the slope between every pair of
+points and use the median of them.
+
+$$\widehat{\beta} = \operatorname{median}\left\{
+\dfrac{x_j - x_i}{t_j - t_i} \ :\ i < j \right\}.$$
+
+There are $\binom{n}{2}$ such pairwise slopes. Because the estimator is a median,
+it has a breakdown point of about $29\%$ --- roughly three observations in ten can
+be arbitrarily corrupted before the estimate is destroyed, against a breakdown
+point of $0$ for least squares, where a single bad point suffices.
+
+The pairing of Mann--Kendall with Theil--Sen is deliberate: both depend on the
+data only through pairwise comparisons, so the test and the estimate agree with
+one another. In particular $\widehat{\beta}$ and $S$ always carry the same sign.
+
+\begin{center}
+\textbf{Serial Correlation, and Why It Breaks the Test}
+\end{center}
+
+Mann--Kendall assumes the observations are independent. Series measured through
+time frequently are not: a wet year tends to follow a wet year, and a warm month
+a warm month. Positive serial correlation means consecutive observations carry
+overlapping information, so the series contains less independent evidence than
+its length suggests. The true variance of $S$ is then \emph{larger} than the
+formula above, and using the uncorrected formula rejects $H_0$ too often --- it
+reports trends that are not there.
+
+Hamed and Rao (1998) give the standard remedy: rescale $\operatorname{var}(S)$ by
+a factor computed from the autocorrelation of the data.
+
+\begin{enumerate}
+\item[(i).] Estimate the slope by Theil--Sen and \emph{detrend}:
+$y_i = x_i - \widehat{\beta}\,(t_i - t_1)$. Detrending matters --- the trend
+itself induces autocorrelation, and without removing it first the correction
+would count the signal as if it were noise.
+\item[(ii).] Rank the detrended series and compute the lag-$\ell$
+autocorrelations $\rho_\ell$ of those ranks.
+\item[(iii).] Keep only the autocorrelations that are significant, setting
+$\rho_\ell = 0$ whenever
+$\left|\rho_\ell\right| \leq \dfrac{1.96}{\sqrt{n}}$.
+\item[(iv).] Form the variance inflation factor
+$$\dfrac{n}{n^{*}} = 1 + \dfrac{2}{n(n-1)(n-2)}
+\sum_{\ell} (n - \ell)(n - \ell - 1)(n - \ell - 2)\,\rho_\ell$$
+and use $\operatorname{var}^{*}(S) = \dfrac{n}{n^{*}}\operatorname{var}(S)$ in
+place of $\operatorname{var}(S)$.
+\end{enumerate}
+
+The quantity $n^{*}$ is an \emph{effective sample size}: the number of
+independent observations the correlated series is really worth.
+
+\begin{center}
+\textbf{A Warning Not Found in the Textbooks}
+\end{center}
+
+Applied exactly as written above, this correction is
+\textbf{anti-conservative} --- it rejects $H_0$ far more often than it should.
+
+The reason is in step (iii). The threshold $1.96/\sqrt{n}$ admits any
+autocorrelation that looks significant, and on a series with no correlation at
+all roughly one lag in twenty will clear it by chance. Those spurious values are
+as likely to be negative as positive, and a \emph{negative} $\rho_\ell$
+\emph{shrinks} the inflation factor. A factor below $1$ deflates
+$\operatorname{var}(S)$, which inflates $Z$, which manufactures trends.
+
+This is not a small effect. On $4{,}000$ simulated white-noise series of length
+$45$ --- no trend whatever --- the correction as published rejected at
+$\mathbf{9.8\%}$ against a nominal $5\%$. About a third of the computed inflation
+factors fell below $1$, some close to zero.
+
+The remedy is to constrain the factor so that it can only ever inflate the
+variance:
+$$\dfrac{n}{n^{*}} \longleftarrow \max\left(1,\ \dfrac{n}{n^{*}}\right).$$
+
+With that single clip the same simulation rejects at $4.7\%$, against $5.0\%$ for
+uncorrected Mann--Kendall. The justification is not merely empirical: the
+correction exists to account for information \emph{lost} to serial dependence,
+and dependence cannot create information. A correction that reduces the variance
+is answering a question nobody asked.
+
+\begin{note}
+The lesson generalises beyond this test. A correction derived under an assumption
+--- here, that the estimated autocorrelations are real --- can do more damage than
+the problem it corrects when that assumption fails at random. Simulating the null
+is the only way to find out, and it costs a few lines of code. Any correction you
+apply to a test statistic should be checked this way before it is trusted.
+\end{note}
+
+\begin{center}
+\textbf{Testing Many Series at Once}
+\end{center}
+
+Trend tests are rarely run once. A study will test every rain gauge in a country
+or every grid cell in a region, and at the $5\%$ level one test in twenty will be
+significant with no trend present. Testing $200$ stations yields about ten false
+positives before any real signal is counted.
+
+The Bonferroni correction of Chapter 3 --- compare each $p$-value against
+$\alpha/m$ --- controls the probability of \emph{any} false positive, but at
+$m = 200$ it is so severe that genuine trends are missed. The modern alternative
+is the Benjamini--Hochberg procedure, which controls instead the expected
+\emph{proportion} of false discoveries among those declared significant.
+
+Order the $p$-values $p_{(1)} \leq p_{(2)} \leq \cdots \leq p_{(m)}$, find
+$$k = \max\left\{ i \ :\ p_{(i)} \leq \dfrac{i}{m}\,\alpha \right\},$$
+and reject the hypotheses attached to $p_{(1)}, \ldots, p_{(k)}$. If no $i$
+satisfies the inequality, reject nothing. The false discovery rate is then at
+most $\alpha$.
+
+Bonferroni asks "how confident am I that I have made no mistake at all?"
+Benjamini--Hochberg asks "of the findings I am reporting, what fraction are
+likely to be wrong?" For a map of two hundred stations the second question is
+almost always the useful one.
+
+\begin{center}
+\textbf{Seasonality}
+\end{center}
+
+A series with a strong annual cycle violates the identical-distribution part of
+$H_0$ before any trend is considered: January and July are not draws from the
+same distribution. The Hirsch--Slack \emph{seasonal Mann--Kendall} test handles
+this by computing $S$ separately within each season and summing:
+$$S' = \sum^{g}_{k=1} S_k, \hspace{0.8cm}
+\operatorname{var}(S') = \sum^{g}_{k=1}\operatorname{var}(S_k),$$
+comparisons being made only between like seasons in different years. The
+variances add because the seasonal statistics are treated as independent; where
+that is doubtful, a covariance term is required.
+
+\begin{center}
+\textbf{Practice problems}
+\end{center}
+
+\begin{problem}
+For the series $4, 7, 6, 9, 11$ compute $S$ by hand, listing all
+$\binom{5}{2} = 10$ pairwise signs. Compute $\operatorname{var}(S)$ and the
+Theil--Sen slope, taking $t = 1, 2, 3, 4, 5$.
+\end{problem}
+
+\begin{problem}
+Show that if every observation is distinct then $\operatorname{var}(S)$ reduces
+to $\dfrac{n(n-1)(2n+5)}{18}$, and evaluate it for $n = 10$.
+\end{problem}
+
+\begin{problem}
+Take the series of Problem 1 and replace the final value $11$ by $1100$.
+Recompute $S$ and the Theil--Sen slope. Then fit a least-squares line to both the
+original and the altered series. Comment on which estimate of trend survived the
+outlier and why.
+\end{problem}
+
+\begin{problem}
+Explain why the continuity correction subtracts $1$ from a positive $S$ but adds
+$1$ to a negative $S$, and show that in both cases the effect is to reduce
+$\left|Z\right|$.
+\end{problem}
+
+\begin{problem}
+A series of length $n = 45$ has significant lag-1 autocorrelation
+$\rho_1 = 0.35$ and no other significant lags. Compute the variance inflation
+factor $n/n^{*}$ and the effective sample size $n^{*}$.
+\end{problem}
+
+\begin{problem}
+Suppose the same series instead returned a single significant autocorrelation
+$\rho_3 = -0.31$ at lag $3$. Compute the unclipped inflation factor. What would
+the uncorrected and corrected tests conclude if $S = 210$ and there are no ties?
+Which of the two is trustworthy, and why?
+\end{problem}
+
+\begin{problem}
+Twenty rain gauges are tested for trend, giving the $p$-values
+$$0.001,\ 0.002,\ 0.003,\ 0.004,\ 0.006,\ 0.008,\ 0.010,\ 0.015,\ 0.030,\ 0.045,$$
+$$0.06,\ 0.09,\ 0.13,\ 0.20,\ 0.28,\ 0.37,\ 0.49,\ 0.61,\ 0.77,\ 0.95 .$$
+At $\alpha = 0.05$, which are significant (a) uncorrected, (b) under Bonferroni,
+(c) under Benjamini--Hochberg? Comment on the difference.
+\end{problem}
+
+\begin{problem}
+Write down, in words, why the Theil--Sen slope and the Mann--Kendall statistic
+must always agree in sign.
+\end{problem}
+
+
+
+\pagebreak
 \textbf{Prescribed Readings}
 \begin{enumerate}
 \item Conover W.J., (1999) Practical non parametric statistics, $3^{rd}$ ed. John Wiley and Sons. ISBN: 0 471 16068 7
@@ -2205,5 +2486,15 @@ Note that $n=8$
 \begin{enumerate}
 \item Mood A.M., Grabill F.A. and Boes D.C., (1974) Introduction to the theory of statistics. McGraw-Hill. ISBN: 0 070 42864 5
 \item Lehman E.L., (2006) Non-parametrics: Statistical methods based on ranks, McGraw-Hill. ISBN: 0 387 35212 1
+\end{enumerate}
+\textbf{For the chapter on trend}
+\begin{enumerate}
+\item Mann H.B., (1945) Nonparametric tests against trend. \textit{Econometrica} \textbf{13}, 245--259
+\item Kendall M.G., (1975) \textit{Rank Correlation Methods}, 4th ed. Charles Griffin, London
+\item Theil H., (1950) A rank-invariant method of linear and polynomial regression analysis. \textit{Nederl. Akad. Wetensch. Proc.} \textbf{53}, 386--392
+\item Sen P.K., (1968) Estimates of the regression coefficient based on Kendall's tau. \textit{J. Amer. Statist. Assoc.} \textbf{63}, 1379--1389
+\item Hirsch R.M. and Slack J.R., (1984) A nonparametric trend test for seasonal data with serial dependence. \textit{Water Resources Research} \textbf{20}, 727--732
+\item Hamed K.H. and Rao A.R., (1998) A modified Mann--Kendall trend test for autocorrelated data. \textit{Journal of Hydrology} \textbf{204}, 182--196
+\item Benjamini Y. and Hochberg Y., (1995) Controlling the false discovery rate. \textit{J. Roy. Statist. Soc. B} \textbf{57}, 289--300
 \end{enumerate}
 \end{document}
