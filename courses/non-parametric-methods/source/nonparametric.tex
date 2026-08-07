@@ -111,7 +111,7 @@ Populations, samples and statistics. Estimation. Hypothesis testing. Some proper
 \item \textbf{Some test based on Binomial Distribution}\\ 
 Binomial test. Quantile test. Sign test and its variations.
 \item \textbf{Some tests based on Ranks}\\ 
-One and two independent samples. Several independent samples, Kruskal-Wallis one-way analysis of variance. Freedman two-way analysis of variance. The one-sample or matched-pairs case. Measures of rank correlation.
+One and two independent samples. Several independent samples, Kruskal-Wallis one-way analysis of variance. Friedman two-way analysis of variance. The one-sample or matched-pairs case. Measures of rank correlation.
 \item \textbf{Statistics of Kolmogorov-Smirnov type}\\ 
 The Kolmogorov goodness-of-fit test. Tests on two independent samples. Tests on several independent samples.\\\\
 \end{enumerate}
@@ -1725,37 +1725,82 @@ The following are some of the assumptions made on the Kruskal-Wallis test:
 
 
 \pagebreak
-\subsection{Freedman Test}
-Sometimes it happens that the data collected are only in the rank form within each block normality can introduced.\\ 
-In these situations a non-parametric approach called Freedman test can be used.\\ 
-The Freedman test is primary used to test whether $k$ sample groups (i.e the treatment level) have been selected from populations using equal medians i.e you test $H_0$,\\\hspace{0.2cm} $H_0:M_{.1}=M_{.2}=\dots=M_{.k}$ against \hspace{0.2cm} $H_1:$ Not all $M_{.j}$ are equal ( where $j=1,2,\dots,k$).\\
+\subsection{The Friedman Test}
 
-To develop the test. You first replace the data with their ranks on a block to block basis.\\ 
-In each of the $n$ independent blocks, the $k$ observations are replaced by their corresponding ranks such that rank one is given to the smallest observation and rank $k$ is given to the largest.\\ 
-If any values in a block are tide assign the averaged rank that they would otherwise have been given. Thus $R_{ij}$ is the rank from $1,\dots,k$ associated with $j^{th}$ group (where $j$ runs from $1,\dots,k$) in the $i^{th}$ block (where $i=1,\dots,n$).\\ 
-Under the null hypothesis of no difference in $k$ groups each ranking within a block is equally likely. They are $k!$ ways of ranking within each particular block and $(k!)^n$ possible arrangements of ranks over an $n$ independent blocks. If the null hypothesis is true there will be no differences any way average ranks for each group are taken over  all blocks.\\
+Kruskal--Wallis compares $k$ \emph{independent} samples. When the samples are
+related --- the same subjects measured under $k$ conditions, or $k$ treatments
+applied within each of $n$ blocks --- independence fails and Kruskal--Wallis is not
+available. Friedman's test is the replacement, and it stands to the two-way
+analysis of variance as Kruskal--Wallis stands to the one-way.
 
-From the above the following $F$ test statistic
-\begin{align*}
-F_R &=\frac{12}{nk(k+1)}\sum^k_{j=1}R^2_{.j}-3n(k+1)\\\\
-    &=\frac{12n}{k(k+1)}\Bigg[\sum^k_jR^2_{.j}-\frac{k(k+1)^2}{4}\Bigg]\\
-\end{align*}
+\begin{definition}
+Let $k$ treatments be applied within each of $n$ independent blocks, giving
+observations $X_{ij}$ for block $i$ and treatment $j$. \emph{Within each block
+separately}, replace the $k$ observations by their ranks $1$ to $k$, rank $1$ going
+to the smallest, and let $R_{ij}$ be the resulting rank. Write
+$$R_{\cdot j} = \sum^{n}_{i=1} R_{ij}
+\qquad\text{and}\qquad
+\overline{R}_{\cdot j} = \dfrac{R_{\cdot j}}{n}$$
+for the rank \emph{total} and the \emph{mean} rank of treatment $j$. The
+\emph{Friedman test} of
+$$H_0 : \text{the } k \text{ treatments have identical effects}$$
+is based on the dispersion of these rank totals.
+\end{definition}
 
-$R^2_{.j}$ is the square rank total for group $j$.  $n$ is the number of independent blocks $k$ is the number of groups or treatment levels\\
+The essential step is that ranking happens \emph{within each block}, never across
+the whole data set. That removes the block effect entirely: a consistently generous
+judge, or a consistently fertile plot, contributes the same set of ranks $1$ to $k$
+as any other and cannot influence the comparison between treatments.
 
-Small sample sizes typically for $k<6$ and $n<14$ use critical values from the tables \hspace{0.2cm}$F(k,n,\alpha).$\\
+\begin{thm}
+Under $H_0$, each of the $k!$ rankings within a block is equally likely, so
+$E\left(R_{\cdot j}\right) = \dfrac{n(k+1)}{2}$, and the statistic
+$$F_R = \dfrac{12}{nk(k+1)}\sum^{k}_{j=1}R_{\cdot j}^{2} \;-\; 3n(k+1)$$
+is distributed approximately as $\chi^{2}$ on $k-1$ degrees of freedom when $n$ is
+reasonably large.
+\end{thm}
 
-As the number of blocks or treatment groups gets large ($k>5$ or $n>13$), the test statistic $F_R$ can be approximated by the chi-square $\chi^2_{\alpha}$ distribution thus for any level of significance $\alpha$. The decision rule is reject $H_0$ if computed \hspace{0.2cm}$F_R>\chi_{(k-1,\alpha)}\hspace{0.2cm}$ the upper tail critical value for the $\chi^2$ distribution having $k-1$ degree freedom. i.e Reject $H_0$ if $F_R>\chi^2_{(k-1,\alpha)}$ otherwise do not reject $H_0$.\\
+\begin{note}
+\textbf{The equivalent form, and a trap in it.} The statistic is often written
+$$F_R = \dfrac{12n}{k(k+1)}
+\left[\sum^{k}_{j=1}\overline{R}_{\cdot j}^{\,2} - \dfrac{k(k+1)^{2}}{4}\right],$$
+and this is the \emph{same} quantity --- but only when $\overline{R}_{\cdot j}$ is
+the \emph{mean} rank $R_{\cdot j}/n$, not the rank total. Substituting the totals
+into the second form gives a number hundreds of times too large: on a small
+example with $n = 4$, $k = 3$ the first form returns $3.5$ and the second, read
+with totals, returns $776$.
 
+The two forms are related by
+$\sum \overline{R}_{\cdot j}^{\,2} = n^{-2}\sum R_{\cdot j}^{2}$, and the second is
+simply $\dfrac{12n}{k(k+1)}\sum\left(\overline{R}_{\cdot j} - \frac{k+1}{2}\right)^{2}$
+expanded --- a weighted sum of squared deviations of the mean ranks from their null
+expectation $\frac{k+1}{2}$, which is what makes its meaning transparent.
+\end{note}
 
+\begin{note}
+\textbf{Ties.} If observations are tied within a block they receive the average of
+the ranks they would otherwise have occupied, and $F_R$ is divided by
+$$1 - \dfrac{\sum\left(t_p^{3} - t_p\right)}{n\left(k^{3}-k\right)},$$
+the sum running over all groups of tied ranks in all blocks --- the same shape of
+correction as for Kruskal--Wallis.
+\end{note}
 
+\textbf{Critical values.} For small designs, typically $k < 6$ and $n < 14$, exact
+critical values are tabulated and should be used. For $k > 5$ or $n > 13$ the
+$\chi^{2}_{k-1}$ approximation is adequate, and $H_0$ is rejected when
+$F_R \geq \chi^{2}_{\alpha,\,k-1}$.
 
+\begin{note}
+\textbf{The case $k = 2$.} With two treatments the Friedman test reduces exactly to
+the sign test of Chapter 2 applied to the within-block differences. Writing $a$ for
+the number of blocks favouring treatment~1, the algebra collapses to
+$F_R = \dfrac{(n-2a)^{2}}{n}$, which is the square of the sign-test statistic
+$Z = \dfrac{2a-n}{\sqrt{n}}$. Since the square of a standard normal is
+$\chi^{2}$ on one degree of freedom, and Friedman here has $k - 1 = 1$ degree of
+freedom, the two tests are identical rather than merely similar. This is a useful
+check on both.
+\end{note}
 
-
-
-
-
-\pagebreak
 \subsection{Multiple Comparisons}
 If the null hypothesis is rejected, we can proceed with a post-hoe test. \\ 
 The Nemenyi test is similar to the Turkey test for above and is used when all classifies are compared to each other.\\ 
@@ -2007,6 +2052,83 @@ statistic $S$. The trend test is Kendall's tau between the observations and time
 
 
 
+
+
+\textbf{Practice problems}
+
+\begin{problem}
+Three fertilisers are applied within each of eight fields, giving one yield per
+fertiliser per field. Explain why Kruskal--Wallis is not appropriate, state which
+test is, and say precisely what is ranked and within what.
+\end{problem}
+
+\begin{solution}
+Kruskal--Wallis requires the $k$ samples to be \emph{independent}. Here they are
+not: the three yields recorded in one field share that field's soil, drainage and
+rainfall, so they are related observations, and treating them as independent
+would ignore the very structure the design was built to control.
+
+The appropriate test is \textbf{Friedman's}. Each field is a block. Within each
+field the three yields are ranked $1$, $2$, $3$ separately --- the ranking is done
+\emph{within the block, never across the whole data set}. So a rich field and a
+poor one each contribute the ranks $\{1,2,3\}$ and neither can influence the
+comparison between fertilisers. With $b = 8$ blocks and $k = 3$ treatments, the
+statistic is compared against $\chi^{2}$ on $k - 1 = 2$ degrees of freedom.
+\end{solution}
+
+
+\begin{problem}
+Four judges each rank the same three wines. Write down the smallest and largest
+possible values of $\sum R_j^{2}$, and hence the range of $\chi^{2}_{F}$. What
+arrangement of ranks produces the maximum?
+\end{problem}
+
+\begin{solution}
+Here $b = 4$ and $k = 3$. Each judge awards the ranks $1, 2, 3$, so the ranks sum
+to $4 \times 6 = 24$ overall and each $R_j$ lies between $4$ and $12$.
+
+Since $\sum R_j$ is fixed, $\sum R_j^{2}$ is smallest when the $R_j$ are as equal
+as possible and largest when they are as unequal as possible:
+$$\text{minimum: } (8,8,8) \Rightarrow \sum R_j^{2} = 192,\qquad
+\text{maximum: } (4,8,12) \Rightarrow \sum R_j^{2} = 224 .$$
+With
+$$\chi^{2}_{F} = \dfrac{12}{4 \cdot 3 \cdot 4}\sum R_j^{2} - 3(4)(4)
+= \tfrac{1}{4}\sum R_j^{2} - 48,$$
+the range is
+$$0 \ \leq\ \chi^{2}_{F}\ \leq\ 8 .$$
+
+The maximum occurs when all four judges produce \emph{exactly the same ranking},
+so that one wine takes rank $1$ from everybody, another rank $2$, the third rank
+$3$. Against $\chi^{2}_{0.05,2} = 5.991$ even perfect agreement among four judges
+on three wines is only just significant --- four blocks is very little evidence.
+\end{solution}
+
+
+\begin{problem}
+Show that when $k = 2$ the Friedman statistic is equivalent to the sign test
+applied to the $b$ within-block differences.
+\end{problem}
+
+\begin{solution}
+With $k = 2$ each block is ranked $1$ and $2$. Let $a$ be the number of blocks in
+which treatment~1 receives rank $1$. Then
+$$R_1 = a(1) + (b-a)(2) = 2b - a,\qquad R_2 = a(2) + (b-a)(1) = b + a .$$
+Substituting into the statistic with $k = 2$,
+$$\chi^{2}_{F} = \dfrac{12}{b(2)(3)}\left[(2b-a)^{2} + (b+a)^{2}\right] - 3b(3)
+= \dfrac{2}{b}\left[5b^{2} - 2ab + 2a^{2}\right] - 9b
+= \dfrac{(b - 2a)^{2}}{b}.$$
+
+Now the sign test. Under $H_0$ each block is equally likely to favour either
+treatment, so $a \sim B\!\left(b, \tfrac12\right)$ and the standardised statistic
+is
+$$Z = \dfrac{a - \frac{b}{2}}{\sqrt{b/4}} = \dfrac{2a - b}{\sqrt{b}},
+\qquad\text{so}\qquad Z^{2} = \dfrac{(2a-b)^{2}}{b} = \chi^{2}_{F}.$$
+
+The Friedman statistic is exactly the square of the sign-test $Z$. Since the
+square of a standard normal is $\chi^{2}$ on one degree of freedom, and Friedman
+here has $k - 1 = 1$ degree of freedom, the two tests are identical --- not merely
+similar.
+\end{solution}
 
 \pagebreak
 \subsection{Tests}
@@ -2288,11 +2410,13 @@ Note that $n=8$
 
 
 \pagebreak
-\section{\textbf{THREE FURTHER TESTS}}
+\section{\textbf{TWO FURTHER TESTS}}
 
-Three tests complete the standard toolkit. The first asks a question none of the
-earlier ones do; the other two extend tests already met to situations they cannot
-handle as they stand.
+Two tests complete the standard toolkit. The first asks a question none of the
+earlier ones do; the second extends a test already met to a situation it cannot
+handle as it stands. Friedman's test, which also belongs to this group, is placed
+with the rank tests of Chapter 3 alongside Kruskal--Wallis, where it reads more
+naturally.
 
 \subsection{The Runs Test for Randomness}
 
@@ -2348,36 +2472,6 @@ throws away most of the information, and the median test is markedly less
 powerful than Kruskal--Wallis when both apply. Prefer Kruskal--Wallis unless the
 data will not support it.
 
-\subsection{The Friedman Test}
-
-Kruskal--Wallis compares $k$ \emph{independent} samples. When the samples are
-\emph{related} --- the same subjects measured under $k$ conditions, or $k$
-treatments applied within each of $b$ blocks --- independence fails and
-Kruskal--Wallis is not available. Friedman's test is the replacement, and it
-stands to the two-way analysis of variance as Kruskal--Wallis stands to the
-one-way.
-
-The essential step is that ranking happens \emph{within each block}, not across
-the whole data set. Each block of $k$ observations is ranked $1$ to $k$
-separately, which removes the block effect entirely: a consistently generous
-judge or a consistently fertile plot contributes the same set of ranks as any
-other and cannot influence the comparison between treatments.
-
-Let $R_j$ be the sum of ranks for treatment $j$ across the $b$ blocks. Then
-$$\chi^{2}_{F} = \dfrac{12}{bk(k+1)}\sum^{k}_{j=1} R_j^{2} - 3b(k+1),$$
-distributed approximately as $\chi^{2}$ on $k - 1$ degrees of freedom when $b$ is
-reasonably large. Under $H_0$ each treatment is equally likely to receive any
-rank within a block, so every $R_j$ should be near $b(k+1)/2$.
-
-\textbf{With ties} within a block, average ranks are used and the statistic is
-divided by
-$$1 - \dfrac{\sum\left(t_p^{3} - t_p\right)}{b\left(k^{3} - k\right)},$$
-the sum running over all groups of tied ranks in all blocks --- the same shape of
-correction as for Kruskal--Wallis.
-
-For $k = 2$ the Friedman test reduces to the sign test of Chapter 2, which is a
-useful check on both.
-
 \subsection{Practice problems}
 
 \begin{problem}
@@ -2429,81 +2523,6 @@ Both reject at the $5\%$ level, and by the same margin. The first is a series th
 remembers its previous value --- positive serial correlation --- and the second one
 that systematically contradicts it. A one-sided test would catch one of these
 and be blind to the other, and both are failures of randomness.
-\end{solution}
-
-
-\begin{problem}
-Three fertilisers are applied within each of eight fields, giving one yield per
-fertiliser per field. Explain why Kruskal--Wallis is not appropriate, state which
-test is, and say precisely what is ranked and within what.
-\end{problem}
-
-\begin{solution}
-Kruskal--Wallis requires the $k$ samples to be \emph{independent}. Here they are
-not: the three yields recorded in one field share that field's soil, drainage and
-rainfall, so they are related observations, and treating them as independent
-would ignore the very structure the design was built to control.
-
-The appropriate test is \textbf{Friedman's}. Each field is a block. Within each
-field the three yields are ranked $1$, $2$, $3$ separately --- the ranking is done
-\emph{within the block, never across the whole data set}. So a rich field and a
-poor one each contribute the ranks $\{1,2,3\}$ and neither can influence the
-comparison between fertilisers. With $b = 8$ blocks and $k = 3$ treatments, the
-statistic is compared against $\chi^{2}$ on $k - 1 = 2$ degrees of freedom.
-\end{solution}
-
-
-\begin{problem}
-Four judges each rank the same three wines. Write down the smallest and largest
-possible values of $\sum R_j^{2}$, and hence the range of $\chi^{2}_{F}$. What
-arrangement of ranks produces the maximum?
-\end{problem}
-
-\begin{solution}
-Here $b = 4$ and $k = 3$. Each judge awards the ranks $1, 2, 3$, so the ranks sum
-to $4 \times 6 = 24$ overall and each $R_j$ lies between $4$ and $12$.
-
-Since $\sum R_j$ is fixed, $\sum R_j^{2}$ is smallest when the $R_j$ are as equal
-as possible and largest when they are as unequal as possible:
-$$\text{minimum: } (8,8,8) \Rightarrow \sum R_j^{2} = 192,\qquad
-\text{maximum: } (4,8,12) \Rightarrow \sum R_j^{2} = 224 .$$
-With
-$$\chi^{2}_{F} = \dfrac{12}{4 \cdot 3 \cdot 4}\sum R_j^{2} - 3(4)(4)
-= \tfrac{1}{4}\sum R_j^{2} - 48,$$
-the range is
-$$0 \ \leq\ \chi^{2}_{F}\ \leq\ 8 .$$
-
-The maximum occurs when all four judges produce \emph{exactly the same ranking},
-so that one wine takes rank $1$ from everybody, another rank $2$, the third rank
-$3$. Against $\chi^{2}_{0.05,2} = 5.991$ even perfect agreement among four judges
-on three wines is only just significant --- four blocks is very little evidence.
-\end{solution}
-
-
-\begin{problem}
-Show that when $k = 2$ the Friedman statistic is equivalent to the sign test
-applied to the $b$ within-block differences.
-\end{problem}
-
-\begin{solution}
-With $k = 2$ each block is ranked $1$ and $2$. Let $a$ be the number of blocks in
-which treatment~1 receives rank $1$. Then
-$$R_1 = a(1) + (b-a)(2) = 2b - a,\qquad R_2 = a(2) + (b-a)(1) = b + a .$$
-Substituting into the statistic with $k = 2$,
-$$\chi^{2}_{F} = \dfrac{12}{b(2)(3)}\left[(2b-a)^{2} + (b+a)^{2}\right] - 3b(3)
-= \dfrac{2}{b}\left[5b^{2} - 2ab + 2a^{2}\right] - 9b
-= \dfrac{(b - 2a)^{2}}{b}.$$
-
-Now the sign test. Under $H_0$ each block is equally likely to favour either
-treatment, so $a \sim B\!\left(b, \tfrac12\right)$ and the standardised statistic
-is
-$$Z = \dfrac{a - \frac{b}{2}}{\sqrt{b/4}} = \dfrac{2a - b}{\sqrt{b}},
-\qquad\text{so}\qquad Z^{2} = \dfrac{(2a-b)^{2}}{b} = \chi^{2}_{F}.$$
-
-The Friedman statistic is exactly the square of the sign-test $Z$. Since the
-square of a standard normal is $\chi^{2}$ on one degree of freedom, and Friedman
-here has $k - 1 = 1$ degree of freedom, the two tests are identical --- not merely
-similar.
 \end{solution}
 
 
