@@ -773,107 +773,115 @@ $95\%$ C.I is between 1.90 and 8.11.\\
 
 \subsection{Wilcoxon Signed Rank Test}
 
+The sign test throws away the sizes of the differences and keeps only their signs.
+The Wilcoxon signed-rank test keeps a little more --- the \emph{order} of the
+sizes --- and is correspondingly more powerful.
 
-- Applicable to paired differences.\\
+\begin{definition}
+Let $(Y_i, Z_i)$, $i = 1,\ldots,n$, be matched pairs and put $d_i = Y_i - Z_i$.
+Discard every pair with $d_i = 0$, leaving $n'$ pairs. Rank the remaining
+$\left|d_i\right|$ from $1$ to $n'$, smallest first, assigning \emph{average
+ranks} to ties. The \emph{signed-rank statistics} are
+$$T_{+} = \sum_{d_i > 0}\operatorname{rank}\left|d_i\right|,
+\qquad
+T_{-} = \sum_{d_i < 0}\operatorname{rank}\left|d_i\right|,$$
+and necessarily
+$$T_{+} + T_{-} = \dfrac{n'(n'+1)}{2}.$$
+\end{definition}
 
+The identity is a useful arithmetic check: the two statistics must add to the sum
+of the first $n'$ integers, because every retained pair contributes its rank to
+exactly one of them.
 
+\begin{example}
+Two treatments are compared on eight subjects.
 
-\textbf{Example}:
-\begin{table}[H]
+\begin{center}
 \begin{tabular}{c|c|c|c|c|c}
-Obs & Sample 1& Sample 2& $S_1-S_2$& $|S_1-S_2|$&Rank\\
-\hline 1&9&8&$+1$&1&3\\
-2&6&9&$-3$&3&5\\
-3&8&10&$-2$&2&4\\
-4&7&7&0&0&\\
-5&10&6&$+4$&4&6\\
-6&5&4&$+1$&1&2\\
-7&6&5&$+1$&1&1\\
-8&7&7&0&0&\\
+Obs & Sample 1 & Sample 2 & $d = S_1-S_2$ & $\left|d\right|$ & Rank of $\left|d\right|$\\
+\hline
+1 & 9  & 8  & $+1$ & 1 & $2$\\
+2 & 6  & 9  & $-3$ & 3 & $5$\\
+3 & 8  & 10 & $-2$ & 2 & $4$\\
+4 & 7  & 7  & $0$  & --- & discarded\\
+5 & 10 & 6  & $+4$ & 4 & $6$\\
+6 & 5  & 4  & $+1$ & 1 & $2$\\
+7 & 6  & 5  & $+1$ & 1 & $2$\\
+8 & 7  & 7  & $0$  & --- & discarded\\
 \end{tabular}
-\end{table}
-\vspace{0.2cm}
+\end{center}
 
+Two pairs are discarded, so $n' = 6$. The absolute differences in order are
+$$1,\ 1,\ 1,\ 2,\ 3,\ 4 .$$
+The three $1$'s would occupy ranks $1, 2, 3$; being tied they each receive the
+average $\frac{1+2+3}{3} = 2$. The remaining values take ranks $4$, $5$, $6$.
 
-
-
-
-
-
-
-\begin{table}[H]
-\centering
-\begin{tabular}{c|cccccc}
-&1&1&1&2&3&4\\
-\hline 1$^{st}$ Rank&1&2&3&4&5&6\\
-2$^{nd}$ Rank&$+2$&$-2$&2&4&5&6\\
-Final Ranking&+&+&+&$-$&$-$&+\\
+\begin{center}
+\begin{tabular}{l|cccccc}
+$\left|d\right|$ sorted & 1 & 1 & 1 & 2 & 3 & 4\\
+\hline
+Provisional rank & 1 & 2 & 3 & 4 & 5 & 6\\
+Rank used (ties averaged) & $2$ & $2$ & $2$ & $4$ & $5$ & $6$\\
+Sign of $d$ & $+$ & $+$ & $+$ & $-$ & $-$ & $+$\\
 \end{tabular}
-\end{table}
+\end{center}
 
+Hence
+$$T_{+} = 2 + 2 + 2 + 6 = 12,
+\qquad
+T_{-} = 4 + 5 = 9,$$
+and the check holds: $12 + 9 = 21 = \dfrac{6(7)}{2}$.
+\end{example}
 
+\begin{note}
+\textbf{Ties must be averaged, even when it seems not to matter.} In this example
+the provisional ranks $1,2,3$ would give $T_{+} = 1+2+3+6 = 12$ as well, because
+all three tied observations happen to be positive and $1+2+3 = 3 \times 2$. That
+is a coincidence of this data set and not a licence: had one of the three been
+negative, the two rankings would have disagreed. Average the ranks always.
+\end{note}
 
-\vspace{0.2cm}
-$$T_+=|2|+|6|+|2|+|2|=12$$ $$T_-=|5|+|4|=9$$ $$T_+=12\hspace{1cm}\text{and}\hspace{1cm} T_-=9$$ $H_0$: $D_1$ and $D_2$ are identical.
+\textbf{Hypotheses and the matching statistic.} Write $D_1$, $D_2$ for the two
+distributions. The statistic to use is the one that becomes \emph{small} under the
+alternative:
 
+\begin{center}
+\begin{tabular}{l|l|l}
+Alternative & Statistic & Reject $H_0$ when\\
+\hline
+$D_1$ shifted \emph{left} of $D_2$ & $T_{+}$ & $T_{+} \leq T_0$\\
+$D_1$ shifted \emph{right} of $D_2$ & $T_{-}$ & $T_{-} \leq T_0$\\
+$D_1$ shifted either way & $T = \min(T_{+},T_{-})$ & $T \leq T_0$\\
+\end{tabular}
+\end{center}
 
+\begin{note}
+The pairing is worth pausing over, because it is easy to get backwards. If $D_1$
+lies to the \emph{left} of $D_2$ then the differences $d = S_1 - S_2$ are mostly
+negative, so few and small ranks fall on the positive side and it is $T_{+}$ that
+shrinks. The statistic named is the one the alternative drives \emph{down}, never
+the one it drives up.
+\end{note}
 
-\begin{enumerate}
-\item $H_a$: $D_1$ is shifted to the left of $D_2$.
-\item $H_a$: $D_1$ shifted to the right of $D_2$.
-\item $H_a$: $D_1$ is shifted to the right or left of $D_2$.\\
-\end{enumerate}
+\textbf{The test on the example.} For a two-sided alternative at
+$\alpha = 0.05$ with $n' = 6$, the critical value is $T_0 = 1$; for a one-sided
+test at $\alpha = 0.05$ it is $T_0 = 2$. Here
+$$T = \min(12, 9) = 9 \ \not\leq\ T_0 ,$$
+so we \textbf{fail to reject} $H_0$: there is no evidence of a shift.
 
-
-
-
-
-
-Test statistics:
-\begin{enumerate}
-\item Test statistic = $T_-=9$.
-\item Test statistic = $T_+=12$.
-\item Test statistic = $T=\min (T_+,T_-)=9$.\\
-\end{enumerate}
-
-
-
-
-
-
-
-Rejection Region
-\begin{enumerate}
-\item[i] $T_+\leq T_0$
-\item[ii] $T_-\leq T_0$
-\item[iii] $T\leq T_0$\\
-\end{enumerate}
-
-
-
-
-
-
-
-
-
-
-Test $H_0$ at $\alpha =0.05$\\
-
-
-C.V $\hspace{0.4cm} \implies \hspace{0.5cm} W_{(0.05,6)}=3=T_0$
-$$W_{(0.05,6)}T_0=3/\hspace{0.3cm} T_-=9$$ $$W_{(0.05,6)}T_0=3/\hspace{0.3cm} T_+=12$$ $$W_{(0.05/2,6)}T_0=1/\hspace{0.3cm} T=9$$
-Decision: failed to reject $H_0$.\\\\
-
-
-
-
-
-
-
-
-\textbf{Large Sample Approximation}\\
-For $n\geq 25$, $T_+$ is often standardised and normal approximation is used to obtain $P$-values and C.I for standardised test statistics e.g when $H_0$ is true the expected value and the variance of $T_+$ can be shown that$$E(T_+)=\frac{n(n+1)}{4};\hspace{1cm} \text{var}(T_+)=\frac{n(n+1)(2n+1)}{24}$$ It can be shown that the random quantity is $$T^{*}=\frac{T_+-E(T_+)}{\sqrt{\text{var}(T_+)}}=\frac{T_+-\dfrac{n(n+1)}{4}}{\sqrt{\dfrac{n(n+1)(2n+1)}{24}}}\thicksim N(0,1)$$ \\\\
+\begin{note}
+\textbf{Where the critical values come from.} With $n' = 6$ there are $2^{6} = 64$
+equally likely sign patterns under $H_0$, so the null distribution of $T_{+}$ can
+be written down exactly:
+$$P(T_{+} \leq 0) = \tfrac{1}{64} = 0.0156,\quad
+P(T_{+} \leq 1) = \tfrac{2}{64} = 0.0312,\quad
+P(T_{+} \leq 2) = \tfrac{3}{64} = 0.0469,$$
+$$P(T_{+} \leq 3) = \tfrac{5}{64} = 0.0781 .$$
+The largest cut-off with tail at most $0.05$ is therefore $T_0 = 2$, not $3$: a
+cut-off of $3$ would be a $7.8\%$ test, not a $5\%$ one. At such small $n'$ the
+attainable levels are coarse, and it is worth quoting the exact tail rather than
+the nominal $\alpha$.
+\end{note}
 
 \subsection{Zeros and Ties in the Signed-Rank Test}
 Two things can go wrong with the data before the statistic is even formed, and
