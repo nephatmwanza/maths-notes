@@ -2358,10 +2358,50 @@ Count $n_1$, $n_2$ and $R$. Compute $E(R)$ and $\operatorname{var}(R)$ and test
 for randomness at the $5\%$ level.
 \end{problem}
 
+\begin{solution}
+There are $n_1 = 11$ symbols $+$ and $n_2 = 9$ symbols $-$, so $N = 20$. Reading
+the sequence and marking each change of symbol gives the runs
+$$\{++\}\{-\}\{+\}\{---\}\{+++\}\{-\}\{+\}\{--\}\{++\}\{--\}\{++\},$$
+so $R = 11$. Under $H_0$,
+$$E(R) = \dfrac{2(11)(9)}{20} + 1 = 10.9,\qquad
+\operatorname{var}(R) = \dfrac{2(11)(9)\big(2(11)(9) - 20\big)}{20^{2}(19)}
+= \dfrac{198 \times 178}{7600} = 4.6374,$$
+so the standard deviation is $2.1535$ and
+$$Z = \dfrac{11 - 10.9}{2.1535} = 0.046 .$$
+Since $\left|Z\right| = 0.046 < 1.96$ we do not reject $H_0$: there is no evidence
+against randomness.
+
+The sequence looks patterned to the eye --- there are visible clusters of three
+$+$ and three $-$ --- and it is almost exactly what randomness predicts. That is
+the point of computing $R$ rather than trusting the impression.
+\end{solution}
+
+
 \begin{problem}
 Explain why the runs test must be two-sided, giving a concrete sequence that has
 far too few runs and one that has far too many, each with $n_1 = n_2 = 6$.
 \end{problem}
+
+\begin{solution}
+With $n_1 = n_2 = 6$ and $N = 12$,
+$$E(R) = \dfrac{2(6)(6)}{12} + 1 = 7,\qquad
+\operatorname{var}(R) = \dfrac{2(6)(6)\big(72 - 12\big)}{12^{2}(11)} = 2.7273,$$
+so the standard deviation is $1.6514$.
+
+\textbf{Too few runs.} The sequence $+\,+\,+\,+\,+\,+\,-\,-\,-\,-\,-\,-$ has
+$R = 2$, giving
+$$Z = \dfrac{2 - 7}{1.6514} = -3.028 .$$
+
+\textbf{Too many runs.} The sequence $+\,-\,+\,-\,+\,-\,+\,-\,+\,-\,+\,-$ has
+$R = 12$, giving
+$$Z = \dfrac{12 - 7}{1.6514} = +3.028 .$$
+
+Both reject at the $5\%$ level, and by the same margin. The first is a series that
+remembers its previous value --- positive serial correlation --- and the second one
+that systematically contradicts it. A one-sided test would catch one of these
+and be blind to the other, and both are failures of randomness.
+\end{solution}
+
 
 \begin{problem}
 Three fertilisers are applied within each of eight fields, giving one yield per
@@ -2369,16 +2409,74 @@ fertiliser per field. Explain why Kruskal--Wallis is not appropriate, state whic
 test is, and say precisely what is ranked and within what.
 \end{problem}
 
+\begin{solution}
+Kruskal--Wallis requires the $k$ samples to be \emph{independent}. Here they are
+not: the three yields recorded in one field share that field's soil, drainage and
+rainfall, so they are related observations, and treating them as independent
+would ignore the very structure the design was built to control.
+
+The appropriate test is \textbf{Friedman's}. Each field is a block. Within each
+field the three yields are ranked $1$, $2$, $3$ separately --- the ranking is done
+\emph{within the block, never across the whole data set}. So a rich field and a
+poor one each contribute the ranks $\{1,2,3\}$ and neither can influence the
+comparison between fertilisers. With $b = 8$ blocks and $k = 3$ treatments, the
+statistic is compared against $\chi^{2}$ on $k - 1 = 2$ degrees of freedom.
+\end{solution}
+
+
 \begin{problem}
 Four judges each rank the same three wines. Write down the smallest and largest
 possible values of $\sum R_j^{2}$, and hence the range of $\chi^{2}_{F}$. What
 arrangement of ranks produces the maximum?
 \end{problem}
 
+\begin{solution}
+Here $b = 4$ and $k = 3$. Each judge awards the ranks $1, 2, 3$, so the ranks sum
+to $4 \times 6 = 24$ overall and each $R_j$ lies between $4$ and $12$.
+
+Since $\sum R_j$ is fixed, $\sum R_j^{2}$ is smallest when the $R_j$ are as equal
+as possible and largest when they are as unequal as possible:
+$$\text{minimum: } (8,8,8) \Rightarrow \sum R_j^{2} = 192,\qquad
+\text{maximum: } (4,8,12) \Rightarrow \sum R_j^{2} = 224 .$$
+With
+$$\chi^{2}_{F} = \dfrac{12}{4 \cdot 3 \cdot 4}\sum R_j^{2} - 3(4)(4)
+= \tfrac{1}{4}\sum R_j^{2} - 48,$$
+the range is
+$$0 \ \leq\ \chi^{2}_{F}\ \leq\ 8 .$$
+
+The maximum occurs when all four judges produce \emph{exactly the same ranking},
+so that one wine takes rank $1$ from everybody, another rank $2$, the third rank
+$3$. Against $\chi^{2}_{0.05,2} = 5.991$ even perfect agreement among four judges
+on three wines is only just significant --- four blocks is very little evidence.
+\end{solution}
+
+
 \begin{problem}
 Show that when $k = 2$ the Friedman statistic is equivalent to the sign test
 applied to the $b$ within-block differences.
 \end{problem}
+
+\begin{solution}
+With $k = 2$ each block is ranked $1$ and $2$. Let $a$ be the number of blocks in
+which treatment~1 receives rank $1$. Then
+$$R_1 = a(1) + (b-a)(2) = 2b - a,\qquad R_2 = a(2) + (b-a)(1) = b + a .$$
+Substituting into the statistic with $k = 2$,
+$$\chi^{2}_{F} = \dfrac{12}{b(2)(3)}\left[(2b-a)^{2} + (b+a)^{2}\right] - 3b(3)
+= \dfrac{2}{b}\left[5b^{2} - 2ab + 2a^{2}\right] - 9b
+= \dfrac{(b - 2a)^{2}}{b}.$$
+
+Now the sign test. Under $H_0$ each block is equally likely to favour either
+treatment, so $a \sim B\!\left(b, \tfrac12\right)$ and the standardised statistic
+is
+$$Z = \dfrac{a - \frac{b}{2}}{\sqrt{b/4}} = \dfrac{2a - b}{\sqrt{b}},
+\qquad\text{so}\qquad Z^{2} = \dfrac{(2a-b)^{2}}{b} = \chi^{2}_{F}.$$
+
+The Friedman statistic is exactly the square of the sign-test $Z$. Since the
+square of a standard normal is $\chi^{2}$ on one degree of freedom, and Friedman
+here has $k - 1 = 1$ degree of freedom, the two tests are identical --- not merely
+similar.
+\end{solution}
+
 
 \begin{problem}
 Two samples of sizes $12$ and $15$ give, respectively, $9$ and $4$ observations
@@ -2386,11 +2484,62 @@ above the pooled median. Construct the $2\times 2$ table and carry out the media
 test. Would Kruskal--Wallis on the same data be more or less powerful, and why?
 \end{problem}
 
+\begin{solution}
+Of the $12$ observations in the first sample, $9$ exceed the pooled median and
+$3$ do not; of the $15$ in the second, $4$ exceed it and $11$ do not.
+$$\begin{array}{l|cc|c}
+ & \text{sample 1} & \text{sample 2} & \text{total}\\\hline
+\text{above } M & 9 & 4 & 13\\
+\text{at or below } M & 3 & 11 & 14\\\hline
+\text{total} & 12 & 15 & 27
+\end{array}$$
+For a $2\times 2$ table,
+$$\chi^{2} = \dfrac{N(ad - bc)^{2}}{(a+b)(c+d)(a+c)(b+d)}
+= \dfrac{27\big(9(11) - 3(4)\big)^{2}}{13 \times 14 \times 12 \times 15}
+= 6.238 .$$
+Against $\chi^{2}_{0.05,1} = 3.841$ we reject: the medians differ.
+
+Kruskal--Wallis on the same data would be \emph{more} powerful. The median test
+reduces every observation to a single bit --- above the median or not --- and
+discards the rest. Kruskal--Wallis keeps the full ordering, so it can distinguish
+a sample that sits just above the median from one far above it, and the median
+test cannot. Use the median test only when the data will not support ranking:
+censored values, or measurements recorded merely as ``high'' and ``low''.
+\end{solution}
+
+
 \begin{problem}
 A series of $60$ observations is to be tested for trend by Mann--Kendall. Describe
 how you would use the runs test first, and say what you would do differently
 depending on its outcome.
 \end{problem}
+
+\begin{solution}
+Reduce the $60$ observations to symbols by comparing each with the sample median,
+count the runs $R$, and test as above with $n_1 \approx n_2 \approx 30$.
+
+\textbf{If randomness is not rejected}, the independence assumption behind
+Mann--Kendall is tenable and the ordinary test may be used as it stands.
+
+\textbf{If there are too few runs}, the series is positively serially correlated:
+consecutive observations resemble one another, the series carries less independent
+information than its length suggests, and uncorrected Mann--Kendall will reject
+too often. Apply the Hamed--Rao variance inflation --- with the factor clipped at
+$1$.
+
+\textbf{If there are too many runs}, the correlation is negative. The true
+variance of $S$ is then smaller than the formula gives, so the uncorrected test
+is conservative and will simply miss some real trends. The clipped correction
+leaves it unchanged, which is the honest outcome: it is better to under-claim
+than to manufacture a trend.
+
+One caution. A trend itself will produce clustering --- early values below the
+median, late values above --- so a runs test on the raw series may reject
+randomness because of the trend rather than because of serial correlation. Run it
+on the residuals after removing the Theil--Sen slope, which is exactly what
+Hamed--Rao does before computing its autocorrelations.
+\end{solution}
+
 
 
 \pagebreak
@@ -2591,10 +2740,43 @@ $\binom{5}{2} = 10$ pairwise signs. Compute $\operatorname{var}(S)$ and the
 Theil--Sen slope, taking $t = 1, 2, 3, 4, 5$.
 \end{problem}
 
+\begin{solution}
+With $t = 1,\ldots,5$ and $x = 4, 7, 6, 9, 11$, the ten pairwise signs are
+$$\begin{array}{llll}
+(4,7)\ + & (4,6)\ + & (4,9)\ + & (4,11)\ +\\
+(7,6)\ - & (7,9)\ + & (7,11)\ + &\\
+(6,9)\ + & (6,11)\ + & &\\
+(9,11)\ + & & &
+\end{array}$$
+Nine are positive and one negative, so
+$$S = 9 - 1 = 8 .$$
+There are no ties, so
+$$\operatorname{var}(S) = \dfrac{n(n-1)(2n+5)}{18} = \dfrac{5(4)(15)}{18}
+= 16.6667 .$$
+The ten pairwise slopes $\dfrac{x_j - x_i}{t_j - t_i}$ are
+$$-1,\ 1,\ 1,\ 1.3333,\ 1.6667,\ 1.75,\ 2,\ 2.5,\ 3,\ 3,$$
+and the Theil--Sen estimate is the median of these, the mean of the fifth and
+sixth:
+$$\widehat{\beta} = \dfrac{1.6667 + 1.75}{2} = 1.7083 \text{ per unit time}.$$
+\end{solution}
+
+
 \begin{problem}
 Show that if every observation is distinct then $\operatorname{var}(S)$ reduces
 to $\dfrac{n(n-1)(2n+5)}{18}$, and evaluate it for $n = 10$.
 \end{problem}
+
+\begin{solution}
+If every observation is distinct then every tied group has size $t_p = 1$, and
+each term of the correction is
+$$t_p(t_p - 1)(2t_p + 5) = 1(0)(7) = 0 .$$
+The whole sum vanishes and
+$$\operatorname{var}(S) = \dfrac{n(n-1)(2n+5)}{18}.$$
+For $n = 10$,
+$$\operatorname{var}(S) = \dfrac{10 \times 9 \times 25}{18} = 125,$$
+so the standard deviation of $S$ is $\sqrt{125} = 11.18$.
+\end{solution}
+
 
 \begin{problem}
 Take the series of Problem 1 and replace the final value $11$ by $1100$.
@@ -2603,11 +2785,61 @@ original and the altered series. Comment on which estimate of trend survived the
 outlier and why.
 \end{problem}
 
+\begin{solution}
+Replacing $11$ by $1100$ changes the value but not its \emph{rank}: it was the
+largest observation and it still is. Every pairwise sign is therefore unchanged
+and
+$$S = 8 \text{ exactly as before.}$$
+The Mann--Kendall test does not move at all.
+
+The Theil--Sen slope moves, but modestly. Four of the ten pairwise slopes involve
+the altered point and become large, but they are pushed to the top of the sorted
+list where the median does not reach:
+$$\widehat{\beta}: \quad 1.7083 \longrightarrow 3.0000 .$$
+
+Least squares has no such protection:
+$$\widehat{\beta}_{\text{OLS}}: \quad 1.6000 \longrightarrow 219.4000 .$$
+
+\begin{center}
+\begin{tabular}{lrrr}
+ & original & altered & factor\\\hline
+Mann--Kendall $S$ & $8$ & $8$ & $1.00$\\
+Theil--Sen & $1.7083$ & $3.0000$ & $1.76$\\
+Least squares & $1.6000$ & $219.4000$ & $137.1$\\\hline
+\end{tabular}
+\end{center}
+
+One corrupted reading in five multiplies the least-squares slope by $137$ and
+leaves the Mann--Kendall statistic untouched. This is the whole case for
+rank-based methods on environmental data, where a misplaced decimal point or a
+faulty gauge is an ordinary occurrence rather than a hypothetical one.
+\end{solution}
+
+
 \begin{problem}
 Explain why the continuity correction subtracts $1$ from a positive $S$ but adds
 $1$ to a negative $S$, and show that in both cases the effect is to reduce
 $\left|Z\right|$.
 \end{problem}
+
+\begin{solution}
+The statistic $S$ takes only integer values, while the normal distribution used
+to approximate it is continuous. The correction is the usual device of treating
+the integer $s$ as covering the interval $\left(s - \tfrac12,\ s + \tfrac12\right)$,
+and here it is applied so as to shrink $\left|S\right|$ towards zero.
+
+For $S > 0$ we use $S - 1$, and since $S > 0$,
+$$\left|S - 1\right| < \left|S\right| \quad\Longrightarrow\quad
+\dfrac{S-1}{\sqrt{\operatorname{var}(S)}} < \dfrac{S}{\sqrt{\operatorname{var}(S)}} .$$
+For $S < 0$ we use $S + 1$, and since $S < 0$,
+$$\left|S + 1\right| < \left|S\right| \quad\Longrightarrow\quad
+\left|\dfrac{S+1}{\sqrt{\operatorname{var}(S)}}\right|
+< \left|\dfrac{S}{\sqrt{\operatorname{var}(S)}}\right| .$$
+In both cases $\left|Z\right|$ is reduced, the $p$-value is enlarged, and the
+trend is made harder to declare. The correction can only ever be conservative:
+it will never turn a non-significant result into a significant one.
+\end{solution}
+
 
 \begin{problem}
 A series of length $n = 45$ has significant lag-1 autocorrelation
@@ -2615,12 +2847,54 @@ $\rho_1 = 0.35$ and no other significant lags. Compute the variance inflation
 factor $n/n^{*}$ and the effective sample size $n^{*}$.
 \end{problem}
 
+\begin{solution}
+Only lag $1$ survives the significance screen, so the sum has the single term
+$\ell = 1$:
+$$\dfrac{n}{n^{*}} = 1 + \dfrac{2}{n(n-1)(n-2)}(n-1)(n-2)(n-3)\,\rho_1
+= 1 + \dfrac{2(n-3)}{n}\,\rho_1 .$$
+With $n = 45$ and $\rho_1 = 0.35$,
+$$\dfrac{n}{n^{*}} = 1 + \dfrac{2(42)}{45}(0.35) = 1 + 0.6533 = 1.6533 .$$
+Hence
+$$n^{*} = \dfrac{45}{1.6533} = 27.2 .$$
+Forty-five correlated observations carry about as much information about trend as
+twenty-seven independent ones. The variance of $S$ must be multiplied by
+$1.6533$, which divides $Z$ by $\sqrt{1.6533} = 1.286$.
+\end{solution}
+
+
 \begin{problem}
 Suppose the same series instead returned a single significant autocorrelation
 $\rho_3 = -0.31$ at lag $3$. Compute the unclipped inflation factor. What would
 the uncorrected and corrected tests conclude if $S = 210$ and there are no ties?
 Which of the two is trustworthy, and why?
 \end{problem}
+
+\begin{solution}
+With the single significant lag at $\ell = 3$,
+$$\dfrac{n}{n^{*}} = 1 + \dfrac{2}{45(44)(43)}(42)(41)(40)(-0.31)
+= 1 + 1.6180(-0.31) = 0.4984 .$$
+
+Now the consequences. There are no ties, so
+$$\operatorname{var}(S) = \dfrac{45(44)(95)}{18} = 10450,
+\qquad \sqrt{\operatorname{var}(S)} = 102.2 .$$
+
+\textbf{Uncorrected:} $Z = \dfrac{210 - 1}{102.2} = 2.045$, giving $p = 0.041$ ---
+significant at the $5\%$ level.
+
+\textbf{With the unclipped factor:}
+$\operatorname{var}^{*}(S) = 10450(0.4984) = 5208$, so $Z = 2.896$ and
+$p = 0.0038$ --- \emph{ten times more significant}.
+
+\textbf{With the factor clipped at $1$:} unchanged from uncorrected,
+$Z = 2.045$, $p = 0.041$.
+
+The uncorrected and the clipped results are trustworthy; the unclipped one is
+not. A correction for serial dependence has been allowed to \emph{strengthen} the
+evidence, which is impossible on its own logic: dependence destroys information,
+it does not create it. The $-0.31$ is almost certainly a chance artefact of the
+$1.96/\sqrt{n}$ screen, and clipping is what stops it doing damage.
+\end{solution}
+
 
 \begin{problem}
 Twenty rain gauges are tested for trend, giving the $p$-values
@@ -2630,10 +2904,64 @@ At $\alpha = 0.05$, which are significant (a) uncorrected, (b) under Bonferroni,
 (c) under Benjamini--Hochberg? Comment on the difference.
 \end{problem}
 
+\begin{solution}
+Here $m = 20$ and $\alpha = 0.05$.
+
+\textbf{(a) Uncorrected.} Reject wherever $p < 0.05$: the first ten $p$-values,
+from $0.001$ to $0.045$. \textbf{Ten significant} --- and about one of the twenty
+would be expected to fall below $0.05$ by chance alone even with no trend
+anywhere.
+
+\textbf{(b) Bonferroni.} Compare each against $\alpha/m = 0.05/20 = 0.0025$. Only
+$0.001$ and $0.002$ survive. \textbf{Two significant.}
+
+\textbf{(c) Benjamini--Hochberg.} Compare $p_{(i)}$ against $\dfrac{i}{20}(0.05)
+= 0.0025\,i$:
+$$\begin{array}{rlll}
+i=1: & 0.001 \leq 0.0025 & \checkmark & \\
+i=2: & 0.002 \leq 0.0050 & \checkmark & \\
+i=3: & 0.003 \leq 0.0075 & \checkmark & \\
+i=4: & 0.004 \leq 0.0100 & \checkmark & \\
+i=5: & 0.006 \leq 0.0125 & \checkmark & \\
+i=6: & 0.008 \leq 0.0150 & \checkmark & \\
+i=7: & 0.010 \leq 0.0175 & \checkmark & \\
+i=8: & 0.015 \leq 0.0200 & \checkmark & \\
+i=9: & 0.030 \leq 0.0225 & \times & \\
+i=10: & 0.045 \leq 0.0250 & \times &
+\end{array}$$
+The largest $i$ satisfying the inequality is $k = 8$, so the eight smallest
+$p$-values are declared significant. \textbf{Eight significant.}
+
+Bonferroni asks how confident we are of having made \emph{no} error at all, and
+at $m = 20$ that costs six genuine findings. Benjamini--Hochberg accepts that
+perhaps one of its eight is wrong --- that is what a false discovery rate of $5\%$
+means --- and recovers them. For a map of rain gauges, where the question is which
+stations to look at more closely, the second is the useful guarantee.
+\end{solution}
+
+
 \begin{problem}
 Write down, in words, why the Theil--Sen slope and the Mann--Kendall statistic
 must always agree in sign.
 \end{problem}
+
+\begin{solution}
+Both quantities are built from the same $\binom{n}{2}$ pairwise comparisons.
+
+$S$ counts the pairs that increase minus the pairs that decrease. The Theil--Sen
+estimate is the median of the pairwise slopes, and a pairwise slope
+$\dfrac{x_j - x_i}{t_j - t_i}$ with $i < j$ is positive precisely when that pair
+increases, since the denominator is positive.
+
+So the pairwise slopes are positive for exactly the pairs $S$ counts as $+1$ and
+negative for exactly those it counts as $-1$. If $S > 0$ then more than half the
+slopes are positive, so the median of them is positive. If $S < 0$ then more than
+half are negative and the median is negative.
+
+Test and estimate cannot disagree, which is not true of a $t$-test paired with a
+least-squares slope on skewed data.
+\end{solution}
+
 
 
 
