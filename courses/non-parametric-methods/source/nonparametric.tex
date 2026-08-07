@@ -2468,6 +2468,150 @@ hypotheses are $H_0 : \rho_s = 0$ against $H_1 : \rho_s \neq 0$. Testing an
 inequality as a null is not something the machinery can do.
 \end{solution}
 
+
+\begin{problem}
+The Wall Street Journal has periodically run a stock-picking contest. Four Wall
+Street professionals each selected one stock, four randomly chosen readers each
+selected one, and four stocks were selected by throwing darts at a list. The
+percentage returns from March to August 2001 were:
+\begin{center}
+\begin{tabular}{ccc}
+\hline
+\textbf{Experts} & \textbf{Readers} & \textbf{Darts}\\
+\hline
+39.5 & $-31.0$ & 39.0\\
+$-1.1$ & $-20.7$ & 31.9\\
+$-4.5$ & $-45.0$ & 14.1\\
+$-8.0$ & $-73.3$ & 5.4\\
+\hline
+\end{tabular}
+\end{center}
+\begin{enumerate}
+\item[(a).] Which assumptions are appropriate here?
+\item[(b).] State the hypotheses.
+\item[(c).] Compute the test statistic and give the critical value at
+$\alpha = 0.05$.
+\item[(d).] Is there evidence of a difference in median return between the three
+categories?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a). The choice of test is the first thing to get right.} The three
+columns are \emph{independent} groups: four different professionals, four different
+readers, twelve different stocks. Nothing pairs the first expert with the first
+reader, so the rows are not blocks and Friedman does not apply. The appropriate
+test is \textbf{Kruskal--Wallis} for $k = 3$ independent samples.
+
+The assumptions are then: independent random samples; at least ordinal
+measurement; and populations identical under $H_0$.
+
+\textbf{(b).} $H_0$: the three selection methods give identical return
+distributions. $H_1$: at least one differs.
+
+\textbf{(c).} Ranking all $N = 12$ returns together, smallest first:
+$$-73.3,\ -45.0,\ -31.0,\ -20.7,\ -8.0,\ -4.5,\ -1.1,\ 5.4,\ 14.1,\ 31.9,\ 39.0,\ 39.5$$
+gives rank sums
+$$R_{\text{experts}} = 12+7+6+5 = 30,
+\qquad
+R_{\text{readers}} = 3+4+2+1 = 10,
+\qquad
+R_{\text{darts}} = 11+10+9+8 = 38,$$
+and $30+10+38 = 78 = \frac{12(13)}{2}$. There are no ties. Then
+$$H = \dfrac{12}{12(13)}\left[\dfrac{30^{2}}{4}+\dfrac{10^{2}}{4}+\dfrac{38^{2}}{4}\right]
+- 3(13) = 47 - 39 = 8.0000 .$$
+With $k-1 = 2$ degrees of freedom, $\chi^{2}_{0.05,2} = 5.9915$.
+
+\textbf{(d).} Since $8.0000 > 5.9915$ we \textbf{reject} $H_0$; the exact
+$P$-value is $0.0183$. There is evidence that the three methods differ.
+
+\textbf{Reading the result.} The rank sums say where the difference lies: the darts
+scored highest ($38$), the experts next ($30$) and the readers lowest ($10$). Over
+this period the darts beat both the professionals and the readers. That is the
+finding the contest was designed to provoke, and Kruskal--Wallis confirms it is
+more than chance --- though with four stocks per method it says nothing about
+\emph{why}, and the Dow gained $2.4\%$ over the same window, so only the darts beat
+the market at all.
+\end{solution}
+
+\begin{problem}
+Let $X_1,\ldots,X_n$ and $Y_1,\ldots,Y_m$ be random samples from continuous
+populations $F$ and $G$. The Mann--Whitney statistics are
+$$U_n = nm + \dfrac{n(n+1)}{2} - S_n,
+\qquad
+U_m = nm + \dfrac{m(m+1)}{2} - S_m ,$$
+where $S_n$ and $S_m$ are the rank sums of the $X$'s and $Y$'s in the combined
+sample. Show that
+$$U_n = nm - U_m .$$
+\end{problem}
+
+\begin{solution}
+Add the two definitions:
+$$U_n + U_m = 2nm + \dfrac{n(n+1)}{2} + \dfrac{m(m+1)}{2} - \left(S_n + S_m\right).$$
+
+Every rank from $1$ to $N = n+m$ is used exactly once between the two samples, so
+$$S_n + S_m = \dfrac{N(N+1)}{2} = \dfrac{(n+m)(n+m+1)}{2}.$$
+Substituting,
+$$U_n + U_m = 2nm + \dfrac{n^{2}+n+m^{2}+m}{2}
+- \dfrac{(n+m)^{2}+(n+m)}{2}.$$
+Expanding the last numerator, $(n+m)^{2}+(n+m) = n^{2}+2nm+m^{2}+n+m$, so the two
+fractions differ only by the cross term:
+$$U_n + U_m = 2nm + \dfrac{-2nm}{2} = 2nm - nm = nm .$$
+Therefore
+$$\boxed{U_n = nm - U_m .} \qquad \blacksquare$$
+
+\textbf{What the identity says.} $U_n$ counts the pairs $(X_i, Y_j)$ with
+$X_i > Y_j$ and $U_m$ counts those with $Y_j > X_i$. There are $nm$ pairs
+altogether and, the populations being continuous, no ties --- so the two counts must
+add to $nm$. The algebra above is that observation done through the rank sums.
+
+It also means only one statistic need ever be computed: the other follows by
+subtraction, and $\min(U_n, U_m)$ --- the value usually referred to tables --- is
+available at once.
+\end{solution}
+
+\begin{problem}
+Explain what is meant by an \emph{order statistic}, and name three non-parametric
+methods built on order statistics, illustrating with notation where useful.
+\end{problem}
+
+\begin{solution}
+\textbf{Definition.} Given a sample $X_1,\ldots,X_n$, arrange the values in
+increasing order
+$$X_{(1)} \leq X_{(2)} \leq \cdots \leq X_{(n)} .$$
+The $i$-th of these, $X_{(i)}$, is the $i$-th \emph{order statistic}. It is a
+statistic in the ordinary sense --- a function of the sample --- but one that depends
+on the observations only through their \emph{relative magnitudes}, which is
+precisely why order statistics underpin distribution-free methods: their
+distribution theory under $H_0$ can be worked out without knowing $F$.
+
+Note $X_{(1)} = \min_i X_i$ and $X_{(n)} = \max_i X_i$, and the sample median is
+$X_{((n+1)/2)}$ for odd $n$.
+
+\textbf{Three methods built on them.}
+
+\begin{enumerate}
+\item[(i).] \textbf{The confidence interval for a median.} The interval
+$\left(X_{(k)},\,X_{(n+1-k)}\right)$ has coverage
+$1 - 2P\!\left(\text{Bin}(n,\tfrac12) \leq k-1\right)$, free of $F$ entirely. The
+endpoints are order statistics and nothing else is used.
+
+\item[(ii).] \textbf{The Kolmogorov--Smirnov test.} The empirical distribution
+function is built directly from the order statistics,
+$$\widehat{F}_n\left(X_{(i)}\right) = \dfrac{i}{n},$$
+and the statistic $D = \max\left|\widehat{F}_n - F_0\right|$ is evaluated at the
+$X_{(i)}$.
+
+\item[(iii).] \textbf{Rank tests generally} --- the sign test, Wilcoxon
+signed-rank, Wilcoxon rank-sum and Kruskal--Wallis. Ranking is exactly the
+operation of recording which order statistic each observation is, and every one of
+these tests uses that information and discards the rest.
+\end{enumerate}
+
+The quartiles and percentiles are also order statistics, which is why the quartile
+test of the previous chapter belongs to the same family.
+\end{solution}
+
 \pagebreak
 \subsection{Tests}
 \begin{enumerate}
