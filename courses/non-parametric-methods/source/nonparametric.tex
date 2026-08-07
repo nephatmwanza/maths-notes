@@ -2201,7 +2201,7 @@ There are several computation methods for the K-S statistic. We follow the commo
 \item Compute the assumed distribution $(F_0)$ and the edf $\widehat{F}_n$ at each data point.
 \item Since the K-S is the distance test, we need to find the maximum distance $\max|F_0-\widehat{F}_n|$ between the theoretical and edf empirical distribution.
 \end{enumerate}
-There two basic functions are defined as $$F_0(X_{(i)})=P(X\leq X_{(i)})=CDF(X_{(i)}),\hspace{0.5cm} i=1(n)$$ $F_0(X_{(i)})$ is the assumed cdf evaluated at $X_i$ and $\widehat{F}_n(X_{(i)})$ is the edf obtained by the proportion of the data smaller $X_i$ in the data set of size $n$.
+These two functions are defined as $$F_0(X_{(i)})=P(X\leq X_{(i)})=CDF(X_{(i)}),\hspace{0.5cm} i=1,\dots,n$$ $F_0(X_{(i)})$ is the assumed cdf evaluated at $X_i$ and $\widehat{F}_n(X_{(i)})$ is the edf obtained by the proportion of the data smaller $X_i$ in the data set of size $n$.
 
 
 
@@ -2218,7 +2218,7 @@ There two basic functions are defined as $$F_0(X_{(i)})=P(X\leq X_{(i)})=CDF(X_{
 Let $x_1,\dots,x_n$ be observations on continuous iid random variables $X_1,X_2,\dots,X_n$ with cdf $F$ we want to test the hypothesis such that $H_0:F(x)=F_0(x)$ for all values of $x$ vs $H_a:F(x)\neq F_0(x)$ for at least one value of $x$. Where $F_0$ is the known cdf.\\ The K-S statistic $$D_n=D_n\sup_{x\in \mathbb{R}}|F_n(x)-F_0(x)|$$ where $F_n(x)$ is as given above
 \begin{align*}
  D^+_n &=\max\{F_n(x)-F_0(x_{(i)})\}=\max \Big\{\frac{i}{n}-F_0(x_{(i)})\Big\}\\\\
- D^-_n &=\max\{F_0(x_{(i)})-F_{n-1}(x_{(i)})\}=\max \Big\{F_0(X_{(i)}-\frac{i-1}{n}\Big\}\\\\
+ D^-_n &=\max\{F_0(x_{(i)})-\widehat{F}_n(x_{(i-1)})\}=\max \Big\{F_0(X_{(i)})-\frac{i-1}{n}\Big\}\\\\
  D_n &=\max \{D_n^+,D_n^-\}.\\
 \end{align*}
 
@@ -2231,26 +2231,34 @@ Let $x_1,\dots,x_n$ be observations on continuous iid random variables $X_1,X_2,
 
 
 \subsection{Rationale Of K-S}
-If the maximum distance between the assumed cdf and empirical distribution is known then the assumed cdf will likely be correct. But if this descriptive is 'large' then the assumed cdf is likely not the underlined data distribution.\\ If $D_n$ exceeds $D_n(\alpha)$ (critical value) then reject $H_0$. i.e if $D_n$ exceeds $(1-\alpha)^{th}$ quartile from the tables reject $H_0$ at the level of significance $\alpha$.\\\\
+If the maximum distance between the assumed cdf and the empirical distribution
+function is \emph{small}, the assumed cdf is plausible; if that distance is
+\emph{large}, the data are telling us the assumed distribution is wrong. The whole
+test is that one sentence --- everything else is working out how large a distance
+chance alone can produce.
 
+\begin{note}
+The statistic is distribution-free for a reason worth seeing. If $F_0$ is the true
+continuous cdf then $F_0(X)$ is uniform on $[0,1]$, so the whole comparison can be
+transported to the uniform distribution whatever $F_0$ was. The null distribution
+of $D_n$ therefore does not depend on $F_0$ at all --- which is exactly what makes
+one table of critical values serve every goodness-of-fit problem.
 
-
-
-
-
-
-
-
-
-
+This also shows the limitation: the argument needs $F_0$ \emph{fully specified in
+advance}. If parameters are estimated from the same data, the null distribution
+changes and the ordinary table no longer applies.
+\end{note}
 
 \subsection{Two Sample Test}
 The two sample K-S test is used to test whether the 2 samples come from the same distribution.\\ 
 The procedure is similar to the one-sample case.\\ 
-Suppose that the first sample has size $m$ with an assumed cdf $F(x)$ and the second sample has size $n$ with cdf $G(x)$. Define the statistic $$D_{m,n}=\sqrt{\frac{mn}{m+n}}\,\,\sup_{x\in \mathbb{R}}|F_m(x)-G_n(x)|$$ 
-Then we reject the hypothesis $H_0:F(x)=G(x)$ for all $x$. vs $H_a:F(x)\neq G(x)$ for some $x$.\\
-
-If $D_{m,n}>D_{m,n}(\alpha)$ where $D_{m,n}(\alpha)$ is the critical value.\\\\
+Suppose the first sample has size $m$ and unknown cdf $F(x)$, and the second has size $n$ and unknown cdf $G(x)$; neither is assumed known. Define the statistic $$D_{m,n}=\sqrt{\frac{mn}{m+n}}\,\,\sup_{x\in \mathbb{R}}|F_m(x)-G_n(x)|$$ 
+We test
+$$H_0: F(x)=G(x) \text{ for all } x
+\qquad\text{against}\qquad
+H_a: F(x)\neq G(x) \text{ for some } x,$$
+and reject $H_0$ when $D_{m,n} > D_{m,n}(\alpha)$, where $D_{m,n}(\alpha)$ is the
+tabulated critical value.\\\\
 
 
 
@@ -2262,7 +2270,7 @@ If $D_{m,n}>D_{m,n}(\alpha)$ where $D_{m,n}(\alpha)$ is the critical value.\\\\
 \subsection{The K Sample K-S Statistic}
 Let $X_1,X_2,\dots,X_k$, for some $i=1,2,\dots,k$ be $k$ independent samples drawn respectively from distributions with cdf $$F_i(x):\hspace{0.3cm} i=1,2,\dots,k$$
 Let $\widehat{F}_i(X)$ denote the edf of the $i^{th}$ sample.\\ 
-To test $H_0$ that $F_i(X)$ are identical $$H_0:F_1(x)=F_2(x)=\dots=F_n(x)\hspace{0.4cm}\text{vs}\hspace{0.4cm} H_a:F_1(x)\geq F_2(x)\geq \dots \geq F_k(x)$$
+To test $H_0$ that $F_i(X)$ are identical $$H_0:F_1(x)=F_2(x)=\dots=F_k(x)\hspace{0.4cm}\text{vs}\hspace{0.4cm} H_a:F_1(x)\geq F_2(x)\geq \dots \geq F_k(x)$$
 The test statistic is computed as follows
 $$D^+(k,n)=\sup_{x:\,i<k}\Big\{\widehat{F}_i(x)-\widehat{F}_{i+1}(x)\Big\}$$
 and, in the same fashion, the opposite ordering
