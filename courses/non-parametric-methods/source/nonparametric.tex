@@ -382,16 +382,22 @@ the point of computing the null distribution rather than trusting the impression
 
 \section{\textbf{SOME TESTS BASED ON BINOMIAL DISTRIBUTION}}
 
+\begin{definition}[Binomial distribution]
+A random variable $X$ counting the occurrences of some outcome in a fixed number
+$n$ of observations is \emph{Binomial}, written $X\thicksim B(n,P)$, if
 \begin{enumerate}
-\item[-] A random variable $X$, a count of the occurrences of some outcome in a fixed number of observations $(n)$ is Binomial if 
-\begin{enumerate}
-\item[*] each observation falls into one of the just two categories i.e success/failure.
-\item[*] $n$ observations are all independent.
-\item[*] probability of success is the same for each observations
+\item[*] each observation falls into one of just two categories, success or failure;
+\item[*] the $n$ observations are independent;
+\item[*] the probability $P$ of success is the same for every observation.
 \end{enumerate}
-$X\thicksim B(n,P)$
-\item[-] Sign and Binomial tests are examples of NP tests that are based on the Binomial distribution.\\\\
-\end{enumerate}
+\end{definition}
+
+The tests of this chapter --- the sign test, the binomial test and the quantile
+test --- all reduce the data to a count of successes and so all rest on this one
+distribution. The reduction is what makes them distribution-free: whatever the
+shape of the population, the count of observations falling on one side of a
+hypothesised value is binomial, and nothing further need be assumed.
+
 
 
 
@@ -484,21 +490,33 @@ $n' = 60$ with $R = 22$, $0.0528$ against $0.0519$. When the decision is close t
 the boundary, use the exact binomial.
 \end{note}
 \textbf{Tied Scores}
+
+If a subject scores the same under both conditions the difference is zero and
+there is no sign to record. The zeros must be dealt with before the test can
+proceed, and two treatments are in use.
+
 \begin{enumerate}
-\item[-] If a subject has the same score in each condition, there will be no sign, because the difference score is zero.
-\item[-] Two methods of handling zero difference are proposed.
-\begin{enumerate}
-\item Scores are dropped from the sample and reduced $n$ by the appropriate number.
-\item It may not be the best way as can lead to loss of too much power.
+\item[(i).] \textbf{Discard them.} Drop the tied subjects and reduce $n$
+accordingly. This is the standard procedure and the one assumed in the tables.
+Its cost is power: the discarded subjects were observations, and a test on $n=12$
+is weaker than a test on $n=20$.
+\item[(ii).] \textbf{Split them.} With an even number of ties, assign half a plus
+and half a minus; with an odd number greater than one, drop one tied subject at
+random and split the rest. This keeps more of the sample, at the price of a small
+arbitrary element.
 \end{enumerate}
 
-\item[-] Best practice is that 
-\begin{enumerate}
-\item[*] if one observation/score/subject with tied score drop that subject.
-\item[*] if two subjects with tied score, make one a "$+$" and one a "$-$".
-\item[*] generally for odd number of subject $(>1)$ drop one randomly selected subject and then proceed as for even numbered tied scores.\\\\ 
-\end{enumerate}
-\end{enumerate}
+Discarding is the safer default, and is what should be done unless the ties are
+numerous. Splitting pulls $S_+$ towards $n/2$, which makes rejection harder, so it
+errs on the conservative side rather than the reckless one.
+
+\begin{note}
+Many ties are a warning, not a nuisance to be tidied away. If a quarter of the
+subjects score identically under both conditions, the measurement is probably too
+coarse to detect the effect being looked for, and no choice of convention will
+repair that. Say how many ties there were when reporting the test.
+\end{note}
+
 
 
 
@@ -578,23 +596,45 @@ $\therefore$ Extreme number of `$+$' signs, smaller or large will support $H_1$.
 
 
 \textit{Procedure}
-\begin{enumerate}
-\item[-] Sampling distribution of the test statistic is the Binomial distribution with $N=14$ and $P=0.5$ i.e $\Big(14,\dfrac{1}{2}\Big)$.
-\item[-] To carry out the sign test consider $$S_+=3\hspace{0.5cm}\text{and}\hspace{0.5cm} S_-=11$$ 
 
-$$N=\min(S_+,S_-)=3$$ $$N=3\hspace{1cm}\text{is}\hspace{0.3cm}+\hspace{0.3cm}\text{Signs}$$
+\textbf{Null distribution.} All $14$ subjects gave a non-zero difference, so
+$n=14$. Under $H_0$ a plus and a minus are equally likely for each subject
+independently, so the number of plus signs is
+$$S_+\sim \operatorname{Bin}\left(14,\tfrac{1}{2}\right).$$
+Note that $n=14$ is the \emph{sample size} and $S_+$ is the \emph{statistic}; they
+are different quantities and must not share a symbol.
 
-\item[-] Since $H_1$ is non directional/ 2-sided we must find $$P(N\leq 3)+P(N\geq 11)$$ $$\text{C.V}:\hspace{0.5cm} 3\hspace{1cm} \text{and}\hspace{1cm} 11$$ 
+\textbf{Statistic.} The table gives
+$$S_+=3\hspace{0.8cm}\text{and}\hspace{0.8cm}S_-=11,\hspace{0.8cm}
+S=\min\left(S_+,S_-\right)=3 .$$
 
-$$\text{C.R}\hspace{0.5cm} N\leq 3\hspace{0.5cm}\text{and}\hspace{0.5cm}N\geq 11$$
-\begin{align*}
-P-\text{value} &=P(N\leq 3)+P(N\geq 11)\\
-               &=0.029+(1-P(N<11))\\
-               &=1.029-0.971\\
-               &=0.0578
-\end{align*}
-\textit{Conclusion:}\\ No sufficient evidence to allow the rejection of $H_0$.\\\\
-\end{enumerate}
+\textbf{Critical region.} For a two-sided test at $\alpha=0.05$ the critical value
+is the largest $c$ with $2\,P\left(S_+\leq c\right)\leq 0.05$. From the binomial
+table,
+$$2\,P\left(S_+\leq 2\right)=2(0.00647)=0.0129\leq 0.05,\hspace{0.8cm}
+2\,P\left(S_+\leq 3\right)=2(0.02869)=0.0574>0.05,$$
+so $c=2$ and the critical region is $S\leq 2$, that is $S_+\leq 2$ or
+$S_+\geq 12$. The observed $S=3$ lies outside it.
+
+\textbf{$p$-value.} Equivalently, and more informatively,
+$$p=P\left(S_+\leq 3\right)+P\left(S_+\geq 11\right)=2(0.02869)=0.0574 .$$
+
+\textit{Conclusion:} $0.0574>0.05$, so there is not sufficient evidence to reject
+$H_0$ at the $5\%$ level.
+
+\begin{note}
+The result is a near miss, and it is worth being clear about what that does and
+does not mean. A $p$-value of $0.0574$ is not evidence that the two conditions
+agree; it is evidence that fell just short of the conventional threshold with only
+$14$ subjects. The same imbalance of $3$ against $11$ in a larger study would be
+decisive. Report the $p$-value, not merely the verdict, and let the reader judge.
+
+Note also that $3$ and $11$ are the observed statistic and its mirror image, not
+the critical values. Reading a critical region off the data is circular: every
+observation lies on the boundary of the region it defines, so the test would
+always be on the edge of significance.
+\end{note}
+
 
 
 
@@ -699,159 +739,251 @@ the level achieved rather than the level requested.
 \end{note}
 
 \subsection{Order Statistics}
-\begin{enumerate}
-\item[-]  Let $X_1,X_2,\dots,X_n$ denote a random sample from a population with continuous cdf $F_X$.
-\item[-] $F_X$ is continuous so that the probability is zero that any two or more of these random variables have equal magnitude.
-\item[-] There exist a unique ordered arrangement within the sample.
-\item[-] Suppose that $X_{(1)}$ denotes the smallest of the set $X_{(1)},\dots,X_{(n)}$; $X_{(2)}$ the 2$^{th}$ smallest  and $X_{(n)}$ is the largest. Then \hspace{0.2cm}$X_{(1)}<X_{(2)}<\dots <X_{(n)}\hspace{0.2cm}$ denote the original random sample after arrangement in ascending  order of magnitude and these are collectively termed order statistics of the random sample $X_{(1)},\dots,X_{(n)}$.
-\item[-] The r$^{th}$ smallest, $1\leq r\leq n$, of the ordered $X's$, $X_{(r)}$ is called the r$^{th}$ order statistic.\\
-\end{enumerate}
+\begin{definition}[Order statistics]
+Let $X_1,X_2,\dots,X_n$ be a random sample from a population with continuous cdf
+$F_X$, and let
+$$X_{(1)}<X_{(2)}<\dots<X_{(n)}$$
+be the same $n$ observations rearranged in ascending order of magnitude. These are
+the \emph{order statistics} of the sample, and $X_{(r)}$, the $r^{th}$ smallest,
+$1\leq r\leq n$, is the $r^{th}$ order statistic.
+\end{definition}
 
+Two pieces of notation are in play and they must not be confused. $X_i$ is the
+$i^{th}$ observation \emph{as recorded}; $X_{(i)}$ is the $i^{th}$
+\emph{smallest}. In the sample $5,\ 2,\ 9$ we have $X_1=5$ but $X_{(1)}=2$.
 
+Continuity of $F_X$ is what makes the ordering unique. For a continuous
+distribution $P\left(X_i=X_j\right)=0$ whenever $i\neq j$, so with probability one
+no two observations are equal and the inequalities above are strict. Real data
+recorded to a fixed number of decimal places do produce ties, and those are
+handled by the mid-rank convention of a later section, but the theory is built on
+the continuous case.
 
+\begin{example}
+The seven observations $12,\ 5,\ 19,\ 5.5,\ 8,\ 21,\ 14$ have order statistics
+$$X_{(1)}=5,\ X_{(2)}=5.5,\ X_{(3)}=8,\ X_{(4)}=12,\ X_{(5)}=14,\ X_{(6)}=19,\ X_{(7)}=21 .$$
+The sample median is $X_{(4)}=12$, the range is $X_{(7)}-X_{(1)}=16$, and the
+largest observation $21$ is $X_{(7)}$ regardless of where it appeared in the
+recording.
+\end{example}
 
-
-
-
-
-
-
-
-
-
+\begin{note}
+Order statistics are the reason non-parametric methods work at all. Every test in
+these notes uses the data only through order or rank, never through the raw
+magnitudes, and that is precisely why no distributional form has to be assumed.
+The confidence interval for the median of the previous section is the clearest
+case: its endpoints \emph{are} order statistics, $\left(X_{(k)},X_{(n-k+1)}\right)$.
+\end{note}
 
 \pagebreak
 \subsection{Quantile Functions}
-\begin{enumerate}
-\item[-] A quantile of the cdf $F_X$ of a random variable $X$ is a real number that divides the area under the pdf into two parts of specified amounts.
-\item[-] Only area to the left need to be specified.
-\item[-] The $P^{th}$ quantile (the $100P^{th}$ percentile) of $F_X$ is that value of $X_1$, $X_P$ such that 100P percentile of the value of $X$ is the population, are less than or equal to $X_P$ for any $+ve$ $P(0<P<1)$.
-\item[-] $X_P$ is parameter of the population that satisfies $P(X\leq X_P)=P$ or $F_X(X_P)=P$.
-\item[-] For a strictly increasing cdf of $X$ the $P^{th}$ quantile is the unique solution to the equation $$X_P=F_X^{-1}(P)=Q_X(P).$$
-\item[-] We call $Q_X(P)$, $0<P<1$, the inverse of the cdf, the \emph{quantile function} of the random variable $X$.\\\\
-\end{enumerate}
+A quantile of the cdf $F_X$ is a value that divides the area under the density
+into two parts of specified size. Only the area to the left need be named, since
+the area to the right is what is left over.
 
+\begin{definition}[Quantile]
+For $0<P<1$, the $P^{th}$ quantile of $X$ is a value $x_P$ such that
+$$P\left(X\leq x_P\right)=P, \hspace{0.8cm}\text{that is}\hspace{0.4cm} F_X\left(x_P\right)=P .$$
+If $F_X$ is continuous and strictly increasing this equation has exactly one
+solution, and
+$$x_P=F_X^{-1}(P)=Q_X(P).$$
+The function $Q_X=F_X^{-1}$, defined for $0<P<1$, is the \emph{quantile function}
+of $X$.
+\end{definition}
 
+The $P^{th}$ quantile and the $100P^{th}$ percentile are the same number on two
+scales: the $0.25$ quantile is the $25^{th}$ percentile. Quantile is the general
+term, and the quartiles, deciles and percentiles are particular quantiles, not
+separate objects.
 
+\begin{note}
+The requirement that $F_X$ be strictly increasing is doing real work. If $F_X$ is
+flat over an interval then $F_X(x)=P$ holds for every $x$ in it and the quantile is
+not unique; if $F_X$ jumps past the level $P$, as every discrete cdf does, then no
+$x$ satisfies the equation at all. The definition that covers every case is
+$$Q_X(P)=\inf\left\{x:F_X(x)\geq P\right\},$$
+the smallest value at which the cdf has reached $P$. It agrees with $F_X^{-1}(P)$
+whenever the inverse exists, and it is what any software returns.
+\end{note}
 
-
-
-
-
-
-
-
-
+\begin{example}
+Let $X$ be exponential with rate $\lambda$, so $F_X(x)=1-e^{-\lambda x}$ for
+$x\geq 0$. Solving $1-e^{-\lambda x_P}=P$ gives the quantile function
+$$Q_X(P)=-\dfrac{\ln(1-P)}{\lambda},\hspace{0.8cm}0<P<1 .$$
+The median is $Q_X(0.5)=\ln 2/\lambda\approx 0.693/\lambda$, the lower quartile is
+$Q_X(0.25)=\ln(4/3)/\lambda\approx 0.288/\lambda$ and the upper quartile is
+$Q_X(0.75)=\ln 4/\lambda\approx 1.386/\lambda$. Note that the median is well below
+the mean $1/\lambda$, as it must be for a distribution skewed to the right.
+\end{example}
 
 \subsection{Percentile and Quartile}
-The $K^{th}$ percentile of a set of values divides them so that $K\%$ of the values lie below and $(100-K)\%$ of values above.
+The $K^{th}$ percentile of a set of values divides them so that $K\%$ of the
+values lie below it and $(100-K)\%$ above. Three percentiles are used often enough
+to have names of their own:
 \begin{enumerate}
-\item[*] $25^{th}$ percentile $\implies$ lower quartile.
-\item[*] $50^{th}$ percentile $\implies$ median.
-\item[*] $75^{th}$ percentile $\implies$ upper quartile.\\
+\item[*] $25^{th}$ percentile $\implies$ lower quartile, $Q_1$.
+\item[*] $50^{th}$ percentile $\implies$ median, $Q_2$.
+\item[*] $75^{th}$ percentile $\implies$ upper quartile, $Q_3$.
 \end{enumerate}
+A \emph{quartile} is one of these three values; a \emph{quantile} is the general
+object $Q_X(P)$ for arbitrary $P$. The two words are not interchangeable.
 
-Consider a set of values\hspace{0.2cm} $3.7,\hspace{0.3cm} 2.7,\hspace{0.3cm} 3.3,\hspace{0.3cm} 1.3,\hspace{0.3cm} 2.2,\hspace{0.3cm} 3.1$\\
+\begin{center}
+\textbf{Sample quantiles}
+\end{center}
 
-- Order statistic of the sample is fractions.
-
-
-
+A sample gives no cdf to invert, so the quantile function must be estimated from
+the order statistics. The convention used here attaches to the $i^{th}$ order
+statistic the fraction
+$$P_i=\dfrac{i-1}{n-1},\hspace{0.4cm}i=1,2,\dots,n,$$
+so that the smallest observation sits at $P=0$ and the largest at $P=1$, and the
+remainder are spread evenly between. For the sample
+$$3.7,\hspace{0.3cm}2.7,\hspace{0.3cm}3.3,\hspace{0.3cm}1.3,\hspace{0.3cm}2.2,\hspace{0.3cm}3.1$$
+of size $n=6$ this gives
 
 \begin{table}[H]
 \centering
 \begin{tabular}{r|cccccc}
-quantiles &1.3&2.2&2.7&3.1&3.3&3.7\\
+order statistic $x_{(i)}$ &1.3&2.2&2.7&3.1&3.3&3.7\\
 \hline
-sample fractions &0&0.2&0.4&0.6&0.8&1\\
+sample fraction $P_i$ &0&0.2&0.4&0.6&0.8&1\\
 \end{tabular}
 \end{table}
 
+For a fraction $P$ falling between two of the $P_i$ the quantile is defined by
+linear interpolation. If $P$ lies a fraction $f$ of the way from $P_i$ to
+$P_{i+1}$, that is $f=\left(P-P_i\right)/\left(P_{i+1}-P_i\right)$, then
+$$Q(P)=(1-f)\,Q\left(P_i\right)+f\,Q\left(P_{i+1}\right).$$
+Geometrically this simply joins the plotted points by straight lines, as in the
+figure below.
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth]
+\draw[->](0,0)--(11.70,0) node[right,font=\small]{$P$};
+\draw[->](0,0)--(0,6.45) node[above,font=\small]{$Q(P)$};
+\draw(0.00,-0.08)--(0.00,0.08) node[below=2pt,font=\scriptsize]{$0$};
+\draw(2.75,-0.08)--(2.75,0.08) node[below=2pt,font=\scriptsize]{$0.25$};
+\draw(5.50,-0.08)--(5.50,0.08) node[below=2pt,font=\scriptsize]{$0.5$};
+\draw(8.25,-0.08)--(8.25,0.08) node[below=2pt,font=\scriptsize]{$0.75$};
+\draw(11.00,-0.08)--(11.00,0.08) node[below=2pt,font=\scriptsize]{$1$};
+\draw(-0.08,1.00)--(0.08,1.00) node[left=2pt,font=\scriptsize]{$1.5$};
+\draw(-0.08,2.00)--(0.08,2.00) node[left=2pt,font=\scriptsize]{$2.0$};
+\draw(-0.08,3.00)--(0.08,3.00) node[left=2pt,font=\scriptsize]{$2.5$};
+\draw(-0.08,4.00)--(0.08,4.00) node[left=2pt,font=\scriptsize]{$3.0$};
+\draw(-0.08,5.00)--(0.08,5.00) node[left=2pt,font=\scriptsize]{$3.5$};
+\draw[gray!35](0,0)--(0,6.00);
+\draw[thick,blue!65!black](0.00,0.60)--(2.20,2.40)--(4.40,3.40)--(6.60,4.20)--(8.80,4.60)--(11.00,5.40);
+\fill[blue!65!black](0.00,0.60) circle (2.2pt);
+\fill[blue!65!black](2.20,2.40) circle (2.2pt);
+\fill[blue!65!black](4.40,3.40) circle (2.2pt);
+\fill[blue!65!black](6.60,4.20) circle (2.2pt);
+\fill[blue!65!black](8.80,4.60) circle (2.2pt);
+\fill[blue!65!black](11.00,5.40) circle (2.2pt);
+\draw[dashed,red!70!black](2.75,0)--(2.75,2.65)--(0,2.65);
+\fill[red!70!black](2.75,2.65) circle (1.8pt);
+\node[below right,font=\scriptsize,red!70!black,xshift=1pt,yshift=-1pt] at (2.75,2.65){$2.325$};
+\draw[dashed,red!70!black](5.50,0)--(5.50,3.80)--(0,3.80);
+\fill[red!70!black](5.50,3.80) circle (1.8pt);
+\node[below right,font=\scriptsize,red!70!black,xshift=1pt,yshift=-1pt] at (5.50,3.80){$2.9$};
+\draw[dashed,red!70!black](8.25,0)--(8.25,4.50)--(0,4.50);
+\fill[red!70!black](8.25,4.50) circle (1.8pt);
+\node[below right,font=\scriptsize,red!70!black,xshift=1pt,yshift=-1pt] at (8.25,4.50){$3.25$};
+\end{tikzpicture}
+\caption{The sample quantile function of $1.3,\ 2.2,\ 2.7,\ 3.1,\ 3.3,\ 3.7$. The six order statistics are plotted against the fractions $P_i=(i-1)/(n-1)$ and joined by straight lines; the dashed lines read off the two quartiles and the median.}
+\end{figure}
 
+\begin{example}
+Find the lower quartile, median and upper quartile of the sample above.
 
+\textbf{Lower quartile.} $P=0.25$ lies between $P_2=0.2$ and $P_3=0.4$, with
+$f=\dfrac{0.25-0.2}{0.4-0.2}=0.25$, so
+$$Q(0.25)=0.75\times 2.2+0.25\times 2.7=1.65+0.675=2.325 .$$
 
+\textbf{Median.} $P=0.5$ lies between $P_3=0.4$ and $P_4=0.6$, with $f=0.5$, so
+$$Q(0.5)=0.5\times 2.7+0.5\times 3.1=2.9 ,$$
+which agrees with the usual rule $\left(x_{(3)}+x_{(4)}\right)/2$ for an even
+sample size, as it must.
 
+\textbf{Upper quartile.} $P=0.75$ lies between $P_4=0.6$ and $P_5=0.8$, with
+$f=\dfrac{0.75-0.6}{0.8-0.6}=0.75$, so
+$$Q(0.75)=0.25\times 3.1+0.75\times 3.3=0.775+2.475=3.25 .$$
+\end{example}
 
-
-
-
-Exercise: (Quantile function)
-\begin{enumerate}
-\item What is the lower quartile of these values? [ans: 2.325]
-\item What is the median of these values? [ans: 2.9]
-\item What is the upper quartile of these values? [ans: 3.35]\\
-\end{enumerate}
-
-
-
-
-
-\begin{enumerate}
-\item[-] In general the quantile corresponding to a fraction $P$ is defined by linear interpolation between the two nearest $P_i$.
-\item[-] If $P_i$ lies a fraction $f$ of the way from $P_i$ to $P_{i+1}$ define the $P^{th}$ quantile to be $$Q(P)=(1-f)Q(P_i)+fQ(P_{i+1})$$
-\end{enumerate}
-
-
-
-
-\begin{enumerate}
-\item[-] Median $Q(0.5)$
-\item[-] L.Q $Q(0.25)$
-\item[-] U.P $Q(0.75)$\\
-\end{enumerate}
-- General case: Given a random sample $x_1,\dots,x_n$ we can define the quar-tiles for any fraction $P$ as follows \hspace{0.2cm}$x_{(1)}<x_{(2)}<\dots <x_{(n)}.$\\
-
-Take the order statistic to be the quar-tile which corresponds to the fractions $$P_i=\frac{i-1}{n-1},\hspace{0.4cm}i=1,2,\dots,n$$\\
-
-
-
-
-
-
-
-
-
-
-
+\begin{remark}
+Several conventions for sample quantiles are in circulation and they do not agree.
+The one above is the default in some software; others place $x_{(i)}$ at $i/(n+1)$
+or at $(i-0.5)/n$. All of them agree in the limit as $n$ grows, and all of them
+give the same median, but for a small sample the quartiles can differ in the first
+decimal place. State which convention you are using when you report a quartile.
+\end{remark}
 
 \subsection{Quartile Test}
-The sign test is relevant to population medians. We are often interested in other quantiles of a population. For example, the value below which 3/4 of the population values lie below it 1/4 above it is known as an upper quartile.\\ 
-Quantiles such that $r$ tenths of the observations lie below and $10-r$ tenths lie above it where $r=1,2,\dots,9$ is called the $r^{th}$ decile.\\ 
-Many tests and estimation procedures involving quantiles proceed along similar lines, replacing $P=0.5$ by the fraction of interest\\ 
-For a continuous distribution quantiles are unique (there are no ties) but for discrete distributions a convention is needed, and the one adopted in most texts is given below.\\ 
-We've meet the usual convention of the set of even number, say $2m$ observations.\\ 
-We arrange them in ascending order and denote the $r^{th}$ ordered observation by $X_{(r)}$ and we define the median as $$\frac{X_{(m)}+X_{(m+1)}}{2}$$ Note that the $5^{th}$ decile is the median.\\\\
+The sign test of the previous chapter tests a hypothesis about the population
+median. Nothing in its construction is special to the median, and the same
+argument tests any quantile: the leading case, and the one this section is named
+for, is a quartile.
 
+The general situation is this. The value below which one quarter of the population
+lies is the lower quartile; the value below which three quarters lie is the upper
+quartile. More finely, a value such that $r$ tenths of the observations fall below
+it and $10-r$ tenths above, $r=1,2,\dots,9$, is the $r^{th}$ decile, the fifth
+decile being the median. To test $H_0:Q(P)=q_0$ for any fraction $P$, count how
+many observations fall below $q_0$. Under $H_0$ each observation independently
+falls below $q_0$ with probability $P$, so that count is
+$$B\sim \operatorname{Bin}(n,P),$$
+and the sign test is exactly the case $P=0.5$. Many tests and estimation
+procedures involving quantiles proceed along these lines, replacing $P=0.5$ by the
+fraction of interest.
 
+For a continuous distribution quantiles are unique and no ties arise. For a
+discrete distribution a convention is needed, and the usual one for a sample of
+even size $2m$ is to order the observations, write $X_{(r)}$ for the $r^{th}$, and
+define the median as
+$$\dfrac{X_{(m)}+X_{(m+1)}}{2}.$$
 
+\begin{example}
+A central examination body reports that three quarters of all candidates taking
+mathematics achieve $40$ marks or more, so that $40$ is the national lower
+quartile. At one school, $32$ candidates sat the paper and $13$ scored below $40$.
+The chair of the PTA says the school is performing below the national standard.
+The head master replies that in a random sample of $32$ candidates about $8$ would
+be expected to fall below the lower quartile, and $13$ is within reach of $8$. Is
+the head master's claim justified?
 
+\textbf{Hypotheses.} Writing $Q_1$ for the school's lower quartile,
+$$H_0:Q_1=40\hspace{0.6cm}\text{vs}\hspace{0.6cm}H_a:Q_1\neq 40 .$$
 
+\textbf{Statistic.} Associate a minus with a mark below $40$. The data give $13$
+minuses and $19$ pluses. If the school's lower quartile really is $40$ then each
+candidate scores below $40$ with probability $P=0.25$, so the number of minuses is
+$$B\sim \operatorname{Bin}\left(32,\tfrac{1}{4}\right),\hspace{0.8cm}E(B)=32\times 0.25=8 .$$
 
+\textbf{$p$-value.} The observed $13$ exceeds the expected $8$, so the upper tail
+is the relevant one:
+$$P(B\geq 13)=\sum^{32}_{b=13}\binom{32}{b}(0.25)^{b}(0.75)^{32-b}=0.0378 ,$$
+and for the two-sided alternative $p=2\times 0.0378=0.0755$.
 
+\textbf{Decision.} Since $0.0755>0.05$ we do not reject $H_0$ at the $5\%$ level.
+The evidence is not strong enough to say the school's lower quartile differs from
+$40$, and to that extent the head master's claim is justified.
+\end{example}
 
-\textbf{Example}\\ 
-A central examination body shows that 3/4 candidates of taking mathematics achieve 40 or more.  One show 32 candidates of whom 13 scored less than 40. The president of the PTA urges the school performance is below national standards. The head master claims that in random sample of 32 candidates that 13 would score less than the lower quartile mark, 8/32 is expected population. Is the head masters claim justified.
+\begin{note}
+This example is worth a second look, because the one-sided and two-sided tests
+disagree. The one-sided $p$-value is $0.0378$, which is below $0.05$; the
+two-sided is $0.0755$, which is above. Had the alternative been
+$H_a:Q_1<40$ --- the PTA chair's claim, that the school is \emph{worse} than the
+national standard --- the same data would have led to rejection.
 
-\begin{enumerate}
-\item[-] Denote $Q_1$ a test for the head master.
-\item[-] Denoting $1^{st}$ quartile by $Q_1$ a test for the head masters assertion is a test for: $$H_0:\theta_1=40\hspace{0.4cm} \text{vs}\hspace{0.4cm} H_a:\theta_1\neq 40$$- We associate a $(-)$ with a mark below 40, thus from the information given we have $13(-)'s$ or 13 mimises and $19(+)'s$.
-\item[-] If the first quartile is 40 then the probability $P=0.25$ that each candidate in the sample has a mark below 40 and thus these scored as a $(-)$ minus.
-\item[-] The distribution of $(-)$ is therefore a Binomial $B\Big(32,\dfrac{1}{4}\Big)$, $[P=0.0755]$ the answer is $$P=0.0759$$ - At $\alpha =0.05$, we fail to reject the null hypothesis and conclude that the head masters assertion is no justified.\\\\
-\end{enumerate}
-
-
-
-
-
-
-
-
-
-
-
-
-
+Which is right depends entirely on what was decided \emph{before} the marks were
+seen. If the concern was always that the school might be underperforming, the
+one-sided test is legitimate and the school has a case to answer. If the question
+was open, the two-sided test is the honest one and the verdict is no evidence
+either way. Choosing the side after seeing which tail the data fell in doubles the
+true error rate while appearing to leave it at $5\%$, and is one of the commonest
+abuses of significance testing. Fix the alternative first.
+\end{note}
 
 
 \subsection{Ranks}
@@ -1499,17 +1631,34 @@ The data referred to were is bivariate so that each data item is reported in ter
 
 
 \subsection{Association and Correlation}
-\begin{enumerate}
-\item[-] There is association between two variables if knowing the value of one provides information about the other.
-\item[-] There is correlation between two variables if association is linear; this can be represented on a straight line by the scatter diagram.\\
-\end{enumerate}
+\begin{definition}
+Two variables are \emph{associated} if knowing the value of one provides
+information about the other. They are \emph{correlated} if that association is
+linear, so that the scatter diagram is described by a straight line.
+\end{definition}
+
+Correlation is therefore the special case, and the distinction matters. Two
+variables can be perfectly associated --- $Y=X^{2}$ on $[-1,1]$, say --- and have
+correlation zero, because the relationship, though exact, is not linear and not
+monotonic. A correlation of zero never establishes independence.
+
 
 
 
 
 \subsection{Rank correlation}
-In cases were association is non-linear, the relationship can sometimes be transformed into a linear one by using ranks of items ranks than using their actual values. There fulfill the conditions for the use of descriptive "correlation" since their relationship is linear.\\ 
-Pearsons test is not appropriate on ranks because there are not from a bivariate normal.\\
+Where the association is non-linear, replacing the observations by their ranks
+often turns it into a linear one. A relationship that is merely \emph{monotonic}
+--- one variable rising whenever the other does, at whatever rate --- becomes exactly
+linear in the ranks, so a correlation coefficient computed on ranks measures
+something the coefficient computed on the raw values would miss.
+
+Pearson's significance test cannot be applied to ranks, because ranks are not a
+sample from a bivariate normal distribution: they are a permutation of
+$1,2,\dots,n$, with fixed mean and fixed variance. The null distribution has to be
+worked out for ranks specifically, which is what the tables of $r_s$ and $\tau$
+provide.
+
 
 
 
@@ -1521,9 +1670,14 @@ If the distributions underlying the variables are far from bivariate normal, or 
 
 The assumptions underlying non-parametric correlation are:
 \begin{enumerate}
-\item[-] the $n$ pairs of ratio, interval or ordinal data constitute a random sample;
-\item[-] the two members of each pair are measured on the same subject.
+\item[(i).] the $n$ pairs of ratio, interval or ordinal data constitute a random
+sample;
+\item[(ii).] the two members of each pair are measured on the same subject.
 \end{enumerate}
+Nothing is assumed about the shape of either distribution, which is the whole
+point: Pearson's coefficient requires bivariate normality before its significance
+test is valid, and these methods require none.
+
 The rank correlation coefficient proposed by C. Spearman is Pearson's coefficient computed on the \emph{ranks} of the observations rather than on the observations themselves.\\
 The Spearman rank correlation coefficient computed from a sample is written $r_s$. Then the parameter is denoted as $\rho_s$.\\ If each of the $n$ measurements of $X_i$ (i.e $X_1,\dots,X_n$), then  $R(X_i)$ represents the rank of $X_i$ where each $i\in \mathbb{Z}$ each rank is a integer $1,\dots,n$ indicating relative magnitude.
 
@@ -1605,12 +1759,17 @@ Pearson's formula.
 \end{note}
 Using sum of the ranks for each pair \hspace{0.2cm}$\displaystyle{r_s=\frac{6\sum S^2_i}{n^3-n}-\frac{7n+5}{n-1}}\hspace{0.2cm}$ where \hspace{0.2cm}$S_i=R(X_i)+R(Y_i).$\\
 
-\textit{Note:}
+\textit{Note:} the sign and size of $r_s$ are read as follows.
 \begin{enumerate}
-\item[-] $r_s=0\implies$ No correlation\\ i.e the magnitude of the ranks of one variable are  independent of the other variable.
-\item[-] $r_s>0\implies$ $R(X_i)$ tends to increase as $R(Y_i)$ increases.
-\item[-] $r_s<0\implies$ $R(X_i)$ tends to decrease as $R(Y_i)$ increase.\\\\
+\item[(i).] $r_s=0$: no correlation. The ranks of one variable carry no
+information about the ranks of the other.
+\item[(ii).] $r_s>0$: $R(Y_i)$ tends to increase as $R(X_i)$ increases.
+\item[(iii).] $r_s<0$: $R(Y_i)$ tends to decrease as $R(X_i)$ increases.
 \end{enumerate}
+Like Pearson's coefficient, $r_s$ lies in $[-1,1]$, and the extremes are attained
+exactly when the two rankings are identical $(r_s=1)$ or exactly reversed
+$(r_s=-1)$.
+
 
 
 
@@ -1627,12 +1786,93 @@ Using sum of the ranks for each pair \hspace{0.2cm}$\displaystyle{r_s=\frac{6\su
 r_s &=\frac{\sum S_i^2-\Big[\dfrac{n^3-n}{6}\Big]\Big[\dfrac{7n+5}{n-1}\Big]-\sum t_X-\sum t_Y}{\Bigg\{\Big[\dfrac{n^3-n}{6}-2\sum t_X\Big]\Big[\dfrac{n^3-n}{6}-2\sum t_Y\Big]\Bigg\}^{\dfrac{1}{2}}}\\
 \end{align*}
 
-where $\hspace{0.2cm}\displaystyle{\sum t_X=\frac{\sum(t^3_i-t_i)}{12}\hspace{0.3cm}\text{and}\hspace{0.3cm} \sum t_Y=\frac{\sum (t^3_i-t_i)}{12}}$\\ 
-
-$t_i$ is the number of tied ranks/ values of $X$ or $Y$ in a group of ties.\\ 
+where the corrections are computed separately for each variable,
+$$\sum t_X=\dfrac{\sum_{p}\left(t_p^{3}-t_p\right)}{12}
+\hspace{0.6cm}\text{over the tied groups in } X,
+\hspace{0.6cm}
+\sum t_Y=\dfrac{\sum_{q}\left(u_q^{3}-u_q\right)}{12}
+\hspace{0.6cm}\text{over the tied groups in } Y,$$
+with $t_p$ the size of the $p^{th}$ group of tied $X$ values and $u_q$ the size of
+the $q^{th}$ group of tied $Y$ values. A group of size $1$ contributes nothing,
+since $1^{3}-1=0$, so untied observations may be ignored.
 
 $r_s$ computed with and without the tie correction differs noticeably only when
-ties are numerous.\\
+ties are numerous.
+
+
+\subsection{Tests}
+A sample coefficient $r_s$ estimates the population coefficient $\rho_s$, and the
+question is whether an observed $r_s$ is far enough from zero to rule out
+$\rho_s=0$. The critical values are tabulated for small $n$ and approximated for
+large $n$.
+
+\begin{enumerate}
+\item[(i).] For $H_0:\rho_s\leq 0$ against $H_a:\rho_s>0$, reject $H_0$ if
+$r_s$ exceeds the critical value at level $\alpha$.
+\item[(ii).] For $H_0:\rho_s\geq 0$ against $H_a:\rho_s<0$, reject $H_0$ if
+$r_s<0$ and $\left|r_s\right|$ exceeds the critical value at level $\alpha$.
+\item[(iii).] For $H_0:\rho_s=0$ against $H_a:\rho_s\neq 0$, reject $H_0$ if
+$\left|r_s\right|$ exceeds the critical value at level $\alpha/2$.
+\end{enumerate}
+
+The halving belongs to the two-sided test alone. A one-sided test spends its whole
+$\alpha$ in one tail, and using $\alpha/2$ there makes the test conservative
+without cause.
+
+For moderate $n$, roughly $20<n<40$,
+$$t=r_s\sqrt{\dfrac{n-2}{1-r_s^{2}}}\ \thicksim\ t_{n-2},$$
+referred to one- or two-tailed critical values of the $t$ distribution on $n-2$
+degrees of freedom. An equivalent form sometimes quoted is
+$$F=\dfrac{1+\left|r_s\right|}{1-\left|r_s\right|}\ \thicksim\ F_{(n-2,\,n-2)} .$$
+For $n\geq 40$ the simpler large-sample result
+$$Z=r_s\sqrt{n-1}\ \thicksim\ N(0,1)$$
+is adequate.
+
+\begin{example}
+Two agronomists independently rank five maize varieties for drought tolerance:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccccc}
+variety & A & B & C & D & E\\
+\hline
+$R(X_i)$, first agronomist &1&2&3&4&5\\
+$R(Y_i)$, second agronomist &2&3&1&5&4\\
+$d_i=R(X_i)-R(Y_i)$ &$-1$&$-1$&$2$&$-1$&$1$\\
+$d_i^{2}$ &1&1&4&1&1\\
+\end{tabular}
+\end{table}
+
+Test at the $5\%$ level whether the two agronomists agree, against the one-sided
+alternative $H_a:\rho_s>0$.
+
+\textbf{Coefficient.} Here $n=5$, $\sum d_i^{2}=8$ and $n^{3}-n=125-5=120$, so
+$$r_s=1-\dfrac{6\sum d_i^{2}}{n^{3}-n}=1-\dfrac{6\times 8}{120}
+=1-\dfrac{48}{120}=0.6 .$$
+
+\textbf{Critical value.} For $n=5$ the one-tailed $5\%$ critical value is
+$r_{s(0.05,5)}=0.900$.
+
+\textbf{Decision.} Since $0.6<0.900$ we fail to reject $H_0$. There is no evidence
+at the $5\%$ level that the agronomists agree more than chance would produce.
+\end{example}
+
+\begin{note}
+A coefficient of $0.6$ sounds substantial, and it is not significant. The reason is
+$n=5$: there are only $5!=120$ possible rankings, and enumerating them gives the
+exact null distribution directly. It shows
+$$P\left(r_s\geq 0.6\right)=\dfrac{21}{120}=0.175,$$
+so a value of $0.6$ or better arises by chance in about one ranking in six. Only
+$r_s\geq 0.9$ is rare enough, with $P=5/120=0.0417$, and $r_s=1$ --- perfect
+agreement --- has $P=1/120=0.0083$.
+
+This is worth remembering whenever a correlation is quoted from a handful of
+observations. With $n=5$ nothing short of near-perfect agreement can reach the
+$5\%$ level, so a non-significant result carries almost no information. The
+sample was too small to answer the question, which is a different finding from
+the two agronomists disagreeing.
+\end{note}
+
 
 \subsection{Kendall's Tau}
 Spearman's coefficient is Pearson's applied to ranks. Kendall's is built on a
@@ -1642,10 +1882,10 @@ is easier to defend.
 Take the $n$ pairs $(X_i, Y_i)$ and compare them two at a time. A pair of pairs
 $\left\{(X_i,Y_i),(X_j,Y_j)\right\}$ is
 \begin{enumerate}
-\item[-] \emph{concordant} if $X$ and $Y$ move the same way, that is if
+\item[(i).] \emph{concordant} if $X$ and $Y$ move the same way, that is if
 $(X_j - X_i)(Y_j - Y_i) > 0$;
-\item[-] \emph{discordant} if they move oppositely, $(X_j - X_i)(Y_j - Y_i) < 0$;
-\item[-] \emph{tied} if either difference is zero.
+\item[(ii).] \emph{discordant} if they move oppositely, $(X_j - X_i)(Y_j - Y_i) < 0$;
+\item[(iii).] \emph{tied} if either difference is zero.
 \end{enumerate}
 Write $C$ for the number of concordant and $D$ for the number of discordant
 pairs. With no ties,
@@ -2154,39 +2394,6 @@ test of the previous chapter belongs to the same family.
 \end{solution}
 
 \pagebreak
-\subsection{Tests}
-\begin{enumerate}
-\item For $H_0:\rho_s\leq 0\hspace{0.3cm}\text{vs}\hspace{0.3cm}H_a:\rho_s>0$ reject $H_0$ if $r_s>0$ and greater than the C.V for $\alpha/2$.
-\item For $H_0:\rho_s\geq 0\hspace{0.3cm}\text{vs}\hspace{0.3cm}H_a:\rho_s<0$; reject $H_0$ if $r_s<0$ and if its absolute value $|r_s|$ is greater than C.V for $\alpha/2$.
-\item For $20<n<40$, compute \hspace{0.2cm}$\displaystyle{t=\frac{r_s}{S}\hspace{0.5cm}\text{where}\hspace{0.5cm} S=\Bigg(\frac{1-r^2_s}{n-s}\Bigg)}\hspace{0.2cm}$ for which two and one-tailed t(statistic t- distribution), for $df=n-2$ are formulated.\\
- 
-Equivalently, you may employ $$F=\frac{1+|r_s|}{1-|r_s|}\thicksim F_{(n-2,n-2)}$$ referring to two and one tailed C.V of F-distribution for numerator and denominator are degrees of freedom $df=n-2$, C.V $=F_{(\alpha,n-2,n-2)}$.
-\item For $n\geq 40$ i.e larger samples use \hspace{0.2cm}$Z=r_s(n-1)^{\frac{1}{2}},\hspace{1cm}Z\thicksim N(0,1)$
-\end{enumerate}
-
-
-$$\gamma_s=1-\frac{6\sum d_i^2}{n(n^2-n)}$$
-
-
-
-
-
-Test
-\begin{enumerate}
-\item[-] $H_0:\rho\geq 0$ vs $H_a:\rho_s<0$.
-\item[-] Rejection region: $H_0$ is rejected if $\gamma_s<0$ and $|\gamma_s|$ is greater than the C.V for $\alpha/2$.
-\item[-]
-\begin{align*}
-\sum &=8\\\\
-n^3-n &=125-5=120\\\\
-\gamma_s &=1-\frac{6\times 8}{120}\\
-         &=1-\frac{48}{120}\\
-         &=0.6\\
-\end{align*}
-\item[$\rightarrow$] C.V $\gamma_{s(\alpha,n)}=\gamma_{s(0.025,5)}=1$
-\item[$\rightarrow$] $\gamma_s=0.6$; $\gamma_{s(0.05,5)}=1.00$
-\item[$\rightarrow$] fail to reject $H_0$.
-\end{enumerate}
 
 
 
