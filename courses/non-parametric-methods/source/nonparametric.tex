@@ -1571,74 +1571,116 @@ Then non-parametric techniques which have been developed for this $k$ sample pro
 
 
 \subsection{Kruskal-Wallis Test}
-The linear model for one way out can be be written as \hspace{0.2cm}$Y_i=\mu +\alpha_i+e_i\hspace{0.2cm}$ where $Y$-response outcome\\
 
-With
-\begin{enumerate}
-\item[-] $Y_i$ response vector
-\item[-] $\mu$ the global mean of the data
-\item[-] $\alpha_i$ the difference to the sample mean
-\item[-] $e_i$ residuals
-\end{enumerate} 
+The parametric one-way analysis of variance fits the linear model
+$$Y_{ij} = \mu + \alpha_i + e_{ij},$$
+with $\mu$ the overall mean, $\alpha_i$ the effect of group $i$, and $e_{ij}$
+normal errors. The Kruskal--Wallis test is its distribution-free counterpart: it
+replaces the observations by their ranks and asks the same question without
+assuming normality.
 
-The non-parametric alternative is the Kruskal-Wallis test. It tests the null hypothesis that each of the $k$ samples belong to the sample population $$H_0:\overline{R}_i=\frac{N+1}{2}$$ First the response of $Y$ is transformed in ranks. In the presence of the sequences with equal values of mean ranks are designated to the corresponding realizations.\\ 
-Then the test statistic can be calculated by $$\widehat{H}=\Bigg[\frac{12}{N(N+1)}\Bigg]\Bigg[\sum^k_{i=1}\frac{R_i^2}{n_i}\Bigg]-3(N+1)$$ with $N=\sum\limits_{i=1}^kn_i$ the total sample size $n_i$ the number of data the $i^{th}$ group.\\
-$R^2_i$ the squared rank sum of the $i^{th}$ group in the presence of many ties the statistic $\widehat{H}$ can be corrected using the equation $$C=1-\frac{\sum\limits_{i=1}^{r}(t^3_i-t_i)}{N^3-N}$$ with $t_i$ the number of ties in the $i^{th}$ group \hspace{0.2cm}$\displaystyle{\widehat{H}^*=\frac{1}{C}\,\widehat{H}}$\\ 
-When the null hypothesis is rejected as in the normal theory case one can compare any two groups say $i$ and $j$ (with $1\leq i\leq j\leq k$) by a multiple comparison procedure.\\ This can be done by calculating $$Z_{ij}=\frac{|\overline{R}_i-\overline{R}_j|}{\sqrt{\Bigg[\dfrac{N(N+1)}{12}\Bigg]\Bigg(\dfrac{1}{n_i}+\dfrac{1}{n_j}\Bigg)}}$$ and comparing it to \hspace{0.2cm}$Z^*=Z_{\frac{\alpha}{k(k-1)}}.$ The \hspace{0.2cm} $\displaystyle{\Big[\frac{\alpha}{k(k-1)}\Big]^{th}}$, upper standard Normal quatrtile.\\
+\begin{definition}
+Let there be $k$ independent samples of sizes $n_1,\ldots,n_k$, with
+$N = \sum n_i$. Rank all $N$ observations together, averaging ties, and let $R_i$
+be the sum of the ranks in group $i$. The \emph{Kruskal--Wallis statistic} is
+$$H = \dfrac{12}{N(N+1)}\sum^{k}_{i=1}\dfrac{R_i^{2}}{n_i} \;-\; 3(N+1).$$
+It tests
+$$H_0 : \text{all } k \text{ samples come from the same distribution.}$$
+\end{definition}
 
-If $Z_{ij}$ exceeds $Z^*$, the two groups are declared to be significantly different. The quantity $\alpha$ is called the experiment wise error late of overall significant level. Which is probability of at least one error significant projection among the $\dfrac{k(k-1)}{2}$ pairwise comparisons.\\\\
-$\widehat{H}$ or $\widehat{H}^*$ is distributed as Chi square with $k-1$ degree of freedom. The approximation size $\alpha$ rejection is \hspace{0.2cm}$H\geq \chi^2_{\alpha, k-1}$\\
+\begin{thm}
+Under $H_0$, and provided the group sizes are not too small, $H$ is distributed
+approximately as $\chi^{2}$ on $k-1$ degrees of freedom. $H_0$ is rejected at level
+$\alpha$ when
+$$H \geq \chi^{2}_{\alpha,\,k-1}.$$
+\end{thm}
 
+\begin{note}
+\textbf{Ties.} With tied observations the ranks are averaged and $H$ is divided by
+$$C = 1 - \dfrac{\sum_{p}\left(t_p^{3} - t_p\right)}{N^{3} - N},$$
+the sum running over the groups of tied values and $t_p$ being the size of the
+$p$-th group; the corrected statistic is $H^{*} = H/C$. Note the denominator:
+$N^{3} - N = N(N^{2}-1)$, \emph{not} $N(N+1)$. Since $C \leq 1$, the correction can
+only increase $H$, which is the right direction --- ties reduce the spread of the
+rank sums and the statistic must be inflated to compensate.
+\end{note}
 
+\textbf{Multiple comparisons.} When $H_0$ is rejected, any two groups $i$ and $j$
+may be compared by
+$$Z_{ij} = \dfrac{\left|\overline{R}_i - \overline{R}_j\right|}
+{\sqrt{\Bigg[\dfrac{N(N+1)}{12}\Bigg]\Bigg(\dfrac{1}{n_i}+\dfrac{1}{n_j}\Bigg)}},$$
+declaring them different when $Z_{ij}$ exceeds
+$Z^{*} = Z_{\alpha/(k(k-1))}$. The quantity $\alpha$ is then the experimentwise
+error rate --- the probability of at least one false declaration among the
+$\frac{k(k-1)}{2}$ pairwise comparisons.
 
+\begin{example}
+Tensile strengths of parachutes from four suppliers, five each, ranked together
+over $N = 20$ observations.
 
-
-\textbf{Example:} (large sample situation Question)\\ The table presents the table data for tensile strength and Ranks of parachutes wear from synthetic fibers from four suppliers, along the corresponding ranks.
-\begin{table}[H]
-\centering
-\caption{Supliers}
-\label{Suppliers}
+\begin{center}
 \begin{tabular}{|cc|cc|cc|cc|}
-\hline \multicolumn{2}{|c}{1}&\multicolumn{2}{c|}{2}&\multicolumn{2}{c|}{3}&\multicolumn{2}{c|}{4}\\
-\hline Amount&Rank&Amount&Rank&Amount&Rank&Amount&Rank\\
-\hline 18.5&4&26.3&20&20.6&8&25.4&19\\
-24.0&13.5&25.3&18&25.2&17&19.9&5.5\\
-17.2&1&24.0&13.5&20.8&9&22.6&11\\
-19.9&5.5&21.2&10&24.7&16&17.5&2\\
-18.0&3&24.5&15&22.9&12&20.4&7\\
+\hline
+\multicolumn{2}{|c|}{Supplier 1} & \multicolumn{2}{c|}{Supplier 2}
+& \multicolumn{2}{c|}{Supplier 3} & \multicolumn{2}{c|}{Supplier 4}\\
+\hline
+Amount & Rank & Amount & Rank & Amount & Rank & Amount & Rank\\
+\hline
+18.5 & 4    & 26.3 & 20   & 20.6 & 8  & 25.4 & 19\\
+24.0 & 13.5 & 25.3 & 18   & 25.2 & 17 & 19.9 & 5.5\\
+17.2 & 1    & 24.0 & 13.5 & 20.8 & 9  & 22.6 & 11\\
+19.9 & 5.5  & 21.2 & 10   & 24.7 & 16 & 17.5 & 2\\
+18.0 & 3    & 24.5 & 15   & 22.9 & 12 & 20.4 & 7\\
 \hline
 \end{tabular}
-\end{table}
-\begin{center}
-Group the data with the ideal that the data comes from the same population.\\
-$H_0$: same average median $\theta$.
 \end{center}
 
-We have that $T_1=27$, $T_2=76.5$, $T_3=62$, $T_4=44.5$ Check that \hspace{0.2cm}$\displaystyle{\frac{N(N+1)}{2}=210}$
- $$T_1+T_2+T_3+T_4=\frac{N(N+1)}{2}$$
-Test statistic:\hspace{0.2cm} $\displaystyle{H=\Bigg[\frac{12}{N(N+1)}\sum^k_{j=1}\frac{T_j^2}{n_j}\Bigg]=3(N+1)=7.8886}$,\hspace{0.2cm}
-$n_j=5$, $j$ runs from 1 to 4 $(1\leq j\leq 4)$.\\ 
+Two values are tied at $19.9$, sharing ranks $5$ and $6$ as $5.5$, and two at
+$24.0$, sharing ranks $13$ and $14$ as $13.5$.
 
-The test statistic $H$ approximately follows a Chi-square distribution with $k-1$ degrees of freedom \hspace{0.2cm}$(H\thicksim \chi^2_{k-1})\hspace{0.2cm}$ using $0.05$ level of significance, the chi-square $\chi^2_4$, the upper tail critical value of the chi-square distribution with $k-1=4-1=3$ degrees of freedom is 7.815 (from tables). Now $[\chi^2_{0.05,3}=7.815]$ $$P(X^2\geq \chi^2_C)=0.05$$ (Since the chi-square distribution is not symmetric)\\ 
-Because the computed value of the test statistic $H=7.8886$ is greater than the critical value, you reject the null hypothesis and conclude that not all suppliers are the same with respect to median tensile strength.\\\\
+\textbf{Rank sums.}
+$$R_1 = 27,\qquad R_2 = 76.5,\qquad R_3 = 62,\qquad R_4 = 44.5,$$
+and the check holds:
+$27 + 76.5 + 62 + 44.5 = 210 = \dfrac{20(21)}{2}$.
 
+\textbf{The statistic.} With every $n_i = 5$,
+$$H = \dfrac{12}{20(21)}\cdot\dfrac{27^{2} + 76.5^{2} + 62^{2} + 44.5^{2}}{5}
+\;-\; 3(21)
+= 70.8886 - 63 = 7.8886 .$$
 
+\textbf{Decision.} With $k - 1 = 3$ degrees of freedom,
+$\chi^{2}_{0.05,\,3} = 7.8147$. Since $7.8886 > 7.8147$ we reject $H_0$: the
+suppliers do not all deliver the same distribution of tensile strength.
+\end{example}
 
+\begin{note}
+\textbf{The decision is marginal.} The statistic exceeds the critical value by
+$0.074$. A single observation reordered could reverse it, and the honest report is
+the $P$-value, $P(\chi^{2}_{3} \geq 7.8886) = 0.0484$, rather than a bare
+``significant at $5\%$''.
+\end{note}
 
-\textbf{Exercise}\\
-take ties in account and do the pairwise comparisons also use \hspace{0.2cm}$Z^*=Z_{\frac{\alpha}{k(k-1)}}\hspace{0.4cm}\text{to find.}$\\
+\begin{example}[The tie correction applied]
+There are two tied groups, each of size $2$, so
+$$\sum_{p}\left(t_p^{3}-t_p\right) = \left(2^{3}-2\right) + \left(2^{3}-2\right)
+= 6 + 6 = 12 ,$$
+and with $N = 20$,
+$$C = 1 - \dfrac{12}{20^{3}-20} = 1 - \dfrac{12}{7980} = 0.998496 .$$
+Hence
+$$H^{*} = \dfrac{H}{C} = \dfrac{7.8886}{0.998496} = 7.9005 ,$$
+still above $7.8147$, so the conclusion stands.
+\end{example}
 
+\begin{note}
+\textbf{Three things to get right in that correction.} The denominator is
+$N^{3}-N = 20 \times 399 = 7980$, not $N(N+1) = 420$ --- an error here is a factor of
+nearly twenty. \emph{Every} tied group counts, so two groups of size two give $12$,
+not $6$. And with only four tied observations out of twenty the correction is
+tiny: it moves $H$ from $7.8886$ to $7.9005$, a change of about one part in seven
+hundred. Where ties are heavy it will matter much more, which is why it should be
+computed rather than waved away.
+\end{note}
 
-\textbf{Solution:}
-\begin{align*}
-\widehat{H}^* &=\frac{H}{C}\\\\
-C &=1-\frac{\sum_{i=1}t_i(t_i^2-1)}{N(N^2-1)}\\
-  &=1-\frac{(2((2)^2-1)+((1)(1)^2-1)+(1(1)^2-1)}{20(21)}\\
-  &=1-\frac{7}{420}\\
-  &=0.98\overline{3}\\\\  
-\text{So then} \hspace{0.5cm} \widehat{H}^* &=\frac{7.8886}{0.983}=8.025\\
-\end{align*}
-Conclusion: Reject $H_0$.\\\\
 \subsection{Assumption of Kruskal-Wallis Test}
 The following are some of the assumptions made on the Kruskal-Wallis test:
 \begin{enumerate}
