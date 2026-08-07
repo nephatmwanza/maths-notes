@@ -11352,16 +11352,97 @@ that $a \in G$ is a zero of first order for each $f_n$. Prove that $f$ is
 one-to-one on $G$ and that $a$ is a zero of first order for $f$.
 \end{problem}
 
+\begin{solution}
+Since $f_n \rightarrow f$ uniformly, $f$ is analytic by Weierstrass' theorem.
+
+\textbf{$a$ is a zero of first order for $f$.} Each $f_n$ vanishes at $a$, so
+$f(a) = \lim f_n(a) = 0$. Suppose the order were greater than $1$, so
+$f'(a) = 0$. Uniform convergence on compact sets gives $f_n' \rightarrow f'$
+uniformly on compact sets, but that alone is not decisive; use Hurwitz instead, on
+the functions $f_n'$. Since $f_n'(a) \neq 0$ for every $n$ (the zero at $a$ being
+simple) and $f_n' \rightarrow f'$ locally uniformly, if $f' \not\equiv 0$ near $a$
+then $f'(a) = 0$ would force some $f_n'$ to vanish near $a$ --- which is not
+immediately a contradiction. The clean route is the argument principle: choose
+$r$ small with $f \neq 0$ on $0 < \left|z-a\right| \leq r$, then
+$$\dfrac{1}{2\pi i}\oint_{\left|z-a\right|=r}\dfrac{f_n'}{f_n}
+\longrightarrow \dfrac{1}{2\pi i}\oint_{\left|z-a\right|=r}\dfrac{f'}{f},$$
+because $f_n \rightarrow f$ uniformly on the circle and $f$ is bounded away from
+$0$ there. The left side is $1$ for every $n$, and the right side counts the zeros
+of $f$ inside, so $f$ has exactly one zero there, of order $1$.
+
+\textbf{$f$ is one-to-one.} Suppose $f(z_1) = f(z_2) = w$ with $z_1 \neq z_2$ in
+$G$. Apply Hurwitz's theorem to $f_n - w$ on small disjoint discs about $z_1$ and
+$z_2$: since $f - w$ vanishes in each and is not identically zero (it has isolated
+zeros, $f$ being non-constant --- non-constant because it has a simple zero), for
+large $n$ each disc contains a zero of $f_n - w$. That gives two distinct points
+where $f_n$ takes the value $w$, contradicting injectivity of $f_n$.
+$\blacksquare$
+
+The case $f$ constant is excluded by the first part: a constant cannot have a
+first-order zero.
+\end{solution}
+
+
 \begin{problem}
 Let $(f_n)$ be a sequence of injective analytic functions on a domain $\Omega$
 converging to $f$ in $H(\Omega)$, the space of analytic functions on $\Omega$.
 Prove that either $f$ is injective or $f$ is constant.
 \end{problem}
 
+\begin{solution}
+This is Hurwitz's theorem in the form usually stated for univalent limits.
+
+Suppose $f$ is \emph{not} injective, so $f(z_1) = f(z_2) = w$ for some
+$z_1 \neq z_2$ in $\Omega$, and suppose $f$ is not constant. Then $f - w$ is a
+non-constant analytic function vanishing at $z_1$ and $z_2$, and its zeros are
+isolated: choose disjoint closed discs $\overline{D_1}, \overline{D_2}$ about
+$z_1, z_2$ inside $\Omega$ on which $f - w$ has no zero except the centre.
+
+Let $\delta = \min\left|f - w\right|$ over the two boundary circles, which is
+positive by compactness. Convergence in $H(\Omega)$ is locally uniform, so for
+large $n$
+$$\left|\left(f_n - w\right) - \left(f - w\right)\right| < \delta
+\leq \left|f-w\right| \qquad\text{on } \partial D_1 \cup \partial D_2 .$$
+By Rouch\'e, $f_n - w$ has as many zeros in each disc as $f - w$ does, namely at
+least one. So $f_n$ takes the value $w$ at a point of $D_1$ and at a point of
+$D_2$, two distinct points --- contradicting injectivity of $f_n$.
+
+Hence either $f$ is injective or $f$ is constant. $\blacksquare$
+
+$$\boxed{f \text{ is injective, or } f \text{ is constant.}}$$
+
+The constant alternative genuinely occurs: $f_n(z) = z/n$ are all injective on
+$D$ and converge to $0$.
+\end{solution}
+
+
 \begin{problem}
 Let $G$ be a region and suppose $f_n$ is analytic on $G$ for each $n \geq 1$.
 Suppose $(f_n)$ converges uniformly to $f$ on $G$. Show that $f$ is analytic.
 \end{problem}
+
+\begin{solution}
+This is Weierstrass' theorem on analytic limits.
+
+$f$ is continuous, being a uniform limit of continuous functions. Let $\Delta$ be
+any closed triangle contained in $G$. Since $f_n$ is analytic, Cauchy's theorem
+gives
+$$\int_{\partial\Delta} f_n(z)\,dz = 0 \qquad\text{for every } n .$$
+The boundary $\partial\Delta$ is compact with finite length $L$, and
+$f_n \rightarrow f$ uniformly there, so
+$$\left|\int_{\partial\Delta} f - \int_{\partial\Delta} f_n\right|
+\leq L \max_{\partial\Delta}\left|f - f_n\right| \longrightarrow 0 ,$$
+whence $\int_{\partial\Delta} f = 0$.
+
+By Morera's theorem $f$ is analytic on $G$. $\blacksquare$
+
+Uniformity is what allows the limit to pass through the integral; pointwise
+convergence is not enough, and indeed a pointwise limit of analytic functions can
+be as bad as one likes. Note also that only \emph{local} uniform convergence is
+needed, since analyticity is a local property --- and that weaker hypothesis is the
+one usually stated, because it is what normal families deliver.
+\end{solution}
+
 
 \begin{problem}
 Prove Vitali's Theorem. Let $H(G)$ be the set of holomorphic functions on $G$. If
@@ -11370,6 +11451,36 @@ property that $A = \{z \in G : \lim_n f_n(z) = f(z)\}$ has a limit point in $G$,
 then $f_n$ converges to $f$ in $H(G)$.
 \end{problem}
 
+\begin{solution}
+\textbf{Statement.} Let $G$ be a region, $(f_n)$ locally bounded in $H(G)$, and
+$f \in H(G)$. If
+$$A = \left\{z \in G : \lim_n f_n(z) = f(z)\right\}$$
+has a limit point in $G$, then $f_n \rightarrow f$ in $H(G)$, that is locally
+uniformly.
+
+\textbf{Proof.} Suppose not. Then there are a compact $K \subseteq G$, an
+$\varepsilon > 0$ and a subsequence $(f_{n_k})$ with
+$$\max_{K}\left|f_{n_k} - f\right| \geq \varepsilon \qquad\text{for all } k. \qquad (*)$$
+
+The family $(f_n)$ is locally bounded, so by Montel's theorem it is normal:
+$(f_{n_k})$ has a subsequence converging locally uniformly to some $g \in H(G)$.
+
+On the set $A$ we know $f_n \rightarrow f$ pointwise, so along that
+sub-subsequence $g = f$ on $A$. But $A$ has a limit point in $G$, so by the
+Identity Theorem $g \equiv f$ on $G$.
+
+That sub-subsequence therefore converges to $f$ uniformly on $K$, contradicting
+$(*)$. $\blacksquare$
+
+The shape --- assume failure, extract a normal-family subsequence, identify its
+limit by the Identity Theorem, contradict --- is the standard way normality is used,
+and it recurs in every problem of this group. Vitali is remarkable in that
+convergence on a very thin set (a convergent sequence of points, say) upgrades to
+locally uniform convergence everywhere, provided only that the family does not
+blow up.
+\end{solution}
+
+
 \begin{problem}
 Let $\{f_n\}$ be a sequence of analytic functions on a region $G$ with
 $f_n \rightarrow f$ uniformly on compact subsets, and let $a \in G$. Suppose each
@@ -11377,11 +11488,68 @@ $f_n$ is one-to-one and $f'(a) > 0$. Show that $f$ is one-to-one and that
 $f_n'(a)$ is non-zero for all sufficiently large $n$.
 \end{problem}
 
+\begin{solution}
+By Weierstrass' theorem $f$ is analytic and $f_n' \rightarrow f'$ locally
+uniformly.
+
+\textbf{$f$ is one-to-one.} Suppose $f(z_1) = f(z_2)$ with $z_1 \neq z_2$. As $f$
+is non-constant --- because $f'(a) > 0$ --- the argument of the second problem in
+this set applies verbatim: Rouch\'e on small disjoint discs produces two distinct
+points where some $f_n$ takes the same value, contradicting injectivity.
+
+\textbf{$f_n'(a) \neq 0$ for large $n$.} We know $f_n'(a) \rightarrow f'(a) > 0$,
+so certainly $f_n'(a) \neq 0$ once $n$ is large enough that
+$\left|f_n'(a) - f'(a)\right| < f'(a)$.
+
+It is worth noting the stronger statement that makes this robust: since each $f_n$
+is injective, $f_n'$ has \emph{no} zeros at all in $G$. For if $f_n'(c) = 0$ then
+$f_n$ behaves near $c$ like $f_n(c) + a_k(z-c)^{k}$ with $k \geq 2$, hence is
+$k$-to-one on a punctured neighbourhood of $c$ --- not injective. So injectivity of
+each $f_n$ already gives $f_n' \neq 0$ everywhere, and the hypothesis
+$f'(a) > 0$ is needed only to rule out the constant limit. $\blacksquare$
+\end{solution}
+
+
 \begin{problem}
 Without using Montel's Theorem, prove directly that a family of locally bounded
 analytic functions is equicontinuous on any compact subset of its domain of
 definition.
 \end{problem}
+
+\begin{solution}
+Let $\mathcal{F}$ be locally bounded on $G$ and let $K \subseteq G$ be compact. We
+show $\mathcal{F}$ is equicontinuous on $K$ without invoking Montel --- indeed this
+estimate is the main step in \emph{proving} Montel.
+
+Choose $r > 0$ with
+$$K_{2r} = \left\{z : \operatorname{dist}(z,K) \leq 2r\right\} \subseteq G,$$
+possible because $K$ is compact and $G$ open. By local boundedness (and a finite
+subcover of $K_{2r}$) there is $M$ with
+$$\left|f(z)\right| \leq M \qquad\text{for all } f \in \mathcal{F},\ z \in K_{2r}.$$
+
+Let $z, w \in K$ with $\left|z-w\right| < r$, and let $\gamma$ be the circle of
+centre $z$ and radius $2r$, which lies in $K_{2r}$. Cauchy's integral formula
+applied twice and subtracted gives
+$$f(z)-f(w) = \dfrac{1}{2\pi i}\oint_{\gamma}
+f(\zeta)\left[\dfrac{1}{\zeta-z}-\dfrac{1}{\zeta-w}\right]d\zeta
+= \dfrac{z-w}{2\pi i}\oint_{\gamma}
+\dfrac{f(\zeta)\,d\zeta}{(\zeta-z)(\zeta-w)} .$$
+On $\gamma$ we have $\left|\zeta - z\right| = 2r$ and
+$\left|\zeta-w\right| \geq 2r - r = r$, so
+$$\left|f(z)-f(w)\right|
+\leq \dfrac{\left|z-w\right|}{2\pi}\cdot\dfrac{M}{2r\cdot r}\cdot 2\pi(2r)
+= \dfrac{M}{r}\left|z-w\right| .$$
+
+The bound $M/r$ depends only on $K$ and $G$, not on $f$: given $\varepsilon$, take
+$\delta = \min\left(r,\ \varepsilon r/M\right)$ and every member of $\mathcal{F}$
+satisfies $\left|f(z)-f(w)\right| < \varepsilon$ whenever
+$\left|z-w\right| < \delta$. So $\mathcal{F}$ is (uniformly) equicontinuous on
+$K$. $\blacksquare$
+
+In fact the family is uniformly \emph{Lipschitz} on $K$, which is stronger than
+equicontinuity. Montel's theorem then follows by Arzel\`a--Ascoli.
+\end{solution}
+
 
 \begin{problem}
 Suppose $\mathcal{F} \subseteq H(G)$, the analytic functions on a region $G$, is
@@ -11393,6 +11561,33 @@ normal family.
 \end{enumerate}
 \end{problem}
 
+\begin{solution}
+\textbf{(a). $\mathcal{F}'$ is normal.} Let $(f_n') $ be a sequence in
+$\mathcal{F}'$. Since $\mathcal{F}$ is normal, the corresponding $(f_n)$ has a
+subsequence converging locally uniformly to some analytic $g$ (or to $\infty$
+locally uniformly, if the wider definition of normality is in use --- assume the
+former, as is standard for $H(G)$). By Weierstrass' theorem the derivatives of that
+subsequence converge locally uniformly to $g'$.
+
+So every sequence in $\mathcal{F}'$ has a locally uniformly convergent subsequence:
+$\mathcal{F}'$ is normal. $\blacksquare$
+
+\textbf{(b). The converse is false.} Take
+$$\mathcal{F} = \{f_n(z) = n : n \in \mathbb{N}\},$$
+the constant functions on any region $G$. Then $\mathcal{F}' = \{0\}$, a single
+function, which is trivially normal. But $\mathcal{F}$ itself is not normal in
+$H(G)$: $f_n = n$ has no subsequence converging locally uniformly to an analytic
+function, since $\left|f_n\right| \rightarrow \infty$ everywhere.
+
+$$\boxed{\text{No; adding an unbounded constant to each member destroys normality
+while leaving } \mathcal{F}' \text{ untouched.}}$$
+
+The obstruction is exactly the loss of information at one point: normality of
+$\mathcal{F}'$ plus boundedness of $\{f(z_0) : f \in \mathcal{F}\}$ at a single
+point $z_0$ \emph{does} give normality of $\mathcal{F}$, by integrating.
+\end{solution}
+
+
 \begin{problem}
 Let $G$ be a region and $M$ a fixed real number. Define
 $$H(G) = \{g : G \rightarrow \mathbb{C} \ :\ g \text{ is analytic}\}$$
@@ -11401,6 +11596,35 @@ $$\mathcal{F} = \left\{ g \in H(G)\ :\
 \iint\limits_{G}\left|g(z)\right|^{100}dx\,dy \leq M \right\}.$$
 Show that $\mathcal{F}$ is a normal family.
 \end{problem}
+
+\begin{solution}
+By Montel's theorem it suffices to show $\mathcal{F}$ is locally bounded, that is
+uniformly bounded on each compact subset of $G$.
+
+Let $K \subseteq G$ be compact and choose $r > 0$ with
+$\overline{B(z,r)} \subseteq G$ for every $z \in K$ --- possible as
+$\operatorname{dist}(K,\partial G) > 0$.
+
+Fix $g \in \mathcal{F}$ and $z \in K$. The function $\left|g\right|^{100}$ is
+subharmonic (being $\left|g\right|^{p}$ for $p > 0$ with $g$ analytic), so it
+satisfies the sub-mean-value inequality over the disc $B(z,r)$:
+$$\left|g(z)\right|^{100}
+\leq \dfrac{1}{\pi r^{2}}\iint\limits_{B(z,r)}\left|g\right|^{100}dx\,dy
+\leq \dfrac{1}{\pi r^{2}}\iint\limits_{G}\left|g\right|^{100}dx\,dy
+\leq \dfrac{M}{\pi r^{2}} .$$
+Hence
+$$\left|g(z)\right| \leq \left(\dfrac{M}{\pi r^{2}}\right)^{1/100}
+\qquad\text{for all } g \in \mathcal{F},\ z \in K,$$
+a bound independent of $g$. So $\mathcal{F}$ is locally bounded and therefore
+normal. $\blacksquare$
+
+The exponent $100$ is a red herring --- any positive exponent works, since
+$\left|g\right|^{p}$ is subharmonic for every $p > 0$. The step that matters is the
+area version of the mean value inequality, which converts an $L^{p}$ bound into a
+pointwise one; this is why an integral constraint suffices where one might have
+expected a sup-norm constraint.
+\end{solution}
+
 
 \begin{problem}
 Let $G \subseteq \mathbb{C}$ be an open region and $\{f_n\}_{n \geq 1}$ a
@@ -11411,12 +11635,79 @@ $$\left\{\int_{\gamma} f_n(\zeta)\,d\zeta\right\}_{n \geq 1}$$
 is a Cauchy sequence in $\mathbb{C}$.
 \end{problem}
 
+\begin{solution}
+\textbf{($\Rightarrow$)} If $f_n \rightarrow f$ uniformly on compact subsets, then
+for a fixed piecewise differentiable $\gamma$ --- whose image is compact --- the
+convergence is uniform on $\{\gamma\}$, so
+$$\left|\int_{\gamma} f_n - \int_{\gamma} f_m\right|
+\leq L\max_{\gamma}\left|f_n - f_m\right| \longrightarrow 0$$
+as $n,m \rightarrow \infty$, where $L$ is the length. So the integrals form a
+Cauchy sequence.
+
+\textbf{($\Leftarrow$)} Suppose the integrals are Cauchy for every such $\gamma$.
+Fix $z_0 \in G$ and a closed disc $\overline{B(z_0,2r)} \subseteq G$. Applying the
+hypothesis to the segment from $z_0$ to $z$, the functions
+$$F_n(z) = \int_{[z_0,z]} f_n(w)\,dw$$
+converge pointwise on $B(z_0,2r)$; call the limit $F$. Each $F_n$ is an
+antiderivative of $f_n$ on the disc.
+
+Applying the hypothesis to the circles $\left|w - z\right| = \rho$ shows in
+particular that $\displaystyle\oint f_n$ is Cauchy on every circle, and Cauchy's
+integral formula
+$$f_n(z) = \dfrac{1}{2\pi i}\oint_{\left|w-z_0\right|=2r}\dfrac{f_n(w)}{w-z}\,dw$$
+expresses $f_n(z)$ as an integral of $f_n$ against a kernel that varies
+continuously in $z$; uniform Cauchyness of the integrals over that circle,
+together with the uniform bound on the kernel for $z$ in the smaller disc
+$\left|z-z_0\right| \leq r$, makes $(f_n)$ uniformly Cauchy there. Since
+$\mathbb{C}$ is complete, $f_n$ converges uniformly on $\overline{B(z_0,r)}$.
+
+Every compact subset of $G$ is covered by finitely many such discs, so the
+convergence is uniform on compact sets. $\blacksquare$
+
+The content is that the Cauchy kernel lets integral information be converted back
+into pointwise information --- the same mechanism as in the equicontinuity estimate
+above.
+\end{solution}
+
+
 \begin{problem}
 Let $G$ be a region in $\mathbb{C}$ and let $(a_k)_{k \geq 1}$ be a sequence of
 distinct points of $G$ with no limit point in $G$. Show that for an arbitrary
 sequence of complex numbers $(w_k)_{k \geq 1}$ there exists an analytic function
 $f$ on $G$ with $f(a_k) = w_k$ for every $k$.
 \end{problem}
+
+\begin{solution}
+This is the Weierstrass interpolation theorem, and the point is that the sequence
+has \emph{no limit point in $G$}: the prescribed values may therefore be completely
+arbitrary.
+
+\textbf{Construction.} By the Weierstrass product theorem there is a function
+$g \in H(G)$ whose zeros are exactly the $a_k$, each simple. (Such a $g$ exists
+precisely because $(a_k)$ has no limit point in $G$; a function with a
+non-isolated zero set would be identically zero.)
+
+Now seek $f$ in the form
+$$f(z) = g(z)\sum^{\infty}_{k=1} c_k\,\dfrac{h_k(z)}{z - a_k},$$
+where $c_k = w_k / g'(a_k)$ --- note $g'(a_k) \neq 0$ as the zeros are simple --- and
+the $h_k$ are Mittag-Leffler convergence factors, analytic near $a_k$ with
+$h_k(a_k) = 1$, chosen so that the series converges locally uniformly on $G$. Such
+factors exist by the Mittag-Leffler theorem, which is exactly designed to force
+convergence of a series of prescribed principal parts.
+
+Each term is analytic except for a simple pole at $a_k$ cancelled by the zero of
+$g$, so $f$ is analytic on $G$, and evaluating at $a_j$ only the $j$-th term
+survives:
+$$f(a_j) = g'(a_j)\,c_j = w_j . \qquad \blacksquare$$
+
+$$\boxed{\text{Any values } (w_k) \text{ whatever can be interpolated.}}$$
+
+Contrast the Identity Theorem problems earlier in the course: there the points
+accumulated \emph{inside} the region and the values were almost entirely
+determined. Here they accumulate only at the boundary, and nothing is determined at
+all. The position of the limit point is the whole difference.
+\end{solution}
+
 
 \begin{problem}
 Let $G$ be an open subset of the plane and $f_n : G \rightarrow \mathbb{C}$
@@ -11425,6 +11716,32 @@ $\displaystyle\sum^{\infty}_{n = 1} f_n(z)$ converges uniformly on compact
 subsets of $G$ to $f$, then $f$ is analytic on $G$ and
 $$f'(z) = \sum^{\infty}_{n = 1} f_n'(z).$$
 \end{problem}
+
+\begin{solution}
+Write $S_N = \sum^{N}_{n=1} f_n$, the partial sums, which are analytic on $G$. The
+hypothesis is $S_N \rightarrow f$ uniformly on compact subsets.
+
+\textbf{$f$ is analytic.} By Weierstrass' theorem on analytic limits, a locally
+uniform limit of analytic functions is analytic. So $f \in H(G)$.
+
+\textbf{Term-by-term differentiation.} The same theorem gives
+$S_N' \rightarrow f'$ locally uniformly. But
+$$S_N'(z) = \sum^{N}_{n=1} f_n'(z),$$
+so the series of derivatives converges (locally uniformly) to $f'$:
+$$\boxed{f'(z) = \sum^{\infty}_{n=1} f_n'(z).} \qquad \blacksquare$$
+
+For completeness, the derivative statement comes from the Cauchy integral formula:
+on a circle $\left|\zeta - z\right| = \rho$ inside $G$,
+$$S_N'(z) - f'(z) = \dfrac{1}{2\pi i}\oint
+\dfrac{S_N(\zeta)-f(\zeta)}{(\zeta-z)^{2}}\,d\zeta,$$
+so $\left|S_N' - f'\right| \leq \rho^{-1}\max_{\left|\zeta-z\right|=\rho}
+\left|S_N-f\right| \rightarrow 0$.
+
+The real analogue is false: a uniformly convergent series of differentiable real
+functions need not be differentiable term by term. Analyticity, through the Cauchy
+kernel, controls all derivatives at once.
+\end{solution}
+
 
 \begin{problem}
 Let $G$ be an open domain, $f : G \rightarrow \mathbb{C}$ holomorphic, and
@@ -11446,6 +11763,47 @@ topology of uniform convergence on compact sets.
 \end{enumerate}
 \end{problem}
 
+\begin{solution}
+\textbf{(a).} Let $\left|z - z_0\right| < \tfrac12 R$. The circle
+$\left|\zeta - z_0\right| = R$ lies in $G$, and Cauchy's integral formula gives
+$$f(z) = \dfrac{1}{2\pi i}\oint_{\left|\zeta-z_0\right|=R}
+\dfrac{f(\zeta)}{\zeta - z}\,d\zeta .$$
+On that circle $\left|\zeta - z\right| \geq R - \tfrac12 R = \tfrac12 R$, and
+parametrising $\zeta = z_0 + Re^{i\alpha}$ so that
+$\left|d\zeta\right| = R\,d\alpha$,
+$$\left|f(z)\right| \leq \dfrac{1}{2\pi}\cdot\dfrac{1}{R/2}
+\int^{2\pi}_{0}\left|f\!\left(z_0+Re^{i\alpha}\right)\right| R\,d\alpha
+= \dfrac{1}{\pi R}\int^{2\pi}_{0}
+\left|f\!\left(z_0+Re^{i\alpha}\right)\right| R\,d\alpha . \qquad\blacksquare$$
+
+\textbf{(b).} Part (a) holds with $R$ replaced by any $s \in (0,R]$ for which the
+circle still lies in $A$; multiplying the inequality
+$$\left|f(z)\right| \leq \dfrac{1}{\pi s}\int^{2\pi}_{0}
+\left|f\!\left(z_0+se^{i\alpha}\right)\right| s\,d\alpha$$
+by $s$ and integrating over $s \in (0,R]$ gives
+$$\dfrac{R^{2}}{2}\left|f(z)\right|
+\leq \dfrac{1}{\pi}\int^{R}_{0}\!\!\int^{2\pi}_{0}
+\left|f\!\left(z_0+se^{i\alpha}\right)\right| s\,d\alpha\,ds
+= \dfrac{1}{\pi}\iint\limits_{A}\left|f(\zeta)\right|dA,$$
+the last step being the polar-coordinate form of the area integral, as hinted.
+Hence
+$$\left|f(z)\right| \leq \dfrac{2}{\pi R^{2}}\iint\limits_{A}
+\left|f(\zeta)\right| dA . \qquad\blacksquare$$
+
+\textbf{(c).} Suppose $\iint_A\left|f\right|dA \leq M$ for every
+$f \in \mathcal{F}$ and every compact $A \subseteq G$. Given a compact
+$K \subseteq G$, cover it by finitely many discs of the type in (b) with closures
+in $G$; part (b) bounds $\left|f\right|$ on each by $2M/(\pi R^{2})$, a constant
+independent of $f$. So $\mathcal{F}$ is locally bounded, and Montel's theorem makes
+it normal --- that is, pre-compact in $H(G)$ with the topology of uniform
+convergence on compact sets. $\blacksquare$
+
+Parts (a) and (b) are the mechanism by which an $L^{1}$ bound becomes a sup bound,
+which is what Montel needs; the same device with exponent $100$ appears elsewhere
+in this set.
+\end{solution}
+
+
 \begin{problem}
 Let $f_k$ be a sequence of functions analytic on a region $G$, converging
 uniformly to a function $f$ on $G$. Show that
@@ -11455,6 +11813,27 @@ uniformly to a function $f$ on $G$. Show that
 \item[(b).] $f$ is analytic.
 \end{enumerate}
 \end{problem}
+
+\begin{solution}
+\textbf{(a).} For a closed rectifiable $\gamma$ in $G$, Cauchy's theorem gives
+$\int_{\gamma} f_k = 0$ for each $k$. The image $\{\gamma\}$ is compact and
+$f_k \rightarrow f$ uniformly there, so with $L$ the length of $\gamma$,
+$$\left|\int_{\gamma} f_k - \int_{\gamma} f\right|
+\leq L\max_{\{\gamma\}}\left|f_k - f\right| \longrightarrow 0 .$$
+Hence
+$$\lim_{k\to\infty}\int_{\gamma} f_k = \int_{\gamma} f ,$$
+and since each term on the left is $0$, the limit is $0$ as well.
+
+\textbf{(b).} $f$ is continuous as a uniform limit of continuous functions, and by
+part (a) $\int_{\partial\Delta} f = 0$ for every triangle $\Delta \subseteq G$. By
+Morera's theorem $f$ is analytic on $G$. $\blacksquare$
+
+This is Weierstrass' theorem again, split into the two steps that prove it, and it
+is worth seeing that the whole content is: uniform convergence lets the limit pass
+through the integral, and Morera converts vanishing integrals back into
+analyticity.
+\end{solution}
+
 
 \begin{problem}
 \begin{enumerate}
@@ -11467,6 +11846,35 @@ Show that $f$ is one-to-one and $f'(a) > 0$.
 \end{enumerate}
 \end{problem}
 
+\begin{solution}
+\textbf{(a). Hurwitz's Theorem.} Let $f_n \rightarrow f$ locally uniformly on a
+region $G$, with each $f_n$ analytic and $f \not\equiv 0$. If $f$ has a zero of
+order $m$ at $z_0$, then for every sufficiently small $r > 0$ there is $N$ such
+that for all $n \geq N$ the function $f_n$ has exactly $m$ zeros, counted with
+multiplicity, in $0 < \left|z - z_0\right| < r$.
+
+\textbf{Proof of the statement.} Choose $r$ with $f \neq 0$ on
+$0 < \left|z-z_0\right| \leq r$, possible because zeros of a non-zero analytic
+function are isolated. Let $\delta = \min_{\left|z-z_0\right|=r}\left|f\right| > 0$.
+For $n$ large, $\left|f_n - f\right| < \delta \leq \left|f\right|$ on that circle,
+so by Rouch\'e $f_n$ and $f$ have the same number of zeros inside, namely $m$.
+
+\textbf{(b).} Suppose each $f_n$ is one-to-one, $f_n \rightarrow f$ in $H(G)$, and
+$$f_n(a) = 0,\qquad f_n'(a) > 0 .$$
+Then $f(a) = \lim f_n(a) = 0$ and $f'(a) = \lim f_n'(a) \geq 0$.
+
+If $f \equiv 0$ the claim fails, so we must exclude it --- and the hypothesis
+$f'(a) > 0$ in the problem is exactly what does: it is given, and
+$f'(a) = \lim f_n'(a)$, so $f \not\equiv 0$.
+
+Now $f$ is injective by the Rouch\'e argument of the second problem in this set: a
+repeated value would put zeros of $f_n - w$ in two disjoint discs. And
+$f'(a) > 0$ is immediate from $f'(a) = \lim f_n'(a)$ together with
+$f' (a) \neq 0$, which holds because an injective analytic function has
+nowhere-vanishing derivative. $\blacksquare$
+\end{solution}
+
+
 \begin{problem}
 \begin{enumerate}
 \item[(a).] State Montel's Theorem.
@@ -11477,6 +11885,37 @@ where $H(\Omega)$ is the family of all analytic functions on $\Omega$. Prove tha
 $\mathcal{F}$ is a normal family.
 \end{enumerate}
 \end{problem}
+
+\begin{solution}
+\textbf{(a). Montel's Theorem.} A family $\mathcal{F} \subseteq H(G)$ that is
+locally bounded --- uniformly bounded on each compact subset of $G$ --- is normal:
+every sequence in $\mathcal{F}$ has a subsequence converging uniformly on compact
+subsets of $G$ to some analytic function.
+
+\textbf{(b).} Let
+$$\mathcal{F} = \left\{ f \in H(\Omega) :
+\iint\limits_{\Omega}\left|f(z)\right|^{2}dx\,dy < 10 \right\}.$$
+By Montel it suffices to show local boundedness.
+
+Fix compact $K \subseteq \Omega$ and $r > 0$ with
+$\overline{B(z,r)} \subseteq \Omega$ for every $z \in K$. For $f \in \mathcal{F}$
+and $z \in K$, the function $\left|f\right|^{2}$ is subharmonic, so the area
+mean value inequality gives
+$$\left|f(z)\right|^{2}
+\leq \dfrac{1}{\pi r^{2}}\iint\limits_{B(z,r)}\left|f\right|^{2}dA
+\leq \dfrac{1}{\pi r^{2}}\iint\limits_{\Omega}\left|f\right|^{2}dA
+< \dfrac{10}{\pi r^{2}} .$$
+Hence
+$$\left|f(z)\right| < \sqrt{\dfrac{10}{\pi r^{2}}}
+= \dfrac{1}{r}\sqrt{\dfrac{10}{\pi}} \qquad\text{for all } f \in \mathcal{F},\ z\in K,$$
+a bound depending only on $K$ and $\Omega$. So $\mathcal{F}$ is locally bounded and
+therefore normal. $\blacksquare$
+
+This is the Bergman space $A^{2}(\Omega)$, and the estimate just proved --- that
+point evaluation is bounded by the $L^{2}$ norm --- is precisely what makes it a
+reproducing kernel Hilbert space.
+\end{solution}
+
 
 \begin{problem}
 Let $G$ be a simply connected region in $\mathbb{C}$ with $G \neq \mathbb{C}$.
@@ -11715,12 +12154,6 @@ the Riemann sphere $S^{2}$.
 cover from $M$ to $S^{2}$. Prove that $R = 2(4 + r)$, where $R$ is the total
 ramification index of $F$ and $r$ the number of sheets of the cover.
 \end{enumerate}
-\end{problem}
-
-\begin{problem}
-Prove that the Dolbeault cohomology group
-$H^{1,1}(X) = \Omega^{1,1}/\partial\Omega^{1,0}$ is isomorphic to $\mathbb{C}$
-for any compact Riemann surface $X$.
 \end{problem}
 
 \begin{problem}
