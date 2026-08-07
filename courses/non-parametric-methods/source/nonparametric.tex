@@ -426,59 +426,88 @@ $X\thicksim B(n,P)$
 
 
 \subsection{Sign Test}
+
+\begin{definition}
+Let $X_1, X_2, \ldots, X_n$ be a random sample from a continuous distribution with
+median $M$. The \emph{sign test} of
+$$H_0 : M = M_0 \qquad\text{against}\qquad H_1 : M \neq M_0$$
+discards every observation equal to $M_0$, replaces each of the remaining $n'$
+observations by the sign of $X_i - M_0$, and bases the decision on
+$$N_{+} = \#\{i : X_i > M_0\},
+\qquad
+N_{-} = \#\{i : X_i < M_0\},
+\qquad N_{+} + N_{-} = n' .$$
+\end{definition}
+
+The test uses only the \emph{signs} of the deviations, never their sizes. That is
+its strength and its weakness at once: no assumption about the shape of the
+distribution is needed, but a great deal of information is thrown away, and where
+the Wilcoxon signed-rank test is applicable it will usually be preferred.
+
+\begin{thm}
+Under $H_0$ the sign statistic is binomial,
+$$N_{+} \ \sim\ B\!\left(n', \tfrac12\right),$$
+so that $E(N_{+}) = \dfrac{n'}{2}$ and
+$\operatorname{var}(N_{+}) = \dfrac{n'}{4}$.
+\end{thm}
+
+\begin{proof}
+Since the distribution is continuous, $P(X_i = M_0) = 0$ and each retained
+observation satisfies $P(X_i > M_0) = P(X_i < M_0) = \tfrac12$ under $H_0$, by the
+definition of the median. The observations are independent, so $N_{+}$ counts the
+successes in $n'$ independent trials each of probability $\tfrac12$.
+\end{proof}
+
+\begin{note}
+\textbf{Paired data.} For matched pairs $(Y_i, Z_i)$ the test is applied to the
+differences $X_i = Y_i - Z_i$ with $M_0 = 0$, giving a distribution-free
+alternative to the paired $t$-test. For a single sample it replaces the one-sample
+$t$-test, and for ordered categorical data --- where a numerical scale is
+inappropriate but observations can be ranked --- it is often the only test
+available.
+\end{note}
+
+\textbf{Test procedure.} Choose whichever of $N_{+}$, $N_{-}$ the alternative
+makes appropriate, and compute the exact binomial tail probability with
+$p = \tfrac12$:
 \begin{enumerate}
-\item[-] A sign test is a statistical method for consistent differences between pairs of observations. It is  useful in situations where the conditions for the parametric $z$ or t-test are not true.
-\item[-] It is used to test $H_0$ that the median distribution is equal to some value. It is also used in
-\begin{enumerate}
-  \item[*] place of a one sample t-test.
-  \item[*] place of a paired t-test.
-  \item[*] for ordered categorical data where a numerical scale is inappropriate but where it is possible to rank observations.\\
-\end{enumerate}
+\item[(i).] for a one-sided alternative, that tail probability is the $P$-value;
+\item[(ii).] for a two-sided alternative, double it.
 \end{enumerate}
 
+\begin{thm}[Large-sample approximation]
+Let $R = \min\left(N_{+}, N_{-}\right)$. For $n' \geq 25$ the standardised
+statistic
+$$Z = \dfrac{n' - 2R - 1}{\sqrt{n'}}$$
+is approximately standard normal under $H_0$, and $H_0$ is rejected at level
+$\alpha$ when $Z > Z_{\alpha/2}$ for a two-sided test.
+\end{thm}
 
+\begin{proof}
+By the previous theorem $N_{+} \sim B(n',\tfrac12)$, so the standardised variable
+is
+$$\dfrac{N_{+} - n'/2}{\sqrt{n'/4}} = \dfrac{2N_{+} - n'}{\sqrt{n'}} .$$
+Taking $R$ to be the smaller count and applying the continuity correction of
+$\tfrac12$ towards the mean replaces $2R - n'$ by $2R + 1 - n'$, and changing sign
+so that the statistic is positive gives
+$$Z = \dfrac{n' - 2R - 1}{\sqrt{n'}} .$$
+Equivalently, since $N_{+} + N_{-} = n'$ gives
+$\left|N_{+} - N_{-}\right| = n' - 2R$,
+$$Z = \dfrac{\left|N_{+}-N_{-}\right| - 1}{\sqrt{n'}} ,$$
+which is the form quoted in many texts.
+\end{proof}
 
+\begin{note}
+\textbf{$R$ must be the smaller of the two counts.} If the larger is used, $Z$
+comes out negative and the test is mis-signed --- with $n' = 30$ and the counts
+$20$ and $10$, the correct value is $Z = 1.643$ and the wrong choice gives
+$-2.008$.
 
-
-
-
-
-
-
-\textbf{Procedure}
-\begin{enumerate}
-\item[-] The observation in a sample of size $n$ are $x_1, x_2,\dots ,x_n$.
-\item[-] These could be paired differences from correlated/ matched observations.
-\item[-] $H_0$ is that the population median is equal to some value $M$.
-\item[-] Suppose that $N_+$ (number of "$+$" signs) of these observations are greater than $M$ and $N_-$ (number of "$-$" signs) are smaller than $M$.
-\item[-] In the case of paired test $M$ would be zero under $H_0$.
-\item[-] Values of $X$ which are exactly equal to will give a difference $0$.
-\item[-] Values of $X$ which are equal to $M$ are ignored.
-\item[-] The sum $N_+ +N_-$ may therefore be less than $n$, denoted by $n'$.\\
-\end{enumerate}
-
-
-
-\textbf{Test Procedure}
-\begin{enumerate}
-  \item[-] Chose an appropriate statistics $N_+$/$N_-$ according to the information provided by $H$.
-  \item[-] Use the Binomial distribution to find the probability of observing a value $N_+$/$N_-$ or higher assuming $P=0.5$ and $n=n'$.
-  \item[-] For 1-sided $H_1$, thus the $P$-value.
-  \item[-] For 2-sided $H_1$, double the probability obtained to obtain the $P$-value.\\
-\end{enumerate}
-
-\begin{enumerate}
-\item[-] For $n\geq 25$, the normal distribution approximation can be used. Calculate the $z$-value as follows: $$z=\frac{n-2R-1}{\sqrt{n}}$$ where $R$ is $N_+$ or $N_-$.
-\item[-] And use standard normal tables to find the $P$-value.\\\\
-\end{enumerate}
-
-
-
-
-
-
-
-
+The approximation is good well before $n' = 25$. At $n' = 30$ with $R = 10$ it
+returns a two-sided $P$-value of $0.1004$ against the exact binomial $0.0987$; at
+$n' = 60$ with $R = 22$, $0.0528$ against $0.0519$. When the decision is close to
+the boundary, use the exact binomial.
+\end{note}
 \textbf{Tied Scores}
 \begin{enumerate}
 \item[-] If a subject has the same score in each condition, there will be no sign, because the difference score is zero.
