@@ -128,283 +128,215 @@ The Kolmogorov goodness-of-fit test. Tests on two independent samples. Tests on 
 \pagebreak
 
 \section{\textbf{INTRODUCTION}}
-We shall survey concepts relevant to Non-Parametric methods (NP). It is important to note that it is the method and Not the data that are non-parametric.\\\\
 
+This chapter surveys the ideas the rest of the course depends on. One point should
+be settled before anything else, because the name misleads almost everybody who
+meets it first:
 
-\textbf{Parametric and Non-Parametric Methods}\\
-Parametric and Non-parametric are two broad classifications of statistical procedure.\\\\
+\begin{note}
+It is the \emph{method} that is non-parametric, not the data. Nothing about a data
+set makes it non-parametric; what is non-parametric is a procedure that does not
+require the population to belong to a specified family of distributions.
+\end{note}
 
+\subsection{Parametric Inference, Recalled}
 
+Parametric and non-parametric are the two broad classifications of statistical
+procedure. A parametric procedure assumes the observations come from a distribution
+of known form, indexed by finitely many unknown parameters, and draws its
+conclusions about those parameters.
 
+\textbf{The normal distribution.} The best known family is the normal, indexed by
+the mean $\mu$ and variance $\sigma^{2}$. Given independent observations from it,
+the sample mean $\overline{X}$ is a point estimate of $\mu$; the $t$-test measures
+the strength of evidence against an \emph{a priori} hypothesised value $\mu_0$; and
+a confidence interval gives a range of plausible values for the true mean. All of
+this is parametric inference, and all of it leans on the assumed normality.
 
-\textbf{Normal Distribution (ND)}\\
-Early in the course families of probability distribution are taught. One of the best known is the ND/Gaussian family, where individual members are specified by assigning constant values of two quantities called parameters, denoted by $\mu$ and $\sigma^2$ representing the mean and variance. \\i.e $N(\mu,\sigma^2)$ denotes the ND with these parameters.\\
+The normal distribution is strictly appropriate only to certain continuous
+measurements, though it often works well enough when the measurement scale is fine
+and the distribution roughly symmetric.
 
-Given a set of independent observations from the ND we often want to infer something about the unknown parameter.\\
+\textbf{The binomial distribution.} For counts, the binomial family has parameters
+$n$, the number of observations, and $P$, the probability that the event of
+interest occurs at any one of them. The number of occurrences $R$, with
+$0 \leq R \leq n$, satisfies
+$$P(R = r) = \binom{n}{r}P^{r}(1-P)^{\,n-r},$$
+and $\widehat{P} = r/n$ is the point estimate of $P$. Again one may test an
+\emph{a priori} value $P_0$ or form a confidence interval.
 
-Sample $\overline{X}$ is the point estimate of parameter $\mu$ (population mean).\\ 
+The binomial is relevant to counts in discrete outcome situations --- the number of
+males in a family of size $n$, for instance. The outcome being counted is
+conventionally called the ``favourable'' event, a name that sits awkwardly when the
+event is a positive diagnosis of an illness.
 
-t-test is used to measure the strength of the evidence given by a sample to support an a prior hypothesized value of $\mu_0$ for the population mean.\\
+\textbf{Other families.} Uniform, multinomial, Poisson, exponential, double
+exponential, gamma and many others. Sometimes theory or experience makes it
+reasonable to assume a particular family; often it does not.
 
-More usually, we may want to determine a C.I for the 'true' population mean. This is an interval for which we have reasonable confidence that it contains the true but unknown value $\mu$(mean).\\ 
+\subsection{When Parametric Inference Will Not Do}
 
-This is an example of parametric inference.\\ 
-
-The ND is strictly relevant only to some types of continuous scale data such as measurements, works quite well if the measurements scale is course, values recorded to the nearest integer. It is also useful for approximations in a wider range of circumstances when applied to other types of data.\\\\
-
-
-
-
-
-
-
-
-
-\textbf{Binomial Distribution (BD)}
 \begin{enumerate}
-\item[*] It is relent to some types of counts.
-\item[*] Family has parameters $n,P$ where $n\rightarrow$ total number of observations and $P \rightarrow$ probability that a particular one from two possible events occur at any observation.
-\item[*] Subject to certain conditions, the number of occurrence, $r$ where $0\leq r\leq n$ of that event in the $n$ observations has a binomial distribution denoted by $B(n,P)$.
-\item[] If we observe $r$ occurrences of an event in a set of $n$ observations, then $\widehat{P}=r/n$ is the point estimate of $P$, probability of success at each independent observation. 
-\item[*] We may want to access how strong sample evidence supports an a prior hypothesized value $P_0$ say for $P$ or obtain a C.I for the value of $P$ for the population.
-\item[*] BD is relevant for counts in discontinuous outcome situations e.g the number of males in a family of size $n$ is assumed to have BD with $P=1/2$; the number of $6s$ recorded in 10 casts of a fair die has a $(10,1/6)$.
-\item[*] Outcome of interest is referred to as "favorable" event.
-\item[*] Although not appropriate if the event is say a $+Ve$ diagnosis of an illness.\\\\
+\item[(i).] The assumption may be unreasonable. Examination marks, for example,
+are bounded and frequently skewed, and no standard family fits them naturally.
+\item[(ii).] Even with precise measurements, assuming normality asserts properties
+--- symmetry, unbounded support, specific tail behaviour --- that the data may
+visibly contradict.
+\item[(iii).] The data may not be measurements at all. For ranked or ordered
+categorical data there is no numerical scale on which a mean is meaningful.
 \end{enumerate}
 
+\begin{definition}
+A statistical method is \emph{distribution-free} if the null distribution of its
+test statistic does not depend on the distribution from which the sample was
+drawn.
+\end{definition}
 
+\begin{note}
+``Distribution-free'' and ``non-parametric'' are used interchangeably, and the term
+is slightly misleading in the same way the first note warned about. It does
+\emph{not} say the test statistic has no distribution --- it has a perfectly
+definite one. It says the method may be applied whatever the population
+distribution happens to be.
+\end{note}
 
+Non-parametric methods make weaker assumptions, but they are not preferred in all
+situations. Breadth of applicability is bought at a price: when a parametric
+assumption is justified, the parametric test extracts more information from the
+same data and is more powerful. The sensible rule is to use the parametric method
+when its assumptions hold and the non-parametric one when they do not.
 
-
-
-
-
-
-
-\textbf{Other Distributions}
-\begin{enumerate}
-\item[-] Other well known families of parametric distributions include uniform, multnomial, Poisson, exponential, double exponential, gamma, beta and Wei-bull e.t.c 
-\item[-] Sometimes it is reasonable on theoretical grounds/experience to assume that observations come from a particular family of distributions. Also experience suggest that for many measurement inferences based on the assumption for some ND may not be misleading even it the normality assumption is incorrect because of the CLT. It justifies these and other uses of the ND particularly in what are called asymptotic approximations.\\\\
-\end{enumerate}
-
-
-
-
-
-
-
-
-
-
-
-
-\subsection{Non-Parametric Methods}
-\begin{enumerate}
-\item[-] Sometimes parametric inference is inappropriate or even impossible. 
-\item[-] To assume that a sample comes from any specified family of distributions may be unreasonable e.g exam results on a percentage scale for each candidate is bounded and ordered grades designated Grade A, B, C e.t.c. Given these number for two different schools we may not know if they indicate a difference in performances between schools that might be due to unequal standards of teaching or ability of one school to attract more able pupils. The methods of inference is usually non-parametric.
-\item[-] Even with precise measurements it may be irrational to assume ND because normality implies certain properties of symmetry and spread. 
-\item[-]We may be able to see a simple is not from a ND simply by looking at sample measurement of central tendency like mean and median and measure of variation like standard deviation and range.
-\item[-] There are well known distributions that are flatter than normal or skew. Therefore we are often able to say little more than that our sample appears to come from a distribution that is skew or very pecked of very flat e.t.c. 
-\item[-] NP inference may be appropriate.
-\item[-] NP methods are referred to as distribution free.
-\item[-] The term relate not to be the distribution of the test statistics but to the fact that the method can be applied to samples from population having distributions which need only be specified in broad ed terms e.g as  being continuous, symmetric, identical, differing only in mean and median e.t.c.
-\item[-] NP methods often have weaker assumption about distribution than the parametric methods.
-\item[-] If a parametric test does not depend critically on assumption that samples come from a distribution in a particular family, then a NP test needing weaker assumption may be preferred.
-\item[-] NP methods are in no sense preferred methods of analysis for all situations. A strength in their applicability where there is insufficient theory or data to justify or test compatibility with specific distribution model.
-\item[-] Tests and estimation procedure for measurement data often about average or centrality measure mean and medians are widely used to indicate where distributions are centred. 
-\item[-]They are also known as measures of location/centrality.
-\item[-] Measures of dispersion/spread often measured by variance of SD are also widely used.\\\\
-\end{enumerate}
-
-
-
-
-
-
-
-
+Most of the tests here concern measures of \emph{location} --- the mean, and more
+often the median --- though measures of \emph{dispersion} such as the variance and
+standard deviation also arise.
 
 \subsection{Population and Sample}
-\begin{enumerate}
-\item[- ] In statistical inference we assume that observations are random. Sample from some population e.g if we select 20 books at random from 100, 000 volumes in 9 libraries, and record the number of pages in each book in the sample the inferences made from the sample about mean/median number of pages apply strictly only to the population of books in the library.
-\item[-] In statistics, we rarely deal in random samples from a so clearly specified distribution. Commonly data form samples that may be expected to have essential properties of a random sample from vaguely-specified population.
-\item[-]E.g if a new diet is tested on pigs and we measure weight for 20 pigs at an agricultural exptal station, we might assume that there are somethings like a random sample from all pigs of that of similar breeds raised under such conditions. 
-\item[-] A random sample from a distribution is a sequence of $n$ independent observations of all having the same distribution.
-\item[-] Independence implies that knowing one value tells us nothing about other variables. It is an important requirement for the valibity of many statistical inferences.\\\\
-\end{enumerate}
 
+\begin{definition}
+A \emph{random sample} of size $n$ from a distribution is a sequence
+$X_1, \ldots, X_n$ of independent observations, each having that distribution.
+\end{definition}
 
+Independence means that knowing one value tells us nothing about the others. It is
+the requirement most often violated in practice and the one whose violation does
+most damage --- Chapter 6 returns to exactly this point for time-ordered data.
 
+In practice we rarely sample from a cleanly specified distribution. If a new diet
+is tested on twenty pigs at one agricultural station, the twenty are not a random
+sample from all pigs; they are the pigs available. The population being sampled is
+then a hypothetical one, and the inference is only as good as that idealisation.
 
+\subsection{Hypothesis Tests, Recalled}
 
-\subsection{Hypothesis Tests} 
-\begin{enumerate}
-\item[-] Estimation is a key aim of statistical analysis.
-\item[-] Often t-test is often used to test hypothesis about the unknown mean $\mu$ of a ND we specify a null hypothesis to the $\mu$ takes a specific value $\mu_0$ and alternative hypothesis that it takes some other value \hspace{0.2cm}$H_0:\mu =\mu_0\hspace{0.3cm}\text{vs}\hspace{0.3cm} H_1:\mu \neq
- \mu_0$ 
-\item[-] test statistic $t$ is a function of sample values computed by a formula.
-\item[-] The procedure requires that Tables are used to compare the magnitude of the calculated $t=|t|$ with $t_{\alpha}$ given by the Tables.\\ i.e $t_{\alpha}$ chosen such that when $H_0$ was true \hspace{0.2cm}$P_r(|t|\geq t_{\alpha})=\alpha.$ 
-\item[-] In practice $\alpha$ is usually $0.05\hspace{0.1cm}(5\%), \hspace{0.3cm}0.01\hspace{0.1cm}(1\%),\hspace{0.3cm}0.001\hspace{0.1cm}(1\%)$ known as significance levels.
-\item[-] If we obtain a value $|t|\geq t_{\alpha}$ the results are are said to be significant at probability level $\alpha$ or at corresponding $100\alpha$ percent level.
-\item[-] These are often referred to as significantly $(5\%)$ highly significant $(1\%)$ and very high significance $(0.01\%)$.
-\item[-] If significance is attained, we speak of rejecting the $H_0$ at the $\alpha$ level.
-\item[-] If significance is not attained, the $H_0$ is said to be that accepted at level $\alpha$.
-\item[-] Non significance $\implies$ $H_0$ is true while significance $\implies$ $H_0$ is false.\\\\
-\end{enumerate} 
- 
- 
- 
- 
- 
- 
- 
- 
-\subsection{Rationale of $H_0$ and $\alpha$}  
-\begin{enumerate}
-\item[-] True $H_0$ $\implies$ that values of $t$ near $0$ are more likely than large value of $t$ either $+ve$ or $-ve$.
-\item[-] False $H_0$ $\implies$ that large values of $|t|$ are more likely to occur.
-\item[-] $\alpha=5\%\implies$ that if we perform a large number of such tests on different independent samples when $H_0$ is true we shall in the long run incorrectly reject $H_0$ in a proportion $\alpha$ of these i.e we would reject $H_0$ when it were true in a long in $1$ in $20$ tests on $5\%$ of all tests.
-\item[-] Modern software gives the exact probability of obtaining the value $|t|$ equal to or greater than the observed when $H_0$ is true. The probability is called a $P$-value. It measures the strength of evidence against $H_0$ provided by the data. The smaller the $P$-value is, the stronger is the evidence.\item[-] Type I error/ Error of the 1$^{st}$ kind $\implies$ rejecting $H_0$ when it is true. If we decide to reject $H_0$ whenever our $P$-value is less than some fixed $P_0$ and then if in all cases $H_0$ is true, we would in the long run reject it in a proportion $P_0$ of these cases.
-\item[-] We reject $H_0$ whenever $P$-value $\leq P_0$ and do so when $|t|\geq k$, where $k$ is  true\\ $\hspace{0.2cm} P_r(|t|\geq k)=P_0\hspace{0.2cm}$ and these values of $t$ define a critical/ rejection region of size $P_0$.
-\item[-] Using critical of size $P_0\implies H_0$ is plausible if $|t|<k$.
-\item[-] Using CR sometimes we continue to regard $H_0$ as plausible when in fact $H_1$ is true. Continuing to accept $H_0$ when $H_1$ is true is type II error.
-\item[-] If we let $P$ be probability of Type II error then ${1-\beta}$ is the power of the test. Large values of ${1-\beta}$ are preferred.\\\\
-\end{enumerate}
+To test a hypothesis about the unknown mean $\mu$ of a normal distribution we
+specify a null hypothesis $H_0 : \mu = \mu_0$, compute the statistic $t$ from the
+sample, and compare $\left|t\right|$ with a tabulated critical value
+$t_{\alpha}$.
 
+If $\left|t\right| \geq t_{\alpha}$ the result is called \emph{significant at
+level} $\alpha$, and we \emph{reject} $H_0$. Conventional levels are
+$\alpha = 0.05$, $0.01$ and $0.001$, described as significant, highly significant
+and very highly significant.
 
+\begin{note}
+\textbf{What significance does and does not mean.} If the result is not
+significant we \emph{fail to reject} $H_0$; we do not accept it, and we certainly
+do not conclude that it is true. Failing to detect a difference is not the same as
+demonstrating there is none --- a small sample will fail to reject almost any null
+hypothesis.
 
+Nor does significance establish that $H_0$ is false. It says the data would be
+unusual if $H_0$ held, and at $\alpha = 0.05$ one test in twenty will say so when
+$H_0$ is perfectly true. This is the single most common misreading of a
+significance test, and Chapter 6 shows what it costs when two hundred tests are
+run at once.
+\end{note}
+
+\subsection{The Rationale of $H_0$ and $\alpha$}
+
+If $H_0$ is true, values of $t$ near zero are more likely than large ones of either
+sign; if $H_0$ is false, large $\left|t\right|$ becomes more likely. Choosing
+$\alpha = 5\%$ means that over many independent tests performed when $H_0$ is true,
+about one in twenty will be declared significant. That is the rate of false
+positives we agree to tolerate.
+
+Modern software reports the exact probability of a value at least as extreme as the
+one observed --- the $P$-value --- and $H_0$ is rejected when
+$P \leq \alpha$, which is the same rule as $\left|t\right| \geq t_\alpha$.
+
+\begin{definition}
+A \emph{Type I} error is rejecting $H_0$ when it is true; its probability is
+$\alpha$. A \emph{Type II} error is failing to reject $H_0$ when it is false; its
+probability is denoted $\beta$. The \emph{power} of the test is $1 - \beta$, the
+probability of detecting a departure from $H_0$ when one exists.
+\end{definition}
+
+Large power is desirable, and it is precisely where non-parametric tests pay for
+their generality: against normal data the sign test has markedly less power than
+the $t$-test, while against skewed or contaminated data it may have more.
 
 \subsection{Types of Hypotheses}
-Specification of $H_0$ and $H_1$ is determined by the logic of a problem
+
+The choice of $H_1$ is determined by the logic of the problem, not by the data.
 \begin{enumerate}
-\item Two tailed alternative \hspace{0.2cm}$H_0:\mu_0=\mu_1\hspace{0.3cm}\text{vs}\hspace{0.3cm} H_1:\mu_0\neq \mu_1\hspace{0.4cm} |t|\geq k$
-\item One tailed alternative \hspace{0.2cm}$H_0:\mu=\mu_0\hspace{0.3cm}\text{vs}\hspace{0.3cm} H_1:\mu >\mu_0\hspace{0.4cm} t>k$ 
-$$H_0:\mu=\mu_0\hspace{0.3cm} \text{vs}\hspace{0.3cm} H_1:\mu<\mu_0\hspace{0.4cm}\text{large +ve values}$$ 
-$$H_0:\mu\geq \mu_0\hspace{0.3cm} \text{vs}\hspace{0.3cm} H_1:\mu<\mu_0\hspace{0.4cm}\text{large -ve values}$$ 
+\item[(i).] \emph{Two-tailed}: $H_0 : \mu = \mu_0$ against
+$H_1 : \mu \neq \mu_0$, when a departure in either direction matters.
+\item[(ii).] \emph{One-tailed}: $H_0 : \mu = \mu_0$ against
+$H_1 : \mu > \mu_0$ (or $<$), when only one direction is of interest and the other
+would be treated as no effect.
 \end{enumerate}
+Choosing one tail after seeing which way the data fell doubles the true error rate
+and is not legitimate.
 
+\subsection{A First Non-Parametric Test}
 
+Some non-parametric statistics have approximately continuous null distributions,
+the normal among them; others are frankly discrete, and the following is one.
 
+\begin{example}
+Survival times are recorded for ten patients. Test
+$$H_0 : \theta = 200 \qquad\text{against}\qquad H_1 : \theta \neq 200$$
+at the $5\%$ level, where $\theta$ is the population median. Suppose three of the
+ten observations exceed $200$.
 
+\textbf{The statistic.} Count the observations above $200$, recording each as a
+``$+$''. By the definition of the median, under $H_0$ each observation is above
+$200$ with probability $\tfrac12$, independently. So the number $R$ of ``$+$''
+signs satisfies
+$$R \sim B\!\left(10, \tfrac12\right),
+\qquad
+P(R = r) = \binom{10}{r}\left(\tfrac12\right)^{10}.$$
 
-
-
-
-
-
-
-
-
-\pagebreak
-\subsection{Non- Parametric Test}
-\begin{enumerate}
-\item[-] Some statistics for NP tests have at least approximately familiar continuous distributions such as the Normal,$t$, $F$ or $\chi^2$ distributions.
-\item[-] We shall also use some statistics with discontinuous distributions.\\
-\end{enumerate}
-
-
-
-\textbf{Example}\\ 
-We want to test the $H_0$ that the median $\theta$ of survival times for the population is $200$ vs $H_1$ of some other valise i.e \hspace{0.2cm}$H_0:\theta=200\hspace{0.3cm} \text{vs}\hspace{0.3cm} H_1:\theta\neq 200$
-
-
-\begin{enumerate}
-\item[-] test $H_0$ at $\alpha=0.05/5\%$ level.
-\item[-] Steps to take when carrying out the test: (1) Statement, (2) C.R, (3) Test Statistic, (4) Decision Rule, (5) Conclusion.\\
-\end{enumerate}
-
-
-
-
-
-
-\begin{enumerate}
-\item[-] A simple test need a count of the number of sample values $>$ 200. Recording each as "$+$" sign.
-\item[-] According to definition of R.S and of population median. A r.s from any distribution with 200 each sample value is equally likely to be above or below 200.
-\item[-] This implies that under $H_0$ the number of "$+$" sign in 10 observations when $P=1/2$; given by $$P(R=r)=C^N_rP^r(1-P)^{N-r}$$ $$P_r=P(X=r)=C^{10}_r\Big(\frac{1}{2}\Big)^{10}\hspace{0.4cm} X\thicksim B\Big(10,\frac{1}{2}\Big)$$
-
-\begin{table}[H]
-\centering
-\begin{tabular}{ccccccccccc}
-R&1&2&3&4&5&6&7&8&9&10\\ 
-P&0.01&0.0098&0.0439&0.01172&0.2051&0.2461
-\end{tabular}
-\end{table}
-\item[-] If $R=3$ i.e 3 observations exceed 200.
-\item[-] $\implies$ There are $3$ '$+$' signs in a sample of $10$. $$\text{C.R}:\hspace{0.5cm} R\leq 3\hspace{0.5cm}\text{or}\hspace{0.5cm} R\geq 7$$ 
-\item[-] $\hspace{0.4cm}\displaystyle{ P(R\leq 3)=\sum^3_{r=0}C^{10}_r\Big(\frac{1}{2}\Big)^{10}=0.1719}.$ when $H_0$ is true.
-\item[-] Since the probability of getting 3 or less "$+$" signs $P(R\leq 3)$ or probability of getting 7 or more  "$+$" signs $P(R\geq 7)$ is
-\begin{align*}
-P(R\leq 3)+P(R\geq 7) &=2P(R\leq 3)\hspace{0.3cm} \text{by symmetry}\\
-                      &=0.3438
-\end{align*}
-\item[-] The sign test.
-\item[-] Conclusion\\\\
-\end{enumerate}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\textbf{Example}\\ 
-The heart rate [beats/m] when standing was recorded for seven members of a tutorial group. We assume that in population of students the distribution of heart rates when standing is symmetric.\\ 
-Given observations of  \hspace{0.2cm}73, 82, 87, 68, 106, 60, 97\\
-
-Test the hypothesis:\hspace{0.2cm}$H_0:\theta =70\hspace{0.4cm}\text{vs}\hspace{0.4cm} H_1:\theta>70$\\
-
-symmetry implies that under $H_0$ sample values should have a near symmetry scatter about $\theta = 70$.\\
-
-So the magnitude of the sum of $+ve$ and $-ve$ deviations from $70$ (the d$_i$) should not differ greatly.
-
-\begin{enumerate}
-\item[-] The one sided alternative $H_1\implies$ that when it holds there is likely to be more $+ve$ deviations from $70$ than there would be under $H_0$ and that these $+ve$ deviations will tend to be larger than the $-ve$ deviations. 
-\item[-] For the given data deviations from 70 are \hspace{0.2cm}$3, 12, 17, -2, 36, -10,27,X_i-70,\hspace{0.5cm} i=1,2,\dots ,7$
-\item[-] Under $H_0$ the sum of the $+ve$ and negative deviations should nearly equal where as under $H_1$ we expect the sum of positives to be larger than the sum of negative deviations.
-\item[-] So the sum of positive deviations (differences from 70) is a reasonable statistic to assess the strength of evidence against $H_0$ in favor of $H_1$.
-\item[-] If $H_1$ had been two sided $H_1:\theta \neq 70$, small as well as large values of positive deviations would also support $H_1$.
-\item[-] For randomized test based on sum of positive deviations $S_+$, the sum of the positive deviations would also have supported $H_1$.
-\item[-] The key to obtaining the randomised distribution of $S_+$ when $H_0$ is true/ holds lies in the  fact that under $H_0$ the sign of each deviation is equally likely, on account of symmetry assumption to be $+ve$ or negative $-ve$.
-\item[-] Therefore any combination of $+ve$ and $-ve$ sign attached to a set of deviations having the observed magnitude is equally likely.
-\item[-] In the 7 observations there are $2^7=128$ possible allocations of signs (2 to each of the 7 deviations) each allocation being equally likely under $H_0$.
-\item[-] If we want to obtain the $P$-value when, that is small because we then only need to know how many of the equally likely allocations of signs given an $S_+$ greater than or equal to that for our sample i.e \hspace{0.2cm}$S_+=3+12+17+2+36+10+27=107$
-\item[-] The next highest $S_+(105)$ is obtained when only then smallest deviation, 2, has a $-ve$ sign.
-\item[-] In order of decreasing magnitude it can be verified that the other sums greater than the observed $S_+=95$ occur only when $-ve$ signs are attached to 3 only $(104)$, 2 and 3 $(102)$ and 10 only $(97)$.
-\item[-] Attaching $-ve$ to 12 only or to both 10 and 2 the sum is 95.
-\item[-] Therefore there are seven sums greater than or equal to the observed $S_+=95$.
-\item[-] Since all are equally likely, the $P$-value for assessing the strength of evidence against \hspace{0.2cm}$H_0\hspace{0.3cm}\text{is}\hspace{0.3cm} P=\dfrac{7}{128}\thickapprox 0.055\hspace{0.5cm} P=P-\text{value}$ 
-\item[-] The test is called Pitmum test.\\\\ 
-\end{enumerate}
+\textbf{The null distribution.}
 \begin{center}
-How to answer (Format)\\ $\rightarrow$ Statement\\ $\rightarrow$ Assumption\\ $\rightarrow$ Procedure\\$\rightarrow$ Conclusion \\$\rightarrow$ Comment
+\begin{tabular}{c|ccccccccccc}
+$r$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10\\
+\hline
+$P(R=r)$ & $0.0010$ & $0.0098$ & $0.0439$ & $0.1172$ & $0.2051$ & $0.2461$
+& $0.2051$ & $0.1172$ & $0.0439$ & $0.0098$ & $0.0010$\\
+\end{tabular}
 \end{center}
+The distribution is symmetric about $r = 5$, as it must be when $P = \tfrac12$.
 
+\textbf{The test.} With $R = 3$ observed, the evidence against $H_0$ in the lower
+tail is
+$$P(R \leq 3) = \sum^{3}_{r=0}\binom{10}{r}\left(\tfrac12\right)^{10}
+= \dfrac{1+10+45+120}{1024} = \dfrac{176}{1024} = 0.1719 .$$
+The alternative is two-sided, and by symmetry $P(R \geq 7) = P(R \leq 3)$, so
+$$P\text{-value} = 2(0.1719) = 0.3438 .$$
 
+\textbf{Decision.} Since $0.3438 > 0.05$ we do not reject $H_0$. There is no
+evidence at the $5\%$ level that the median differs from $200$.
+\end{example}
 
+\begin{note}
+Three out of ten looks like a clear imbalance and is not. With only ten
+observations the sign test cannot resolve anything but a gross departure: even
+$R = 1$ gives a two-sided $P$-value of $2(0.0108) = 0.0215$, and $R = 2$ gives
+$0.1094$. The test is honest about how little ten signs can tell us --- which is
+the point of computing the null distribution rather than trusting the impression.
+\end{note}
 
-
-
-
-
-
-
-
-
-
-
-
-
-\pagebreak
 \section{\textbf{SOME TESTS BASED ON BINOMIAL DISTRIBUTION}}
 
 \begin{enumerate}
