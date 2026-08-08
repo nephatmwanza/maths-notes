@@ -557,6 +557,67 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-08 — Non-parametric cleaned to publication standard; a self-inflicted deletion found and reversed
+
+**The course is done.** 67 pages, 8 chapters, 26 problems all with solutions, 34
+solutions, 21 examples, 12 definitions, 7 theorems, 7 figures. Zero dash bullets
+(178 at the start) and zero bold pseudo-environments, so `build.py` builds it with
+no warnings for the first time. Live at wjmaths.com, 61 pages, 59 question boxes.
+
+**A regression I caused and did not notice for four commits.** Commit `8d90aa5`,
+whose message says it gives the median confidence interval a theorem, removed 568
+lines and added 66. Besides its stated work it deleted the entire
+`SOME TESTS BASED ON RANKS` chapter — the Wilcoxon signed-rank test, the zeros and
+ties section — plus a practice-problems subsection with three worked problems.
+
+Two things should have caught it and didn't. The problem count fell from 26 to 23
+and I assumed I had miscounted before rather than checking. And I later wrote a
+commit message asserting the notes "had never taught" the signed-rank test, which
+was false — I had rewritten that very section days earlier.
+
+What actually surfaced it: `check-site.py` reported an orphaned giscus key,
+`3-1-wilcoxon-signed-rank-test`, pointing at a section that no longer existed.
+
+**The lesson, for next time.** A scripted splice that replaces a line range can
+swallow whatever sits between the anchors, and a clean LaTeX compile will not
+notice — the document still builds, just shorter. Before and after any bulk edit,
+count `\begin{problem}`, `\begin{solution}`, `\section` and `\subsection` and
+compare. `git diff --stat` showing 568 deletions on a commit meant to touch one
+subsection was visible the whole time.
+
+**Chapter structure fixed.** Everything had drifted into one 40-page chapter called
+"Some tests based on binomial distribution" that contained Wilcoxon,
+Kruskal-Wallis, Friedman and Spearman. Now eight chapters named for their contents:
+binomial tests, rank tests, three-or-more samples, correlation, K-S, two further
+tests, trend.
+
+**Errors found in the source material, this session's batch** (running total for
+this course is around 30). Upper quartile given as 3.35 where the notes' own
+interpolation rule gives 3.25. The sign test's "critical region" being the observed
+statistic and its mirror, twice. Mann-Whitney's decision rule stated backwards
+(`U >= CV` for `U <= CV`), contradicting the line below it. Every left-hand label in
+the empirical distribution function example shifted by one step, in the chapter that
+introduces the edf. A K-S table repeating 1.18 as the eighth order statistic when it
+is 1.97. Both one-sided Spearman tests comparing against alpha/2. The Spearman t
+statistic missing its square root and using `n - s` for `n - 2`. Multiple comparisons
+equating the critical difference with the observed difference. A worked example
+ending "Fail to reject H_0. We .........." with a `% Start from HERE` marker below it.
+
+**Three courses had stale builds.** `intro_prob.tex`, `intro_stats.tex` and
+`math_stats.tex` were edited in `5d5cd76` and never rebuilt, so the published pages
+ran behind their sources for a day. All rebuilt. Worth checking after any commit
+that touches several courses' sources at once.
+
+**Discussion keys.** The restructure renumbered chapters, so 56 keys are new and 53
+no longer resolve. Snapshot re-recorded with `--write-keys`; `check-site.py` reports
+OK at 290 keys.
+
+**Next:** Mathematical Methods is prepped on disk at
+`courses/mathematical-methods/source/math_methods.tex` and compiles at 217 pages,
+still uncommitted and unbuilt — deferred by the user. The remaining question-bank
+items for non-parametric (Friedman multiple comparisons, two-sample rank-sum theory,
+Type I/II error theory) are not yet worked.
+
 ### 2026-08-06 — Catalogue widened to all four years; deploy stuck in `waiting`
 
 Eight courses added to the "in preparation" list, so the catalogue now shows
