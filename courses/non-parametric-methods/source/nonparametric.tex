@@ -380,7 +380,7 @@ $0.1094$. The test is honest about how little ten signs can tell us --- which is
 the point of computing the null distribution rather than trusting the impression.
 \end{note}
 
-\section{\textbf{SOME TESTS BASED ON BINOMIAL DISTRIBUTION}}
+\section{\textbf{SOME TESTS BASED ON THE BINOMIAL DISTRIBUTION}}
 
 \begin{definition}[Binomial distribution]
 A random variable $X$ counting the occurrences of some outcome in a fixed number
@@ -1040,6 +1040,114 @@ abuses of significance testing. Fix the alternative first.
 \end{note}
 
 
+\subsection{Practice problems}
+
+\begin{problem}
+A traffic warden records how long sixteen cars remained illegally parked after
+their meter expired, in minutes:
+$$10,\ 42,\ 29,\ 11,\ 63,\ 145,\ 11,\ 8,\ 23,\ 17,\ 5,\ 20,\ 15,\ 36,\ 32,\ 15 .$$
+Obtain an appropriate $95\%$ confidence interval for the median overstay time, and
+state what assumptions justify the method used.
+\end{problem}
+
+\begin{solution}
+Order the data:
+$$5,\ 8,\ 10,\ \mathbf{11},\ 11,\ 15,\ 15,\ 17,\ 20,\ 23,\ 29,\ 32,\ \mathbf{36},\ 42,\ 63,\ 145 .$$
+A distribution-free interval for the median is
+$\left(X_{(k)},\ X_{(n+1-k)}\right)$, whose coverage is
+$$1 - 2\,P\!\left(\text{Bin}\!\left(n,\tfrac12\right) \leq k-1\right).$$
+With $n = 16$:
+$$\begin{array}{c|c|c}
+k & \text{interval} & \text{coverage}\\\hline
+3 & (10,\ 42) & 0.9958\\
+4 & (11,\ 36) & 0.9787\\
+5 & (11,\ 32) & 0.9232
+\end{array}$$
+Take the largest $k$ whose coverage still reaches $95\%$, namely $k = 4$:
+$$\boxed{\left(X_{(4)},\ X_{(13)}\right) = (11,\ 36) \text{ minutes, with actual
+confidence } 97.87\% .}$$
+
+\textbf{Assumptions.} Only that the sixteen observations are independent and come
+from a continuous distribution. Nothing is assumed about its shape --- which is the
+point, since the value $145$ is a severe outlier and would wreck any interval built
+on the mean and standard deviation.
+
+\textbf{Note on the confidence level.} The attainable levels are discrete, so
+$95\%$ cannot be hit exactly; one reports the interval and its true coverage
+rather than pretending it is $95\%$. The next interval down, $(11,32)$, covers only
+$92.3\%$ and is not a $95\%$ interval at all.
+\end{solution}
+
+\begin{problem}
+Eleven people with sleep problems have a median sleeping time of $2$ hours per
+night before treatment. A drug is administered; if it has any effect it will
+\emph{increase} sleeping time, though some doctors doubt it does anything. After
+treatment the hours slept are
+$$3.1,\ 1.8,\ 2.7,\ 2.4,\ 2.9,\ 0.2,\ 3.7,\ 5.1,\ 8,\ 2.1,\ 2 .$$
+Are the doctors' doubts justified?
+\end{problem}
+
+\begin{solution}
+\textbf{Hypotheses.} $H_0 : \theta = 2$ against the one-sided
+$H_1 : \theta > 2$, the direction fixed in advance by the pharmacology and not by
+the data.
+
+\textbf{Signs.} Comparing each value with $2$:
+$$+,\ -,\ +,\ +,\ +,\ -,\ +,\ +,\ +,\ +,\ 0 .$$
+The observation of exactly $2$ gives no sign and is discarded, leaving
+$$n' = 10,\qquad N_{+} = 8,\qquad N_{-} = 2 .$$
+
+\textbf{Exact test.} Under $H_0$, $N_{+} \sim B\!\left(10,\tfrac12\right)$, so
+$$P\left(N_{+} \geq 8\right)
+= \dfrac{\binom{10}{8}+\binom{10}{9}+\binom{10}{10}}{2^{10}}
+= \dfrac{45+10+1}{1024} = \dfrac{56}{1024} = 0.0547 .$$
+
+\textbf{Decision.} Since $0.0547 > 0.05$ we do \textbf{not} reject $H_0$ at the
+$5\%$ level. On this evidence the doctors' doubts are \emph{not} overturned.
+
+\textbf{But only just.} Eight of ten moving the right way is suggestive, and the
+$P$-value misses the conventional threshold by $0.0047$. The honest report is the
+$P$-value itself, not a verdict: a trial of even modest additional size would
+settle the question, and dismissing the drug on this result would be as wrong as
+adopting it.
+\end{solution}
+
+\begin{problem}
+A realtor claims the median sale price of houses sold in a certain month is
+$\$134{,}500$. In a random sample of $85$ sales, $30$ houses sold for less than
+that figure and $51$ for more. Test the claim at the $10\%$ significance level.
+\end{problem}
+
+\begin{solution}
+\textbf{The sample size is not $85$.} Only $30 + 51 = 81$ houses are recorded above
+or below the claimed median, so $4$ sold at exactly $\$134{,}500$. Those give no
+sign and are discarded:
+$$n' = 81,\qquad N_{-} = 30,\qquad N_{+} = 51 .$$
+
+\textbf{Hypotheses.} $H_0 : \theta = 134{,}500$ against
+$H_1 : \theta \neq 134{,}500$, two-sided, at $\alpha = 0.10$.
+
+\textbf{Large-sample statistic.} With $R = \min(N_{+},N_{-}) = 30$,
+$$Z = \dfrac{n' - 2R - 1}{\sqrt{n'}}
+= \dfrac{81 - 60 - 1}{\sqrt{81}} = \dfrac{20}{9} = 2.2222 ,$$
+giving a two-sided $P$-value of
+$$2\left[1 - \Phi(2.2222)\right] = 0.0263 .$$
+(The exact binomial two-sided value is $0.0257$, so the approximation is good at
+this size.)
+
+\textbf{Decision.} Since $0.0263 < 0.10$ we \textbf{reject} $H_0$: the data do not
+support the realtor's claim, and the evidence points to a median above
+$\$134{,}500$.
+
+\textbf{The trap.} Using $n = 85$ instead of $n' = 81$ gives $Z = 2.6032$ --- a
+different and wrong answer. Ties with the hypothesised median must be removed
+\emph{and} the sample size reduced to match; keeping $85$ in the denominator while
+having dropped the four observations from the counts is inconsistent.
+\end{solution}
+
+\pagebreak
+\section{\textbf{SOME TESTS BASED ON RANKS}}
+
 \subsection{Ranks}
 The ranks of observations play an important role in non-parametric methods. The rank of the $i^{th}$ observation $X_i$, in a sample of $m$ observations, is equal to the number of observations that are less than or equal to $X_i$. In other words, using the indicator function given as
 \begin{align*}
@@ -1227,16 +1335,98 @@ $T$.
 \caption{The exact null distribution of $T_{+}$ for $n=8$, obtained by enumerating all $2^{8}=256$ ways of attaching signs to the ranks $1,\dots,8$. It is symmetric about $n(n+1)/4=18$. The shaded tails are the two-sided $5\%$ critical region $T\leq 3$, whose exact size is $0.0391$; extending it to $T\leq 4$ would give $0.0547$ and exceed the nominal level.}
 \end{figure}
 
+\begin{example}
+Two treatments are compared on eight subjects.
+
 \begin{center}
-\textbf{Ties}
+\begin{tabular}{c|c|c|c|c|c}
+Obs & Sample 1 & Sample 2 & $d = S_1-S_2$ & $\left|d\right|$ & Rank of $\left|d\right|$\\
+\hline
+1 & 9  & 8  & $+1$ & 1 & $2$\\
+2 & 6  & 9  & $-3$ & 3 & $5$\\
+3 & 8  & 10 & $-2$ & 2 & $4$\\
+4 & 7  & 7  & $0$  & --- & discarded\\
+5 & 10 & 6  & $+4$ & 4 & $6$\\
+6 & 5  & 4  & $+1$ & 1 & $2$\\
+7 & 6  & 5  & $+1$ & 1 & $2$\\
+8 & 7  & 7  & $0$  & --- & discarded\\
+\end{tabular}
 \end{center}
 
-Tied absolute differences take mid-ranks, exactly as elsewhere. Ties reduce the
-variance of $T_{+}$, and where they are numerous the correction
-$$\operatorname{var}\left(T_{+}\right)
-=\dfrac{n(n+1)(2n+1)}{24}-\dfrac{\sum_{p}\left(t_p^{3}-t_p\right)}{48}$$
-is applied, $t_p$ being the size of the $p^{th}$ group of tied $\left|d_i\right|$.
-Zero differences are a separate matter and are dropped before ranking begins.
+Two pairs are discarded, so $n' = 6$. The absolute differences in order are
+$$1,\ 1,\ 1,\ 2,\ 3,\ 4 .$$
+The three $1$'s would occupy ranks $1, 2, 3$; being tied they each receive the
+average $\frac{1+2+3}{3} = 2$. The remaining values take ranks $4$, $5$, $6$.
+
+\begin{center}
+\begin{tabular}{l|cccccc}
+$\left|d\right|$ sorted & 1 & 1 & 1 & 2 & 3 & 4\\
+\hline
+Provisional rank & 1 & 2 & 3 & 4 & 5 & 6\\
+Rank used (ties averaged) & $2$ & $2$ & $2$ & $4$ & $5$ & $6$\\
+Sign of $d$ & $+$ & $+$ & $+$ & $-$ & $-$ & $+$\\
+\end{tabular}
+\end{center}
+
+Hence
+$$T_{+} = 2 + 2 + 2 + 6 = 12,
+\qquad
+T_{-} = 4 + 5 = 9,$$
+and the check holds: $12 + 9 = 21 = \dfrac{6(7)}{2}$.
+\end{example}
+
+\begin{note}
+\textbf{Ties must be averaged, even when it seems not to matter.} In this example
+the provisional ranks $1,2,3$ would give $T_{+} = 1+2+3+6 = 12$ as well, because
+all three tied observations happen to be positive and $1+2+3 = 3 \times 2$. That
+is a coincidence of this data set and not a licence: had one of the three been
+negative, the two rankings would have disagreed. Average the ranks always.
+\end{note}
+
+\textbf{Hypotheses and the matching statistic.} Write $D_1$, $D_2$ for the two
+distributions. The statistic to use is the one that becomes \emph{small} under the
+alternative:
+
+\begin{center}
+\begin{tabular}{l|l|l}
+Alternative & Statistic & Reject $H_0$ when\\
+\hline
+$D_1$ shifted \emph{left} of $D_2$ & $T_{+}$ & $T_{+} \leq T_0$\\
+$D_1$ shifted \emph{right} of $D_2$ & $T_{-}$ & $T_{-} \leq T_0$\\
+$D_1$ shifted either way & $T = \min(T_{+},T_{-})$ & $T \leq T_0$\\
+\end{tabular}
+\end{center}
+
+\begin{note}
+The pairing is worth pausing over, because it is easy to get backwards. If $D_1$
+lies to the \emph{left} of $D_2$ then the differences $d = S_1 - S_2$ are mostly
+negative, so few and small ranks fall on the positive side and it is $T_{+}$ that
+shrinks. The statistic named is the one the alternative drives \emph{down}, never
+the one it drives up.
+\end{note}
+
+\textbf{The test on the example.} For a two-sided alternative at
+$\alpha = 0.05$ with $n' = 6$, the critical value is $T_0 = 0$; for a one-sided
+test at $\alpha = 0.05$ it is $T_0 = 2$. Here
+$$T = \min(12, 9) = 9 \ \not\leq\ T_0 ,$$
+so we \textbf{fail to reject} $H_0$: there is no evidence of a shift.
+\textbf{Where the critical values come from.} With $n' = 6$ there are $2^{6} = 64$
+equally likely sign patterns under $H_0$, so the null distribution of $T_{+}$ can
+be written down exactly:
+$$P(T_{+} \leq 0) = \tfrac{1}{64} = 0.0156,\quad
+P(T_{+} \leq 1) = \tfrac{2}{64} = 0.0312,\quad
+P(T_{+} \leq 2) = \tfrac{3}{64} = 0.0469,$$
+$$P(T_{+} \leq 3) = \tfrac{5}{64} = 0.0781 .$$
+For a \emph{one-sided} test the whole of $\alpha$ sits in one tail, so the largest
+usable cut-off is $T_0 = 2$, not $3$: a cut-off of $3$ would give a $7.8\%$ test,
+not a $5\%$ one. For a \emph{two-sided} test each tail may carry only $0.025$, and
+since $P(T_{+}\leq 1) = 0.0312$ already exceeds that, the cut-off drops to
+$T_0 = 0$ --- a two-sided test at $n' = 6$ can reject only when every single
+difference points the same way.
+
+At such small $n'$ the attainable levels are coarse, and it is worth quoting the
+exact tail rather than the nominal $\alpha$. The two-sided test above is really a
+$3.1\%$ test, and there is no way to make it a $5\%$ one.
 
 \begin{example}
 Eight plots of maize are each sown half with a conventional variety and half with
@@ -1301,6 +1491,30 @@ The moral is not that the signed-rank test is better in general --- it buys its
 power by assuming symmetry, which the sign test does not. It is that discarding
 the magnitudes has a price, and on data like these the price is the entire result.
 \end{note}
+
+\subsection{Zeros and Ties in the Signed-Rank Test}
+Two things can go wrong with the data before the statistic is even formed, and
+the variance above assumes neither has happened.
+
+\textbf{Zeros.} A difference of exactly $0$ has no sign, so it cannot be ranked.
+The usual treatment is to discard such pairs and reduce $n$ accordingly, so that
+$n$ in every formula means the number of \emph{non-zero} differences, not the
+number of pairs collected. Reporting the original sample size after discarding
+zeros overstates the evidence.
+
+\textbf{Ties.} Tied absolute differences are given the average of the ranks they
+would otherwise have occupied. Averaging leaves $E(T_+)$ unchanged but
+\emph{reduces} the variance, and the correct expression is
+$$\operatorname{var}(T_+) = \dfrac{1}{24}\left[
+n(n+1)(2n+1) - \dfrac{1}{2}\sum_{p}\left(t_p^{3} - t_p\right)\right],$$
+the sum running over the groups of tied absolute differences with $t_p$ the size
+of the $p$-th group. With no ties every $t_p = 1$, each term vanishes, and the
+expression returns to $\dfrac{n(n+1)(2n+1)}{24}$.
+
+Using the uncorrected variance when ties are present overstates the denominator,
+shrinks $\left|T^{*}\right|$, and so makes the test conservative --- it will fail
+to detect real shifts. The error is in the safe direction, which is precisely why
+it goes unnoticed.
 
 \subsection{General Two Sample Problem}
 For matched or paired sign and sign rank test the data consists of two samples but each element in one sample has linked  with a particular element of the other sample by some unit association. This sampling situation can be described as a case of two dependent samples or as been sample of pairs from a bivariate population. During analysis differences of the paired observations are taken leaving a single set of observations. This type of data may be classified as a one sample problem.\\ 
@@ -1628,6 +1842,9 @@ Then non-parametric techniques which have been developed for this $k$ sample pro
 
 
 
+
+\pagebreak
+\section{\textbf{TESTS FOR THREE OR MORE SAMPLES}}
 
 \subsection{Kruskal-Wallis Test}
 
@@ -1962,7 +2179,8 @@ of them.
 
 
 
-\subsection{Non-Parametric Measures of Correlation}
+\pagebreak
+\section{\textbf{NON-PARAMETRIC MEASURES OF CORRELATION}}
 Rank  correlation is used quite intensively. There are many used e.g  Spearmans, gammas, Kendall's e.t.c of these , the spearmans is the widely used.\\ 
 The data referred to were is bivariate so that each data item is reported in terms of two attribute. A general bivariate is denoted $(X_i,Y_i)$. The sample size is denoted by $n$.\\
 
