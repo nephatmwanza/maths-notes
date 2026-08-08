@@ -612,6 +612,31 @@ that touches several courses' sources at once.
 no longer resolve. Snapshot re-recorded with `--write-keys`; `check-site.py` reports
 OK at 290 keys.
 
+**Sidebar bug, found by the user.** The non-parametric sidebar was one flat list of
+51 subsections with no chapter outline, unlike every other course. `read_toc`
+matched contents entries with `href='...se3.html#...'>([^<]+)`, which needs bare
+text right after the `>`. This course wrote its chapters as
+`\section{\textbf{...}}`, so tex4ht wrapped each label in a `<span>` and every
+`\section` entry failed to match. Subsections have no markup and matched fine, so
+the sidebar built without erroring — just missing its whole top level. The label is
+now captured up to `</a>` and stripped of tags. **Check this after any heading that
+contains formatting**: the failure is silent.
+
+Chapters also retitled from `\textbf{ALL CAPS}` to title case. `slug()` strips tags
+and lowercases already, so all 290 keys stayed byte-identical.
+
+**Practice problems now in every chapter** — chapters 1, 3 and 4 had none. Five more
+from the bank worked in full: the five definitions (critical region, Type I/II
+error, power, H_0); parametric vs non-parametric; the autism trial where the sign
+test gives p = 0.1445 and signed-rank p = 0.0273 on the same data; the derivation
+of the T+ null distribution at n = 4, whose answer is that no 5% critical region
+exists at that sample size; Kruskal-Wallis ties; the algebraic identity reducing
+the expected-value form of H to the computational form; and Friedman multiple
+comparisons with a worked k = 4, n = 10 case.
+
+Course final state: 74 pages, 64 web pages, 8 chapters, 33 problems, 41 solutions,
+7 figures, 62 sidebar entries, 293 discussion keys, no build warnings.
+
 **Next:** Mathematical Methods is prepped on disk at
 `courses/mathematical-methods/source/math_methods.tex` and compiles at 217 pages,
 still uncommitted and unbuilt — deferred by the user. The remaining question-bank
