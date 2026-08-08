@@ -218,10 +218,20 @@ def read_toc(build: Path) -> list[dict]:
     # complex variables contents page with zero entries parsed, so every page
     # of that course shipped with an empty sidebar - the document was fine and
     # the reader simply had no way to navigate it.
+    # The label is captured as everything up to </a>, then stripped of tags,
+    # rather than as bare text right after '>'. A heading written
+    # \section{\textbf{...}} makes tex4ht wrap the label in a <span>, so a
+    # pattern anchored on '>([^<]+)' matches nothing and the entry vanishes.
+    # That silently dropped all eight chapter headings from the non-parametric
+    # sidebar, leaving one flat list of fifty-one subsections and no outline.
     for m in re.finditer(
-        r"href=['\"]([^'\"]*?(?:ch|se|su)\d+\.html)#[^'\"]*['\"]>([^<]+)", html
+        r"href=['\"]([^'\"]*?(?:ch|se|su)\d+\.html)#[^'\"]*['\"]\s*>(.*?)</a>",
+        html, re.S
     ):
-        href, label = m.group(1), unescape(m.group(2)).strip()
+        href = m.group(1)
+        label = unescape(re.sub(r"<[^>]+>", "", m.group(2))).strip()
+        if not label:
+            continue
         stem = Path(href).stem
         if re.search(r"ch\d+$", stem):
             kind = "ch"
