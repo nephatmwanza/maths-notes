@@ -1113,6 +1113,195 @@ The mid rank method assigns to each member of a group of type observations the s
 
 
 
+\subsection{The Wilcoxon Signed-Rank Test}
+The sign test discards a great deal. It records that a difference was positive but
+not that it was large, so a subject who improved enormously counts exactly as much
+as one who improved by a hair. When the differences are measured on a scale where
+their sizes mean something, that information is worth keeping, and the Wilcoxon
+signed-rank test keeps it.
+
+Proposed by Wilcoxon in the same 1945 paper as the rank-sum test, it applies to the
+same situations as the sign test --- one sample, or paired data reduced to
+differences --- and is almost always the better choice there.
+
+\begin{center}
+\textbf{Procedure}
+\end{center}
+
+For a sample $X_1,\dots,X_n$ and a hypothesised median $\theta_0$, form the
+differences $d_i=X_i-\theta_0$; for paired data $\left(Y_i,Z_i\right)$ take
+$d_i=Y_i-Z_i$. Then
+\begin{enumerate}
+\item[(i).] discard any $d_i=0$ and reduce $n$ accordingly, as in the sign test;
+\item[(ii).] rank the \emph{absolute} differences $\left|d_i\right|$ from $1$ to
+$n$, smallest first, using mid-ranks for ties;
+\item[(iii).] attach to each rank the sign of its $d_i$;
+\item[(iv).] let $T_{+}$ be the sum of the ranks carrying a plus and $T_{-}$ the
+sum of those carrying a minus.
+\end{enumerate}
+
+Since every rank goes into one sum or the other,
+$$T_{+}+T_{-}=\sum^{n}_{i=1}i=\dfrac{n(n+1)}{2},$$
+which is the arithmetic check: if the two sums do not add to $n(n+1)/2$, the
+ranking is wrong. For a two-sided test the statistic is
+$$T=\min\left(T_{+},T_{-}\right).$$
+
+\begin{center}
+\textbf{The null hypothesis, and what it assumes}
+\end{center}
+
+$$H_0:\text{the differences are symmetrically distributed about } 0 .$$
+
+Symmetry is doing essential work here, and it is an assumption the sign test does
+not need. Under $H_0$ a difference of any given magnitude is as likely to be
+negative as positive, independently across observations, so each rank
+$1,2,\dots,n$ carries a plus or a minus with probability $\tfrac{1}{2}$ each. That
+is what makes the null distribution of $T_{+}$ computable without knowing anything
+else about the population --- and it is why the test is not valid for strongly
+skewed differences, where the sign test remains available.
+
+Enumerating all $2^{n}$ sign patterns gives the exact distribution. From it,
+$$E\left(T_{+}\right)=\dfrac{n(n+1)}{4},\hspace{0.8cm}
+\operatorname{var}\left(T_{+}\right)=\dfrac{n(n+1)(2n+1)}{24},$$
+the mean being half the total $n(n+1)/2$ by symmetry. For $n>20$,
+$$Z=\dfrac{T_{+}-\dfrac{n(n+1)}{4}}{\sqrt{\dfrac{n(n+1)(2n+1)}{24}}}\ \thicksim\ N(0,1);$$
+below that, exact tables of $T$ are used, and $H_0$ is rejected for \emph{small}
+$T$.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth]
+\draw[->](-0.35,0)--(13.45,0) node[right,font=\small]{$t$};
+\draw[->](-0.35,0)--(-0.35,5.10) node[above,font=\small]{$P(T_+=t)$};
+\draw(-0.45,0.84)--(-0.25,0.84) node[left=2pt,font=\scriptsize]{$0.01$};
+\draw(-0.45,1.68)--(-0.25,1.68) node[left=2pt,font=\scriptsize]{$0.02$};
+\draw(-0.45,2.52)--(-0.25,2.52) node[left=2pt,font=\scriptsize]{$0.03$};
+\draw(-0.45,3.36)--(-0.25,3.36) node[left=2pt,font=\scriptsize]{$0.04$};
+\fill[red!60](0.06,0) rectangle (0.29,0.329);
+\fill[red!60](0.41,0) rectangle (0.64,0.329);
+\fill[red!60](0.76,0) rectangle (0.99,0.329);
+\fill[red!60](1.11,0) rectangle (1.35,0.657);
+\fill[blue!45!black!55](1.47,0) rectangle (1.70,0.657);
+\fill[blue!45!black!55](1.82,0) rectangle (2.05,0.986);
+\fill[blue!45!black!55](2.17,0) rectangle (2.40,1.314);
+\fill[blue!45!black!55](2.52,0) rectangle (2.75,1.643);
+\fill[blue!45!black!55](2.87,0) rectangle (3.10,1.971);
+\fill[blue!45!black!55](3.22,0) rectangle (3.45,2.300);
+\fill[blue!45!black!55](3.57,0) rectangle (3.80,2.629);
+\fill[blue!45!black!55](3.92,0) rectangle (4.16,2.957);
+\fill[blue!45!black!55](4.28,0) rectangle (4.51,3.286);
+\fill[blue!45!black!55](4.63,0) rectangle (4.86,3.614);
+\fill[blue!45!black!55](4.98,0) rectangle (5.21,3.943);
+\fill[blue!45!black!55](5.33,0) rectangle (5.56,4.271);
+\fill[blue!45!black!55](5.68,0) rectangle (5.91,4.271);
+\fill[blue!45!black!55](6.03,0) rectangle (6.26,4.271);
+\fill[blue!45!black!55](6.38,0) rectangle (6.62,4.600);
+\fill[blue!45!black!55](6.74,0) rectangle (6.97,4.271);
+\fill[blue!45!black!55](7.09,0) rectangle (7.32,4.271);
+\fill[blue!45!black!55](7.44,0) rectangle (7.67,4.271);
+\fill[blue!45!black!55](7.79,0) rectangle (8.02,3.943);
+\fill[blue!45!black!55](8.14,0) rectangle (8.37,3.614);
+\fill[blue!45!black!55](8.49,0) rectangle (8.72,3.286);
+\fill[blue!45!black!55](8.84,0) rectangle (9.08,2.957);
+\fill[blue!45!black!55](9.20,0) rectangle (9.43,2.629);
+\fill[blue!45!black!55](9.55,0) rectangle (9.78,2.300);
+\fill[blue!45!black!55](9.90,0) rectangle (10.13,1.971);
+\fill[blue!45!black!55](10.25,0) rectangle (10.48,1.643);
+\fill[blue!45!black!55](10.60,0) rectangle (10.83,1.314);
+\fill[blue!45!black!55](10.95,0) rectangle (11.18,0.986);
+\fill[blue!45!black!55](11.30,0) rectangle (11.53,0.657);
+\fill[red!60](11.65,0) rectangle (11.89,0.657);
+\fill[red!60](12.01,0) rectangle (12.24,0.329);
+\fill[red!60](12.36,0) rectangle (12.59,0.329);
+\fill[red!60](12.71,0) rectangle (12.94,0.329);
+\node[below,font=\scriptsize] at (0.18,0){$0$};
+\node[below,font=\scriptsize] at (2.28,0){$6$};
+\node[below,font=\scriptsize] at (4.39,0){$12$};
+\node[below,font=\scriptsize] at (6.50,0){$18$};
+\node[below,font=\scriptsize] at (8.61,0){$24$};
+\node[below,font=\scriptsize] at (10.72,0){$30$};
+\node[below,font=\scriptsize] at (12.82,0){$36$};
+\node[font=\scriptsize,red!70!black,anchor=west] at (1.62,3.03){critical region, $T\leq 3$};
+\draw[red!70!black,->](1.57,2.73)--(0.70,1.05);
+\end{tikzpicture}
+\caption{The exact null distribution of $T_{+}$ for $n=8$, obtained by enumerating all $2^{8}=256$ ways of attaching signs to the ranks $1,\dots,8$. It is symmetric about $n(n+1)/4=18$. The shaded tails are the two-sided $5\%$ critical region $T\leq 3$, whose exact size is $0.0391$; extending it to $T\leq 4$ would give $0.0547$ and exceed the nominal level.}
+\end{figure}
+
+\begin{center}
+\textbf{Ties}
+\end{center}
+
+Tied absolute differences take mid-ranks, exactly as elsewhere. Ties reduce the
+variance of $T_{+}$, and where they are numerous the correction
+$$\operatorname{var}\left(T_{+}\right)
+=\dfrac{n(n+1)(2n+1)}{24}-\dfrac{\sum_{p}\left(t_p^{3}-t_p\right)}{48}$$
+is applied, $t_p$ being the size of the $p^{th}$ group of tied $\left|d_i\right|$.
+Zero differences are a separate matter and are dropped before ranking begins.
+
+\begin{example}
+Eight plots of maize are each sown half with a conventional variety and half with
+an improved one, and the yields (t/ha) recorded:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccccccc}
+Plot &1&2&3&4&5&6&7&8\\
+\hline
+Conventional &2.1&2.4&3.0&2.8&1.9&3.3&2.6&2.2\\
+Improved &2.9&3.6&3.3&3.3&3.4&3.5&3.5&2.1\\
+\end{tabular}
+\end{table}
+
+Test at the $5\%$ level whether the improved variety yields differently.
+\end{example}
+
+\begin{solution}
+The differences $d=\text{improved}-\text{conventional}$ are
+$$0.8,\hspace{0.3cm}1.2,\hspace{0.3cm}0.3,\hspace{0.3cm}0.5,\hspace{0.3cm}
+1.5,\hspace{0.3cm}0.2,\hspace{0.3cm}0.9,\hspace{0.3cm}-0.1 .$$
+None is zero, so $n=8$. Ranking the absolute differences:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccccccc}
+$\left|d\right|$ &0.1&0.2&0.3&0.5&0.8&0.9&1.2&1.5\\
+\hline
+rank &1&2&3&4&5&6&7&8\\
+sign of $d$ &$-$&$+$&$+$&$+$&$+$&$+$&$+$&$+$\\
+\end{tabular}
+\end{table}
+
+$$T_{+}=2+3+4+5+6+7+8=35,\hspace{0.8cm}T_{-}=1,$$
+and $35+1=36=\dfrac{8\times 9}{2}$, so the ranking is consistent. The statistic is
+$$T=\min(35,1)=1 .$$
+
+For $n=8$ the two-sided $5\%$ critical value is $T\leq 3$. Since $1\leq 3$ we
+reject $H_0$: the improved variety gives a different --- and, from the signs, a
+higher --- yield.
+
+The exact $p$-value follows from the figure above:
+$$p=2\,P\left(T_{+}\leq 1\right)=2\times\dfrac{2}{256}=0.0156 .$$
+\end{solution}
+
+\begin{note}
+Compare what the sign test would have made of the same data. Seven of the eight
+differences are positive, so $N_{+}=7$ and
+$$p=2\,P\left(N_{+}\geq 7\right)
+=2\times\dfrac{\binom{8}{7}+\binom{8}{8}}{256}=2\times\dfrac{9}{256}=0.0703 ,$$
+which does not reach the $5\%$ level. The two tests reach opposite verdicts on
+identical data: $0.0156$ against $0.0703$, a fourfold difference.
+
+The reason is visible in the differences themselves. The single negative one is
+$-0.1$, the smallest change in the table, while the seven positive ones run up to
+$1.5$. The sign test sees eight arrows, seven up and one down, and one down out of
+eight is unremarkable. The signed-rank test sees that the lone dissenter is also
+the least substantial observation, and that costs it rank $1$ out of $36$.
+
+The moral is not that the signed-rank test is better in general --- it buys its
+power by assuming symmetry, which the sign test does not. It is that discarding
+the magnitudes has a price, and on data like these the price is the entire result.
+\end{note}
+
 \subsection{General Two Sample Problem}
 For matched or paired sign and sign rank test the data consists of two samples but each element in one sample has linked  with a particular element of the other sample by some unit association. This sampling situation can be described as a case of two dependent samples or as been sample of pairs from a bivariate population. During analysis differences of the paired observations are taken leaving a single set of observations. This type of data may be classified as a one sample problem.\\ 
 Here we shall be concerned with data consisting of two mutually independent samples. i.e random samples drawn independently from each of the two populations. All the elements are independent of each other and between samples. This consists of two population $X$ and $Y$ population with edf $F_X$ and $F_Y$ respectively. We have a random sample of size $m$ drawn from $X$ population and other sample of size $n$ drawn from $Y$ population. $X_1,X_2,\dots,X_m$ and $Y_1,Y_2,\dots,Y_m$. The hypothesis of interest in the two sample problem is that the samples are drawn from identical populations. \hspace{0.2cm}$\text{i.e}\hspace{0.5cm} H_0:F_X(x)=F_Y(y)\hspace{0.4cm}\forall x$\\\\\\
@@ -1908,7 +2097,8 @@ Pearson's formula.
 \end{note}
 Using sum of the ranks for each pair \hspace{0.2cm}$\displaystyle{r_s=\frac{6\sum S^2_i}{n^3-n}-\frac{7n+5}{n-1}}\hspace{0.2cm}$ where \hspace{0.2cm}$S_i=R(X_i)+R(Y_i).$\\
 
-\textit{Note:} the sign and size of $r_s$ are read as follows.
+\begin{note}
+The sign and size of $r_s$ are read as follows.
 \begin{enumerate}
 \item[(i).] $r_s=0$: no correlation. The ranks of one variable carry no
 information about the ranks of the other.
@@ -1918,6 +2108,7 @@ information about the ranks of the other.
 Like Pearson's coefficient, $r_s$ lies in $[-1,1]$, and the extremes are attained
 exactly when the two rankings are identical $(r_s=1)$ or exactly reversed
 $(r_s=-1)$.
+\end{note}
 
 
 
