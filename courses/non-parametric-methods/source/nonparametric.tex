@@ -380,6 +380,109 @@ $0.1094$. The test is honest about how little ten signs can tell us --- which is
 the point of computing the null distribution rather than trusting the impression.
 \end{note}
 
+\pagebreak
+\subsection{Practice problems}
+
+\begin{problem}
+Explain what you understand by each of the following:
+\begin{enumerate}
+\item[(a).] critical region;
+\item[(b).] Type I error;
+\item[(c).] Type II error;
+\item[(d).] power;
+\item[(e).] null hypothesis.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(e) Null hypothesis.} Take this first, since the other four are defined
+against it. $H_0$ is the statement being tested --- conventionally the statement of
+\emph{no effect}, no difference, no association. It is given the benefit of the
+doubt: the test asks whether the data are embarrassing for $H_0$, and only a
+sufficiently embarrassing sample leads to its rejection. It is never
+\emph{proved}; it is either rejected or not rejected.
+
+\textbf{(a) Critical region.} The set of values of the test statistic for which
+$H_0$ is rejected. It is fixed \emph{before} the data are seen, by choosing a
+significance level $\alpha$ and then finding the values of the statistic whose
+total probability under $H_0$ is at most $\alpha$. Its complement is the
+acceptance region. For the sign test with $n=10$ at $\alpha=0.05$ two-sided, for
+instance, the critical region is $N_+\leq 1$ or $N_+\geq 9$.
+
+\textbf{(b) Type I error.} Rejecting $H_0$ when it is in fact true --- a false
+positive. Its probability is
+$$P(\text{Type I error})=P\left(\text{statistic falls in the critical region}
+\mid H_0 \text{ true}\right)=\alpha .$$
+This is the one error rate the experimenter controls directly, by choosing
+$\alpha$ and constructing the critical region to match.
+
+\textbf{(c) Type II error.} Failing to reject $H_0$ when it is false --- a false
+negative. Its probability is written $\beta$. Unlike $\alpha$ it is not a single
+number: $\beta$ depends on \emph{how} false $H_0$ is, so there is a different
+$\beta$ for every value the parameter might really take. A small departure from
+$H_0$ is hard to detect and gives a large $\beta$; a gross one gives a small
+$\beta$.
+
+\textbf{(d) Power.} The probability of correctly rejecting a false $H_0$,
+$$\text{power}=1-\beta=P\left(\text{reject } H_0 \mid H_0 \text{ false}\right),$$
+again a function of the true parameter value rather than one number. Power rises
+with the sample size, with the size of the real effect, and with $\alpha$.
+\end{solution}
+
+\begin{note}
+The four are linked by a trade-off that cannot be escaped. For a fixed sample
+size, shrinking the critical region lowers $\alpha$ and raises $\beta$; enlarging
+it does the reverse. Only increasing $n$ improves both at once.
+
+This is why $\alpha$ is chosen in advance and $\beta$ is usually left to fall
+where it may: with $H_0$ true there is exactly one distribution to compute
+against, but with $H_0$ false there are infinitely many. It is also why "we do not
+reject $H_0$" must never be reported as "$H_0$ is true". A test with low power
+fails to reject almost regardless of the truth, and its non-rejections carry
+almost no information --- as in the Kolmogorov--Smirnov example later in these
+notes, where eight observations could not have ruled out the uniform distribution
+whatever they had been.
+\end{note}
+
+\begin{problem}
+\begin{enumerate}
+\item[(a).] What is the difference between a parametric and a non-parametric
+statistical test?
+\item[(b).] Non-parametric methods have very desirable properties, yet parametric
+methods are still used far more often. Give two main reasons.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} A \emph{parametric} test assumes the population belongs to a family
+of distributions indexed by a finite number of parameters --- most often the
+normal family $N\left(\mu,\sigma^{2}\right)$ --- and the hypothesis is a statement
+about those parameters, such as $H_0:\mu=\mu_0$. The null distribution of the test
+statistic is derived \emph{from} that assumed form, so if the assumption fails the
+stated error rate is not the real one.
+
+A \emph{non-parametric} test assumes no such family. It typically requires only
+that the distribution be continuous, and the hypothesis concerns the distribution
+itself or a feature of it that needs no parametric form, such as its median. The
+statistic is built from signs, ranks or order statistics, whose null distribution
+is the same whatever the underlying continuous distribution happens to be --- which
+is why these tests are also called \emph{distribution-free}.
+
+\textbf{(b).} Two reasons.
+
+\emph{Power.} When the parametric assumption is actually true, the parametric test
+is more efficient: it uses the numerical values, while a rank test uses only their
+order. The $t$-test on normal data beats the sign test comfortably, so with
+genuinely normal data the non-parametric test wastes information and needs a
+larger sample for the same power.
+
+\emph{Scope.} Parametric theory is far more fully developed. Estimation,
+confidence intervals, regression, factorial designs, covariates and mixed models
+all have standard parametric treatments; the non-parametric versions are fewer,
+more awkward, and in some cases do not exist. A researcher with a complicated
+design often has no distribution-free option at all.
+\end{solution}
+
 \section{Some Tests Based on the Binomial Distribution}
 
 \begin{definition}[Binomial distribution]
@@ -1844,6 +1947,139 @@ Then non-parametric techniques which have been developed for this $k$ sample pro
 
 
 \pagebreak
+\pagebreak
+\subsection{Practice problems}
+
+\begin{problem}
+In a clinical investigation of a new drug intended to reduce repetitive behaviour
+in children with autism, the drug is effective if a child shows \emph{less} such
+behaviour on treatment. Eight children were enrolled. Each was observed for three
+hours before treatment and again after a week on the drug, and the percentage of
+the observation period spent in repetitive behaviour was recorded.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccccccc}
+Child &1&2&3&4&5&6&7&8\\
+\hline
+Before treatment &85&70&40&65&80&75&55&20\\
+After one week &75&50&50&40&20&65&40&25\\
+\end{tabular}
+\end{table}
+
+Test $H_0$: the median difference is zero, against $H_1$: the median difference is
+positive, using
+\begin{enumerate}
+\item[(a).] the sign test;
+\item[(b).] the Wilcoxon signed-rank test;
+\item[(c).] and comment on the two results.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+The differences $d=\text{before}-\text{after}$ are
+$$10,\hspace{0.3cm}20,\hspace{0.3cm}-10,\hspace{0.3cm}25,\hspace{0.3cm}60,
+\hspace{0.3cm}10,\hspace{0.3cm}15,\hspace{0.3cm}-5 .$$
+A positive $d$ means the behaviour fell, so the drug working corresponds to
+positive differences and the alternative is one-sided upward. None is zero, so
+$n=8$ throughout.
+
+\textbf{(a) Sign test.} Six differences are positive and two negative, so
+$N_{+}=6$ with $N_{+}\sim\operatorname{Bin}\left(8,\tfrac{1}{2}\right)$ under
+$H_0$. Large $N_{+}$ favours $H_1$:
+$$p=P\left(N_{+}\geq 6\right)
+=\dfrac{\binom{8}{6}+\binom{8}{7}+\binom{8}{8}}{2^{8}}
+=\dfrac{28+8+1}{256}=\dfrac{37}{256}=0.1445 .$$
+Since $0.1445>0.05$ we do \textbf{not} reject $H_0$. The sign test finds no
+evidence that the drug works.
+
+\textbf{(b) Wilcoxon signed-rank test.} Rank the absolute differences, averaging
+ties:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccccccc}
+$\left|d\right|$ sorted &5&10&10&10&15&20&25&60\\
+\hline
+provisional rank &1&2&3&4&5&6&7&8\\
+rank used &1&3&3&3&5&6&7&8\\
+sign of $d$ &$-$&$+$&$-$&$+$&$+$&$+$&$+$&$+$\\
+\end{tabular}
+\end{table}
+
+The three $\left|d\right|=10$ would take ranks $2,3,4$ and so each receives
+$\frac{2+3+4}{3}=3$. Then
+$$T_{+}=3+3+5+6+7+8=32,\hspace{0.8cm}T_{-}=1+3=4,$$
+and the check holds: $32+4=36=\dfrac{8\times 9}{2}$.
+
+The alternative says the differences run positive, which drives $T_{-}$ down, so
+$T_{-}$ is the statistic and small values are significant. For $n=8$ one-sided at
+$\alpha=0.05$ the critical value is $T_0=5$, since $P\left(T\leq 5\right)=0.0391$
+while $P\left(T\leq 6\right)=0.0547$. Here
+$$T_{-}=4\leq 5,$$
+so we \textbf{reject} $H_0$. The exact $p$-value is
+$P\left(T\leq 4\right)=\frac{7}{256}=0.0273$.
+
+\textbf{(c) Comment.} The two tests disagree: $p=0.1445$ against $p=0.0273$, on
+identical data. The reason is that the two negative differences, $-10$ and $-5$,
+are among the smallest in the set, while the positive ones include $60$, $25$ and
+$20$. The sign test counts six arrows up and two down and finds that unremarkable
+in eight children. The signed-rank test sees that the two children who worsened
+did so barely, and that between them they account for only $4$ of the $36$ available
+rank points.
+
+Where both tests apply, the signed-rank test is the more powerful and is the one
+to report. It buys that power by assuming the differences are symmetric about
+their median, which the sign test does not require --- so on markedly skewed
+differences the sign test's verdict would be the one to trust.
+\end{solution}
+
+\begin{problem}
+Derive the null distribution of the Wilcoxon signed-rank statistic $T_{+}$ for
+$n=4$ by enumeration. Hence give the critical values for a one-sided and a
+two-sided test at $\alpha=0.05$, and comment.
+\end{problem}
+
+\begin{solution}
+Under $H_0$ each of the ranks $1,2,3,4$ independently carries a plus or a minus
+with probability $\tfrac{1}{2}$, so there are $2^{4}=16$ equally likely sign
+patterns and $T_{+}$ is the sum of the ranks carrying a plus. Enumerating the
+subsets of $\{1,2,3,4\}$ by their totals:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccccccccccc}
+$t$ &0&1&2&3&4&5&6&7&8&9&10\\
+\hline
+subsets summing to $t$ &1&1&1&2&2&2&2&2&1&1&1\\
+$P\left(T_{+}=t\right)$ &$\frac{1}{16}$&$\frac{1}{16}$&$\frac{1}{16}$&$\frac{2}{16}$&$\frac{2}{16}$&$\frac{2}{16}$&$\frac{2}{16}$&$\frac{2}{16}$&$\frac{1}{16}$&$\frac{1}{16}$&$\frac{1}{16}$\\
+\end{tabular}
+\end{table}
+
+The two subsets summing to $3$ are $\{3\}$ and $\{1,2\}$; those summing to $4$ are
+$\{4\}$ and $\{1,3\}$, and so on. The distribution is symmetric about
+$\dfrac{n(n+1)}{4}=5$ and the totals check: $1+1+1+2+2+2+2+2+1+1+1=16$.
+
+Accumulating the lower tail,
+$$P\left(T_{+}\leq 0\right)=\dfrac{1}{16}=0.0625,\hspace{0.6cm}
+P\left(T_{+}\leq 1\right)=\dfrac{2}{16}=0.1250,\hspace{0.6cm}
+P\left(T_{+}\leq 2\right)=\dfrac{3}{16}=0.1875 .$$
+
+\textbf{Critical values.} There are none. Even the most extreme outcome
+possible --- every one of the four differences pointing the same way --- has
+one-sided probability $0.0625$, which exceeds $0.05$. No critical region of size
+at most $0.05$ exists, one-sided or two-sided, so at $n=4$ the test cannot reject
+$H_0$ at the $5\%$ level whatever the data.
+
+\textbf{Comment.} This is a property of the design, not of the sample. With four
+paired observations the smallest attainable significance level is $2/16=0.125$
+two-sided, and no amount of favourable data will improve it. The practical
+consequence is that the sample size must be checked \emph{before} the study is
+run: for a two-sided $5\%$ signed-rank test $n\geq 6$ is needed for any critical
+region to exist at all, and $n=6$ only rejects when all six differences agree in
+sign.
+\end{solution}
+
 \section{Tests for Three or More Samples}
 
 \subsection{Kruskal-Wallis Test}
@@ -2180,6 +2416,162 @@ of them.
 
 
 \pagebreak
+\pagebreak
+\subsection{Practice problems}
+
+\begin{problem}
+Describe how the problem of tied observations is resolved when calculating the
+Kruskal--Wallis statistic $H$.
+\end{problem}
+
+\begin{solution}
+$H$ is computed from the ranks of the pooled sample, and ties leave the ranking
+undefined until a convention is imposed.
+
+\textbf{Step one: mid-ranks.} Observations that are equal are given the average of
+the ranks they would jointly have occupied. If the fourth, fifth and sixth
+smallest values in the pooled sample are all equal, each receives
+$\frac{4+5+6}{3}=5$. The rank sums $R_j$ and the statistic
+$$H=\dfrac{12}{N(N+1)}\sum^{k}_{j=1}\dfrac{R_j^{2}}{n_j}-3(N+1)$$
+are then formed from these mid-ranks in the usual way. Note that the total of all
+ranks is still $N(N+1)/2$, so the arithmetic check is unaffected by ties.
+
+\textbf{Step two: correct the statistic.} Averaging ranks reduces the variance of
+the rank sums, which makes $H$ systematically too small. The corrected statistic
+divides by a factor computed from the tie pattern:
+$$H^{*}=\dfrac{H}{1-\dfrac{\sum_{p}\left(t_p^{3}-t_p\right)}{N^{3}-N}},$$
+the sum running over every group of tied values in the pooled sample and $t_p$
+being the number of observations in the $p^{th}$ group. Untied observations form
+groups of size $1$ and contribute nothing, since $1^{3}-1=0$.
+
+$H^{*}$ is then referred to $\chi^{2}_{k-1}$ as before.
+
+\textbf{Direction and size of the correction.} The divisor is at most $1$, so
+$H^{*}\geq H$: the correction always inflates the statistic and makes rejection
+easier. Omitting it is therefore \emph{conservative} --- the test loses power but
+does not overstate significance --- which is why the omission so often goes
+unnoticed. The effect is negligible unless ties are numerous, but with heavily
+tied data, such as ordinal scores on a five-point scale, it can be substantial.
+\end{solution}
+
+\begin{problem}
+The Kruskal--Wallis statistic may be written
+$$F=A\sum^{k}_{j=1}\dfrac{1}{n_j}\left[R_j-\dfrac{n_j(N+1)}{2}\right]^{2},$$
+where $R_j$ is the rank sum of the $j^{th}$ sample, $n_j$ its size, $k$ the number
+of samples, $N=n_1+n_2+\dots+n_k$, and $A=\dfrac{12}{N(N+1)}$. Show that
+$$F=A\sum^{k}_{j=1}\dfrac{R_j^{2}}{n_j}-3(N+1).$$
+\end{problem}
+
+\begin{solution}
+Two facts about the pooled ranking are needed. Every rank from $1$ to $N$ is used
+exactly once, so
+$$\sum^{k}_{j=1}R_j=\sum^{N}_{i=1}i=\dfrac{N(N+1)}{2},
+\hspace{1cm}\text{and}\hspace{1cm}\sum^{k}_{j=1}n_j=N .$$
+
+Expand the square:
+\begin{align*}
+F &=A\sum^{k}_{j=1}\dfrac{1}{n_j}
+   \left[R_j^{2}-2R_j\cdot\dfrac{n_j(N+1)}{2}+\dfrac{n_j^{2}(N+1)^{2}}{4}\right]\\[4pt]
+  &=A\sum^{k}_{j=1}\left[\dfrac{R_j^{2}}{n_j}-R_j(N+1)
+     +\dfrac{n_j(N+1)^{2}}{4}\right]\\[4pt]
+  &=A\sum^{k}_{j=1}\dfrac{R_j^{2}}{n_j}
+     -A(N+1)\sum^{k}_{j=1}R_j
+     +\dfrac{A(N+1)^{2}}{4}\sum^{k}_{j=1}n_j .
+\end{align*}
+
+Substituting the two sums,
+\begin{align*}
+F &=A\sum^{k}_{j=1}\dfrac{R_j^{2}}{n_j}
+     -A(N+1)\cdot\dfrac{N(N+1)}{2}
+     +\dfrac{A(N+1)^{2}}{4}\cdot N\\[4pt]
+  &=A\sum^{k}_{j=1}\dfrac{R_j^{2}}{n_j}
+     -\dfrac{AN(N+1)^{2}}{2}+\dfrac{AN(N+1)^{2}}{4}\\[4pt]
+  &=A\sum^{k}_{j=1}\dfrac{R_j^{2}}{n_j}-\dfrac{AN(N+1)^{2}}{4} .
+\end{align*}
+
+Finally, with $A=\dfrac{12}{N(N+1)}$,
+$$\dfrac{AN(N+1)^{2}}{4}
+=\dfrac{12}{N(N+1)}\cdot\dfrac{N(N+1)^{2}}{4}
+=\dfrac{12(N+1)}{4}=3(N+1),$$
+so
+$$F=A\sum^{k}_{j=1}\dfrac{R_j^{2}}{n_j}-3(N+1). \qquad\blacksquare$$
+\end{solution}
+
+\begin{note}
+The two forms say different things about the same quantity. The first shows
+\emph{what the statistic measures}: $n_j(N+1)/2$ is the rank sum expected for
+sample $j$ under $H_0$, so $F$ is a weighted sum of squared departures from
+expectation --- visibly a $\chi^{2}$-like quantity, which is why $\chi^{2}_{k-1}$
+is the reference distribution. The second is what you actually compute, needing
+only the $R_j$ and $n_j$ with no expected values worked out separately. Derivations
+of this kind are worth doing once: the memorable form and the computable form are
+rarely the same expression.
+\end{note}
+
+\begin{problem}
+Describe how multiple comparisons may be made in Friedman's test when the null
+hypothesis has been rejected.
+
+Four treatments are compared in $n=10$ blocks, giving rank sums
+$$R_{\cdot 1}=34,\hspace{0.5cm}R_{\cdot 2}=18,\hspace{0.5cm}
+R_{\cdot 3}=32,\hspace{0.5cm}R_{\cdot 4}=16 .$$
+Confirm that $H_0$ is rejected at $\alpha=0.05$, then determine which treatments
+differ.
+\end{problem}
+
+\begin{solution}
+\textbf{The procedure.} A significant Friedman test says only that the $k$
+treatments are not all alike. To find which pairs differ, the Nemenyi test --- the
+rank analogue of Tukey's --- compares every pair of mean ranks against a single
+\emph{critical difference}
+$$CD=q_{\alpha}\sqrt{\dfrac{k(k+1)}{6n}},
+\hspace{0.8cm}q_{\alpha}=\dfrac{q_{\infty,k,\alpha}}{\sqrt{2}},$$
+declaring treatments $i$ and $j$ different when
+$\left|\overline{R}_{\cdot i}-\overline{R}_{\cdot j}\right|\geq CD$, where
+$\overline{R}_{\cdot j}=R_{\cdot j}/n$. Using one threshold for all
+$\binom{k}{2}$ pairs is what keeps the family-wise error rate at $\alpha$; testing
+each pair at $\alpha$ separately would not.
+
+If instead every treatment is compared only with a control, there are $k-1$
+comparisons rather than $\binom{k}{2}$, and a Bonferroni adjustment --- each
+comparison at $\alpha/(k-1)$ --- is available and more powerful than Nemenyi,
+which pays for comparisons that are not being made.
+
+\textbf{The omnibus test.} First check the rank sums:
+$34+18+32+16=100=\dfrac{nk(k+1)}{2}=\dfrac{10\times 4\times 5}{2}$. Then
+\begin{align*}
+F_R &=\dfrac{12}{nk(k+1)}\sum^{k}_{j=1}R_{\cdot j}^{2}-3n(k+1)\\
+    &=\dfrac{12}{10\times 4\times 5}\left(34^{2}+18^{2}+32^{2}+16^{2}\right)
+       -3\times 10\times 5\\
+    &=0.06\left(1156+324+1024+256\right)-150\\
+    &=0.06(2760)-150=165.6-150=15.6 .
+\end{align*}
+With $k-1=3$ degrees of freedom, $\chi^{2}_{(0.05,3)}=7.815$, and $15.6>7.815$, so
+$H_0$ is rejected.
+
+\textbf{The comparisons.} The mean ranks are $3.4$, $1.8$, $3.2$, $1.6$. With
+$q_{0.05}=3.633/\sqrt{2}=2.569$,
+$$CD=2.569\sqrt{\dfrac{4\times 5}{6\times 10}}=2.569\times 0.577=1.483 .$$
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|cccccc}
+pair &1--2&1--3&1--4&2--3&2--4&3--4\\
+\hline
+$\left|\overline{R}_{\cdot i}-\overline{R}_{\cdot j}\right|$
+&1.6&0.2&1.8&1.4&0.2&1.6\\
+$\geq CD=1.483$? &\textbf{yes}&no&\textbf{yes}&no&no&\textbf{yes}\\
+\end{tabular}
+\end{table}
+
+Treatments $1$ and $3$ form one group and treatments $2$ and $4$ another: each of
+$1$ and $3$ differs from $4$, and $1$ differs from $2$, while the members of each
+pair cannot be separated. Note that $2$ against $3$, at $1.4$, falls just short of
+the threshold even though $2$ against $1$ at $1.6$ clears it --- with overlapping
+groups like this the honest report is the set of differences that reached $CD$,
+not a clean ranking of all four.
+\end{solution}
+
 \section{Non-Parametric Measures of Correlation}
 Rank  correlation is used quite intensively. There are many used e.g  Spearmans, gammas, Kendall's e.t.c of these , the spearmans is the widely used.\\ 
 The data referred to were is bivariate so that each data item is reported in terms of two attribute. A general bivariate is denoted $(X_i,Y_i)$. The sample size is denoted by $n$.\\
