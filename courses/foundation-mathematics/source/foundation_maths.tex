@@ -11528,9 +11528,27 @@ $c$ is the constant of integration.\\\\
 
 
 
-A function $F(x)$ is an anti-derivative of $f(x)$ if $\dfrac{F(x)}{dx} = f(x)$.\\
+\begin{definition}
+A function $F(x)$ is an \emph{anti-derivative} of $f(x)$ if
+$\dfrac{dF(x)}{dx}=f(x)$.
+\end{definition}
 
-If $F(x)$ is an anti-derivative of $f(x)$ then $F(x) + c$, for any constant $c$. We can use a table to get the anti-derivative from right to left.\\
+If $F(x)$ is an anti-derivative of $f(x)$ then so is $F(x)+c$ for any constant $c$,
+since differentiating a constant gives zero. Conversely, any two anti-derivatives
+of the same function differ only by a constant --- if $F'=G'$ then $(F-G)'=0$, and
+a function with zero derivative everywhere is constant.
+
+\begin{note}
+That is why the arbitrary constant is not optional decoration. $\int f(x)\,dx$
+denotes not one function but a whole family of them, every member differing from
+the next by a vertical shift, and $+c$ is what says so. Omitting it gives one
+member of the family and claims it is all of them.
+
+The constant disappears only in a \emph{definite} integral, where it cancels in
+the subtraction $F(b)-F(a)$ --- as the first example below shows explicitly.
+\end{note}
+
+The table below can be read from right to left to get anti-derivatives.\\
 
 \begin{table}[H]
 \centering
@@ -11552,7 +11570,7 @@ If $F(x)$ is an anti-derivative of $f(x)$ then $F(x) + c$, for any constant $c$.
 &&&&\\
 7. & $e^{mx}$ &&& $\dfrac{e^{mx}}{m} + c$\\
 &&&&\\
-8. & $\dfrac{1}{x}$ &&& $\ln (x) + c$\\
+8. & $\dfrac{1}{x}$ &&& $\ln \left|x\right| + c$\\
 &&&&\\
 \hline
 \end{tabular}
@@ -11629,7 +11647,28 @@ $$A = \lim\limits_{dx \rightarrow 0} \sum^b_a f(x)\hspace{0.2cm}dx = \int^b_a f(
 
 \subsection{Fundamental Theorem of Calculus}
 
-If $\hspace{0.2cm} f= F'\hspace{0.2cm}$ is continuous and differentiable on $[a,b]$. Then 
+\begin{thm}[Fundamental theorem of calculus]
+If $f$ is continuous on $[a,b]$ and $F$ is any anti-derivative of $f$, so that
+$F'=f$, then
+$$\int^{b}_{a} f(x)\,dx = F(b)-F(a).$$
+\end{thm}
+
+\begin{note}
+This is the result that makes the whole subject work, and it is worth pausing on.
+The left side is defined as a limit of sums --- an area, built by slicing. The right
+side is a difference of two values of an anti-derivative, found by reversing
+differentiation. There is no obvious reason those two should be related at all,
+and the theorem says they are the same number.
+
+The practical consequence is that areas need never be computed by summing slices.
+Finding one anti-derivative and subtracting two of its values replaces an infinite
+process with two substitutions.
+
+Note that \emph{any} anti-derivative will do. If $F$ is replaced by $F+c$ the
+constant appears twice and cancels: $(F(b)+c)-(F(a)+c)=F(b)-F(a)$.
+\end{note}
+
+In particular
 
 \begin{enumerate}
 \item[] $\hspace{0.3cm} \displaystyle{\int^b_a f(x)\hspace{0.1cm}dx = F(b) - F(a) = \hspace{0.2cm}\text{Area}}$\\
@@ -11667,7 +11706,19 @@ If $\hspace{0.2cm} f= F'\hspace{0.2cm}$ is continuous and differentiable on $[a,
 
 
 
-The area under the $x-$axis is negative.\\\\
+Where the curve lies below the $x$-axis the integral is negative.
+
+\begin{note}
+Strictly it is the \emph{integral} that is negative, not the area --- an area is a
+positive quantity. The integral counts area below the axis with a minus sign, so
+for a curve crossing the axis the two parts partly cancel and
+$\int_{a}^{b}f(x)\,dx$ gives the \emph{net} signed area.
+
+If the actual area enclosed is wanted, the integral must be split at each crossing
+and the absolute values added. For $\int_{0}^{2\pi}\sin x\,dx$ the answer is $0$,
+because the hump above the axis and the trough below cancel exactly, while the
+area between the curve and the axis is $4$.
+\end{note}
 
 
 
@@ -11749,7 +11800,7 @@ If the integrand of the function is a power of functions: such as
 
 \subsubsection{Integration by Parts}
 Integration by parts is used when integrating products of two functions.\\
-So, if $f$ and $g$ are differentiabl functions of $x$, the product Rule says that
+So, if $f$ and $g$ are differentiable functions of $x$, the product rule says that
 $$\dfrac{d}{dx}\big(f(x)\cdot g(x)\big) = f'(x)\cdot g(x) + f(x)\cdot g'(x)\hspace{0.5cm} \cdots\hspace{0.5cm} (1)$$
 In terms of indefinite integrals, this equation becomes 
 $$\int\dfrac{d}{dx}\big(f(x)\cdot g(x)\big)\hspace{0.2cm}dx = \int f'(x)g(x)\hspace{0.2cm}dx + \int f(x) g'(x)\hspace{0.2cm}dx \hspace{0.5cm} \cdots\hspace{0.5cm} (2)$$
@@ -11765,7 +11816,27 @@ $$\int u dv = uv - \int vdu  \hspace{0.5cm}\cdots\hspace{0.5cm} (5) $$\\
 
 
 
-When the integrand is a product of two functions, you choose the two parts in $u$ and $v$ in a manner such that $u$ is differentiable diminishing (but not always) and $v'$ should be easy integrate.\\\\
+When the integrand is a product of two functions, choose $u$ and $v'$ so that $u$
+becomes \emph{simpler} on differentiating --- usually meaning it loses a power or
+turns into an algebraic expression --- while $v'$ is easy to integrate.
+
+\begin{note}
+The choice is the whole difficulty, and a wrong one makes the integral worse rather
+than better. In $\int xe^{3x}dx$, taking $u=x$ reduces it to $1$ and leaves
+$\int \frac{e^{3x}}{3}dx$, which is easy; taking $u=e^{3x}$ instead would leave
+$\int \frac{x^{2}}{2}\cdot 3e^{3x}dx$, with a higher power of $x$ than we started
+with.
+
+A common ordering for choosing $u$ runs: logarithmic, inverse trigonometric,
+algebraic, trigonometric, exponential --- take $u$ to be whichever appears first in
+that list. It puts $\ln x$ first because $\ln x$ is awkward to integrate but
+differentiates to $\frac{1}{x}$, and exponentials last because they integrate as
+easily as they differentiate.
+
+That also explains the third example below. $\int\ln x\,dx$ looks like a single
+function rather than a product, but writing it as $\ln x\cdot 1$ and taking
+$u=\ln x$, $v'=1$ turns it into something elementary.
+\end{note}
 
 
 
