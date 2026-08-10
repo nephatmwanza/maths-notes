@@ -557,6 +557,68 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-10 — Foundation Mathematics: all 26 chapters revised, published
+
+Renamed from Mathematical Methods at the user's request and published as the
+first-year course. Live at wjmaths.com; catalogue now reads 7 available, 8 in
+preparation.
+
+**Final state.** 240 pages, 103 web pages, 141 figures, 147 rendered diagrams, no
+build warnings. 38 definitions, 18 theorems, 186 examples, 122 solutions, 96 notes,
+22 proofs — against **zero** theorem environments and zero notes when the course
+was picked up.
+
+**Mechanical cleanup.** 308 bold pseudo-environments converted (plus 11 more split
+out of nested examples), 96 manual `$\bullet$`/`$*$` bullets, 56 absolute values
+typeset as one-entry `vmatrix` determinants, 41 binomial coefficients typeset as
+`pmatrix`, 26 ALL-CAPS chapter titles. The genuine determinants (53) and column
+vectors (16) were told apart by `&` separators and row counts and left alone.
+
+**The errors that mattered most**, roughly in order of how much damage they would
+have done:
+
+- **An exercise asking students to prove something false** — `sin^2 x = (1-cos^2 x)/2`,
+  where `cos 2x` was meant. Since `1-cos^2 x` IS `sin^2 x`, it asserts
+  `sin^2 x = sin^2 x / 2`.
+- **De Morgan's law proved wrongly in both directions** (and/or swapped), with the
+  conclusion coming out right anyway so nothing looked amiss.
+- **cos = b/a** as the opening definition of cosine, and **sin 60 = sqrt2/2**.
+- **The fundamental hyperbolic identity backwards**: `cosh^2 = sinh^2 - 1`.
+- **The change-of-base formula** with the wrong base on the left, in the subsection
+  that exists to establish it.
+- **De Moivre stated for all real n** — false for n = 1/3, theta = 2pi.
+- **A worked linear system whose answer solves a different system** (the matrix
+  silently changes mid-working).
+- **The constant multiple rule as f'(Kx) = K f'(x)**, and the power rule never
+  stated at all though used on the next line.
+- **A cubic claimed to have "at least one" turning point**, three lines after an
+  example with none.
+- **A vector product result declared false** immediately after being correctly
+  derived.
+
+**What was added.** Roughly 90 notes, all of them explaining a *why* rather than
+restating a *what*: why the number systems were extended, why radians rather than
+degrees, why the empty set is a subset of everything, why the sqrt(2) proof's
+contradiction comes from "in lowest terms" and where it must fail for sqrt(4),
+where the name "hyperbolic" comes from, why the fundamental theorem is surprising,
+why `+c` is not decoration, why cross-multiplying an inequality is forbidden.
+Around 60 previously unanswered questions worked in full.
+
+**Verification method.** Every numerical or symbolic answer added was checked with
+sympy before being written. That caught several of my own errors mid-draft, and one
+place where sympy's `simplify` failed on a true identity — numeric spot-checks
+settled it. Worth keeping: a `simplify` returning non-zero is not proof of an error.
+
+**Caveat.** Chapter 9, "Functions of the Form f(x) = sqrt(x)", received only a
+single fix (a domain stated as x >= 0 where x >= 2 was meant) rather than a full
+editorial pass. It is short and mostly graphs, but it has not had the same
+attention as the other 25.
+
+**Also fixed this stretch:** the sidebar bug in `site/build.py` (chapter headings
+written `\section{\textbf{...}}` were silently dropped from the navigation),
+and three courses whose builds had fallen behind their sources.
+
+
 ### 2026-08-08 — Non-parametric cleaned to publication standard; a self-inflicted deletion found and reversed
 
 **The course is done.** 67 pages, 8 chapters, 26 problems all with solutions, 34
