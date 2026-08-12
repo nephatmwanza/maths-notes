@@ -17,7 +17,7 @@
 \usepackage[noadjust]{cite}
 \usepackage{filecontents}
 \usepackage[all,knot,arc,poly]{xy}
-\usepackage[pdftex]{graphicx}
+\usepackage{graphicx}
 \graphicspath{{images/}{../images/}}
 \DeclareGraphicsExtensions{.pdf,.jpeg,.png, .jpg}
 \usepackage{lscape}
@@ -113,6 +113,14 @@
 \newcommand{\bpf}{\noindent {\ttfamily  PROOF}. $\mbox{}$}
 \newcommand{\epf}{\hfill \hbox{\raisebox{.5ex}{$\blacksquare$}$\phantom{.}$}}
 %-----------------------------------------------------------------------------
+
+%-----------------------------------------------------------------------------
+% tikz is loaded last: it pulls in graphicx and xcolor, and this file loads both
+% itself further up. Loading tikz early makes the option processing collide and
+% tex4ht fails in the preamble with an unhelpful message about \@reset@ptions.
+\usepackage{tikz}
+\usetikzlibrary{patterns,graphs,arrows.meta,shapes,trees,bending,fadings,quotes,angles}
+
 \begin{document}
 \pagenumbering{roman}
 % Title page depersonalised for the web, as with every other course here:
@@ -847,7 +855,24 @@ consider the following mixed integrals for convergence or divergence.
 
 
 %------------------------------------------------------------------------------------------------------------------------------------------------------
-\chapter{The Gamma Function}
+\chapter{Special Functions}
+
+The functions of this chapter are called special not because they are unusual
+but because they are singled out: each arises repeatedly, each fails to be
+elementary, and each is therefore given a name and tabulated once rather than
+re-derived. The gamma function extends the factorial to non-integer argument;
+the beta function does the same for the binomial coefficient and reduces
+entirely to the gamma; the error function supplies the antiderivative of the
+Gaussian that elementary calculus cannot; and the incomplete forms of the gamma
+and beta functions turn out to be the distribution functions of most of
+classical statistics.
+
+They are gathered here because they form one subject. Each is defined by a
+definite integral depending on a parameter, each is evaluated by the same
+techniques of Chapter~1, and the relations between them are as important as the
+functions themselves.
+
+\section{The Gamma Function}
 \vspace*{-6mm}
 The Gamma function is one of the special functions that have wide applications in mathematical and physical sciences. In particular it is used to evaluate certain improper integrals in terms of Gamma functions, and also in probability theory.
 
@@ -988,6 +1013,17 @@ $$\int_0^{\infty} e^{-t^2}\, dt = \frac{\Gamma\left(\frac{1}{2}\right)}{2} = \fr
 We can use the property $$\Gamma(x) = \frac{1}{x}\, \Gamma(x + 1)$$ to deduce the Gamma function for $x\leq 0$. If  $x + 1 > 0,$ $$\Gamma(x) = \frac{1}{x}\, \Gamma(x + 1)$$ is well defined for $x\neq 0$.
 So $\Gamma(x)$ is also defined for $x > -1$, $\, x\neq 0.$
 \end{thm}
+
+\begin{note}
+The functional equation $\Gamma(x+1)=x\,\Gamma(x)$ is the defining property of
+the gamma function, not merely one of its identities. Read forwards with
+$\Gamma(1)=1$ it gives $\Gamma(n+1)=n!$, so the function interpolates the
+factorial. Read backwards, as $\Gamma(x)=\Gamma(x+1)/x$, it defines $\Gamma$ for
+$x<0$ where the defining integral diverges, and it is this rearrangement that
+extends the function to the whole plane except the non-positive integers. The
+poles there are visible in the same formula: as $x\to 0$ the right-hand side has
+$\Gamma(1)=1$ over a vanishing denominator.
+\end{note}
 
 
 
@@ -1298,11 +1334,27 @@ $$\Gamma\left(n + \frac{1}{2}\right) = \frac{1\, \cdot\, 3\, \cdot\, \cdot\, 7\,
 
 
 
-\chapter{Beta Function}
+\section{The Beta Function}
+
+The gamma function of Chapter~2 interpolated the factorial. The beta function
+does the same for the binomial coefficient, and the two are so closely related
+that everything about the second reduces to the first --- a relation established
+in Theorem~\ref{thm:betagamma} below and used constantly thereafter.
+
+Two reasons make the beta function worth its own chapter. It converts a large
+class of definite integrals into gamma values, so that integrals with no
+elementary antiderivative can nonetheless be evaluated exactly; the
+trigonometric form of Theorem~\ref{thm:betatrig} is the workhorse here. And it is the
+normalising constant of the beta distribution, which is why the function appears
+throughout statistics --- in the distribution of order statistics met in any
+course on non-parametric methods, in Bayesian inference as the conjugate prior
+for a probability, and in the $F$ and $t$ distributions.
+
 We define the Beta function of $x$ and $y$, by $$\beta(x,y) = \int^1_0t^{x-1}\, (1  - t)^{y-1}\, dt$$ for $x>0$ and $y>0$.
 
 
 \begin{thm}
+\label{thm:betatrig}
 $$\beta(x,y) = 2\int_0^{\frac{\pi}{2}}\sin^{2x-1}\theta \cos^{2y-1}\theta\, d\theta.$$
 \end{thm}
 \begin{proof}
@@ -1318,6 +1370,7 @@ Let $\, t = \sin^2\theta$, $\, \hspace{0.3cm} dt = 2\sin\theta\cos\theta\, d\the
 
 
 \begin{thm}
+\label{thm:betagamma}
 $$\beta(x,y) = \frac{\Gamma(x)\, \Gamma(y)}{\Gamma(x+y)}.$$
 \end{thm}
 
@@ -1328,6 +1381,16 @@ $$\beta(x,y) = \frac{\Gamma(x)\, \Gamma(y)}{\Gamma(x+y)}.$$
            & = \frac{\Gamma(x)\, \Gamma(y)}{\Gamma(x + y)}.
 \end{align*}
 \end{proof}
+
+\begin{note}
+This is the result the chapter is built around. Every beta integral is now a
+gamma computation, and the symmetry $\beta(x,y)=\beta(y,x)$, which is obvious
+from the defining integral under $t\mapsto 1-t$, becomes obvious again from the
+right-hand side. It also explains the appearance of the beta function in
+statistics: the density of the $\operatorname{Beta}(x,y)$ distribution is
+$t^{x-1}(1-t)^{y-1}$ divided by exactly this constant, and the moments of that
+distribution are ratios of gamma values in consequence.
+\end{note}
 
 
 
@@ -1431,6 +1494,192 @@ $$\int_0^{\frac{\pi}{2}} \sin^{2n-1}\theta\, d\theta  = \frac{2^{n-1}\, \Gamma(n
 
 
 
+
+
+\section{The Error Function}
+
+The gamma and beta functions were reached by asking which integrals extend the
+factorial and the binomial coefficient. The error function arises from a
+different and more immediate question: the integral of the Gaussian has no
+elementary antiderivative, and yet it must be evaluated constantly.
+
+\begin{defn}[Error function]
+$$\operatorname{erf}(x) = \frac{2}{\sqrt{\pi}}\int^{x}_{0}e^{-t^{2}}\,dt,
+\qquad
+\operatorname{erfc}(x) = 1-\operatorname{erf}(x)
+= \frac{2}{\sqrt{\pi}}\int^{\infty}_{x}e^{-t^{2}}\,dt .$$
+The second is the \emph{complementary} error function.
+\end{defn}
+
+The normalising factor $2/\sqrt{\pi}$ is chosen so that
+$\operatorname{erf}(\infty)=1$, which is Theorem~2.1.4 --- the evaluation
+$\Gamma(1/2)=\sqrt{\pi}$ --- in another guise.
+
+\begin{thm}[Elementary properties]
+\begin{enumerate}
+\item[(i)] $\operatorname{erf}$ is odd: $\operatorname{erf}(-x) = -\operatorname{erf}(x)$;
+\item[(ii)] $\operatorname{erf}(0)=0$ and $\operatorname{erf}(\pm\infty)=\pm1$;
+\item[(iii)] $\dfrac{d}{dx}\operatorname{erf}(x) = \dfrac{2}{\sqrt{\pi}}e^{-x^{2}}$;
+\item[(iv)] $\displaystyle\operatorname{erf}(x)
+= \frac{2}{\sqrt{\pi}}\sum^{\infty}_{n=0}\frac{(-1)^{n}x^{2n+1}}{n!\,(2n+1)}$,
+convergent for all $x$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) and (iii) are immediate from the definition, the integrand being even.
+For (ii), $\operatorname{erf}(\infty)=\frac{2}{\sqrt{\pi}}\cdot\frac{\sqrt{\pi}}{2}=1$
+using $\int^{\infty}_{0}e^{-t^{2}}dt=\tfrac12\Gamma(1/2)$. For (iv), expand
+$e^{-t^{2}}=\sum(-1)^{n}t^{2n}/n!$ and integrate term by term, which is
+permitted because the series converges uniformly on any bounded interval.
+\end{proof}
+
+\begin{note}
+The relation to the normal distribution is the reason this function matters
+here. If $Z\sim N(0,1)$ then
+$$P(Z\leq z) = \Phi(z)
+= \frac{1}{2}\left[1+\operatorname{erf}\!\left(\frac{z}{\sqrt2}\right)\right],$$
+so every normal probability is an error function value and conversely. The
+factor $\sqrt2$ is the only thing separating the two, and it exists because
+$\operatorname{erf}$ is defined with $e^{-t^{2}}$ while the standard normal
+density carries $e^{-t^{2}/2}$. This is the same split of convention met in the
+probabilists' and physicists' Hermite polynomials of Section~3.6, and for the
+same reason.
+\end{note}
+
+\begin{thm}[Relation to the incomplete gamma function]
+$$\operatorname{erf}(x) = \frac{1}{\sqrt{\pi}}\,\gamma\!\left(\tfrac12,\,x^{2}\right),$$
+where $\gamma$ is the lower incomplete gamma function of Section~2.4.
+\end{thm}
+
+\begin{proof}
+Substitute $u=t^{2}$ in the defining integral, so $dt = \tfrac12 u^{-1/2}du$ and
+$$\operatorname{erf}(x)=\frac{2}{\sqrt\pi}\int^{x^{2}}_{0}e^{-u}\,\tfrac12 u^{-1/2}\,du
+=\frac{1}{\sqrt\pi}\int^{x^{2}}_{0}u^{-1/2}e^{-u}\,du,$$
+which is the definition of $\gamma\left(\tfrac12,x^{2}\right)$ divided by
+$\sqrt{\pi}$.
+\end{proof}
+
+\section{The Incomplete Gamma and Beta Functions}
+
+The gamma and beta functions were defined by definite integrals over their full
+ranges. Cutting the range short gives two further functions, and these are the
+ones that carry the classical distributions of statistics.
+
+\begin{defn}[Incomplete gamma functions]
+$$\gamma(s,x) = \int^{x}_{0}t^{s-1}e^{-t}\,dt,
+\qquad
+\Gamma(s,x) = \int^{\infty}_{x}t^{s-1}e^{-t}\,dt,$$
+the \emph{lower} and \emph{upper} incomplete gamma functions, so that
+$\gamma(s,x)+\Gamma(s,x)=\Gamma(s)$. The \emph{regularised} form is
+$P(s,x) = \gamma(s,x)/\Gamma(s)$.
+\end{defn}
+
+\begin{defn}[Incomplete beta function]
+$$\beta_x(a,b) = \int^{x}_{0}t^{a-1}(1-t)^{b-1}\,dt,
+\qquad 0\leq x\leq 1,$$
+with regularised form $I_x(a,b) = \beta_x(a,b)/\beta(a,b)$.
+\end{defn}
+
+\begin{thm}[Recurrence]
+$$\gamma(s+1,x) = s\,\gamma(s,x) - x^{s}e^{-x}.$$
+\end{thm}
+
+\begin{proof}
+Integrate $\gamma(s+1,x)=\int^{x}_{0}t^{s}e^{-t}dt$ by parts, taking $u=t^{s}$
+and $dv=e^{-t}dt$:
+$$\gamma(s+1,x) = \left[-t^{s}e^{-t}\right]^{x}_{0}
++ s\int^{x}_{0}t^{s-1}e^{-t}\,dt
+= -x^{s}e^{-x} + s\,\gamma(s,x).$$
+Letting $x\to\infty$ recovers $\Gamma(s+1)=s\,\Gamma(s)$, the functional
+equation of Section~2.1.
+\end{proof}
+
+\begin{note}
+These two functions are the distribution functions of statistics written in
+analytic form, and the correspondence is worth setting out explicitly.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Distribution} & \textbf{Distribution function}\\
+\hline
+Gamma$(s,\theta)$ & $P\left(s,\,x/\theta\right)$\\
+Chi-square on $k$ degrees of freedom & $P\left(k/2,\,x/2\right)$\\
+Poisson$(\lambda)$, $P(X\leq k)$ & $\Gamma(k+1,\lambda)/k!$\\
+Beta$(a,b)$ & $I_x(a,b)$\\
+Binomial$(n,p)$, $P(X\leq k)$ & $I_{1-p}(n-k,\,k+1)$\\
+Student's $t$ on $\nu$ degrees of freedom & $I$ evaluated at $\nu/(\nu+t^{2})$\\
+$F$ on $(d_1,d_2)$ degrees of freedom & $I$ evaluated at $d_1x/(d_1x+d_2)$\\
+\hline
+\end{tabular}
+\caption{The classical distributions as incomplete gamma and beta functions.}
+\label{tab:incompl}
+\end{table}
+
+Every entry in the right-hand column is one of the two functions defined above.
+This is why a statistical table is possible at all: the whole collection reduces
+to two functions of two arguments, and tabulating those tabulates everything.
+It is also why the chi-square and the gamma share a distribution function, and
+why the $t$ and $F$ distributions --- which look quite unrelated --- are
+evaluated by the same routine in every statistical library.
+\end{note}
+
+\begin{exa}
+For integer $s=n$, repeated application of the recurrence gives
+$$\Gamma(n,x) = (n-1)!\,e^{-x}\sum^{n-1}_{k=0}\frac{x^{k}}{k!} .$$
+Dividing by $(n-1)!$ shows that the upper incomplete gamma function at integer
+argument is exactly the Poisson distribution function, which is the third row of
+Table~\ref{tab:incompl}. The identity is the analytic statement of a fact
+familiar from probability: the waiting time to the $n$th event of a Poisson
+process exceeds $x$ precisely when fewer than $n$ events have occurred by $x$.
+\end{exa}
+
+\section{Practice Problems}
+
+\begin{problem}
+Show that $\displaystyle\int^{\infty}_{-\infty}e^{-a x^{2}}dx = \sqrt{\pi/a}$
+for $a>0$, and deduce $\Gamma(1/2)=\sqrt{\pi}$.
+\emph{Where to start: substitute $u = x\sqrt{a}$ and compare with the definition
+of the error function at infinity.}
+\end{problem}
+
+\begin{problem}
+Prove that $\operatorname{erfc}(x)\sim\dfrac{e^{-x^{2}}}{x\sqrt{\pi}}$ as
+$x\to\infty$.
+\emph{Where to start: integrate by parts once in
+$\int^{\infty}_{x}e^{-t^{2}}dt$, writing the integrand as
+$\frac{1}{2t}\cdot 2t\,e^{-t^{2}}$, and show the remaining integral is of
+smaller order.}
+\end{problem}
+
+\begin{problem}
+Express $P(|Z|\leq 1.96)$ for $Z\sim N(0,1)$ in terms of the error function, and
+verify numerically that it is approximately $0.95$.
+\end{problem}
+
+\begin{problem}
+Using the recurrence for the incomplete gamma function, establish the identity
+$$\Gamma(n,x) = (n-1)!\,e^{-x}\sum^{n-1}_{k=0}\frac{x^{k}}{k!}$$
+for positive integers $n$, and interpret it in terms of a Poisson process.
+\end{problem}
+
+\begin{problem}
+Show that $I_x(a,b) = 1 - I_{1-x}(b,a)$, and explain how this symmetry halves
+the work of tabulating the beta distribution.
+\emph{Where to start: substitute $t\mapsto 1-t$ in the defining integral.}
+\end{problem}
+
+\begin{problem}
+Show that for a $\operatorname{Beta}(a,b)$ random variable
+$$E(X) = \frac{a}{a+b},\qquad
+\operatorname{var}(X) = \frac{ab}{(a+b)^{2}(a+b+1)},$$
+using the beta--gamma relation of Section~2.2 rather than integrating directly.
+\emph{Where to start: $E(X^{k}) = \beta(a+k,b)/\beta(a,b)$, then apply
+$\Gamma(z+1)=z\Gamma(z)$ repeatedly.}
+\end{problem}
 
 
 \chapter{Orthogonal Polynomials}
@@ -1550,7 +1799,7 @@ Jacobi & -1,\, 1 & $(1 - x)^{\alpha}(1 + x)^{\beta}, \, \hspace{0.2cm} \alpha,\,
 Chebyshev of $1^{\text{st}}$ kind & -1, \, 1 & $(1 - x^2)^{-\frac{1}{2}}$\\
 Chebyshev of $2^{\text{nd}}$ kind & -1, \, 1 & $(1 - x^2)^{\frac{1}{2}}$\\
 Hermite & $-\infty, \, \infty$  & $e^{-\frac{x^2}{2}}$\\
-Laguerre & $0,\, \infty$ & $e^{-x}\, \cdot\, e^{\alpha}, \,\hspace{0.2cm} \alpha > -1$.\\
+Laguerre & $0,\, \infty$ & $x^{\alpha}\, e^{-x}, \,\hspace{0.2cm} \alpha > -1$\\
 \hline
 \end{tabular}
 \end{table}
@@ -1568,7 +1817,39 @@ Legendre polynomials are defined by Rodrigues' formula
 $$P_n(x) = \frac{1}{2^n\, n!}\, \frac{d^n}{dx^n}(x^2-1)^n\, , \hspace{0.4cm} n = 0, \, 1, \, 2, \, \cdots$$
 \end{defn}
 
-Thus for $n = 0, \, 1, \, 2, \, 3, \, 4, \, \cdots$ we have $$P_0(x) = 1, \,\hspace{0.5cm}  P_1(x) = x, \,\hspace{0.5cm} P_2(x) = \frac{3}{2}x^2 - \frac{1}{2}, \,\hspace{0.5cm} P_4(x) = \frac{35}{8}x^4 - \frac{30}{8}x^2 + \frac{3}{8}.$$
+Thus for $n = 0, \, 1, \, 2, \, 3, \, 4, \, \cdots$ we have $$P_0(x) = 1, \,\hspace{0.5cm}  P_1(x) = x, \,\hspace{0.5cm} P_2(x) = \frac{3}{2}x^2 - \frac{1}{2}, \,\hspace{0.5cm} P_3(x) = \frac{5}{2}x^3 - \frac{3}{2}x, \,\hspace{0.5cm} P_4(x) = \frac{35}{8}x^4 - \frac{30}{8}x^2 + \frac{3}{8}.$$
+
+
+
+% The first five Legendre polynomials. A methods course on orthogonal
+% polynomials with no picture of one asks the reader to take the shape on
+% trust; the alternation of parity and the confinement to [-1,1] are both
+% visible at a glance and both matter later.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[xscale=3.6,yscale=1.9]
+\draw[->] (-1.15,0) -- (1.2,0) node[right] {\footnotesize $x$};
+\draw[->] (0,-1.25) -- (0,1.32);
+\foreach \x in {-1,1} \draw (\x,0.04) -- (\x,-0.04) node[below] {\footnotesize $\x$};
+\foreach \y in {-1,1} \draw (0.02,\y) -- (-0.02,\y) node[left] {\footnotesize $\y$};
+\draw[thick,domain=-1:1,samples=2]  plot (\x,1);
+\node[above] at (-0.72,1.0) {\footnotesize $P_0$};
+\draw[thick,domain=-1:1,samples=2]  plot (\x,\x);
+\node[right] at (0.90,0.80) {\footnotesize $P_1$};
+\draw[thick,dashed,domain=-1:1,samples=90] plot (\x,{1.5*\x*\x-0.5});
+\node[below] at (0.0,-0.62) {\footnotesize $P_2$};
+\draw[thick,dotted,domain=-1:1,samples=110] plot (\x,{2.5*\x*\x*\x-1.5*\x});
+\node[left] at (-0.60,0.55) {\footnotesize $P_3$};
+\draw[thick,dash dot,domain=-1:1,samples=130]
+  plot (\x,{4.375*\x*\x*\x*\x-3.75*\x*\x+0.375});
+\node[right] at (0.42,-0.52) {\footnotesize $P_4$};
+\end{tikzpicture}
+\caption{The first five Legendre polynomials on $[-1,1]$. Each satisfies
+$P_n(1)=1$ and $P_n(-1)=(-1)^n$, and $P_n$ has exactly $n$ zeros in the open
+interval --- a property shared by the eigenfunctions of any Sturm--Liouville
+problem, and the reason these polynomials interlace as they do.}
+\label{fig:legendre}
+\end{figure}
 
 Using the Binomial expansion, we can rewrite the expression for the $n^{\text{th}}$ Rodrigues' 
 $$(x^2 - 1)^n = \sum_{k = 0}^n \frac{(-1)^k\, n!}{k!\, (n - k)!}\, x^{2(n-k)},$$ so that 
@@ -2712,6 +2993,363 @@ Since the $b_n$'s are functions of the moments associated to with $g(x)$, it is 
 
 
 
+
+
+\chapter{Sturm--Liouville Theory}
+
+Chapter~3 introduced six families of orthogonal polynomials one after another.
+Each was defined by a Rodrigues formula, each was shown to satisfy recurrence
+relations, and each was proved orthogonal on its own interval with respect to
+its own weight function. The table of Section~3.1 collected the intervals and
+the weights and said that particular families arise ``depending on the choice of
+the interval $[a,b]$ and the weight function $w(x)$''.
+
+That statement is true but it invites the wrong picture, and this chapter exists
+to correct it. The weight is not chosen. Once the differential equation a family
+satisfies is written down, the interval and the weight are determined, and the
+orthogonality is then automatic. All six families --- and, as Chapter~5 will
+show, the trigonometric system behind Fourier series as well --- are instances of
+one theorem.
+
+That theorem is the subject of Sturm--Liouville theory.
+
+\section{The Sturm--Liouville Problem}
+
+\begin{defn}[Sturm--Liouville problem]
+A \emph{Sturm--Liouville problem} on an interval $[a,b]$ is the differential
+equation
+\begin{equation}
+\frac{d}{dx}\left[p(x)\,\frac{dy}{dx}\right] + \left[q(x) + \lambda\, w(x)\right] y = 0,
+\label{eq:sl}
+\end{equation}
+together with boundary conditions at $a$ and $b$. Here $p$, $p'$, $q$ and $w$
+are continuous on $[a,b]$, with $p(x)>0$ and $w(x)>0$ on the open interval. The
+values of $\lambda$ for which a non-trivial solution exists are the
+\emph{eigenvalues}, and the corresponding solutions the \emph{eigenfunctions}.
+\end{defn}
+
+The function $w$ is called the \emph{weight}, and the name is not a coincidence:
+it is exactly the weight against which the eigenfunctions will turn out to be
+orthogonal.
+
+\begin{defn}[Regular and singular problems]
+The problem is \emph{regular} if $[a,b]$ is finite, $p(x)>0$ and $w(x)>0$
+throughout the closed interval, and the boundary conditions are separated,
+$$\alpha_1 y(a) + \alpha_2 y'(a) = 0,\qquad
+\beta_1 y(b) + \beta_2 y'(b) = 0 .$$
+It is \emph{singular} if the interval is infinite, or if $p$ or $w$ vanishes at
+an endpoint. In the singular case the boundary condition is usually replaced by
+the requirement that $y$ remain bounded at the offending endpoint.
+\end{defn}
+
+\begin{note}
+Every classical family in Chapter~3 belongs to the singular case, and it is
+worth seeing why before the machinery starts. Legendre's equation has
+$p(x)=1-x^{2}$, which vanishes at both $x=\pm1$; Hermite's interval is the whole
+line; Laguerre's is a half-line and its $p$ vanishes at the origin. In each case
+the boundary condition that selects the polynomial solutions is simply that the
+solution stay bounded --- and it is that requirement, not any choice made by the
+analyst, which forces $\lambda$ to take the discrete values $n$ or $n(n+1)$ and
+so produces a polynomial of degree $n$ rather than an infinite series.
+\end{note}
+
+\section{Reduction to Sturm--Liouville Form}
+
+A second-order linear equation need not arrive in the form \eqref{eq:sl}, and
+none of the classical equations does. Any such equation can be put into that
+form, and the procedure is short.
+
+\begin{thm}[Reduction to self-adjoint form]
+\label{thm:reduce}
+The equation
+$$a_2(x)\,y'' + a_1(x)\,y' + \left[a_0(x)+\lambda\right]y = 0,
+\qquad a_2(x)\neq 0,$$
+becomes a Sturm--Liouville equation on multiplication by the integrating factor
+$$\mu(x) = \frac{1}{a_2(x)}\exp\left(\int^{x}\frac{a_1(t)}{a_2(t)}\,dt\right),$$
+with
+$$p(x) = \exp\left(\int^{x}\frac{a_1(t)}{a_2(t)}\,dt\right),
+\qquad q(x) = a_0(x)\,\mu(x),
+\qquad w(x) = \mu(x).$$
+\end{thm}
+
+\begin{proof}
+Multiplying through by $\mu$ gives
+$\mu a_2 y'' + \mu a_1 y' + \mu(a_0+\lambda)y = 0$. For the first two terms to
+be $\left(py'\right)' = py''+p'y'$ we need $\mu a_2 = p$ and $\mu a_1 = p'$.
+Dividing, $p'/p = a_1/a_2$, whence
+$p = \exp\left(\int a_1/a_2\right)$ and $\mu = p/a_2$, which is the stated
+factor. The remaining term is $\mu(a_0+\lambda)y = \left(q+\lambda w\right)y$
+with $q=a_0\mu$ and $w=\mu$.
+\end{proof}
+
+\begin{note}
+Theorem~\ref{thm:reduce} is where the weight function comes from. It is not
+selected to make an orthogonality relation come out; it is the integrating
+factor $\mu = p/a_2$ forced by the equation itself. This is the answer to the
+question Chapter~3 left open, and the calculations of the next section simply
+carry it out for each family in turn.
+\end{note}
+
+\begin{exa}[Legendre]
+Legendre's equation is
+$$\left(1-x^{2}\right)y'' - 2x\,y' + n(n+1)\,y = 0 .$$
+Here $a_2 = 1-x^{2}$ and $a_1 = -2x$, so
+$a_1/a_2 = -2x/(1-x^{2})$ and
+$$\int\frac{-2x}{1-x^{2}}\,dx = \ln\left(1-x^{2}\right),
+\qquad p(x) = 1-x^{2},\qquad \mu = \frac{p}{a_2} = 1 .$$
+The weight is therefore $w(x)=1$ and the equation is already self-adjoint:
+$$\left[\left(1-x^{2}\right)y'\right]' + n(n+1)\,y = 0 .$$
+This is why the Legendre polynomials are orthogonal on $[-1,1]$ with weight $1$,
+and it required no choice at all.
+\end{exa}
+
+\begin{exa}[Hermite]
+The notes use the probabilists' Hermite polynomials of Section~3.6, which
+satisfy
+$$y'' - x\,y' + n\,y = 0 .$$
+Here $a_2=1$ and $a_1=-x$, so
+$\int(-x)\,dx = -x^{2}/2$ and $p(x) = w(x) = e^{-x^{2}/2}$, giving
+$$\left(e^{-x^{2}/2}\,y'\right)' + n\,e^{-x^{2}/2}\,y = 0 .$$
+The weight $e^{-x^{2}/2}$ in the table of Section~3.1 is precisely this
+integrating factor.
+\end{exa}
+
+\begin{remark}
+Most texts define Hermite polynomials by
+$H_n(x)=(-1)^n e^{x^{2}}\frac{d^n}{dx^n}e^{-x^{2}}$, the \emph{physicists'}
+convention, whose equation is $y''-2xy'+2ny=0$ and whose weight is
+$e^{-x^{2}}$ with eigenvalue $2n$. These notes use the \emph{probabilists'}
+convention throughout, with weight $e^{-x^{2}/2}$ and eigenvalue $n$; the two
+are related by $H_n^{\text{phys}}(x)=2^{n/2}H_n^{\text{prob}}(x\sqrt2)$. Neither
+is more correct, but a reader comparing these notes with another book should
+check which is in use before comparing formulae.
+\end{remark}
+
+\section{Orthogonality: the Central Theorem}
+
+Everything now follows from a single identity.
+
+\begin{lem}[Lagrange's identity]
+\label{lem:lagrange}
+For any twice-differentiable $u$ and $v$, writing
+$\mathcal{L}y = \left(p\,y'\right)' + q\,y$,
+$$u\,\mathcal{L}v - v\,\mathcal{L}u = \frac{d}{dx}\left[p\left(u\,v' - v\,u'\right)\right].$$
+\end{lem}
+
+\begin{proof}
+Expanding,
+$$u\left(pv'\right)' - v\left(pu'\right)'
+= u\left(pv'\right)' + u'pv' - v\left(pu'\right)' - v'pu'
+= \frac{d}{dx}\left[u\,p\,v'\right]-\frac{d}{dx}\left[v\,p\,u'\right],$$
+since the added and subtracted terms cancel. The $q$ terms cancel identically.
+\end{proof}
+
+\begin{thm}[Orthogonality of eigenfunctions]
+\label{thm:slorth}
+Let $y_m$ and $y_n$ be eigenfunctions of the Sturm--Liouville problem
+\eqref{eq:sl} corresponding to distinct eigenvalues $\lambda_m\neq\lambda_n$,
+and suppose the boundary conditions are such that
+\begin{equation}
+\Big[p(x)\left(y_m\,y_n' - y_n\,y_m'\right)\Big]^{b}_{a} = 0 .
+\label{eq:bc}
+\end{equation}
+Then
+$$\int^{b}_{a} y_m(x)\,y_n(x)\,w(x)\,dx = 0 .$$
+\end{thm}
+
+\begin{proof}
+By definition $\mathcal{L}y_m = -\lambda_m w\,y_m$ and
+$\mathcal{L}y_n = -\lambda_n w\,y_n$. Multiply the first by $y_n$, the second by
+$y_m$, and subtract:
+$$y_n\mathcal{L}y_m - y_m\mathcal{L}y_n
+= \left(\lambda_n-\lambda_m\right)w\,y_m\,y_n .$$
+Integrating over $[a,b]$ and applying Lemma~\ref{lem:lagrange} to the left-hand
+side gives
+$$\Big[p\left(y_n\,y_m'-y_m\,y_n'\right)\Big]^{b}_{a}
+= \left(\lambda_n-\lambda_m\right)\int^{b}_{a}y_m\,y_n\,w\,dx .$$
+The left-hand side vanishes by \eqref{eq:bc}, and since
+$\lambda_n\neq\lambda_m$ the integral must be zero.
+\end{proof}
+
+This one theorem contains every orthogonality proof of Chapter~3. Each of those
+proofs was a separate calculation using a Rodrigues formula and repeated
+integration by parts; each is an instance of the argument just given, with the
+boundary term \eqref{eq:bc} vanishing for its own reason.
+
+\begin{thm}[Reality of the spectrum]
+\label{thm:real}
+Under the same conditions, every eigenvalue of a Sturm--Liouville problem is
+real, and eigenfunctions may be taken real-valued.
+\end{thm}
+
+\begin{proof}
+Suppose $\mathcal{L}y = -\lambda w y$ with $\lambda$ possibly complex. Taking
+complex conjugates and using that $p,q,w$ are real gives
+$\mathcal{L}\overline{y} = -\overline{\lambda}\,w\,\overline{y}$, so
+$\overline{y}$ is an eigenfunction with eigenvalue $\overline{\lambda}$.
+Applying the computation of Theorem~\ref{thm:slorth} to the pair
+$y,\overline{y}$,
+$$\left(\overline{\lambda}-\lambda\right)\int^{b}_{a}\left|y\right|^{2}w\,dx = 0 .$$
+Since $w>0$ and $y\not\equiv0$, the integral is strictly positive, forcing
+$\overline{\lambda}=\lambda$.
+\end{proof}
+
+\begin{note}
+Theorem~\ref{thm:real} is why the eigenvalues in the table below are the
+familiar integers and integer combinations rather than anything more exotic. It
+is also the property that makes Sturm--Liouville problems the right setting for
+the physical problems they arise from: an eigenvalue is a squared frequency or
+an energy, and those are real quantities.
+\end{note}
+
+\section{The Classical Families as Sturm--Liouville Problems}
+
+We can now do what the chapter promised: display the six families of Chapter~3,
+and the trigonometric system of Chapter~5, as one object.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Family} & $[a,b]$ & $p(x)$ & $w(x)$ & $\lambda_n$\\
+\hline
+Legendre & $[-1,1]$ & $1-x^{2}$ & $1$ & $n(n+1)$\\
+Jacobi & $[-1,1]$ & $(1-x)^{\alpha+1}(1+x)^{\beta+1}$ & $(1-x)^{\alpha}(1+x)^{\beta}$ & $n(n+\alpha+\beta+1)$\\
+Chebyshev I & $[-1,1]$ & $\left(1-x^{2}\right)^{1/2}$ & $\left(1-x^{2}\right)^{-1/2}$ & $n^{2}$\\
+Chebyshev II & $[-1,1]$ & $\left(1-x^{2}\right)^{3/2}$ & $\left(1-x^{2}\right)^{1/2}$ & $n(n+2)$\\
+Hermite & $(-\infty,\infty)$ & $e^{-x^{2}/2}$ & $e^{-x^{2}/2}$ & $n$\\
+Laguerre & $[0,\infty)$ & $x^{\alpha+1}e^{-x}$ & $x^{\alpha}e^{-x}$ & $n$\\
+\hline
+Trigonometric & $[0,L]$ & $1$ & $1$ & $\left(n\pi/L\right)^{2}$\\
+\hline
+\end{tabular}
+\caption{Every orthogonal system in these notes as a Sturm--Liouville problem.
+The weight column reproduces the table of Section~3.1; it is now a consequence
+rather than a choice. The last row is the system underlying Fourier series.}
+\label{tab:slfamilies}
+\end{table}
+
+\begin{note}
+Read Table~\ref{tab:slfamilies} alongside the table of Section~3.1 and the point
+of this chapter is visible at a glance. That table had two columns, an interval
+and a weight, and no reason for either. This one has the differential operator
+as well, and the weight is now computed from it by Theorem~\ref{thm:reduce}. The
+orthogonality that Chapter~3 established six times over is one application of
+Theorem~\ref{thm:slorth}.
+\end{note}
+
+\section{Eigenfunction Expansions}
+
+The remaining property is the one that makes all of this useful: the
+eigenfunctions do not merely fail to overlap, they are enough to build any
+reasonable function.
+
+\begin{thm}[Completeness]
+\label{thm:complete}
+For a regular Sturm--Liouville problem the eigenvalues form an increasing
+sequence $\lambda_1<\lambda_2<\cdots\to\infty$, and the corresponding
+eigenfunctions $\{y_n\}$ form a complete orthogonal system in the space of
+functions square-integrable with respect to $w$ on $[a,b]$. Every such $f$ has
+the expansion
+$$f(x) = \sum^{\infty}_{n=1}c_n\,y_n(x),
+\qquad c_n = \frac{\displaystyle\int^{b}_{a}f(x)\,y_n(x)\,w(x)\,dx}
+{\displaystyle\int^{b}_{a}y_n^{2}(x)\,w(x)\,dx},$$
+converging in the mean-square sense.
+\end{thm}
+
+The formula for $c_n$ should look familiar: it is the coefficient formula met
+for Legendre expansions in Section~3.2.3, for Hermite expansions in
+Section~3.6, and it is the Euler formula for Fourier coefficients in
+Chapter~5. All three are the same computation --- project onto an orthogonal
+direction, divide by that direction's squared length --- carried out in
+different weighted spaces.
+
+\begin{remark}
+Completeness is a genuinely deeper statement than orthogonality and its proof is
+beyond these notes. Orthogonality says the eigenfunctions do not duplicate one
+another; completeness says nothing has been left out, that no non-zero function
+is orthogonal to every $y_n$. It is completeness that entitles us to write an
+equality in Theorem~\ref{thm:complete} rather than merely an approximation, and
+it is what makes the method of separation of variables work: a solution
+expanded in eigenfunctions is not an approximation to the solution, it is the
+solution.
+\end{remark}
+
+\section{Practice Problems}
+
+\begin{problem}
+Reduce each of the following to Sturm--Liouville form, identifying $p$, $q$, $w$
+and the eigenvalue in each case:
+\begin{enumerate}
+\item[(a)] Chebyshev's equation of the first kind,
+$\left(1-x^{2}\right)y''-x\,y'+n^{2}y=0$;
+\item[(b)] Laguerre's equation, $x\,y''+(\alpha+1-x)\,y'+n\,y=0$;
+\item[(c)] Chebyshev's equation of the second kind,
+$\left(1-x^{2}\right)y''-3x\,y'+n(n+2)y=0$.
+\end{enumerate}
+\emph{Where to start: Theorem~\ref{thm:reduce}; compute
+$\int a_1/a_2$ in each case and read off $p$ and $\mu$.}
+\end{problem}
+
+\begin{solution}
+(a) $a_1/a_2 = -x/(1-x^{2})$, whose integral is
+$\tfrac12\ln\left(1-x^{2}\right)$, so
+$p=\left(1-x^{2}\right)^{1/2}$ and
+$w=\mu=p/a_2=\left(1-x^{2}\right)^{-1/2}$, with $q=0$ and $\lambda=n^{2}$.
+
+(b) $a_1/a_2 = (\alpha+1-x)/x$, whose integral is
+$(\alpha+1)\ln x - x$, so $p = x^{\alpha+1}e^{-x}$ and
+$w = p/x = x^{\alpha}e^{-x}$, with $q=0$ and $\lambda=n$.
+
+(c) $a_1/a_2 = -3x/(1-x^{2})$, integrating to
+$\tfrac32\ln\left(1-x^{2}\right)$, so $p=\left(1-x^{2}\right)^{3/2}$ and
+$w=\left(1-x^{2}\right)^{1/2}$, with $\lambda=n(n+2)$.
+
+Each row of Table~\ref{tab:slfamilies} is recovered.
+\end{solution}
+
+\begin{problem}
+Verify that the boundary term \eqref{eq:bc} vanishes for Legendre's equation on
+$[-1,1]$, and explain why no boundary condition beyond boundedness needs to be
+imposed.
+\emph{Where to start: $p(x)=1-x^{2}$ vanishes at both endpoints.}
+\end{problem}
+
+\begin{problem}
+Show that the trigonometric system
+$\left\{\sin\left(n\pi x/L\right)\right\}^{\infty}_{n=1}$ consists of
+eigenfunctions of the Sturm--Liouville problem $y''+\lambda y = 0$ on $[0,L]$
+with $y(0)=y(L)=0$, identify the eigenvalues, and deduce the orthogonality
+relation from Theorem~\ref{thm:slorth} rather than by direct integration.
+\end{problem}
+
+\begin{problem}
+Prove that eigenfunctions of a regular Sturm--Liouville problem corresponding to
+the same eigenvalue are linearly dependent; that is, the eigenvalues are simple.
+\emph{Where to start: two solutions with the same $\lambda$ both satisfy the
+boundary condition at $a$, so their Wronskian vanishes there; Abel's identity
+gives $p\,W = \text{constant}$.}
+\end{problem}
+
+\begin{problem}
+The \emph{Rayleigh quotient} for a Sturm--Liouville problem is
+$$R[y] = \frac{\displaystyle -\Big[p\,y\,y'\Big]^{b}_{a}
++ \int^{b}_{a}\left(p\,y'^{2}-q\,y^{2}\right)dx}
+{\displaystyle\int^{b}_{a}y^{2}\,w\,dx}.$$
+Show that if $y$ is an eigenfunction with eigenvalue $\lambda$ then
+$R[y]=\lambda$, and deduce that if $q\leq0$ and the boundary term vanishes then
+every eigenvalue is non-negative.
+\emph{Where to start: multiply \eqref{eq:sl} by $y$, integrate over $[a,b]$, and
+integrate the first term by parts.}
+\end{problem}
+
+\begin{problem}
+Explain why the orthogonality proofs of Chapter~3, each carried out separately
+by repeated integration by parts of a Rodrigues formula, are all instances of
+Theorem~\ref{thm:slorth}. What does each of those proofs gain, if anything, over
+the general argument?
+\end{problem}
 
 
 \chapter{Fourier Series Analysis}
