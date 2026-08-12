@@ -37,6 +37,14 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    # A run that wedges before it starts holds the `pages` concurrency group
+    # indefinitely, and because cancel-in-progress is false every later push
+    # then queues behind it and is cancelled in turn. That happened on
+    # 9 August 2026: one run sat queued for 63 hours, fourteen deploys were
+    # cancelled behind it, and the site served three-day-old content while
+    # every push appeared to succeed. A timeout lets a wedged run die on its
+    # own instead of blocking every deploy after it.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
