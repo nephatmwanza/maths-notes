@@ -207,39 +207,20 @@
 %-----------------------------------------------------------------------------
 \begin{document}
 \pagenumbering{roman}
+% Title page depersonalised for the web, as with every other course here:
+% no university, no author, no year. The identity below is kept in its place -
+% it is the definition of a U-statistic, the object the whole course is built
+% on, and it says what the notes are about better than a subtitle would.
 \begin{titlepage}
-%titlepage
-\thispagestyle{empty}
 \begin{center}
-
-    \centering
-%University logo
-    %\includegraphics[width=0.3\linewidth]{logo.pdf}
-    
-\vspace{2cm}
-\textbf{\Large THEORY OF NONPARAMETRIC STATISTICS}
-
-
-\vspace{8cm}
-By\\
-N JESHURUN MWANZA
-
-\vspace{4cm}
-Lecture Notes
-
-\vspace{4cm}
-
-{\large UNIVERSITY OF ZAMBIA}
-
-%LUSAKA
-\vfill
-%\vspace{2cm}
-
-2020
+\vspace*{3cm}
+{\Huge\bfseries Theory of Non-Parametric Statistics}\\[1.2cm]
+{\large Lecture Notes}\\[2.5cm]
+\line(1,0){300}\\[1.5cm]
+$$U\left(X_1,\, X_2,\, \cdots,\, X_n\right)
+= \frac{1}{\binom{n}{k}}\sum_{\beta\in\mathcal{B}}
+h\left(X_{\beta_1},\, X_{\beta_2},\, \cdots,\, X_{\beta_k}\right)$$
 \end{center}
-\clearpage
-
-\pagenumbering{roman} 
 \end{titlepage}
 %\maketitle
 
@@ -282,6 +263,24 @@ Lecture Notes
 
 \newpage
 \chapter{ORDER STATISTICS AND QUANTILES}
+
+Almost everything in this course is built from one operation: sorting the
+sample. Ordering the observations destroys the labels --- which subject supplied
+which value --- and keeps only the values and their positions. That loss is
+deliberate, and it is what buys the distribution-free property established in
+Chapter~2, since a statistic depending on the sample only through its ordering
+inherits the symmetry of the underlying variables.
+
+Before that can be exploited we need the distributions of the ordered values
+themselves, and they are not the distributions of the original observations.
+The observations are independent; the order statistics are not, since
+$X_{(1)}\leq X_{(2)}\leq\cdots\leq X_{(n)}$ by construction. The observations
+are identically distributed; the order statistics are not, the smallest and the
+largest having quite different distributions from the middle ones. This chapter
+derives those distributions --- marginal, joint, and conditional --- together
+with the moments that later chapters require.
+
+
 
 \section{Introduction}
 \begin{defn}
@@ -404,6 +403,36 @@ $$r = n, \hspace{0.5cm} f_n(x) = n\, p(x)\, \left[P(x)\right]^{n - 1}$$
 
 
 
+
+
+% Densities of the order statistics of a uniform sample. Placed here because the
+% section derives the distribution of X_(r) and the Beta form is easiest to see
+% rather than read: the extremes are crowded against the ends of the range and
+% the middle order statistics are broad and nearly symmetric.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[xscale=7,yscale=0.62]
+\draw[->] (-0.03,0) -- (1.08,0) node[right] {\footnotesize $u$};
+\draw[->] (0,-0.2) -- (0,5.6);
+\foreach \u in {0,0.5,1} \draw (\u,0.08) -- (\u,-0.08) node[below] {\footnotesize $\u$};
+% Beta(1,5): the sample minimum
+\draw[thick,domain=0:1,samples=120,smooth] plot (\x, {5*(1-\x)^4});
+\node[right] at (0.13,4.15) {\footnotesize $X_{(1)}$};
+% Beta(3,3): the sample median
+\draw[thick,dashed,domain=0:1,samples=120,smooth] plot (\x, {30*\x*\x*(1-\x)^2});
+\node at (0.5,2.35) {\footnotesize $X_{(3)}$};
+% Beta(5,1): the sample maximum
+\draw[thick,dotted,domain=0:1,samples=120,smooth] plot (\x, {5*\x^4});
+\node[left] at (0.87,4.15) {\footnotesize $X_{(5)}$};
+\end{tikzpicture}
+\caption{Densities of the first, third and fifth order statistics of a sample of
+size $n=5$ from the uniform distribution on $(0,1)$; that is, the
+$\operatorname{Beta}(r,\,n-r+1)$ densities for $r=1,3,5$. The extreme order
+statistics are concentrated near the ends of the range and are strongly skewed,
+while the central one is broad and symmetric. The order statistics are neither
+independent nor identically distributed, which is the point of the chapter.}
+\label{fig:orderdens}
+\end{figure}
 
 \section{Joint Distribution of Two or More Order Statistics}
 The joint density of $X_{(r)}$ and $X_{(s)}\,\, \left(1\leq r < s < \leq n\right)$ denoted by $f_{r,s}(x,y)$
