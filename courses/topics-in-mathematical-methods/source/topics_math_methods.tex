@@ -959,6 +959,7 @@ power grows, and at zero because $x^{n}$ vanishes there for $n\geq1$.
 \end{solution}
 
 \begin{problem}
+\label{prob:gammaconv}
 For which values of $s$ does $\displaystyle\int^{\infty}_{0}t^{s-1}e^{-t}\,dt$
 converge? Treat the two ends separately and state the condition each imposes.
 \emph{Where to start: near zero the exponential is close to $1$ and the
@@ -4389,6 +4390,315 @@ densities with variances $\sigma_1^{2}$ and $\sigma_2^{2}$ is normal with
 variance $\sigma_1^{2}+\sigma_2^{2}$.
 \emph{Where to start: convolution becomes a product under the transform, and
 the product of two Gaussians in $\omega$ is a Gaussian whose exponent adds.}
+\end{problem}
+
+
+\chapter{The Laplace Transform}
+
+Section~5.9 obtained the Fourier transform by letting the interval grow without
+bound, and observed that differentiation becomes multiplication under it. That
+is the property worth having, and it is what makes a transform useful: an
+operation that is hard in one representation becomes easy in the other.
+
+The Fourier transform has two drawbacks in practice. It requires $f$ to be
+absolutely integrable over the whole line, which excludes functions as ordinary
+as $f(t)=1$ or $f(t)=e^{t}$; and it takes no account of initial conditions,
+which is precisely what one has when solving an equation forward in time. The
+Laplace transform repairs both. It integrates only over $t\geq0$, so the past is
+not required, and it inserts a decaying factor $e^{-st}$ that tames growth. The
+price is that the transform variable becomes complex and the inversion is less
+symmetric.
+
+\section{Definition and Existence}
+
+\begin{defn}[Laplace transform]
+For $f$ defined on $[0,\infty)$,
+$$\mathcal{L}\{f\}(s) = F(s) = \int^{\infty}_{0}f(t)\,e^{-st}\,dt,$$
+for those $s$ for which the integral converges.
+\end{defn}
+
+\begin{defn}[Exponential order]
+$f$ is of \emph{exponential order} $\alpha$ if there are constants $M$ and $T$
+with $\left|f(t)\right|\leq M e^{\alpha t}$ for all $t\geq T$.
+\end{defn}
+
+\begin{thm}[Existence]
+\label{thm:laplaceexist}
+If $f$ is piecewise continuous on $[0,\infty)$ and of exponential order
+$\alpha$, then $\mathcal{L}\{f\}(s)$ converges absolutely for
+$\operatorname{Re}s>\alpha$, and $F(s)\to0$ as $s\to\infty$.
+\end{thm}
+
+\begin{proof}
+For $t\geq T$ and $\operatorname{Re}s = \sigma>\alpha$,
+$$\left|f(t)e^{-st}\right| \leq M e^{\alpha t}e^{-\sigma t}
+= M e^{-(\sigma-\alpha)t},$$
+and $\int^{\infty}_{T}Me^{-(\sigma-\alpha)t}dt = Me^{-(\sigma-\alpha)T}/(\sigma-\alpha)$
+is finite. The integral over $[0,T]$ is finite because $f$ is piecewise
+continuous there. Letting $\sigma\to\infty$ in the same bound sends $F(s)$ to
+zero.
+\end{proof}
+
+\begin{note}
+The last clause of Theorem~\ref{thm:laplaceexist} is a useful check. A candidate
+transform that does not tend to zero at infinity --- $F(s)=1$, or
+$F(s)=s/(s+1)$ --- is not the transform of any function satisfying the
+hypotheses, and finding one in the middle of a calculation means an error
+earlier.
+\end{note}
+
+\begin{exa}[Powers, and where the gamma function enters]
+\label{exa:laplacepower}
+For $f(t) = t^{a}$ with $a>-1$, substitute $u = st$ in the defining integral:
+$$\mathcal{L}\{t^{a}\}(s)
+= \int^{\infty}_{0}t^{a}e^{-st}dt
+= \frac{1}{s^{a+1}}\int^{\infty}_{0}u^{a}e^{-u}\,du
+= \frac{\Gamma(a+1)}{s^{a+1}},$$
+valid for $s>0$. For integer $a=n$ this is $n!/s^{n+1}$.
+\end{exa}
+
+\begin{note}
+Example~\ref{exa:laplacepower} is the gamma function of Chapter~2 doing the
+work, and it is worth noticing how little was required: a change of variable
+turned the Laplace integral into the gamma integral exactly. The restriction
+$a>-1$ is the convergence condition established in Problem~\ref{prob:gammaconv}, arriving here
+for the same reason --- the behaviour at the origin. Without the gamma function
+the transform of $t^{1/2}$ could not be written down at all.
+\end{note}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|l|l|}
+\hline
+$f(t)$ & $F(s)$ & valid for \\
+\hline
+$1$ & $1/s$ & $s>0$\\
+$t^{a},\ a>-1$ & $\Gamma(a+1)/s^{a+1}$ & $s>0$\\
+$e^{at}$ & $1/(s-a)$ & $s>a$\\
+$\sin bt$ & $b/\left(s^{2}+b^{2}\right)$ & $s>0$\\
+$\cos bt$ & $s/\left(s^{2}+b^{2}\right)$ & $s>0$\\
+$\sinh bt$ & $b/\left(s^{2}-b^{2}\right)$ & $s>|b|$\\
+$\cosh bt$ & $s/\left(s^{2}-b^{2}\right)$ & $s>|b|$\\
+$H(t-a)$ & $e^{-as}/s$ & $s>0$\\
+$\delta(t-a)$ & $e^{-as}$ & all $s$\\
+\hline
+\end{tabular}
+\caption{Elementary Laplace transforms. $H$ is the Heaviside step and $\delta$
+the Dirac delta.}
+\label{tab:laplace}
+\end{table}
+
+\section{Operational Properties}
+
+\begin{thm}[Linearity, shifting and scaling]
+For constants $\alpha,\beta$ and $a>0$:
+\begin{enumerate}
+\item[(i)] $\mathcal{L}\{\alpha f+\beta g\} = \alpha F(s)+\beta G(s)$;
+\item[(ii)] \emph{first shifting}: $\mathcal{L}\{e^{at}f(t)\} = F(s-a)$;
+\item[(iii)] \emph{second shifting}:
+$\mathcal{L}\{f(t-a)H(t-a)\} = e^{-as}F(s)$;
+\item[(iv)] \emph{scaling}: $\mathcal{L}\{f(at)\} = \frac{1}{a}F(s/a)$;
+\item[(v)] \emph{multiplication by $t$}:
+$\mathcal{L}\{t^{n}f(t)\} = (-1)^{n}F^{(n)}(s)$.
+\end{enumerate}
+\end{thm}
+
+\begin{note}
+The two shifting rules are duals and are easily confused. Multiplying by an
+exponential in $t$ shifts the transform in $s$; shifting in $t$ multiplies the
+transform by an exponential in $s$. The Heaviside factor in (iii) is not
+decorative --- without it the formula is false, because the Laplace integral
+knows nothing of $f$ before $t=0$ and a shifted function must be told to remain
+zero until $t=a$.
+\end{note}
+
+\begin{thm}[Transform of derivatives]
+\label{thm:laplacederiv}
+If $f$ is continuous with piecewise continuous derivative and of exponential
+order,
+$$\mathcal{L}\{f'\}(s) = s\,F(s) - f(0),$$
+and by iteration
+$$\mathcal{L}\{f^{(n)}\}(s)
+= s^{n}F(s) - s^{n-1}f(0) - s^{n-2}f'(0) - \cdots - f^{(n-1)}(0).$$
+\end{thm}
+
+\begin{proof}
+Integrate by parts:
+$$\int^{\infty}_{0}f'(t)e^{-st}dt
+= \left[f(t)e^{-st}\right]^{\infty}_{0} + s\int^{\infty}_{0}f(t)e^{-st}dt
+= -f(0) + sF(s),$$
+the boundary term vanishing at infinity by exponential order and
+$\operatorname{Re}s$ large.
+\end{proof}
+
+\begin{note}
+Theorem~\ref{thm:laplacederiv} is the whole reason the transform exists. It
+converts differentiation into multiplication by $s$ \emph{and} absorbs the
+initial conditions into the algebra, so a linear differential equation with
+constant coefficients becomes a linear algebraic equation in $F(s)$ that already
+knows $f(0)$ and $f'(0)$. Compare the Fourier property
+$\widehat{f'}=i\omega\widehat{f}$ of Section~5.9, which converts differentiation
+just as neatly but carries no initial data --- which is why Fourier suits
+boundary-value problems on the line and Laplace suits initial-value problems in
+time.
+\end{note}
+
+\begin{thm}[Convolution]
+\label{thm:laplaceconv}
+With $(f*g)(t) = \displaystyle\int^{t}_{0}f(\tau)g(t-\tau)\,d\tau$,
+$$\mathcal{L}\{f*g\} = F(s)\,G(s).$$
+\end{thm}
+
+\begin{note}
+The convolution here runs from $0$ to $t$, not over the whole line as in
+Section~5.9, because both functions are taken to vanish for negative argument.
+The theorem is what makes the inverse transform of a product tractable: rather
+than inverting $F(s)G(s)$ directly one inverts each factor and convolves.
+\end{note}
+
+\section{Solving Initial-Value Problems}
+
+The method is three steps: transform the equation, solve the resulting algebraic
+equation for $F(s)$, invert.
+
+\begin{exa}
+Solve $y'' + 4y = 0$ with $y(0)=1$ and $y'(0)=0$.
+
+Transforming and using Theorem~\ref{thm:laplacederiv},
+$$s^{2}Y(s) - s\,y(0) - y'(0) + 4Y(s) = 0
+\ \Longrightarrow\ \left(s^{2}+4\right)Y(s) = s ,$$
+so $Y(s) = s/\left(s^{2}+4\right)$, and Table~\ref{tab:laplace} gives
+$y(t) = \cos 2t$ directly.
+\end{exa}
+
+\begin{note}
+No complementary function was found, no particular integral was constructed,
+and no constants were fitted to the initial conditions at the end. The initial
+data entered at the first line and the answer emerged already satisfying them.
+That economy is the practical argument for the method, and it grows with the
+order of the equation.
+\end{note}
+
+\begin{exa}[A discontinuous forcing term]
+Solve $y'+y = H(t-1)$ with $y(0)=0$.
+
+Transforming, $sY+Y = e^{-s}/s$, so
+$Y(s) = e^{-s}\big/\left[s(s+1)\right]$. Since
+$1/\left[s(s+1)\right] = 1/s - 1/(s+1)$ has inverse $1-e^{-t}$, the second
+shifting rule gives
+$$y(t) = \left[1-e^{-(t-1)}\right]H(t-1).$$
+\end{exa}
+
+\begin{note}
+A forcing term that switches on abruptly is awkward for the classical methods,
+which require the solution to be patched together across the discontinuity and
+matched. Here the Heaviside function is simply a term in the table and the
+patching happens by itself. Problems with impulsive or switched inputs are where
+the Laplace transform is not merely convenient but the natural tool.
+\end{note}
+
+\section{Inversion}
+
+\begin{thm}[Lerch]
+If $f$ and $g$ are piecewise continuous, of exponential order, and
+$F(s)=G(s)$ for all $s$ in some half-plane, then $f=g$ at every point of
+continuity. The inverse transform is therefore essentially unique.
+\end{thm}
+
+In practice inversion is done by recognising entries of
+Table~\ref{tab:laplace}, after partial fractions and the shifting rules have
+been used to reduce $F(s)$ to recognisable pieces. For completeness, the general
+formula is the following.
+
+\begin{thm}[Bromwich integral]
+$$f(t) = \frac{1}{2\pi i}\int^{\gamma+i\infty}_{\gamma-i\infty}F(s)\,e^{st}\,ds,$$
+the contour being any vertical line with $\gamma$ to the right of every
+singularity of $F$.
+\end{thm}
+
+\begin{remark}
+The Bromwich integral is the Laplace analogue of the Fourier inversion formula
+of Section~5.9, and the resemblance is not accidental: substituting
+$s=\gamma+i\omega$ turns it into a Fourier inversion of $e^{-\gamma t}f(t)$.
+This is the precise sense in which the Laplace transform is the Fourier
+transform of a function damped by $e^{-\gamma t}$ and cut off below $t=0$, and
+it is why the two transforms share their operational properties. Evaluating the
+contour integral requires the residue calculus and is left to a course in
+complex analysis.
+\end{remark}
+
+\section{Practice Problems}
+
+\begin{problem}
+Compute directly from the definition:
+$\mathcal{L}\{1\}$, $\mathcal{L}\{e^{at}\}$, $\mathcal{L}\{t\}$ and
+$\mathcal{L}\{\sin bt\}$, stating in each case the values of $s$ for which the
+integral converges.
+\emph{Where to start: for $\sin bt$, integrate by parts twice and solve for the
+transform, or write $\sin bt$ in exponential form and use linearity.}
+\end{problem}
+
+\begin{problem}
+Show that $\mathcal{L}\{t^{1/2}\} = \dfrac{\sqrt{\pi}}{2s^{3/2}}$.
+\emph{Where to start: Example~\ref{exa:laplacepower} with $a=\tfrac12$, then
+$\Gamma(3/2)=\tfrac12\Gamma(1/2)$ from the functional equation.}
+\end{problem}
+
+\begin{solution}
+By Example~\ref{exa:laplacepower},
+$\mathcal{L}\{t^{1/2}\} = \Gamma(3/2)/s^{3/2}$. The functional equation gives
+$\Gamma(3/2) = \tfrac12\Gamma(1/2) = \tfrac12\sqrt{\pi}$, whence the result.
+Note that no elementary method produces this: the transform of a half-power
+requires the gamma function.
+\end{solution}
+
+\begin{problem}
+Use the transform to solve $y''-3y'+2y = 0$ with $y(0)=1$, $y'(0)=0$.
+\end{problem}
+
+\begin{problem}
+Solve $y'' + y = \delta(t-\pi)$ with $y(0)=y'(0)=0$, and describe the motion in
+words. What does the delta function represent physically?
+\emph{Where to start: the transform of $\delta(t-a)$ is $e^{-as}$; the answer
+should be zero until $t=\pi$ and sinusoidal thereafter.}
+\end{problem}
+
+\begin{problem}
+Prove the first shifting theorem $\mathcal{L}\{e^{at}f(t)\}=F(s-a)$ directly
+from the definition, and use it to find $\mathcal{L}\{e^{-2t}\cos 3t\}$.
+\end{problem}
+
+\begin{problem}
+Prove the convolution theorem, Theorem~\ref{thm:laplaceconv}, by writing the
+product $F(s)G(s)$ as a double integral and changing the order of integration.
+State the region in the $(\tau,t)$ plane over which the integration runs.
+\emph{Where to start: the substitution $t = \tau + u$ turns the product of two
+integrals into an integral over the wedge $0\leq\tau\leq t$.}
+\end{problem}
+
+\begin{problem}
+Use the convolution theorem to invert $\dfrac{1}{s^{2}\left(s^{2}+1\right)}$,
+and check the answer by partial fractions.
+\end{problem}
+
+\begin{problem}
+Show that $\mathcal{L}\left\{\dfrac{\sin t}{t}\right\} = \arctan\left(1/s\right)$.
+\emph{Where to start: use the property $\mathcal{L}\{f(t)/t\} =
+\int^{\infty}_{s}F(u)\,du$, itself proved by integrating the defining integral
+with respect to $s$.}
+\end{problem}
+
+\begin{problem}
+Explain why $F(s) = s/(s+1)$ cannot be the Laplace transform of any piecewise
+continuous function of exponential order.
+\emph{Where to start: Theorem~\ref{thm:laplaceexist}.}
+\end{problem}
+
+\begin{problem}
+The gamma function was defined in Chapter~2 by an integral converging only for
+$s>0$. Show that $\mathcal{L}\{t^{a}\}$ exists for exactly the same range of
+$a$, and explain why the two conditions coincide.
 \end{problem}
 
 
