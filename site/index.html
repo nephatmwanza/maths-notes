@@ -187,7 +187,10 @@ footer.site{border-top:1px solid var(--line);margin-top:3rem;padding:1.6rem 0 2.
 
   <div class="meta">
     <h2>Courses</h2>
-    <span class="count" id="count">7 available · 8 in preparation</span>
+    <!-- Written out so the count is correct with JavaScript disabled, and
+         recomputed from the cards below on load so it cannot go stale again:
+         it said "7 available" when nine courses were live. -->
+    <span class="count" id="count">9 available · 8 in preparation</span>
   </div>
 
   <div id="results">
@@ -575,6 +578,17 @@ function doSearch(e){
   return false;
 }
 document.getElementById('q').addEventListener('input', function(){ doSearch(null); });
+
+// Keep the course count honest. The number above is maintained by hand so the
+// page is correct without JavaScript, but a hand-maintained number drifts - it
+// read "7 available" for two courses longer than it should have. Counting the
+// cards on load means adding a course updates the heading by itself.
+(function(){
+  var live = document.querySelectorAll('#results article.card').length;
+  var soon = document.querySelectorAll('#results div.soon').length;
+  if(live) document.getElementById('count').textContent =
+    live + ' available · ' + soon + ' in preparation';
+})();
 </script>
 </body>
 </html>

@@ -3276,6 +3276,225 @@ expanded in eigenfunctions is not an approximation to the solution, it is the
 solution.
 \end{remark}
 
+\section{Bessel's Equation}
+
+Every family met so far has been polynomial. Bessel's equation is the point at
+which that stops, and it is worth seeing why, because the reason is structural
+rather than accidental.
+
+\begin{defn}[Bessel's equation]
+For a parameter $\nu\geq0$, \emph{Bessel's equation of order $\nu$} is
+\begin{equation}
+x^{2}y'' + x\,y' + \left(x^{2}-\nu^{2}\right)y = 0 .
+\label{eq:bessel}
+\end{equation}
+\end{defn}
+
+\begin{thm}[Sturm--Liouville form]
+Equation~\eqref{eq:bessel}, rescaled as
+$x^{2}y''+xy'+\left(\lambda x^{2}-\nu^{2}\right)y=0$, is the Sturm--Liouville
+problem
+$$\left(x\,y'\right)' + \left(-\frac{\nu^{2}}{x} + \lambda\,x\right)y = 0$$
+on $[0,a]$, with $p(x)=x$, $q(x)=-\nu^{2}/x$ and weight $w(x)=x$.
+\end{thm}
+
+\begin{proof}
+Apply Theorem~4.2.1 with $a_2 = x^{2}$ and $a_1 = x$. Then $a_1/a_2 = 1/x$,
+whose integral is $\ln x$, so $p(x)=x$ and the integrating factor is
+$\mu = p/a_2 = 1/x$. Multiplying \eqref{eq:bessel} through by $1/x$ gives the
+stated form, with weight $w=\mu\,x^{2}/x = x$.
+\end{proof}
+
+\begin{note}
+The weight $w(x)=x$ is the reason Bessel functions appear wherever a problem is
+posed on a disc. In polar coordinates the area element is $r\,dr\,d\theta$, and
+the $r$ in that element is exactly this weight; orthogonality with respect to
+it is orthogonality over the disc. The same computation on an interval of the
+line produced weight $1$ and the trigonometric system of Chapter~5. The
+geometry chooses the special function.
+\end{note}
+
+\begin{note}
+This is a \emph{singular} Sturm--Liouville problem: $p(0)=0$ and $w(0)=0$, and
+$q$ is unbounded at the origin. As in Section~4.1 the boundary condition at the
+singular end is replaced by the requirement that the solution remain bounded,
+and that requirement is what selects one of the two independent solutions.
+\end{note}
+
+\subsection*{Solution by the method of Frobenius}
+
+Because $x=0$ is a regular singular point, solutions are sought as
+$y = x^{r}\sum^{\infty}_{k=0}a_k x^{k}$ with $a_0\neq0$. Substituting into
+\eqref{eq:bessel} and collecting the lowest power gives the indicial equation
+$r^{2}-\nu^{2}=0$, so $r=\pm\nu$. The recurrence for the coefficients is
+$$a_k = -\frac{a_{k-2}}{k\left(k+2r\right)},$$
+which annihilates every odd coefficient and, with $r=\nu$ and the conventional
+normalisation $a_0 = 1/\left[2^{\nu}\Gamma(\nu+1)\right]$, yields the following.
+
+\begin{defn}[Bessel function of the first kind]
+$$J_{\nu}(x) = \sum^{\infty}_{k=0}
+\frac{(-1)^{k}}{k!\,\Gamma(k+\nu+1)}\left(\frac{x}{2}\right)^{2k+\nu}.$$
+\end{defn}
+
+\begin{note}
+The gamma function of Chapter~2 is doing real work here, and this is the first
+place in these notes where it is indispensable rather than convenient. For
+integer $\nu=n$ the coefficient denominator is $k!\,(k+n)!$ and the series could
+be written with factorials alone. For non-integer $\nu$ --- the half-integer
+case below, for instance --- there is no factorial to write, and only the gamma
+function makes the definition possible at all.
+\end{note}
+
+\begin{thm}[Second solution]
+For non-integer $\nu$, $J_{\nu}$ and $J_{-\nu}$ are linearly independent and the
+general solution of \eqref{eq:bessel} is $c_1J_{\nu}+c_2J_{-\nu}$. For integer
+$\nu = n$ they are not: $J_{-n}(x) = (-1)^{n}J_{n}(x)$. A second independent
+solution valid for all $\nu$ is the \emph{Bessel function of the second kind}
+$$Y_{\nu}(x) = \frac{J_{\nu}(x)\cos\nu\pi - J_{-\nu}(x)}{\sin\nu\pi},$$
+the integer case being defined by the limit $\nu\to n$.
+\end{thm}
+
+\begin{note}
+$Y_{\nu}(x)\to-\infty$ as $x\to0^{+}$ for every $\nu$. On a disc, or anywhere
+the origin is part of the domain, boundedness therefore eliminates $Y_{\nu}$
+entirely and leaves $J_{\nu}$ --- which is the singular boundary condition of
+Section~4.1 doing its work in a concrete case. On an annulus, where the origin
+is excluded, both solutions survive and both are needed.
+\end{note}
+
+\subsection*{Properties}
+
+\begin{thm}[Recurrence relations]
+$$J_{\nu-1}(x)+J_{\nu+1}(x) = \frac{2\nu}{x}J_{\nu}(x),
+\qquad
+J_{\nu-1}(x)-J_{\nu+1}(x) = 2J_{\nu}'(x),$$
+and consequently
+$$\frac{d}{dx}\left[x^{\nu}J_{\nu}(x)\right] = x^{\nu}J_{\nu-1}(x),
+\qquad
+\frac{d}{dx}\left[x^{-\nu}J_{\nu}(x)\right] = -x^{-\nu}J_{\nu+1}(x).$$
+\end{thm}
+
+\begin{thm}[Generating function, integer order]
+$$\exp\left[\frac{x}{2}\left(t-\frac{1}{t}\right)\right]
+= \sum^{\infty}_{n=-\infty}J_{n}(x)\,t^{n},\qquad t\neq0 .$$
+\end{thm}
+
+\begin{note}
+Compare this with the generating functions of Chapter~3 --- $(1-2xt+t^{2})^{-1/2}$
+for Legendre, $\exp\left(xt-t^{2}/2\right)$ for Hermite. Each family has one,
+each is proved the same way, and each yields the recurrence relations by
+differentiating with respect to $t$ and comparing coefficients. The technique is
+the same; only the function changes.
+\end{note}
+
+\begin{exa}[Half-integer order]
+For $\nu = \tfrac12$ the series can be summed in closed form. Using
+$\Gamma\left(k+\tfrac32\right)
+= \frac{(2k+1)!\sqrt{\pi}}{4^{k}\,k!\,2\,(2k+1)}$ and collecting terms,
+$$J_{1/2}(x) = \sqrt{\frac{2}{\pi x}}\,\sin x,
+\qquad
+J_{-1/2}(x) = \sqrt{\frac{2}{\pi x}}\,\cos x .$$
+These are the only orders at which a Bessel function is elementary, and they are
+the reason spherical problems reduce to trigonometry while cylindrical ones do
+not.
+\end{exa}
+
+\begin{thm}[Orthogonality]
+\label{thm:besselorth}
+Let $\alpha_{\nu,1}<\alpha_{\nu,2}<\cdots$ be the positive zeros of $J_{\nu}$.
+Then
+$$\int^{a}_{0}J_{\nu}\!\left(\frac{\alpha_{\nu,m}x}{a}\right)
+J_{\nu}\!\left(\frac{\alpha_{\nu,n}x}{a}\right)x\,dx = 0,
+\qquad m\neq n,$$
+and for $m=n$ the integral equals
+$\tfrac{a^{2}}{2}\left[J_{\nu+1}(\alpha_{\nu,n})\right]^{2}$.
+\end{thm}
+
+\begin{proof}
+This is Theorem~4.3.2 applied to the Sturm--Liouville problem above, with weight
+$w(x)=x$ and eigenvalues $\lambda_n = \left(\alpha_{\nu,n}/a\right)^{2}$. The
+boundary term \eqref{eq:bc} vanishes at $x=0$ because $p(0)=0$, and at $x=a$
+because each eigenfunction vanishes there by the choice of the
+$\alpha_{\nu,n}$.
+\end{proof}
+
+\begin{note}
+Nothing in that proof was specific to Bessel functions. It is the same argument
+that gave the orthogonality of the Legendre polynomials and of the
+trigonometric system, and it is the last confirmation of the claim made at the
+start of Chapter~4: one theorem, many instances. The corresponding expansion
+$$f(x) = \sum^{\infty}_{n=1}c_n J_{\nu}\!\left(\frac{\alpha_{\nu,n}x}{a}\right),
+\qquad
+c_n = \frac{2}{a^{2}J_{\nu+1}^{2}(\alpha_{\nu,n})}
+\int^{a}_{0}f(x)J_{\nu}\!\left(\frac{\alpha_{\nu,n}x}{a}\right)x\,dx,$$
+is the \emph{Fourier--Bessel series}, and it stands to the disc exactly as the
+Fourier series of Chapter~5 stands to the interval.
+\end{note}
+
+\subsection*{Modified Bessel functions}
+
+Replacing $x$ by $ix$ in \eqref{eq:bessel} gives
+$$x^{2}y''+x\,y'-\left(x^{2}+\nu^{2}\right)y = 0,$$
+the \emph{modified} Bessel equation, whose solutions are
+$$I_{\nu}(x) = i^{-\nu}J_{\nu}(ix)
+= \sum^{\infty}_{k=0}\frac{1}{k!\,\Gamma(k+\nu+1)}\left(\frac{x}{2}\right)^{2k+\nu},
+\qquad
+K_{\nu}(x) = \frac{\pi}{2}\,\frac{I_{-\nu}(x)-I_{\nu}(x)}{\sin\nu\pi}.$$
+
+\begin{note}
+The sign change removes the oscillation. $J_{\nu}$ has infinitely many zeros and
+decays like $x^{-1/2}$; $I_{\nu}$ has none on $(0,\infty)$ and grows like
+$e^{x}$, while $K_{\nu}$ decays like $e^{-x}$. The distinction is the same one
+that separates $\sin x$ from $\sinh x$, and it arises in the same way --- from
+the sign of the term that carries the eigenvalue.
+\end{note}
+
+\subsection*{Practice problems}
+
+\begin{problem}
+Carry out the Frobenius substitution in \eqref{eq:bessel} in full: derive the
+indicial equation, the recurrence for $a_k$, and show that all odd coefficients
+vanish.
+\emph{Where to start: substitute $y=\sum a_k x^{k+r}$ and collect the
+coefficient of $x^{k+r}$.}
+\end{problem}
+
+\begin{problem}
+Show that $J_{1/2}(x) = \sqrt{2/(\pi x)}\,\sin x$ directly from the series.
+\emph{Where to start: use the duplication formula, Theorem~2.2.5, to simplify
+$\Gamma\left(k+\tfrac32\right)$.}
+\end{problem}
+
+\begin{problem}
+Prove that $\dfrac{d}{dx}\left[x^{\nu}J_{\nu}(x)\right] = x^{\nu}J_{\nu-1}(x)$
+by differentiating the series term by term, and deduce
+$J_0'(x) = -J_1(x)$.
+\end{problem}
+
+\begin{problem}
+Show that between any two consecutive positive zeros of $J_{\nu}$ there is
+exactly one zero of $J_{\nu+1}$.
+\emph{Where to start: apply Rolle's theorem to $x^{-\nu}J_{\nu}(x)$ using the
+second derivative identity above.}
+\end{problem}
+
+\begin{problem}
+Verify that the boundary term \eqref{eq:bc} vanishes at both ends for the
+Bessel problem on $[0,a]$ with $y(a)=0$, and explain why no condition need be
+imposed at $x=0$ beyond boundedness.
+\end{problem}
+
+\begin{problem}
+A circular drum of radius $a$ is fixed at its rim. Separating variables in the
+wave equation on the disc leads to Bessel's equation of integer order. Explain
+why the admissible frequencies are proportional to the zeros $\alpha_{n,m}$ of
+$J_n$, and why --- unlike a vibrating string --- they are not integer multiples
+of a fundamental.
+\emph{Where to start: the zeros of $J_n$ are not equally spaced, whereas those
+of $\sin$ are. This is why a drum sounds unpitched and a string does not.}
+\end{problem}
+
+
 \section{Practice Problems}
 
 \begin{problem}
