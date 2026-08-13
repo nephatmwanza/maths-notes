@@ -3288,6 +3288,242 @@ using principal components as a preliminary to classification?
 
 \section{The Multivariate Normal Distribution}
 
+\subsection{Definition and Basic Properties}
+
+The distribution this section is named after has been used implicitly since the
+covariance matrices of Section~2; it is defined here, and the properties that
+the inference of the following subsections relies on are established before
+they are used.
+
+\begin{defn}[Multivariate normal distribution]
+A random vector $\underline{X} = (X_1,\dots,X_p)'$ has the \emph{multivariate
+normal} distribution with mean $\underline{\mu}$ and covariance matrix $\Sigma$,
+written $\underline{X}\sim N_p(\underline{\mu},\Sigma)$, if for
+$\Sigma$ positive definite its density is
+$$f(\underline{x}) = \frac{1}{(2\pi)^{p/2}\left|\Sigma\right|^{1/2}}
+\exp\left\{-\tfrac{1}{2}\left(\underline{x}-\underline{\mu}\right)'
+\Sigma^{-1}\left(\underline{x}-\underline{\mu}\right)\right\},
+\qquad \underline{x}\in\mathbb{R}^{p}.$$
+\end{defn}
+
+\begin{note}
+Compare the exponent with the univariate case, where it is
+$-\left(x-\mu\right)^{2}/2\sigma^{2}$. The quadratic form
+$\left(\underline{x}-\underline{\mu}\right)'\Sigma^{-1}
+\left(\underline{x}-\underline{\mu}\right)$ is the squared Mahalanobis distance
+of Section~1.9, so the density depends on $\underline{x}$ only through that
+distance from the mean --- it is constant on the ellipsoids of Section~4, whose
+axes are the eigenvectors of $\Sigma$ and whose extents are proportional to
+$\sqrt{\lambda_i}$. The two constants have the same origin as in one dimension:
+$\left|\Sigma\right|^{1/2}$ generalises $\sigma$, and $(2\pi)^{p/2}$ is the
+normalising constant of $p$ independent standard normals.
+\end{note}
+
+\begin{thm}[Linear combinations]
+\label{thm:mvnlinear}
+If $\underline{X}\sim N_p(\underline{\mu},\Sigma)$ then for any
+$A_{q\times p}$ and $\underline{b}_{q\times1}$ of constants,
+$$A\underline{X}+\underline{b}\ \sim\
+N_q\left(A\underline{\mu}+\underline{b},\ A\Sigma A'\right).$$
+In particular every linear combination
+$\underline{a}'\underline{X}$ is univariate normal.
+\end{thm}
+
+\begin{note}
+Theorem~\ref{thm:mvnlinear} is the property that makes the multivariate normal
+tractable, and it has a converse that is often taken as the definition:
+$\underline{X}$ is multivariate normal precisely when $\underline{a}'\underline{X}$
+is univariate normal for every fixed $\underline{a}$. That formulation has the
+advantage of remaining meaningful when $\Sigma$ is singular, where no density
+exists --- the distribution then lives on a lower-dimensional subspace, which is
+exactly the situation met in Section~4 when an eigenvalue is zero.
+\end{note}
+
+\begin{thm}[Marginals and independence]
+\label{thm:mvnmarg}
+Partition $\underline{X} = \begin{pmatrix}\underline{X}_1\\ \underline{X}_2\end{pmatrix}$
+conformably with
+$\underline{\mu} = \begin{pmatrix}\underline{\mu}_1\\ \underline{\mu}_2\end{pmatrix}$
+and
+$\Sigma = \begin{pmatrix}\Sigma_{11} & \Sigma_{12}\\ \Sigma_{21} & \Sigma_{22}\end{pmatrix}$.
+Then
+\begin{enumerate}
+\item[(i)] $\underline{X}_1 \sim N_{q}\left(\underline{\mu}_1,\Sigma_{11}\right)$;
+\item[(ii)] $\underline{X}_1$ and $\underline{X}_2$ are independent if and only
+if $\Sigma_{12}=0$.
+\end{enumerate}
+\end{thm}
+
+\begin{note}
+Part (ii) deserves emphasis because it is false in general. Zero covariance does
+not imply independence for arbitrary distributions --- it says only that no
+\emph{linear} association is present. Under joint normality the two coincide,
+and this equivalence is used constantly in what follows. It requires
+\emph{joint} normality: two variables that are each normal but not jointly so
+can be uncorrelated and dependent.
+\end{note}
+
+\begin{thm}[Conditional distributions]
+\label{thm:mvncond}
+With the partition above and $\Sigma_{22}$ non-singular,
+$$\underline{X}_1 \mid \underline{X}_2 = \underline{x}_2\ \sim\
+N_q\left(\underline{\mu}_1 + \Sigma_{12}\Sigma_{22}^{-1}
+\left(\underline{x}_2-\underline{\mu}_2\right),\ \
+\Sigma_{11}-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}\right).$$
+\end{thm}
+
+\begin{note}
+Two features of Theorem~\ref{thm:mvncond} are worth naming. The conditional mean
+is a \emph{linear} function of $\underline{x}_2$ --- which is where the linear
+regression of Section~8 comes from, the regression coefficients being
+$\Sigma_{12}\Sigma_{22}^{-1}$. And the conditional covariance does not depend on
+$\underline{x}_2$ at all: the conditional variability is the same wherever one
+conditions, which is the multivariate statement of homoscedasticity. Both are
+special properties of the normal and neither holds in general.
+
+The matrix $\Sigma_{11}-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}$ is the Schur
+complement of $\Sigma_{22}$, and it is never larger than $\Sigma_{11}$ in the
+positive-definite ordering: conditioning on information cannot increase
+uncertainty.
+\end{note}
+
+\begin{thm}[The quadratic form]
+\label{thm:mvnchisq}
+If $\underline{X}\sim N_p(\underline{\mu},\Sigma)$ with $\Sigma$ non-singular,
+then
+$$\left(\underline{X}-\underline{\mu}\right)'\Sigma^{-1}
+\left(\underline{X}-\underline{\mu}\right)\ \sim\ \chi^{2}_{p}.$$
+\end{thm}
+
+\begin{proof}
+By Section~1.9 write $\Sigma^{-1/2}$ for the symmetric square root and put
+$\underline{Z} = \Sigma^{-1/2}\left(\underline{X}-\underline{\mu}\right)$. By
+Theorem~\ref{thm:mvnlinear}, $\underline{Z}\sim N_p(\underline{0}, I)$, so its
+components are independent standard normals, and the quadratic form equals
+$\underline{Z}'\underline{Z} = \sum^{p}_{i=1}Z_i^{2}$, a sum of $p$ independent
+squared standard normals.
+\end{proof}
+
+\begin{note}
+Theorem~\ref{thm:mvnchisq} is what makes the confidence regions of the following
+subsections ellipsoids rather than boxes. The set of $\underline{x}$ with
+Mahalanobis distance below the $\chi^{2}_{p}$ critical value is an ellipsoid
+centred at $\underline{\mu}$, oriented along the eigenvectors of $\Sigma$; it is
+also the natural region for detecting outliers, since a point may be
+unremarkable in each coordinate separately and far away in the joint sense.
+\end{note}
+
+\subsection{Sampling from a Multivariate Normal Population}
+
+Let $\underline{X}_1,\dots,\underline{X}_n$ be a random sample from
+$N_p(\underline{\mu},\Sigma)$, with
+$\overline{\underline{X}} = \frac{1}{n}\sum\underline{X}_j$ and
+$S = \frac{1}{n-1}\sum\left(\underline{X}_j-\overline{\underline{X}}\right)
+\left(\underline{X}_j-\overline{\underline{X}}\right)'$.
+
+\begin{thm}[Maximum likelihood estimators]
+The maximum likelihood estimators of $\underline{\mu}$ and $\Sigma$ are
+$$\widehat{\underline{\mu}} = \overline{\underline{X}},
+\qquad
+\widehat{\Sigma} = \frac{1}{n}\sum^{n}_{j=1}
+\left(\underline{X}_j-\overline{\underline{X}}\right)
+\left(\underline{X}_j-\overline{\underline{X}}\right)'
+= \frac{n-1}{n}\,S .$$
+\end{thm}
+
+\begin{note}
+As in the univariate case the maximum likelihood estimator of the covariance
+divides by $n$ and is biased; $S$ divides by $n-1$ and is unbiased. Both are
+used, and which is meant should always be checked, particularly in software
+output.
+\end{note}
+
+\begin{thm}[Sampling distributions]
+\label{thm:sampling}
+For a random sample from $N_p(\underline{\mu},\Sigma)$:
+\begin{enumerate}
+\item[(i)] $\overline{\underline{X}}\ \sim\ N_p\!\left(\underline{\mu},\ \tfrac{1}{n}\Sigma\right)$;
+\item[(ii)] $(n-1)S \sim W_p\left(n-1,\Sigma\right)$, the Wishart distribution
+defined below;
+\item[(iii)] $\overline{\underline{X}}$ and $S$ are independent.
+\end{enumerate}
+\end{thm}
+
+\begin{note}
+These are the exact multivariate analogues of the univariate facts that
+$\overline{X}\sim N(\mu,\sigma^{2}/n)$, that $(n-1)s^{2}/\sigma^{2}\sim\chi^{2}_{n-1}$,
+and that the two are independent. Part (iii) is the property that makes
+Hotelling's $T^{2}$ possible at all: the statistic is a ratio involving both
+$\overline{\underline{X}}$ and $S$, and its distribution can only be derived
+because the numerator and denominator are independent.
+\end{note}
+
+\subsection{The Wishart Distribution}
+
+The chi-square distribution describes the sampling behaviour of a sample
+variance. Its multivariate counterpart describes the sampling behaviour of a
+whole covariance matrix, and it is the distribution behind every result in the
+remainder of this section.
+
+\begin{defn}[Wishart distribution]
+Let $\underline{Z}_1,\dots,\underline{Z}_m$ be independent
+$N_p(\underline{0},\Sigma)$ vectors. The distribution of the random matrix
+$$W = \sum^{m}_{j=1}\underline{Z}_j\underline{Z}_j'$$
+is the \emph{Wishart distribution} with $m$ degrees of freedom and scale matrix
+$\Sigma$, written $W\sim W_p(m,\Sigma)$.
+\end{defn}
+
+\begin{note}
+Taking $p=1$ and $\Sigma=\sigma^{2}$ gives $W = \sum Z_j^{2}$ with the $Z_j$
+independent $N(0,\sigma^{2})$, so $W/\sigma^{2}\sim\chi^{2}_{m}$: the Wishart
+with $p=1$ \emph{is} the chi-square, scaled. Everything in this subsection
+reduces to a familiar univariate statement when $p=1$, and checking that it does
+is the quickest way to remember any of it.
+\end{note}
+
+\begin{thm}[Properties]
+Let $W\sim W_p(m,\Sigma)$ and $W_1, W_2$ be independent Wisharts with the same
+scale matrix. Then
+\begin{enumerate}
+\item[(i)] $E(W) = m\Sigma$;
+\item[(ii)] $W_1 + W_2 \sim W_p\left(m_1+m_2,\Sigma\right)$;
+\item[(iii)] $AWA' \sim W_q\left(m, A\Sigma A'\right)$ for $A_{q\times p}$ of constants;
+\item[(iv)] $W$ is positive definite with probability one if and only if
+$m\geq p$.
+\end{enumerate}
+\end{thm}
+
+\begin{note}
+Part (iv) is a practical constraint rather than a technicality. Since
+$(n-1)S\sim W_p(n-1,\Sigma)$, the sample covariance matrix is singular whenever
+$n-1<p$ --- fewer observations than variables --- and then $S^{-1}$ does not
+exist. Every procedure in the rest of this section requires $S^{-1}$, so all of
+them fail in that regime, which is the formal reason a multivariate analysis
+needs more observations than variables. It is the same fact met in
+Section~4.4, where at most $n-1$ principal components can be extracted.
+\end{note}
+
+\begin{note}
+Part (i) explains the divisor in $S$: since $E\left[(n-1)S\right] = (n-1)\Sigma$
+we have $E(S)=\Sigma$, so dividing the sum of squares and cross-products by
+$n-1$ rather than $n$ is what makes $S$ unbiased --- the same reason as in one
+dimension, with the same degrees of freedom lost to estimating the mean.
+\end{note}
+
+\begin{note}
+With this in place, Hotelling's $T^{2}$ of the next subsection can be seen for
+what it is. The univariate $t$ statistic squares to
+$$t^{2} = \frac{\left(\overline{X}-\mu\right)^{2}}{s^{2}/n}
+= n\left(\overline{X}-\mu\right)\left(s^{2}\right)^{-1}\left(\overline{X}-\mu\right),$$
+and replacing the scalars by their matrix counterparts gives
+$$T^{2} = n\left(\overline{\underline{X}}-\underline{\mu}\right)'
+S^{-1}\left(\overline{\underline{X}}-\underline{\mu}\right).$$
+It is a normal vector and an independent Wishart matrix combined exactly as a
+normal variable and an independent chi-square are combined in the univariate
+case, which is why its null distribution is a multiple of an $F$.
+\end{note}
+
+
 \subsection{Hotellings}
 \pagebreak
 
