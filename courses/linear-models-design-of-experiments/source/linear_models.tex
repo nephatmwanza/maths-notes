@@ -86,6 +86,21 @@ $$\left(X'X\right)\widehat{\underline{\beta}} = X'\underline{y}$$
 \pagebreak
 
 \section{ANALYSIS OF VARIANCE}
+This first section is about comparing several groups at once. The two-sample
+$t$ test answers the question for two groups; with $k$ groups there are
+$\binom{k}{2}$ pairs, and testing them all separately makes a false positive
+somewhere almost certain. The analysis of variance replaces those many tests
+with one, by splitting the total variation in the data into a part attributable
+to the treatments and a part attributable to everything else, and comparing
+them.
+
+The section builds the two designs the rest of the course refers back to: the
+one-way layout, in which units are assigned to treatments and nothing else is
+recorded, and the randomized block design, in which a known source of nuisance
+variation is used rather than ignored. The distributional facts are stated here
+and used; they are proved in Section~2.4, once the necessary matrix theory is
+available.
+
 
 
 \subsection{Introduction}
@@ -94,10 +109,10 @@ An important distinction in the model assumptions and associated analysis arises
 
 First part the populations are fixed where as the second they are considered randoms. For the first part we use a fixed effect model and the second part we use a random effect model.
 
-\textbf{Fixed effects model.}\\
+\subsubsection*{Fixed effects model}
 If we consider an experiment comparing the effects of three drugs, each is a new compound developed in the laboratory. Information is desired on the comparative effects of these drugs. Other situations usually considered as fixed effects are treatment regiments, types of disease, different methods doing something.
 
-\textbf{Random effects:}\\
+\subsubsection*{Random effects}
 Consider for instance a large company which employs a large number of personal officers who interviews applicants for jobs in the firms. At the end of an interviews, the personal officers assign a rating between 0 and 10 individually. Indicating the applicants potential value for the job.
 
 Suppose that five personal officers where selected at random and each was assigned ten candidates at random to do the rating.\\
@@ -123,11 +138,11 @@ If a smaller company has only five personnel officers who are included in the st
 
 It important to point out that we do have fixed or random factors in the world, but rather different structural models we impose on the world when we design the experiment. Thus, the variable becomes fixed or random only in the context of actual experiment.
 
-\textbf{Randomization}\\
+\subsubsection*{Randomization}
 Analysis of variance model usually result from planned experiments. Often variability among experimental units may mask an obscure the treatment effects of interest.\\
 This nuisance factor (variability) of experimental unit difference can be minimized by randomization. Randomization is the corner stone underlying the use of statistical methods in experimental design. By randomization we mean that both the allocation of experimental units  and the other in which the individual runs or trials of the experiment are to be performed randomly determined.\\
 
-\textbf{Blocking}\\
+\subsubsection*{Blocking}
 This is a technique used to increase the precision of an experiment. A blocking is a group of experimental units which are more homogeneous than the entire set of experimental units.
 
 \begin{note}
@@ -142,6 +157,17 @@ Randomization may consist of any or all of four process.
 
 
 \subsection{One-Way Analysis of Variance}
+The simplest design: $N$ experimental units, each receiving one of $k$
+treatments, with nothing else recorded. The aim is a single test of whether the
+treatment means differ at all.
+
+What follows is an algebraic identity, not a statistical argument. The total
+sum of squares is split into a between-treatments part and a within-treatments
+part; the notation is set up first, the identity is derived, and the ratio of
+the resulting mean squares is the test statistic. Read the derivation as
+book-keeping about sums of squares --- the question of why the ratio has an $F$
+distribution is a separate one, answered in Example~\ref{res:exa:cochranowa}.
+
 $$Y_{ij}=\mu_j+\varepsilon_{ij},\quad  i=1,2,\ldots ,n_j,\quad  j=1,2,\ldots ,k$$
 \begin{itemize}
 \item[] $Y_{ij}=$ the observation for the $i^{\text{th}}$ experiment unit in the $j^{\text{th}}$ treatment.
@@ -164,7 +190,7 @@ $$Y_{ij}=\mu +\tau_j +\varepsilon_{ij},\quad  i=1,2,\ldots ,n_j,\quad  j=1,2,\ld
 \end{itemize}
 
 
-\textbf{Notation:}\\
+\subsubsection*{Notation}
 
 $$Y_{ij}=\sum\limits^{n_j}_{i=1}Y_{ij}\quad  \text{and}\quad  \overline{Y}._{j}=\frac{Y._{j}}{n_j}=\frac{1}{n_j}\sum\limits^{n_j}_{i=1}Y_{ij}$$
 $$Y{..}=\sum^k_{j=1}\sum^{n_j}_{i=1}Y_{ij}\quad  \text{and}\quad  \overline{Y}{..}=\frac{\sum\limits^k_{j=1}\sum\limits^{n_j}_{i=1}Y_{ij}}{\sum^k_{j=1}n_j}$$
@@ -231,6 +257,19 @@ F & = \frac{MSTrt}{MSE}\,,\qquad  MSTrt = \frac{SSTr(t)}{K-1}\,,\qquad  MSE = \f
 
 
 \subsection{The Randomized Block Design}
+The one-way layout treats every source of variation other than the treatments
+as error. Often something else is known: plots lie in fields of different
+fertility, patients come from different age groups, measurements are made by
+different technicians. Ignoring such a factor inflates the error mean square
+and makes the treatment test insensitive.
+
+A block is a group of units expected to be alike. By comparing treatments
+within blocks, the block-to-block variation is removed from the error term
+instead of hiding in it. The decomposition below is the same exercise as in
+Section~1.2 with one more term, and the payoff is visible in the error degrees
+of freedom: fewer of them, but a smaller mean square, and usually a sharper
+test.
+
 $$Y_{ij} = \mu + \beta_i + \tau_j + \varepsilon_{ij}$$
 No replication, $$\quad  i=1,2,\ldots ,b \qquad  \varepsilon_{ij} \thicksim N(0,\sigma^2)\qquad  \sum^b_{i=0} \beta_i=0\qquad  \sum^k_{j=0}\overline{Y}=0$$
 
@@ -274,6 +313,20 @@ $$Y_{ij} = \mu_j + \varepsilon_{ij}\quad   \Big|\quad  Y_{ij} = \mu + \tau_j + \
 
 \pagebreak
 \section{RANDOM VECTORS AND MATRICES}
+Section~1 was conducted in subscripts. That will not scale: the designs ahead
+have several factors, and regression has an arbitrary number of predictors.
+This section rewrites the same ideas in matrix form, where a model is a single
+equation $\underline{Y}=XB+\underline{\varepsilon}$ regardless of how many
+terms it contains.
+
+Three tools are assembled. The algebra of matrices, ranks and inverses gives
+the language. The expectation and variance-covariance of a random vector give
+the first two moments in matrix form. Differentiating linear and quadratic
+forms gives the calculus needed to minimise a sum of squares in one step
+rather than one parameter at a time. The section closes with idempotent
+matrices and the distribution of quadratic forms --- the result that every
+sum of squares in the course depends on.
+
 
 
 \subsection{Review of Matrix Algebra}
@@ -450,6 +503,16 @@ $$Q(X)=X^tAX=\big(P^{-1}Y\big)^tAP^{-1}Y$$
 
 
 \subsection{Expectation of Random Vectors and Variance-Covariance}
+A random vector needs a mean and a measure of spread, and for a vector the
+second of these is a matrix: variances along the diagonal, covariances off it.
+The definitions below are the matrix versions of familiar scalar ones, and the
+results that follow answer the question that recurs throughout the course ---
+if $\underline{Y}$ has mean $\underline{\mu}$ and variance $\Sigma$, what are
+the mean and variance of $A\underline{Y}$?
+
+That single question, with different choices of $A$, produces the distribution
+of $\widehat{B}$, of the fitted values, and of the residuals.
+
 \begin{defn}\label{res:defn:1.2.1}
 \begin{enumerate}
 \item[i.] Let $Y$ be a vector of random variables i.e $Y=
@@ -582,10 +645,19 @@ Hence the Proof.
 
 
 \subsection{Derivatives of Linear and Quadratic Forms}
+Least squares minimises $\left(\underline{Y}-XB\right)^t
+\left(\underline{Y}-XB\right)$ over $B$. Doing this by differentiating with
+respect to each $\beta_j$ in turn gives $k$ equations to be assembled by hand;
+doing it in matrix form gives the normal equations in three lines.
+
+Only two derivatives are needed, and they are the matrix analogues of
+$\frac{d}{dx}(ax)=a$ and $\frac{d}{dx}(ax^2)=2ax$. They are stated and proved
+here, and applied in Section~3.3.
+
 
 
 \begin{defn}\label{res:defn:1.3.1}
-Derivatives of a function with respect to a vector. Let $f(X)$ be a function of $k$ "independent" real variables. $X=
+Derivatives of a function with respect to a vector. Let $f(X)$ be a function of $k$ ``independent'' real variables. $X=
 \begin{pmatrix}
 x_1 & x_2 & \cdots & x_k\\
 \end{pmatrix}^t
@@ -613,7 +685,7 @@ f(X) & = 6x_1^2+x_2^2-2x_1x_2+x_2x_3+2x_3^2\\
 
 \begin{result}\label{res:result:1.3.2}
 \begin{enumerate}
-\item[i).] Let $L(X)$ be a linear function of $k$ "independent" real variables given by $$L(X)=a^tX=\sum^k_{j=1}a_jx_j$$
+\item[i).] Let $L(X)$ be a linear function of $k$ ``independent'' real variables given by $$L(X)=a^tX=\sum^k_{j=1}a_jx_j$$
 $$\frac{\partial L(X)}{\partial X}=a\qquad ,\qquad  a=
 \begin{pmatrix}
 a_1 & a_2 & \cdots & a_k\\
@@ -895,13 +967,37 @@ answer from the proof of Theorem~\ref{res:thm:chisqcrit}.
 
 \newpage
 \section{LINEAR MODELS}
+Sections~1 and 2 have been preparation. The analysis of variance models of
+Section~1 and the regression models of Section~4 are not two subjects: both are
+$\underline{Y}=XB+\underline{\varepsilon}$, differing only in what the columns
+of $X$ contain --- indicators of group membership in one case, measured
+covariates in the other. This section treats them together.
+
+The programme is: define the general linear model and its assumptions; obtain
+the least squares estimator and its distribution; establish that it is best
+among linear unbiased estimators; determine which parameters the data can speak
+about at all when $X$ is rank deficient, as every analysis of variance design
+is; give one test that covers every linear hypothesis; and then apply the whole
+apparatus to designs with two and three factors.
+
 
 
 \subsection{General Linear Model}
+The definitions here fix what is being assumed, and it is worth being explicit
+because the assumptions do different amounts of work. Linearity in the
+parameters and $E\left(\underline{\varepsilon}\right)=\underline{0}$ are needed
+for unbiasedness. Constant variance and uncorrelated errors are needed for the
+Gauss--Markov theorem. Normality is needed only for the tests and confidence
+intervals --- not for estimation.
+
+Keeping track of which assumption supports which conclusion is the difference
+between knowing that a diagnostic plot matters and knowing what it puts at
+risk.
+
 
 
 \begin{defn}\label{res:defn:2.1.1}
-Let $Y$ be an $N\times 1$ observable vector of random variables, $X$ be an $N\times K$ matrix of constants $(N>K)$, $B$ be a vector of $K$ parameters and $\varepsilon$ be $N\times 1$ vector of random variables (unobservable) errors. let these be related by the equation $$Y=XB + \varepsilon\quad \cdots \quad  (*)$$
+Let $Y$ be an $N\times 1$ observable vector of random variables, $X$ be an $N\times K$ matrix of constants $(N>K)$, $B$ be a vector of $K$ parameters and $\varepsilon$ be $N\times 1$ vector of random variables (unobservable) errors. let these be related by the equation \begin{equation}\label{eq:glm}Y=XB + \varepsilon .\end{equation}
 $E(\varepsilon)=0$ and $Cov(\varepsilon)=\Sigma$\\
 These specifications define a general linear model.\\
 
@@ -915,7 +1011,7 @@ The matrix is known as the design matrix. There are three special cases of the g
 
 
 \begin{center}
-\textbf{A: Regression Model}
+\subsubsection*{A: Regression Model}
 \end{center}
 \begin{enumerate}
 \item[i).] Simple linear regression $$Y_i=\beta_0 +\beta_1X_i +e_i,\quad  i=1,2,\ldots ,n\quad  e_i\thicksim N(0,\sigma^2)$$
@@ -973,7 +1069,7 @@ B & =
 
 \begin{table}[H]
 \centering
-\textbf{B: ANOVA Model}
+\subsubsection*{B: ANOVA Model}
 \begin{tabular}{c|c}
 \hline
 &\\
@@ -1177,7 +1273,7 @@ rank(X) & = 7\\
 \end{enumerate}
 
 
-\textbf{Analysis Of Covariance}
+\subsubsection*{Analysis of Covariance}
 \begin{align*}
 Y_{ij} & = \mu +\tau_j + \gamma X_{ij} + e_{ij}\\
 Y_{ij} & = \mu_j +\gamma X_{ij} + e_{ij},\quad i=1,2,\ldots , n\quad  j=1,2,\ldots , k\\
@@ -1223,6 +1319,17 @@ X_{3n\times 5} & =
 
 
 \subsection{Review of Linear Algebra}
+Three ideas are collected here because the estimation theory of Section~3.3
+cannot be stated without them: the column space of $X$, which is the set of
+fitted values the model can produce; projection onto that space, which is what
+least squares does; and rank, which counts how many parameters the data can
+distinguish.
+
+The geometric reading is worth carrying forward. Least squares chooses the
+point of the column space closest to $\underline{Y}$, the residual vector is
+perpendicular to that space, and Pythagoras in $n$ dimensions is the identity
+$SST=SSR+SSE$.
+
 
 
 \begin{defn}\label{res:defn:2.2.1}
@@ -1302,8 +1409,19 @@ Given a fixed vector space $V_r\subset V_n$, a fixed vector $X\in V_n$ and a var
 
 
 \subsection{Estimation of Parameters in a  Linear Model}
+This is the centre of the course. The least squares estimator is derived, its
+mean and variance obtained, its distribution established under normality, and
+its optimality proved.
+
+The order of the argument matters. Unbiasedness needs only
+$E\left(\underline{\varepsilon}\right)=\underline{0}$; the variance formula
+needs $\text{Var}\left(\underline{\varepsilon}\right)=\sigma^2I$; the
+Gauss--Markov theorem needs those two and nothing else --- in particular not
+normality, which is why least squares is used so widely. Normality enters only
+where the sampling distributions are required, for tests and intervals.
+
 $$\underbrace{Y}_{N\times 1} = \underbrace{X}_{N\times K} \underbrace{B}_{K\times 1} + \underbrace{\varepsilon}_{N\times 1}\quad  \varepsilon \thicksim N\big(0,\Sigma\big)$$
-We want to "minimize" the error vector
+We want to ``minimize'' the error vector
 \begin{align*}
 ||\varepsilon||^2 & = \varepsilon^t\varepsilon = (Y-XB)^t(Y-XB)\\
                   & = \big(Y^t-B^tX^t\big)\big(Y-XB\big)\\
@@ -1312,15 +1430,18 @@ We want to "minimize" the error vector
 \end{align*}
 \begin{align*}
 L(B) & = Y^tY-2Y^tXB+B^tX^tXB\\
-\frac{\partial L(B)}{\partial B} & = 0-2X^tY+2X^tXB\\
-\frac{\partial L(B)}{\partial B} & = 0 \iff X^tX\widehat{B}=X^tY\quad \cdots \, (**)
+\frac{\partial L(B)}{\partial B} & = 0-2X^tY+2X^tXB
 \end{align*}
+Setting the derivative to zero gives
+\begin{equation}\label{eq:normal}
+X^tX\widehat{B}=X^tY .
+\end{equation}
 
-$(**)$ is known as normal equations.\\
+Equation~\eqref{eq:normal} is known as the normal equations.\\
 
-The normal equations $(**)$ doesn't always have a unique solution.\\
+The normal equations~\eqref{eq:normal} do not always have a unique solution.\\
 
-$\bullet$ When does $(**)$ have a unique solution?\\
+When does~\eqref{eq:normal} have a unique solution?\\
 
 Recall that $Y=XB+\varepsilon,\quad  E(\varepsilon)=0\quad \implies \quad  E(Y)=XB$\\
 
@@ -1345,7 +1466,7 @@ Y & = X\widehat{B}
 \begin{defn}\label{res:defn:2.3.1}
 A matrix whose columns are linearly independent is known as full column rank.\\
 
-Since the mean vector $\big(XB\big)$ of $Y$ lies in the estimation space say $V$ which is spanned by the columns of the design matrix $X$ then the solution in $(**)$ must satisfy $X\widehat{B}=P_vY$, where $P_vY$ is the projection of $Y$ on the space $V$, $P_v$ is known the projection matrix on $V$.
+Since the mean vector $\big(XB\big)$ of $Y$ lies in the estimation space say $V$ which is spanned by the columns of the design matrix $X$ then the solution of~\eqref{eq:normal} must satisfy $X\widehat{B}=P_vY$, where $P_vY$ is the projection of $Y$ on the space $V$, $P_v$ is known the projection matrix on $V$.
 \end{defn}
 
 
@@ -1405,7 +1526,7 @@ X^tX\widehat{B} & = X^tX\big(X^tX\big)^{-1}X^tY=X^tY\\
 
 
 \begin{thm}[Gauss-Markov theorem]\label{res:thm:2.3.4}
-Let $Y=XB+\varepsilon$, be a linear model. If $E(Y)=XB$ and $Cov(Y)=\Sigma_Y$ which is non-singular and $X$ is full column rank then the least squares estimator of $B, \, \widehat{B}=\big(X^tX\big)^{-1}X^tY$ has "minimum variance" within the classes of linear unbiased estimators of $B$ i.e $\widehat{B}$ is BLUE (Best Linear Unbiased Estimator).
+Let $Y=XB+\varepsilon$, be a linear model. If $E(Y)=XB$ and $Cov(Y)=\Sigma_Y$ which is non-singular and $X$ is full column rank then the least squares estimator of $B, \, \widehat{B}=\big(X^tX\big)^{-1}X^tY$ has ``minimum variance'' within the classes of linear unbiased estimators of $B$ i.e $\widehat{B}$ is BLUE (Best Linear Unbiased Estimator).
 \end{thm}
 
 
@@ -1770,9 +1891,22 @@ the degrees of freedom of the resulting $F$ test.
 
 \newpage
 \subsection{Simultaneous Confidence Intervals and Multiple Comparison}
+A significant $F$ says that the treatment means are not all equal. It does not
+say which differ, and that is usually the question the experiment was run to
+answer.
+
+The difficulty is multiplicity. Each interval computed at $95\%$ confidence
+fails $5\%$ of the time, so with ten intervals the chance that at least one is
+wrong is far above $5\%$. Three remedies follow --- Bonferroni, Scheff\'e and
+Tukey --- and they differ in what they cover. Bonferroni covers a fixed list
+named in advance; Tukey covers all pairwise differences; Scheff\'e covers every
+contrast whatever, including those suggested by the data. The wider the
+guarantee, the wider the intervals, and choosing among them is a matter of
+deciding honestly what will be looked at.
 
 
-\textbf{One-dimensional case}\\
+
+\subsubsection*{One-dimensional case}
 Let $C$ be a known $K\times 1$ vector of constants. We want a $100(1-\alpha)\%$ confidence interval for $\underbrace{C^t}_{1\times K}\underbrace{B}_{K\times 1}$.\\ Let $\text{MSE}=\frac{Y^t\big(I-H\big)Y}{N-K}$, mean squared error then $\hat{B}$ the least squares estimator of $B$ in the linear model $$Y=XB+\varepsilon,\quad  E(\varepsilon)=0,\quad  Cov(\varepsilon)=\sigma^2I$$
 $X$ to be full column rank matrix. $\hat{B}$ and MSE are independent (probability) since there are functions of projections onto orthogonal spaces.\\
 
@@ -1845,7 +1979,7 @@ $$=\frac{\frac{\chi^2_K}{K}}{N-K\cdot\frac{\chi^2_{N-K}}{N-K}}$$\\
  
 \begin{enumerate}
 \item[\textbf{Remark 1:}]
- If we know the "nuisance parameter" $\sigma^2$ we would get our confidence set based on the Chi-square i.e $$\Bigg\{B^*:\frac{\big(\widehat{B}-B^*\big)^tX^tX\big(\widehat{B}-B^*\big)}{\sigma^2}\leq \chi^2_{k,\alpha}\Bigg\}$$ would be the $(100-\alpha)\%$ confidence set for $B$.
+ If we know the ``nuisance parameter'' $\sigma^2$ we would get our confidence set based on the Chi-square i.e $$\Bigg\{B^*:\frac{\big(\widehat{B}-B^*\big)^tX^tX\big(\widehat{B}-B^*\big)}{\sigma^2}\leq \chi^2_{k,\alpha}\Bigg\}$$ would be the $(100-\alpha)\%$ confidence set for $B$.
  
  
 \item[\textbf{Remark 2:}]
@@ -1874,9 +2008,14 @@ hence the simultaneous confidence intervals\\
 \end{thm}
 
 \subsection*{Simultaneous Confidence Intervals}
+The first of the three methods. Bonferroni's inequality requires no
+distributional theory beyond what is already available: if $m$ statements are
+each made at level $\alpha/m$, then the probability that any one of them fails
+is at most $\alpha$, whatever the dependence between them.
 
 
-\textbf{Using Bonferroni's Inequality}\\
+
+\subsubsection*{Using Bonferroni's Inequality}
 
 For any events $A_1, A_2,\ldots , A_k$ $$P\Bigg(\bigcup^k_{j=1}A_j\Bigg)\leq \sum^k_{j=1}P\big(A_j\big).$$ This inequality is known as Bonferroni's inequality. Applying this inequality to confidence intervals we have the next Lemma.\\
 
@@ -2046,6 +2185,16 @@ $$
 
 
 \subsection*{Simultaneous Confidence Intervals by Scheff\'e's Method}
+Scheff\'e's method gives the widest guarantee of the three: every contrast
+among the treatment means simultaneously, not merely a list fixed beforehand.
+That is what makes it the right method when the comparison of interest was
+suggested by looking at the data --- the case in which Bonferroni's count $m$
+is not known in advance and the guarantee it offers does not apply.
+
+The price is width. When only pairwise differences are wanted, Tukey's
+intervals are shorter; when a short list is named in advance, Bonferroni's are
+usually shorter still.
+
 
 \begin{thm}\label{res:thm:2.3.5}
 Let $\widehat{B}$ be the least square estimator for $B$ in the linear model $Y=XB+\varepsilon$, $\quad  \varepsilon \thicksim N(0,I\sigma^2)$, then the $100(1-\alpha)\%$ confidence interval for $C^tB$ is given by $$C^t\widehat{B}\pm \sqrt{Kf^{\alpha}_{K,N-K}}\sqrt{\text{MSE}\,C^t\big(X^tX\big)^{-1}C}$$ for all vectors $C$.\\
@@ -2124,7 +2273,7 @@ $\bullet$ Bonferroni is better method for confidence interval than the S-method.
 The Tukey method of multiple comparison we will consider applies when the interest is only the pairwise simple contrasts.\\
 
 
-\textbf{Studentized range Distribution}\\
+\subsubsection*{Studentized range Distribution}
 The Tukey method utilizes the studentized range distribution. Let $Y_1, Y_2,\ldots , Y_k$ be independent observations from $N(\mu,\sigma^2)$ and $W$ be the range of this set of  observations i.e $$W=\max\big\{Y_1,Y_2,\ldots ,Y_k\big\}-\min\big\{Y_1,Y_2,\ldots ,Y_k\big\}$$ Let $S^2$ be the estimate of $\sigma^2$ based on $v$ degrees of freedom and is independent of the $Y_{j'}$s, then the ratio $W/S$ is called studentized range as is denoted by $$l(k,v)=\frac{W}{S}$$
 
 
@@ -2315,7 +2464,7 @@ Total & $SST$ & $abn-1$ &&\\
 \end{table}
 
 
-\textbf{Computation Formula}\\
+\subsubsection*{Computation Formula}
 
 $\displaystyle{Y_{i}...=\sum^b_{j=1}\sum^n_{l=1}Y_{ijl}\qquad  Y...=\sum^a_{i=1}\sum^b_{j=1}\sum^n_{l=1}Y_{ijl}}$
 
@@ -2439,7 +2588,7 @@ Total & 1,642 & 11 &&&\\
 
 
 
-\textbf{The Two-Factor Model}\\
+\subsubsection*{The Two-Factor Model}
 Sometimes referred to a  randomized block design with replication. The main disadvantage of the two factor model is that it is not suitable for large number of treatments due to the difficulty of finding enough homogeneous can be overcome by using a design known as Randomized incomplete block design (RIBD).\\
 This allows investigation of differences among $k-$ treatments using $b$ blocks containing $(v)$ experimental units when $(v)<k$.\\
 
@@ -2519,11 +2668,11 @@ $$\sum \alpha_i=\sum \beta_j=\sum (\alpha\beta)_{ij}=\sum (\alpha\tau)_{il}=\sum
 \begin{align*}
 Y_{ijlm}-\overline{Y}.... = & \underbrace{\overline{Y}_i...-\overline{Y}....}_{\hat{\alpha}_i} + \underbrace{\overline{Y}._j..-\overline{Y}....}_{\hat{\beta}_j} + \underbrace{\overline{Y}..l.-\overline{Y}....}_{\hat{\tau}} + \underbrace{\overline{Y}_{ij}..-\overline{Y}_i...-\overline{Y}._j..+\overline{Y}....}_{(\hat{\alpha}\hat{b})_{ij}}\\
 & + \underbrace{\overline{Y}_i._l.-\overline{Y}_i...-\overline{Y}.._l.+\overline{Y}....}_{(\alpha \hat{\tau})_{il}}+\underbrace{\overline{Y}._{jl}.-\overline{Y}._j..-\overline{Y}.._l.-\overline{Y}....}_{(\beta\tau)_{jl}}\\
-& + \underbrace{\overline{Y}_{ijl}.-\overline{Y}_i...-\overline{Y}._j..-\overline{Y}.._l.-\overline{Y}....}_{(\alpha\beta\tau)_{ijl}} + \underbrace{Y_{ijlm}-\overline{Y}_{ijl}.}_{\hat{\varepsilon}_{ijlm}}\quad \cdots \quad  (*)
+& + \underbrace{\overline{Y}_{ijl}.-\overline{Y}_i...-\overline{Y}._j..-\overline{Y}.._l.-\overline{Y}....}_{(\alpha\beta\tau)_{ijl}} + \underbrace{Y_{ijlm}-\overline{Y}_{ijl}.}_{\hat{\varepsilon}_{ijlm}}
 \end{align*}
 
 
-Squaring both sides of $(*)$ and adding all the cross-product terms will 
+Squaring both sides of the identity above and adding, all the cross-product terms vanish, leaving 
 \begin{align*}
 SST  = & SSA + SSB + SSC + SSAB + SSAC + SSBC + SS(ABC) + SSE\\
 abkn-1  = & (a-1) + (b-1) + (k-1) + (a-1)(b-1) + (a-1)(k-1) + (b-1)(k-1)\\
@@ -2639,7 +2788,7 @@ The three-way layout and ANOVA is just an extension of a two-factor lay out and 
 
 
 \subsection{Latin Square Design}
-A Latin square design is an experimental design  which uses two "blocking" variables to reduce experimental errors. It is an incomplete three-way analysis of  variance model. Let $A$ and $B$ be blocking variables each with $k-$ experimental units and $T_1,T_2,\ldots ,T_k$ be the $k-$ treatments.
+A Latin square design is an experimental design  which uses two ``blocking'' variables to reduce experimental errors. It is an incomplete three-way analysis of  variance model. Let $A$ and $B$ be blocking variables each with $k-$ experimental units and $T_1,T_2,\ldots ,T_k$ be the $k-$ treatments.
 
 \begin{table}[h!]
 \centering
@@ -2723,14 +2872,14 @@ $$i=1,2,\ldots ,k\qquad  j=1,2,\ldots ,k\qquad  l=1,2,\ldots ,k$$
 $$\sum \alpha_i = 0=\sum \beta_j=\sum \tau_l,\qquad  \varepsilon_{ijl}\thicksim^{iid}N(0,\sigma^2)$$\\
 
 
-\textbf{Advantages Of Latin Design}
+\subsubsection*{Advantages of Latin Design}
 \begin{enumerate}
 \item Allows greater reductions in variability of experimental errors.
 \item Treatment effects can be studied using a small number of experimental units.\\
 \end{enumerate}
 
 
-\textbf{Disadvantages}
+\subsubsection*{Disadvantages}
 \begin{enumerate}
 \item The number of levels in each factor $(A$ and $B)$ must be equal to the number of treatments.
 \item The assumption of no  interaction between either Factor and treatment, as well as no interaction between the two factors.
@@ -2763,7 +2912,6 @@ $$SSE = SST - SSA - SSB - SSTrt$$\\
 
 \begin{table}[H]
 \centering
-\textbf{ANOVA TABLE}\\
 \begin{tabular}{|c|c|c|c|c|}
 \hline
 Source of & SS & df & MS & F\\
@@ -2785,6 +2933,7 @@ Error & $SSE$ & $(k-1)(k-1)$ & $MSE$ &\\
 Total & $SST$ & $k^2-1$ &&\\
 \hline
 \end{tabular}
+\caption{Analysis of variance table.}
 \end{table}
 
 
@@ -3066,8 +3215,19 @@ adj(\overline{Y}._3) & = 36.00 - 0.954(21.20-24.13)=38.80\\
 \pagebreak
 \end{exa}
 \section{MULTIPLE REGRESSION}
+The final section returns to $\underline{Y}=XB+\underline{\varepsilon}$ with
+the columns of $X$ now measured quantities rather than group indicators. The
+estimation theory is already done --- Section~3.3 applies verbatim --- so what
+is new here is everything that arises from the columns being observed rather
+than designed.
 
-\quad 
+An experimenter chooses $X$ and can make its columns orthogonal. A regression
+analyst takes the $X$ that nature supplies, and its columns are generally
+correlated. Four consequences occupy this section: the coefficients change
+meaning depending on what else is in the model; near-dependence between columns
+makes them unstable; individual observations can dominate the fit; and there
+is no longer an obvious answer to which variables belong in the model at all.
+
 \subsection{Introduction}
 Simple linear regression model
 $$Y_i=\beta_0+\beta_1X_i+e_i,\quad  i=1,2,\ldots ,n\quad  e_i\thicksim N(0,\sigma^2)$$
@@ -3190,7 +3350,7 @@ $$
 \subsection{General Multiple Line Regression}
 
 
-\textbf{Introduction}\\
+\subsubsection*{Introduction}
 Multiple linear regression analysis is one of the most widely used of all statistical tools. The problem is estimating or predicting the values of a dependent variable $Y$ on the basis of a  set of  measurements taken on several independent variables $X_1,X_2,\ldots ,X_{k-1}$. For example we wish to estimate the speed of wind $(Y)$ as a function of height above ground $(X_1)$, temperature $(X_2)$ and pressure $(X_3)$. The predication  equation is obtained using least squares estimator on data collected at various heights temperatures and pressures to evaluate the necessary coefficients in the assumed model.
 $$E\big(Y/X_1,X_2,X_3\big)=\beta_0+\beta_1X_1+\beta_2X_2+\beta_3X_3$$
 $$Y=XB+\varepsilon,\quad  \varepsilon \thicksim N\big(0,\sigma^2 I_n\big)$$
@@ -3218,6 +3378,20 @@ $$\\
 
 
 \subsection{Meaning of the Coefficients}
+The single most misread quantity in applied statistics is a regression
+coefficient. In simple regression $\beta_1$ is the change in $Y$ per unit
+change in $X$; in multiple regression $\beta_j$ is the change in $Y$ per unit
+change in $X_j$ \emph{with the other regressors held fixed}, and that
+qualification changes everything.
+
+It means the coefficient depends on which other variables are in the model, so
+that the same variable may have opposite signs in two defensible models of the
+same data. It means the coefficient is estimated from whatever variation in
+$X_j$ remains after the other regressors are accounted for --- little variation
+left, large standard error, which is the subject of Section~4.5. And it means
+that ``holding fixed'' is arithmetic performed on the data, not an intervention
+performed on the world.
+
 $$E\big(Y/X_1,X_2,\ldots ,X_{k-1}\big) = \sum^{k-1}_{j=0}\beta_jX_j$$
 The parameter $\beta_0$ is the $Y$ intercept of the regression plane, it is the mean response at the origin. Though in certain situations $\beta_0$ has no practical importance. The parameter $\beta_j$ indicates change in the response variable $Y$ per unit increase in $X_j=\big(j=1,2,\ldots ,k-1\big)$ when the other variables are held constant. The regression model is a linear model, with design matrix having its columns as vectors of the independent variables
 $$Y=XB+\varepsilon\quad  ,\quad  E(\varepsilon)=0$$
@@ -3261,7 +3435,6 @@ Y_i-\overline{Y} & = \widehat{Y}_i-\overline{Y} + \big(Y_i-\widehat{Y}_i\big)\\
 
 \begin{table}[H]
 \centering
-\textbf{ANOVA TABLE}\\
 \begin{tabular}{|c|c|c|c|c|}
 \hline
 Source of & SS & df & MS & F\\
@@ -3276,6 +3449,7 @@ Error & SSE & $n-k$ & $\text{MSE}=\frac{\text{SSE}}{n-k}$ & $H_0:\beta_j=0$\\
 Total & SST & $n-1$ &&\\
 \hline
 \end{tabular}
+\caption{Analysis of variance table.}
 \end{table}
 
 
@@ -3374,7 +3548,6 @@ increase of the SSR when $X_2$ is introduced given that $X_1$ and $X_3$ is alrea
 
 \begin{table}[H]
 \centering
-\textbf{ANOVA}\\
 \begin{tabular}{|c|c|c|c|c|}
 \hline
 Source of & SS & df & MS & F\\
@@ -3397,6 +3570,7 @@ Error & SSE$(X_1,X_2,X_3)$ & $n-4$ & MSE$(X_1,X_2,X_3)$ &\\
 Total & SST & $n-1$ &&\\
 \hline
 \end{tabular}
+\caption{Analysis of variance table.}
 \end{table}
 
 First $(X_2)$ $\quad $, second $(X_1$ and $X_3)$
@@ -3598,7 +3772,7 @@ lines change, though their total does not.
 
 
 \subsection{Multicollinearity}
-Recall that $Y=XB+\varepsilon$, where the columns of $X$ are "independent" or regression variables when the columns of $X$ are orthogonal then $X^tX$ is a diagonal matrix. Unfortunately in most multiple regression applications the columns of $X$ are not orthogonal in some cases when the column of $X$ are not orthogonal there can be serious problems when there is near dependency between the independent variables columns of $X$ matrix the problem of multi Id linearity is said to exist: $X^t$ is about singular i.e $\det\big(X^tX\big)\approx 0$.\\
+Recall that $Y=XB+\varepsilon$, where the columns of $X$ are ``independent'' or regression variables when the columns of $X$ are orthogonal then $X^tX$ is a diagonal matrix. Unfortunately in most multiple regression applications the columns of $X$ are not orthogonal in some cases when the column of $X$ are not orthogonal there can be serious problems when there is near dependency between the independent variables columns of $X$ matrix the problem of multi Id linearity is said to exist: $X^t$ is about singular i.e $\det\big(X^tX\big)\approx 0$.\\
 
 Let $X^*=$ the matrix in which the column have been centered and standardized.
 $$X^*_{ij}=\frac{X_{ij}-\overline{X}_j}{\sqrt{S^2_j}}\,,  \quad  S^2_j=\sum^n_{j=1}\big(X_{ij}-\overline{X}_j\big)^2$$
@@ -3682,7 +3856,7 @@ $\therefore$ We do not need $X_2$ and $X_3$.\\
 \end{solution}
 
 
-$X^{*t}X^*$ the main diagonal elements are  ones and the off diagonal elements are correlation coefficients i.e $\big(j,j'\big)^{\text{th}}$ element $\big(j\neq j'\big)$ is $X_{ij}=$ correlation coefficients  are "large" then there might be a problem. If $X_j$ and $X_{j'}$ are nearly dependent the $|X_{ij}|$ $|X_{ij'}|$ will be near unity (one).
+$X^{*t}X^*$ the main diagonal elements are  ones and the off diagonal elements are correlation coefficients i.e $\big(j,j'\big)^{\text{th}}$ element $\big(j\neq j'\big)$ is $X_{ij}=$ correlation coefficients  are ``large'' then there might be a problem. If $X_j$ and $X_{j'}$ are nearly dependent the $|X_{ij}|$ $|X_{ij'}|$ will be near unity (one).
 
 
 A different way of examining multicollinearity is finding the eigenvalues of $X^tX[|X^tX-\lambda I|]=0$ (characteristic roots).\\
@@ -3753,7 +3927,7 @@ In performing the regression analysis we make certain assumptions about the erro
 \item Independent 
 \end{enumerate}
 
-If our fitted model is "correct" the residuals should exhibit tendencies that conform to the assumptions.\\
+If our fitted model is ``correct'' the residuals should exhibit tendencies that conform to the assumptions.\\
 
 After examining the residuals we must conclude that either the assumptions appear to be violated or the assumptions do not appear to be violated.\\
 
@@ -3769,7 +3943,7 @@ The four principal way of plotting the residuals are
        $$\widehat{Y}=X\widehat{B}\implies \widehat{e}=Y-\widehat{Y}=Y-X\widehat{B}$$
 \begin{align*}
 \widehat{e} & = Y-X\big(X^tX\big)^{-1}X^tY\\
-        & = \big(I-H\big)Y\quad  \text{where}\quad  H=X\big(X^tX\big)^{-1}X^t\quad  \text{Hessian matrix}
+        & = \big(I-H\big)Y\quad  \text{where}\quad  H=X\big(X^tX\big)^{-1}X^t\quad  \text{hat matrix}
 \end{align*}
 
        \item Against the independent variables $\big(X_j$ vs $\widehat{e}\big)$\\
@@ -3779,7 +3953,7 @@ The four principal way of plotting the residuals are
 
 In addition to the above four the residuals should be also plotted in anyway that is sensible for a particular problem under consideration.\\
 
-The standardized residuals $\frac{\widehat{e}}{\sqrt{1-h_{ii}}}$, $\quad  h_{ii}$ is the $i^{\text{th}}$ diagonal elements of the Hessian matrix $H$
+The standardized residuals $r_i=\frac{\widehat{e}_i}{s\sqrt{1-h_{ii}}}$, where $s=\sqrt{\text{MSE}}$ and $h_{ii}$ is the $i^{\text{th}}$ diagonal element of the hat matrix $H$
 \begin{align*}
 \widehat{e}=\big(I-H\big)Y,\quad  Cov\big(\widehat{e}\big) & = \big(I-H\big)Cov\big(Y\big)\big(I-H\big)^t\\
                                                            & = \big(I-H\big)I\sigma^2\big(I-H\big)^t\\
@@ -3851,6 +4025,218 @@ $\frac{\widehat{e}_i}{\sqrt{I-h_{ii}}}$ are known as standardized residuals.\\
 \end{itemize}
 
 
+\subsection{Leverage, Outliers and Influential Observations}
+
+Residual plots find observations that the model fits badly. They do not find
+the observations that determined the fit in the first place, and those are the
+more dangerous: a point can sit almost exactly on the fitted surface precisely
+because it dragged the surface to itself. Such a point has a small residual
+and a large effect, so no examination of residuals alone will reveal it.
+
+Three questions must be separated. Is the observation extreme in the
+predictors? Is it fitted badly? Would removing it change the conclusions?
+These are leverage, outlyingness and influence, and an observation may have
+any combination of them.
+
+\begin{defn}[Leverage]
+The leverage of observation $i$ is $h_{ii}$, the $i^{\text{th}}$ diagonal
+element of the hat matrix $H=X\left(X^tX\right)^{-1}X^t$.
+\end{defn}
+
+\begin{result}
+\label{res:result:leverage}
+The leverages satisfy
+$$0\leq h_{ii}\leq 1,\qquad \sum_{i=1}^{n}h_{ii}=tr(H)=k,$$
+so the average leverage is $k/n$. An observation is conventionally called a
+high leverage point when $h_{ii}>2k/n$.
+\end{result}
+
+\begin{note}
+Leverage is computed from $X$ alone --- the response never enters it. It
+measures how far observation $i$ is from the centre of the predictor space,
+and $h_{ii}$ is exactly the weight that $Y_i$ receives in its own fitted
+value, since $\widehat{Y}_i=\sum_j h_{ij}Y_j$. A point with $h_{ii}$ near $1$
+fits itself: $\widehat{Y}_i\approx Y_i$ whatever $Y_i$ happens to be. This is
+why $\text{Var}\left(\widehat{e}_i\right)=\sigma^2\left(1-h_{ii}\right)$ is
+small for high leverage points, and why dividing by $\sqrt{1-h_{ii}}$ is
+necessary before residuals can be compared with one another at all.
+\end{note}
+
+\begin{defn}[Studentized residuals]
+The internally studentized residual is
+$$r_i=\frac{\widehat{e}_i}{s\sqrt{1-h_{ii}}},\qquad s^2=MSE,$$
+and the externally studentized (or deleted) residual is
+$$t_i=\frac{\widehat{e}_i}{s_{(i)}\sqrt{1-h_{ii}}},$$
+where $s_{(i)}$ is computed from the fit with observation $i$ omitted.
+\end{defn}
+
+\begin{note}
+The distinction matters. A genuine outlier inflates $s$, so it inflates its
+own denominator and disguises itself --- $r_i$ can never exceed
+$\sqrt{n-k}$ no matter how aberrant the point. In $t_i$ the offending
+observation is excluded from the scale estimate, so it cannot mask itself, and
+under the model $t_i\sim t_{n-k-1}$ exactly, which makes a formal test
+possible. When the two disagree, trust $t_i$.
+\end{note}
+
+\begin{defn}[Cook's distance]
+$$D_i=\frac{\left(\widehat{\underline{B}}-\widehat{\underline{B}}_{(i)}\right)^t
+X^tX\left(\widehat{\underline{B}}-\widehat{\underline{B}}_{(i)}\right)}{k\,s^2}
+=\frac{r_i^{2}}{k}\cdot\frac{h_{ii}}{1-h_{ii}},$$
+where $\widehat{\underline{B}}_{(i)}$ is the coefficient vector fitted without
+observation $i$.
+\end{defn}
+
+\begin{note}
+The second expression is the one to remember, because it displays influence as
+a product of the two separate things: $r_i^2$ measures how badly the point is
+fitted, and $h_{ii}/(1-h_{ii})$ measures how extreme it is in the predictors.
+Influence requires \emph{both}. A wild $Y$ at the centre of the design has a
+large $r_i$ but tiny leverage and moves nothing; a point far out in $X$ that
+happens to lie on the true line has large leverage and a small residual and
+also moves nothing. It is the combination that is dangerous.
+
+Values of $D_i$ above $1$ are usually worth investigating, though the
+comparison to make is between the $D_i$ of a given data set rather than
+against any fixed threshold.
+\end{note}
+
+\begin{note}[What to do about it]
+Finding an influential observation is not grounds for deleting it. The
+question to ask is why it is influential. If the record is a transcription
+error, correct it. If it is a genuine observation from a different regime, the
+model is wrong over the range that includes it, and that is a finding to
+report, not a point to discard. If it is genuine and in range, it stays --- and
+the honest report gives the fit with and without it, so the reader can see how
+much of the conclusion rests on one row of the data.
+\end{note}
+
+\subsection{Variable Selection}
+
+Section~4.4 showed that $R^2$ can never decrease when a variable is added,
+which makes it useless for choosing between models of different size. Section
+4.5 showed that keeping variables that carry the same information produces
+unstable coefficients. Between them these two facts create the selection
+problem: which subset of the available regressors should the final model
+contain?
+
+\begin{defn}[Criteria for comparing subsets]
+For a model with $p$ parameters fitted to $n$ observations:
+\begin{itemize}
+\item Adjusted coefficient of determination
+$R^2_a=1-\dfrac{SSE/(n-p)}{SST/(n-1)}$, which is maximised by the better
+model;
+\item Mallows' statistic
+$C_p=\dfrac{SSE_p}{s^{2}_{\text{full}}}-\left(n-2p\right)$, where
+$s^2_{\text{full}}$ is the mean square error of the full model;
+\item Akaike's criterion $AIC=n\ln\left(SSE_p/n\right)+2p$ and the Bayesian
+criterion $BIC=n\ln\left(SSE_p/n\right)+p\ln n$, both minimised by the better
+model.
+\end{itemize}
+\end{defn}
+
+\begin{note}
+All four penalise size, and they differ only in how heavily. $C_p$ has a
+useful reading: if the model contains all the variables that matter, then
+$E\left(C_p\right)\approx p$, so subsets are plotted against $p$ and those
+falling near the line $C_p=p$ are the candidates. $BIC$ penalises more heavily
+than $AIC$ whenever $\ln n>2$, that is for $n\geq8$, so it selects smaller
+models; and $R^2_a$ penalises least of the four, so it tends to keep variables
+the others drop.
+\end{note}
+
+\begin{defn}[Stepwise procedures]
+\begin{itemize}
+\item \emph{Forward selection} starts from the model with only an intercept
+and at each step adds the variable with the largest partial $F$, stopping when
+no candidate exceeds a chosen entry threshold.
+\item \emph{Backward elimination} starts from the full model and at each step
+removes the variable with the smallest partial $F$, stopping when every
+survivor exceeds a chosen removal threshold.
+\item \emph{Stepwise regression} is forward selection which, after each
+addition, reconsiders every variable already present for removal.
+\end{itemize}
+\end{defn}
+
+\begin{note}
+Stepwise regression reconsiders because forward selection alone cannot undo
+its own mistakes: a variable admitted early may be made redundant by a later
+pair, and without a removal step it stays in the model for good.
+\end{note}
+
+\begin{note}[The hazard]
+The partial $F$ at each step is compared with an $F$ table, but the variable
+being tested was chosen \emph{because} it had the largest such statistic. Its
+distribution under the null is therefore not the $F$ distribution, and the
+$p$-values reported by a stepwise procedure are too small --- often by a
+great deal. With enough candidate regressors and pure noise for a response, a
+stepwise search will return a model of apparently significant variables and a
+respectable $R^2$.
+
+Three consequences follow. Selection is exploratory, and the model it returns
+is a hypothesis rather than a result. The $F$ and $t$ statistics printed for
+the selected model do not have their nominal distributions and should not be
+quoted as though they do. And a model chosen this way should be assessed on
+data not used to choose it --- by splitting the sample, or by
+cross-validation --- because that is the only assessment the selection cannot
+corrupt.
+\end{note}
+
+\begin{note}
+Selection is also not a remedy for the multicollinearity of Section~4.5,
+though it is often used as one. Dropping one of two collinear regressors does
+stabilise the coefficients, but which of the two gets dropped is close to
+arbitrary --- decided by noise --- and the surviving coefficient must then be
+read as carrying the effect of both. If the aim is prediction this is
+harmless; if the aim is to interpret an individual coefficient it is not.
+\end{note}
+
+\subsection*{Practice Problems}
+
+\begin{problem}
+Prove that $\sum_{i=1}^{n}h_{ii}=k$ for a full rank $n\times k$ design matrix,
+and deduce the average leverage.
+\emph{Where to start: $tr(H)$ and the cyclic property of the trace.}
+\end{problem}
+
+\begin{problem}
+Show that $\text{Var}\left(\widehat{e}_i\right)=\sigma^2\left(1-h_{ii}\right)$
+and explain why raw residuals should not be compared with one another
+directly.
+\end{problem}
+
+\begin{problem}
+An observation has $h_{ii}=0.9$ and a residual close to zero. Is it
+influential? Is it well fitted? Should it be a concern? Answer all three and
+explain how they can hold together.
+\end{problem}
+
+\begin{problem}
+Using $D_i=\dfrac{r_i^2}{k}\cdot\dfrac{h_{ii}}{1-h_{ii}}$, compute Cook's
+distance for an observation with $r_i=2.5$, $h_{ii}=0.4$ in a model with
+$k=4$. Comment.
+\end{problem}
+
+\begin{problem}
+For the cement data of Section~4.4, the full model has $s^2=5.983$ with
+$n=13$. The model in $X_1$ and $X_4$ has $SSE=57.90$ and $p=3$. Compute
+$C_p$ and comment on it in relation to $p$.
+\end{problem}
+
+\begin{problem}
+Explain why $R^2$ cannot be used to choose between models with different
+numbers of regressors, and show algebraically that $R^2_a$ can decrease when a
+variable is added.
+\end{problem}
+
+\begin{problem}
+A colleague reports a regression obtained by stepwise selection from 40
+candidate variables on 50 observations, with all retained coefficients
+significant at the $1\%$ level and $R^2=0.86$. What questions would you ask,
+and what would you ask to be done before the model is used?
+\end{problem}
+
+\newpage
 \subsection{Hazards in the use of Regression}
 Regression analysis is widely used and unfortunately if frequently misused.\\
 
@@ -3894,7 +4280,7 @@ $A$ and $B$ are known as influential points\\
 \end{figure}
 
 
-\item Outlies or "bad" values (points)
+\item Outlies or ``bad'' values (points)
 
 % DIAGRAM 11
 \begin{figure}[H]
