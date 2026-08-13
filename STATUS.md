@@ -557,6 +557,60 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-13 — Linear Models and Design of Experiments published (11th course)
+Live at `courses/linear-models-design-of-experiments/`: 38 pages, 10 diagrams, 29
+practice sections. Catalogue now reads 11 available, 6 in preparation. Deploy
+succeeded; all 589 discussion keys verified live, none orphaned.
+
+**Content added** (the source was 4,052 lines of lecture notes with real gaps):
+- *Distribution of Quadratic Forms* — the mean of a quadratic form, the chi-square
+  criterion (idempotency), Craig, independence of a linear and a quadratic form, and
+  Cochran. The notes had asserted the one-way `F` distribution without proof; it is now
+  derived. This is the keystone the whole ANOVA table rests on and it was simply absent.
+- *Estimability and the Generalized Inverse* — every ANOVA design in the notes is rank
+  deficient and the notes never said so. Generalized inverse, the estimability
+  criterion, rank-deficient Gauss--Markov, contrasts, and why `sum(tau)=0` is a
+  convention rather than information.
+- *The General Linear Hypothesis* — `CB = d`, its `F` statistic, and the extra-sum-of-
+  squares form the notes had been using unnamed in Section 4.
+- *Leverage, Outliers and Influential Observations* and *Variable Selection*.
+- 15 direction statements opening sections that began straight on a formula.
+
+**Errors found in the source and corrected** — worth recording because they were found
+by *reading the rendered pages*, not by any check:
+- `H = X(X'X)^{-1}X'` was twice called the **Hessian matrix**. It is the hat matrix.
+- `R^2` written as `(SSR - SSE)/SST` in one place and `SSR/SSR` in another, with the
+  correct `1 - SSE/SST` on the very next line of the same display both times.
+- A worked `F` given as `10.0412/5.98 = 0.84`, which is not that division; the value
+  0.84 is right for `(10.04/2)/5.983`. Its conclusion also named the wrong two
+  variables.
+- The standardized residual was missing the `s` in its denominator.
+- "Schette' Method" is **Scheffé**. Corrected now because a new course has no discussion
+  thread yet — later it would have orphaned one, since the key derives from the title.
+
+**Three tex4ht traps, all of which pdflatex accepts silently** — add to the recipe:
+1. TikZ `pattern=` fills do not convert; the page gets an `<img>` pointing at an SVG
+   that was never written. `make-course.sh` warns, but only after a full build.
+2. A sectioning command inside a theorem body, a list or a float stops the conversion
+   with "perhaps a missing \item" pointing at a line far from the real cause. Use a
+   plain heading macro in those positions.
+3. An `enumerate` that opens straight onto a float with no `\item` — the source had a
+   list whose first item was labelled (ii) and whose (i) was two tables.
+
+**On the environment conversion.** 66 bold pseudo-headings became real environments.
+The converter tracked environment depth, brace balance and math state together and
+refused to close a block where any of the three was non-neutral. Two things earned
+their keep: asserting that every `\subsection` line is seen as top-level caught a
+tracker bug immediately (a comment-stripping regex was cutting at `\%`, which appears
+inside `$100(1-\alpha)\%$` throughout and truncated those lines mid-math); and keying
+labels by kind *and* number caught that the source had reused 2.3.2--2.3.5 for a second
+run of results.
+
+**Next step:** the typographic pass still owes six courses — non-parametric-methods
+(261 dfrac, 134 hspace), intro-to-statistics (223 hspace, 26 bullets),
+theory-of-nonparametrics, topics-in-math-methods, foundation-maths-social-sciences,
+intro-to-probability.
+
 ### 2026-08-10 — Foundation Mathematics: all 26 chapters revised, published
 
 Renamed from Mathematical Methods at the user's request and published as the
