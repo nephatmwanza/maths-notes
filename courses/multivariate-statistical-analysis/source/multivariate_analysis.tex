@@ -3482,6 +3482,7 @@ is the quickest way to remember any of it.
 \end{note}
 
 \begin{thm}[Properties]
+\label{thm:wishart}
 Let $W\sim W_p(m,\Sigma)$ and $W_1, W_2$ be independent Wisharts with the same
 scale matrix. Then
 \begin{enumerate}
@@ -4076,6 +4077,170 @@ $$
 
 \pagebreak
 %\chapter{\textcolor{red}{CLASSIFICATION AND DISCRIMINATION}}
+
+\newpage
+\section{Comparison of Two Multivariate Means}
+
+Section~5 tested a single mean vector against a fixed value. The commoner
+question in practice compares two populations, and there are two distinct
+designs: the observations may be paired, or the two samples may be independent.
+The distinction matters as much here as it does in the univariate case, and for
+the same reason.
+
+\subsection{Paired Comparisons}
+
+Suppose each of $n$ units is measured under two conditions, giving
+$\underline{X}_{j1}$ and $\underline{X}_{j2}$ for unit $j$. The pairing must be
+respected: treating $2n$ vectors as two independent samples of size $n$ throws
+away the very structure the design was built to exploit.
+
+Form the differences
+$$\underline{D}_j = \underline{X}_{j1}-\underline{X}_{j2},
+\qquad j = 1,\dots,n,$$
+and suppose $\underline{D}_j \sim N_p\left(\underline{\delta},\Sigma_d\right)$
+independently. The problem is now a one-sample problem in the differences, and
+Section~5.4 applies unchanged.
+
+\begin{thm}[Paired $T^{2}$]
+\label{thm:pairedT2}
+With $\overline{\underline{D}}$ and $S_d$ the sample mean and covariance of the
+differences, under $H_0: \underline{\delta}=\underline{0}$
+$$T^{2} = n\,\overline{\underline{D}}'\,S_d^{-1}\,\overline{\underline{D}}
+\ \sim\ \frac{(n-1)p}{n-p}\,F_{p,\,n-p},$$
+and $H_0$ is rejected at level $\alpha$ when $T^{2}$ exceeds
+$\frac{(n-1)p}{n-p}F_{p,n-p,\alpha}$.
+\end{thm}
+
+\begin{note}
+Everything about the paired analysis follows from the single act of taking
+differences. The covariance between the two conditions --- which is usually
+substantial, since the same unit is measured twice --- disappears into
+$\Sigma_d$ and is never estimated separately. This is exactly why pairing is
+worth doing: a large positive covariance makes $\Sigma_d$ small, and a small
+$\Sigma_d$ makes the test sensitive.
+\end{note}
+
+\subsection{Two Independent Samples}
+
+Now let $\underline{X}_{11},\dots,\underline{X}_{1n_1}$ be a random sample from
+$N_p(\underline{\mu}_1,\Sigma)$ and
+$\underline{X}_{21},\dots,\underline{X}_{2n_2}$ an independent random sample
+from $N_p(\underline{\mu}_2,\Sigma)$ --- with the \emph{same} covariance matrix.
+
+\begin{defn}[Pooled covariance matrix]
+$$S_{\text{pooled}}
+= \frac{(n_1-1)S_1 + (n_2-1)S_2}{n_1+n_2-2}.$$
+\end{defn}
+
+\begin{note}
+This is the matrix referred to later as $\left(n_1+n_2-2\right)S$ in the MANOVA
+of Section~8. Its justification is the additivity of the Wishart,
+Theorem~\ref{thm:wishart}(ii): $(n_1-1)S_1$ and $(n_2-1)S_2$ are independent
+$W_p(n_1-1,\Sigma)$ and $W_p(n_2-1,\Sigma)$ variates, so their sum is
+$W_p(n_1+n_2-2,\Sigma)$, and dividing by its degrees of freedom gives an
+unbiased estimator of the common $\Sigma$ using both samples at once.
+\end{note}
+
+\begin{thm}[Two-sample $T^{2}$]
+\label{thm:twosampleT2}
+Under $H_0:\underline{\mu}_1=\underline{\mu}_2$ and equal covariance matrices,
+$$T^{2} = \left(\overline{\underline{X}}_1-\overline{\underline{X}}_2\right)'
+\left[\left(\tfrac{1}{n_1}+\tfrac{1}{n_2}\right)S_{\text{pooled}}\right]^{-1}
+\left(\overline{\underline{X}}_1-\overline{\underline{X}}_2\right)
+\ \sim\ \frac{\left(n_1+n_2-2\right)p}{n_1+n_2-p-1}\,F_{p,\,n_1+n_2-p-1}.$$
+\end{thm}
+
+\begin{note}
+Set $p=1$ and the statistic becomes the square of the ordinary two-sample
+$t$, with $\left(\tfrac{1}{n_1}+\tfrac{1}{n_2}\right)s^{2}_{\text{pooled}}$ in
+the denominator. Every multivariate statistic in this course collapses to its
+univariate ancestor in this way, and checking that it does is the surest way to
+remember the degrees of freedom.
+\end{note}
+
+\begin{note}[The assumption of equal covariance]
+The pooling is legitimate only if $\Sigma_1=\Sigma_2$. When the covariance
+matrices differ and the sample sizes are unequal, the test does not hold its
+nominal level --- and the direction of the error depends on which sample is the
+larger, so it cannot even be relied upon to be conservative. This is the
+multivariate Behrens--Fisher problem, and it has no exact solution. Approximate
+procedures replace the pooled matrix by
+$\tfrac{1}{n_1}S_1+\tfrac{1}{n_2}S_2$ and adjust the degrees of freedom.
+
+Equality can be examined by Box's $M$ test, though that test is itself sensitive
+to non-normality, so a significant result may reflect the shape of the data
+rather than a genuine difference in covariance. When $n_1$ and $n_2$ are close
+to equal the pooled procedure is fairly robust to moderate inequality, which is
+one practical argument for balanced designs.
+\end{note}
+
+\subsection{Simultaneous Confidence Statements}
+
+A significant $T^{2}$ says the mean vectors differ but not in which variables.
+Two devices answer that, and they differ in what they guarantee.
+
+\begin{thm}[$T^{2}$ intervals]
+With probability $1-\alpha$, \emph{every} linear combination
+$\underline{a}'\left(\underline{\mu}_1-\underline{\mu}_2\right)$ simultaneously
+satisfies
+$$\underline{a}'\left(\overline{\underline{X}}_1-\overline{\underline{X}}_2\right)
+\pm \sqrt{c^{2}}\,
+\sqrt{\underline{a}'\left(\tfrac{1}{n_1}+\tfrac{1}{n_2}\right)S_{\text{pooled}}\,\underline{a}},$$
+where $c^{2} = \frac{(n_1+n_2-2)p}{n_1+n_2-p-1}F_{p,n_1+n_2-p-1,\alpha}$.
+\end{thm}
+
+\begin{note}
+The guarantee covers infinitely many linear combinations at once, including
+those chosen after seeing the data, which is what makes the intervals safe for
+exploration. The price is width. If only the $p$ individual components are of
+interest, Bonferroni intervals using $t_{n_1+n_2-2,\,\alpha/2p}$ are shorter and
+still control the overall error rate, but they cover only the $p$ comparisons
+named in advance.
+
+A common and instructive outcome is a significant $T^{2}$ with no individual
+component significant. Nothing is wrong: the difference lies in a linear
+combination of the variables rather than in any one of them, and finding which
+combination is precisely what the discriminant function of Section~7 computes.
+\end{note}
+
+\subsection*{Practice Problems}
+
+\begin{problem}
+Explain why the differences must be taken before, not after, computing the
+covariance matrix in a paired design, and what goes wrong if the $2n$
+observations are treated as two independent samples.
+\end{problem}
+
+\begin{problem}
+Show that Theorem~\ref{thm:twosampleT2} reduces to the square of the ordinary
+two-sample $t$ statistic when $p=1$, and check that the degrees of freedom
+agree.
+\end{problem}
+
+\begin{problem}
+Two independent samples of sizes $n_1=25$ and $n_2=30$ are taken on $p=3$
+variables. State the multiplier $c^{2}$ for simultaneous $T^{2}$ intervals at
+$\alpha=0.05$, and the corresponding Bonferroni multiplier for the three
+component comparisons. Which is larger, and why must it be?
+\end{problem}
+
+\begin{problem}
+Using the additivity of the Wishart, prove that
+$E\left(S_{\text{pooled}}\right) = \Sigma$.
+\emph{Where to start: Theorem~\ref{thm:wishart} parts (i) and (ii).}
+\end{problem}
+
+\begin{problem}
+A two-sample $T^{2}$ is significant at the $1\%$ level, yet no individual
+variable differs significantly between the groups. Explain how this arises and
+what should be reported.
+\end{problem}
+
+\begin{problem}
+Discuss what happens to the level of the two-sample test when
+$\Sigma_1\neq\Sigma_2$, distinguishing the cases $n_1=n_2$ and $n_1\ll n_2$.
+\end{problem}
+
 
 \section{Classification and Discrimination}
 
@@ -5064,6 +5229,72 @@ Since $F_{obse} = 4.84>2.85$ we reject $H_0$ and conclude the average means of e
 
 \pagebreak
 %\chapter{\textcolor{red}{MULTIPLE REGRESSION}}
+\subsection{Two-Way MANOVA}
+
+The model above has a single factor. When units are classified by two factors
+simultaneously the univariate two-way analysis of variance generalises in the
+same way, and the additional term it brings --- interaction --- is usually the
+one of real interest.
+
+For factors $A$ at $g$ levels and $B$ at $b$ levels, with $n$ replicates in each
+cell, the model is
+$$\underline{X}_{\ell k r} = \underline{\mu} + \underline{\tau}_{\ell}
++ \underline{\beta}_{k} + \underline{\gamma}_{\ell k} + \underline{e}_{\ell k r},$$
+where $\underline{\tau}_\ell$ is the effect of level $\ell$ of $A$,
+$\underline{\beta}_k$ that of level $k$ of $B$, $\underline{\gamma}_{\ell k}$
+their interaction, and the errors are independent
+$N_p\left(\underline{0},\Sigma\right)$. The effects are constrained to sum to
+zero over each index, as in the univariate case.
+
+The total sum of squares and cross-products decomposes exactly as the univariate
+total sum of squares does, but into matrices rather than scalars:
+$$SSP_{\text{tot}} = SSP_{A} + SSP_{B} + SSP_{AB} + SSP_{\text{res}} .$$
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Source} & \textbf{SSP matrix} & \textbf{d.f.}\\
+\hline
+Factor $A$ & $SSP_A$ & $g-1$\\
+Factor $B$ & $SSP_B$ & $b-1$\\
+Interaction $AB$ & $SSP_{AB}$ & $(g-1)(b-1)$\\
+Residual & $SSP_{\text{res}}$ & $gb(n-1)$\\
+\hline
+Total & $SSP_{\text{tot}}$ & $gbn-1$\\
+\hline
+\end{tabular}
+\caption{The two-way multivariate analysis of variance table. Each entry is a
+$p\times p$ matrix; setting $p=1$ recovers the familiar univariate table.}
+\label{tab:twowaymanova}
+\end{table}
+
+Each effect is tested by its own Wilks' lambda, formed against the residual
+matrix:
+$$\Lambda_A = \frac{\left|SSP_{\text{res}}\right|}
+{\left|SSP_A + SSP_{\text{res}}\right|},$$
+and similarly for $B$ and for the interaction, each referred to its own degrees
+of freedom by the approximations of Section~5.5.
+
+\begin{note}
+Test the interaction first. If $\underline{\gamma}_{\ell k}$ is non-zero the
+effect of factor $A$ depends on the level of $B$, and a statement about $A$
+averaged over $B$ describes a situation that does not occur at any level of
+$B$ --- the main-effect tests are then answering a question nobody asked. Only
+when the interaction is absent do the main effects have their simple reading.
+This is the same discipline as in univariate two-way analysis of variance, and
+it is more easily forgotten here because the output is bulkier.
+\end{note}
+
+\begin{note}
+Each cell must contain $n\geq2$ replicates for $SSP_{\text{res}}$ to have any
+degrees of freedom, and $gb(n-1)\geq p$ for it to be invertible ---
+Theorem~\ref{thm:wishart}(iv) again. With one observation per cell the interaction is
+inseparable from the error and cannot be tested at all.
+\end{note}
+
+
 \section{Multivariate Multiple Regression}
 In this section we consider the problem of modeling the relationship between $m$ responses $(Y_1,Y_2,\cdots\cdots\cdots,Y_m)$ and a single set of predictor variables $(Z_1,Z_2,\cdots\cdots\cdots,Z_r)$ each response is assumed to follow its own regression model so that 
 
@@ -6037,6 +6268,349 @@ Applied Multivariate Statistical Analysis; Richard A Johnson and Dean W Wichem; 
 Introduction to Multivariate Analysis; C. Chatfield and A.J.Collins; Chapman and Hall; ISBN 0 412 16040 4
 \end{thebibliography}
 
+
+
+\newpage
+\section{Factor Analysis}
+
+Principal component analysis in Section~4 rewrote $p$ variables as $p$
+uncorrelated components and then discarded the smaller ones. It is a
+transformation of the data, and it proposes no explanation of them.
+
+Factor analysis proposes one. It supposes that the observed variables are
+correlated \emph{because} they are driven by a small number of unobserved
+quantities, and it asks what those quantities would have to look like. The two
+methods are often confused, produce similar-looking output, and answer different
+questions.
+
+\subsection{The Orthogonal Factor Model}
+
+\begin{defn}[Factor model]
+The vector $\underline{X}$ with mean $\underline{\mu}$ follows the
+\emph{$m$-factor model} if
+$$\underline{X}-\underline{\mu} = L\,\underline{F} + \underline{\varepsilon},$$
+where $L$ is the $p\times m$ matrix of \emph{loadings}, $\underline{F}$ is the
+$m\times1$ vector of \emph{common factors} and $\underline{\varepsilon}$ the
+$p\times1$ vector of \emph{specific factors}, with
+$$E(\underline{F}) = \underline{0},\quad
+\operatorname{cov}(\underline{F}) = I_m,\quad
+E(\underline{\varepsilon}) = \underline{0},\quad
+\operatorname{cov}(\underline{\varepsilon}) = \Psi
+= \operatorname{diag}(\psi_1,\dots,\psi_p),$$
+and $\underline{F}$ independent of $\underline{\varepsilon}$.
+\end{defn}
+
+\begin{thm}[The covariance structure]
+\label{thm:factorcov}
+Under the factor model,
+$$\Sigma = LL' + \Psi,$$
+so that
+$$\sigma_{ii} = \underbrace{\ell_{i1}^{2}+\cdots+\ell_{im}^{2}}_{\text{communality } h_i^{2}}
++ \underbrace{\psi_i}_{\text{specific variance}},
+\qquad
+\sigma_{ik} = \sum^{m}_{j=1}\ell_{ij}\ell_{kj} \ \ (i\neq k).$$
+\end{thm}
+
+\begin{note}
+The second equation is the whole content of the model, and it is a strong
+claim: \emph{all} the covariance between distinct variables is carried by the
+common factors, since $\Psi$ is diagonal and contributes nothing off the
+diagonal. If the model holds with small $m$, the $\binom{p}{2}$ covariances are
+generated by only $pm$ loadings, which is a genuine and testable reduction.
+
+The variance of each variable splits into the part explained by the common
+factors, its communality, and the part specific to it. A variable with low
+communality is not being described by the factors at all, and its presence in
+the analysis should be reconsidered.
+\end{note}
+
+\begin{note}[Why this is not principal component analysis]
+Three differences, in order of importance.
+
+Principal components are defined as linear combinations \emph{of} the observed
+variables; factors are hypothesised causes \emph{of} them, and the arrows point
+the other way. Principal components always exist and are unique; a factor model
+with a given $m$ may fit no covariance matrix at all, so factor analysis can
+fail in a way that principal component analysis cannot. And principal components
+account for total variance, including each variable's specific noise, while
+factor analysis explicitly sets that noise aside in $\Psi$ and models only what
+is shared.
+\end{note}
+
+\subsection{Non-uniqueness and Rotation}
+
+\begin{thm}[Rotational indeterminacy]
+\label{thm:rotation}
+If $T$ is any $m\times m$ orthogonal matrix, then $L^{*}=LT$ and
+$\underline{F}^{*}=T'\underline{F}$ satisfy the model with the same $\Psi$, and
+$$L^{*}L^{*\prime} = LTT'L' = LL'.$$
+\end{thm}
+
+\begin{note}
+The loadings are therefore determined only up to an orthogonal rotation: the
+data cannot distinguish $L$ from $LT$, whatever $T$ may be. This is an
+embarrassment and an opportunity in equal measure. It is an embarrassment
+because no rotation is more correct than another, so any claim that the factors
+have been identified must be read carefully. It is an opportunity because one
+may as well choose the rotation that is easiest to interpret --- which is what
+\emph{varimax} does, seeking loadings near $0$ or $\pm1$ so that each variable
+loads heavily on one factor and negligibly on the rest.
+
+Interpretation of rotated factors is the part of multivariate analysis where
+judgement most easily outruns evidence. The rotation was chosen for
+interpretability; that the result is interpretable is therefore not evidence
+that it is true.
+\end{note}
+
+\subsection{Estimation}
+
+Two methods are standard.
+
+The \emph{principal factor} method estimates the communalities, subtracts the
+resulting $\widehat{\Psi}$ from $S$ or $R$, and takes the spectral decomposition
+of the remainder, setting
+$\widehat{L} = \left(\sqrt{\widehat{\lambda}_1}\widehat{\underline{e}}_1,
+\dots,\sqrt{\widehat{\lambda}_m}\widehat{\underline{e}}_m\right)$. It requires
+no distributional assumption and always produces an answer.
+
+The \emph{maximum likelihood} method assumes $\underline{X}$ multivariate normal
+and maximises the likelihood over $L$ and $\Psi$ subject to a uniqueness
+condition that removes the rotational freedom. It is iterative, may fail to
+converge, and can return a \emph{Heywood case} --- an estimated specific
+variance that is zero or negative, which is impossible and signals that the
+model with that $m$ does not fit. Against these drawbacks it offers what the
+other method cannot: a likelihood ratio test of the adequacy of $m$ factors,
+$$-2\ln\Lambda = \left(n-1-\tfrac{2p+4m+5}{6}\right)
+\ln\frac{\left|\widehat{L}\widehat{L}'+\widehat{\Psi}\right|}{\left|S\right|}
+\ \overset{\cdot}{\sim}\ \chi^{2}_{\left[(p-m)^{2}-p-m\right]/2}.$$
+
+\begin{note}
+The degrees of freedom are worth reading rather than copying. They count
+$\tfrac12 p(p+1)$ free entries in $\Sigma$ against $pm+p$ parameters, less the
+$\tfrac12 m(m-1)$ constraints imposed to fix the rotation. When the count is
+negative the model has more parameters than the covariance matrix has entries
+and cannot be tested at all --- which places a hard upper limit on $m$ for a
+given $p$, independent of any data.
+\end{note}
+
+\newpage
+\section{Canonical Correlation Analysis}
+
+Every method so far has treated the $p$ variables as one set. Suppose instead
+they divide naturally into two groups --- physical measurements and performance
+measurements, say, or inputs and outputs --- and the question is how strongly
+the two groups are related as \emph{groups}.
+
+Correlating every variable in one set with every variable in the other gives
+$p_1p_2$ numbers and no summary. Canonical correlation analysis reduces this to
+a few, by asking for the linear combination of the first set most strongly
+correlated with a linear combination of the second.
+
+\begin{defn}[Canonical variates and correlations]
+Partition
+$\underline{X} = \begin{pmatrix}\underline{X}^{(1)}\\ \underline{X}^{(2)}\end{pmatrix}$
+with $p_1\leq p_2$ and
+$\Sigma = \begin{pmatrix}\Sigma_{11} & \Sigma_{12}\\ \Sigma_{21} & \Sigma_{22}\end{pmatrix}$.
+The \emph{first canonical correlation} is
+$$\rho_1^{*} = \max_{\underline{a},\underline{b}}
+\operatorname{corr}\left(\underline{a}'\underline{X}^{(1)},\
+\underline{b}'\underline{X}^{(2)}\right),$$
+attained at the \emph{first pair of canonical variates}
+$U_1 = \underline{a}_1'\underline{X}^{(1)}$,
+$V_1 = \underline{b}_1'\underline{X}^{(2)}$. Subsequent pairs maximise the
+correlation subject to being uncorrelated with all preceding variates.
+\end{defn}
+
+\begin{thm}[Solution]
+\label{thm:cancorr}
+The squared canonical correlations $\rho_1^{*2}\geq\cdots\geq\rho_{p_1}^{*2}$
+are the eigenvalues of
+$$\Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21},$$
+and the vectors $\underline{a}_i$ are its eigenvectors, with
+$\underline{b}_i \propto \Sigma_{22}^{-1}\Sigma_{21}\underline{a}_i$.
+\end{thm}
+
+\begin{note}
+The pattern of this course should now be familiar. Principal components were the
+eigenvectors of $\Sigma$; the discriminant of Section~7 came from the
+eigenvectors of $W^{-1}B$; canonical correlations come from the eigenvectors of
+$\Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}$. Each method poses a
+different question, and every one of them ends in an eigenvalue problem, which
+is why Section~1.9 was worth the space it took.
+\end{note}
+
+\begin{note}[Special cases]
+Canonical correlation contains several familiar procedures. With $p_1=p_2=1$ it
+is the ordinary correlation coefficient. With $p_1=1$ and $p_2>1$ the single
+squared canonical correlation is the coefficient of determination $R^{2}$ from
+regressing that variable on the second set. And if the first set consists of
+dummy variables coding group membership, canonical correlation reproduces the
+discriminant analysis of Section~7. These are worth knowing: an unfamiliar
+method that contains regression and discriminant analysis as special cases is
+less unfamiliar than it looks.
+\end{note}
+
+\begin{note}[Cautions]
+Canonical variates are chosen to maximise correlation, and with many variables
+and few observations a high canonical correlation can be produced from
+unrelated data by chance alone. Cross-validation, or Bartlett's test of the
+significance of the remaining correlations, is essential before interpreting
+anything.
+
+The variates are also frequently uninterpretable. Maximising a correlation
+places no premium on producing a combination that means anything, and a
+canonical variate weighting six variables with mixed signs may be real and still
+be useless. Report the correlation; interpret the weights only with care.
+\end{note}
+
+\newpage
+\section{Cluster Analysis}
+
+The classification of Section~7 assigned observations to groups that were known
+in advance. Cluster analysis asks whether groups exist at all, and if so what
+they are. The distinction is the difference between supervised and unsupervised
+learning, and it is fundamental: there is no correct answer against which a
+clustering can be checked, and no significance test for its result.
+
+\subsection{Distance}
+
+Everything depends on what ``close'' means, and that choice is made by the
+analyst before any algorithm runs.
+
+\begin{defn}[Common distances]
+For observations $\underline{x}$ and $\underline{y}$ in $\mathbb{R}^{p}$:
+\begin{enumerate}
+\item[(i)] \emph{Euclidean}:
+$d = \sqrt{\left(\underline{x}-\underline{y}\right)'\left(\underline{x}-\underline{y}\right)}$;
+\item[(ii)] \emph{Mahalanobis}:
+$d = \sqrt{\left(\underline{x}-\underline{y}\right)'S^{-1}\left(\underline{x}-\underline{y}\right)}$;
+\item[(iii)] \emph{Manhattan}: $d = \sum^{p}_{i=1}\left|x_i-y_i\right|$.
+\end{enumerate}
+\end{defn}
+
+\begin{note}
+Euclidean distance is not scale-invariant, so a variable measured in small units
+dominates it --- the same difficulty met in Section~4.3, and with the same
+remedy of standardising first. Mahalanobis distance handles both scale and
+correlation automatically, since $S^{-1}$ discounts directions in which the data
+already vary a great deal; it is the distance the ellipsoids of Section~5 are
+built from. Its drawback is that it requires estimating $S$, which is unstable
+when $n$ is small relative to $p$.
+\end{note}
+
+\subsection{Hierarchical Methods}
+
+Agglomerative clustering begins with $n$ clusters of one observation each and
+repeatedly merges the two closest, until one cluster remains. The record of
+merges is drawn as a \emph{dendrogram}, and cutting it at a chosen height gives
+a clustering.
+
+What distinguishes the methods is how the distance between two \emph{clusters}
+is defined:
+
+\begin{enumerate}
+\item[(i)] \emph{Single linkage}: the distance between the nearest pair, one
+from each. Detects elongated clusters, and suffers from chaining, in which a
+bridge of intermediate points joins two otherwise separate groups.
+\item[(ii)] \emph{Complete linkage}: the distance between the furthest pair.
+Produces compact clusters of similar diameter, and will split an elongated group
+in two.
+\item[(iii)] \emph{Average linkage}: the mean over all pairs. A compromise
+between the two.
+\item[(iv)] \emph{Ward's method}: merge the pair that increases the total
+within-cluster sum of squares least. Tends to produce clusters of similar size,
+and is the closest of the four to the criterion that $k$-means optimises.
+\end{enumerate}
+
+\begin{note}
+The choice of linkage changes the answer, often substantially, and no linkage is
+correct in general. This is not a defect to be apologised for but the nature of
+the problem: ``cluster'' has no definition independent of the criterion used to
+find one. What the honest analyst does is state the distance and the linkage,
+and check whether the structure survives changing them.
+\end{note}
+
+\subsection{$k$-Means}
+
+Where hierarchical methods build a whole tree, $k$-means fixes the number of
+clusters in advance and partitions the data directly, minimising the
+within-cluster sum of squares
+$$\sum^{k}_{j=1}\sum_{\underline{x}\in C_j}
+\left\|\underline{x}-\overline{\underline{x}}_j\right\|^{2}.$$
+The algorithm alternates two steps until nothing changes: assign each
+observation to the nearest centroid, then recompute the centroids.
+
+\begin{note}
+Three properties matter in use. The algorithm converges, but only to a local
+minimum, and different starting points give different answers --- so it should
+be run repeatedly from random starts. It requires $k$ in advance, and the
+criterion cannot choose $k$, since the within-cluster sum of squares decreases
+whenever $k$ increases; the elbow of that curve against $k$ is used in the same
+spirit, and with the same imprecision, as the scree plot of Section~4.5. And
+minimising a sum of squared Euclidean distances biases the result toward
+spherical clusters of comparable size, so genuinely elongated groups are
+routinely split.
+\end{note}
+
+\begin{note}
+A clustering is a hypothesis, not a finding. Any of these algorithms will
+partition data that has no group structure whatever, and will do so
+confidently. Before interpreting clusters, check that they persist under a
+different distance, a different linkage or a different $k$; that they are
+separated on variables not used to construct them; and that they mean something
+in the subject the data came from. None of these is a significance test,
+because none exists.
+\end{note}
+
+\subsection*{Practice Problems}
+
+\begin{problem}
+State two differences between principal component analysis and factor analysis,
+and give a situation in which each would be the appropriate choice.
+\end{problem}
+
+\begin{problem}
+For a one-factor model with $p=3$, write $\Sigma=LL'+\Psi$ in full and count the
+free parameters against the entries of $\Sigma$. Is the model testable?
+\emph{Where to start: $\Sigma$ has $\tfrac12 p(p+1)=6$ distinct entries; the
+model has $pm+p=6$ parameters.}
+\end{problem}
+
+\begin{solution}
+With $m=1$, $L=(\ell_1,\ell_2,\ell_3)'$ and $\Psi=\operatorname{diag}(\psi_1,\psi_2,\psi_3)$, so
+$$\Sigma = \begin{pmatrix}
+\ell_1^{2}+\psi_1 & \ell_1\ell_2 & \ell_1\ell_3\\
+\ell_1\ell_2 & \ell_2^{2}+\psi_2 & \ell_2\ell_3\\
+\ell_1\ell_3 & \ell_2\ell_3 & \ell_3^{2}+\psi_3
+\end{pmatrix}.$$
+There are $6$ parameters and $6$ distinct entries in $\Sigma$, and with $m=1$
+the rotational constraint count $\tfrac12 m(m-1)$ is zero. The degrees of
+freedom are therefore $6-6=0$: the model is exactly determined and fits any
+$\Sigma$ with the right sign pattern, so there is nothing to test. Testability
+requires $\tfrac12\left[(p-m)^{2}-p-m\right]>0$, which for $m=1$ needs $p\geq4$.
+\end{solution}
+
+\begin{problem}
+Prove Theorem~\ref{thm:rotation}, and explain why it means the factors cannot be
+identified from the covariance matrix alone.
+\end{problem}
+
+\begin{problem}
+Show that when $p_1=p_2=1$ the single canonical correlation is the ordinary
+correlation coefficient between the two variables.
+\end{problem}
+
+\begin{problem}
+Explain why single linkage is prone to chaining, and construct a small set of
+points in the plane on which single and complete linkage give different
+two-cluster solutions.
+\end{problem}
+
+\begin{problem}
+Data with no group structure at all are given to a $k$-means algorithm with
+$k=3$. Describe what it returns and how one would detect that the clustering is
+spurious.
+\end{problem}
 
 
 \pagebreak
