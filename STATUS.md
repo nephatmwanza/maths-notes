@@ -557,6 +557,80 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-13/14 — Foundation courses corrected; Linear Algebra surveyed, NOT started
+Two deploys, both green. Foundation Mathematics and Foundation Maths (Social Sciences)
+reworked across the sections the user named; Linear Models published earlier the same
+day (its own entry above).
+
+**The lesson worth carrying forward: the PDF is not evidence.** Three separate faults
+this session were invisible in the PDF and wrong only in the browser:
+- `\polylongdiv` / `\polyhornerscheme` (polynom package) — pdflatex *computes* the
+  division; MathJax has no such macro and prints the command name in red. 7 of these.
+- `\qedhere` inside a display — same failure. 1 in foundation, and a sweep found **11
+  more** in Introduction to Statistics (9), Non-parametric Methods, Topics in Math
+  Methods.
+- Two `tabular`s side by side separated by `\qquad` — correct in the PDF, but an HTML
+  table is a block element so tex4ht stacks them. Fixed by merging each pair into one
+  `tabular` with a gap column. 3 pairs in the limits section.
+For anything presentational, check the built HTML. Twice this session a clean-looking
+grep was actually a 404 or a bad regex (`{3}` read as a quantifier), not a passing test.
+
+**Long division:** user's call, and a good one — keep the traditional schematic, because
+it is the layout learners already know from numeric long division in primary. Hand-built
+as a MathJax `array` (quotient row, `divisor \big)` + `\overline{dividend}`, underlined
+subtractions, `\phantom` for indentation). **Verified in MathJax before being written
+into the source.** Pattern is in the Polynomials section of foundation maths and in the
+social-sciences division sheets — copy it from there, do not re-derive it.
+
+**Discussion keys renumber.** Keys are `course/N-M-title`, so inserting a numbered
+subsection orphans every later key in that section. Adding subsections to Complex
+Numbers and Equations orphaned 6. User confirmed no page has comments yet, so accepted.
+Starred `\subsection*` gets no key and no page — that is the escape hatch if numbering
+must be preserved.
+
+**A process failure to avoid repeating:** a fix script that does several `swap()`s and
+calls `write_text()` once at the end loses *all* of them if a later assertion fails. This
+happened and silently discarded four completed fixes; it was caught only via an unrelated
+build error much later. Write after each swap.
+
+---
+
+## NEXT: Linear Algebra — surveyed, not begun
+
+User asked to start it and explicitly asked for full attention: change the examples and
+statements so learners can follow, present it professionally, **solutions to all practice
+problems**, and add whatever is missing — theorems, lemmas, everything. Deferred to a
+fresh session by agreement; this survey is the handover.
+
+**Source:** `/home/corban/LaTeX_Projects/LINEAR ALGEBRA/LINEAR ALGEBRA.tex`
+— 4,563 lines, 73 PDF pages, dated Feb 2020.
+**Also available:** `/home/corban/LaTeX_Projects/Linear Algebra Exam Questions/` —
+1,118 lines, 33 pages, ~358 items. A ready source of practice problems; the user's own.
+
+**Structure** (9 sections): Preliminaries (sets, equivalence relations, functions);
+Matrices; Systems of Linear Equations; Determinants; Vector Spaces; Linear
+Transformations; Orthogonality; Characteristic Roots and Vectors; Quadratic Forms.
+
+**What the survey found — this is the biggest conversion job so far:**
+- **Zero theorem environments. No `\newtheorem` at all.** 273 bold pseudo-headings —
+  four times the 66 in Linear Models. The converter from that job
+  (`scratchpad/lm_env.py` pattern: track environment depth + brace balance + math state
+  together, refuse to close where any is non-neutral, assert `\subsection` lines are
+  seen as top-level to catch drift) is the tool for this. Do not use naive regex.
+- **Practice problems essentially absent** — 2 mentions of "Exercise", no solutions
+  anywhere. The user wants solutions to all of them, so problems largely have to be
+  written as well as solved; the exam-questions file is the place to draw from.
+- 325 `\hspace`, 16 `\dfrac`, no `\bigg`.
+- Section title typo: **"Cayley-Hamiton"** → Cayley-Hamilton. Fix before first build —
+  the title becomes the page slug, so fixing it later orphans that thread.
+- Catalogue already has a "Linear Algebra · Second year" in-preparation card to replace.
+
+**Likely missing mathematics to add** (not yet verified against the source): rank-nullity
+stated as a theorem; existence of a basis / every spanning set contains a basis;
+Gram-Schmidt as a theorem with proof; spectral theorem for symmetric matrices; the
+invertible matrix theorem gathering the equivalences; change of basis and similarity;
+proof of Cayley-Hamilton (or an honest statement that it is quoted).
+
 ### 2026-08-13 — Linear Models and Design of Experiments published (11th course)
 Live at `courses/linear-models-design-of-experiments/`: 38 pages, 10 diagrams, 29
 practice sections. Catalogue now reads 11 available, 6 in preparation. Deploy
