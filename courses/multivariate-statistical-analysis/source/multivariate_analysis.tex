@@ -2945,6 +2945,347 @@ d^2\big(X,\mu) & = \Bigg[\frac{X-\mu}{\sigma}\Bigg]^2
 \pagebreak
 
 %\chapter{\textcolor{red}{MULTIVARIATE NORMAL DISTRIBUTION}}
+\newpage
+\section{Principal Component Analysis}
+
+Section~3 measured the scatter of a multivariate sample and found that the
+total variability can be summarised by the trace or the determinant of the
+covariance matrix. Neither summary says \emph{where} the variability lies. With
+$p$ variables there are $p$ variances and $\binom{p}{2}$ covariances, and beyond
+three or four variables no one can hold that structure in mind, still less plot
+it.
+
+Principal component analysis answers the question directly. It asks for the
+direction in which the data vary most, then the direction of greatest remaining
+variation perpendicular to the first, and so on. The answer turns out to require
+no new machinery at all: the directions are the eigenvectors of $\Sigma$ and the
+variances along them are its eigenvalues, so the whole method is the spectral
+decomposition of Section~1.9 applied to a covariance matrix.
+
+\subsection{Population Principal Components}
+
+Let $\underline{X} = (X_1,\dots,X_p)'$ have covariance matrix $\Sigma$. Consider
+a linear combination $Y = \underline{a}'\underline{X}$, whose variance is
+$$\operatorname{var}(Y) = \underline{a}'\,\Sigma\,\underline{a}.$$
+Making $\underline{a}$ larger makes this larger for trivial reasons, so the
+length of $\underline{a}$ must be fixed; we require $\underline{a}'\underline{a}=1$.
+
+\begin{defn}[Principal components]
+The \emph{first principal component} is the linear combination
+$Y_1 = \underline{a}_1'\underline{X}$ maximising
+$\operatorname{var}(Y_1)$ subject to $\underline{a}_1'\underline{a}_1 = 1$. The
+\emph{$i$th principal component} is
+$Y_i = \underline{a}_i'\underline{X}$ maximising $\operatorname{var}(Y_i)$
+subject to $\underline{a}_i'\underline{a}_i = 1$ and
+$\operatorname{cov}(Y_i, Y_k) = 0$ for all $k<i$.
+\end{defn}
+
+\begin{thm}[Principal components are the eigenvectors of $\Sigma$]
+\label{thm:pca}
+Let $\Sigma$ have eigenvalue--eigenvector pairs
+$(\lambda_1,\underline{e}_1),\dots,(\lambda_p,\underline{e}_p)$ with
+$\lambda_1\geq\lambda_2\geq\cdots\geq\lambda_p\geq0$ and the $\underline{e}_i$
+orthonormal. Then the $i$th principal component is
+$$Y_i = \underline{e}_i'\,\underline{X},$$
+with
+$$\operatorname{var}(Y_i) = \lambda_i,
+\qquad
+\operatorname{cov}(Y_i,Y_k) = 0 \ \ (i\neq k).$$
+\end{thm}
+
+\begin{proof}
+By the spectral decomposition of Section~1.9, $\Sigma = P\Lambda P'$ with
+$P = (\underline{e}_1,\dots,\underline{e}_p)$ orthogonal and
+$\Lambda = \operatorname{diag}(\lambda_1,\dots,\lambda_p)$. Put
+$\underline{b} = P'\underline{a}$; then $\underline{b}'\underline{b} =
+\underline{a}'PP'\underline{a} = \underline{a}'\underline{a} = 1$, and
+$$\underline{a}'\Sigma\underline{a}
+= \underline{a}'P\Lambda P'\underline{a}
+= \underline{b}'\Lambda\underline{b}
+= \sum^{p}_{i=1}\lambda_i b_i^{2}.$$
+This is a weighted average of the $\lambda_i$ with weights $b_i^{2}$ summing to
+one, so it is at most $\lambda_1$, with equality when $b_1=1$ and all other
+$b_i=0$ --- that is, when $\underline{a}=\underline{e}_1$. Hence
+$\operatorname{var}(Y_1)=\lambda_1$ is attained at $\underline{e}_1$.
+
+For the $i$th component, the constraint $\operatorname{cov}(Y_i,Y_k)=0$ for
+$k<i$ forces $b_1=\cdots=b_{i-1}=0$, and the same argument on the remaining
+coordinates gives the maximum $\lambda_i$ at $\underline{a}=\underline{e}_i$.
+Finally
+$\operatorname{cov}(Y_i,Y_k)=\underline{e}_i'\Sigma\underline{e}_k
+=\lambda_k\underline{e}_i'\underline{e}_k = 0$ by orthonormality.
+\end{proof}
+
+\begin{note}
+The components are uncorrelated by construction, which is the practical point.
+The original variables are entangled --- each carries information the others
+also carry --- while the components divide the same total variation into
+non-overlapping pieces. Nothing has been discarded at this stage: $p$ variables
+have become $p$ components, and the transformation is an orthogonal rotation of
+the coordinate axes onto the natural axes of the data.
+\end{note}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\draw[->] (-3.4,0) -- (3.6,0) node[right] {\footnotesize $x_1$};
+\draw[->] (0,-2.4) -- (0,2.6) node[above] {\footnotesize $x_2$};
+% the data ellipse, tilted
+\draw[rotate=32,thick] (0,0) ellipse (2.9 and 1.15);
+\draw[rotate=32,gray!55,dashed] (0,0) ellipse (1.9 and 0.75);
+% principal axes
+\draw[->,very thick] (0,0) -- (2.46,1.54) node[above right] {\footnotesize $\underline{e}_1$};
+\draw[->,very thick] (0,0) -- (-0.61,0.98) node[above left] {\footnotesize $\underline{e}_2$};
+\node[right] at (2.05,0.72) {\footnotesize $\sqrt{\lambda_1}$};
+\node[below left] at (-0.52,0.70) {\footnotesize $\sqrt{\lambda_2}$};
+\end{tikzpicture}
+\caption{Principal components in two dimensions. The ellipse is a contour of
+constant Mahalanobis distance; its axes point along the eigenvectors
+$\underline{e}_1$ and $\underline{e}_2$ of $\Sigma$, and their half-lengths are
+proportional to $\sqrt{\lambda_1}$ and $\sqrt{\lambda_2}$. The analysis is a
+rotation of the coordinate axes onto the axes of the ellipse: the correlation
+between $x_1$ and $x_2$ that tilts the ellipse is exactly what the rotation
+removes.}
+\label{fig:pca}
+\end{figure}
+
+\subsection{How Much Variation Each Component Explains}
+
+\begin{thm}[Total variation is preserved]
+\label{thm:pcatrace}
+$$\sum^{p}_{i=1}\operatorname{var}(X_i)
+= \operatorname{tr}(\Sigma)
+= \sum^{p}_{i=1}\lambda_i
+= \sum^{p}_{i=1}\operatorname{var}(Y_i).$$
+\end{thm}
+
+\begin{proof}
+$\operatorname{tr}(\Sigma) = \operatorname{tr}(P\Lambda P')
+= \operatorname{tr}(\Lambda P'P) = \operatorname{tr}(\Lambda)
+= \sum\lambda_i$, using the cyclic property of the trace from
+Section~1.4 and $P'P=I$.
+\end{proof}
+
+\begin{defn}[Proportion explained]
+The proportion of total variation explained by the $i$th component is
+$$\frac{\lambda_i}{\lambda_1+\cdots+\lambda_p},$$
+and by the first $k$ components,
+$\left(\lambda_1+\cdots+\lambda_k\right)/\left(\lambda_1+\cdots+\lambda_p\right)$.
+\end{defn}
+
+\begin{note}
+Theorem~\ref{thm:pcatrace} is what licenses the word ``explained''. The total
+variability is a fixed quantity, $\operatorname{tr}(\Sigma)$, and the
+eigenvalues partition it exactly. If the first two components account for
+$0.9$ of that total, then a two-dimensional plot of $Y_1$ against $Y_2$
+reproduces ninety percent of the variation in $p$ variables --- and, crucially,
+one knows what has been lost.
+\end{note}
+
+\begin{thm}[Correlation between a component and a variable]
+$$\operatorname{corr}\left(Y_i, X_k\right)
+= \frac{e_{ik}\sqrt{\lambda_i}}{\sqrt{\sigma_{kk}}}.$$
+\end{thm}
+
+These correlations, often called \emph{loadings}, are how a component is
+interpreted: a component correlating strongly with several variables is read as
+whatever those variables have in common.
+
+\subsection{Components from the Correlation Matrix}
+
+Principal components are \emph{not} invariant under rescaling of the variables,
+and this is the most common source of error in applying them.
+
+\begin{note}
+Suppose one variable is a length in millimetres and another a mass in
+kilogrammes. The first has a numerically large variance purely because of its
+units, so the first component will point almost entirely along it and the
+analysis will have discovered nothing but the choice of scale. Re-expressing the
+length in metres would give a completely different answer.
+
+The remedy is to standardise: work with
+$Z_k = \left(X_k-\mu_k\right)/\sqrt{\sigma_{kk}}$, whose covariance matrix is
+the correlation matrix $\rho$. Components extracted from $\rho$ are unaffected
+by the units, and $\operatorname{tr}(\rho)=p$, so the proportion explained by
+the $i$th component is simply $\lambda_i/p$.
+
+Components from $\Sigma$ and from $\rho$ are \emph{not} related in any simple
+way --- one cannot be obtained from the other by rescaling. Which to use is a
+decision that must be made and stated. Standardise unless the variables are
+already in comparable units and their differing variances are themselves
+meaningful.
+\end{note}
+
+\subsection{Sample Principal Components}
+
+In practice $\Sigma$ is unknown and is replaced by the sample covariance matrix
+$S$ of Section~3.3. Writing
+$(\widehat{\lambda}_i, \widehat{\underline{e}}_i)$ for the eigenvalue--eigenvector
+pairs of $S$, the $i$th \emph{sample principal component} of an observation
+$\underline{x}_j$ is
+$$y_{ji} = \widehat{\underline{e}}_i'\left(\underline{x}_j-\overline{\underline{x}}\right),$$
+the centring being conventional so that the components have mean zero. Every
+statement of the previous sections holds with $\Sigma,\lambda_i,\underline{e}_i$
+replaced by $S,\widehat{\lambda}_i,\widehat{\underline{e}}_i$.
+
+\begin{note}
+Two practical points. The eigenvector is determined only up to sign: if
+$\widehat{\underline{e}}_i$ maximises the variance then so does
+$-\widehat{\underline{e}}_i$, so software may return either, and a component
+that appears to have reversed between two analyses may not have changed at all.
+And if $n\leq p$ then $S$ is singular, so at most $n-1$ eigenvalues are
+non-zero and no more than that many components exist --- a real constraint when
+variables outnumber observations.
+\end{note}
+
+\subsection{How Many Components to Keep}
+
+There is no test that settles this, and the honest answer is that it is a
+judgement informed by several partial criteria.
+
+\begin{enumerate}
+\item[(i)] \textbf{Cumulative proportion.} Retain enough components to reach a
+stated proportion of the total variation, commonly $0.8$ or $0.9$.
+\item[(ii)] \textbf{The scree plot.} Plot $\widehat{\lambda}_i$ against $i$ and
+look for the elbow beyond which the eigenvalues fall away slowly and evenly;
+retain the components above it.
+\item[(iii)] \textbf{Kaiser's rule.} Working from the correlation matrix, retain
+components with $\widehat{\lambda}_i>1$, on the ground that a component
+explaining less than one variable's worth of variance has not earned its place.
+\item[(iv)] \textbf{Interpretability.} A component that cannot be described in
+the language of the subject is of limited use however much variance it carries.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[xscale=0.85,yscale=0.62]
+\draw[->] (0,0) -- (8.4,0) node[right] {\footnotesize component $i$};
+\draw[->] (0,0) -- (0,5.2) node[above] {\footnotesize $\widehat{\lambda}_i$};
+\foreach \x in {1,...,8} \draw (\x,0.09) -- (\x,-0.09) node[below] {\footnotesize $\x$};
+\foreach \y in {1,2,3,4} \draw (0.09,\y) -- (-0.09,\y) node[left] {\footnotesize $\y$};
+\draw[gray!55,dashed] (0,1) -- (8.3,1);
+\draw[thick] plot coordinates {(1,4.4) (2,2.6) (3,0.85) (4,0.62) (5,0.48) (6,0.36) (7,0.26) (8,0.18)};
+\foreach \p in {(1,4.4),(2,2.6),(3,0.85),(4,0.62),(5,0.48),(6,0.36),(7,0.26),(8,0.18)}
+  \node[circle,fill,inner sep=1.1pt] at \p {};
+\draw[<-] (3.25,1.35) -- (4.4,2.2) node[right] {\footnotesize elbow};
+\node[right] at (6.35,1.25) {\footnotesize $\widehat{\lambda}=1$};
+\end{tikzpicture}
+\caption{A scree plot. The first two eigenvalues stand well clear and the rest
+decline gently along a straight tail --- the ``scree'' of loose rubble at the
+foot of a cliff, which is where the name comes from. Both the elbow and
+Kaiser's rule point to retaining two components here, though the two criteria
+need not always agree.}
+\label{fig:scree}
+\end{figure}
+
+\begin{note}
+Principal components are a description of the data, not a model of them. No
+distributional assumption has been used anywhere in this section --- only that
+$\Sigma$ exists --- so there is no likelihood, no standard error and no test
+attached to any of it. Multivariate normality becomes relevant only when
+inference about the $\lambda_i$ is wanted, and Section~5 is where that
+assumption enters.
+
+A second caution. The components are chosen to maximise variance, and variance
+is not the same as importance. A direction along which the data barely vary may
+nonetheless be the one that separates two groups, in which case the leading
+components will conceal exactly the structure being sought. That is a job for
+the discriminant analysis of Section~6, which maximises \emph{separation}
+rather than variance, and the distinction between the two is worth keeping
+firmly in view.
+\end{note}
+
+\subsection*{Practice Problems}
+
+\begin{problem}
+Let
+$$\Sigma = \begin{pmatrix} 5 & 2\\ 2 & 2 \end{pmatrix}.$$
+Find the principal components, their variances, and the proportion of total
+variation explained by the first.
+\emph{Where to start: solve $\left|\Sigma-\lambda I\right|=0$ for the
+eigenvalues, then find a unit eigenvector for each.}
+\end{problem}
+
+\begin{solution}
+The characteristic equation is
+$(5-\lambda)(2-\lambda)-4 = \lambda^{2}-7\lambda+6 = 0$, giving
+$\lambda_1 = 6$ and $\lambda_2 = 1$.
+
+For $\lambda_1=6$: $(\Sigma-6I)\underline{e}=0$ gives $-e_1+2e_2=0$, so
+$\underline{e}_1 \propto (2,1)'$ and, normalised,
+$\underline{e}_1 = (2,1)'/\sqrt5$. Similarly
+$\underline{e}_2 = (-1,2)'/\sqrt5$.
+
+Hence $Y_1 = \left(2X_1+X_2\right)/\sqrt5$ with variance $6$, and
+$Y_2 = \left(-X_1+2X_2\right)/\sqrt5$ with variance $1$. The first component
+explains $6/(6+1) = 0.857$ of the total variation, and
+$\operatorname{tr}(\Sigma) = 5+2 = 7 = \lambda_1+\lambda_2$ as
+Theorem~\ref{thm:pcatrace} requires.
+\end{solution}
+
+\begin{problem}
+For the same $\Sigma$, compute $\operatorname{corr}(Y_1,X_1)$ and
+$\operatorname{corr}(Y_1,X_2)$, and interpret the first component.
+\end{problem}
+
+\begin{problem}
+Show that if $\Sigma$ is diagonal then the principal components are the original
+variables, in decreasing order of variance. Explain why this is the expected
+answer.
+\emph{Where to start: the eigenvectors of a diagonal matrix are the coordinate
+axes.}
+\end{problem}
+
+\begin{problem}
+Let $X_1$ be a length in centimetres and $X_2$ a mass in grams, with
+$$\Sigma = \begin{pmatrix} 400 & 10\\ 10 & 4\end{pmatrix}.$$
+Find the first principal component from $\Sigma$, then re-express $X_1$ in
+metres and find it again. Comment on what the analysis has discovered in each
+case, and repeat the exercise using the correlation matrix.
+\end{problem}
+
+\begin{solution}
+From $\Sigma$ the first component is almost exactly $X_1$: the variance of $X_1$
+is a hundred times that of $X_2$ purely because of its units, so
+$\lambda_1\approx400$ with $\underline{e}_1\approx(1,0)'$. Re-expressing the
+length in metres divides its variance by $10^{4}$, giving
+$\Sigma^{*} = \begin{pmatrix}0.04 & 0.1\\ 0.1 & 4\end{pmatrix}$, and now the
+first component lies almost along $X_2$. The two analyses disagree completely,
+and neither has found anything but the choice of unit.
+
+From the correlation matrix, $\rho = \begin{pmatrix}1 & 0.25\\ 0.25 & 1\end{pmatrix}$
+in both cases, with $\lambda_1 = 1.25$, $\underline{e}_1 = (1,1)'/\sqrt2$, and
+$\lambda_2 = 0.75$. The answer is now the same whichever units are used, and it
+says something about the data rather than about the measuring instrument.
+\end{solution}
+
+\begin{problem}
+Prove that $\prod^{p}_{i=1}\lambda_i = \left|\Sigma\right|$, and hence that the
+generalised variance of Section~3.4 is the product of the component variances.
+What does a zero eigenvalue imply about the variables?
+\end{problem}
+
+\begin{problem}
+Explain why the sample principal components are unchanged if every observation
+has a fixed vector $\underline{c}$ added to it, but change if each variable is
+multiplied by a different constant.
+\end{problem}
+
+\begin{problem}
+A scree plot of eight components shows eigenvalues
+$4.4,\ 2.6,\ 0.85,\ 0.62,\ 0.48,\ 0.36,\ 0.26,\ 0.18$ obtained from a
+correlation matrix. How many components would each of the four criteria of this
+section retain? Where they disagree, say which you would follow and why.
+\emph{Where to start: the eigenvalues sum to $p$; check that they do.}
+\end{problem}
+
+\begin{problem}
+Give an example, or describe one, in which the first principal component
+conceals the difference between two known groups. What does this show about
+using principal components as a preliminary to classification?
+\end{problem}
+
+
 \section{The Multivariate Normal Distribution}
 
 \subsection{Hotellings}
