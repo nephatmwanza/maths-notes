@@ -4702,4 +4702,304 @@ $a$, and explain why the two conditions coincide.
 \end{problem}
 
 
+\chapter{Asymptotic Expansions}
+
+The special functions of Chapter~2 were defined by integrals, and the transforms
+of Chapters~5 and~6 produce more of them. Most such integrals cannot be
+evaluated in closed form, and a convergent series for them is often useless in
+practice: the series for $\operatorname{erf}(x)$ converges for every $x$, yet at
+$x=5$ its terms grow to about $10^{9}$ before they begin to fall, and any
+finite-precision computation of it is destroyed by cancellation long before it
+converges.
+
+What is wanted in that regime is different in kind. An \emph{asymptotic}
+expansion is a series that need not converge at all, but whose first few terms
+approximate the function extremely well when the argument is large. This chapter
+develops the idea, and its central tool --- Watson's lemma --- turns out to be
+the gamma function once again.
+
+\section{Asymptotic Sequences and Expansions}
+
+\begin{defn}[Order symbols]
+As $x\to x_0$ we write $f = O(g)$ if $|f/g|$ is bounded, and $f = o(g)$ if
+$f/g\to0$.
+\end{defn}
+
+\begin{defn}[Asymptotic sequence]
+A sequence $\{\varphi_n\}$ is an \emph{asymptotic sequence} as $x\to x_0$ if
+$\varphi_{n+1} = o(\varphi_n)$ for every $n$. The usual choices are
+$\varphi_n(x)=x^{n}$ as $x\to0$ and $\varphi_n(x)=x^{-n}$ as $x\to\infty$.
+\end{defn}
+
+\begin{defn}[Asymptotic expansion, Poincar\'e]
+$f$ has the asymptotic expansion $\sum a_n\varphi_n$, written
+$$f(x)\ \sim\ \sum^{\infty}_{n=0}a_n\varphi_n(x),$$
+if for every $N$
+$$f(x) - \sum^{N}_{n=0}a_n\varphi_n(x) = o\left(\varphi_N(x)\right)
+\qquad\text{as } x\to x_0 .$$
+\end{defn}
+
+\begin{note}
+Read the definition carefully, because it is not the definition of a convergent
+series and the difference is the whole point. Convergence fixes $x$ and lets
+$N\to\infty$; an asymptotic expansion fixes $N$ and lets $x\to x_0$. A series
+may therefore be asymptotic and divergent at every $x$, and the most useful ones
+usually are.
+
+The practical consequence is that adding terms does not always improve matters.
+For a divergent asymptotic series there is an optimal number of terms, after
+which the partial sums get worse; the best accuracy attainable is roughly the
+size of the smallest term, and one stops there.
+\end{note}
+
+\begin{exa}[The exponential integral]
+\label{exa:expint}
+Integrating by parts repeatedly,
+$$\int^{\infty}_{x}\frac{e^{-t}}{t}\,dt
+= e^{-x}\left[\frac{1}{x} - \frac{1}{x^{2}} + \frac{2!}{x^{3}}
+- \frac{3!}{x^{4}} + \cdots + \frac{(-1)^{n}n!}{x^{n+1}}\right] + R_n,$$
+with $\left|R_n\right| \leq (n+1)!\,e^{-x}/x^{n+2}$. For fixed $x$ the terms
+$n!/x^{n+1}$ eventually grow without bound, so the series diverges for every
+$x$. Yet at $x=10$ the first four terms give the integral to five significant
+figures.
+\end{exa}
+
+\section{Watson's Lemma}
+
+Integrals of the form $\int^{\infty}_{0}e^{-xt}f(t)\,dt$ are exactly Laplace
+transforms, and their behaviour for large $x$ is governed entirely by the
+behaviour of $f$ near $t=0$ --- because the factor $e^{-xt}$ suppresses
+everything else.
+
+\begin{thm}[Watson's lemma]
+\label{thm:watson}
+Suppose $f$ is locally integrable on $[0,\infty)$, of at most exponential order
+at infinity, and has the asymptotic expansion
+$$f(t)\ \sim\ \sum^{\infty}_{n=0}a_n\,t^{\lambda_n}
+\qquad (t\to0^{+}),$$
+with $-1<\lambda_0<\lambda_1<\cdots\to\infty$. Then
+$$\int^{\infty}_{0}e^{-xt}f(t)\,dt
+\ \sim\ \sum^{\infty}_{n=0}\frac{a_n\,\Gamma\left(\lambda_n+1\right)}
+{x^{\lambda_n+1}}
+\qquad (x\to\infty).$$
+\end{thm}
+
+\begin{proof}[Sketch]
+Term by term, $\int^{\infty}_{0}e^{-xt}t^{\lambda}dt
+= \Gamma(\lambda+1)/x^{\lambda+1}$ by the substitution of
+Example~6.1.5. The content of the lemma is that the error committed in
+truncating $f$ transfers to an error of the same order after integration, which
+follows from splitting the range at any fixed $\delta>0$: on $[\delta,\infty)$
+the factor $e^{-xt}$ makes the contribution exponentially small, and on
+$[0,\delta]$ the truncation error is bounded by a constant times
+$t^{\lambda_{N+1}}$.
+\end{proof}
+
+\begin{note}
+Every term of the answer is a gamma value, and the condition $\lambda_0>-1$ is
+once more the convergence condition of Problem~\ref{prob:gammaconv}. The
+mechanism is worth stating plainly: because $e^{-xt}$ concentrates the integral
+near $t=0$ as $x$ grows, only the behaviour of $f$ at the origin survives, and
+the gamma function is what converts each power of $t$ there into a power of
+$1/x$ here.
+\end{note}
+
+\begin{exa}
+For the complementary error function, substitute $u = t^{2}-x^{2}$ in
+$$\operatorname{erfc}(x)
+= \frac{2}{\sqrt{\pi}}\int^{\infty}_{x}e^{-t^{2}}dt
+= \frac{e^{-x^{2}}}{\sqrt{\pi}}\int^{\infty}_{0}
+\frac{e^{-u}}{\sqrt{u+x^{2}}}\,du .$$
+Expanding $\left(u+x^{2}\right)^{-1/2}
+= x^{-1}\left(1 - \frac{u}{2x^{2}} + \frac{3u^{2}}{8x^{4}} - \cdots\right)$
+and applying Theorem~\ref{thm:watson} with $\Gamma(n+1)=n!$,
+$$\operatorname{erfc}(x)\ \sim\ \frac{e^{-x^{2}}}{x\sqrt{\pi}}
+\left(1 - \frac{1}{2x^{2}} + \frac{3}{4x^{4}} - \cdots\right).$$
+The leading term is the estimate obtained by a single integration by parts in
+Problem~2.5.2; Watson's lemma supplies the whole expansion at once.
+\end{exa}
+
+\section{Laplace's Method}
+
+Watson's lemma handles integrals whose exponential is $e^{-xt}$. The following
+handles the general case, in which the exponent has an interior maximum.
+
+\begin{thm}[Laplace's method]
+\label{thm:laplacemethod}
+Let $h$ be twice continuously differentiable on $[a,b]$ with a unique maximum at
+an interior point $c$, where $h'(c)=0$ and $h''(c)<0$, and let $g$ be continuous
+with $g(c)\neq0$. Then
+$$\int^{b}_{a}g(t)\,e^{x\,h(t)}\,dt
+\ \sim\ g(c)\,e^{x\,h(c)}\sqrt{\frac{2\pi}{x\left|h''(c)\right|}}
+\qquad (x\to\infty).$$
+\end{thm}
+
+\begin{proof}[Sketch]
+For large $x$ the factor $e^{xh(t)}$ is overwhelmingly concentrated near $t=c$.
+Expanding $h(t)\approx h(c)+\tfrac12h''(c)(t-c)^{2}$ and replacing $g$ by
+$g(c)$,
+$$\int^{b}_{a}g\,e^{xh}\,dt
+\approx g(c)e^{xh(c)}\int^{\infty}_{-\infty}
+e^{-\frac{x\left|h''(c)\right|}{2}(t-c)^{2}}dt,$$
+and the Gaussian integral of Section~2.3 evaluates the right-hand side.
+\end{proof}
+
+\begin{note}
+The idea is worth separating from the algebra. As $x$ grows, the integrand
+becomes a sharper and sharper spike at the maximum of $h$, so the integral is
+determined by an ever-smaller neighbourhood of that point --- and in a small
+enough neighbourhood any smooth function looks like a parabola, which makes the
+integral Gaussian. The whole method is: find the maximum, fit a parabola,
+integrate it exactly.
+
+The same reasoning underlies the saddle-point method in the complex plane, and,
+in statistics, the Laplace approximation to a posterior distribution --- which
+is the statement that a smooth log-likelihood looks quadratic near its maximum,
+so the posterior looks normal.
+\end{note}
+
+\section{Stirling's Formula}
+
+The most familiar asymptotic result in mathematics is an application of
+Theorem~\ref{thm:laplacemethod} to the gamma function, and deriving it here
+closes the circle begun in Chapter~2.
+
+\begin{thm}[Stirling]
+\label{thm:stirling}
+$$\Gamma(x+1)\ \sim\ \sqrt{2\pi x}\,\left(\frac{x}{e}\right)^{x}
+\qquad (x\to\infty),$$
+and in particular $n!\sim\sqrt{2\pi n}\,(n/e)^{n}$.
+\end{thm}
+
+\begin{proof}
+Start from $\Gamma(x+1)=\int^{\infty}_{0}t^{x}e^{-t}\,dt$ and substitute
+$t = xu$, giving
+$$\Gamma(x+1) = x^{x+1}\int^{\infty}_{0}u^{x}e^{-xu}\,du
+= x^{x+1}\int^{\infty}_{0}e^{x\left(\ln u - u\right)}du .$$
+This is the form required by Theorem~\ref{thm:laplacemethod} with
+$h(u)=\ln u - u$ and $g\equiv1$. Then $h'(u)=1/u-1$ vanishes at $u=1$, and
+$h''(u)=-1/u^{2}$ gives $h''(1)=-1$, so the maximum is at $c=1$ with
+$h(1)=-1$. Substituting,
+$$\Gamma(x+1)\ \sim\ x^{x+1}e^{-x}\sqrt{\frac{2\pi}{x}}
+= \sqrt{2\pi x}\left(\frac{x}{e}\right)^{x}. \qedhere$$
+\end{proof}
+
+\begin{note}
+The accuracy is remarkable for so short an argument. At $n=10$ the formula gives
+$3\,598\,696$ against the true $10! = 3\,628\,800$, an error of $0.8$ percent;
+at $n=100$ the relative error is under $0.1$ percent. The error is
+approximately $1/(12n)$, which is the first term of a fuller expansion
+$$\Gamma(x+1)\sim\sqrt{2\pi x}\left(\frac{x}{e}\right)^{x}
+\left(1+\frac{1}{12x}+\frac{1}{288x^{2}}-\cdots\right),$$
+itself divergent, and itself asymptotic.
+\end{note}
+
+\begin{remark}
+Stirling's formula is where several threads of this course meet. The object is
+the gamma function of Chapter~2; the integral is improper at both ends in the
+sense of Chapter~1; the method is Laplace's, which is the large-parameter
+counterpart of the transform of Chapter~6; and the Gaussian integral that
+finishes it is the one that defined the error function in Section~2.3. A result
+usually presented as a combinatorial curiosity is, seen this way, a
+straightforward consequence of the machinery already built.
+\end{remark}
+
+\section{Practice Problems}
+
+\begin{problem}
+Show that $\displaystyle\int^{\infty}_{x}\frac{e^{-t}}{t}\,dt$ has the
+asymptotic expansion given in Example~\ref{exa:expint}, and prove the stated bound on the
+remainder $R_n$.
+\emph{Where to start: integrate by parts repeatedly, keeping track of the
+remainder integral rather than discarding it.}
+\end{problem}
+
+\begin{problem}
+Show that the series in that example diverges for every fixed $x$, and determine
+how many terms give the best accuracy at $x=10$.
+\emph{Where to start: the terms are $n!/x^{n+1}$; find where the ratio of
+consecutive terms passes through $1$.}
+\end{problem}
+
+\begin{solution}
+The ratio of consecutive terms is $(n+1)/x$, which exceeds $1$ once $n>x-1$, so
+the terms decrease only while $n<x-1$ and grow thereafter without bound: the
+series diverges for every $x$.
+
+At $x=10$ the smallest term is at $n\approx9$, so about nine or ten terms give
+the best attainable accuracy, and the error there is roughly the size of that
+term, $9!/10^{10}\approx 3.6\times10^{-5}$. Adding further terms makes the
+approximation worse --- behaviour with no analogue for convergent series, and
+the reason an asymptotic expansion must always be truncated deliberately.
+\end{solution}
+
+\begin{problem}
+Use Watson's lemma to find the first two terms of the large-$x$ behaviour of
+$$\int^{\infty}_{0}\frac{e^{-xt}}{1+t}\,dt .$$
+\emph{Where to start: expand $(1+t)^{-1}$ as a geometric series about $t=0$ and
+apply Theorem~\ref{thm:watson} term by term.}
+\end{problem}
+
+\begin{solution}
+Near the origin $(1+t)^{-1} = 1 - t + t^{2} - \cdots$, so $a_n = (-1)^{n}$ and
+$\lambda_n = n$. Theorem~\ref{thm:watson} gives
+$$\int^{\infty}_{0}\frac{e^{-xt}}{1+t}\,dt
+\ \sim\ \sum^{\infty}_{n=0}\frac{(-1)^{n}\,n!}{x^{n+1}}
+= \frac{1}{x} - \frac{1}{x^{2}} + \frac{2}{x^{3}} - \cdots,$$
+the first two terms being $1/x - 1/x^{2}$. Note this is the expansion of
+Example~\ref{exa:expint} again, which it should be: the substitution $t\mapsto t-x$ turns
+one integral into the other.
+\end{solution}
+
+\begin{problem}
+Apply Laplace's method to $\displaystyle\int^{\pi/2}_{0}e^{x\cos t}\,dt$ and
+obtain the leading behaviour as $x\to\infty$. Note that the maximum lies at an
+endpoint and explain what changes.
+\emph{Where to start: at an endpoint maximum only half the Gaussian is
+integrated, so the result carries a factor $\tfrac12$ --- and here $h'(0)=0$ as
+well, so the parabolic approximation still applies.}
+\end{problem}
+
+\begin{problem}
+Derive Stirling's formula in the form $\ln n! = n\ln n - n + \tfrac12\ln(2\pi n)
++ O(1/n)$, and use it to estimate $\ln(100!)$. Compare with the exact value.
+\end{problem}
+
+\begin{problem}
+Use Stirling's formula to show that
+$$\binom{2n}{n}\ \sim\ \frac{4^{n}}{\sqrt{\pi n}} .$$
+\emph{Where to start: write the binomial coefficient as $(2n)!/(n!)^{2}$ and
+apply the formula to each factorial.}
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:stirling},
+$$\binom{2n}{n} = \frac{(2n)!}{(n!)^{2}}
+\sim \frac{\sqrt{4\pi n}\,(2n/e)^{2n}}{\left[\sqrt{2\pi n}\,(n/e)^{n}\right]^{2}}
+= \frac{\sqrt{4\pi n}\;4^{n}n^{2n}e^{-2n}}{2\pi n\;n^{2n}e^{-2n}}
+= \frac{4^{n}}{\sqrt{\pi n}} .$$
+This is the estimate behind the central term of the binomial distribution, and
+dividing by $4^{n}$ gives the probability of exactly $n$ heads in $2n$ tosses as
+$\left(\pi n\right)^{-1/2}$ --- which decays, though slowly, and is the reason a
+fair coin tossed many times almost never gives exactly half heads.
+\end{solution}
+
+\begin{problem}
+Explain why the convergent Taylor series for $\operatorname{erf}(x)$ is
+unsuitable for computing $\operatorname{erf}(5)$, and why the divergent
+asymptotic series for $\operatorname{erfc}(x)$ is suitable.
+\emph{Where to start: estimate the largest term of the Taylor series at $x=5$
+and compare it with the value of the function.}
+\end{problem}
+
+\begin{problem}
+State precisely why an asymptotic expansion does not determine the function it
+represents uniquely, by showing that $e^{-x}$ has the asymptotic expansion
+$\sum 0\cdot x^{-n}$ as $x\to\infty$. What does this imply about recovering $f$
+from its expansion?
+\emph{Where to start: $e^{-x}$ is smaller than every power of $1/x$ for large
+$x$.}
+\end{problem}
+
+
 \end{document}
