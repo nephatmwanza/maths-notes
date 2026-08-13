@@ -680,13 +680,220 @@ Let $B$ be an $m\times m$ idempotent matrix
 \item[i.] If $rank(B)=m$, then $B=I$.
 \item[ii.] If $B$ is symmetric and $P$ is an $m\times m$ orthogonal matrix then $P^tBP$ is symmetric idempotent matrix.
 \item[iii.] If $P$ is non-singular matrix and $B$ is symmetric idempotent matrix then $PBP^{-1}$ is idempotent matrix.
-\item[iv.] If $B$ is symmetric idempotent matrix then $I-B$ is also symmetric idempotent matrix.\\
+\item[iv.] If $B$ is symmetric idempotent matrix then $I-B$ is also symmetric idempotent matrix.
 \end{enumerate}
-
-
-\pagebreak
 \end{thm}
 
+\subsection{Distribution of Quadratic Forms}
+
+Every sum of squares met so far --- $SSTr$, $SSE$, $SSB$, $SST$ --- is a
+quadratic form $Y^tAY$ in the observation vector. The analysis of variance
+table asserts three things about them: that each has a chi-square
+distribution, that the numerator and denominator of the $F$ ratio are
+independent, and that the degrees of freedom add up. None of the three has
+been proved. This subsection proves all three, and the idempotent matrices of
+Definition~\ref{res:defn:1.3.3} are what does it: a sum of squares behaves like
+a chi-square exactly when its matrix is idempotent, and two sums of squares are
+independent exactly when their matrices multiply to zero.
+
+\begin{thm}[Mean of a quadratic form]
+\label{res:thm:qfmean}
+Let $\underline{Y}$ be a random vector with $E\left(\underline{Y}\right)
+=\underline{\mu}$ and $\text{Var}\left(\underline{Y}\right)=\Sigma$, and let
+$A$ be a constant $n\times n$ matrix. Then
+$$E\left(\underline{Y}^tA\underline{Y}\right)
+= tr\left(A\Sigma\right) + \underline{\mu}^tA\underline{\mu}.$$
+\end{thm}
+
+\begin{proof}
+Because $\underline{Y}^tA\underline{Y}$ is a scalar it equals its own trace,
+and the trace is linear and invariant under cyclic permutation:
+\begin{align*}
+E\left(\underline{Y}^tA\underline{Y}\right)
+& = E\left[tr\left(\underline{Y}^tA\underline{Y}\right)\right]
+  = E\left[tr\left(A\underline{Y}\,\underline{Y}^t\right)\right]
+  = tr\left[A\,E\left(\underline{Y}\,\underline{Y}^t\right)\right]\\
+& = tr\left[A\left(\Sigma+\underline{\mu}\,\underline{\mu}^t\right)\right]
+  = tr\left(A\Sigma\right)+tr\left(A\underline{\mu}\,\underline{\mu}^t\right)
+  = tr\left(A\Sigma\right)+\underline{\mu}^tA\underline{\mu}.
+\end{align*}
+\end{proof}
+
+\begin{note}
+No normality is used, only the first two moments. This one identity produces
+every expected mean square in the course: put $\Sigma=\sigma^2I$ and it
+becomes $E\left(\underline{Y}^tA\underline{Y}\right)
+=\sigma^2\,tr(A)+\underline{\mu}^tA\underline{\mu}$, so a quadratic form is an
+unbiased estimator of $\sigma^2$ precisely when $tr(A)=1$ and
+$A\underline{\mu}=\underline{0}$. That is the calculation which shows $MSE$
+estimates $\sigma^2$ whether or not the null hypothesis is true, while
+$MSTr$ does so only under the null.
+\end{note}
+
+\begin{defn}[Non-central chi-square]
+If $\underline{Z}\sim N_n\left(\underline{\mu},I\right)$ then
+$\underline{Z}^t\underline{Z}$ has the non-central chi-square distribution with
+$n$ degrees of freedom and non-centrality parameter
+$\lambda=\tfrac{1}{2}\underline{\mu}^t\underline{\mu}$, written
+$\chi^2\left(n,\lambda\right)$. When $\lambda=0$ this is the ordinary
+chi-square.
+\end{defn}
+
+\begin{thm}[Chi-square criterion]
+\label{res:thm:chisqcrit}
+Let $\underline{Y}\sim N_n\left(\underline{\mu},\sigma^2I\right)$ and let $A$
+be symmetric. Then
+$$\frac{\underline{Y}^tA\underline{Y}}{\sigma^2}\sim
+\chi^2\left(r,\ \lambda\right),\qquad
+r=rank(A),\quad \lambda=\frac{\underline{\mu}^tA\underline{\mu}}{2\sigma^2},$$
+\emph{if and only if} $A$ is idempotent.
+\end{thm}
+
+\begin{proof}
+Take $\sigma^2=1$ without loss of generality. Since $A$ is symmetric there is
+an orthogonal $P$ with $P^tAP=D=diag\left(\lambda_1,\dots,\lambda_n\right)$.
+Put $\underline{Z}=P^t\underline{Y}$, so that
+$\underline{Z}\sim N_n\left(P^t\underline{\mu},I\right)$ and
+$$\underline{Y}^tA\underline{Y}=\underline{Z}^tD\underline{Z}
+=\sum_{i=1}^{n}\lambda_iZ_i^2 .$$
+The $Z_i^2$ are independent non-central chi-squares on one degree of freedom.
+A weighted sum of independent chi-squares is itself chi-square only when every
+non-zero weight equals one, so the distribution is
+$\chi^2\left(r,\lambda\right)$ exactly when each $\lambda_i$ is $0$ or $1$
+with $r$ of them equal to $1$ --- and a symmetric matrix has all its
+eigenvalues in $\{0,1\}$ if and only if $A^2=A$. For such an $A$,
+$rank(A)=tr(A)=r$.
+\end{proof}
+
+\begin{note}
+This is the theorem the whole analysis of variance rests on, and it explains
+why idempotent matrices were introduced at all. It also explains the phrase
+``degrees of freedom'': for an idempotent matrix rank and trace coincide, so
+the degrees of freedom of a sum of squares can be read off as the trace of its
+matrix --- a quantity that is usually obvious by inspection. For the residual
+sum of squares, $A=I-H$ with $H=X\left(X^tX\right)^{-1}X^t$, and
+$tr(I-H)=n-tr(H)=n-k$.
+\end{note}
+
+\begin{thm}[Craig's theorem]
+\label{res:thm:craig}
+Let $\underline{Y}\sim N_n\left(\underline{\mu},\sigma^2I\right)$ and let $A$
+and $B$ be symmetric. The quadratic forms $\underline{Y}^tA\underline{Y}$ and
+$\underline{Y}^tB\underline{Y}$ are independent if and only if $AB=0$.
+\end{thm}
+
+\begin{thm}[Independence of a linear and a quadratic form]
+\label{res:thm:linquad}
+With $\underline{Y}$ as above and $A$ symmetric, the linear form
+$C\underline{Y}$ and the quadratic form $\underline{Y}^tA\underline{Y}$ are
+independent if and only if $CA=0$.
+\end{thm}
+
+\begin{note}
+Theorem~\ref{res:thm:linquad} is why $\overline{Y}$ and $S^2$ are independent
+in the elementary one-sample theory, a fact usually quoted without proof. Take
+$C=\tfrac{1}{n}\underline{1}^t$ and $A=I-\tfrac{1}{n}J_n$; then
+$CA=\tfrac{1}{n}\underline{1}^t-\tfrac{1}{n}\underline{1}^t=0$. The same
+argument, with $C$ replaced by $\left(X^tX\right)^{-1}X^t$ and $A$ by $I-H$,
+shows that $\widehat{B}$ and $SSE$ are independent in the general linear
+model, which is what allows a $t$ statistic to be formed from them.
+\end{note}
+
+\begin{thm}[Cochran's theorem]
+\label{res:thm:cochran}
+Let $\underline{Y}\sim N_n\left(\underline{\mu},\sigma^2I\right)$ and suppose
+$$\underline{Y}^t\underline{Y}=\underline{Y}^tA_1\underline{Y}
++\underline{Y}^tA_2\underline{Y}+\cdots+\underline{Y}^tA_k\underline{Y},$$
+where each $A_i$ is symmetric with $rank(A_i)=r_i$. If
+$r_1+r_2+\cdots+r_k=n$, then the $\underline{Y}^tA_i\underline{Y}/\sigma^2$
+are mutually independent, each distributed as
+$\chi^2\left(r_i,\ \underline{\mu}^tA_i\underline{\mu}/2\sigma^2\right)$.
+\end{thm}
+
+\begin{note}
+Cochran's theorem is the economical form of the previous three. To justify an
+analysis of variance table one need not verify idempotency of each matrix and
+orthogonality of each pair separately: it is enough that the sums of squares
+add to the total and that the degrees of freedom add to $n$. The arithmetic
+check at the foot of every analysis of variance table --- that the degrees of
+freedom column sums correctly --- is therefore not book-keeping. It is the
+hypothesis of a theorem.
+\end{note}
+
+\begin{exa}
+\label{res:exa:cochranowa}
+For the one-way layout of Section~1.2 with $N$ observations in $k$ groups, the
+identity
+$$SST = SSTr + SSE$$
+of that section is a decomposition of exactly this kind, with
+$$SST=\underline{Y}^t\left(I-\tfrac{1}{N}J_N\right)\underline{Y},\qquad
+rank=N-1,$$
+$$SSTr=\underline{Y}^t\left(\bigoplus_{j=1}^{k}\tfrac{1}{n_j}J_{n_j}
+-\tfrac{1}{N}J_N\right)\underline{Y},\qquad rank=k-1,$$
+$$SSE=\underline{Y}^t\left(I-\bigoplus_{j=1}^{k}\tfrac{1}{n_j}J_{n_j}\right)
+\underline{Y},\qquad rank=N-k.$$
+Since $(k-1)+(N-k)=N-1$, Cochran's theorem gives at once that
+$SSTr/\sigma^2$ and $SSE/\sigma^2$ are independent chi-square variates on
+$k-1$ and $N-k$ degrees of freedom. Under
+$H_0:\tau_1=\cdots=\tau_k$ the non-centrality of the first vanishes, and
+$$F=\frac{SSTr/(k-1)}{SSE/(N-k)}\sim F_{k-1,\,N-k}$$
+by the definition of the $F$ distribution as a ratio of independent
+chi-squares divided by their degrees of freedom.
+\end{exa}
+
+\begin{note}
+This example closes a gap left open in Section~1.2, where the $F$ ratio was
+written down and its distribution asserted. The assertion is now a
+consequence. Notice also what happens when $H_0$ is false: only the
+non-centrality of $SSTr$ changes, $SSE$ being unaffected because
+$A_{SSE}\underline{\mu}=\underline{0}$ whatever the treatment means are. The
+$F$ statistic is therefore stochastically larger under the alternative, which
+is why the test rejects in the upper tail only.
+\end{note}
+
+\subsection*{Practice Problems}
+
+\begin{problem}
+Show that $H=X\left(X^tX\right)^{-1}X^t$ is symmetric and idempotent, and that
+$tr(H)=k$ when $X$ is $n\times k$ of full column rank.
+\emph{Where to start: the cyclic property of the trace.}
+\end{problem}
+
+\begin{problem}
+Use Theorem~\ref{res:thm:qfmean} to show that
+$E\left(SSE\right)=\left(n-k\right)\sigma^2$ in the general linear model,
+whether or not the fitted model is the true one.
+\emph{Where to start: $SSE=\underline{Y}^t(I-H)\underline{Y}$ and
+$(I-H)X=0$.}
+\end{problem}
+
+\begin{problem}
+Verify by Theorem~\ref{res:thm:craig} that $SSTr$ and $SSE$ of
+Example~\ref{res:exa:cochranowa} are independent, by showing that the product
+of their matrices is the zero matrix.
+\end{problem}
+
+\begin{problem}
+Let $A$ be symmetric and idempotent of rank $r$. Prove that $I-A$ is symmetric
+and idempotent of rank $n-r$, and that $A(I-A)=0$. Explain what each of these
+three facts contributes to the analysis of variance table.
+\emph{Where to start: Theorem~\ref{res:thm:1.3.4}(iv) has the first part.}
+\end{problem}
+
+\begin{problem}
+A student proposes to test $H_0$ by comparing $SSTr/SST$ with a chi-square
+table. Explain, using Theorem~\ref{res:thm:chisqcrit}, why this is wrong on
+two separate counts.
+\end{problem}
+
+\begin{problem}
+Suppose $\underline{Y}\sim N_n\left(\underline{\mu},\sigma^2I\right)$ and
+$A$ is symmetric with eigenvalues $2,1,1,0,\dots,0$. What is the distribution
+of $\underline{Y}^tA\underline{Y}/\sigma^2$? Is it chi-square? Justify your
+answer from the proof of Theorem~\ref{res:thm:chisqcrit}.
+\end{problem}
+
+\newpage
 \section{LINEAR MODELS}
 
 
@@ -1295,7 +1502,7 @@ $Y^*_j$ observations from the $j^{\text{th}}$ treatment.
 If $V\thicksim N\big(XB,\sigma^2I\big)$ where $X$ is full column rank, then
 \begin{enumerate}
 \item[i).] The least squares estimators $\widehat{B}$ is mle of $B$.
-\item[ii).] $\widehat{B}\thicksim \big(B,\sigma^2\big(X^tX\big)^{-1}\big)$.
+\item[ii).] $\widehat{B}\thicksim N\big(B,\sigma^2\big(X^tX\big)^{-1}\big)$.
 
 $$Y=XB + \varepsilon$$
 $$\widehat{Y}=X\widehat{B}$$
@@ -1315,6 +1522,253 @@ $$\text{MSE}=\frac{\text{SSE}}{N-K}=\frac{Y^t\big(I-H\big)Y}{N-K}\thicksim \frac
 \end{coro}
 
 
+\subsection{Estimability and the Generalized Inverse}
+
+Everything so far has assumed that $X$ has full column rank, so that
+$\left(X^tX\right)^{-1}$ exists and the normal equations have one solution.
+The analysis of variance models of Section~1 do not satisfy that assumption.
+In the one-way layout
+$$Y_{ij}=\mu+\tau_j+\varepsilon_{ij},$$
+there are $k+1$ parameters $\mu,\tau_1,\dots,\tau_k$ but the design matrix has
+rank $k$: its first column is the sum of the others. The normal equations then
+have infinitely many solutions, and no amount of data will separate $\mu$ from
+the $\tau_j$ --- adding a constant to $\mu$ and subtracting it from every
+$\tau_j$ leaves every fitted value unchanged.
+
+This is not a defect to be repaired. It is a statement about which questions
+the experiment can answer. Some functions of the parameters are determined by
+the data and some are not, and this subsection says exactly which.
+
+\begin{defn}[Generalized inverse]
+\label{res:defn:ginv}
+A matrix $A^{-}$ is a generalized inverse of $A$ if
+$$A A^{-} A = A.$$
+When $A$ is non-singular the only such matrix is $A^{-1}$; otherwise $A^{-}$
+exists but is not unique.
+\end{defn}
+
+\begin{result}
+\label{res:result:normalsol}
+The normal equations $X^tX\underline{b}=X^t\underline{Y}$ are always
+consistent, and every solution has the form
+$$\widehat{\underline{b}}=\left(X^tX\right)^{-}X^t\underline{Y}$$
+for some generalized inverse $\left(X^tX\right)^{-}$. Different generalized
+inverses give different solutions.
+\end{result}
+
+\begin{note}
+Consistency is the important half: however deficient $X$ may be, a least
+squares solution always exists. What fails without full rank is uniqueness,
+and uniqueness is not needed for the parts of the answer that matter, as the
+next definition makes precise. Note also that the fitted values are unique
+regardless, since $X\widehat{\underline{b}}=H\underline{Y}$ with
+$H=X\left(X^tX\right)^{-}X^t$ the projection onto the column space of $X$ ---
+and a projection does not depend on which generalized inverse produced it.
+\end{note}
+
+\begin{defn}[Estimable function]
+A linear function $\underline{\lambda}^tB$ of the parameters is
+\emph{estimable} if there exists a vector $\underline{a}$ with
+$$E\left(\underline{a}^t\underline{Y}\right)=\underline{\lambda}^tB
+\qquad\text{for every }B,$$
+that is, if some linear function of the observations is an unbiased estimator
+of it.
+\end{defn}
+
+\begin{thm}[Criterion for estimability]
+\label{res:thm:estcrit}
+$\underline{\lambda}^tB$ is estimable if and only if
+$\underline{\lambda}^t$ lies in the row space of $X$; equivalently, if and
+only if
+$$\underline{\lambda}^t\left(X^tX\right)^{-}\left(X^tX\right)
+=\underline{\lambda}^t .$$
+\end{thm}
+
+\begin{proof}
+If $\underline{\lambda}^tB$ is estimable then
+$\underline{a}^tXB=\underline{\lambda}^tB$ for all $B$, so
+$\underline{\lambda}^t=\underline{a}^tX$ and $\underline{\lambda}^t$ is a
+combination of the rows of $X$. Conversely if
+$\underline{\lambda}^t=\underline{a}^tX$ then
+$E\left(\underline{a}^t\underline{Y}\right)=\underline{a}^tXB
+=\underline{\lambda}^tB$. The second form follows because
+$\left(X^tX\right)^{-}\left(X^tX\right)$ acts as the identity exactly on the
+row space of $X$.
+\end{proof}
+
+\begin{thm}[Gauss--Markov, rank-deficient form]
+\label{res:thm:gmdeficient}
+If $\underline{\lambda}^tB$ is estimable then
+$\underline{\lambda}^t\widehat{\underline{b}}$ is the same for every solution
+$\widehat{\underline{b}}$ of the normal equations, is unbiased for
+$\underline{\lambda}^tB$, and has smaller variance than any other linear
+unbiased estimator of it. Its variance is
+$$\text{Var}\left(\underline{\lambda}^t\widehat{\underline{b}}\right)
+=\sigma^2\,\underline{\lambda}^t\left(X^tX\right)^{-}\underline{\lambda}.$$
+\end{thm}
+
+\begin{note}
+The invariance is the point. A computer package solving a rank-deficient
+analysis of variance must pick some generalized inverse, and different
+packages pick different ones --- so the printed values of $\widehat{\mu}$ and
+$\widehat{\tau}_j$ may differ between two programs run on the same data. The
+estimable functions do not differ. If two analyses disagree about a quantity,
+that quantity was not estimable, and the disagreement is the software telling
+you so.
+\end{note}
+
+\begin{exa}
+\label{res:exa:estowa}
+In the one-way layout with $k$ treatments, write
+$B=\left(\mu,\tau_1,\dots,\tau_k\right)^t$. The rows of $X$ are of the form
+$\left(1,0,\dots,1,\dots,0\right)$ with the $1$ in position $j+1$, so the row
+space consists of all $\underline{\lambda}^t=\left(c,c_1,\dots,c_k\right)$
+with $c=\sum_j c_j$. Hence
+\begin{itemize}
+\item $\mu+\tau_j$ is estimable, with $c=1$, $c_j=1$: it is the mean of
+treatment $j$, and $\overline{Y}_{\cdot j}$ estimates it.
+\item $\tau_i-\tau_j$ is estimable, with $c=0$: any difference of treatment
+effects is estimable, and $\overline{Y}_{\cdot i}-\overline{Y}_{\cdot j}$
+estimates it.
+\item $\mu$ alone is not estimable: it would need $c=1$ with every $c_j=0$,
+and $0\neq1$.
+\item $\tau_j$ alone is not estimable, by the same arithmetic.
+\end{itemize}
+\end{exa}
+
+\begin{note}
+Example~\ref{res:exa:estowa} explains why the whole of Section~1 is written in
+terms of differences between treatments and never in terms of a single
+$\tau_j$. It also puts the familiar side condition $\sum_j\tau_j=0$ in its
+place: it is a convention that selects one solution out of the infinitely
+many, not information extracted from the data. Imposing it makes $\mu$ and
+$\tau_j$ individually computable, but their values then describe the
+convention as much as the experiment. Any quantity whose value changes when
+the side condition is changed was never estimable.
+\end{note}
+
+\begin{defn}[Contrast]
+A contrast is an estimable function $\sum_j c_j\tau_j$ with
+$\sum_j c_j=0$. Two contrasts $\underline{c}$ and $\underline{d}$ are
+orthogonal if $\sum_j c_jd_j/n_j=0$; in the balanced case this is
+$\sum_j c_jd_j=0$.
+\end{defn}
+
+\begin{note}
+By Example~\ref{res:exa:estowa} every contrast is estimable, and the
+contrasts are precisely the estimable functions of the $\tau_j$ alone. A set
+of $k-1$ mutually orthogonal contrasts partitions $SSTr$ into $k-1$
+single-degree-of-freedom sums of squares that add to it exactly --- so a
+significant overall $F$ can be followed by an examination of which contrast
+carries the effect, with no multiplicity penalty if the contrasts were chosen
+before the data were seen.
+\end{note}
+
+\subsection{The General Linear Hypothesis}
+
+Individual tests on single parameters have been treated. Most hypotheses of
+interest involve several parameters at once: that all treatments are alike,
+that a subset of regressors may be dropped, that two effects are equal. All of
+them are of one form, and one test covers all of them.
+
+\begin{defn}[General linear hypothesis]
+Let $C$ be a $q\times p$ matrix of full row rank whose rows are estimable
+functions. The general linear hypothesis is
+$$H_0:\ CB=\underline{d}\qquad\text{against}\qquad H_a:\ CB\neq\underline{d}.$$
+\end{defn}
+
+\begin{thm}[Test of the general linear hypothesis]
+\label{res:thm:glh}
+Under $H_0$, with $r=rank(X)$,
+$$F=\frac{\left(C\widehat{\underline{b}}-\underline{d}\right)^t
+\left[C\left(X^tX\right)^{-}C^t\right]^{-1}
+\left(C\widehat{\underline{b}}-\underline{d}\right)\big/q}{MSE}
+\ \sim\ F_{q,\,n-r},$$
+and $H_0$ is rejected at level $\alpha$ when $F>F_{q,\,n-r,\alpha}$.
+\end{thm}
+
+\begin{thm}[Extra sum of squares form]
+\label{res:thm:extrass}
+The same test is obtained by fitting the model twice. Let $SSE_{\text{full}}$
+be the residual sum of squares of the unrestricted model and
+$SSE_{\text{red}}$ that of the model fitted subject to $CB=\underline{d}$.
+Then
+$$F=\frac{\left(SSE_{\text{red}}-SSE_{\text{full}}\right)\big/q}
+{SSE_{\text{full}}\big/(n-r)} .$$
+\end{thm}
+
+\begin{note}
+Theorem~\ref{res:thm:extrass} is the form used in practice, and it is the one
+behind every ``extra sum of squares'' calculation in Section~4: the quantity
+written $SSR\left(X_2,X_3\mid X_1,X_4\right)$ there is exactly
+$SSE_{\text{red}}-SSE_{\text{full}}$ for the hypothesis $\beta_2=\beta_3=0$.
+The two theorems are the same test seen from two directions --- one computes
+the restriction, the other computes the cost of imposing it. The second needs
+no generalized inverse and no matrix $C$, only two model fits, which is why
+software reports it that way.
+\end{note}
+
+\begin{exa}
+For the one-way layout, $H_0:\tau_1=\tau_2=\cdots=\tau_k$ is written with
+$q=k-1$ and
+$$C=\begin{pmatrix}
+0 & 1 & -1 & 0 & \cdots & 0\\
+0 & 0 & 1 & -1 & \cdots & 0\\
+\vdots & & & \ddots & & \vdots\\
+0 & 0 & \cdots & 0 & 1 & -1
+\end{pmatrix}.$$
+Every row is a contrast, hence estimable, and the resulting $F$ is the
+$SSTr/SSE$ ratio of Section~1.2. The reduced model is
+$Y_{ij}=\mu+\varepsilon_{ij}$, whose residual sum of squares is $SST$; so
+$SSE_{\text{red}}-SSE_{\text{full}}=SST-SSE=SSTr$, as
+Theorem~\ref{res:thm:extrass} requires.
+\end{exa}
+
+\subsection*{Practice Problems}
+
+\begin{problem}
+Show that in the one-way layout $\mu+\overline{\tau}$, where
+$\overline{\tau}=\tfrac{1}{k}\sum_j\tau_j$, is estimable, and give a linear
+function of the observations that estimates it unbiasedly.
+\end{problem}
+
+\begin{problem}
+For the randomized block model $Y_{ij}=\mu+\beta_i+\tau_j+\varepsilon_{ij}$,
+determine which of $\mu$, $\tau_1$, $\tau_1-\tau_2$, $\beta_1-\beta_2$ and
+$\mu+\beta_1+\tau_1$ are estimable.
+\emph{Where to start: write down a typical row of $X$ and apply
+Theorem~\ref{res:thm:estcrit}.}
+\end{problem}
+
+\begin{problem}
+Verify Definition~\ref{res:defn:ginv} for
+$A=\begin{pmatrix}1&1\\1&1\end{pmatrix}$ by exhibiting two different
+generalized inverses, and confirm that $\underline{\lambda}^t=(1,-1)$ gives
+the same value of $\underline{\lambda}^tA^{-}\underline{\lambda}$ for both
+while $\underline{\lambda}^t=(1,0)$ does not.
+\end{problem}
+
+\begin{problem}
+With $k=4$ treatments, write down three mutually orthogonal contrasts and
+verify their orthogonality. Explain what each one tests if the treatments are
+four doses of a fertiliser, $0,1,2,3$ units.
+\end{problem}
+
+\begin{problem}
+Two statistical packages fit the same one-way analysis of variance and report
+different values of $\widehat{\tau}_1$ but identical values of
+$\widehat{\tau}_1-\widehat{\tau}_2$ and identical analysis of variance tables.
+Explain, and say which of the reported quantities you would be willing to put
+in a report.
+\end{problem}
+
+\begin{problem}
+Show that the hypothesis $\beta_2=\beta_3=0$ in a regression on
+$X_1,X_2,X_3,X_4$ can be written as $CB=\underline{0}$, give $C$, and state
+the degrees of freedom of the resulting $F$ test.
+\end{problem}
+
+\newpage
 \subsection{Simultaneous Confidence Intervals and Multiple Comparison}
 
 
@@ -1591,7 +2045,7 @@ $$
 \end{solution}
 
 
-\subsection*{Simultaneous C.Is Using Schette' Method (S.Method)}
+\subsection*{Simultaneous Confidence Intervals by Scheff\'e's Method}
 
 \begin{thm}\label{res:thm:2.3.5}
 Let $\widehat{B}$ be the least square estimator for $B$ in the linear model $Y=XB+\varepsilon$, $\quad  \varepsilon \thicksim N(0,I\sigma^2)$, then the $100(1-\alpha)\%$ confidence interval for $C^tB$ is given by $$C^t\widehat{B}\pm \sqrt{Kf^{\alpha}_{K,N-K}}\sqrt{\text{MSE}\,C^t\big(X^tX\big)^{-1}C}$$ for all vectors $C$.\\
@@ -3021,7 +3475,7 @@ We need the $X_3$ and $X_4$.\\
 \end{solution}
 
 
-\item The heat evolved in Calories per gram of cement$(Y)$ as a function of each of four ingredients in the mix duminate $(X_1)$, silicate $(X_2)$, alumuious $(X_3)$ and dicalcium $(X_4)$, hence the following model:$$Y=\beta_0+\beta_1X_1+\beta_2X_2+\beta_3X_3+\beta_4X_4+e.$$ The fitted model on thirteen prints is $$\widehat{Y}=62.41+1.55X_1+0.51X_2+0.20X_3-0.14X_4$$
+\item The heat evolved in Calories per gram of cement$(Y)$ as a function of each of four ingredients in the mix, aluminate $(X_1)$, silicate $(X_2)$, alumino-ferrite $(X_3)$ and dicalcium $(X_4)$, hence the following model:$$Y=\beta_0+\beta_1X_1+\beta_2X_2+\beta_3X_3+\beta_4X_4+e.$$ The fitted model on thirteen batches is $$\widehat{Y}=62.41+1.55X_1+0.51X_2+0.20X_3-0.14X_4$$
 
 \begin{enumerate}
      \item Complete the ANOVA TABLE\\
@@ -3073,7 +3527,7 @@ $Y=\beta_0+\beta_1X_1+\beta_2X_2+\beta_4X_4+e$ & 2667.79\\
 \begin{enumerate}
        \item Compute $R^2$ and $R^2_a$ for $$Y=\beta_0+\beta_1X_1+\beta_4X_4+e$$
        \item Decompose the SSR for the model
-       \item Test whether $X_2$ and $X_3$ are needed in the model which arleady as $X_1$ and $X_4$.\\
+       \item Test whether $X_2$ and $X_3$ are needed in the model which already has $X_1$ and $X_4$.\\
 \end{enumerate}
 
 
@@ -3082,37 +3536,62 @@ $Y=\beta_0+\beta_1X_1+\beta_2X_2+\beta_4X_4+e$ & 2667.79\\
 
 \begin{solution}
 \begin{enumerate}
-       \item 
-       \item\quad 
-       
+\item The model in $X_1$ and $X_4$ has $\text{SSR}=2657.86$, and $\text{SST}$
+does not depend on which model is fitted, so $\text{SST}=2715.76$ with
+$n-1=12$ degrees of freedom and $n=13$. Hence
+$$\text{SSE}=2715.76-2657.86=57.90, \qquad n-k=13-3=10,$$
+$$R^{2}=\frac{2657.86}{2715.76}=0.9787,$$
+$$R^{2}_{a}=1-\frac{\text{SSE}/(n-k)}{\text{SST}/(n-1)}
+=1-\frac{57.90/10}{2715.76/12}=1-\frac{5.790}{226.31}=0.9744.$$
+The full four-variable model gave $R^{2}=2667.90/2715.76=0.9824$. Dropping
+$X_2$ and $X_3$ costs 0.0037 of $R^{2}$ and \emph{raises} the adjusted value,
+which is the first sign of what part (c) confirms.
+
+\item Each line is the extra regression sum of squares brought by a variable
+given those above it, so the entries add to the regression sum of squares of
+the full model.
+
 \begin{table}[H]
 \centering
-\begin{tabular}{lcc}
- & SS & df\\
+\begin{tabular}{|l|c|c|}
 \hline
-&&\\
-$X_1,X_2,X_3,X_4$ & 2667.90 & 4\\
-&&\\
+\textbf{Source} & \textbf{SS} & \textbf{d.f.}\\
+\hline
 $X_4$ & 1831.90 & 1\\
-&&\\
-$X_1/X_4$ & 825.96 & 1\\
-&&\\
-$X_2/X_1,X_4$ & 9.93 & 1\\
-&&\\
-$X_3/X_1,X_2,X_4$ & 0.11 & 1\\
-&&\\\
+$X_1\mid X_4$ & 825.96 & 1\\
+$X_2\mid X_1,X_4$ & 9.93 & 1\\
+$X_3\mid X_1,X_2,X_4$ & 0.11 & 1\\
+\hline
+$X_1,X_2,X_3,X_4$ & 2667.90 & 4\\
+\hline
 \end{tabular}
+\caption{Sequential decomposition of the regression sum of squares. The four
+extra sums of squares total $1831.90+825.96+9.93+0.11=2667.90$, which is the
+regression sum of squares of the full model.}
+\label{tab:seqssr}
 \end{table}
 
-$$\frac{\text{SSR}\big(X_2,X_3/X_1,X_4\big)/2}{\text{MSE}}$$\\
-
-      \item SSR$\big(X_2,X_3/X_1,X_4\big)=$ SSR$\big(X_1,X_2,X_3,X_4\big)-$ SSR$\big(X_1,X_4\big)$\\
-      
-      
-      $F=\frac{10.0412}{5.98}=0.84$\\
-      
-      We do not need $X_1$ and $X_3$.\\
+\item The two variables are tested together, against the model that already
+contains $X_1$ and $X_4$:
+$$\text{SSR}\big(X_2,X_3\mid X_1,X_4\big)
+=\text{SSR}\big(X_1,X_2,X_3,X_4\big)-\text{SSR}\big(X_1,X_4\big)
+=2667.90-2657.86=10.04,$$
+on $2$ degrees of freedom. With the full model's $\text{MSE}=5.983$,
+$$F=\frac{\text{SSR}\big(X_2,X_3\mid X_1,X_4\big)/2}{\text{MSE}}
+=\frac{10.04/2}{5.983}=0.84,$$
+to be compared with $F_{2,8,0.05}=4.46$. Since $0.84<4.46$ the hypothesis
+$\beta_2=\beta_3=0$ is not rejected: $X_2$ and $X_3$ are not needed once $X_1$
+and $X_4$ are in the model.
 \end{enumerate}
+
+\begin{note}
+The conclusion is about $X_2$ and $X_3$ \emph{jointly, and given $X_1$ and
+$X_4$}. It does not say either variable is unrelated to $Y$: fitted alone,
+$X_2$ explains a great deal. What the test says is that whatever they carry is
+already carried by $X_1$ and $X_4$. This is why the decomposition of part (b)
+is written as a sequence --- change the order of entry and the individual
+lines change, though their total does not.
+\end{note}
 \end{solution}
 \end{enumerate}
 \end{exa}
