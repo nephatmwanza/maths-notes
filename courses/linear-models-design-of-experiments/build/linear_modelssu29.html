@@ -1,0 +1,166 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>4.8 Leverage, Outliers and Influential Observations — Linear Models and Design of Experiments</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='linear_models.css' rel='stylesheet' type='text/css' /> 
+<meta content='linear_models.tex' name='src' /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Linear Models and Design of Experiments</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="linear_modelsse1.html">Analysis of Variance</a></li>
+<li class="sub"><a class="" href="linear_modelssu1.html">Introduction</a></li>
+<li class="sub"><a class="" href="linear_modelssu2.html">One-Way Analysis of Variance</a></li>
+<li class="sub"><a class="" href="linear_modelssu3.html">The Randomised Block Design</a></li>
+<li class="sub"><a class="" href="linear_modelssu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="linear_modelsse2.html">Random Vectors and Matrices</a></li>
+<li class="sub"><a class="" href="linear_modelssu5.html">Review of Matrix Algebra</a></li>
+<li class="sub"><a class="" href="linear_modelssu6.html">Expectation of Random Vectors and Variance-Covariance</a></li>
+<li class="sub"><a class="" href="linear_modelssu7.html">Derivatives of Linear and Quadratic Forms</a></li>
+<li class="sub"><a class="" href="linear_modelssu8.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="linear_modelssu9.html">Distribution of Quadratic Forms</a></li>
+<li class="sub"><a class="" href="linear_modelssu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="linear_modelsse3.html">Linear Models</a></li>
+<li class="sub"><a class="" href="linear_modelssu11.html">General Linear Model</a></li>
+<li class="sub"><a class="" href="linear_modelssu12.html">Review of Linear Algebra</a></li>
+<li class="sub"><a class="" href="linear_modelssu13.html">Estimation of Parameters in a Linear Model</a></li>
+<li class="sub"><a class="" href="linear_modelssu14.html">Estimability and the Generalised Inverse</a></li>
+<li class="sub"><a class="" href="linear_modelssu15.html">The General Linear Hypothesis</a></li>
+<li class="sub"><a class="" href="linear_modelssu16.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="linear_modelssu17.html">Simultaneous Confidence Intervals and Multiple Comparison</a></li>
+<li class="sub"><a class="" href="linear_modelssu18.html">Two-Factor Studies</a></li>
+<li class="sub"><a class="" href="linear_modelssu19.html">Three-Way Analysis Of Variance</a></li>
+<li class="sub"><a class="" href="linear_modelssu20.html">Latin Square Design</a></li>
+<li class="sub"><a class="" href="linear_modelssu21.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="linear_modelsse4.html">Multiple Regression</a></li>
+<li class="sub"><a class="" href="linear_modelssu22.html">Introduction</a></li>
+<li class="sub"><a class="" href="linear_modelssu23.html">Multiple Linear Regression Model With Two Independent (Regressor) Variables</a></li>
+<li class="sub"><a class="" href="linear_modelssu24.html">General Multiple Line Regression</a></li>
+<li class="sub"><a class="" href="linear_modelssu25.html">Meaning of the Coefficients</a></li>
+<li class="sub"><a class="" href="linear_modelssu26.html">Multicollinearity</a></li>
+<li class="sub"><a class="" href="linear_modelssu27.html">Examination of Residuals(errors)</a></li>
+<li class="sub"><a class="" href="linear_modelssu28.html">Practice Problems</a></li>
+<li class="sub"><a class="current" href="linear_modelssu29.html">Leverage, Outliers and Influential Observations</a></li>
+<li class="sub"><a class="" href="linear_modelssu30.html">Variable Selection</a></li>
+<li class="sub"><a class="" href="linear_modelssu31.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="linear_modelssu32.html">Hazards in the use of Regression</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 4247 --><div class='crosslinks'><p class='noindent'>[<a href='linear_modelssu30.html'>next</a>] [<a href='linear_modelssu28.html'>prev</a>] [<a href='linear_modelssu28.html#taillinear_modelssu28.html'>prev-tail</a>] [<a href='#taillinear_modelssu29.html'>tail</a>] [<a href='linear_modelsse4.html#linear_modelssu29.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>4.8   </span> <a id='x39-480004.8'></a>Leverage, Outliers and Influential Observations</h4>
+<!-- l. 4249 --><p class='noindent'>Residual plots find observations that the model fits badly. They do not find the observations that
+determined the fit in the first place, and those are the more dangerous: a point can sit almost
+exactly on the fitted surface precisely because it dragged the surface to itself. Such a point
+has a small residual and a large effect, so no examination of residuals alone will reveal
+it.
+</p><!-- l. 4255 --><p class='noindent'>Three questions must be separated. Is the observation extreme in the predictors? Is it fitted badly?
+Would removing it change the conclusions? These are leverage, outlyingness and influence, and an
+observation may have any combination of them.
+</p>
+<div class='newtheorem nt-definition'>
+<!-- l. 4260 --><p class='noindent'><span class='head'>
+<a id='x39-48001r1'></a>
+<span class='cmbx-10x-x-109'>Definition 4.8.1 </span>(Leverage)<span class='cmbx-10x-x-109'>.</span>  </span>The leverage of observation \(i\) is \(h_{ii}\), the \(i^{\text {th}}\) diagonal element of the hat
+matrix \(H=X\left (X^tX\right )^{-1}X^t\).
+</p>
+</div>
+<!-- l. 4263 --><p class='noindent'>
+</p>
+<div class='newtheorem'>
+<!-- l. 4265 --><p class='noindent'><span class='head'>
+<a id='x39-48002r2'></a>
+<span class='cmbx-10x-x-109'>Result 4.8.2.</span>  </span> The leverages satisfy
+                                                                                      
+                                                                                      
+                                           \[0\leq h_{ii}\leq 1,\qquad \sum _{i=1}^{n}h_{ii}=tr(H)=k,\]
+ so the average leverage is \(k/n\). An observation is conventionally called a high leverage point when
+\(h_{ii}&gt;2k/n\).
+</p>
+</div>
+<!-- l. 4271 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-note'>
+<!-- l. 4273 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>Leverage is computed from \(X\) alone — the response never enters it. It measures how far
+observation \(i\) is from the centre of the predictor space, and \(h_{ii}\) is exactly the weight that \(Y_i\) receives
+in its own fitted value, since \(\widehat {Y}_i=\sum _j h_{ij}Y_j\). A point with \(h_{ii}\) near \(1\) fits itself: \(\widehat {Y}_i\approx Y_i\) whatever \(Y_i\) happens to be. This is
+why \(\text {Var}\left (\widehat {e}_i\right )=\sigma ^2\left (1-h_{ii}\right )\) is small for high leverage points, and why dividing by \(\sqrt {1-h_{ii}}\) is necessary before residuals can
+be compared with one another at all.
+</p>
+</div>
+<!-- l. 4282 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-definition'>
+<!-- l. 4284 --><p class='noindent'><span class='head'>
+<a id='x39-48003r3'></a>
+<span class='cmbx-10x-x-109'>Definition 4.8.3 </span>(Studentised residuals)<span class='cmbx-10x-x-109'>.</span>  </span>The internally studentised residual is
+                                           \[r_i=\frac {\widehat {e}_i}{s\sqrt {1-h_{ii}}},\qquad s^2=MSE,\]
+ and the externally studentised (or deleted) residual is
+                                                                                      
+                                                                                      
+                                           \[t_i=\frac {\widehat {e}_i}{s_{(i)}\sqrt {1-h_{ii}}},\]
+ where \(s_{(i)}\) is computed from the fit with observation \(i\) omitted.
+</p>
+</div>
+<!-- l. 4290 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-note'>
+<!-- l. 4292 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>The distinction matters. A genuine outlier inflates \(s\), so it inflates its own denominator
+and disguises itself — \(r_i\) can never exceed \(\sqrt {n-k}\) no matter how aberrant the point. In \(t_i\) the offending
+observation is excluded from the scale estimate, so it cannot mask itself, and under the model \(t_i\sim t_{n-k-1}\)
+exactly, which makes a formal test possible. When the two disagree, trust \(t_i\).
+</p>
+</div>
+<!-- l. 4299 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-definition'>
+<!-- l. 4301 --><p class='noindent'><span class='head'>
+<a id='x39-48004r4'></a>
+<span class='cmbx-10x-x-109'>Definition 4.8.4 </span>(Cook’s distance)<span class='cmbx-10x-x-109'>.</span>  </span>
+                                           \[D_i=\frac {\left (\widehat {\underline {B}}-\widehat {\underline {B}}_{(i)}\right )^t X^tX\left (\widehat {\underline {B}}-\widehat {\underline {B}}_{(i)}\right )}{k\,s^2} =\frac {r_i^{2}}{k}\cdot \frac {h_{ii}}{1-h_{ii}},\]
+ where \(\widehat {\underline {B}}_{(i)}\) is the coefficient vector fitted without observation \(i\).
+</p>
+</div>
+<!-- l. 4307 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-note'>
+                                                                                      
+                                                                                      
+<!-- l. 4309 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>The second expression is the one to remember, because it displays influence as a product
+of the two separate things: \(r_i^2\) measures how badly the point is fitted, and \(h_{ii}/(1-h_{ii})\) measures how extreme
+it is in the predictors. Influence requires <span class='cmti-10x-x-109'>both</span>. A wild \(Y\) at the centre of the design has a large
+\(r_i\) but tiny leverage and moves nothing; a point far out in \(X\) that happens to lie on the true line
+has large leverage and a small residual and also moves nothing. It is the combination that is
+dangerous.
+</p><!-- l. 4318 --><p class='noindent'>Values of \(D_i\) above \(1\) are usually worth investigating, though the comparison to make is between
+the \(D_i\) of a given data set rather than against any fixed threshold.
+</p>
+</div>
+<!-- l. 4321 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-note'>
+<!-- l. 4323 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note </span>(What to do about it)<span class='cmbx-10x-x-109'>.</span>  </span>Finding an influential observation is not grounds for deleting it.
+The question to ask is why it is influential. If the record is a transcription error, correct it. If it
+is a genuine observation from a different regime, the model is wrong over the range that includes
+it, and that is a finding to report, not a point to discard. If it is genuine and in range, it stays
+— and the honest report gives the fit with and without it, so the reader can see how much of
+the conclusion rests on one row of the data.
+</p>
+</div>
+<!-- l. 4331 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 4333 --><div class='crosslinks'><p class='noindent'>[<a href='linear_modelssu30.html'>next</a>] [<a href='linear_modelssu28.html'>prev</a>] [<a href='linear_modelssu28.html#taillinear_modelssu28.html'>prev-tail</a>] [<a href='linear_modelssu29.html'>front</a>] [<a href='linear_modelsse4.html#linear_modelssu29.html'>up</a>] </p></div>
+<!-- l. 4333 --><p class='noindent'><a id='taillinear_modelssu29.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="linear_modelssu28.html">&larr; Previous</a><a class="up" href="linear_modelsse4.html#linear_modelssu29.html">Contents</a><a class="next" href="linear_modelssu30.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="linear-models-design-of-experiments/4-8-leverage-outliers-and-influential-observations" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

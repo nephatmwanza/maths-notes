@@ -557,6 +557,87 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-14 (final) — Written as a book, not transcribed; site-wide conventions settled
+User instruction, and it should govern future work here: **the site is under a month old, so
+fix things now rather than asking** — and, on Linear Algebra, *"I have noticed the rigidity
+on your side to keep things the way I typed them. Present things as a professional writer
+of a book that will be sold."*
+
+That criticism was correct and worth recording precisely. The failure was treating the
+original's formatting as **data to preserve** rather than a draft to edit. Three symptoms:
+
+- **Seven of the nine sections opened cold**, straight into `\begin{defn}` with no
+  orientation. Linear Models already opens each section with prose saying what it is for —
+  the house standard was in front of me and I did not apply it. Nine introductions written.
+- **184 forced line breaks in running prose.** The source used `\\` where a book uses a
+  paragraph. 112 became paragraph breaks, 72 flowed into the sentence they belonged to.
+  This was most of why it read as typed notes.
+- **Section titles shouted** (`PRELIMINARIES`). Ten of twelve courses are Title Case; only
+  the two I had touched were ALL CAPS, because that is how they were typed.
+
+**Rewriting Inner Product Spaces turned up errors that formatting had hidden**, which is the
+argument for editing rather than transcribing:
+- the inner product axiom read $(x,y)=\overline{(x,y)}$ — it is $\overline{(y,x)}$; as
+  written it asserts every inner product is real;
+- the norm was defined as $\sqrt{(x,y)}$ rather than $\sqrt{(x,x)}$;
+- the triangle inequality was typed $||x+y||\leq ||x||+|y||$;
+- orthogonality was defined as "if $\cos\theta$", with nothing after it;
+- and the norm was defined three times in one subsection, before the inner product it
+  depends on. Restructured: dot product first, norm from it, then the general axioms.
+
+**Site-wide conventions settled (all twelve courses rebuilt):**
+- **Spelling unified to `-ise`** — 182 conversions. On genuine variants the site already ran
+  311 `-ise` to 182 `-ize`, and `-ise` suits Zambian usage. Guarded against `\normalsize`,
+  `\footnotesize`, `\scriptsize`; all 251 verified intact afterwards.
+- **Practice sections numbered everywhere** — 20 starred headings converted, and the 16
+  `\addcontentsline` lines removed, which would otherwise have double-listed them.
+
+**A wrong claim I made and had to correct.** I said the practice subsections all sat at the
+end of their sections so numbering them would shift nothing. True for Multivariate; **false
+for Linear Models**, where four of seven sit mid-section, so numbering pushed eight later
+subsections up. Checking one course and generalising is exactly the habit that produced the
+other errors in this file.
+
+**13 discussion keys were orphaned and the churn was accepted deliberately**, because no
+page has comments yet and the site is under a month old — the cheapest moment this will ever
+be. Causes worth knowing for next time:
+1. **Spelling changes inside section titles move the key** (`randomized-block-design` →
+   `randomised-...`, `generalized-inverse`, `diagonalization` ×2, `utilizing`). A
+   site-wide spelling sweep is not key-neutral.
+2. Numbering a mid-section subsection shifts every later one in that section.
+Capitalisation changes are safe — `slug()` lowercases — which is why the Title Case and
+`Practice Problems` normalisations cost nothing.
+
+**Two more presentation defects the rewrite exposed**, both in Matrices:
+`Definition 2.0.1` — the zero appears whenever a numbered environment sits before the first
+subsection, which looks like a bug to a reader. Two sections had stranded openings; both now
+have a proper first subsection (`Definition and Notation`, `Definition and Examples`). And
+matrix equality was a single paragraph carrying two inline $2\times 2$ matrices; it is now a
+definition with displayed matrices --- and setting it out revealed $B$'s $(2,1)$ entry typed
+as $b_{12}$ instead of $b_{21}$.
+
+**A 9px overflow, and a misdiagnosis worth recording.** After splitting the subsections the
+overflow reported on a different page number, and I read that as it being fixed. It was not:
+the pages had simply renumbered, and the same paragraph was still too wide. The real cause
+was in *Types of Matrices* --- a worked example setting two $2\times 2$ matrices inline in
+one running line ($A=[\dots]$ is symmetric since $A^t=[\dots]=A$). Displayed, it fits.
+The lesson is that a page identifier is not stable across a structural change, so "the
+warning moved" is not evidence that anything was repaired.
+
+That example also exposed a redundancy I had introduced: I gave the symmetric and
+skew-symmetric list items $3\times 3$ examples without noticing a worked Example
+immediately followed doing the same job. The list items now carry the definitions only.
+
+**Verified:** pdflatex clean, no undefined references; all twelve courses build; check-site
+OK at 662 keys, none duplicated; overflow 55 pages, 0.
+
+**Deliberately deferred, with a plan.** Theory of Functions of Complex Variables has **31
+marker-word pseudo-headings** (`\textbf{\textcolor{red}{Example}}` and friends) that should
+be environments — the same defect class as Linear Algebra's 267, and the source of that
+course's numbering warning. It needs `site/tex_env.py` extended to handle the `\textcolor`
+wrapper, and the same end-of-block boundary pass. Rushing it at the end of another task is
+how the swap-script mistake happened; it is next, as its own job.
+
 ### 2026-08-14 (later) — Sidebar bug fixed site-wide; Linear Algebra presentation pass
 User review of the published course. Six points, all fixed, plus one they spotted on the
 catalogue.

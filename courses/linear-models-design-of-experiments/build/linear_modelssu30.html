@@ -1,0 +1,150 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>4.9 Variable Selection — Linear Models and Design of Experiments</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='linear_models.css' rel='stylesheet' type='text/css' /> 
+<meta content='linear_models.tex' name='src' /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Linear Models and Design of Experiments</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="linear_modelsse1.html">Analysis of Variance</a></li>
+<li class="sub"><a class="" href="linear_modelssu1.html">Introduction</a></li>
+<li class="sub"><a class="" href="linear_modelssu2.html">One-Way Analysis of Variance</a></li>
+<li class="sub"><a class="" href="linear_modelssu3.html">The Randomised Block Design</a></li>
+<li class="sub"><a class="" href="linear_modelssu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="linear_modelsse2.html">Random Vectors and Matrices</a></li>
+<li class="sub"><a class="" href="linear_modelssu5.html">Review of Matrix Algebra</a></li>
+<li class="sub"><a class="" href="linear_modelssu6.html">Expectation of Random Vectors and Variance-Covariance</a></li>
+<li class="sub"><a class="" href="linear_modelssu7.html">Derivatives of Linear and Quadratic Forms</a></li>
+<li class="sub"><a class="" href="linear_modelssu8.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="linear_modelssu9.html">Distribution of Quadratic Forms</a></li>
+<li class="sub"><a class="" href="linear_modelssu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="linear_modelsse3.html">Linear Models</a></li>
+<li class="sub"><a class="" href="linear_modelssu11.html">General Linear Model</a></li>
+<li class="sub"><a class="" href="linear_modelssu12.html">Review of Linear Algebra</a></li>
+<li class="sub"><a class="" href="linear_modelssu13.html">Estimation of Parameters in a Linear Model</a></li>
+<li class="sub"><a class="" href="linear_modelssu14.html">Estimability and the Generalised Inverse</a></li>
+<li class="sub"><a class="" href="linear_modelssu15.html">The General Linear Hypothesis</a></li>
+<li class="sub"><a class="" href="linear_modelssu16.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="linear_modelssu17.html">Simultaneous Confidence Intervals and Multiple Comparison</a></li>
+<li class="sub"><a class="" href="linear_modelssu18.html">Two-Factor Studies</a></li>
+<li class="sub"><a class="" href="linear_modelssu19.html">Three-Way Analysis Of Variance</a></li>
+<li class="sub"><a class="" href="linear_modelssu20.html">Latin Square Design</a></li>
+<li class="sub"><a class="" href="linear_modelssu21.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="linear_modelsse4.html">Multiple Regression</a></li>
+<li class="sub"><a class="" href="linear_modelssu22.html">Introduction</a></li>
+<li class="sub"><a class="" href="linear_modelssu23.html">Multiple Linear Regression Model With Two Independent (Regressor) Variables</a></li>
+<li class="sub"><a class="" href="linear_modelssu24.html">General Multiple Line Regression</a></li>
+<li class="sub"><a class="" href="linear_modelssu25.html">Meaning of the Coefficients</a></li>
+<li class="sub"><a class="" href="linear_modelssu26.html">Multicollinearity</a></li>
+<li class="sub"><a class="" href="linear_modelssu27.html">Examination of Residuals(errors)</a></li>
+<li class="sub"><a class="" href="linear_modelssu28.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="linear_modelssu29.html">Leverage, Outliers and Influential Observations</a></li>
+<li class="sub"><a class="current" href="linear_modelssu30.html">Variable Selection</a></li>
+<li class="sub"><a class="" href="linear_modelssu31.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="linear_modelssu32.html">Hazards in the use of Regression</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 4333 --><div class='crosslinks'><p class='noindent'>[<a href='linear_modelssu31.html'>next</a>] [<a href='linear_modelssu29.html'>prev</a>] [<a href='linear_modelssu29.html#taillinear_modelssu29.html'>prev-tail</a>] [<a href='#taillinear_modelssu30.html'>tail</a>] [<a href='linear_modelsse4.html#linear_modelssu30.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>4.9   </span> <a id='x40-490004.9'></a>Variable Selection</h4>
+<!-- l. 4335 --><p class='noindent'>Section 4.4 showed that \(R^2\) can never decrease when a variable is added, which makes it useless for
+choosing between models of different size. Section 4.5 showed that keeping variables that
+carry the same information produces unstable coefficients. Between them these two facts
+create the selection problem: which subset of the available regressors should the final model
+contain?
+</p>
+<div class='newtheorem nt-definition'>
+<!-- l. 4342 --><p class='noindent'><span class='head'>
+<a id='x40-49001r1'></a>
+<span class='cmbx-10x-x-109'>Definition 4.9.1 </span>(Criteria for comparing subsets)<span class='cmbx-10x-x-109'>.</span>  </span>For a model with \(p\) parameters fitted to \(n\)
+observations: </p>
+     <ul class='itemize1'>
+     <li class='itemize'>Adjusted coefficient of determination \(R^2_a=1-\dfrac {SSE/(n-p)}{SST/(n-1)}\), which is maximised by the better model;
+     </li>
+     <li class='itemize'>Mallows’ statistic \(C_p=\dfrac {SSE_p}{s^{2}_{\text {full}}}-\left (n-2p\right )\), where \(s^2_{\text {full}}\) is the mean square error of the full model;
+     </li>
+     <li class='itemize'>Akaike’s criterion \(AIC=n\ln \left (SSE_p/n\right )+2p\) and the Bayesian criterion \(BIC=n\ln \left (SSE_p/n\right )+p\ln n\), both minimised by the better model.</li></ul>
+</div>
+<!-- l. 4355 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-note'>
+<!-- l. 4357 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>All four penalise size, and they differ only in how heavily. \(C_p\) has a useful reading: if the
+                                                                                      
+                                                                                      
+model contains all the variables that matter, then \(E\left (C_p\right )\approx p\), so subsets are plotted against \(p\) and those
+falling near the line \(C_p=p\) are the candidates. \(BIC\) penalises more heavily than \(AIC\) whenever \(\ln n&gt;2\), that is for \(n\geq 8\),
+so it selects smaller models; and \(R^2_a\) penalises least of the four, so it tends to keep variables the
+others drop.
+</p>
+</div>
+<!-- l. 4365 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-definition'>
+<!-- l. 4367 --><p class='noindent'><span class='head'>
+<a id='x40-49002r2'></a>
+<span class='cmbx-10x-x-109'>Definition 4.9.2 </span>(Stepwise procedures)<span class='cmbx-10x-x-109'>.</span>  </span></p>
+     <ul class='itemize1'>
+     <li class='itemize'><span class='cmti-10x-x-109'>Forward selection </span>starts from the model with only an intercept and at each step adds
+     the variable with the largest partial \(F\), stopping when no candidate exceeds a chosen entry
+     threshold.
+     </li>
+     <li class='itemize'><span class='cmti-10x-x-109'>Backward elimination </span>starts from the full model and at each step removes the variable with
+     the smallest partial \(F\), stopping when every survivor exceeds a chosen removal threshold.
+     </li>
+     <li class='itemize'><span class='cmti-10x-x-109'>Stepwise  regression  </span>is  forward  selection  which,  after  each  addition,  reconsiders  every
+     variable already present for removal.</li></ul>
+</div>
+<!-- l. 4378 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-note'>
+<!-- l. 4380 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>Stepwise regression reconsiders because forward selection alone cannot undo its own
+mistakes: a variable admitted early may be made redundant by a later pair, and without a
+removal step it stays in the model for good.
+</p>
+</div>
+                                                                                      
+                                                                                      
+<!-- l. 4384 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-note'>
+<!-- l. 4386 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note </span>(The hazard)<span class='cmbx-10x-x-109'>.</span>  </span>The partial \(F\) at each step is compared with an \(F\) table, but the variable
+being tested was chosen <span class='cmti-10x-x-109'>because </span>it had the largest such statistic. Its distribution under the null
+is therefore not the \(F\) distribution, and the \(p\)-values reported by a stepwise procedure are too small
+— often by a great deal. With enough candidate regressors and pure noise for a response, a
+stepwise search will return a model of apparently significant variables and a respectable \(R^2\).
+</p><!-- l. 4395 --><p class='noindent'>Three consequences follow. Selection is exploratory, and the model it returns is a hypothesis
+rather than a result. The \(F\) and \(t\) statistics printed for the selected model do not have their nominal
+distributions and should not be quoted as though they do. And a model chosen this way should
+be assessed on data not used to choose it — by splitting the sample, or by cross-validation —
+because that is the only assessment the selection cannot corrupt.
+</p>
+</div>
+<!-- l. 4402 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-note'>
+<!-- l. 4404 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>Selection is also not a remedy for the multicollinearity of Section 4.5, though it is often
+used as one. Dropping one of two collinear regressors does stabilise the coefficients, but which
+of the two gets dropped is close to arbitrary — decided by noise — and the surviving coefficient
+must then be read as carrying the effect of both. If the aim is prediction this is harmless; if the
+aim is to interpret an individual coefficient it is not.
+</p>
+</div>
+<!-- l. 4411 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 4413 --><div class='crosslinks'><p class='noindent'>[<a href='linear_modelssu31.html'>next</a>] [<a href='linear_modelssu29.html'>prev</a>] [<a href='linear_modelssu29.html#taillinear_modelssu29.html'>prev-tail</a>] [<a href='linear_modelssu30.html'>front</a>] [<a href='linear_modelsse4.html#linear_modelssu30.html'>up</a>] </p></div>
+<!-- l. 4413 --><p class='noindent'><a id='taillinear_modelssu30.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="linear_modelssu29.html">&larr; Previous</a><a class="up" href="linear_modelsse4.html#linear_modelssu30.html">Contents</a><a class="next" href="linear_modelssu31.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="linear-models-design-of-experiments/4-9-variable-selection" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
