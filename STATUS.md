@@ -557,6 +557,119 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-14 — Linear Algebra: all nine sections finished (12th course)
+Source at `courses/linear-algebra/`, building clean through the whole pipeline: 53 pages,
+4 diagrams, no warnings, no stray markers, no missing diagrams. 116 PDF pages from a
+73-page original. **All 25 results that were stated without proof now have one, and all
+nine sections have practice problems: 64 problems, every one with a full worked solution**
+(verified in the built HTML as 64 `nt-problem` blocks and 64 collapsed `<details>`).
+
+**The converter is now in the repo, not a session scratchpad.** `site/tex_env.py` — note
+`site/`, not `scratch/`, because **`scratch/` is in `.gitignore`**: putting it there would
+have lost it exactly the way `lm_env.py` was lost. The
+Linear Models one (`lm_env.py`) was lost with its scratchpad and had to be rewritten —
+this one is committed so the next old-source course does not pay that cost a third time.
+It converted 267 bold pseudo-headings. Its safety property is the assertion that every
+`\section`/`\subsection` is reached at neutral brace/math/environment state; that assertion
+is what catches tracker drift, because sectioning commands are unambiguously top-level.
+
+**What the converter cannot know, and what it cost.** A heading says where a result
+*starts*; nothing in the source says where it *ends*. Closing at "just before the next
+heading" swallows any transitional sentence sitting at the end of a block — "The next
+theorem provides some of the properties of the sets." ends up *inside* the example above
+it. 18 of these. Detected by listing every environment's last non-blank prose line
+(34 candidates, 18 real) rather than by reading 4,500 lines. Budget for this pass on the
+next such course; it is not optional, and it is invisible in a compile.
+
+**Two process failures worth not repeating:**
+- A move-a-line-out-of-an-environment script that did `del` then `insert` with an index
+  computed *before* the delete duplicated the `\end` and dropped the prose, in 17 places
+  at once. Caught only by reading the result. Rebuilt from a pre-conversion backup —
+  which is the reason to keep one.
+- `\end{document}` is not a heading and not a sectioning command, so the *last* environment
+  in the file closed after it. LaTeX reports this as "`\begin{proof}` ended by
+  `\end{document}`", which reads like an unbalanced brace somewhere in 4,500 lines.
+  The converter now treats it as a stop.
+
+**The source is in worse shape than the survey suggested, and the errors are mathematical,
+not cosmetic.** Found and fixed in Section 1 alone:
+- Theorem 1.1.11(iv) was **never proved** — the PDF has `\vspace{4cm}` and the label "iv."
+  where the proof should be. 13 such handwriting gaps across the document, all removed.
+- A dropped `Z`: `x\in (X\cup Y)\cup \iff \dots` in the associativity proof.
+- The partition definition read `$x_i\cap y_i=\emptyset$ for $i\neq j$` — wrong set, wrong
+  index. Its example `{{1,2},{3,4},{5,6},{7,6},{9,10}}` is **not a partition**: `{7,6}`
+  should be `{7,8}`, so 6 repeats and 8 is missing.
+- Equivalence classes were written `[X]` (the class of the *set*) throughout, including in
+  the proof that they partition $X$, which made that proof incoherent — it ended by
+  deriving `[X]=[Y]` and calling it a contradiction. Rewritten.
+- "f is surjective if $f(x)=Y$" — should be $f(X)=Y$.
+- Composition written `gof` and `fog` throughout, which renders as the letters g-o-f.
+- The existence of an inverse function was tagged **Definition** and then given a proof.
+- Two parts of the image/inverse-image theorem were `\item Exercise`.
+
+**19 hand-written cross-references ("by theorem 4.1.3") were all silently wrong** once
+LaTeX took over the numbering, because the source's own numbering has gaps (it skips
+4.1.7–4.1.8) and errors (an example in section 2 numbered 1.2.1). Resolved by pairing the
+pre-conversion headings with the converted environments by position, labelling the 14
+targets, and rewriting the references to `\ref`. One reference — "From Proposition,
+range$T=\dim A-\dim$ null$T$" — pointed at **nothing**: it is the rank–nullity theorem,
+which the source uses but never states.
+
+**Section 1 is finished:** every result proved, rank–nullity stated and proved properly
+(with the basis-extension argument written out), and **8 practice problems with full
+worked solutions** — the first practice problems in this course, drawn from the user's own
+Tutorial Sheet 1. One of them is built on the fact that the tutorial sheet's own question
+6(c), `f(A^c)=(f(A))^c`, is **false as stated**; the problem asks for the counterexample
+and the condition under which it holds.
+
+**Everything the user asked for is done.** Their four requests were: make the examples and
+statements followable, present it professionally, solutions to all practice problems, and
+add whatever is missing. Against those:
+
+- **Missing mathematics added.** Rank–nullity (used by the source but never stated), the
+  exchange lemma, row rank = column rank, the adjoint formula for the inverse, Cramer's
+  rule, the change-of-basis theorem, `M(L∘T)=M(L)M(T)`, the spectral theorem by induction,
+  and a real proof of **Cayley–Hamilton** via the adjoint — not the `det(A−A)=0`
+  non-argument, which the text now explicitly warns against.
+- **Practice problems** drawn from the user's own Tutorial Sheets 1–10 and tests. Several
+  are built on defects in the sheets themselves: Sheet 1 Q6(c) (`f(Aᶜ)=(f(A))ᶜ`) is false
+  as stated, and the problem now asks for the counterexample and the condition under which
+  it holds.
+- **One diagram written**, in the house projection style, for `V = A ⊕ A^⊥`; it is also the
+  catalogue thumbnail. The course had only 3 figures and none suited a card.
+
+**Numerical verification, per the standing rule.** Every number touched was recomputed
+(sympy/exact fractions), which caught three errors *in work written this session* before it
+shipped: a transition matrix `P` whose (3,1) entry was wrong, a quoted determinant of −51
+that is 69, and an elementary-operation sequence missing its scaling step. It also caught a
+pre-existing one: the worked inverse example's stated matrix has (3,3) = 1 where the
+working uses −1 — **the printed answer is correct for a different matrix than the one
+printed**, plus a row operation labelled `r₁→r₁+r₃` that is actually `r₁→r₁+r₂`.
+
+**More source defects found and fixed beyond Section 1** (all invisible in the PDF's
+appearance, all wrong):
+- Three of the six cofactor expansions were **left blank** (`\item $\det A=$`), and the
+  first had the *same* minor for `a₁₂` and `a₁₃`. All six now written out and verified
+  symbolically against `sympy`.
+- Cramer's rule denominator for `z` had `a₃₂` where it needs `a₃₃`.
+- Normal-form theorem said "`m` by `m`" for a rectangular matrix and `PQA=N` for `PAQ=N`.
+- Diagonalization criterion said a matrix is diagonalizable iff its **eigenvalues** form a
+  basis (eigenvectors), and "diagonalizable **it it** has `n` distinct eigenvalues".
+- The orthogonal-complement proof paired vectors with `0` instead of an arbitrary `a ∈ A`.
+- Sum/index errors: `Σⱼaᵢⱼxᵢ`, `Σᵢrᵢⱼxⱼ`, `b_j` for `b_i`, "has a non-trivial solution and
+  only if".
+- `\subsection{Cayley-Hamiton}` → Cayley-Hamilton, fixed **before** the first build because
+  the title becomes the page slug and fixing it later orphans the discussion thread.
+
+**Still open (not blocking publication):**
+- Not committed and not deployed at the time of writing — see whether the catalogue card
+  and `STATUS.md` went out together.
+- The remaining ~290 small `\hspace{0.3cm}` word-spacers inside math are crude but render
+  correctly; they were left alone except where a block was being rewritten anyway.
+
+**Checked and clean:** none of the MathJax-only failure modes from the last session are
+present — no `polynom` macros, no `\qedhere`, no side-by-side `tabular`s.
+
 ### 2026-08-13/14 — Foundation courses corrected; Linear Algebra surveyed, NOT started
 Two deploys, both green. Foundation Mathematics and Foundation Maths (Social Sciences)
 reworked across the sections the user named; Linear Models published earlier the same
@@ -595,12 +708,15 @@ build error much later. Write after each swap.
 
 ---
 
-## NEXT: Linear Algebra — surveyed, not begun
+## DONE: Linear Algebra — completed 2026-08-14 (12th course)
 
 User asked to start it and explicitly asked for full attention: change the examples and
 statements so learners can follow, present it professionally, **solutions to all practice
-problems**, and add whatever is missing — theorems, lemmas, everything. Deferred to a
-fresh session by agreement; this survey is the handover.
+problems**, and add whatever is missing — theorems, lemmas, everything.
+
+**Status: see the 2026-08-14 log entry.** All nine sections are finished. The survey below
+is the original handover and was accurate on every point it checked; what it did not
+anticipate is how many *mathematical* errors the source carries (see the log).
 
 **Source:** `/home/corban/LaTeX_Projects/LINEAR ALGEBRA/LINEAR ALGEBRA.tex`
 — 4,563 lines, 73 PDF pages, dated Feb 2020.
