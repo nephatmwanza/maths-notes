@@ -557,6 +557,61 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-14 (later) — Sidebar bug fixed site-wide; Linear Algebra presentation pass
+User review of the published course. Six points, all fixed, plus one they spotted on the
+catalogue.
+
+**The sidebar bug was real and site-wide, not a Linear Algebra quirk.** A starred heading
+— `\subsection*{Practice Problems}` — is unnumbered, so tex4ht gives it an `li` page rather
+than `su`, and `read_toc()` in `site/build.py` matched only `ch|se|su`. Every such page was
+dropped from the sidebar: reachable by next/prev alone, invisible where a reader actually
+looks. Fixed by matching `li` too and classifying it as a subsection.
+
+**But the fix has two halves, and the second is per-course.** A starred heading also never
+reaches the `.toc` at all unless the source says `\addcontentsline`. Linear Algebra had it;
+**Linear Models did not**, so after the builder fix its sidebar was still missing all seven
+practice pages. Added `\addcontentsline` to its seven headings. The other ten courses use
+*numbered* `\subsection{Practice problems}`, which was never affected — worth knowing before
+assuming a sidebar fix is global.
+
+All twelve courses rebuilt. The diff is **purely additive**: 778 `Practice Problems`, 205
+`References` and 53 `Further reading` sidebar entries gained across the site, and **nothing
+removed**. Seven courses rebuilt byte-identical, which is the useful confirmation that the
+pipeline is deterministic and the change did not disturb them.
+
+**Presentation pass on Linear Algebra**, all from the user's list:
+- **Ellipses.** 108 hand-typed dot runs replaced: `\cdots` between operators and in matrix
+  rows, `\dots` in lists, `\vdots`/`\ddots` for vertical and diagonal. Rows of lone
+  periods standing in for a vertical ellipsis collapsed to one `\vdots` row. **Six of those
+  runs were not ellipses at all** — they were leader dots pushing an equation label `(1)`
+  to the right margin, now `\qquad(1)`. Convert those first, or they silently become
+  `\dots` and read as an omission.
+- **Seven definitions were loose prose**, including linear transformation itself. Wrapping
+  them turned up two errors: the $n$ by $n$ determinant summed `a_{ij}` where it must be
+  `a_{1j}`, and the "back shift operator" example was written as the identity map.
+- **Sets split from the number sets.** Definition 1.1.1 is the definition of a set alone;
+  the five number sets now form their own block, each stated in terms of what it *adds* —
+  ℤ free subtraction, ℚ division, ℝ the irrationals, ℂ roots of negatives. The user's point
+  was that learners cannot tell them apart, so the contrast is the content.
+- **Two set-operations definitions merged into one** with all four operations, followed by
+  a single example computing all four on the same two sets, ending with a self-check.
+- Mid-sentence line breaks removed (a `\\` before "Then" put it on its own line); nine more
+  of the same fault elsewhere, plus `Thus ,`, spaces before punctuation, 17 bare `i.e`.
+
+**The catalogue thumbnail was a near-copy of Linear Models'** — because the projection
+figure in Section 7 was built from the Linear Models template, so the two cards looked
+copy-pasted. Swapped the card to the conic-sections figure (the tilted ellipse with its
+rotated axes), which is unmistakably this course. The body figure stays: the shared house
+diagram style is deliberate, it was only the thumbnail collision that was wrong.
+
+**Verified:** pdflatex clean, no undefined references; 53 pages, 4 diagrams; `check-site.py`
+OK at 641 keys, none orphaned, none duplicated; overflow check 53 pages, 0 with overflow.
+
+**Pre-existing, not fixed, not mine:** the rebuild surfaced a warning in
+`complex_variablessu58.html` — a bold `Example` that is not an environment, so it gets no
+label or number and every later example on that page is misnumbered. It predates this work;
+flagged rather than silently changed.
+
 ### 2026-08-14 — Linear Algebra: all nine sections finished (12th course)
 Source at `courses/linear-algebra/`, building clean through the whole pipeline: 53 pages,
 4 diagrams, no warnings, no stray markers, no missing diagrams. 116 PDF pages from a

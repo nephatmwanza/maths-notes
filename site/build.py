@@ -224,18 +224,28 @@ def read_toc(build: Path) -> list[dict]:
     # pattern anchored on '>([^<]+)' matches nothing and the entry vanishes.
     # That silently dropped all eight chapter headings from the non-parametric
     # sidebar, leaving one flat list of fifty-one subsections and no outline.
+    # `li` pages matter as much as the rest. A starred heading - the
+    # `\subsection*{Practice Problems}` every course ends its sections with -
+    # is unnumbered, so tex4ht gives it an `li` page rather than `su`. Matching
+    # only ch/se/su dropped every one of them: nine pages of worked problems
+    # per course, reachable by next/prev alone and invisible in the sidebar,
+    # which is exactly where a reader looks for them.
     for m in re.finditer(
-        r"href=['\"]([^'\"]*?(?:ch|se|su)\d+\.html)#[^'\"]*['\"]\s*>(.*?)</a>",
+        r"href=['\"]([^'\"]*?(?:ch|se|su|li)\d+\.html)#[^'\"]*['\"]\s*>(.*?)</a>",
         html, re.S
     ):
         href = m.group(1)
         label = unescape(re.sub(r"<[^>]+>", "", m.group(2))).strip()
         if not label:
             continue
+        # The contents page lists itself. In the sidebar that is a link back to
+        # the page the sidebar is already on, so it is noise.
+        if label.lower() in ("contents", "table of contents"):
+            continue
         stem = Path(href).stem
         if re.search(r"ch\d+$", stem):
             kind = "ch"
-        elif re.search(r"su\d+$", stem):
+        elif re.search(r"(su|li)\d+$", stem):
             kind = "sub"
         else:
             kind = "sec"
