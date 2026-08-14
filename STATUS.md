@@ -661,9 +661,18 @@ appearance, all wrong):
 - `\subsection{Cayley-Hamiton}` → Cayley-Hamilton, fixed **before** the first build because
   the title becomes the page slug and fixing it later orphans the discussion thread.
 
-**Still open (not blocking publication):**
-- Not committed and not deployed at the time of writing — see whether the catalogue card
-  and `STATUS.md` went out together.
+**Deployed and verified live.** Commit `b071d48`, pushed to `main`, Pages deploy green.
+Confirmed by fetching `wjmaths.com` directly, not by trusting the run: the contents page,
+a practice page (8 collapsed solutions), the rank–nullity page, the conic-sections page,
+the projection thumbnail SVG, and the catalogue card link all return 200 with the expected
+content. Site is now **12 courses available, 5 in preparation**.
+
+**Still open (small, not blocking):**
+- **All nine practice pages share the `<title>` "Practice Problems — Linear Algebra"**, so
+  they are indistinguishable in tabs, bookmarks and search results. This is **site-wide,
+  not specific to this course** — Linear Models has the same pattern. Fixing it properly
+  means changing the convention across all twelve courses and renaming discussion keys, so
+  it was deliberately left alone. Worth a decision at some point.
 - The remaining ~290 small `\hspace{0.3cm}` word-spacers inside math are crude but render
   correctly; they were left alone except where a block was being rewritten anyway.
 
