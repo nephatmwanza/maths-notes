@@ -557,6 +557,78 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-15 — Complex Variables: converted, solved and proved; the converter hardened twice
+User instruction: turn the exercises into worked examples and solve them, prove the
+theorems and lemmas left unproved, add practice problems where sections have none, and fix
+the `\ointctrclockwise` showing in red.
+
+**The red macro, and why the previous fix could never have worked.** An earlier session
+"fixed" it with `\renewcommand{\ointctrclockwise}{\oint}` in the preamble, reasoning that
+redefining once beats editing call sites. That fixes the PDF and nothing else: **in
+`mathjax` build mode tex4ht copies formula contents through verbatim for the browser to
+typeset, so author macros are never expanded.** The call sites themselves had to change.
+The failed reasoning is now recorded in the preamble so it is not retried.
+
+**The converter was wrong twice, and both faults were silent.**
+1. `SECTIONING_RE` was anchored to the start of a line. **Every one of this course's 82
+   sectioning commands is wrapped as `{\color[wave]{485}\section{...}}`**, so the pattern
+   matched none of them: the safety assertion never fired, and no section acted as a stop.
+   A conversion under that pattern put a `\section` *inside* a `proof`.
+2. Blocks stopped only at *marker* words. This course uses bold for ordinary subheadings
+   too ("Laurent Series", "Poles"), so **eight environments over-ran** — one reached 200
+   lines and swallowed a heading, its prose and its displays; another nested an `example`
+   inside an `enumerate` and orphaned an `\item`. **It compiled cleanly**, which is exactly
+   why the output had to be checked rather than trusted.
+
+Both fixed: the sectioning pattern is unanchored and searched, and any standalone bold line
+is now a stop. On the rerun the tool converted 26 and **declined the three cases that had
+produced the mangling** rather than emitting broken output — the refusal is the feature.
+Verified afterwards: zero environments swallow a heading or a section.
+
+`tex_env.py` also gained `env_map_from_source()`, which reads each document's own
+`\newtheorem` declarations. Courses disagree on names — Linear Algebra's `exa` is Complex
+Variables' `example` — and hard-coding either emits an undefined environment that only
+fails at the far end of a ten-minute build.
+
+**Content written this pass:**
+- **All 16 exercises are now worked examples with full solutions.** Every numerical answer
+  verified independently (sympy/mpmath): the four trigonometric contour integrals, the
+  Rouché zero count, the residue computations, the Laurent expansions.
+- **All 27 unproved results now have proofs** — 77 proofs in the course. Including
+  Heine--Borel, the Cauchy--Riemann equations in both directions, the Cauchy integral
+  formula, Green's theorem, the Laurent expansion, the identity theorem, and the existence
+  of a single-valued logarithm on a simply connected domain.
+- **Four empty environments** (`\begin{thm}\end{thm}`) repaired: a bold heading sitting
+  immediately before a subsection produced them, with the real statement stranded as loose
+  prose after the heading.
+- **A blank 4cm proof gap** for the Maximum Modulus Principle — the same handwriting-gap
+  pattern as Linear Algebra — now proved via the mean value property.
+- **Practice Problems added** to the two content sections that had none.
+- Typo fixed in the identity theorem: `f(z) = G(z)` for `g(z)`.
+
+**Three more structural faults surfaced while clearing the last warnings**, all pre-dating
+this work and all invisible in the PDF:
+- `\textbf{\textcolor{teal}{Theorem\subsubsection{ Mapping Derived from Cross-Ratio}}}` —
+  a sectioning command nested inside a bold colour group, with unbalanced braces.
+- An `Example` heading missing a closing brace, run together with its bracketed title.
+- The exponential-function properties: the theorem closed *before* the list of properties it
+  states, a proof straddled an `\item`, and the worked example's `\end{enumerate}` sat
+  inside a `solution`. That block was rebuilt.
+- An author placeholder reading **"Proof: Research"** where Green's theorem's proof belonged
+  — now superseded by the written proof.
+
+**A mistake of mine worth recording.** Clearing the leftover markers, I wrote a loop that
+searched for the same marker string twice without advancing the search position, so two
+insertions were duplicated and the build broke. The fix is trivial; the lesson is that
+`find()` without an offset inside a loop silently returns the same match, and the damage
+only shows at compile time. Since then every batch edit here is verified with a full
+begin/end nesting check *before* a twenty-minute build is started, not after.
+
+**Verified:** pdflatex clean, no undefined references; **zero marker-word warnings** (down
+from six); 85 pages, 64 diagrams; nesting check clean; 161 problems each with a collapsed
+solution; no `ointctrclockwise` and no MathJax error markers in the built HTML;
+check-site OK at 665 keys with **none lost**.
+
 ### 2026-08-14 (final) — Written as a book, not transcribed; site-wide conventions settled
 User instruction, and it should govern future work here: **the site is under a month old, so
 fix things now rather than asking** — and, on Linear Algebra, *"I have noticed the rigidity

@@ -64,6 +64,10 @@ ENVS = {
     "Proof": "proof",
     "Solution": "solution",
     "Solutions": "solution",
+    # Complex Variables declares \newtheorem{exe}{Exercise}; the default is
+    # only a fallback, since env_map_from_source() reads the real name.
+    "Exercise": "exe",
+    "Exercises": "exe",
 }
 
 # Environments that take no optional title and are not numbered.
@@ -72,26 +76,86 @@ UNTITLED = {"proof", "solution"}
 # A heading line: nothing but \textbf{Word ...} and optional trailing \\ or \\\\.
 # The number is matched so it can be thrown away; a parenthetical name is
 # captured so it can become the optional argument of the environment.
+#
+# Two shapes occur across the sources and both are accepted:
+#
+#     \textbf{Definition 2.3.1}                 -- Linear Algebra, Linear Models
+#     \textbf{\textcolor{red}{Example}}         -- Complex Variables
+#
+# The colour is discarded: it was carrying the meaning that the environment
+# will carry properly once converted, and a red word is not a heading to a
+# screen reader. A trailing colon is allowed and dropped, since
+# `\textbf{\textcolor{blue}{Note:}}` and `\textbf{Note}` mean the same thing.
 HEADING_RE = re.compile(
     r"""^\s*\\textbf\{\s*
+        (?:\\textcolor\{[A-Za-z!0-9]+\}\{\s*)?   # optional colour wrapper
         (?P<word>[A-Za-z]+)          # Definition, Theorem, Proof, ...
         \s*
         (?P<num>[\d.]*)              # 2.3.1  -- discarded
-        \s*
+        \s*:?\s*
         (?:\((?P<title>[^()]*)\))?   # (De Morgan's theorem) -- kept
+        \s*:?\s*
+        \}?                          # closes the colour wrapper, if present
         \s*\}
+        \s*:?                        # a colon written outside the braces
         (?P<tail>(?:\s*\\\\)*)       # trailing \\ or \\\\
         \s*$""",
     re.VERBOSE,
 )
 
-SECTIONING_RE = re.compile(r"^\s*\\(?:sub)*section\*?\{")
+NEWTHEOREM_RE = re.compile(
+    r"\\newtheorem\*?\{(?P<env>[A-Za-z]+)\}(?:\[[A-Za-z]+\])?\{(?P<label>[^}]+)\}")
+
+
+def env_map_from_source(text):
+    """Map marker words to the environment names *this document* declares.
+
+    The courses do not agree on names: Linear Algebra calls it `exa`, Complex
+    Variables calls it `example`, and one of them also has `exe`. Hard-coding
+    either produces \\begin{exa} in a document where only `example` exists,
+    which fails at the far end of a ten-minute build.
+
+    So the mapping is read from the file's own \\newtheorem declarations, whose
+    second argument is the word actually printed. Anything the document does
+    not declare falls back to the defaults, and `proof` is always available
+    from amsthm.
+    """
+    declared = {}
+    for m in NEWTHEOREM_RE.finditer(text):
+        declared[m.group("label").strip().lower()] = m.group("env")
+    out = {}
+    for word, default in ENVS.items():
+        key = word.rstrip("s").lower()
+        out[word] = declared.get(key, declared.get(word.lower(), default))
+    out["Proof"] = "proof"            # amsthm's, never redeclared
+    return out
+
+
+# NOT anchored to the start of the line, and that is the whole point. Complex
+# Variables writes every one of its 82 sectioning commands as
+# `{\color[wave]{485}\section{...}}`, so an anchored pattern matched none of
+# them: the assertion below silently never fired, and no section acted as a stop
+# for an environment. A conversion run under that pattern produced a `\section`
+# nested inside a `proof`. Search the whole line.
+SECTIONING_RE = re.compile(r"\\(?:sub)*section\*?\{")
 
 # The last heading in a file has no following heading to stop it, so without
 # this its \end lands after \end{document} and the document is reported as
 # "ended by \end{document}" -- which reads like an unbalanced brace somewhere in
 # 4,500 lines rather than what it is.
 DOC_END_RE = re.compile(r"^\s*\\end\s*\{document\}")
+
+# A line that is nothing but a bold phrase is a heading of SOME kind, even when
+# it is not one of the marker words -- "Properties of Exponential Functions",
+# "Laurent Series", "Poles". It therefore ends whatever block precedes it.
+#
+# Leaving these out is not a cosmetic slip. Complex Variables uses bold for its
+# ordinary subheadings as well as for its Examples, so without this rule a
+# converted Example ran on until the next *marker* word and swallowed entire
+# subsections of exposition -- one block reached 200 lines and absorbed a
+# heading, its prose and its displays.
+BOLD_HEADING_RE = re.compile(
+    r"^\s*\\textbf\{(?:\\textcolor\{[A-Za-z!0-9]+\}\{)?[^{}]*\}?\}\s*(?:\\\\)*\s*$")
 
 # Lines the scanner must not read as content: the preamble defines \subhead
 # with a \textbf inside it, and comments can contain anything.
@@ -210,6 +274,7 @@ def advance(state, line):
 
 def convert(text, path_label="<file>"):
     lines = text.split("\n")
+    envmap = env_map_from_source(text)
 
     # ---- pass 1: structural state at the start of every line ---------------
     # The preamble is skipped: it legitimately contains \textbf inside a macro
@@ -226,7 +291,7 @@ def convert(text, path_label="<file>"):
     problems = []
     for i in range(body_start, len(lines)):
         at[i] = (list(state.envs), state.braces, list(state.math))
-        if SECTIONING_RE.match(lines[i]) and not state.neutral:
+        if SECTIONING_RE.search(lines[i]) and not state.neutral:
             problems.append(
                 f"{path_label}:{i+1}: sectioning command reached at non-neutral "
                 f"state ({state.describe()}) -- the scanner has drifted, or the "
@@ -259,7 +324,7 @@ def convert(text, path_label="<file>"):
                 f"inside {envs or 'braces/math'} -- left as bold text."
             )
             continue
-        heads.append((i, ENVS[word], m.group("title")))
+        heads.append((i, envmap[word], m.group("title")))
 
     if not heads:
         return None, problems + ["no headings found"], {}
@@ -273,7 +338,9 @@ def convert(text, path_label="<file>"):
         | {
             i
             for i in range(body_start, len(lines))
-            if SECTIONING_RE.match(lines[i]) or DOC_END_RE.match(lines[i])
+            if SECTIONING_RE.search(lines[i])
+            or DOC_END_RE.match(lines[i])
+            or BOLD_HEADING_RE.match(lines[i])
         }
         | {len(lines)}
     )
