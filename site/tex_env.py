@@ -161,6 +161,18 @@ BOLD_HEADING_RE = re.compile(
 # with a \textbf inside it, and comments can contain anything.
 VERBATIM_ENVS = {"verbatim", "lstlisting"}
 
+# Environments that only affect alignment. A course may wrap its headings in
+# one -- Functional Analysis writes every section as
+#
+#     \begin{center}\section{...}\end{center}
+#
+# -- and being inside one says nothing about whether the document is
+# structurally at top level. Counting them made the drift assertion fire on all
+# five sections of a perfectly balanced file and refuse to convert it. They are
+# transparent for that check only; they still count when deciding where an
+# environment may be closed.
+FORMATTING_ENVS = {"center", "flushleft", "flushright"}
+
 
 class State:
     """Structural state of the file at a line boundary."""
@@ -291,7 +303,10 @@ def convert(text, path_label="<file>"):
     problems = []
     for i in range(body_start, len(lines)):
         at[i] = (list(state.envs), state.braces, list(state.math))
-        if SECTIONING_RE.search(lines[i]) and not state.neutral:
+        structural = [e for e in state.envs if e not in FORMATTING_ENVS]
+        if SECTIONING_RE.search(lines[i]) and (
+            structural or state.braces or state.math
+        ):
             problems.append(
                 f"{path_label}:{i+1}: sectioning command reached at non-neutral "
                 f"state ({state.describe()}) -- the scanner has drifted, or the "

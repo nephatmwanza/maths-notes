@@ -557,6 +557,51 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-15 (later) — Elements of Functional Analysis started (13th course)
+**NOT published; source staged and building clean, content pass under way.** Named
+**Elements of Functional Analysis** and it is an **undergraduate** course — the user was
+explicit that functional analysis proper is postgraduate and this one is not, so the
+catalogue card must not say postgraduate.
+
+**Source:** `ELEMENTS OF FUNCTIONAL ANALYSIS/Functional Analysis.tex`, 2,241 lines, 59
+pages, 2016. Five sections: the $l_p$ spaces, compact metric spaces, complete metric
+spaces, normed linear spaces, inner product spaces. Companion question bank of 790 lines
+and ~298 items — five tutorial sheets, three tests, three quizzes and a final exam, several
+already carrying solutions. The richest problem source any course here has had.
+
+**The converter refused the file outright, and was right to.** Every section is written
+`\begin{center}\section{...}\end{center}`, so the scanner met all five at non-neutral depth
+and reported drift. That was a false positive: `center` is a formatting wrapper and says
+nothing about structural depth. **This is the third distinct way a course wraps its
+headings** — Linear Algebra plain, Complex Variables in `{\color[wave]{485}...}`, this one
+in `center`. `site/tex_env.py` now treats alignment-only environments as transparent to the
+drift assertion while still counting them when deciding where a block may close. Both
+already-converted courses still correctly refuse, so nothing was loosened.
+
+A second, subtler consequence of the same habit: eleven bold *subheadings* were also
+wrapped in `center`, which made eleven conversions land their `\end` inside the wrapper and
+be refused. Converting those subheadings to the house `\subhead` fixed the presentation and
+the conversion in one move.
+
+**Done so far:** 197 headings converted; boundary audit clean (0 nesting errors, 0
+environments swallowing a heading or a section) **run before any build**, which is the
+lesson from Complex Variables. 342 forced line breaks in prose turned into paragraphs — the
+page count fell 64 → 56 as the spurious space came out. 81 dot runs to proper ellipses, 17
+leader-dot equation labels to `\qquad(n)`, 2 vertical period runs to `\vdots`, 22 stray
+trailing breaks removed. Five section introductions written.
+
+**Two `\vspace{4cm}` handwriting gaps, both filled**: an example asking whether the taxicab
+metric is a metric, left blank, now worked in full; and *"a convergent sequence has a unique
+limit"* stated with a blank gap where its proof belonged, now proved.
+
+**The four basic inequalities were list items.** Young's, H\"older's, Cauchy--Schwarz and
+Minkowski's were `\item`s of one `enumerate`, each with its proof inside the item and
+Cauchy--Schwarz given no proof at all. They are now theorems with proofs, Cauchy--Schwarz a
+corollary of H\"older with the $p=q=2$ derivation written out.
+
+**Still to do:** 14 results without proofs; 29 examples with no worked solution; 1 exercise;
+practice problems for all five sections (none at present) drawn from the question bank.
+
 ### 2026-08-15 — Complex Variables: converted, solved and proved; the converter hardened twice
 User instruction: turn the exercises into worked examples and solve them, prove the
 theorems and lemmas left unproved, add practice problems where sections have none, and fix
