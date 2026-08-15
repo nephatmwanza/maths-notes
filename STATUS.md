@@ -557,6 +557,91 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-15 (end of day) — HANDOVER: next job is Analytic Geometry and the Calculus
+
+**Read this first tomorrow.** Elements of Functional Analysis is deployed and verified (entry
+below). Three things carry forward.
+
+#### 1. User feedback received today
+- **"great job."** And, more importantly: **the site is already helping the user's learners,
+  specifically Foundation Mathematics for the Social Sciences.** That course is in real use
+  now, which raises the cost of breaking it.
+- **The course outline is a foundation, not a specification.** Verbatim: *"on the section of
+  compact metric spaces you are free to change or add, remember we are not serving just the
+  outline we have. We are just using it as a foundation."* This settles the open question I
+  left in the entry below — **I may restructure and add content beyond the syllabus wording.**
+  It generalises: syllabus section titles are no longer a reason to leave something wrong.
+- **Keep fixing things now, while the site is young.** Restated again today.
+- The user expects **a whole-site cleanup pass later**, once all courses are online. Things
+  noticed but deferred should be logged rather than silently dropped.
+
+#### 2. Outstanding on Elements of Functional Analysis (first task tomorrow)
+**Section 2 is titled "Compact Metric Spaces" and contains no compactness.** Its subsections
+are Limit of a Sequence, Bounded Sets, Limit and Continuity, Countable Sets, The Cantor Set,
+Partially Ordered Sets — metric-space fundamentals. Compactness actually sits in Section 3
+(3.4 Compact Sets in a Metric Space, plus totally bounded sets at 3.3).
+
+The user has now authorised changing it. Options, in order of preference:
+- **Add the compactness material to Section 2 so the title becomes true** — open covers,
+  finite subcovers, sequential compactness, Heine--Borel, compactness implies closed and
+  bounded, continuous image of a compact set. Then Section 3 keeps completeness proper.
+  This is "add", which is what the user invited, and it fills a genuine gap: the course
+  currently never proves the standard compactness theorems.
+- Or retitle Section 2 to "Metric Spaces" and move 3.3/3.4 into it.
+**Note:** either change moves discussion keys for the affected pages. Section titles are
+slugged, so renaming Section 2 orphans `2-compact-metric-spaces` and every `2-x-*` key.
+Adding subsections without renaming is key-safe for existing pages. Check with
+`site/check-site.py` before committing.
+
+#### 3. The next course: Analytic Geometry and the Calculus
+Surveyed today, **not started**.
+
+**Sources** (all under `/home/corban/LaTeX_Projects/`):
+- `ANALYTIC GEOMETRY AND THE CALCULUS/Analytic Geometry And The Calculus.tex` — 9,527 lines,
+  the authored notes, dated Feb 2020. **This is the conversion source.**
+- Same folder: `MAT2100 Analytic Geometry Lecture Notes 2024-25.pdf` and
+  `MAT 2100 INTEGRATION LECTURE NOTES 2026.pdf` — recent lecture notes, added Aug 2026.
+  Reference/reconciliation material, not conversion input.
+- `Analytic Geometry and Calculus Exam Questions/...tex` — 44 KB question bank, for
+  Practice Problems.
+- Also present: `ADVANCED CALCULUS/` and `Advanced Calculus  Exam Questions/` — a *different*
+  course, do not conflate.
+
+**Provenance the user gave:** these notes came from the person who taught the user, whom the
+user now works alongside. So improvements are welcome but the material is a colleague's;
+treat it as inherited rather than anonymous.
+
+**Section sizes, which show the problem at a glance:**
+
+    Analytic Geometry                                   1516 lines
+    Differential Calculus of Functions of one Variable   2327
+    Integral Calculus of Functions of one Variable       1743
+    Vector Analysis                                      2306
+    Differential Calculus of Several Variables           1310
+    Ordinary Differential Equations                       265   <-- the lost chapter
+
+**The lost differential equations chapter, precisely.** It is not missing, it is
+**truncated**. It has: an introduction (type/order/degree), first-order first-degree form
+`M dx + N dy = 0`, and subsections Separable, Homogeneous, Linear, Exact. It **stops
+mid-topic** — Exact Equations defines the condition dM/dy = dN/dx and the method, gives no
+worked example, and the file goes straight to `\begin{thebibliography}`.
+
+**What has to be written** (taken from the course outline at the end of that same file, so
+this is the author's own intended scope):
+- Bernoulli equations; integrating factors for non-exact equations
+- The general linear equation, homogeneous and non-homogeneous
+- Superposition of solutions
+- GS = CF + PI, complementary function and particular integral
+- Linear equations of order 2 with constant or homogeneous coefficients
+- Variation of parameters
+- Solution by series
+
+That is a full chapter to author, not a repair — budget accordingly, and expect it to be the
+largest single piece of writing in the project so far.
+
+**Also note:** the folder contains `unza.png`, the university crest. Every course here is
+depersonalised on the web (no crest, no author, no year) — strip it as usual.
+
 ### 2026-08-15 (latest) — Functional Analysis finished; a whole class of structural bug found
 
 **DEPLOYED AND VERIFIED LIVE.** Commit `9c01a1c`, pushed to `main`. Site is now
