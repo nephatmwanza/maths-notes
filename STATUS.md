@@ -557,6 +557,103 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-15 (latest) — Functional Analysis finished; a whole class of structural bug found
+
+**Practice Problems now in all five sections** (28 problems, every one worked), the
+remaining unproved results proved, and every assertion-style example given a
+justification. The course compiles at 84 pages with `\begin`/`\end` balanced.
+
+**The find that mattered: thirteen environments in the original were never closed where
+they should have been.** LaTeX did not complain, because the counts happened to balance
+again further down — an `\end{proof}` intended for one lemma silently closed a different
+one. The largest ran 331 lines. The effect on the page is severe and invisible in the
+source: the Banach-space definition and a worked example were being typeset *inside* a
+lemma's proof, and 10 pages of Section 3 sat inside an example. Found by an audit that
+flags any `proof`/`exa`/`thm` containing a later sectioning command or result
+declaration, not by compiling — compiling was clean throughout.
+
+**Lesson, and it generalises to every course already published:** a clean compile says
+nothing about whether environments close where they were meant to. Balanced counts are
+not correct nesting. The audit script is cheap and should be run on the other twelve
+courses before trusting their structure.
+
+**Ordering bug I hit three times in one session:** editing a file by line number requires
+strictly descending order, and a mutation that inserts lines invalidates every number
+below it. I applied a batch in ascending order and it silently deleted a `\begin{defn}`;
+another batch used a pre-mutation slice and duplicated an `\begin{enumerate}`. Each time
+the compile caught it, but only because the damage happened to be syntactic. Fix: compute
+all edits first, apply strictly bottom-up, and re-run the nesting check after every batch.
+
+**Site bug fixed for every future course** — `site/build.py:read_toc` assumed the contents
+page was always `*li1.html`. That holds only when nothing starred precedes
+`\tableofcontents`. This course opens with `\section*{Preface}`, which took the `li1`
+slot, so the sidebar came out empty for the whole course. It now identifies the contents
+page by link density instead of position. Checked: all twelve other courses still resolve
+to `li1`, so their sidebars are unaffected.
+
+**Splitting had to be fixed too.** The original set every subheading as bold text, which I
+had converted to `\subhead` — correct typographically, but `\subhead` is not a sectioning
+command, so make4ht produced 5 enormous section pages (one of 80 kB) and nothing for the
+sidebar. Promoted 15 document-level `\subhead`s to real `\subsection`s and added 9 more at
+natural breaks, giving 24 subsections and a usable outline.
+
+**Mathematical errors corrected in the source** (all verified, none were typographical):
+- `\textbf{Exercise 3.18} Prove that $l_{\infty}$ is separable` — **false**. $l_\infty$ is
+  the standard example of a non-separable space. Rewritten as a worked example proving it
+  is *not* separable, via the uncountable family of $0$--$1$ sequences at mutual distance 1.
+- An example asserted $\big(l^p,(\cdot,\cdot)\big)$ is an inner product space for general
+  $p$. Only $p=2$ works — for $p\neq2$ the series need not converge and the parallelogram
+  law fails. Corrected to $l^2$ and proved.
+- Projection formula had two wrong denominators: `(x,x_1)/||x||^2` should be `||x_1||^2`,
+  and `(x,x_2)/||x_2||` should be squared.
+- Three placeholder proofs (`Search for the proof!`, `(Exercise)`, `you have to do it`) and
+  the Cantor-set asides (`Can you find more?`) replaced with actual arguments. Cantor
+  claims checked with sympy: removed length $=1$, and $1/4=0.020202\ldots_3\in F$.
+
+**A figure was added** — the unit balls of $l_p^2$ for $p=1,2,\infty$ (diamond, disc,
+square) with a legend, placed where the exponent is first introduced. It doubles as the
+catalogue thumbnail, and is visually distinct from the other cards.
+
+**Card added to `site/index.html`**: Analysis · **Fourth year** — undergraduate, as the
+user required, not postgraduate.
+
+**Left alone deliberately:** Section 2 is titled *Compact Metric Spaces* but contains no
+compactness (it is metric-space fundamentals; compactness is in Section 3). That is the
+course outline's wording, not a presentation defect, so I did not silently rename a
+syllabus section. **Worth raising with the user.**
+
+**New tool: `site/check-envs.py`** — the audit above, made reusable. Run it on a source
+before trusting a build:
+
+    python3 site/check-envs.py courses/*/source/*.tex
+
+It flags (a) crossed or unclosed environments and (b) any result environment containing
+another result declaration, which is the signature of a missing closer. It ignores
+`\subhead` (deliberate inside proofs) and strips LaTeX comments — without that it read a
+commented-out `\end{enumerate}` as real and declared Introduction to Statistics broken.
+
+**Run across all thirteen courses it found one more real defect, in an already-published
+one.** Complex Variables had `\begin{note}` closing after `\end{thm}` instead of before it,
+so the radius-of-convergence theorem and a worked geometric-series example were being
+typeset *inside* a Note box. The same block also had `\begin{example}[Geometric series]`
+immediately followed by `\end{example}` — an empty example with its entire working
+stranded outside. Both fixed and the course rebuilt. Introduction to Probability's
+`\subsubsection` step headings inside solutions were checked and are fine: they render as
+unnumbered headings and never reach the sidebar.
+
+**Two more site bugs fixed after seeing the rendered page** — screenshots caught what the
+checks did not:
+- `prev-tail` appeared as the first sidebar entry, above Preface. It is tex4ht's own
+  "previous page" link, which only exists when the contents page is not the first page —
+  so no other course ever showed it. `read_toc` now skips prev/next/up navigation labels.
+- I had written the five Practice Problems headings as `\subsection*` (starred). **Every
+  other course uses the unnumbered-looking but numbered `\subsection`**, which is what
+  gives their practice pages distinct titles like "1.4 Practice Problems — Linear Algebra".
+  Starred left all five FA pages sharing one title. Changed to match the other twelve.
+  Note this also corrects the older STATUS claim that duplicate practice-page titles are
+  site-wide — they are not; Linear Algebra's are already distinct.
+
+
 ### 2026-08-15 (later) — Elements of Functional Analysis started (13th course)
 **NOT published; source staged and building clean, content pass under way.** Named
 **Elements of Functional Analysis** and it is an **undergraduate** course — the user was

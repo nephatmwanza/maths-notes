@@ -201,10 +201,27 @@ def collapse_solutions(html: str) -> str:
 
 def read_toc(build: Path) -> list[dict]:
     """Parse the generated contents page into a flat nav structure."""
-    toc_files = sorted(build.glob("*li1.html"))
-    if not toc_files:
+    # The contents page is an unnumbered heading, so it lands among the `li`
+    # pages - but not necessarily as li1. Anything starred that precedes
+    # \tableofcontents takes that slot first: the functional analysis notes open
+    # with \section*{Preface}, which pushed contents to li2 and left this
+    # function reading the preface, finding no links, and shipping the whole
+    # course with an empty sidebar. Identify the page by what it is rather than
+    # by where it happens to fall, and keep li1 as the fallback.
+    li_pages = sorted(build.glob("*li[0-9]*.html"),
+                      key=lambda p: int(re.search(r"li(\d+)\.html$", p.name).group(1)))
+    if not li_pages:
         return []
-    html = toc_files[0].read_text(encoding="utf-8", errors="replace")
+    # Identified by content, not by title: this runs on raw conversion output,
+    # before the titles are rewritten, so there is no "Contents" to match on.
+    # The contents page is the one densely packed with links to the other split
+    # pages; a preface has none.
+    link_re = re.compile(r"href=['\"][^'\"]*?(?:ch|se|su|li)\d+\.html#")
+    toc_page = max(li_pages,
+                   key=lambda p: (len(link_re.findall(
+                       p.read_text(encoding="utf-8", errors="replace"))),
+                       -li_pages.index(p)))
+    html = toc_page.read_text(encoding="utf-8", errors="replace")
     items = []
     # Which page kinds appear depends on the document class. The probability
     # notes use \chapter, so tex4ht emits chN/seN and subsections stay inside
@@ -241,6 +258,14 @@ def read_toc(build: Path) -> list[dict]:
         # The contents page lists itself. In the sidebar that is a link back to
         # the page the sidebar is already on, so it is noise.
         if label.lower() in ("contents", "table of contents"):
+            continue
+        # tex4ht's own page furniture. A contents page that is not the first
+        # page carries a "prev" link back to whatever precedes it, and that was
+        # being read as a real entry - "prev-tail" appeared at the head of the
+        # functional analysis sidebar, above Preface. Courses whose contents
+        # page comes first have no such link, which is why this never showed up
+        # before.
+        if re.fullmatch(r"(prev|next|up)(-tail)?", label.lower()):
             continue
         stem = Path(href).stem
         if re.search(r"ch\d+$", stem):
