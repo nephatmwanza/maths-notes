@@ -559,6 +559,24 @@ two sides of the identity did not balance.
 
 ### 2026-08-15 (latest) — Functional Analysis finished; a whole class of structural bug found
 
+**DEPLOYED AND VERIFIED LIVE.** Commit `9c01a1c`, pushed to `main`. Site is now
+**13 courses available, 5 in preparation.** Confirmed by fetching wjmaths.com, not by
+trusting the run: the course landing page, contents page, section pages, all five Practice
+Problems pages (distinct titles `1.2`/`2.7`/`3.8`/`4.4`/`5.8`, six collapsed solutions on
+the first), the unit-ball thumbnail SVG, and the catalogue card ("Analysis · Fourth year",
+13 cards total) all return 200 with the expected content. The sidebar carries 38 links and
+no `prev-tail`. The Complex Variables repair is live too: Note 2.16, Example 2.17 with a
+real statement, and Theorem 2.18 standing on its own.
+
+Final numbers: 84-page source, 39 web pages, 0 overflow; Complex Variables 85 pages,
+0 overflow; 699 discussion keys site-wide, all unique, all 665 pre-existing keys still live.
+
+Seven prose errors were also fixed just before deploying, caught by reading the rendered
+page rather than the source: "we can extended them", "Picard's existance theorem", and a
+theorem titled **"Gram-Schmidt Organization Procedure"** — it is the *orthogonalisation*
+procedure.
+
+
 **Practice Problems now in all five sections** (28 problems, every one worked), the
 remaining unproved results proved, and every assertion-style example given a
 justification. The course compiles at 84 pages with `\begin`/`\end` balanced.
