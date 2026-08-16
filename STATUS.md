@@ -557,6 +557,74 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-16 — Analytic Geometry and Calculus: published, tutorial bank complete
+
+**LIVE.** Fourteenth course. The site is now **14 available, 4 in preparation**.
+86 web pages, 74 diagrams, 236-page source. Card reads **Calculus · Second year**, with
+the hyperbola figure as its thumbnail.
+
+#### The two things the user asked for, both done
+1. **The lost differential equations chapter.** It was not missing but truncated: 265 lines
+   against 1,300-2,300 for every other section, stopping mid-topic in Exact Equations with no
+   worked example, then running straight into the bibliography. Written out in full to the
+   scope set by the author's own course outline: exact equations, integrating factors,
+   Bernoulli, second-order linear with superposition and GS = CF + PI proved, the auxiliary
+   equation in all three root cases, undetermined coefficients including resonance, variation
+   of parameters with the Wronskian, and solution by series.
+2. **Every tutorial question answered.** All 155 items of the exam question bank, worked in
+   full across the six practice sections: 34, 31, 16, 36, 19, 15 = **151 problems** (the
+   difference of 4 is genuine merges where two questions ask the same thing). Audited section
+   by section against the bank rather than by memory -- see below for why that mattered.
+
+#### Errors found in the source material (fourteen)
+Worth keeping because the same author's other notes may carry the same habits.
+- The ellipse derivation squares (a^2 - cx) and **drops the factor of 2 in the cross term,
+  twice**. The subsequent cancellation does not work with the printed values.
+- The same derivation writes a^2(x-c)^2 + y^2 where the a^2 multiplies both terms.
+- Indefinite Integrals states the definition **backwards**: "if f is an antiderivative of F".
+  The align block immediately below has F as the antiderivative of f.
+- "For any **zero** vector A, we obtain a unit vector by dividing A by its own length."
+- A hyperbola example completes the square inside a coefficient of 25 as though the 25 were
+  not there; its own next line only works if the constant in the question is 61, not 109.
+- The derivation of lim (1+1/x)^x = e keeps **both** the factor x and the exponent x after
+  bringing the power down, counting it twice.
+- The scalar triple product volume is written with a bare \cos, no angle.
+- The component formula for the triple product is **missing its equals sign**.
+- A theorem's note reads "Note that is if alpha = -(a x b) = ...", which is neither a sentence
+  nor true; it is the alpha = -1 case of the scalar law above it.
+- The reduction formula for x^m (ln x)^n reduces to exponent n-2; parts gives n-1.
+- Question 36(b) asks for a delta proving (x^2-4)/(x+2) tends to 4 as x tends to 2. It tends
+  to 0; the denominator must be x-2.
+- Question 94 asks for the distance to "the plane containing" **two** points.
+- The coefficient of x^6 in sec x is printed 61/260; it is 61/720.
+- 278 of the 297 vmatrix environments were **magnitude bars set as determinants**, each with a
+  trailing row separator, so every vector magnitude rendered as a tall empty two-row box.
+
+#### Mistakes of my own, and what caught them
+- **An unsquared mixed partial** in the second-derivative discriminant would have reported a
+  saddle point as a minimum. Caught by computing the answer before writing it.
+- **The Practice Problems headings were starred**, unlike all 104 others on the site. Six pages
+  shared one title and, worse, had **no discussion key at all**, so students could not comment
+  on the tutorial questions. This is the same defect I had found and fixed in Elements of
+  Functional Analysis the day before, then reproduced. Caught only by checking the live site.
+- **Four Section 2 questions were skipped** and I did not notice until I counted problems per
+  built page against the bank ranges. Now added and the coverage audited.
+- **Three of four "overflow fixes" hit the wrong element.** I edited the widest-looking maths
+  rather than measuring which element actually overflowed. `.viewport/measure.html` now reports
+  a slice of the offending element's text, not just its tag.
+
+#### A CAS returned a wrong answer
+Asked for sin x cosh y - y' cos x sinh y = 0 with y(0) = 0, sympy returned y = 0. Substituting
+leaves sin x, so it is not a solution. The answer is cosh y = sec x. **Every result in this
+course was checked by substituting back, which is the only reason this surfaced.** Do not
+trust dsolve output without verification.
+
+#### Site fixes made in passing
+- The Linear Algebra and Elements of Functional Analysis cards had been appended after the
+  "Planned courses" comment when published, so two live courses were rendering inside the
+  in-preparation block. Both moved above it.
+- The static course count still read "10 available, 7 in preparation". Now 14 and 4.
+
 ### 2026-08-15 (end of day) — HANDOVER: next job is Analytic Geometry and the Calculus
 
 **Read this first tomorrow.** Elements of Functional Analysis is deployed and verified (entry
