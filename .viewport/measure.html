@@ -22,7 +22,11 @@ fr.onload = () => setTimeout(() => {
       if (getComputedStyle(el).overflowX === 'auto') continue;
       const lab = el.querySelector('mjx-labels');
       if (lab && over <= lab.getBoundingClientRect().width + 8) continue;
-      out.push(`${el.tagName.toLowerCase()}.${(el.className||'').toString().slice(0,30)} +${over}px`);
+      // The tag alone is not enough to act on: a page may hold thirty
+      // paragraphs and only one of them overflows. Carrying a slice of the
+      // text identifies it directly in the source.
+      const txt = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+      out.push(`${el.tagName.toLowerCase()}.${(el.className||'').toString().slice(0,30)} +${over}px  ${txt}`);
     }
     document.getElementById('out').textContent = out.length ? out.join('\n') : 'OK';
   } catch (e) {
