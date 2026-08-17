@@ -87,7 +87,9 @@ UNTITLED = {"proof", "solution"}
 # screen reader. A trailing colon is allowed and dropped, since
 # `\textbf{\textcolor{blue}{Note:}}` and `\textbf{Note}` mean the same thing.
 HEADING_RE = re.compile(
-    r"""^\s*\\textbf\{\s*
+    r"""^\s*
+        (?:\{\s*\\color\[[a-z]+\]\{\d+\}\s*)?    # {\color[wave]{485} ... } wrapper
+        \\textbf\{\s*
         (?:\\textcolor\{[A-Za-z!0-9]+\}\{\s*)?   # optional colour wrapper
         (?P<word>[A-Za-z]+)          # Definition, Theorem, Proof, ...
         \s*
@@ -97,6 +99,7 @@ HEADING_RE = re.compile(
         \s*:?\s*
         \}?                          # closes the colour wrapper, if present
         \s*\}
+        \s*\}?                       # closes the \color group, if present
         \s*:?                        # a colon written outside the braces
         (?P<tail>(?:\s*\\\\)*)       # trailing \\ or \\\\
         \s*$""",
@@ -145,6 +148,16 @@ SECTIONING_RE = re.compile(r"\\(?:sub)*section\*?\{")
 # 4,500 lines rather than what it is.
 DOC_END_RE = re.compile(r"^\s*\\end\s*\{document\}")
 
+# An environment that has ALREADY been converted also ends the body of an
+# unconverted heading above it. Without this a theorem stated just before a
+# worked example swallows the whole example and its solution, and the scanner
+# then refuses because the body does not close at a neutral point. Advanced
+# Calculus states its linearity theorems immediately above the examples that
+# use them, so this is the normal case there rather than an oddity.
+CONVERTED_RE = re.compile(
+    r"^\s*\\begin\{(thm|defn|exa|prop|coro|lem|result|exe|note|remark|problemx"
+    r"|problem|solution|proof)\}")
+
 # A line that is nothing but a bold phrase is a heading of SOME kind, even when
 # it is not one of the marker words -- "Properties of Exponential Functions",
 # "Laurent Series", "Poles". It therefore ends whatever block precedes it.
@@ -155,7 +168,8 @@ DOC_END_RE = re.compile(r"^\s*\\end\s*\{document\}")
 # subsections of exposition -- one block reached 200 lines and absorbed a
 # heading, its prose and its displays.
 BOLD_HEADING_RE = re.compile(
-    r"^\s*\\textbf\{(?:\\textcolor\{[A-Za-z!0-9]+\}\{)?[^{}]*\}?\}\s*(?:\\\\)*\s*$")
+    r"^\s*(?:\{\s*\\color\[[a-z]+\]\{\d+\}\s*)?"
+    r"\\textbf\{(?:\\textcolor\{[A-Za-z!0-9]+\}\{)?[^{}]*\}?\}\s*\}?\s*(?:\\\\)*\s*$")
 
 # Lines the scanner must not read as content: the preamble defines \subhead
 # with a \textbf inside it, and comments can contain anything.
@@ -356,6 +370,7 @@ def convert(text, path_label="<file>"):
             if SECTIONING_RE.search(lines[i])
             or DOC_END_RE.match(lines[i])
             or BOLD_HEADING_RE.match(lines[i])
+            or CONVERTED_RE.match(lines[i])
         }
         | {len(lines)}
     )
