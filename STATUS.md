@@ -639,6 +639,28 @@ Solution blocks. Now one solution with two subheads.
 Counts after the pass: problems 114 (unchanged), solutions 199 → 198 (the merge), examples
 125 → 126 (the wrapped problem). 874 discussion keys, none moved.
 
+#### Two things carried forward
+
+**1. Site-wide: 41 prose Americanisms.** `center` / `centered` appears in prose in nine
+courses (Complex Variables 16, Foundation Maths 12, Multivariate Analysis 3, Introduction
+to Probability 3, Introduction to Statistics 2, and one each in Analytic Geometry, Linear
+Models, Nonparametrics), against 134 uses of `centre` / `centred` elsewhere. Multivariate
+Calculus's two are fixed because it was rebuilding anyway. The rest need a rebuild each,
+about 20 minutes per course, so this is a deliberate half-day job, not a drive-by. Count
+the variants to find which spelling is the house one — the majority wins by definition.
+
+**2. Elements of Functional Analysis, Section 2.** Still titled *Compact Metric Spaces*
+with no compactness in it. Surveyed again today: Section 3.4 has coverings, the definition
+of compact, and Heine--Borel for a closed bounded set in R, plus one example — and that is
+all. It never proves compact implies closed and bounded, never does sequential compactness
+or its equivalence in metric spaces, never does the continuous image of a compact set or
+the attainment of bounds, and never connects to 3.3 Totally Bounded Sets sitting directly
+above it. So the honest fix is not a rename: it is to write the compactness theory the
+section is named for, move 3.3/3.4 up into it, and leave Section 3 as completeness proper.
+That moves the keys `3-3-*` and `3-4-*`. The site is under a month old, which is exactly
+the argument for doing it now rather than later.
+
+
 ### 2026-08-17 — Multivariate Calculus: published (15th course)
 
 **LIVE.** The site is now **15 available, 3 in preparation**. 95 web pages, 102 diagrams,
