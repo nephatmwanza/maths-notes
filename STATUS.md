@@ -557,6 +557,67 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-17 — Multivariate Calculus: published (15th course)
+
+**LIVE.** The site is now **15 available, 3 in preparation**. 95 web pages, 102 diagrams,
+11,374 source lines over 8 sections — the most diagram-heavy course here by a wide margin.
+Card reads **Calculus · Third year**, no course code, with the cylindrical-coordinate
+figure as its thumbnail: a three-dimensional diagram, deliberately unlike the flat conics
+on the two neighbouring Calculus cards.
+
+#### The name
+The course was **Advanced Calculus** when the user took it and was renamed
+**Multivariate Calculus** later. Published under the current name; the old one is carried
+in the card's `data-search` attribute so a search for either finds it. Directory and file
+renamed to match, and because the course had never been deployed under the old name the
+rename cost **no discussion keys** — all 782 pre-existing keys were still live afterwards.
+Site total is now 874, all unique.
+
+#### Coverage
+All **114 tutorial questions worked in full**, across seven practice sections plus a
+revision section: 27, 17, 15, 19, 6, 11, 6 = 101, and 13 revision problems. 125 worked
+examples, 19 definitions, 16 named results. Every number recomputed rather than re-derived
+from the source, and every ODE and transform checked by substituting back.
+
+#### Errors found in the source material
+- **A Jacobian identically zero.** The question asks for the inverse transformation; there
+  is none, because the two functions are functionally dependent. The honest answer is that
+  the hypothesis of the inverse function theorem fails, which is the more instructive one.
+- **Two cones printed as hyperboloids.** In both the right-hand side is zero, which is
+  exactly the degenerate case separating the two families of hyperboloid — the surface the
+  question calls a hyperboloid is the cone dividing them.
+- **Two Laplace transforms that do not exist**: L{cosh²t/t} and L{(3−3e^{−3t})/t³}. The
+  rule L{f(t)/t} = ∫F(u)du needs f(t)/t bounded at the origin and neither is; the first
+  diverges logarithmically (numerically 4.77, 7.07, 9.37 as ε → 10⁻³, 10⁻⁴, 10⁻⁵), the
+  second like 9/t². Both are written up as non-existence results, followed by the nearby
+  versions that *do* converge — sinh²t/t and the matching power of t — so the exercise is
+  still worth doing.
+- **Three integrals impossible in the order given** (∫cos x² dx, ∫sec²(y²) dy and one more),
+  each requiring the order of integration to be reversed. Worth flagging: these are not
+  errors, they are the point of the question, and the source does not say so.
+- A bare `cos` set as three italic variables, and a missing `dx`.
+
+#### Mistakes of my own, and what caught them
+- **Two stray bold markers survived into the build**, both left by my own earlier repairs
+  rather than by the source: a "Solution" that was a companion result inside another
+  solution's working, and a "Note" that was a remark about a definition, left sitting
+  inside it. Each would have rendered as unlabelled bold text, indistinguishable from a
+  real heading. `build.py`'s stray-marker check is the only thing that found them.
+- `\ointctrclockwise` at **7 sites**, which renders in red. Same macro, same fix as on the
+  Complex Variables pages — replaced with `\oint`, which the rest of the site uses.
+
+#### Tooling added or improved this phase
+- **`site/split-examples.py`** promoted from scratchpad into the repo, after being needed
+  for a second course. Splits multi-part examples whose solutions are interleaved inside
+  the question list; stop-detection is depth-aware, so a bold heading inside a list is not
+  mistaken for the end of one.
+- **`site/tex_env.py`** extended twice: it now recognises `{\color[wave]{485}...}`-wrapped
+  headings, and treats an already-converted environment as a stop. Regression-checked
+  against four already-converted courses — identical output before and after.
+- **`.viewport/measure.html`** now reports a slice of the offending element's *text*, not
+  just its tag, after three of four "overflow fixes" on the previous course hit the wrong
+  element.
+
 ### 2026-08-16 — Analytic Geometry and Calculus: published, tutorial bank complete
 
 **LIVE.** Fourteenth course. The site is now **14 available, 4 in preparation**.
