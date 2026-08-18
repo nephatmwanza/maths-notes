@@ -226,6 +226,23 @@ mjx-container[display]::-webkit-scrollbar{height:6px}
 mjx-container[display]::-webkit-scrollbar-thumb{
   background:var(--rule);border-radius:3px;
 }
+/* MathJax emits a hidden MathML copy of every formula for screen readers. Its
+   own rule positions it absolutely and clips it, but `clip` only stops it being
+   PAINTED - the box is still laid out at the formula's full width, and because
+   `p` is not a positioned ancestor the box lands wherever the initial containing
+   block puts it. When that overshoots the paragraph's right edge, the paragraph
+   gains scrollWidth and the reader gets a horizontal scrollbar for something
+   that is not on the page at all. Collapsing the box to a pixel keeps it
+   readable by assistive technology - which walks the MathML, not the layout -
+   while removing it from the scroll extent.
+
+   The selector is deliberately two levels deep: MathJax injects its own
+   `width:auto!important` at runtime, after this file has loaded, so an equally
+   specific rule would lose on source order. */
+mjx-container mjx-assistive-mml{
+  width:1px!important;height:1px!important;overflow:hidden!important;
+}
+
 .equation,.equation-star{margin:1.25rem 0}
 
 /* ---------- figures ---------- */
