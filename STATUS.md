@@ -557,6 +557,88 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-18 — Multivariate Calculus proofread; a site-wide MathJax overflow fixed
+
+The course went live on the 17th. This is the pass after it: the overflow sweep, a
+proofread of the source, and one fix that applies to every page on the site.
+
+#### The MathJax overflow — worth understanding, because it will recur
+The sweep flagged two pages. One was a real content problem. The other was not a content
+problem at all, and I began by "fixing" it in the source — the same mistake as the
+previous course, editing the widest-looking maths instead of measuring.
+
+Measuring took one probe: the element overshooting the paragraph was
+`MJX-ASSISTIVE-MML`, the hidden MathML copy MathJax emits for screen readers. MathJax's
+own rule positions it absolutely and clips it, but **`clip` stops an element being
+painted, not laid out**. Because `p` is not a positioned ancestor, the box is placed
+relative to the initial containing block — wherever that happens to fall. When it
+overshoots the paragraph's right edge, the paragraph gains `scrollWidth` and the reader
+gets a horizontal scrollbar for content that is not visible on the page at all.
+
+The fix is three lines in `site/assets/notes.css`, needs **no rebuild**, and applies
+site-wide:
+
+    mjx-container mjx-assistive-mml{
+      width:1px!important;height:1px!important;overflow:hidden!important;
+    }
+
+The selector is two levels deep deliberately. MathJax injects `width:auto!important` at
+runtime, *after* this stylesheet has loaded, so an equally specific rule loses on source
+order. Screen readers walk the MathML tree, not the layout box, so collapsing it costs
+nothing in accessibility.
+
+**Implication for earlier courses:** some of the overflows I fixed by editing source on
+previous courses were probably this same thing. Not worth re-opening, but from now on:
+*measure before editing*, and check whether the offender is `mjx-assistive-mml` before
+touching any maths.
+
+#### The pmatrix habit
+The Implicit Function Theorem set its argument lists as `pmatrix` environments, so
+`F_i(x_1,...,x_n , y_1,...,y_m)` rendered as a tall parenthesised matrix with wide column
+gaps, and the Jacobian in the hypothesis rendered the same way. 11 of the file's 24
+`pmatrix` environments were argument lists rather than matrices; all 11 are now plain
+parentheses. **Checked every other course for the same habit — none has it.** Same family
+as the 278 `vmatrix`-as-magnitude-bars in Analytic Geometry: a matrix environment pressed
+into service as a delimiter.
+
+#### What reading the built page found that no tool did
+Screenshotting the live Implicit Function Theorem showed three further defects in the same
+theorem: it read "be satisfied $P_0$" with no "at"; it wrote $y_1,\cdots,y_n$ for
+$y_1,\cdots,y_m$ in its first line; and **its conclusion simply stopped, with no "= 0"** —
+the entire content of the theorem was missing. This is the fourth time the rendered page
+has shown something invisible in the source and invisible to the checkers.
+
+#### Other source errors found proofreading
+- A temperature field printed $80/(1+x^2+2y^2+3y^2)$ — **independent of $z$**. The solution
+  uses $3z^2$ throughout, so only the question was wrong, but with the printed version the
+  gradient's $z$-component vanishes and the answer changes.
+- A system of ODEs in $t$ whose second equation was written $dy/dx$.
+- **That same problem sat in no environment at all**, so it rendered as an unlabelled
+  paragraph followed by a Solution block. A scan for imperative openings at top level found
+  it, and found only it — worth keeping as a check.
+- Implicit differentiation stating $dy/dx = F_x/F_y$ where the theorem two lines above says
+  $-F_x/F_y$; the value printed beside it already carries the minus.
+- A chain-rule display, like the theorem above, missing its "= 0".
+- A line integral written $\int_{C_2}F\cdot\overline{r}$, with no $d$.
+- "It it is possible to choose a unit a normal vector ... is called on oriented surface" —
+  three errors in one sentence, the first inverting the meaning.
+- `(1,2,)` for `(1,2)` three times, "Three of More Variables", "parababloid", and two of my
+  own solutions that opened an integral without its integrand.
+
+#### Notation
+One `\underline{r}` among 235 `\overline{r}`; one `\hat{n}` among eleven `\widehat{n}`;
+and a title page written in a third convention again. All brought into line. Counting the
+variants is the cheap way to find the outlier — the majority is the house style by
+definition.
+
+#### Presentation
+Two consecutive `solution` environments answered one example — they are the two orders of
+integration for the same double integral, not two answers — and rendered as two separate
+Solution blocks. Now one solution with two subheads.
+
+Counts after the pass: problems 114 (unchanged), solutions 199 → 198 (the merge), examples
+125 → 126 (the wrapped problem). 874 discussion keys, none moved.
+
 ### 2026-08-17 — Multivariate Calculus: published (15th course)
 
 **LIVE.** The site is now **15 available, 3 in preparation**. 95 web pages, 102 diagrams,
