@@ -368,11 +368,55 @@ $$E_{\theta}\left(X^p\right) = \frac{\beta^p\, \Gamma\left(\alpha + p\right)}{\G
 For what values of $p$ does this expectation exist?
 \end{problem}
 
+\begin{solution}
+The GAM$(\alpha,\beta)$ density is
+$$f(x) = \frac{x^{\alpha-1}e^{-x/\beta}}{\beta^{\alpha}\Gamma(\alpha)},\qquad x>0 .$$
+Hence
+$$E\left(X^{p}\right)
+= \frac{1}{\beta^{\alpha}\Gamma(\alpha)}\int_0^{\infty} x^{\alpha+p-1}e^{-x/\beta}\,dx .$$
+The integral is the normalising constant of a GAM$(\alpha+p,\beta)$ density, so
+it equals $\beta^{\alpha+p}\,\Gamma(\alpha+p)$ whenever $\alpha+p>0$, and
+$$E\left(X^{p}\right) = \frac{\beta^{\alpha+p}\Gamma(\alpha+p)}{\beta^{\alpha}\Gamma(\alpha)}
+= \frac{\beta^{p}\,\Gamma(\alpha+p)}{\Gamma(\alpha)} .$$
+
+\subhead{When it exists}
+The integral converges at the origin only if $\alpha+p>0$, so the expectation
+exists precisely for $p>-\alpha$. Positive moments always exist; negative moments
+exist only down to $-\alpha$, which is why $E(1/X)$ requires $\alpha>1$ and
+$E(1/X^{2})$ requires $\alpha>2$. Convergence at infinity is never in doubt --- the
+exponential dominates any power.
+\end{solution}
+
+
 
 \begin{problem}
 Let $\, m(t) = E\left(e^{tx}\right)\,$ be the moment generating function of a continued random variable $X$. The function $m(-t)$ is often called the Laplace Transform of the probability function $X$. Show that
 $$E\left(X^{-p}\right) = \frac{1}{\Gamma (p)}\, \int_0^{\infty}\, m(-t)\, t^{p - 1}\, dt$$
 \end{problem}
+
+\begin{solution}
+Assume $X>0$ with probability one and $p>0$. The key is the integral
+representation of a negative power: substituting $u=tx$ in
+$$\int_0^{\infty} e^{-tx}\,t^{p-1}\,dt
+= \frac{1}{x^{p}}\int_0^{\infty}e^{-u}u^{p-1}\,du = \frac{\Gamma(p)}{x^{p}},
+\qquad x>0 .$$
+Now start from the right-hand side of the claim and use $m(-t)=E\left(e^{-tX}\right)$:
+$$\frac{1}{\Gamma(p)}\int_0^{\infty} m(-t)\,t^{p-1}\,dt
+= \frac{1}{\Gamma(p)}\int_0^{\infty} E\left(e^{-tX}\right) t^{p-1}\,dt
+= \frac{1}{\Gamma(p)}\, E\left[\int_0^{\infty} e^{-tX}t^{p-1}\,dt\right],$$
+the exchange of expectation and integral being justified by Tonelli's theorem,
+since the integrand is non-negative throughout. By the displayed identity the
+inner integral is $\Gamma(p)/X^{p}$, so the whole expression is
+$$\frac{1}{\Gamma(p)}\,E\left[\frac{\Gamma(p)}{X^{p}}\right] = E\left(X^{-p}\right).$$
+
+\begin{note}
+The result converts a negative moment, which is usually awkward, into an
+integral of the moment generating function, which is often known in closed form.
+The requirement $X>0$ is essential: without it $X^{-p}$ need not be defined, and
+$m(-t)$ need not be finite for all $t>0$.
+\end{note}
+\end{solution}
+
 
 
 
@@ -519,6 +563,36 @@ $$E_{\theta}\left(X^{(k)}\right) = E_{\theta}\left[X(X-1)(X-2)\cdots\cdots(X-k+1
 the $k^{\text{th}}$ factorial moment of $X$, and thus find an unbiased estimator of $\theta^k\,\, , \,\ k = 1\,, \, 2\, \, \cdots\cdots$
 \end{problem}
 
+\begin{solution}
+\subhead{The factorial moment}
+For $X\sim$ POI$(\theta)$ the terms with $x<k$ vanish, because the product
+$x(x-1)\cdots(x-k+1)$ contains a zero factor. For $x\geq k$,
+$$\frac{x(x-1)\cdots(x-k+1)}{x!} = \frac{1}{(x-k)!},$$
+so
+$$E_{\theta}\left(X^{(k)}\right)
+= \sum_{x=k}^{\infty} \frac{e^{-\theta}\theta^{x}}{(x-k)!}
+= \theta^{k}\sum_{y=0}^{\infty}\frac{e^{-\theta}\theta^{y}}{y!}
+= \theta^{k},$$
+substituting $y=x-k$ and recognising the Poisson probabilities, which sum to one.
+
+\subhead{An unbiased estimator}
+The calculation already gives one: $X_1^{(k)}$ is unbiased for $\theta^{k}$. It
+uses a single observation, so it is a poor estimator, and the sufficient
+statistic $T=\sum_{i=1}^{n}X_i$ does better. Since $T\sim$ POI$(n\theta)$, the
+same identity applied to $T$ gives $E_{\theta}\left(T^{(k)}\right) = (n\theta)^{k}$,
+so
+$$\widehat{\theta^{k}} = \frac{T^{(k)}}{n^{k}}
+= \frac{T(T-1)\cdots(T-k+1)}{n^{k}}$$
+is unbiased for $\theta^{k}$. As $T$ is complete and sufficient, this is the
+UMVUE by the theorem of the previous section.
+
+For $k=1$ it reduces to $\overline{X}$, as it should. For $k=2$ it is
+$T(T-1)/n^{2}$, which is \emph{not} $\overline{X}^{2}$ --- a reminder that an
+unbiased estimator of $\theta$ does not give an unbiased estimator of
+$\theta^{2}$ by squaring.
+\end{solution}
+
+
 
 
 
@@ -580,8 +654,33 @@ T(X) - \theta\\
 
 
 \begin{problem}
-Show that $\,\, \MSE _{\theta} (T) = \var _{\theta}(T) + \left(Bias_{\theta}(T)\right)^2\,$ where $Bias_{\theta}(T) = E_{\theta}\left(T(X) - \theta\right)$.
+Show that $\,\, \MSE _{\theta} (T) = \var _{\theta}(T) + \left(\bias _{\theta}(T)\right)^2\,$ where $\bias _{\theta}(T) = E_{\theta}\left(T(X) - \theta\right)$.
 \end{problem}
+
+\begin{solution}
+Write $\mu_T = E_{\theta}\left(T\right)$ and add and subtract it inside the
+square:
+\begin{align*}
+\MSE _{\theta}(T) &= E_{\theta}\left[\left(T-\theta\right)^{2}\right]
+ = E_{\theta}\left[\left\{\left(T-\mu_T\right) + \left(\mu_T-\theta\right)\right\}^{2}\right]\\
+ &= E_{\theta}\left[\left(T-\mu_T\right)^{2}\right]
+  + 2\left(\mu_T-\theta\right)E_{\theta}\left[T-\mu_T\right]
+  + \left(\mu_T-\theta\right)^{2}.
+\end{align*}
+The middle term vanishes because $E_{\theta}\left[T-\mu_T\right]=0$, and
+$\mu_T-\theta$ is a constant that may be taken outside the expectation. The first
+term is $\var _{\theta}(T)$ and the last is $\left[\bias _{\theta}(T)\right]^{2}$,
+giving
+$$\MSE _{\theta}(T) = \var _{\theta}(T) + \left[\bias _{\theta}(T)\right]^{2}.$$
+
+\begin{note}
+The decomposition is the reason unbiasedness is a convenience rather than a
+virtue. Setting the bias to zero removes one term, but nothing guarantees the
+sum is smallest there --- and the next two problems produce estimators that are
+biased and beat the unbiased ones outright.
+\end{note}
+\end{solution}
+
 
 
 
@@ -772,6 +871,36 @@ which estimator is unbiased?
  Compare the MSE's of these estimators.
 \end{problem}
 
+\begin{solution}
+For a sample from UNIF$(0,\theta)$ the extreme order statistics satisfy
+$$E\left(X_{(1)}\right) = \frac{\theta}{n+1},\qquad
+E\left(X_{(n)}\right) = \frac{n\theta}{n+1},$$
+$$\var\left(X_{(1)}\right) = \var\left(X_{(n)}\right) = \frac{n\theta^{2}}{(n+1)^{2}(n+2)},
+\qquad
+\cov\left(X_{(1)},X_{(n)}\right) = \frac{\theta^{2}}{(n+1)^{2}(n+2)} .$$
+
+\subhead{Which is unbiased}
+$$E(T) = \frac{\theta}{n+1} + \frac{n\theta}{n+1} = \theta ,\qquad
+E(R) = \frac{n\theta}{n+1} - \frac{\theta}{n+1} = \frac{(n-1)\theta}{n+1}.$$
+So $T$ is unbiased and $R$ is not; $R$ has bias $-2\theta/(n+1)$, which is
+negative because the range of a sample can never reach the full length $\theta$.
+
+\subhead{Comparing mean square errors}
+Adding the variances with the covariance term,
+$$\var(T) = 2\var\left(X_{(1)}\right) + 2\cov\left(X_{(1)},X_{(n)}\right)
+= \frac{2\theta^{2}}{(n+1)(n+2)},$$
+$$\var(R) = 2\var\left(X_{(1)}\right) - 2\cov\left(X_{(1)},X_{(n)}\right)
+= \frac{2(n-1)\theta^{2}}{(n+1)^{2}(n+2)} .$$
+Since $T$ is unbiased, $\MSE (T) = \var(T)$. For $R$, adding the squared bias,
+$$\MSE (R) = \frac{2(n-1)\theta^{2}}{(n+1)^{2}(n+2)} + \frac{4\theta^{2}}{(n+1)^{2}}
+= \frac{6\theta^{2}}{(n+1)(n+2)} .$$
+Therefore
+$$\frac{\MSE (R)}{\MSE (T)} = 3 \qquad\text{for every } n .$$
+$T$ beats $R$ by a factor of three at every sample size. The ratio does not
+depend on $n$ or on $\theta$, so no sample size rescues $R$.
+\end{solution}
+
+
 
 
 
@@ -781,6 +910,36 @@ Let $\, X_1\, , \, X_2\, , \, \cdots\cdots\, , \, X_n\,$ be a random sample from
 $$T_1= \frac{n - 1}{n}S^2\hspace{0.8cm}, \hspace{0.8cm} T_2 = \frac{n - 1}{n + 1}\, S^2\hspace{0.8cm}\text{where}\hspace{0.5cm}S^2 = \frac{1}{n - 1}\sum^n_{i = 1}\left(X_i - \overline{X}\right)^2$$
 Compare the MSE's of these estimators by grouping them as a function of $\sigma^2$ for $n = 5$.
 \end{problem}
+
+\begin{solution}
+Under normality $W = (n-1)S^{2}/\sigma^{2} \sim \chi^{2}_{(n-1)}$, so
+$E(W)=n-1$ and $\var(W)=2(n-1)$. Both estimators have the form
+$c\,\sigma^{2}W$: for $T_1$, $c=1/n$; for $T_2$, $c=1/(n+1)$. For such an
+estimator
+$$\MSE  = c^{2}\sigma^{4}\var(W) + \left[c\,\sigma^{2}E(W) - \sigma^{2}\right]^{2}
+= \sigma^{4}\left\{2(n-1)c^{2} + \left[c(n-1)-1\right]^{2}\right\}.$$
+Substituting the two values of $c$,
+$$\MSE (T_1) = \frac{(2n-1)\,\sigma^{4}}{n^{2}},\qquad
+\MSE (T_2) = \frac{2\,\sigma^{4}}{n+1} .$$
+For comparison the unbiased $S^{2}$ itself has $\MSE (S^{2}) = 2\sigma^{4}/(n-1)$.
+
+\subhead{At $n=5$}
+$$\MSE (T_1) = \frac{9}{25}\sigma^{4} = 0.360\,\sigma^{4},\qquad
+\MSE (T_2) = \frac{1}{3}\sigma^{4} \approx 0.333\,\sigma^{4},\qquad
+\MSE (S^{2}) = \frac{1}{2}\sigma^{4} .$$
+The ordering is $\MSE (T_2) < \MSE (T_1) < \MSE (S^{2})$, and it holds for every
+$n$, not only $n=5$.
+
+\begin{remark}
+Minimising $2(n-1)c^{2} + \left[c(n-1)-1\right]^{2}$ over $c$ gives
+$c = 1/(n+1)$ exactly, so $T_2$ is not merely better than the other two --- it is
+the best estimator of the form $cS^{2}$ there is. The unbiased choice
+$c=1/(n-1)$ is the worst of the three. This is the clearest illustration in the
+chapter of the point made in the previous problem: insisting on unbiasedness
+costs accuracy.
+\end{remark}
+\end{solution}
+
 
 
 
@@ -980,6 +1139,47 @@ Find $\, E_{\theta}\left(U\right)\, $ and $\, E\left(U \mid T = t\right)$
 \end{enumerate}
 \end{problem}
 
+\begin{solution}
+\subhead{(a)}
+The joint probability function is
+$$f_{\theta}(x_1,\dots,x_n) = \prod_{i=1}^{n}\theta^{x_i}(1-\theta)^{1-x_i}
+= \theta^{t}(1-\theta)^{n-t},\qquad t=\sum_{i=1}^{n}x_i ,$$
+which depends on the data only through $t$. Taking $g(t,\theta)=\theta^{t}(1-\theta)^{n-t}$
+and $h(x)=1$, the factorisation criterion gives sufficiency of $T$.
+
+\subhead{(b)}
+Given $T=t$, every arrangement of $t$ ones among $n$ positions has the same
+conditional probability, namely $1/\binom{n}{t}$: the conditional probability of
+a particular $x$ with $\sum x_i=t$ is
+$$\frac{\theta^{t}(1-\theta)^{n-t}}{\binom{n}{t}\theta^{t}(1-\theta)^{n-t}}
+= \frac{1}{\binom{n}{t}},$$
+free of $\theta$. So it is enough to choose a subset of $\{1,\dots,n\}$ of size
+$t$ uniformly at random and put a one in those positions and a zero elsewhere.
+The result has exactly the distribution of the original sample, and $\theta$ was
+never needed. That is what sufficiency means operationally: $T$ carries all the
+information about $\theta$, and the rest of the data can be regenerated by
+randomisation alone.
+
+\subhead{(c)}
+Here $U=X_1$, so
+$$E_{\theta}(U) = P_{\theta}\left(X_1=1\right) = \theta .$$
+For the conditional expectation, $U$ is an indicator, so
+$$E\left(U \mid T=t\right) = P\left(X_1=1 \mid T=t\right)
+= \frac{P\left(X_1=1,\ \sum_{i\geq 2}X_i = t-1\right)}{P(T=t)}
+= \frac{\theta\,\binom{n-1}{t-1}\theta^{t-1}(1-\theta)^{n-t}}
+       {\binom{n}{t}\theta^{t}(1-\theta)^{n-t}}
+= \frac{\binom{n-1}{t-1}}{\binom{n}{t}} = \frac{t}{n}.$$
+So $E\left(U\mid T\right) = T/n = \overline{X}$.
+
+\begin{note}
+This is the Rao--Blackwell theorem in miniature. $U=X_1$ is unbiased for
+$\theta$ but throws away $n-1$ observations; conditioning it on the sufficient
+statistic returns $\overline{X}$, which is unbiased, has variance
+$\theta(1-\theta)/n$ instead of $\theta(1-\theta)$, and is the UMVUE.
+\end{note}
+\end{solution}
+
+
 
 
 To use the above definition, we must guess a statistic $T(X)$ to be sufficient, however, the next theorem allows us to find a sufficient statistic by simple inspection of  the pdf.
@@ -1129,11 +1329,50 @@ $$I(x\in A) = \begin{cases}
 Let $\, X_1\, , \, X_2\, , \, \cdots\cdots\, , \, X_n\,$  be a random sample from  $X\thicksim N(\mu, \sigma^2)\,$ with $\mu$ known. Find a sufficient statistic for $\sigma^2$.
 \end{problem}
 
+\begin{solution}
+With $\mu$ known the joint density is
+$$f_{\sigma^{2}}(x) = \left(2\pi\sigma^{2}\right)^{-n/2}
+\exp\left\{-\frac{1}{2\sigma^{2}}\sum_{i=1}^{n}\left(x_i-\mu\right)^{2}\right\}.$$
+The data enter only through $\sum_{i=1}^{n}(x_i-\mu)^{2}$, so with
+$$g(t,\sigma^{2}) = \left(2\pi\sigma^{2}\right)^{-n/2}e^{-t/2\sigma^{2}},
+\qquad h(x)=1,$$
+the factorisation criterion gives that
+$$T(X) = \sum_{i=1}^{n}\left(X_i-\mu\right)^{2}$$
+is sufficient for $\sigma^{2}$.
+
+\begin{note}
+Note that $T$ is not $ (n-1)S^{2}$. Knowing $\mu$ means the deviations are taken
+about the true mean rather than about $\overline{X}$, and $T/\sigma^{2}\sim\chi^{2}_{(n)}$
+rather than $\chi^{2}_{(n-1)}$ --- one degree of freedom is recovered, which is
+exactly the information that would otherwise have been spent estimating $\mu$.
+\end{note}
+\end{solution}
+
+
 
 
 \begin{problem}
 Let $\, X_1\, , \, X_2\, , \, \cdots\cdots\, , \, X_n\,$  be a random sample from the $EXP(1,\theta)$ distribution. Find a sufficient statistic for this model.
 \end{problem}
+
+\begin{solution}
+The EXP$(1,\theta)$ density is $f_{\theta}(x)=e^{-(x-\theta)}$ for $x>\theta$
+and zero otherwise, so the joint density is
+$$f_{\theta}(x) = \prod_{i=1}^{n} e^{-(x_i-\theta)}\,I\left(x_i>\theta\right)
+= \underbrace{e^{n\theta}\,I\left(x_{(1)}>\theta\right)}_{g\left(x_{(1)},\,\theta\right)}\ \cdot\
+\underbrace{e^{-\sum_{i=1}^{n}x_i}}_{h(x)} .$$
+Every $x_i$ exceeds $\theta$ exactly when the smallest of them does, which is
+what turns $n$ indicator functions into one. By the factorisation criterion
+$T(X)=X_{(1)}$ is sufficient.
+
+\begin{remark}
+The parameter here is a threshold rather than a location in the usual sense, and
+the sufficient statistic is an order statistic rather than a sum. Whenever the
+\emph{support} depends on the parameter, the indicator function carries the
+information and an extreme order statistic is what the factorisation produces.
+\end{remark}
+\end{solution}
+
 
 
 
@@ -1296,6 +1535,36 @@ Therefore $\,\, T(X) = X_{(n)}\,$ is a minimal sufficient statistics for the mod
 Let $\, X_1\, , \, X_2\, , \, \cdots\cdots\, , \, X_n\,$ be a random sample from the $UNIF(\theta, \theta + 1)\,$ distribution. Find  a minimal sufficient statistic for $\, \{f_{\theta}(x)\, :\, \theta \in \Omega\}$.
 \end{problem}
 
+\begin{solution}
+The joint density is one exactly when every observation lies in
+$(\theta,\theta+1)$, that is
+$$f_{\theta}(x) = \prod_{i=1}^{n} I\left(\theta<x_i<\theta+1\right)
+= I\left(x_{(n)}-1 < \theta < x_{(1)}\right),$$
+and zero otherwise. Sufficiency of $T=\left(X_{(1)},X_{(n)}\right)$ is immediate
+from this display.
+
+For minimality use the ratio criterion. For two samples $x$ and $y$ in the
+support,
+$$\frac{f_{\theta}(x)}{f_{\theta}(y)}
+= \frac{I\left(x_{(n)}-1<\theta<x_{(1)}\right)}{I\left(y_{(n)}-1<\theta<y_{(1)}\right)} .$$
+This ratio is a constant function of $\theta$ precisely when the two intervals
+$\left(x_{(n)}-1,\ x_{(1)}\right)$ and $\left(y_{(n)}-1,\ y_{(1)}\right)$
+coincide, and two intervals coincide exactly when their endpoints agree, that is
+when $x_{(1)}=y_{(1)}$ and $x_{(n)}=y_{(n)}$. Hence
+$$T(X) = \left(X_{(1)},\, X_{(n)}\right)$$
+is minimal sufficient.
+
+\begin{remark}
+The parameter is one-dimensional and the minimal sufficient statistic is
+two-dimensional. There is no contradiction --- minimal means no further
+reduction is possible, not that the dimension matches. It also shows why this
+model is a standard source of counterexamples: the same $T$ is minimal
+sufficient but, as the next problem in the completeness section shows, it is not
+complete.
+\end{remark}
+\end{solution}
+
+
 
 
 
@@ -1304,6 +1573,38 @@ Let $\, X_1\, , \, X_2\, , \, \cdots\cdots\, , \, X_n\,$ be a random sample from
 Let $\, X_1\, , \, X_2\, , \, \cdots\cdots\, , \, X_n\,$ be a random sample from the $EXP(1, \theta)$ distribution. Show that $X_{(1)}$ is sufficient statistic for the model and find the conditional distribution for $\, X_1\, , \, X_2\, , \, \cdots\cdots\, , \, X_n\,$ given $X_{(1)} = t$. Prove that $X_{(1)}$ is a minimal sufficient statistic.
 \end{problem}
 
+\begin{solution}
+\subhead{Sufficiency}
+As in the previous section, the joint density factorises as
+$$f_{\theta}(x) = e^{n\theta}\,I\left(x_{(1)}>\theta\right)\cdot e^{-\sum_i x_i},$$
+so $X_{(1)}$ is sufficient.
+
+\subhead{The conditional distribution}
+The density of $X_{(1)}$ is that of the minimum of $n$ independent shifted
+exponentials,
+$$f_{X_{(1)}}(t) = n\,e^{-n(t-\theta)},\qquad t>\theta ,$$
+so on the set where $\min_i x_i = t$,
+$$f\left(x \mid X_{(1)}=t\right)
+= \frac{e^{n\theta}e^{-\sum_i x_i}}{n\,e^{-n(t-\theta)}}
+= \frac{e^{nt-\sum_i x_i}}{n} .$$
+The result does not involve $\theta$, which confirms sufficiency directly rather
+than through the factorisation criterion. Read another way: given
+$X_{(1)}=t$, the label of the minimising index is uniform on $\{1,\dots,n\}$ and
+the remaining $n-1$ observations are distributed as $t$ plus independent
+EXP$(1,0)$ variables --- the memoryless property, with the threshold reset to
+$t$.
+
+\subhead{Minimality}
+For two samples,
+$$\frac{f_{\theta}(x)}{f_{\theta}(y)}
+= e^{\sum_i y_i - \sum_i x_i}\cdot
+\frac{I\left(x_{(1)}>\theta\right)}{I\left(y_{(1)}>\theta\right)} .$$
+The first factor is free of $\theta$ already. The second is a constant function
+of $\theta$ only if the two indicators switch at the same place, that is only if
+$x_{(1)} = y_{(1)}$. Hence $X_{(1)}$ is minimal sufficient.
+\end{solution}
+
+
 
 
 
@@ -1311,6 +1612,35 @@ Let $\, X_1\, , \, X_2\, , \, \cdots\cdots\, , \, X_n\,$ be a random sample from
 \begin{problem}
 Let $\, X_1\, , \, X_2\, , \, \cdots\cdots\, , \, X_n\,$ be a random sample from the $CAU(1,\theta)$ distribution. Find a minimal sufficient for $\, \{f_{\theta}(x)\, :\, \theta\in \Omega\}$.
 \end{problem}
+
+\begin{solution}
+The Cauchy density with location $\theta$ and scale $1$ is
+$f_{\theta}(x) = \left[\pi\left(1+(x-\theta)^{2}\right)\right]^{-1}$, so
+$$f_{\theta}(x_1,\dots,x_n) = \frac{1}{\pi^{n}}\prod_{i=1}^{n}\frac{1}{1+(x_i-\theta)^{2}} .$$
+For two samples $x$ and $y$ the ratio is
+$$\frac{f_{\theta}(x)}{f_{\theta}(y)}
+= \frac{\prod_{i=1}^{n}\left[1+(y_i-\theta)^{2}\right]}
+       {\prod_{i=1}^{n}\left[1+(x_i-\theta)^{2}\right]} .$$
+Regard numerator and denominator as polynomials in $\theta$. Each is monic of
+degree $2n$. The ratio is a constant function of $\theta$ exactly when the two
+polynomials are proportional, and two monic polynomials of the same degree are
+proportional only if they are equal. Equal polynomials have the same roots with
+the same multiplicities; the roots of $\prod_i\left[1+(x_i-\theta)^{2}\right]$
+are $\theta = x_i \pm i$, so the multiset $\{x_1,\dots,x_n\}$ is determined.
+Hence the ratio is free of $\theta$ if and only if $y$ is a permutation of $x$,
+and the minimal sufficient statistic is the full set of order statistics
+$$T(X) = \left(X_{(1)},\, X_{(2)},\, \dots,\, X_{(n)}\right).$$
+
+\begin{remark}
+No reduction of the data is possible beyond discarding the order in which the
+observations arrived. This is the standard warning against expecting a
+low-dimensional summary: the Cauchy location model has one parameter and a
+minimal sufficient statistic of dimension $n$. It is also why the sample mean is
+useless here --- $\overline{X}$ has the same Cauchy distribution as a single
+observation, so averaging buys nothing at all.
+\end{remark}
+\end{solution}
+
 
 
 
