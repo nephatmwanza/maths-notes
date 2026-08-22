@@ -4338,6 +4338,42 @@ Find
 \item[(c)] The exact $95\%$ C.I for $\theta$.
 \end{enumerate}
 \end{problem}
+
+\begin{solution}
+The ten observations sum to $\sum x_i = 288$, so $\overline{x}=28.8$.
+
+\subhead{(a)}
+For the EXP$(\theta)$ density $f_{\theta}(x)=\theta^{-1}e^{-x/\theta}$,
+$$\log L = -n\log\theta - \frac{1}{\theta}\sum_i x_i,\qquad
+S(\theta) = -\frac{n}{\theta} + \frac{\sum_i x_i}{\theta^{2}} .$$
+Setting $S=0$ gives $\widehat{\theta}=\overline{x}=28.8$ days. It is a maximum
+because
+$$\left.\frac{\partial^{2}\log L}{\partial\theta^{2}}\right|_{\theta=\overline{x}}
+= \frac{n}{\overline{x}^{2}} - \frac{2\sum_i x_i}{\overline{x}^{3}}
+= \frac{n}{\overline{x}^{2}} - \frac{2n}{\overline{x}^{2}}
+= -\frac{n}{\overline{x}^{2}} < 0 .$$
+
+\subhead{(b)}
+$-E\left[\partial^{2}\log L/\partial\theta^{2}\right] = n/\theta^{2}$, so
+$I_n(\theta)=n/\theta^{2}$ and the asymptotic standard error is
+$\widehat{\theta}/\sqrt{n} = 28.8/\sqrt{10} = 9.107$. An approximate $95\%$
+interval is
+$$28.8 \pm 1.96(9.107) = (10.95,\ 46.65).$$
+
+\subhead{(c)}
+Exactly, $2\sum_i X_i/\theta \sim \chi^{2}_{(2n)} = \chi^{2}_{(20)}$. From the
+tables $\chi^{2}_{20,\,0.975}=34.170$ and $\chi^{2}_{20,\,0.025}=9.591$, so
+$$\left(\frac{2(288)}{34.170},\ \frac{2(288)}{9.591}\right) = (16.86,\ 60.06).$$
+
+\begin{remark}
+The exact interval is both wider and markedly asymmetric about $28.8$, while the
+approximate one is symmetric by construction. With $n=10$ the normal
+approximation is simply not good enough --- and note the approximate interval's
+lower endpoint, $10.95$, sits well below the exact one at $16.86$. Use the exact
+interval whenever the pivotal quantity is available, as it is here.
+\end{remark}
+\end{solution}
+
 \vspace{4pt}
 
 
@@ -4427,12 +4463,69 @@ a $95\%$ C.I for $\tau(\theta) = \alpha\beta$ is given by $$\widehat{\alpha}_n\w
 For problem 2.2.5 find an approximate $95\%$ C.I for $$\ \tau (\theta) = \cov (X_1, X_2) = -n\theta_1\theta_2.$$
 \end{problem}
 
+\begin{solution}
+From the multinomial problem, $\widehat{\theta}_j = X_j/n$ and
+$$J(\theta) = n\begin{pmatrix}
+\dfrac{1}{\theta_1}+\dfrac{1}{\theta_3} & \dfrac{1}{\theta_3}\\[6pt]
+\dfrac{1}{\theta_3} & \dfrac{1}{\theta_2}+\dfrac{1}{\theta_3}\end{pmatrix},
+\qquad
+J^{-1}(\theta) = \frac{1}{n}\begin{pmatrix}
+\theta_1(1-\theta_1) & -\theta_1\theta_2\\
+-\theta_1\theta_2 & \theta_2(1-\theta_2)\end{pmatrix}.$$
+With $\tau(\theta) = -n\theta_1\theta_2$,
+$$D(\theta) = \left(\frac{\partial\tau}{\partial\theta_1},\ \frac{\partial\tau}{\partial\theta_2}\right)^{t}
+= -n\left(\theta_2,\ \theta_1\right)^{t},$$
+and the delta method gives
+$$\var\left(\widehat{\tau}\right) \approx D^{t}J^{-1}D
+= n\,\theta_1\theta_2\left(\theta_1+\theta_2-4\theta_1\theta_2\right).$$
+Substituting the estimates, an approximate $95\%$ interval for
+$\cov(X_1,X_2)$ is
+$$-n\widehat{\theta}_1\widehat{\theta}_2 \ \pm\ 1.96
+\sqrt{n\,\widehat{\theta}_1\widehat{\theta}_2
+\left(\widehat{\theta}_1+\widehat{\theta}_2-4\widehat{\theta}_1\widehat{\theta}_2\right)} .$$
+The interval should be truncated at zero on the right, since a multinomial
+covariance is always negative.
+\end{solution}
+
+
 
 
 
 \begin{problem}
 In problem 2.2.9, find an approximate $95\%$ C.I for $\beta$ and $E(X)$.
 \end{problem}
+
+\begin{solution}
+From the earlier problem the information matrix for $\theta=(\alpha,\beta)^{t}$ is
+$$J(\theta) = n\begin{pmatrix}
+\dfrac{1}{\alpha^{2}} & \dfrac{1}{\beta(\alpha+1)}\\[6pt]
+\dfrac{1}{\beta(\alpha+1)} & \dfrac{\alpha}{\beta^{2}(\alpha+2)}\end{pmatrix},$$
+whose determinant is
+$$\left|J\right| = n^{2}\left[\frac{1}{\alpha\beta^{2}(\alpha+2)}
+- \frac{1}{\beta^{2}(\alpha+1)^{2}}\right]
+= \frac{n^{2}}{\alpha\beta^{2}(\alpha+2)(\alpha+1)^{2}}
+\left[(\alpha+1)^{2}-\alpha(\alpha+2)\right]
+= \frac{n^{2}}{\alpha\beta^{2}(\alpha+2)(\alpha+1)^{2}} ,$$
+using $(\alpha+1)^{2}-\alpha(\alpha+2)=1$.
+
+\subhead{Interval for $\beta$}
+The relevant entry of $J^{-1}$ is
+$$\left[J^{-1}\right]_{22} = \frac{n/\alpha^{2}}{\left|J\right|}
+= \frac{\beta^{2}(\alpha+1)^{2}(\alpha+2)}{n\,\alpha},$$
+so an approximate $95\%$ interval is
+$$\widehat{\beta} \pm 1.96\,\frac{\widehat{\beta}\left(\widehat{\alpha}+1\right)}{\sqrt{n}}
+\sqrt{\frac{\widehat{\alpha}+2}{\widehat{\alpha}}} .$$
+
+\subhead{Interval for $E(X)$}
+Integration gives $\tau(\theta)=E(X)=\dfrac{1}{\beta(\alpha-1)}$ for $\alpha>1$,
+so
+$$D(\theta) = \left(-\frac{1}{\beta(\alpha-1)^{2}},\ -\frac{1}{\beta^{2}(\alpha-1)}\right)^{t},$$
+and the interval is $\widehat{\tau} \pm 1.96\sqrt{D^{t}J^{-1}D}$ with everything
+evaluated at the maximum likelihood estimates. Note the mean does not exist at
+all unless $\alpha>1$, so the interval is meaningful only when
+$\widehat{\alpha}$ is comfortably above one.
+\end{solution}
+
 
 
 
@@ -4441,6 +4534,37 @@ In problem 2.2.9, find an approximate $95\%$ C.I for $\beta$ and $E(X)$.
 \begin{problem}
 Suppose $X_1, \, \cdots\, , \, X_n$ is a random sample from  the $BETA(\alpha\, ,\, \beta)$ distribution. Explain how you would find the $ML$ estimate of $\theta = (\alpha, \beta)^t$, approximate $95\%$ C.I's for $\alpha$ and $$\tau(\theta) = E(X) = \frac{\alpha}{\alpha + \beta}.$$
 \end{problem}
+
+\begin{solution}
+\subhead{The estimate}
+$$\log L = n\log\Gamma(\alpha+\beta) - n\log\Gamma(\alpha) - n\log\Gamma(\beta)
++ (\alpha-1)\sum_i\log x_i + (\beta-1)\sum_i\log(1-x_i).$$
+Differentiating and writing $\psi=\Gamma'/\Gamma$ for the digamma function, the
+likelihood equations are
+$$\psi(\alpha+\beta)-\psi(\alpha) = -\frac{1}{n}\sum_i\log x_i,\qquad
+\psi(\alpha+\beta)-\psi(\beta) = -\frac{1}{n}\sum_i\log(1-x_i).$$
+Neither can be solved in closed form; the pair is solved numerically by
+Newton--Raphson, using method-of-moments values as starting points. This is the
+same situation as the previous problem, but with no parameter eliminable in
+closed form, so the search is two-dimensional.
+
+\subhead{The information matrix}
+Differentiating once more gives, with $\psi'$ the trigamma function,
+$$J(\theta) = n\begin{pmatrix}
+\psi'(\alpha)-\psi'(\alpha+\beta) & -\psi'(\alpha+\beta)\\
+-\psi'(\alpha+\beta) & \psi'(\beta)-\psi'(\alpha+\beta)\end{pmatrix},$$
+which is free of the data, so the observed and expected information coincide.
+
+\subhead{Intervals}
+For $\alpha$, use $\widehat{\alpha}\pm1.96\sqrt{\left[J^{-1}\right]_{11}}$
+evaluated at the estimates. For $\tau(\theta)=\alpha/(\alpha+\beta)$,
+$$D(\theta) = \left(\frac{\beta}{(\alpha+\beta)^{2}},\ \frac{-\alpha}{(\alpha+\beta)^{2}}\right)^{t},$$
+and the interval is $\widehat{\tau}\pm1.96\sqrt{D^{t}J^{-1}D}$. Since $\tau$ is
+a probability the interval should be truncated to $[0,1]$; a logit
+transformation before applying the delta method usually behaves better near the
+endpoints.
+\end{solution}
+
 
 
 
@@ -4531,10 +4655,54 @@ Y_n\\
 Suppose $Y_1, \, \cdots\, , \, Y_n$ are independent unbiased estimators of $\theta$ with known variances $\var (Y_i) = \sigma_i^2, \, i = 1, \, 2, \, \cdots\, , \, n$. Find the BLUE of $\theta$.
 \end{problem}
 
+\begin{solution}
+A linear estimator $\sum_i a_iY_i$ is unbiased for $\theta$ if and only if
+$\sum_i a_i = 1$, since $E\left(\sum_i a_iY_i\right)=\theta\sum_i a_i$. Its
+variance is $\sum_i a_i^{2}\sigma_i^{2}$ by independence, so the problem is to
+minimise $\sum_i a_i^{2}\sigma_i^{2}$ subject to $\sum_i a_i=1$.
+
+With a Lagrange multiplier $\lambda$, differentiating
+$\sum_i a_i^{2}\sigma_i^{2} - \lambda\left(\sum_i a_i - 1\right)$ gives
+$2a_i\sigma_i^{2}=\lambda$, so $a_i \propto 1/\sigma_i^{2}$. Normalising to make
+the weights sum to one,
+$$\widehat{\theta} = \frac{\sum_{i=1}^{n} Y_i/\sigma_i^{2}}
+{\sum_{i=1}^{n} 1/\sigma_i^{2}},
+\qquad
+\var\left(\widehat{\theta}\right) = \frac{1}{\sum_{i=1}^{n}1/\sigma_i^{2}} .$$
+
+\begin{note}
+Each estimator is weighted by its precision, the reciprocal of its variance, and
+the precision of the combination is the \emph{sum} of the individual precisions.
+So adding even a poor estimator never hurts --- it can only increase the total
+precision --- which is the formal basis of meta-analysis and of inverse-variance
+weighting generally.
+\end{note}
+\end{solution}
+
+
 
 \begin{problem}
 Suppose $Y_{ij}, \, i = 1, \, 2, \ j  = 1, \, 2, \, \cdots\, , n$ are independent random variables with $E(Y_{ij}) = \mu  + \alpha_i$ and $\var (Y_{ij}) = \sigma^2$ where $\alpha_1 + \alpha_2 = 0$. Find the BLUE of $\alpha_1$.
 \end{problem}
+
+\begin{solution}
+The constraint $\alpha_1+\alpha_2=0$ means $\alpha_2=-\alpha_1$, so
+$$E\left(\overline{Y}_{1\cdot}\right) = \mu+\alpha_1,\qquad
+E\left(\overline{Y}_{2\cdot}\right) = \mu-\alpha_1 ,$$
+where $\overline{Y}_{i\cdot}=n^{-1}\sum_{j=1}^{n}Y_{ij}$. Subtracting removes
+$\mu$:
+$$E\left(\overline{Y}_{1\cdot}-\overline{Y}_{2\cdot}\right) = 2\alpha_1 ,$$
+so
+$$\widehat{\alpha_1} = \frac{\overline{Y}_{1\cdot}-\overline{Y}_{2\cdot}}{2}$$
+is linear and unbiased. Its variance is
+$$\var\left(\widehat{\alpha_1}\right) = \frac{1}{4}\left(\frac{\sigma^{2}}{n}+\frac{\sigma^{2}}{n}\right)
+= \frac{\sigma^{2}}{2n} .$$
+That it is \emph{best} follows from the Gauss--Markov theorem: the model is
+linear with uncorrelated errors of constant variance, and
+$\widehat{\alpha_1}$ is the least squares estimator of the estimable function
+$\alpha_1$ under the constraint.
+\end{solution}
+
 
 
 
@@ -4648,6 +4816,20 @@ Therefore the $UMVUE$ of $\theta^2$ is a scale equivariant estimator.
 Show that the $UNIF(\theta - 1, \theta + 1)$ distribution is a location invariant family.
 \end{problem}
 
+\begin{solution}
+The UNIF$(\theta-1,\theta+1)$ density is
+$$f_{\theta}(x) = \frac12\,I\left(\theta-1<x<\theta+1\right)
+= \frac12\,I\left(-1<x-\theta<1\right) = f_0(x-\theta),$$
+where $f_0$ is the UNIF$(-1,1)$ density. Since every member of the family is
+obtained from the single density $f_0$ by a shift, the family is location
+invariant with location parameter $\theta$.
+
+Equivalently: if $X\sim$ UNIF$(\theta-1,\theta+1)$ then $X+c\sim$
+UNIF$(\theta+c-1,\ \theta+c+1)$, so translating the data by $c$ moves the
+parameter by $c$ and leaves the family as a whole unchanged.
+\end{solution}
+
+
 
 \begin{problem}
 Let $X_1, \, \cdots\, , \, X_n$ be a random sample the $UNIF(0,\theta)$ distribution. Show that then
@@ -4656,6 +4838,35 @@ Let $X_1, \, \cdots\, , \, X_n$ be a random sample the $UNIF(0,\theta)$ distribu
 \item[(b)] $UMVUE$ of $\theta$ is a scale equivariant estimator.
 \end{enumerate}
 \end{problem}
+
+\begin{solution}
+\subhead{(a)}
+The UNIF$(0,\theta)$ density is
+$$f_{\theta}(x) = \frac{1}{\theta}\,I\left(0<x<\theta\right)
+= \frac{1}{\theta}\,I\left(0<\frac{x}{\theta}<1\right)
+= \frac{1}{\theta}f_1\!\left(\frac{x}{\theta}\right),$$
+with $f_1$ the UNIF$(0,1)$ density. Every member is obtained from $f_1$ by the
+scaling $x\mapsto x/\theta$, so the family is scale invariant. Equivalently, if
+$X\sim$ UNIF$(0,\theta)$ and $c>0$ then $cX\sim$ UNIF$(0,c\theta)$.
+
+\subhead{(b)}
+Since $E\left(X_{(n)}\right)=n\theta/(n+1)$ and $X_{(n)}$ is complete and
+sufficient, the UMVUE is
+$$\widehat{\theta} = \frac{n+1}{n}X_{(n)} .$$
+Scale equivariance asks that $\widehat{\theta}(cX_1,\dots,cX_n) = c\,\widehat{\theta}(X_1,\dots,X_n)$
+for every $c>0$. The maximum of the rescaled sample is $c\,X_{(n)}$, so
+$$\widehat{\theta}(cX) = \frac{n+1}{n}\,cX_{(n)} = c\,\widehat{\theta}(X),$$
+and the estimator is scale equivariant.
+
+\begin{note}
+Equivariance is a consistency requirement, not an optimality one: it says only
+that measuring the data in different units should change the estimate in the
+same units. It is worth checking because an estimator that fails it is
+answering a different question depending on whether the lifetimes were recorded
+in days or in hours.
+\end{note}
+\end{solution}
+
 
 
 
@@ -4856,17 +5067,98 @@ Let  $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $POI(\theta
 \end{enumerate}
 \end{problem}
 
+\begin{solution}
+\subhead{(a) Conjugacy}
+Write $T=\sum_{i=1}^{n}X_i$. The likelihood and the GAM$\left(b+1,1/a\right)$
+prior are
+$$L(\theta) \propto e^{-n\theta}\theta^{T},
+\qquad \pi(\theta) \propto \theta^{b}e^{-a\theta},\quad \theta>0 .$$
+Multiplying,
+$$\pi\left(\theta \mid x\right) \propto \theta^{\,T+b}\,e^{-(n+a)\theta},$$
+which is the kernel of a GAM$\left(T+b+1,\ \dfrac{1}{n+a}\right)$ density. The
+posterior belongs to the same gamma family as the prior, so the family is
+conjugate for the Poisson likelihood.
+
+\subhead{(b) The Bayes estimator}
+Under squared error loss the Bayes estimator is the posterior mean. A
+GAM$(\kappa,\lambda)$ variable has mean $\kappa\lambda$, so
+$$\widetilde{\theta} = \frac{T+b+1}{n+a}
+= \frac{\sum_{i=1}^{n}X_i + b + 1}{n+a} .$$
+
+\begin{note}
+Write it as a weighted average:
+$$\widetilde{\theta} = \frac{n}{n+a}\,\overline{X} + \frac{a}{n+a}\cdot\frac{b+1}{a},$$
+a compromise between the sample mean and the prior mean $(b+1)/a$, with weights
+$n$ and $a$. So $a$ acts as a prior sample size: the prior carries as much
+influence as $a$ observations, and its influence vanishes as $n$ grows.
+\end{note}
+\end{solution}
+
+
 
 
 \begin{problem}
 Let  $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $X\thicksim N(0, \sigma^2)$ distribution where $\sigma^2$ is known. Assuming the prior distribution is $\theta \, \thicksim\, N\left(\frac{b}{a}, \frac{\sigma^2}{a}\right),$ fined the Bayes estimator using a squared error loss function.
 \end{problem}
 
+\begin{solution}
+The model must be $X_i \sim N\left(\theta,\sigma^{2}\right)$ with $\sigma^{2}$
+known --- as printed the mean is zero and $\theta$ does not appear in the
+likelihood at all, so there would be nothing to estimate.
+
+With $T=\sum_i X_i$ and prior $\theta\sim N\left(b/a,\ \sigma^{2}/a\right)$,
+$$\pi\left(\theta\mid x\right)
+\propto \exp\left\{-\frac{1}{2\sigma^{2}}\sum_i\left(x_i-\theta\right)^{2}\right\}
+\exp\left\{-\frac{a}{2\sigma^{2}}\left(\theta-\frac{b}{a}\right)^{2}\right\}.$$
+Both exponents are quadratic in $\theta$, so the posterior is normal and it is
+enough to collect the coefficients. Discarding terms free of $\theta$, the
+exponent is
+$$-\frac{1}{2\sigma^{2}}\left[(n+a)\theta^{2} - 2\theta\left(T+b\right)\right]
+= -\frac{n+a}{2\sigma^{2}}\left[\theta - \frac{T+b}{n+a}\right]^{2} + \text{const} .$$
+Hence
+$$\theta \mid x \ \sim\ N\!\left(\frac{T+b}{n+a},\ \frac{\sigma^{2}}{n+a}\right),$$
+and under squared error loss the Bayes estimator is the posterior mean
+$$\widetilde{\theta} = \frac{\sum_{i=1}^{n}X_i + b}{n+a} .$$
+
+As in the Poisson problem this is a weighted average of $\overline{X}$ and the
+prior mean $b/a$, with weights $n$ and $a$; the prior is worth $a$ observations,
+and the posterior variance $\sigma^{2}/(n+a)$ says the same thing.
+\end{solution}
+
+
 
 
 \begin{problem}
 Let  $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $POI(\theta)$ distribution. Assuming the prior distribution of $\theta$ is $\theta \thicksim BETA(1/2,1)$, find the Bayes estimator of $\theta$ using the squared error loss function.
 \end{problem}
+
+\begin{solution}
+The BETA$(1/2,1)$ prior is $\pi(\theta)\propto\theta^{-1/2}$ on $(0,1)$, so with
+$T=\sum_i X_i$,
+$$\pi\left(\theta\mid x\right) \propto \theta^{\,T-1/2}e^{-n\theta},
+\qquad 0<\theta<1 .$$
+This is a gamma kernel \emph{truncated} to the unit interval, not a gamma
+density, so the normalising constant is an incomplete gamma function. Using
+$$\int_0^{1}\theta^{\,s-1}e^{-n\theta}\,d\theta = n^{-s}\,\gamma(s,n),$$
+where $\gamma$ is the lower incomplete gamma function, the posterior mean is
+$$\widetilde{\theta}
+= \frac{\int_0^{1}\theta^{\,T+1/2}e^{-n\theta}d\theta}{\int_0^{1}\theta^{\,T-1/2}e^{-n\theta}d\theta}
+= \frac{n^{-(T+3/2)}\gamma\left(T+\tfrac32,\,n\right)}{n^{-(T+1/2)}\gamma\left(T+\tfrac12,\,n\right)}
+= \frac{\gamma\left(T+\tfrac32,\,n\right)}{n\,\gamma\left(T+\tfrac12,\,n\right)} .$$
+This is the Bayes estimator under squared error loss. It has no expression in
+elementary functions and is evaluated numerically.
+
+\begin{remark}
+The prior deserves comment. A BETA$(1/2,1)$ distribution lives on $(0,1)$, so it
+asserts with certainty that the Poisson rate is below one. That is a strong
+claim, and it is what destroys conjugacy --- the gamma prior of the previous
+problem is supported on all of $(0,\infty)$ and returns a gamma posterior. If
+the restriction is genuinely believed the answer above is correct; if it was
+chosen for convenience it is the wrong prior, and it is worth noticing that the
+inconvenience of the answer is the model telling us so.
+\end{remark}
+\end{solution}
+
 
 
 
@@ -5138,6 +5430,58 @@ Let $X_1, \, \cdots\,, \, X_n$ be a random sample from the $GAM(1/2,\theta)$ dis
 \end{enumerate}
 \end{problem}
 
+\begin{solution}
+For GAM$(1/2,\theta)$,
+$$L(\theta) = \frac{\prod_i x_i^{-1/2}}{\Gamma(1/2)^{n}\,\theta^{n/2}}
+\exp\left\{-\frac{1}{\theta}\sum_i x_i\right\}.$$
+
+\subhead{(a)}
+By Neyman--Pearson the most powerful test rejects for large values of
+$$\frac{L(\theta_1)}{L(2)} = \left(\frac{2}{\theta_1}\right)^{n/2}
+\exp\left\{-\left(\frac{1}{\theta_1}-\frac12\right)\sum_i x_i\right\}.$$
+Since $\theta_1<2$ the coefficient $1/\theta_1-1/2$ is positive, so the ratio is
+a \emph{decreasing} function of $\sum_i x_i$ and the test rejects for
+\emph{small} values of it. Under $H_0$, $\sum_i X_i\sim$ GAM$(n/2,2)$, so
+$\sum_i X_i \sim \chi^{2}_{(n)}$ exactly, and the size-$0.05$ region is
+$$R = \left\{x:\ \sum_{i=1}^{n}x_i < \chi^{2}_{n,\,0.05}\right\}.$$
+
+\subhead{(b)}
+The region does not involve $\theta_1$ --- every alternative below $2$ gives the
+same rejection rule --- so by definition the same test is uniformly most
+powerful for $H_1:\theta<2$. Its power function is
+$$\beta(\theta) = P_{\theta}\left(\sum_i X_i < \chi^{2}_{n,\,0.05}\right)
+= P\left(\chi^{2}_{(n)} < \frac{2\,\chi^{2}_{n,\,0.05}}{\theta}\right),$$
+which decreases from $1$ as $\theta\downarrow0$, passes through $0.05$ at
+$\theta=2$, and tends to $0$ as $\theta\rightarrow\infty$.
+
+\subhead{(c)}
+For $\theta_1>2$ the coefficient changes sign, the ratio increases in
+$\sum_i x_i$, and the UMP test of $H_1:\theta>2$ rejects for large values:
+$$R = \left\{x:\ \sum_{i=1}^{n}x_i > \chi^{2}_{n,\,0.95}\right\},$$
+with power function increasing from $0$, through $0.05$ at $\theta=2$, to $1$.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+\draw[->](0,0)--(6.4,0)node[right]{$\theta$};
+\draw[->](0,0)--(0,3.4)node[above]{$\beta(\theta)$};
+\draw[dashed](0,0.3)--(6.2,0.3)node[right,scale=0.8]{$0.05$};
+\draw[dashed](2.4,0)--(2.4,3)node[above,scale=0.8]{};
+\draw(2.4,0)node[below,scale=0.8]{$2$};
+\draw[thick,blue] plot[smooth,domain=0.25:6] (\x, {3/(1+exp(2.4*(\x-2.4)))+0.02});
+\draw[thick,red]  plot[smooth,domain=0.25:6] (\x, {3/(1+exp(-2.4*(\x-2.4)))*0.98});
+\node[blue,scale=0.8] at (1.15,2.55) {$H_1:\theta<2$};
+\node[red,scale=0.8]  at (5.0,2.55) {$H_1:\theta>2$};
+\draw(0,3)node[left,scale=0.8]{$1$};
+\end{tikzpicture}
+\end{center}
+Both curves pass through $0.05$ at $\theta=2$, which is the size constraint, and
+each rises towards $1$ on the side its alternative occupies. No test can be UMP
+against the two-sided alternative $\theta\neq2$, because the two regions are
+different and a test cannot reject simultaneously for small and for large
+$\sum_i x_i$ while keeping size $0.05$.
+\end{solution}
+
+
 
 
 \begin{problem}
@@ -5148,6 +5492,52 @@ Let $X_1, \, \cdots\,, \, X_n$ be a random sample from the distribution with pdf
 \item[(c)] uniformly most powerful test of size $\alpha = 0.05$ of $H_0:\, \theta = 1$ against $H_1:\, \theta < 1$. On the same graph as in (b), sketch the power function of this test.
 \end{enumerate}
 \end{problem}
+
+\begin{solution}
+The density is Pareto: $f_{\theta}(x)=\theta x^{-(1+\theta)}$ for $x>1$. Writing
+$T=\sum_{i=1}^{n}\log X_i$,
+$$L(\theta) = \theta^{n}\exp\left\{-(1+\theta)\sum_i\log x_i\right\}
+= \theta^{n}e^{-(1+\theta)T}.$$
+Note that $\log X_i \sim$ EXP$(1/\theta)$, since
+$P\left(\log X>t\right)=P\left(X>e^{t}\right)=e^{-\theta t}$, so
+$T\sim$ GAM$(n,1/\theta)$ and $2\theta T\sim\chi^{2}_{(2n)}$.
+
+\subhead{(a)}
+$$\frac{L(\theta_1)}{L(1)} = \theta_1^{n}\,e^{-(\theta_1-1)T},$$
+which for $\theta_1>1$ is decreasing in $T$. The most powerful test therefore
+rejects for small $T$, and under $H_0$ we have $2T\sim\chi^{2}_{(2n)}$, so
+$$R = \left\{x:\ 2\sum_{i=1}^{n}\log x_i < \chi^{2}_{2n,\,0.05}\right\}.$$
+
+\subhead{(b)}
+The region is free of $\theta_1$, so the same test is UMP for $H_1:\theta>1$.
+Its power is
+$$\beta(\theta) = P_{\theta}\left(2T<\chi^{2}_{2n,\,0.05}\right)
+= P\left(\chi^{2}_{(2n)} < \theta\,\chi^{2}_{2n,\,0.05}\right),$$
+increasing in $\theta$, equal to $0.05$ at $\theta=1$ and tending to $1$ as
+$\theta\rightarrow\infty$.
+
+\subhead{(c)}
+For $\theta_1<1$ the ratio increases in $T$, so the UMP test of $H_1:\theta<1$
+rejects for large $T$:
+$$R = \left\{x:\ 2\sum_{i=1}^{n}\log x_i > \chi^{2}_{2n,\,0.95}\right\},$$
+with power decreasing in $\theta$, again passing through $0.05$ at $\theta=1$.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+\draw[->](0,0)--(6.4,0)node[right]{$\theta$};
+\draw[->](0,0)--(0,3.4)node[above]{$\beta(\theta)$};
+\draw[dashed](0,0.3)--(6.2,0.3)node[right,scale=0.8]{$0.05$};
+\draw[dashed](2.4,0)--(2.4,3);
+\draw(2.4,0)node[below,scale=0.8]{$1$};
+\draw[thick,red]  plot[smooth,domain=0.25:6] (\x, {3/(1+exp(-2.4*(\x-2.4)))*0.98});
+\draw[thick,blue] plot[smooth,domain=0.25:6] (\x, {3/(1+exp(2.4*(\x-2.4)))+0.02});
+\node[red,scale=0.8]  at (5.0,2.55) {$H_1:\theta>1$};
+\node[blue,scale=0.8] at (1.15,2.55) {$H_1:\theta<1$};
+\draw(0,3)node[left,scale=0.8]{$1$};
+\end{tikzpicture}
+\end{center}
+\end{solution}
+
 
 There is a close relationship between hypothesis tests and confidence
 intervals, and it is worth seeing it on a concrete case before it is stated in
@@ -5170,6 +5560,41 @@ Let $X_1, \, \cdots\,, \, X_n$ be a random sample from the $GAM(2, \theta)$ dist
 $$R = \left\{x:\, \sum^5_{i = 1}x_i  < 4.7955\, \theta_0\, \, \text{or}\,\, \sum^5_{i = 1} x_i > 17.085\, \theta_0\right\}$$
 is a size $\alpha = 0.05$ critical region for testing $H_0:\, \theta = \theta_0$. Show that this critical region may be used to construct a $95\%$ C.I for $\theta$. 
 \end{problem}
+
+\begin{solution}
+Here $n=5$ and each $X_i\sim$ GAM$(2,\theta)$, so
+$\sum_{i=1}^{5}X_i \sim$ GAM$(10,\theta)$ and
+$$\frac{2}{\theta}\sum_{i=1}^{5}X_i \ \sim\ \chi^{2}_{(20)} .$$
+
+\subhead{The size}
+Under $H_0:\theta=\theta_0$ the two boundaries transform to
+$$\frac{2(4.7955\,\theta_0)}{\theta_0} = 9.591,
+\qquad \frac{2(17.085\,\theta_0)}{\theta_0} = 34.170,$$
+and these are exactly the $2.5\%$ and $97.5\%$ points of $\chi^{2}_{(20)}$.
+Hence
+$$P_{\theta_0}(X\in R) = P\left(\chi^{2}_{(20)}<9.591\right)
++ P\left(\chi^{2}_{(20)}>34.170\right) = 0.025+0.025 = 0.05 ,$$
+so $R$ has size $\alpha=0.05$.
+
+\subhead{The confidence interval}
+Acceptance means $4.7955\,\theta_0 \leq \sum_i x_i \leq 17.085\,\theta_0$, which
+rearranges to
+$$\frac{\sum_{i=1}^{5}x_i}{17.085} \ \leq\ \theta_0 \ \leq\ \frac{\sum_{i=1}^{5}x_i}{4.7955} .$$
+The set of $\theta_0$ that would \emph{not} be rejected is therefore an
+interval, and since the test has size $0.05$ this interval covers the true
+$\theta$ with probability $0.95$:
+$$\left(\frac{\sum_i X_i}{17.085},\ \frac{\sum_i X_i}{4.7955}\right)$$
+is a $95\%$ confidence interval for $\theta$.
+
+\begin{note}
+This is the duality of the earlier example, used in the useful direction:
+inverting a family of size-$\alpha$ tests produces a $100(1-\alpha)\%$
+confidence set, and the set is an interval exactly when the acceptance regions
+are intervals in the statistic. Nothing new is computed --- the same two
+constants do both jobs.
+\end{note}
+\end{solution}
+
 
 
 
@@ -5225,6 +5650,36 @@ Therefore the critical region corresponding to the LMP test is $R = \{x:\,\overl
 \begin{problem}
 Consider a single observation $X$ from the LOG$(1,\theta)$ distribution. Find the locally most powerful test of $H_0:\, \theta = 0$ against $H_1:\, \theta > 0$.
 \end{problem}
+
+\begin{solution}
+The logistic density with location $\theta$ and scale $1$ is
+$$f_{\theta}(x) = \frac{e^{-(x-\theta)}}{\left[1+e^{-(x-\theta)}\right]^{2}} .$$
+A locally most powerful test of $H_0:\theta=0$ against $H_1:\theta>0$ rejects
+for large values of the score at $\theta=0$. Now
+$$\log f_{\theta}(x) = -(x-\theta) - 2\log\left[1+e^{-(x-\theta)}\right],$$
+so
+$$S(\theta,x) = \frac{\partial}{\partial\theta}\log f_{\theta}(x)
+= 1 - \frac{2e^{-(x-\theta)}}{1+e^{-(x-\theta)}}
+= 1 - \frac{2}{1+e^{\,x-\theta}} ,$$
+and at $\theta=0$,
+$$S(0,x) = 1 - \frac{2}{1+e^{x}} = \frac{e^{x}-1}{e^{x}+1} = \tanh\!\left(\frac{x}{2}\right).$$
+This is a strictly increasing function of $x$, so rejecting for large $S(0,X)$
+is the same as rejecting for large $X$, and the locally most powerful test is
+$$R = \left\{x:\ x > c\right\}.$$
+Under $H_0$ the standard logistic distribution has
+$P_0(X>c) = 1-\dfrac{1}{1+e^{-c}} = \dfrac{1}{1+e^{c}}$, so setting this equal to
+$\alpha$ gives
+$$c = \log\left(\frac{1-\alpha}{\alpha}\right).$$
+For $\alpha=0.05$, $c=\log 19 \approx 2.944$.
+
+\begin{note}
+The test is only \emph{locally} most powerful --- best against alternatives just
+above zero. Here it happens also to be UMP, because the logistic location family
+has monotone likelihood ratio in $x$, but that is a bonus rather than something
+the locally most powerful construction guarantees.
+\end{note}
+\end{solution}
+
 %----------------------------------------------
 
 \section{Likelihood ratio tests}
@@ -5305,6 +5760,40 @@ Find the distribution of $T$ under $H_0$. Find the critical region for a size $\
 \textit{Hint:} If $X\thicksim GAM(a,1)$ and $Y\thicksim GAM(b,1)$ are independent random variable then $$\frac{X}{X + Y} \thicksim BETA(a,b).$$
 \end{problem}
 
+\begin{solution}
+With $X\sim$ GAM$(2,\beta_1)$ and $Y\sim$ GAM$(2,\beta_2)$ independent,
+$$L(\beta_1,\beta_2) = \frac{x\,e^{-x/\beta_1}}{\beta_1^{2}}\cdot
+\frac{y\,e^{-y/\beta_2}}{\beta_2^{2}} .$$
+Unrestricted, the maximum likelihood estimates are
+$\widehat{\beta}_1 = x/2$ and $\widehat{\beta}_2 = y/2$. Under
+$H_0:\beta_1=\beta_2=\beta$ the total $x+y$ has shape $4$, so
+$\widehat{\beta} = (x+y)/4$. Substituting,
+$$\Lambda = \frac{\sup_{H_0}L}{\sup L}
+= \frac{\left[(x+y)/4\right]^{-4}e^{-4}}
+       {\left(x/2\right)^{-2}\left(y/2\right)^{-2}e^{-2}e^{-2}}
+= \frac{\left(x/2\right)^{2}\left(y/2\right)^{2}}{\left[(x+y)/4\right]^{4}}
+= \frac{64\,x^{2}y^{2}}{(x+y)^{4}} .$$
+Writing $t = x/(x+y)$, so that $x=t(x+y)$ and $y=(1-t)(x+y)$, the factors of
+$(x+y)$ cancel and
+$$\Lambda = 64\,t^{2}(1-t)^{2} = 64\left[t(1-t)\right]^{2},$$
+a function of $T$ alone.
+
+\subhead{The distribution of $T$ under $H_0$}
+Under $H_0$, $X$ and $Y$ are independent gamma variables with the same scale and
+shapes $2$ and $2$, so
+$$T = \frac{X}{X+Y} \ \sim\ \text{BETA}(2,2),$$
+with density $6t(1-t)$ on $(0,1)$. The common scale $\beta$ cancels, which is
+what makes the null distribution free of the nuisance parameter and the test
+usable.
+
+\begin{note}
+$\Lambda$ is largest when $t=\tfrac12$ and falls away symmetrically, so rejecting
+for small $\Lambda$ means rejecting when $T$ is far from $\tfrac12$ in either
+direction --- exactly what a two-sided test of $\beta_1=\beta_2$ should do.
+\end{note}
+\end{solution}
+
+
 
 
 \begin{problem}
@@ -5312,6 +5801,31 @@ Suppose $X_1, \, \cdots\, , X_n$ are independent $EXP(\lambda)$ random variables
 Show that the likelihood ratio statistic for testing the hypothesis $H_0: \lambda = \mu$ against the alternative $H_1: \lambda \neq \mu$ is  a function of 
 $$T = \frac{\sum^n_{i = 1} X_i}{\sum^n_{i =1} X_i + \sum^n_{i = 1} Y_i}.$$
 \end{problem}
+
+\begin{solution}
+Write $S=\sum_{i=1}^{n}X_i$ and $U=\sum_{i=1}^{n}Y_i$. With the exponential
+parameterised by its mean,
+$$L(\lambda,\mu) = \lambda^{-n}e^{-S/\lambda}\,\mu^{-n}e^{-U/\mu},$$
+so unrestricted $\widehat{\lambda}=S/n$, $\widehat{\mu}=U/n$, while under
+$H_0:\lambda=\mu$ the pooled estimate is $\widehat{\lambda}_0=(S+U)/(2n)$.
+Hence
+$$\Lambda = \frac{\left[(S+U)/2n\right]^{-2n}e^{-2n}}
+{\left(S/n\right)^{-n}\left(U/n\right)^{-n}e^{-n}e^{-n}}
+= \frac{\left(S/n\right)^{n}\left(U/n\right)^{n}}{\left[(S+U)/2n\right]^{2n}}
+= 2^{2n}\,\frac{S^{n}U^{n}}{(S+U)^{2n}} .$$
+Putting $T = S/(S+U)$ gives
+$$\Lambda = 2^{2n}\left[T(1-T)\right]^{n},$$
+so the statistic is a function of $T$ alone --- the same shape as the previous
+problem with $n$ in place of $1$.
+
+Under $H_0$ the sums $S$ and $U$ are independent GAM$(n,\lambda)$ variables with
+a common scale, so
+$$T = \frac{S}{S+U}\ \sim\ \text{BETA}(n,n),$$
+free of $\lambda$. The test rejects for small $\Lambda$, that is when $T$ departs
+from $\tfrac12$ in either direction, with the critical values taken from the
+BETA$(n,n)$ distribution.
+\end{solution}
+
 
 
 
@@ -5323,6 +5837,42 @@ $$\Lambda_n(x) = \frac{\sup_{\theta\in \Omega} \prod^n_{i = 1} f_{\theta}(x_i)}{
 is such that, under $H_0: \theta \in \Omega_0$,
 $$2\, \log \Lambda_n(x) \, \underset{D}{\longrightarrow} \, W\thicksim \chi^2_{(k - q)}.$$
 \end{problem}
+
+\begin{solution}
+This is Wilks' theorem. A full proof belongs to asymptotic theory, but the
+argument is short enough to give in outline, and it explains where the degrees
+of freedom come from.
+
+Let $\widehat{\theta}$ maximise the likelihood over $\Omega$ and
+$\widehat{\theta}_0$ over $\Omega_0$, and expand $\log L$ about $\widehat{\theta}$
+to second order. The first-order term vanishes because $\widehat{\theta}$ is a
+stationary point, leaving
+$$2\log\Lambda_n = 2\left[\log L\left(\widehat{\theta}\right) - \log L\left(\widehat{\theta}_0\right)\right]
+\approx \left(\widehat{\theta}-\widehat{\theta}_0\right)^{t} J\left(\theta_0\right)
+\left(\widehat{\theta}-\widehat{\theta}_0\right),$$
+since $-\partial^{2}\log L/\partial\theta\partial\theta^{t}$ converges to
+$J(\theta_0)$.
+
+Under $H_0$ the large-sample theory of the previous section gives
+$$J\left(\theta_0\right)^{1/2}\left(\widehat{\theta}-\theta_0\right)
+\underset{D}{\longrightarrow} Z \sim N_k(0,I),$$
+so the quadratic form above is asymptotically $Z^{t}PZ$, where $P$ is the
+orthogonal projection onto the orthogonal complement of the tangent space of
+$\Omega_0$ at $\theta_0$. That tangent space has dimension $q$, so $P$ has rank
+$k-q$. A quadratic form $Z^{t}PZ$ in a standard normal vector, with $P$ an
+orthogonal projection of rank $r$, has the $\chi^{2}_{(r)}$ distribution. Hence
+$$2\log\Lambda_n \underset{D}{\longrightarrow} W \sim \chi^{2}_{(k-q)} .$$
+
+\begin{note}
+The degrees of freedom are the number of restrictions --- the dimension the null
+hypothesis removes --- and not the dimension of either space on its own. That is
+the practical content of the theorem: to use it, count constraints. The
+regularity conditions matter too: $\Omega_0$ must be a smooth surface in the
+interior of $\Omega$, which is why the result fails when the null puts a
+parameter on the boundary, as in testing a variance component equal to zero.
+\end{note}
+\end{solution}
+
 
 
 \textbf{Note:}\\
@@ -5459,6 +6009,36 @@ Suppose $X\thicksim BIN(n,\theta)$. Find the Score test and the Wald test for te
 Suppose $(X_1, \, \cdots\, , X_n)$ is a random sample from the $POI(\theta)$ distribution. Find the Score test and Wald test for testing $H_0:\, \theta = \theta_0$ against $H_1:\, \theta \neq \theta_0$.
 \end{problem}
 
+\begin{solution}
+With $T=\sum_{i=1}^{n}X_i$,
+$$\log L(\theta) = -n\theta + T\log\theta + \text{const},\qquad
+S(\theta,X) = \frac{T}{\theta} - n = \frac{T-n\theta}{\theta},$$
+and $J(\theta) = n/\theta$. The maximum likelihood estimator is
+$\widehat{\theta}=\overline{X}$.
+
+\subhead{Score test}
+$$R(\theta_0,X) = \frac{\left[S(\theta_0,X)\right]^{2}}{J(\theta_0)}
+= \frac{(T-n\theta_0)^{2}}{\theta_0^{2}}\cdot\frac{\theta_0}{n}
+= \frac{(T-n\theta_0)^{2}}{n\theta_0}
+= \frac{n\left(\overline{X}-\theta_0\right)^{2}}{\theta_0},$$
+and $H_0$ is rejected when $R>\chi^{2}_{1,\,1-\alpha}$.
+
+\subhead{Wald test}
+$$w(\theta_0,X) = \left(\widehat{\theta}-\theta_0\right)^{2}J\left(\widehat{\theta}\right)
+= \left(\overline{X}-\theta_0\right)^{2}\frac{n}{\overline{X}}
+= \frac{n\left(\overline{X}-\theta_0\right)^{2}}{\overline{X}},$$
+rejected on the same scale.
+
+\begin{note}
+The two differ only in where the information is evaluated --- at $\theta_0$ for
+the score test, at $\widehat{\theta}$ for the Wald test --- and they agree to
+first order, as the theory says they must. The score version needs no maximum
+likelihood estimate at all, and its null distribution uses only $\theta_0$,
+which is why it is preferred when the null value is the natural reference point.
+\end{note}
+\end{solution}
+
+
 \begin{proof}[\textbf{Solution.}]
 $H_0:\, \theta = \theta_0\,$ against $\, H_1:\, \theta \neq \theta_0$
 $$L(\theta) = \binom{n}{x}\, \theta^x\, (1  - \theta)^{n - x}.$$
@@ -5506,6 +6086,39 @@ Therefore $\, R = \{x:\, w(\theta_0, x) > c \}\,$ where $c$ is determined from $
 Let $X_1, \, \cdots\, , X_n$ be a random sample from the distribution with pdf $$f_{\theta}(x) = \frac{\theta}{x^{1 + \theta}}\, , \hspace{0.3cm} x\geq 1$$
 Find the Score test and the Wald test for testing $H_0:\, \theta = \theta_0$ against $H_1:\, \theta \neq \theta_0.$
 \end{problem}
+
+\begin{solution}
+For $f_{\theta}(x)=\theta x^{-(1+\theta)}$ on $x\geq1$, write
+$T=\sum_{i=1}^{n}\log X_i$. Then
+$$\log L(\theta) = n\log\theta - (1+\theta)T,\qquad
+S(\theta,X) = \frac{n}{\theta} - T,$$
+$$-\frac{\partial^{2}\log L}{\partial\theta^{2}} = \frac{n}{\theta^{2}}
+\quad\Longrightarrow\quad J(\theta) = \frac{n}{\theta^{2}},$$
+the information being free of the data here. Setting the score to zero gives
+$\widehat{\theta} = n/T$.
+
+\subhead{Score test}
+$$R(\theta_0,X) = \frac{\left[S(\theta_0,X)\right]^{2}}{J(\theta_0)}
+= \left(\frac{n}{\theta_0}-T\right)^{2}\frac{\theta_0^{2}}{n}
+= \frac{\left(n-\theta_0 T\right)^{2}}{n} .$$
+
+\subhead{Wald test}
+$$w(\theta_0,X) = \left(\widehat{\theta}-\theta_0\right)^{2}J\left(\widehat{\theta}\right)
+= \left(\frac{n}{T}-\theta_0\right)^{2}\frac{n}{\left(n/T\right)^{2}}
+= \frac{\left(n-\theta_0T\right)^{2}}{n} .$$
+
+Both are referred to $\chi^{2}_{(1)}$ and $H_0$ is rejected for large values.
+
+\begin{remark}
+The two statistics are \emph{identical} here, which does not happen in general.
+It occurs because the information $n/\theta^{2}$ and the score $n/\theta - T$
+combine so that the $\theta$ at which the information is evaluated cancels
+exactly. Recalling that $T\sim$ GAM$(n,1/\theta)$, the common statistic is
+$n\left(1-\theta_0T/n\right)^{2}$, a squared standardised deviation of $T$ from
+its null mean $n/\theta_0$.
+\end{remark}
+\end{solution}
+
 
 
 
