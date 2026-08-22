@@ -2463,10 +2463,61 @@ Show that the geometric mean $$\left(\prod^n_{i = 1} X_i \right)^{1/n}$$ is a co
 $$\textit{Hint:} - \log X_i \, \thicksim \, Exp\left(\frac{1}{\theta}\right)$$
 \end{problem}
 
+\begin{solution}
+Put $Y_i = -\log X_i$. Since $x=e^{-y}$ and $\left|dx/dy\right| = e^{-y}$,
+$$f_Y(y) = \theta\left(e^{-y}\right)^{\theta-1}e^{-y} = \theta e^{-\theta y},
+\qquad y>0 ,$$
+so $Y_i$ is exponential with rate $\theta$, as the hint states.
+
+Writing the density as
+$f_{\theta}(x) = \theta\exp\left\{(\theta-1)\log x\right\}$ exhibits a
+one-parameter exponential family with natural statistic $\sum_i \log X_i$.
+Hence $T = -\sum_{i=1}^{n}\log X_i = \sum_i Y_i$ is complete and sufficient, and
+$T\sim$ GAM$(n,1/\theta)$ --- shape $n$, rate $\theta$. The geometric mean
+$$G = \left(\prod_{i=1}^{n}X_i\right)^{1/n} = e^{-T/n}$$
+is a strictly monotone function of $T$, so it is complete and sufficient too.
+
+For the UMVUE, a gamma variable of shape $n$ and rate $\theta$ has
+$$E\left(\frac{1}{T}\right) = \frac{\theta}{n-1}\qquad (n>1),$$
+so $(n-1)/T$ is unbiased for $\theta$ and, being a function of a complete
+sufficient statistic, is the UMVUE:
+$$\widehat{\theta} = \frac{n-1}{T} = \frac{-(n-1)}{\sum_{i=1}^{n}\log X_i}
+= \frac{n-1}{-n\log G}.$$
+The maximum likelihood estimator is $n/T$, so the two differ only in replacing
+$n$ by $n-1$ --- the usual correction that converts a maximum likelihood
+estimator into an unbiased one.
+\end{solution}
+
+
 
 \begin{problem}
 Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $GAM(\alpha, \beta)$ distribution and $\theta = (\alpha , \beta)$. Find the $UMVE$ of $\tau(\theta) = \alpha\beta$.
 \end{problem}
+
+\begin{solution}
+With both parameters unknown the density is
+$$f_{\theta}(x) = \frac{x^{\alpha-1}e^{-x/\beta}}{\beta^{\alpha}\Gamma(\alpha)}
+= \frac{1}{\beta^{\alpha}\Gamma(\alpha)}
+\exp\left\{(\alpha-1)\log x - \frac{x}{\beta}\right\},$$
+a two-parameter exponential family whose natural statistic is
+$$T = \left(\sum_{i=1}^{n}X_i,\ \sum_{i=1}^{n}\log X_i\right),$$
+complete and sufficient because the natural parameter space
+$\left\{(\alpha-1,\,-1/\beta):\alpha>0,\beta>0\right\}$ contains an open
+rectangle.
+
+Now $E(X_i)=\alpha\beta$, so $\overline{X}$ is unbiased for $\tau(\theta)$, and
+it is a function of the first component of $T$. By Lehmann--Scheff\'e it is
+therefore the UMVUE:
+$$\widehat{\alpha\beta} = \overline{X}.$$
+
+\begin{note}
+No calculation was needed beyond identifying the family. That is the point of
+the exponential-family machinery: once completeness is established, producing
+\emph{any} unbiased function of the sufficient statistic settles the question,
+and here the obvious estimator already is one.
+\end{note}
+\end{solution}
+
 
 
 
@@ -2474,10 +2525,60 @@ Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $GAM(\alpha,
 Let $X\thicksim NBIN(k, \theta)$. Find the $UMVUE$ of $\theta$. $$\textit{Hint:}\hspace{0.3cm}\, \text{Find}\,\,\, \, E\left(\frac{1}{X + K - 1}\right).$$
 \end{problem}
 
+\begin{solution}
+Take the negative binomial in the form
+$$P_{\theta}(X=x) = \binom{x+k-1}{x}\theta^{k}(1-\theta)^{x},
+\qquad x = 0,1,2,\dots$$
+the number of failures before the $k$-th success. This is a one-parameter
+exponential family in $\theta$ and $X$ is the whole sample, so $X$ is complete
+and sufficient.
+
+Following the hint, use the binomial identity
+$$\frac{1}{x+k-1}\binom{x+k-1}{x}
+= \frac{(x+k-2)!}{x!\,(k-1)!}
+= \frac{1}{k-1}\binom{x+k-2}{x},$$
+valid for $k\geq 2$. Then
+$$E_{\theta}\left(\frac{1}{X+k-1}\right)
+= \frac{1}{k-1}\sum_{x=0}^{\infty}\binom{x+k-2}{x}\theta^{k}(1-\theta)^{x}
+= \frac{\theta}{k-1}\underbrace{\sum_{x=0}^{\infty}\binom{x+k-2}{x}\theta^{k-1}(1-\theta)^{x}}_{\textstyle =\,1},$$
+the sum being the total mass of a NBIN$(k-1,\theta)$ distribution. Hence
+$$E_{\theta}\left(\frac{k-1}{X+k-1}\right) = \theta ,$$
+and since this is a function of the complete sufficient statistic,
+$$\widehat{\theta} = \frac{k-1}{X+k-1}$$
+is the UMVUE, provided $k\geq2$.
+
+\begin{remark}
+For $k=1$ --- the geometric case --- no unbiased estimator of $\theta$ exists at
+all. Any candidate $g(X)$ would have to satisfy
+$\sum_x g(x)\theta(1-\theta)^{x} = \theta$ for every $\theta$, forcing
+$g(0)=1$ and $g(x)=0$ thereafter; that estimator is unbiased but takes only the
+values $0$ and $1$, which is a reminder that unbiasedness on its own is a weak
+requirement.
+\end{remark}
+\end{solution}
+
+
 
 \begin{problem}
 Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $N(\theta, 1)$ distribution. Find the $UMVUE$ of $\tau(\theta) = \theta^2$.
 \end{problem}
+
+\begin{solution}
+With unit variance the family is exponential with natural statistic
+$\sum_i X_i$, so $\overline{X}$ is complete and sufficient. Since
+$\overline{X}\sim N\left(\theta,\ 1/n\right)$,
+$$E\left(\overline{X}^{2}\right) = \var\left(\overline{X}\right) + \left[E\left(\overline{X}\right)\right]^{2}
+= \frac{1}{n} + \theta^{2}.$$
+Subtracting the constant gives an unbiased estimator which, being a function of
+the complete sufficient statistic, is the UMVUE:
+$$\widehat{\theta^{2}} = \overline{X}^{2} - \frac{1}{n}.$$
+
+As in the EXP$(1,\theta)$ problem earlier, the estimator is negative whenever
+$\left|\overline{X}\right| < 1/\sqrt{n}$, although $\theta^{2}$ cannot be. The
+same comment applies: unbiasedness constrains the average, not the individual
+value.
+\end{solution}
+
 
 
 
@@ -2486,11 +2587,65 @@ Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $N(\theta, 1
 Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $N(0, \theta)$ distribution. Find the $UMVUE$ of $\tau (\theta) = \theta^2$.
 \end{problem}
 
+\begin{solution}
+Here $\theta$ is the variance and the mean is known to be zero, so
+$$f_{\theta}(x) = \left(2\pi\theta\right)^{-1/2}\exp\left\{-\frac{x^{2}}{2\theta}\right\}$$
+is a one-parameter exponential family with natural statistic $\sum_i X_i^{2}$.
+Thus $T=\sum_{i=1}^{n}X_i^{2}$ is complete and sufficient, and $T/\theta\sim\chi^{2}_{(n)}$,
+so
+$$E(T) = n\theta,\qquad \var(T) = 2n\theta^{2},\qquad
+E\left(T^{2}\right) = 2n\theta^{2} + n^{2}\theta^{2} = n(n+2)\,\theta^{2}.$$
+Therefore
+$$\widehat{\theta^{2}} = \frac{T^{2}}{n(n+2)}
+= \frac{\left(\sum_{i=1}^{n}X_i^{2}\right)^{2}}{n(n+2)}$$
+is unbiased and hence the UMVUE.
+
+\begin{note}
+Contrast this with the previous problem: because the parameter is now the
+variance, the natural statistic is the sum of squares rather than the sum, and
+the estimator of $\theta^{2}$ is a multiple of $T^{2}$ with no correction term
+needed. The divisor $n(n+2)$ rather than $n^{2}$ is exactly the variance of the
+chi-square distribution making itself felt.
+\end{note}
+\end{solution}
+
+
 
 
 \begin{problem}
 Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $POI(\theta)$ distribution. Find the $UMVUE$ for $\tau(\theta) = \left(1 + \theta\right)\, e^{-\theta}$.\\ \, \textit{Hint:}\, \, Find $P(X \leq 1)$.
 \end{problem}
+
+\begin{solution}
+Note first that $\tau(\theta) = P_{\theta}\left(X_1\leq 1\right)$, as the hint
+suggests, since a Poisson variable takes the values $0$ and $1$ with
+probabilities $e^{-\theta}$ and $\theta e^{-\theta}$.
+
+So $U = I\left(X_1\leq 1\right)$ is an unbiased estimator of $\tau(\theta)$,
+though a poor one --- it uses one observation and takes only two values.
+Rao--Blackwellise it on the complete sufficient statistic
+$T=\sum_{i=1}^{n}X_i\sim$ POI$(n\theta)$. Given $T=t$ the conditional
+distribution of $X_1$ is binomial with $t$ trials and success probability $1/n$,
+so
+\begin{align*}
+E\left(U\mid T=t\right) &= P\left(X_1\leq 1\mid T=t\right)
+ = \left(1-\frac1n\right)^{t} + t\cdot\frac1n\left(1-\frac1n\right)^{t-1}\\[2pt]
+ &= \frac{(n-1)^{t} + t\,(n-1)^{t-1}}{n^{t}}
+  = \frac{(n-1)^{\,t-1}\left(n-1+t\right)}{n^{t}} .
+\end{align*}
+Hence the UMVUE is
+$$\widehat{\tau} = \frac{(n-1)^{\,T-1}\left(n-1+T\right)}{n^{T}},$$
+interpreted as $1$ when $T=0$.
+
+\begin{note}
+The three moving parts here are worth separating. Finding \emph{an} unbiased
+estimator was easy, because $\tau$ was recognised as a probability. Improving it
+was mechanical, because conditioning on a sufficient statistic can only help.
+Knowing the result is best required completeness. Every UMVUE in this section is
+built the same way.
+\end{note}
+\end{solution}
+
 
 
 \begin{problem}
@@ -2498,10 +2653,72 @@ Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $POI(\theta)
 $$\textit{Hint:}\hspace{0.3cm} E_{\theta}\left[(-1)^{X_1}\right]$$
 \end{problem}
 
+\begin{solution}
+Following the hint,
+$$E_{\theta}\left[(-1)^{X_1}\right]
+= \sum_{x=0}^{\infty}(-1)^{x}\frac{e^{-\theta}\theta^{x}}{x!}
+= e^{-\theta}\sum_{x=0}^{\infty}\frac{(-\theta)^{x}}{x!}
+= e^{-\theta}e^{-\theta} = e^{-2\theta},$$
+so $U=(-1)^{X_1}$ is unbiased for $\tau(\theta)$.
+
+Rao--Blackwellise on $T=\sum_i X_i$. Given $T=t$ we have $X_1\sim$ BIN$(t,1/n)$,
+and the binomial theorem gives
+$$E\left[(-1)^{X_1}\mid T=t\right]
+= \sum_{x=0}^{t}\binom{t}{x}\left(-\frac1n\right)^{x}\left(1-\frac1n\right)^{t-x}
+= \left(1-\frac1n-\frac1n\right)^{t} = \left(\frac{n-2}{n}\right)^{t}.$$
+Since $T$ is complete and sufficient, the UMVUE is
+$$\widehat{\tau} = \left(\frac{n-2}{n}\right)^{T}.$$
+
+\begin{remark}
+For $n=2$ the estimator is $0^{T}$, which is $1$ if $T=0$ and $0$ otherwise, and
+for $n=1$ it is $(-1)^{T}$ --- an estimator of a positive quantity that is
+negative half the time. Both are the UMVUE at those sample sizes, which shows
+how little ``uniformly minimum variance unbiased'' guarantees when the sample is
+small. The estimator becomes sensible only once $n$ is large enough that
+$(n-2)/n$ is close to one.
+\end{remark}
+\end{solution}
+
+
 
 \begin{problem}
 Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $GAM(2, \theta)$ distribution. Find the $UMVUE$ of $\tau_1(\theta) = \frac{1}{\theta}$ and the $UMVUE$ of $\tau_2(\theta) = P\left(X_1 > c\right)$ where $c>0$ is a constant.
 \end{problem}
+
+\begin{solution}
+Take GAM$(2,\theta)$ to have shape $2$ and scale $\theta$, so that
+$f_{\theta}(x) = x e^{-x/\theta}/\theta^{2}$ for $x>0$. This is a one-parameter
+exponential family with natural statistic $\sum_i X_i$, so
+$T=\sum_{i=1}^{n}X_i\sim$ GAM$(2n,\theta)$ is complete and sufficient.
+
+\subhead{The UMVUE of $\tau_1(\theta)=1/\theta$}
+For a gamma variable of shape $a$ and scale $\theta$,
+$E\left(T^{-1}\right) = 1/\left[\theta(a-1)\right]$. With $a=2n$,
+$$E\left(\frac{1}{T}\right) = \frac{1}{\theta\,(2n-1)}
+\qquad\Longrightarrow\qquad
+\widehat{\tau_1} = \frac{2n-1}{T} .$$
+
+\subhead{The UMVUE of $\tau_2(\theta)=P\left(X_1>c\right)$}
+Start from the unbiased indicator $U = I\left(X_1>c\right)$ and condition on
+$T$. Given $T=t$, the ratio $X_1/T$ has the Beta$(2,\,2n-2)$ distribution ---
+the standard result for independent gamma variables with a common scale, and
+note the scale $\theta$ has cancelled, which is what makes the conditional law
+free of the parameter. Hence for $t>c$,
+$$P\left(X_1>c \mid T=t\right)
+= \int_{c/t}^{1}(2n-1)(2n-2)\,u\,(1-u)^{2n-3}\,du
+= \left(1-\frac{c}{t}\right)^{2n-2}\left[1+(2n-2)\frac{c}{t}\right],$$
+and the probability is zero when $t\leq c$. The UMVUE is therefore
+$$\widehat{\tau_2} =
+\begin{cases}
+\left(1-\dfrac{c}{T}\right)^{2n-2}\left[1+(2n-2)\dfrac{c}{T}\right], & T>c,\\[10pt]
+0, & T\leq c .
+\end{cases}$$
+
+A check: at $n=1$ the sample is the single observation $X_1=T$, the exponent
+$2n-2$ is zero and the bracket is one, so the estimator reduces to
+$I\left(X_1>c\right)$ --- exactly the indicator we started from, as it must.
+\end{solution}
+
 
 
 
