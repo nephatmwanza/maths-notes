@@ -16,6 +16,13 @@
 
 \usetikzlibrary{quotes,angles,graphs,patterns,fadings,arrows.meta,shapes,trees,bending}
 
+% grad, div and curl are operator NAMES. Set as bare letters in maths they come
+% out italic, so "grad" reads as the product g.r.a.d - the same defect as a bare
+% \cos. These give them upright type and the correct spacing.
+\DeclareMathOperator{\grad}{grad}
+\DeclareMathOperator{\dive}{div}
+\DeclareMathOperator{\curl}{curl}
+
 \parindent 0ex
 \setlength{\parskip}{0.55\baselineskip}
 % Displays carry their own skips; with a non-zero \parskip on top of them,
@@ -106,34 +113,62 @@ of variables formula for multiple integrals.
 
 
 \begin{defn}
+Let $D$ be a set of ordered pairs of real numbers. A \emph{function of two
+variables} on $D$ is a rule $f$ which assigns to each pair $(x,y)\in D$ exactly
+one real number, denoted $f(x,y)$. The set $D$ is the \emph{domain} of $f$, and
+the set of numbers $f$ produces as $(x,y)$ runs over $D$ is its \emph{range}.
+\end{defn}
 
+The value is usually given a name of its own, and one writes
+$$z = f(x,y).$$
+In this notation $x$ and $y$ are the \emph{independent} variables and $z$ is the
+\emph{dependent} variable. The names say exactly what they mean: $x$ and $y$ may
+be chosen freely, subject only to the pair $(x,y)$ lying in $D$, and once they
+have been chosen the value of $z$ is determined --- there is no freedom left in
+it. This is the same language used for a function of one variable, and it is
+used here in the same way.
 
-A function $f$ of two variables is a correspondence that associates with each pair $(x,y)\in D$, a unique real number, denoted $f(x,y)$. $$z = f(x,y)$$
-\begin{align*}
-z & - \text{dependent variable}\\
-x,y & - \text{independent variables}\\\\
-\end{align*}
+What has changed is the shape of the domain. For $y = f(x)$ the domain is a
+subset of the line, usually an interval; for $z = f(x,y)$ it is a subset of the
+plane, and a region of the plane can have a boundary of any shape, can have
+holes, and can be approached from infinitely many directions. Almost everything
+that is genuinely new in this course traces back to that one change, and not to
+the extra letter.
 
-Examples of functions of two or three variables
+\begin{exa}
+Quantities that depend on two or three others are the ordinary case rather than
+the exception.
 \begin{enumerate}
-\item[$-$] Volume of Cylinder $\displaystyle{V = \pi r^2 h}$
+\item[$-$] The volume of a cylinder, $V = \pi r^2h$, is a function of the two
+variables $r$ and $h$.
 
-\item[$-$] Ideal gas law $\hspace{0.4cm}\displaystyle{P = \frac{RT}{V}}$
+\item[$-$] The ideal gas law, $\displaystyle{P = \frac{RT}{V}}$, gives the
+pressure as a function of the temperature $T$ and the volume $V$, with $R$
+constant.
 
-\item[$-$] $z = f(x,y) = \sqrt{1 - x^2 - y^2}$
+\item[$-$] For $\displaystyle{z = f(x,y) = \sqrt{1 - x^2 - y^2}}$ the quantity
+under the root must not be negative, which restricts the pair $(x,y)$ before any
+arithmetic is done:
 \begin{align*}
-\text{Domain} & = \{(x,y)\hspace{0.1cm}|\hspace{0.2cm} x^2 + y^2 \leq 1\}\\\\
-\text{Range of}\hspace{0.2cm} z & = \{z\hspace{0.1cm}|\hspace{0.2cm} 0\leq z \leq 1\}\\
-                  & = [0,1]\\
+\text{domain} & = \big\{(x,y)\ :\ x^2 + y^2 \leq 1\big\},\\\\
+\text{range}  & = \big\{z\ :\ 0\leq z \leq 1\big\} = [0,1].
 \end{align*}
+The domain is the closed unit disc --- a region of the plane, as promised, and
+not an interval.
 \end{enumerate}
+\end{exa}
 
-In $3D$, the set of points $(x,y,z)$ such $z = 1 - x^2 - y^2$
-$$\implies \hspace{0.5cm} z^2 = 1 - x^2 - y^2$$
+The last of these is worth following through, because its graph is a surface
+with a name. Squaring $z = \sqrt{1 - x^2 - y^2}$ gives $z^2 = 1 - x^2 - y^2$,
+that is
+$$x^2 + y^2 + z^2 = 1,$$
+the sphere of radius $1$ centred at the origin. Squaring, however, throws away a
+sign, and the sphere is \emph{not} the graph of $f$: a sphere fails the vertical
+line test, since most points $(x,y)$ of the disc lie below two points of it. The
+function takes only the non-negative square root, so its graph is the upper half
+of the sphere --- the hemisphere of radius $1$ lying on or above the
+$xy-$plane.
 
-$$ x^2 + y^2 + z^2 = 1 \hspace{0.2cm}\text{i.e Sphere with radius 1}$$
-
-$$z = \sqrt{1 - x^2 - y^2}\hspace{0.3cm}\text{is a hemisphere of radius}$$
 
 % DIAGRAM 1
 
@@ -164,7 +199,6 @@ $$z = \sqrt{1 - x^2 - y^2}\hspace{0.3cm}\text{is a hemisphere of radius}$$
 (0,0,2)node[right,scale=0.9]{(1,0,0)};
 \end{tikzpicture}
 \end{figure}
-\end{defn}
 
 {\color[wave]{485}\subsection{Level Curves}}
 Another useful method of describing a function of two variables consists of sketching in the $xy-$ plane, the groups of $f(x,y) = K$ (a constant) for various values of $K$. The graphs so obtained are called level curves of $f$.\\ \textit{N.B} As a point $(x,y)$ moves on a level curve the values of $f(x,y)$ are constant.
@@ -290,19 +324,30 @@ i.e the point $P(x,y)$ lies inside a certain circle of radius $\delta$, and cent
 
 
 \begin{defn}
-
-
-The function $f(x,y)$ is continuous at $P_0(x_0,y_0)$ if 
+The function $f$ is \emph{continuous} at the point $P_0(x_0,y_0)$ if all three
+of the following hold.
 \begin{enumerate}
-\item $f$ must be defined
+\item $f$ is defined at $P_0$; that is, $f(x_0,y_0)$ exists.
 
-\item $\displaystyle{\lim\limits_{(x,y)\longrightarrow (x_0,y_0)} = L}$
+\item The limit
+$\displaystyle{\lim_{(x,y)\rightarrow (x_0,y_0)} f(x,y)}$ exists.
 
-\item $\displaystyle{\lim\limits_{(x,y)\longrightarrow (x_0,y_0)} = f(x_0,y_0)}$
+\item The two agree:
+$\displaystyle{\lim_{(x,y)\rightarrow (x_0,y_0)} f(x,y) = f(x_0,y_0)}$.
 \end{enumerate}
-
-The function $f$ is continuous in the set $S$ if it is continuous at every point of $S$.
+The function $f$ is continuous on a set $S$ if it is continuous at every point
+of $S$.
 \end{defn}
+
+The three conditions are independent, and a single example fails each of them in
+turn: $f(x,y) = \dfrac{xy}{x^2+y^2}$ is undefined at the origin and so fails the
+first; assigning it any value there still fails the second, since the limit does
+not exist; and a function whose limit at $P_0$ exists but differs from its value
+there fails only the third. This is the same three-part test as for one
+variable. What is not the same is condition 2, and the difference is the whole
+difficulty: on the line a point can be approached from two sides, in the plane
+from infinitely many directions, and along curves as well as straight lines.
+
 
 
 \begin{exa}
@@ -569,26 +614,44 @@ Suppose that we have a functional of two or three variables and we consider all 
 {\textcolor{blue}{Question:}} In which direction does $f$ change fastest.
 
 
-\begin{thm}
+\begin{thm}[Maximising the directional derivative]
+Let $f$ be a differentiable function of two or three variables. At any point
+$\overrightarrow{x}$ the largest value taken by the directional derivative
+$D_{\overrightarrow{u}}f\big(\overrightarrow{x}\big)$, as the unit vector
+$\overrightarrow{u}$ ranges over all directions, is
+$\big|\nabla f\big(\overrightarrow{x}\big)\big|$, and it is attained when
+$\overrightarrow{u}$ points in the direction of $\nabla f\big(\overrightarrow{x}\big)$.
+\end{thm}
 
-
-Suppose $f$ is a differentiable  function of 2 or 3 variables, the maximum value of the directional derivative.
-$D_u\hspace{0.1cm} f\big(\overrightarrow{x}\big)$ is $\big|\nabla f\big(\overrightarrow{x}\big)\big|$ and it occurs when $\overrightarrow{u}$ has the same direction as the gradient vector.
-
-
-{\color[wave]{485}{Proof}}
+\begin{proof}
+Write $\theta$ for the angle between $\nabla f$ and $\overrightarrow{u}$. Since
+$\overrightarrow{u}$ is a unit vector,
 \begin{align*}
-D_u f & = \nabla f\cdot\overrightarrow{u}\\
+D_{\overrightarrow{u}} f & = \nabla f\cdot\overrightarrow{u}\\
       & = \big|\nabla f\big|\hspace{0.1cm}\big|\overrightarrow{u}\big|\hspace{0.1cm} \cos \theta\\
-      & = \big|\nabla f\big|\cos \theta
+      & = \big|\nabla f\big|\cos \theta .
 \end{align*}
-where $\theta$ is the angle between $\nabla f$ and $\overrightarrow{u}$.
+Only $\cos\theta$ depends on the direction chosen, and $\cos\theta$ is largest
+when $\theta = 0$. Hence the maximum value is $\big|\nabla f\big|$, attained
+when $\overrightarrow{u}$ is parallel to $\nabla f$.
+\end{proof}
 
+The same one-line calculation settles the other two directions at once, and it
+is worth reading off all three together:
+\begin{enumerate}
+\item[$-$] $\theta = 0$: the derivative is $+\big|\nabla f\big|$. The gradient
+points in the direction of \emph{steepest ascent}.
 
-Therefore, the maximum value of $D_u f$ is $\big|\nabla f\big|$ and it occurs when $\theta = 0$.
+\item[$-$] $\theta = \dfrac{\pi}{2}$: the derivative is $0$. Perpendicular to
+the gradient the function does not change to first order --- which is exactly
+why the level curves of $f$ cross the gradient at right angles.
 
+\item[$-$] $\theta = \pi$: the derivative is $-\big|\nabla f\big|$, the
+direction of \emph{steepest descent}.
+\end{enumerate}
+So a single vector, $\nabla f$, answers three questions: which way is uphill,
+which way is flat, and how steep the hill is.
 
-Direction derivative is maximum in the direction of the gradient vector, zero in directions orthogonal to the gradient vector and minimum in the direction opposite the gradient vector.
 
 % DIAGRAM 6
 
@@ -619,7 +682,6 @@ Direction derivative is maximum in the direction of the gradient vector, zero in
 %\shade[top color=blue,opacity=0.4](0,2.5,0)parabola(2.5,0,0)--(2.5,0,0)parabola[bend at end](0,0,2.5)--(0,0,2.5)parabola[bend at end](0,2.5,0)--cycle;
 \end{tikzpicture}
 \end{figure}
-\end{thm}
 
 \begin{exa}
 \begin{enumerate}
@@ -770,7 +832,7 @@ $\therefore\hspace{0.3cm} f(0,0) = 0$ is not an extreme value of $f$.
 \subhead{Second Derivative Test}
 
 
-Suppose the second partial derivatives of $f$ are continuous on a disk with $(a,b)$ and suppose that $f_x(a,b)=0\hspace{0.1cm},\hspace{0.1cm} f_y(a,b) =0$. Let $$D = D(a,b) = f_{xx}(a,b)f_{yy}(a,b) -\big(f_{xy}(a,b)\big)^2$$  
+Suppose the second partial derivatives of $f$ are continuous on a disc with $(a,b)$ and suppose that $f_x(a,b)=0\hspace{0.1cm},\hspace{0.1cm} f_y(a,b) =0$. Let $$D = D(a,b) = f_{xx}(a,b)f_{yy}(a,b) -\big(f_{xy}(a,b)\big)^2$$  
 \begin{enumerate}
 \item If $D> 0,\hspace{0.1cm} f_{xx}(a,b)>0$ then $f(a,b)$ is local minimum.
 
@@ -2151,7 +2213,7 @@ $$\text{Domain of } \hspace{0.3cm} f+ g = \big\{ (x,y,z)\hspace{0.1cm} : \hspace
 \begin{defn}
 
 
-Let $f: \mathbb{R}^n \longrightarrow \mathbb{R}^m$ be differentiable at a point $\underline{X}$ in $\mathbb{R}^n$.
+Let $f: \mathbb{R}^n \longrightarrow \mathbb{R}^m$ be differentiable at a point $\textbf{X}$ in $\mathbb{R}^n$.
 Then the Jacobian of the mapping is the determinant of the Jacobian matrix.
 \end{defn}
 
@@ -2436,7 +2498,7 @@ $$\nabla V = \langle 30-12+20,\ -9+15,\ 12\rangle = \langle 38, 6, 12\rangle .$$
 \subhead{(a)}
 The unit vector in the given direction is
 $\dfrac{1}{\sqrt3}\langle 1,1,-1\rangle$, so
-$$D_{\underline{u}}V = \nabla V\cdot\underline{u}
+$$D_{\textbf{u}}V = \nabla V\cdot\textbf{u}
 = \frac{38+6-12}{\sqrt3} = \frac{32}{\sqrt3} = \frac{32\sqrt3}{3}\approx 18.5 .$$
 
 \subhead{(b)}
@@ -2962,7 +3024,7 @@ in the variables --- no powers, no products, no constants.
 
 \subhead{First map: not linear.} The components contain $x^3$ and $x^2$. Failure
 is confirmed concretely: $F(2,0) = (-8,4)$ but $2F(1,0) = (-2,2)$, so
-$F(2\underline{v})\neq 2F(\underline{v})$.
+$F(2\textbf{v})\neq 2F(\textbf{v})$.
 
 \subhead{Second map: linear.} Every component is a linear combination, and the
 map is multiplication by
@@ -4006,7 +4068,7 @@ $$(a)\ 16x^2-9y^2+36z^2 = 144\hspace{1.5cm}(b)\ y^2+4z^2 = x .$$
 \end{problem}
 \begin{solution}
 \subhead{(a)}
-Divide by $144$:
+divide by $144$:
 $$\frac{x^2}{9} - \frac{y^2}{16} + \frac{z^2}{4} = 1 .$$
 Two positive terms and one negative, with the right-hand side positive: a
 \emph{hyperboloid of one sheet}, with axis along $y$, the variable carrying the
@@ -5100,7 +5162,7 @@ Evaluate the iterated integral $\displaystyle{\int^1_0\int^1_{x}\sin (y^2)\hspac
 \begin{exa}
 
 
-Use property 6 to estimate the integral $\displaystyle{\iint\limits_De^{\displaystyle{\sin x \cos y}}\hspace{0.1cm} dA}$ where $dA$ is the disk with centre origin and radius 2.
+Use property 6 to estimate the integral $\displaystyle{\iint\limits_De^{\displaystyle{\sin x \cos y}}\hspace{0.1cm} dA}$ where $dA$ is the disc with centre origin and radius 2.
 \end{exa}
 
 
@@ -5220,7 +5282,7 @@ pic[draw=violet,thick, angle radius=1.4cm,-Stealth]{angle=a--b--d};
 \end{figure}
 
 $$R = \big\{ (r,\theta) \hspace{0.1cm} \big| \hspace{0.1cm}a\leq r\leq b\hspace{0.1cm}, \hspace{0.1cm} \alpha \leq \theta \leq \beta \big\}$$
-Divide $[a,b]$ into $m$ sub intervals and $[\alpha, \beta]$ into $n$ subintervals. The circles $r=r_i$ and the ranges $\theta = \theta_j$ divide the polar rectangle $R$ into the smaller polar rectangles $$R_{ij} = \big\{(r,\theta)\hspace{0.1cm}\big|\hspace{0.1cm} r_{i-1} \leq r \leq r_j\hspace{0.1cm} , \hspace{0.1cm} \theta_{j-1}\leq \theta \theta_j\big\}$$
+divide $[a,b]$ into $m$ sub intervals and $[\alpha, \beta]$ into $n$ subintervals. The circles $r=r_i$ and the ranges $\theta = \theta_j$ divide the polar rectangle $R$ into the smaller polar rectangles $$R_{ij} = \big\{(r,\theta)\hspace{0.1cm}\big|\hspace{0.1cm} r_{i-1} \leq r \leq r_j\hspace{0.1cm} , \hspace{0.1cm} \theta_{j-1}\leq \theta \theta_j\big\}$$
 
 has polar coordinates $\big(r^*_i, \theta^*_j\big)$.
 
@@ -5423,7 +5485,7 @@ $$\big(\overline{X},\overline{Y}\big) = \Bigg( \frac{3}{8},\frac{11}{16}\Bigg)$$
 {\color[wave]{485}\subsection{Triple Integrals}}
 Suppose that $f$ is defined on a rectangular box
 $$B = \big\{(x,y,z)\hspace{0.1cm} \big| \hspace{0.1cm} a\leq x \leq b\hspace{0.1cm} , \hspace{0.1cm} c\leq y \leq \hspace{0.1cm} , \hspace{0.1cm} r\leq z \leq s\big\}$$
-Divide $[a,b]$ in $L$ equal sub-intervals, $[c,d]$ into $m$ intervals, and $[r,s]$ into $n$ intervals.
+divide $[a,b]$ in $L$ equal sub-intervals, $[c,d]$ into $m$ intervals, and $[r,s]$ into $n$ intervals.
 $$B_{ijk} = [x_{i-1},x_i]\times [y_{j-1},y_j] \times [z_{k-1},z_k]$$
 
 % DIAGRAM 55
@@ -6285,61 +6347,82 @@ r_u \times r_v & = \begin{vmatrix}
 \end{align*}
 
 \begin{defn}
-
-
-The Jacobian of the transformation $T$ given $x = g(u,v)\hspace{0.2cm} , \hspace{0.2cm} y = h(u,v)$ is 
-
+Let $T$ be the transformation $x = g(u,v)$, $y = h(u,v)$. Its \emph{Jacobian} is
+the determinant
 \begin{align*}
-\frac{\partial (x,y)}{\partial (u,v)} = J(u,v) = &
+\frac{\partial (x,y)}{\partial (u,v)} = J(u,v) & =
  \begin{vmatrix}
 \dfrac{\partial x}{\partial u} & \dfrac{\partial x}{\partial v}\\\\
 \dfrac{\partial y}{\partial u} & \dfrac{\partial y}{\partial v}\\
 \end{vmatrix}\\\\
-& = \frac{\partial x}{\partial u}\cdot \frac{\partial y}{\partial v} - \frac{\partial x}{\partial v}\cdot \frac{\partial y}{\partial u}
+& = \frac{\partial x}{\partial u}\cdot \frac{\partial y}{\partial v}
+  - \frac{\partial x}{\partial v}\cdot \frac{\partial y}{\partial u} .
 \end{align*}
+\end{defn}
 
-$$\therefore \hspace{0.5cm} \Delta A \approx \begin{vmatrix}
-\dfrac{\partial ( x,y)}{\partial (u,v)}\\
-\end{vmatrix} \Delta u\, \Delta v$$  where the Jacobian is evaluated at $(u_0,v_0)$.
+The Jacobian is the two-variable answer to a question already familiar from one
+variable. In the substitution $\int f(x)\,dx = \int f\big(g(u)\big)g'(u)\,du$
+the factor $g'(u)$ appears because a small interval $\Delta u$ is stretched into
+an interval of length roughly $\left|g'(u)\right|\Delta u$. In the plane a small
+rectangle $\Delta u\,\Delta v$ is carried by $T$ into a small parallelogram, and
+the factor by which its \emph{area} is stretched is the absolute value of the
+Jacobian:
+$$\Delta A \approx \left|\frac{\partial ( x,y)}{\partial (u,v)}\right|
+\Delta u\, \Delta v ,$$
+the Jacobian being evaluated at $(u_0,v_0)$. It is an area magnification factor,
+and nothing more mysterious than that. Its sign records whether $T$ preserves or
+reverses orientation, which is why the absolute value is taken.
 
+Summing over the rectangles of a partition,
 \begin{align*}
 \iint\limits_R f(x,y)\, dA & \approx \sum^m_{i=1}\sum^n_{j = 1} f(x_i , y_j)\, \Delta A\\\\
-& \approx \sum^m_{i=1}\sum^n_{j = 1}f\big(g(u,v), h(u,v)\big)\begin{vmatrix}
-\dfrac{\partial ( x,y)}{\partial (u,v)}\\
-\end{vmatrix}\, \Delta u \,\Delta v 
+& \approx \sum^m_{i=1}\sum^n_{j = 1}f\big(g(u,v), h(u,v)\big)
+\left|\frac{\partial ( x,y)}{\partial (u,v)}\right|\, \Delta u \,\Delta v ,
 \end{align*}
+and the right-hand side is a Riemann sum for an integral over $S$. Passing to
+the limit gives the result the whole construction was for.
 
-This double sum is a Riemann sum for the integral $$\iint\limits_S f\big(g(u,v),h(u,v)\big)\, \Big|J(u,v)\Big|\, du\, dv $$
+\begin{thm}[Change of variables in a double integral]
+Let $T$ be a one-to-one transformation with continuous partial derivatives
+carrying a region $S$ in the $uv-$plane onto a region $R$ in the $xy-$plane, and
+suppose $J(u,v)\neq 0$ on $S$. Then for $f$ continuous on $R$,
+$$\iint\limits_R f(x,y)\,dx\,dy = \iint\limits_S
+f\big(g(u,v),h(u,v)\big)\,\Big|J(u,v)\Big|\, du\, dv .$$
+\end{thm}
 
+The condition $J\neq 0$ is not decoration: where the Jacobian vanishes the
+transformation collapses area, and the formula has nothing to say.
 
-Formula for integration in polar coordinates is just a special case
+\begin{exa}
+Show that integration in polar coordinates is the special case
+$x = r\cos\theta$, $y = r\sin\theta$.
+\end{exa}
 
-
-$x = g(r,\theta) = r \cos \theta , $
-
-
-$ y = h(r,\theta ) = r\sin \theta$.
-
+\begin{solution}
 \begin{align*}
 J(r,\theta) & = \begin{vmatrix}
 \dfrac{\partial x}{\partial r} & \dfrac{\partial x}{\partial \theta}\\\\
 \dfrac{\partial y}{\partial r} & \dfrac{\partial y}{\partial \theta}\\
-\end{vmatrix}\\\\
-& = \begin{vmatrix}
+\end{vmatrix}
+ = \begin{vmatrix}
 \cos \theta & - r \sin \theta \\
 \sin \theta & r \cos \theta \\
 \end{vmatrix}\\\\
-& = r \cos^2 \theta + r \sin^2 \theta\\
-& = r\\
+& = r \cos^2 \theta + r \sin^2 \theta = r .
 \end{align*}
-
+Since $r\geq 0$ the absolute value may be dropped, and the theorem gives
 \begin{align*}
-\iint\limits_R f(x,y) dxdy & =  \iint\limits_S f\big( r\cos \theta , r \sin \theta \big)\, \begin{vmatrix}
-\dfrac{\partial(x,y)}{\partial (r, \theta )}
-\end{vmatrix}
-dr\hspace{0.1cm} d\theta\\\\
-& =  \iint\limits_S f\big( r\cos \theta , r \sin \theta \big)\hspace{0.1cm}r\hspace{0.1cm}dr\hspace{0.1cm}d\theta\\
+\iint\limits_R f(x,y)\, dx\,dy
+ & =  \iint\limits_S f\big( r\cos \theta , r \sin \theta \big)\,
+   \left|\frac{\partial(x,y)}{\partial (r, \theta )}\right| dr\, d\theta\\\\
+ & =  \iint\limits_S f\big( r\cos \theta , r \sin \theta \big)\ r\ dr\, d\theta .
 \end{align*}
+The familiar extra $r$ in polar integration is therefore not a rule to be
+memorised. It is this Jacobian, and it says that a polar rectangle of sides
+$\Delta r$ and $\Delta\theta$ has area about $r\,\Delta r\,\Delta\theta$ --- the
+further from the origin, the more area the same change of angle sweeps out.
+\end{solution}
+
 
 % DIAGRAM 71
 
@@ -6374,9 +6457,6 @@ dr\hspace{0.1cm} d\theta\\\\
 (10.7,2.5)node[right]{$r=b$};
 \end{tikzpicture}
 \end{figure}
-
-\vspace{0.8cm}
-\end{defn}
 \begin{exa}
 
 
@@ -7075,7 +7155,7 @@ Use a change of variables to evaluate $\displaystyle{\iint_R y^2\,dA}$, where
 $R$ is bounded by the ellipse $25x^2+y^2 = 25$.
 \end{problem}
 \begin{solution}
-Dividing by $25$, the ellipse is $x^2+\dfrac{y^2}{25} = 1$, so the substitution
+dividing by $25$, the ellipse is $x^2+\dfrac{y^2}{25} = 1$, so the substitution
 $$x = u,\qquad y = 5v$$
 turns it into the unit circle $u^2+v^2 = 1$. The Jacobian is
 $$\frac{\partial(x,y)}{\partial(u,v)}
@@ -7166,49 +7246,84 @@ Imagine a fluid flowing steadily along a pipe and let $V(x,y,z)$ be the velocity
 \end{exa}
 {\color[wave]{485}\subsection{Gradients}}
 
-{\color[wave]{485}Gradient Fields}
+\subhead{Gradient Fields}
 
 
-Recall that if $f$ is a scalar function of two variables, then its gradient $\nabla f$ (or grad $f$) is defined by $$\nabla f(x,y) = f_x(x,y)\textbf{i} + f_y(x,y) \textbf{j}$$
+Recall that if $f$ is a scalar function of two variables, then its gradient $\nabla f$ (or $\grad f$) is defined by $$\nabla f(x,y) = f_x(x,y)\textbf{i} + f_y(x,y) \textbf{j}$$
 
 Therefore $\nabla f$ is a vector field on $\mathbb{R}^2$. Similarly for $f$ a function of 3 variables $(x,y,z)$ $$\nabla f(x,y,z) = f_x(x,y,z)\textbf{i} + f_y(x,y,z)\textbf{j} + f_z(x,y,z)\textbf{k}$$
 
 
 \begin{exa}
-Find the gradient vector field of $$f(x,y) = x^2 + y^2$$ Plot the gradient vector field together with a contour map of $f$.
-
-
-How are related?
+Find the gradient vector field of $$f(x,y) = x^2 + y^2 .$$ Plot the gradient
+vector field together with a contour map of $f$, and say how the two are
+related.
 \end{exa}
 
 
 \begin{solution}
-$\displaystyle{\nabla f(x,y) = f_x\textbf{i} + f_y \textbf{j} = 2x\textbf{i} + 2y\textbf{j}}$
-
-$$f(x,y) = x^2 + y^2\hspace{1cm} \nabla f(1,0) = 2\textbf{i},\hspace{0.5cm} \nabla f(-1,0)=$$
+$$\nabla f(x,y) = f_x\textbf{i} + f_y \textbf{j} = 2x\textbf{i} + 2y\textbf{j}
+= 2\big(x\textbf{i} + y\textbf{j}\big).$$
+At every point the gradient therefore points directly away from the origin, and
+its length $2\sqrt{x^2+y^2}$ grows with the distance from it. For instance
+$$\nabla f(1,0) = 2\textbf{i},\qquad \nabla f(-1,0)= -2\textbf{i},\qquad
+\nabla f(0,1) = 2\textbf{j},\qquad \nabla f(0,-1) = -2\textbf{j}.$$
+The level curves $f(x,y) = k$ are the circles $x^2+y^2 = k$, centred at the
+origin.
 
 % DIAGRAM 79
 
-Note that the gradient vectors are perpendicular to the level curves.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.15]
+\foreach \r in {0.6,1.2,1.8,2.4}{
+  \draw[gray!55] (0,0) circle (\r);
+}
+\foreach \a in {0,30,...,330}{
+  \foreach \r in {0.6,1.2,1.8}{
+    \draw[-Stealth,red!75!black,thick]
+      (\a:\r) -- (\a:{\r+0.28+0.16*\r});
+  }
+}
+\draw[-Stealth](-2.9,0)--(2.9,0)node[right]{$x$};
+\draw[-Stealth](0,-2.9)--(0,2.9)node[above]{$y$};
+\node[gray!70!black,scale=0.8] at (35:2.4) {$f=k$};
+\end{tikzpicture}
+\end{figure}
 
-
-{\color[wave]{485} Conservative Vector Fields}
-
-
-A vector field $F$ is called a conservative vector field if it is the gradient of some scalar function, i.e, if there exists a function $f$ such that $F = \nabla f$. In this case $f$ is potential function of $F$.
-
-
-{\color[wave]{485} Theorem}
-
-
-A vector field $F = P\textbf{i} + Q \textbf{j} + R \textbf{k}$ is the gradient of a function $f$ if and only if $$\frac{\partial P}{\partial y} = \frac{\partial Q}{\partial x}\hspace{0.5cm}, \hspace{0.5cm} \frac{\partial R}{\partial x} = \frac{\partial P}{\partial z}\hspace{0.5cm} \text{and}\hspace{0.5cm} \frac{\partial Q}{\partial z}= \frac{\partial R}{\partial y}$$
+The arrows cross every circle at right angles, and they lengthen as the circles
+grow further apart in value. Both observations are general: the gradient is
+always perpendicular to the level curve through a point, because moving along a
+level curve does not change $f$ and so the directional derivative in that
+direction is zero; and the gradient is longest where the level curves are most
+crowded, because that is where $f$ changes fastest.
 \end{solution}
 
 
+\subhead{Conservative Vector Fields}
+
+A vector field $F$ is called a \emph{conservative} vector field if it is the
+gradient of some scalar function, that is, if there exists a function $f$ with
+$F = \nabla f$. The function $f$ is then called a \emph{potential} for $F$.
+
+\begin{thm}
+A vector field $F = P\textbf{i} + Q \textbf{j} + R \textbf{k}$ with continuous
+first partial derivatives is the gradient of a function $f$ if and only if
+$$\frac{\partial P}{\partial y} = \frac{\partial Q}{\partial x}\hspace{0.5cm}, \hspace{0.5cm} \frac{\partial R}{\partial x} = \frac{\partial P}{\partial z}\hspace{0.5cm} \text{and}\hspace{0.5cm} \frac{\partial Q}{\partial z}= \frac{\partial R}{\partial y}$$
+on a simply connected domain.
+\end{thm}
+
+These three equations say no more than that mixed second partial derivatives of
+$f$ agree, since $P = f_x$, $Q = f_y$ and $R = f_z$ would give
+$P_y = f_{xy} = f_{yx} = Q_x$, and likewise for the other two. They are quick to
+check, and they are the standard test for whether looking for a potential is
+worth the effort.
+
+
 {\color[wave]{485}\subsection{The Operator $\nabla$}}
-Recall that if a scalar function $\Phi (x,y,z)$ is continuously differentiable with respect to $x,y$ and $z$, then the gradient of $\Phi$ written $grad \Phi$ is defined as the vector 
+Recall that if a scalar function $\Phi (x,y,z)$ is continuously differentiable with respect to $x,y$ and $z$, then the gradient of $\Phi$ written $\grad \Phi$ is defined as the vector 
 \begin{align*}
-grad\,\Phi & = \frac{\partial \Phi}{\partial x} \textbf{i} + \frac{\partial \Phi}{\partial y}\textbf{j} + \frac{\partial \Phi}{\partial z}\textbf{k}\\\\
+\grad \Phi & = \frac{\partial \Phi}{\partial x} \textbf{i} + \frac{\partial \Phi}{\partial y}\textbf{j} + \frac{\partial \Phi}{\partial z}\textbf{k}\\\\
           & = \Bigg(\textbf{i}\frac{\partial}{\partial x} + \textbf{j} \frac{\partial}{\partial y} + \textbf{k} \frac{\partial}{\partial z}\Bigg) \Phi
 \end{align*}
 where $\Bigg(\textbf{i}\dfrac{\partial}{\partial x} + \textbf{j} \dfrac{\partial}{\partial y} + \textbf{k} \dfrac{\partial}{\partial z}\Bigg)$ is called a vector differential operator and denoted by $(\nabla)$ called del or nabla. That is $$\nabla = \Bigg(\textbf{i} \frac{\partial}{\partial x} + \textbf{j}\frac{\partial}{\partial y} + \textbf{k} \frac{\partial}{\partial z}\Bigg)$$ Note that $\nabla$ is an operator and therefore must operate on a stated function $\Phi (x,y,z)$.
@@ -7244,9 +7359,7 @@ Let $f, g$ be differentiable functions and $\alpha$ a scalar then
 \begin{exa}
 
 
-Prove that $\nabla r^{n} = n r^{n-2}\overline{r}$, where $\overline{r} = x\textbf{i} + y\textbf{j} + z\textbf{k}$ and $r = \begin{vmatrix}
-\overline{r}\\
-\end{vmatrix} = \sqrt{x^2 + y^2 + z^2}$.\\\\
+Prove that $\nabla r^{n} = n r^{n-2}\overline{r}$, where $\overline{r} = x\textbf{i} + y\textbf{j} + z\textbf{k}$ and $r = \left|\overline{r}\\\right| = \sqrt{x^2 + y^2 + z^2}$.\\\\
 
 \end{exa}
 
@@ -7281,7 +7394,7 @@ $$\frac{\partial}{\partial x} r^n = \frac{\partial}{\partial x} (x^2 + y^2 + z^2
 \end{solution}
 
 
-{\color[wave]{485}\subsection{Divergence and Curl of a Vector Field}}
+{\color[wave]{485}\subsection{divergence and curl of a Vector Field}}
 Since $\nabla$ has the character of a vector, we can consider the dot and cross product on which it appears as one factor. If $$F = F_1 \textbf{i} + F_2 \textbf{j} + F_3\textbf{k}$$ is a vector whose components are differentiable functions of $x, y, z$
 
 \begin{enumerate}
@@ -7290,17 +7403,17 @@ Since $\nabla$ has the character of a vector, we can consider the dot and cross 
 \nabla\cdot F & = \Bigg(\textbf{i}\frac{\partial}{\partial x} + \textbf{j}\frac{\partial}{\partial y} + \textbf{k}\frac{\partial}{\partial z}\Bigg)\cdot\Bigg(F_1\textbf{i} + F_2\textbf{j} + F_3\textbf{k}\Bigg)\\\\
 \implies \hspace{0.5cm}\nabla\cdot F & = \frac{\partial F_1}{\partial x} + \frac{\partial F_2}{\partial y} + \frac{\partial F_3}{\partial z}
 \end{align*}
-This is called the divergence of the vector $F$ written as $div\, F$.
+This is called the divergence of the vector $F$ written as $\dive \, F$.
 
 \item The cross product
 \begin{align*}
 \nabla \times F & = \Bigg(\textbf{i} \frac{\partial}{\partial x} + \textbf{j} \frac{\partial}{\partial y} + \textbf{k} \frac{\partial}{\partial z}\Bigg) \times \Big( F_1\textbf{i} + F_2\textbf{j} + F_3\textbf{k}\Big)\\\\
 & = \Bigg( \frac{\partial F_3}{\partial y}-\frac{\partial F_2}{\partial z}\Bigg)\textbf{i} - \Bigg(\frac{\partial F_3}{\partial x}-\frac{\partial F_1}{\partial z}\Bigg) \textbf{j} + \Bigg(\frac{\partial F_2 }{\partial x}-\frac{\partial F_1}{\partial y}\Bigg) \textbf{k}
 \end{align*}
-is called the Curl of $F$ and written $Curl\, F$.
+is called the curl of $F$ and written $\curl \, F$.
 
 Note that
-$$Curl F = \nabla \times F = 
+$$\curl F = \nabla \times F = 
 \begin{vmatrix}
 \textbf{i} & \textbf{j} & \textbf{k}\\\\
 \dfrac{\partial}{\partial x} & \dfrac{\partial}{\partial y} & \dfrac{\partial }{\partial z}\\\\
@@ -7308,7 +7421,7 @@ F_1 & F_2 & F_3\\
 \end{vmatrix}
 $$
 
-\item If $f(x,y,z)$ is a twice differentiable function, then $$grad\, f = \nabla f = \frac{\partial f}{\partial x}\textbf{i} + \frac{\partial f}{\partial y}\textbf{j} + \frac{\partial f}{\partial z}\textbf{k}$$ and $$div\big(grad\, f\big) = \frac{\partial^2 f}{\partial x^2} + \frac{\partial^2 f}{\partial y^2}+ \frac{\partial^2f}{\partial^2z} = \nabla^2f$$
+\item If $f(x,y,z)$ is a twice differentiable function, then $$\grad \, f = \nabla f = \frac{\partial f}{\partial x}\textbf{i} + \frac{\partial f}{\partial y}\textbf{j} + \frac{\partial f}{\partial z}\textbf{k}$$ and $$\dive \big(\grad \, f\big) = \frac{\partial^2 f}{\partial x^2} + \frac{\partial^2 f}{\partial y^2}+ \frac{\partial^2f}{\partial^2z} = \nabla^2f$$
 
 Here $\displaystyle{\nabla^2 = \frac{\partial^2}{\partial x^2}+ \frac{\partial^2}{\partial y^2} + \frac{\partial^2}{\partial z^2}}$ is called the Laplacian operator.
 
@@ -7319,36 +7432,36 @@ Any function $f$  which satisfies the equation $\nabla^2f=0$ is called a Harmoni
 \subhead{Properties}
 
 
-If $\underline{U}$ and $\underline{V}$ are vector point functions and $f$ is a scalar function, then
+If $\textbf{U}$ and $\textbf{V}$ are vector point functions and $f$ is a scalar function, then
 \begin{enumerate}
-\item $\nabla \big(\underline{U}\pm \underline{V}\big) = \nabla \cdot \underline{U} \pm \nabla \cdot \underline{V}$ or $div\big(\underline{U}\pm \underline{V}\big) = div\big(\underline{U}\big) \pm div\big(\underline{V}\big)$
+\item $\nabla \cdot\big(\textbf{U}\pm \textbf{V}\big) = \nabla \cdot \textbf{U} \pm \nabla \cdot \textbf{V}$ or $\dive \big(\textbf{U}\pm \textbf{V}\big) = \dive \big(\textbf{U}\big) \pm \dive \big(\textbf{V}\big)$
 
-\item $\nabla \cdot \Big(f(\underline{U})\Big) = \Big(\nabla\cdot \underline{U}\Big)f + \underline{U}\cdot \nabla f$
+\item $\nabla \cdot \Big(f(\textbf{U})\Big) = \Big(\nabla\cdot \textbf{U}\Big)f + \textbf{U}\cdot \nabla f$
 
-\item $\nabla\times (\underline{U}+\underline{V}) = \nabla\times\underline{U} + \nabla\times \underline{V}$
+\item $\nabla\times (\textbf{U}+\textbf{V}) = \nabla\times\textbf{U} + \nabla\times \textbf{V}$
 
-\item $Curl (f\underline{V}) = f\, Curl \underline{V} + (grad\, f)\times \underline{V} = f(\nabla \times \underline{V}\big) + \big(\nabla f\big)\times \underline{V}$
+\item $\curl (f\textbf{V}) = f\, \curl \textbf{V} + (\grad \, f)\times \textbf{V} = f(\nabla \times \textbf{V}\big) + \big(\nabla f\big)\times \textbf{V}$
 \end{enumerate}
 
-To prove, let $\underline{U} = U_1\textbf{i} + U_2\textbf{j} + U_3\textbf{k}$ and $\underline{V} = V_1\textbf{i} + V_2\textbf{j} + V_3\textbf{k}$.
+To prove, let $\textbf{U} = U_1\textbf{i} + U_2\textbf{j} + U_3\textbf{k}$ and $\textbf{V} = V_1\textbf{i} + V_2\textbf{j} + V_3\textbf{k}$.
 
 
 \begin{exa}
 \begin{enumerate}
-\item Find the Curl and divergence of $$F = x^2y\textbf{i} - xyz\textbf{j} + yz^2\textbf{k}$$
+\item Find the curl and divergence of $$F = x^2y\textbf{i} - xyz\textbf{j} + yz^2\textbf{k}$$
 \item Prove that $\nabla^2\bigg(\dfrac{1}{r}\bigg) = 0$, where $ r^2 = x^2 + y^2 + z^2$ and $\displaystyle{\nabla^2 = \frac{\partial^2}{\partial x^2} + \frac{\partial^2}{\partial y^2} + \frac{\partial^2}{\partial z^2}}$
 \end{enumerate}
 \end{exa}
 
 \begin{solution}
-Divergence of $F$ is $\nabla\cdot F$
+divergence of $F$ is $\nabla\cdot F$
 \begin{align*}
 \nabla\cdot F & = \Bigg(\textbf{i}\frac{\partial}{\partial x} + \textbf{j}\frac{\partial}{\partial y} +\textbf{k} \frac{\partial}{\partial z}\Bigg) \cdot \big(x^2y\textbf{i} - xyz\textbf{j} + yz^2\textbf{k}\big)\\\\
 & = \frac{\partial}{\partial x}\big(x^2y\big) + \frac{\partial}{\partial y}\big(-xyz\big) + \frac{\partial}{\partial z}\big(yz^2\big)\\\\
 & = 2xy - xz + 2yz\\
 \end{align*}
 
-Curl of $F$ is $\nabla\times F$
+curl of $F$ is $\nabla\times F$
 \begin{align*}
 \nabla \times F & = 
 \begin{vmatrix}
@@ -7358,24 +7471,24 @@ x^2y & -xyz & yz^2\\
 \end{vmatrix}\\\\
 & = \textbf{i}\Bigg(\frac{\partial}{\partial x}\big(yz^2\big) + \frac{\partial}{\partial z}\big(xyz\big)\Bigg)-\textbf{j}\Bigg(\frac{\partial}{\partial x}\big(yz^2\big) - \frac{\partial}{\partial z}\big(x^2y\big) \Bigg) + \textbf{k}\Bigg(\frac{\partial}{\partial x}\big(-xyz\big) - \frac{\partial}{\partial y}\big(x^2y\big)\Bigg)\\\\
 & = \big(z^2+xy\big)\textbf{i} - (0)\textbf{j} + \big(-yz-x^2\big)\textbf{k}\\\\
-\therefore \hspace{0.5cm} Curl\, F & = \big(xy+z^2\big)\textbf{i} -\big(x^2+yz\big)\textbf{k}\\
+\therefore \hspace{0.5cm} \curl \, F & = \big(xy+z^2\big)\textbf{i} -\big(x^2+yz\big)\textbf{k}\\
 \end{align*}
 \end{solution}
 
-Let $F(x,y,z)$ be a vector field. We say that $F$ is irrotational if $Curl\, F = \overline{0}$ and $F$ is incompressible if $div F =0$.
+Let $F(x,y,z)$ be a vector field. We say that $F$ is irrotational if $\curl \, F = \textbf{0}$ and $F$ is incompressible if $\dive F =0$.
 
 
 Recall in $\mathbb{R}^3$, a vector field $F=P\textbf{i} + Q\textbf{j} + R\textbf{k}$ is the gradient of a function $f$ if and only if
 $$\frac{\partial P}{\partial y} = \frac{\partial Q}{\partial x}\hspace{0.5cm} ,\hspace{1cm} \frac{\partial R}{\partial x} = \frac{\partial P}{\partial z}\hspace{0.5cm} , \hspace{1cm} \frac{\partial Q}{\partial z} = \frac{\partial R}{\partial y}$$
 
 
-From the definition of $Curl\, F$ , we get following result.
+From the definition of $\curl \, F$ , we get following result.
 
 
 \begin{thm}
 
 
-In a simply connected region, the differentiable vector field $F$ is the gradient of a function $f$ if and only if $Curl F = \overline{0}$.
+In a simply connected region, the differentiable vector field $F$ is the gradient of a function $f$ if and only if $\curl F = \textbf{0}$.
 \end{thm}
 
 
@@ -7390,7 +7503,7 @@ $$ F = 2xy\textbf{i} + (x^2 + z^2)\textbf{j} + 2zy\textbf{k}$$ is a gradient of 
 \begin{solution}
 
 
-We need to show that $Curl F = \overline{0}$
+We need to show that $\curl F = \textbf{0}$
 \begin{align*}
 \nabla \times F &  = \begin{vmatrix}
 \textbf{i} & \textbf{j} & \textbf{k}\\\\
@@ -7398,7 +7511,7 @@ We need to show that $Curl F = \overline{0}$
 2xy & (x^2+ z^2) & 2zy\\
 \end{vmatrix}\\\\
 & = (0)\textbf{i} - (0)\textbf{j} + (0)\textbf{k}\\
-\therefore \hspace{0.5cm} \nabla \times F &= \overline{0}
+\therefore \hspace{0.5cm} \nabla \times F &= \textbf{0}
 \end{align*}
 Hence conservative.
 
@@ -7444,39 +7557,33 @@ Suppose that $f(x,y,z)$ is a function whose domain contains the curve $$\overlin
 To evaluate the line integral we use the following theorem.
 
 
-\begin{thm}
-
-
-$\displaystyle{\int_C f(x,y,z)dS = \int^b_af\big[\overline{r}(t)\big]\begin{vmatrix}
-\underline{V}(t)\\
-\end{vmatrix}\,dt,
-}$
-
-
-\hspace{0.3cm}
-$\overline{r}(t) = x(t)\textbf{i} + y(t)\textbf{j} + z(t)\textbf{k}$ and $\underline{V}(t)$ is the velocity vector of $\overline{r}(t)$.
-
-
-{\color[wave]{485} Proof}
-
-
-Recall that if $S(t)$ is the length of $C$ between $\overline{r}(a)$ and $\overline{r}(b)$, then 
-$$\frac{dS}{dt} = \sqrt{\Bigg(\dfrac{dx}{dt}\Bigg)^2 + \Bigg(\dfrac{dy}{dt}\Bigg)^2 + \Bigg(\dfrac{dz}{dt}\Bigg)^2}$$
-
-$$\implies \hspace{0.5cm} dS = \sqrt{\Bigg(\dfrac{dx}{dt}\Bigg)^2 + \Bigg(\dfrac{dy}{dt}\Bigg)^2 + \Bigg(\dfrac{dz}{dt}\Bigg)^2}\,dt$$
-
-and $S$ 
-$$\int_C f(x,y,z)dS = \int^b_a f[x(t),y(t),z(t)]\sqrt{\Bigg(\dfrac{dx}{dt}\Bigg)^2 + \Bigg(\dfrac{dy}{dt}\Bigg)^2 + \Bigg(\dfrac{dz}{dt}\Bigg)^2}\,dt$$
-
-But 
-\hspace{0.2cm}$\displaystyle{\sqrt{\Bigg(\dfrac{dx}{dt}\Bigg)^2 + \Bigg(\dfrac{dy}{dt}\Bigg)^2 + \Bigg(\dfrac{dz}{dt}\Bigg)^2} = \begin{vmatrix}
-\overline{r}(t)\\
-\end{vmatrix} = \begin{vmatrix}
-\underline{V}(t)\\
-\end{vmatrix}}$\\\\
-
-Hence the result.
+\begin{thm}[Line integral with respect to arc length]
+Let $C$ be the smooth curve
+$\overline{r}(t) = x(t)\textbf{i} + y(t)\textbf{j} + z(t)\textbf{k}$,
+$a\leq t\leq b$, and let $\textbf{V}(t) = \overline{r}\,'(t)$ be its velocity
+vector. Then for $f$ continuous on $C$,
+$$\int_C f(x,y,z)\,dS = \int^b_a f\big[\overline{r}(t)\big]
+\left|\textbf{V}(t)\right|\,dt .$$
 \end{thm}
+
+\begin{proof}
+Let $S(t)$ be the arc length of $C$ measured from $\overline{r}(a)$. Then
+$$\frac{dS}{dt} = \sqrt{\Bigg(\dfrac{dx}{dt}\Bigg)^2 + \Bigg(\dfrac{dy}{dt}\Bigg)^2 + \Bigg(\dfrac{dz}{dt}\Bigg)^2},$$
+so that
+$$dS = \sqrt{\Bigg(\dfrac{dx}{dt}\Bigg)^2 + \Bigg(\dfrac{dy}{dt}\Bigg)^2 + \Bigg(\dfrac{dz}{dt}\Bigg)^2}\,dt .$$
+Substituting this for $dS$ and $x(t), y(t), z(t)$ for $x,y,z$,
+$$\int_C f(x,y,z)\,dS = \int^b_a f[x(t),y(t),z(t)]\sqrt{\Bigg(\dfrac{dx}{dt}\Bigg)^2 + \Bigg(\dfrac{dy}{dt}\Bigg)^2 + \Bigg(\dfrac{dz}{dt}\Bigg)^2}\,dt .$$
+The square root is precisely the length of the velocity vector,
+$$\sqrt{\Bigg(\dfrac{dx}{dt}\Bigg)^2 + \Bigg(\dfrac{dy}{dt}\Bigg)^2 + \Bigg(\dfrac{dz}{dt}\Bigg)^2}
+= \left|\overline{r}\,'(t)\right| = \left|\textbf{V}(t)\right| ,$$
+which gives the stated formula.
+\end{proof}
+
+The integral is written $dS$ rather than $dt$ to record that it does not depend
+on how the curve is parametrised: the speed $\left|\textbf{V}\right|$ rises
+exactly as $dt$ falls, and the product $\left|\textbf{V}\right|dt = dS$ is a
+property of the curve alone.
+
 
 
 \begin{exa}
@@ -7504,19 +7611,13 @@ $\implies\hspace{0.5cm} f\big(\overline{r}(t)\big) = 2 + \cos^2(t)\sin (t)$, whe
 $$C: \overline{r}(t) = \cos t\textbf{i} + \sin t \textbf{j}$$
 
 \begin{align*}
-\int_C f(x,y)\,dS & = \int^b_af(x(t),y(t))\begin{vmatrix}
-\overline{r}'(t)\\
-\end{vmatrix}\,dt\\
-& = \int^{\pi}_0 \big(2 + \cos^2t\sin t\big)\begin{vmatrix}
-\overline{r}'(t)\\
-\end{vmatrix}\,dt
+\int_C f(x,y)\,dS & = \int^b_af(x(t),y(t))\left|\overline{r}'(t)\\\right|\,dt\\
+& = \int^{\pi}_0 \big(2 + \cos^2t\sin t\big)\left|\overline{r}'(t)\\\right|\,dt
 \end{align*}
 
 \begin{align*}
 \overline{r}(t) & = \cos t \textbf{i} + \sin t \textbf{j}\\
-\overline{r}'(t) & = -\sin t\textbf{i} + \cos t \textbf{j} \implies \begin{vmatrix}
-\overline{r}'(t)\\
-\end{vmatrix}= \sqrt{\sin^2 (t) + \cos^2(t)}=1
+\overline{r}'(t) & = -\sin t\textbf{i} + \cos t \textbf{j} \implies \left|\overline{r}'(t)\\\right|= \sqrt{\sin^2 (t) + \cos^2(t)}=1
 \end{align*}
 
 \begin{align*}
@@ -7585,16 +7686,12 @@ C_3 : \overline{r}_1 & = (1-t)\langle 0,0,0\rangle + t\langle 1,1,1\rangle\\
 \implies\hspace{0.5cm} \overline{r}_1 & = t\textbf{i} + t\textbf{j} + t\textbf{k}\hspace{0.3cm} , \hspace{0.5cm} 0\leq t \leq 1
 \end{align*}
 
-$$\int_{C_3} f(x,y,z)\, dS = \int^1_0f(\overline{r}_1(t))\begin{vmatrix}
-\overline{r}'_1(t)\\
-\end{vmatrix}\,dt
+$$\int_{C_3} f(x,y,z)\, dS = \int^1_0f(\overline{r}_1(t))\left|\overline{r}'_1(t)\\\right|\,dt
 $$
 
 $$f\big[\overline{r}_1(t)\big]= t - 3t^2 + t = 2t - 3t^2$$
 
-$$\overline{r}'_1(t) = \textbf{i} + \textbf{j} + \textbf{k}\implies \begin{vmatrix}
-\overline{r}'_1(t)\\
-\end{vmatrix}=\sqrt{3}
+$$\overline{r}'_1(t) = \textbf{i} + \textbf{j} + \textbf{k}\implies \left|\overline{r}'_1(t)\\\right|=\sqrt{3}
 $$
 
 \begin{align*}
@@ -7609,9 +7706,7 @@ $$\overline{r}_2(t) = t\textbf{i} + t\textbf{j}\hspace{0.4cm}, \hspace{0.4cm} 0\
 
 $$f\big(\overline{r}_2(t)\big) = t - 3t^2$$
 
-$$\overline{r}_2'(t) = \textbf{i} + \textbf{j} \implies \begin{vmatrix}
-\overline{r}'_2(t)\\
-\end{vmatrix}= \sqrt{2}\\
+$$\overline{r}_2'(t) = \textbf{i} + \textbf{j} \implies \left|\overline{r}'_2(t)\\\right|= \sqrt{2}\\
 $$
 
 \begin{align*}
@@ -7620,9 +7715,7 @@ C_2 : \hspace{0.5cm} \overline{r}_3 & = (1-t)\langle 1,1,0\rangle + t\langle 1,1
 \implies\hspace{1cm} \overline{r}_3(t) & = \textbf{i} + \textbf{j} + \textbf{k}\hspace{0.3cm} ,\hspace{0.5cm} 0\leq t\leq 1\hspace{1cm} x=1, y=1, z =t
 \end{align*}
 
-$$\overline{r}'_3(t) = \textbf{k}\hspace{0.2cm},\hspace{0.5cm} \begin{vmatrix}
-\overline{r}'_3(t)\\
-\end{vmatrix}  = 1\hspace{0.2cm},\hspace{0.5cm} f\big[\overline{r}'_3(t)\big] =-2 +t$$
+$$\overline{r}'_3(t) = \textbf{k}\hspace{0.2cm},\hspace{0.5cm} \left|\overline{r}'_3(t)\\\right|  = 1\hspace{0.2cm},\hspace{0.5cm} f\big[\overline{r}'_3(t)\big] =-2 +t$$
 
 \begin{align*}
 \int_{C_1\cup C_2}f(x,y,z)\,dS & = \int_{C_1}f(x,y,z)\,dS + \int_{C_2}f(x,y,z)\,dS\\\\
@@ -7659,7 +7752,7 @@ C_2: \overline{r}_2(t) & = (1-t)\langle 1,1\rangle + t\langle 1,2\rangle, \hspac
 \end{align*}
 \end{solution}
 
-{\color[wave]{485} Line Integrals With Respect to x, y and z}
+\subhead{Line Integrals With Respect to $x$, $y$ and $z$}
 
 
 $$\int_C f(x,y,z)\,dx = \int^b_a f\big[x(t),y(t),z(t)\big]\, x'(t)\, dt$$
@@ -7717,17 +7810,11 @@ $$\int_{-C}f(x,y,z)\,dS = \int_C f(x,y,z)\,dS$$
 The work done by the vector force field $F$ in moving a particle along a curve $C$ given by
 $$W = \int_C F(x,y,z)\cdot T(x,y,z)\,dS = \int_C F\cdot T\,dS\hspace{1.5cm}*$$
 where $T(x,y,z)$ is the unit tangent vector on the curve at the point $(x,y,z)$. In other words, work is the line integral with respect to arc length of the tangential component of the force $F$. If the curve $C$ is given by $$\overline{r}(t) = x(t)\textbf{i} + y(t)\textbf{j} + z(t)\textbf{k},$$ then $\displaystyle{T(t) = \frac{\overline{r}'(t)}{
-\begin{vmatrix}
-\overline{r}'(t)\\
-\end{vmatrix}
+\left|\overline{r}'(t)\\\right|
 }}$ so then equation $*$ can be written as 
 \begin{align*}
-W & = \int^b_a \Bigg[F\big(\overline{r}(t)\big) \cdot \frac{\overline{r}'(t)}{\begin{vmatrix}
-\overline{r}'(t)\\
-\end{vmatrix}
-}\Bigg]\begin{vmatrix}
-\overline{r}'(t)\\
-\end{vmatrix}\,dt\\\\
+W & = \int^b_a \Bigg[F\big(\overline{r}(t)\big) \cdot \frac{\overline{r}'(t)}{\left|\overline{r}'(t)\\\right|
+}\Bigg]\left|\overline{r}'(t)\\\right|\,dt\\\\
 & = \int^b_aF\big[\overline{r}(t)\big]\cdot \overline{r}'(t)\,df\\
 \end{align*}
 
@@ -7985,7 +8072,7 @@ Evaluate $\displaystyle{\oint_C\Big(3y - e^{\displaystyle{\sin x}}\Big)\,dx + \B
 \begin{solution}
 
 
-The region $D$ bounded by $C$ is the disk $x^2 + y^2 =9$. Applying Green's theorem 
+The region $D$ bounded by $C$ is the disc $x^2 + y^2 =9$. Applying Green's theorem 
 \begin{align*}
 \oint_C \Big( 3y - e^{\displaystyle{\sin x}}\Big)\, dx + \Big( 7x + \sqrt{y^4 + 1}\Big) \,dy
 &  = \iint\limits_D (7-3)\,dA\\\\
@@ -8033,7 +8120,7 @@ A(D) & = \iint\limits_D dA = \frac{1}{2} \int_C x\,dy - y\,dx\\\\
 \end{solution}
 {\color[wave]{485}\subsection{Parametric Surfaces and their Areas}}
 
-{\color[wave]{485} \textbf{Surface Area}}
+\subhead{Surface Area}
 
 
 \begin{defn}
@@ -8043,9 +8130,7 @@ If a smooth  parametric surface $S$ is given by the equation
 
 $$\overline{r}(u,v) = x(u,v)\,\textbf{i} + y(u,v)\,\textbf{j} + z(u,v)\,\textbf{k}\hspace{0.2cm},\hspace{0.5cm} (u,v)\in D$$
 and $S$ is covered just once as $(u,v)$ ranges throughout the parameter domain $D$, then 
-$$A(S) = \iint\limits_D\begin{vmatrix}
-\overline{r}_u \times \overline{r}_v\\
-\end{vmatrix} dA\hspace{0.2cm}, \hspace{0.5cm} \text{where}$$
+$$A(S) = \iint\limits_D\left|\overline{r}_u \times \overline{r}_v\\\right| dA\hspace{0.2cm}, \hspace{0.5cm} \text{where}$$
 
 $$\overline{r}_u = \frac{\partial x}{\partial u}\,\textbf{i} + \frac{\partial y}{\partial u}\,\textbf{j} + \frac{\partial z}{\partial u}\,\textbf{k}$$
 
@@ -8085,18 +8170,14 @@ a\cos \phi \cos \theta & a\cos \phi \sin \theta & -asin\phi\\
 \end{align*}
 
 \begin{align*}
-\begin{vmatrix}
-\overline{r}_{\phi} \times \overline{r}_{\theta}\\
-\end{vmatrix} & = \sqrt{a^4\sin^4\phi \cos^2\theta + a^4\sin^4\phi \sin^2\theta + a^4\sin^2\phi \cos^2\theta}\\
+\left|\overline{r}_{\phi} \times \overline{r}_{\theta}\\\right| & = \sqrt{a^4\sin^4\phi \cos^2\theta + a^4\sin^4\phi \sin^2\theta + a^4\sin^2\phi \cos^2\theta}\\
  & = \sqrt{a^4\sin^4\phi ( \cos^2\theta + \sin^2 \theta) + a^4 \sin^2 \phi \cos^2\theta}\\
 & = a^2 \sin \phi \sqrt{\sin^2 \phi + \cos^2\phi}
 \end{align*}
 
 Thus the surface Area of sphere is
 \begin{align*}
-A & = \iint\limits_D \begin{vmatrix}
-\overline{r}_{\phi} \times \overline{r}_{\theta}\\
-\end{vmatrix}dA\\\\
+A & = \iint\limits_D \left|\overline{r}_{\phi} \times \overline{r}_{\theta}\\\right|dA\\\\
 & = \int^{2\pi}_0\int^{\pi}_0 a^2\sin \phi d \phi d \theta\\\\
 & = 4\pi a^2\\\\\\
 \end{align*}
@@ -8117,9 +8198,7 @@ $$\overline{r}_x = \textbf{i} + \frac{\partial f}{\partial x}\,\textbf{k}\hspace
 & = -\frac{\partial f}{\partial x}\,\textbf{i} - \frac{\partial f}{\partial y}\,\textbf{j} +\textbf{k}\\
 \end{align*}
 
-$$\begin{vmatrix}
-\overline{r}_x \times \overline{r}_y\\
-\end{vmatrix} = \sqrt{\Bigg(\dfrac{\partial f}{\partial x}\Bigg)^2 + \Bigg(\dfrac{\partial f}{\partial y}\Bigg)^2 + 1}$$
+$$\left|\overline{r}_x \times \overline{r}_y\\\right| = \sqrt{\Bigg(\dfrac{\partial f}{\partial x}\Bigg)^2 + \Bigg(\dfrac{\partial f}{\partial y}\Bigg)^2 + 1}$$
 
 So surface area is 
 $$A(S)  = \iint\limits_D \sqrt{1 +\Bigg(\dfrac{\partial f}{\partial x}\Bigg)^2 + \Bigg(\dfrac{\partial f}{\partial y}\Bigg)^2 }\,\,dA$$
@@ -8132,9 +8211,7 @@ Suppose that a surface $S$ has a vector equation
 $$\overline{r}(u,v) = x(u,v)\textbf{i} + y(u,v)\textbf{j} + z(u,v)\textbf{k}\hspace{0.2cm},\hspace{0.5cm} (u,v)\in D$$
 Then the surface integral of $f$ over the surface $S$ is given by 
 
-$$\iint\limits_S f(x,y,z)\,dS = \iint\limits_D f\big[\overline{r}(u,v)\big]\begin{vmatrix}
-\overline{r}_u \times \overline{r}_v\\
-\end{vmatrix}\,dA$$\\
+$$\iint\limits_S f(x,y,z)\,dS = \iint\limits_D f\big[\overline{r}(u,v)\big]\left|\overline{r}_u \times \overline{r}_v\\\right|\,dA$$\\
 
 Note that $\displaystyle{\iint\limits_S dS = \iint\limits_D\big|\overline{r}_u \times \overline{r}_v\big|\,dA =A(S)}$
 
@@ -8186,7 +8263,7 @@ If $S$ is a piecewise - smooth surface, that is a finite union of smooth surface
 \begin{exa}
 
 
-Evaluate $\displaystyle{\iint\limits_S z\hspace{0.1cm}dS}$, where $S$ is the surface whose sides $S_1$ are given by the cylinder $x^2 + y^2 =1$, whose bottom $S_2$ is the disk $x^2 + y^2 \leq 1$ in the plane $z =0$ , and whose top $S_3$ is the part of the plane $z = 1 + x$ that lies above $S_2$.
+Evaluate $\displaystyle{\iint\limits_S z\hspace{0.1cm}dS}$, where $S$ is the surface whose sides $S_1$ are given by the cylinder $x^2 + y^2 =1$, whose bottom $S_2$ is the disc $x^2 + y^2 \leq 1$ in the plane $z =0$ , and whose top $S_3$ is the part of the plane $z = 1 + x$ that lies above $S_2$.
 \end{exa}
 
 
@@ -8258,7 +8335,7 @@ Thus,
 
 $S_2$ lies in the plane $z = 0$, so we have $$\iint\limits_{S_2}z\hspace{0.1cm}dS = \iint\limits_{S_2}0\hspace{0.1cm}dS = 0$$
 
-On $S_3$, $z = 1 + x$ and the projection onto the $xy-$ plane is the unit disk $D$. So taking $g(x,y) = 1 +x,$
+On $S_3$, $z = 1 + x$ and the projection onto the $xy-$ plane is the unit disc $D$. So taking $g(x,y) = 1 +x,$
 
 
 we get
@@ -8267,7 +8344,7 @@ $$\iint\limits_{S_3} f(x,y,z) dS = \iint\limits_D f(x,y,g(x,y))\sqrt{\Big(\dfrac
 $$\frac{\partial g}{\partial x} = 1\hspace{0.5cm} , \hspace{0.5cm} \frac{\partial g}{\partial y}=0$$
 
 \begin{align*}
-\iint\limits_{S_3} z\hspace{0.1cm} dS & = \iint\limits_D (1+x)\sqrt{2}dA\hspace{0.2cm},\hspace{1cm} D\hspace{0.2cm}\text{is unit disk}\\\\
+\iint\limits_{S_3} z\hspace{0.1cm} dS & = \iint\limits_D (1+x)\sqrt{2}dA\hspace{0.2cm},\hspace{1cm} D\hspace{0.2cm}\text{is unit disc}\\\\
 & = \int^{2\pi}_0\int^1_0 r\big( 1 + r\cos \theta \big) \sqrt{2}\hspace{0.1cm} dr\hspace{0.1cm} d\theta\\\\
 & = \sqrt{2}\pi\\
 \end{align*}
@@ -8373,7 +8450,7 @@ For a closed surface, the convention is that the positive orientation is the one
 
 
 {\color[wave]{485}\subsection{Stokes' Theorem}}
-Let $S$ be an oriented piece-wise smooth surface that is bounded by a simple closed piecewise-smooth boundary curve $C$ with positive orientation. Let $F$ be a vector field whose components have continuous partial derivatives on an open region in $\mathbb{R}^3$ that contains $S$. Then $$\int_C F\cdot d\overline{r} = \iint\limits_S\big(Curl\hspace{0.1cm} F\big) dS$$
+Let $S$ be an oriented piece-wise smooth surface that is bounded by a simple closed piecewise-smooth boundary curve $C$ with positive orientation. Let $F$ be a vector field whose components have continuous partial derivatives on an open region in $\mathbb{R}^3$ that contains $S$. Then $$\int_C F\cdot d\overline{r} = \iint\limits_S\big(\curl \hspace{0.1cm} F\big) dS$$
 
 
 \begin{exa}
@@ -8422,7 +8499,7 @@ $\implies \hspace{0.5cm} x^2 + (z-2)^2 = 1$
 
 
 \begin{align*}
-Curl \hspace{0.1cm} F & = \begin{vmatrix}
+\curl \hspace{0.1cm} F & = \begin{vmatrix}
 \textbf{i} & \textbf{j} & \textbf{k}\\\\
 \dfrac{\partial}{\partial x} & \dfrac{\partial}{\partial y} & \dfrac{\partial}{\partial z}\\\\
 -y^2 & x & z^2\\
@@ -8430,12 +8507,12 @@ Curl \hspace{0.1cm} F & = \begin{vmatrix}
  = (1 + 2y)\textbf{k} = \langle 0, 0, 1 + 2y\rangle\\
 \end{align*}
 
-The projection $D$ of $S$ onto the $xy-$ plane is the disk $x^2 + y^2 \leq 1$ and so using $z = g(x,y) = 2 -y$
+The projection $D$ of $S$ onto the $xy-$ plane is the disc $x^2 + y^2 \leq 1$ and so using $z = g(x,y) = 2 -y$
 
 
 We get:
 \begin{align*}
-\int_C F\cdot d \overline{r} & = \iint\limits_S\big( Curl\hspace{0.1cm}F\big)\cdot dS\\\\
+\int_C F\cdot d \overline{r} & = \iint\limits_S\big( \curl F\big)\cdot dS\\\\
 & = \iint\limits_D \Bigg[-0 \Bigg(\dfrac{\partial g}{\partial x}\Bigg) - 0\Bigg(\dfrac{\partial g}{\partial y}\Bigg) + (1 + 2y)\Bigg]dA\\\\
 & = \iint\limits_D (1 + 2y)dA\\\\
 & = \int^{2\pi}_0\int^{\pi}_0\big( 1 + 2r\sin \theta \big) r dr d\theta\\\\
@@ -8443,8 +8520,8 @@ We get:
 \end{align*}
 \end{solution}
 
-{\color[wave]{485}\subsection{The Divergence Theorem}}
-Let $E$ be a simple solid region and let $S$ be the boundary surface of $E$ given with positive (outward) orientation. Let $F$ be a vector field whose component functions have continuous partial derivatives on an open region that contains $E$. Then $$\iint\limits_S F\cdot dS = \iiint\limits_E div\hspace{0.1cm}F\hspace{0.1cm}dV$$
+{\color[wave]{485}\subsection{The divergence Theorem}}
+Let $E$ be a simple solid region and let $S$ be the boundary surface of $E$ given with positive (outward) orientation. Let $F$ be a vector field whose component functions have continuous partial derivatives on an open region that contains $E$. Then $$\iint\limits_S F\cdot dS = \iiint\limits_E \dive F\hspace{0.1cm}dV$$
 
 
 \begin{exa}
@@ -8457,7 +8534,7 @@ Find the flux of the vector field $F =z\,\textbf{i} + y\,\textbf{j} + x\,\textbf
 \begin{solution}
 
 
-$div\hspace{0.1cm} F = 0 + 1 + 0 = 1$
+$\dive \hspace{0.1cm} F = 0 + 1 + 0 = 1$
 
 \begin{align*}
 \iint\limits_S F\cdot dS & = \iiint\limits_Bdiv\hspace{0.1cm}F\hspace{0.1cm}dV\\\\
@@ -8516,7 +8593,7 @@ $$f = x^4y^3 + \ln\left|x\right| - \ln\left|y\right| + C .$$
 \subhead{(b)}
 Here the test is that the curl vanishes:
 $$\nabla\times\textbf{F}
-= \big\langle xe^z-xe^z,\ ye^z-ye^z,\ e^z-e^z\big\rangle = \underline{0}.$$
+= \big\langle xe^z-xe^z,\ ye^z-ye^z,\ e^z-e^z\big\rangle = \textbf{0}.$$
 Integrating the first component with respect to $x$ gives
 $f = xye^z + g(y,z)$, and the other two components then force $g$ to be
 constant. Hence
@@ -8528,7 +8605,7 @@ $$f = xye^z + C .$$
 \item[(a)] For a vector field $\textbf{u}$ and a scalar $\Phi$, show that
 $\nabla\cdot(\Phi\textbf{u}) = \nabla\Phi\cdot\textbf{u}
 + \Phi\big(\nabla\cdot\textbf{u}\big)$.
-\item[(b)] Find $\text{div grad } r^n$, where $r = \left|\overline{r}\right|$.
+\item[(b)] Find $\dive\grad r^n$, where $r = \left|\overline{r}\right|$.
 \end{enumerate}
 \end{problem}
 \begin{solution}
@@ -8553,7 +8630,7 @@ $$\nabla\cdot\big(nr^{n-2}\overline{r}\big)
 = n(n-2)r^{n-4}\big(\overline{r}\cdot\overline{r}\big) + 3nr^{n-2}
 = n(n-2)r^{n-2} + 3nr^{n-2},$$
 so
-$$\text{div grad } r^n = n(n+1)r^{n-2}.$$
+$$\dive\grad r^n = n(n+1)r^{n-2}.$$
 Note that $n = -1$ gives zero: that is the statement that $\dfrac1r$ is
 harmonic, which is why it is the potential of a point source.
 \end{solution}
@@ -8584,7 +8661,7 @@ $$\nabla\times\textbf{F}
 This is $\dfrac{\overline{r}}{r}$, the unit radial field. Using part (a) of the
 previous question with $\Phi = r^{-1}$,
 $$\nabla\cdot\textbf{F} = \frac2r = \frac{2}{\sqrt{x^2+y^2+z^2}},$$
-and the curl is $\underline{0}$, since the field is the gradient of $r$.
+and the curl is $\textbf{0}$, since the field is the gradient of $r$.
 
 \subhead{(d)}
 $$\nabla\cdot\textbf{F} = \frac1y + \frac1z + \frac1x ,$$
@@ -8605,7 +8682,7 @@ which is the Laplacian $f_{xx}+f_{yy}+f_{zz}$.
 
 \subhead{(b)}
 $$\nabla\times(\nabla f)
-= \big\langle 2z-2z,\ 0-0,\ 2x-2x\big\rangle = \underline{0}.$$
+= \big\langle 2z-2z,\ 0-0,\ 2x-2x\big\rangle = \textbf{0}.$$
 This is no accident: the curl of any gradient is zero, because mixed partial
 derivatives are equal. It is the reason a field with non-zero curl can never be
 conservative.
@@ -9208,7 +9285,7 @@ Given the equation $p(x)y'' + q(x)y' + r(x)y = 0$. If $x_0$ is a singular point 
 
 Suppose $p(x)y'' + q(x)y' + r(x)y = 0$ has a regular singular point $x =0$, then there exists at least one solution of the form $$y(x) = x^r \sum^{\infty} _{k = 0} a_k x^k$$ 
 In this case , the solution is $$y(x) = \sum^{\infty}_{k=0} a_k x^{k+r}$$
-Plugin this $y$ in the ODE and setting the coefficient to zero, we obtain the indicial equation which is quadratic in $r$.
+Substituting this $y$ into the equation and setting the coefficient of the lowest power of $x$ to zero gives the \emph{indicial equation}, a quadratic in $r$. Its roots decide which of three cases applies, and the three differ only in how the second solution has to be built when the first does not supply one.
 
 
 \begin{enumerate}
@@ -9224,7 +9301,7 @@ y_1 & = x^r \sum^{\infty}_{k = 0} a_k x^k\\\\
 y_2 & = x^r \sum^{\infty}_{k = 0} b_kx^k + \big(\ln x\big) y_1\\
 \end{align*}
 
-\item If $r_1 -r_2$ is an  integer, then 
+\item If $r_1 - r_2$ is a non-zero integer, with $r_1 > r_2$, then 
 \begin{align*}
 y_1 & = x^{r_1} \sum^{\infty}_{k = 0} a_k x^k\\\\
 y_2 & = x^{r_2} \sum^{\infty}_{k=0} b_kx^k + C\big(\ln (x)\big) y_1\\
@@ -9831,38 +9908,38 @@ Y(s) & = \frac{1}{(s -1)^2} + \frac{s - 1}{(s -1)^2} - \frac{1}{(s - 1)^2} + \fr
 \end{solution}
 {\color[wave]{485}\subsection{Second Shifting Theorem: the $t$-Shift}}
 
-\begin{thm}
-
-
-If $f(t)$ has the transform $F(s)$, then the function 
-\[\overline{f}(t) =
-\begin{cases}
-0, & \text{if}\hspace{0.5cm} t<a\\
- & , a\geq 0\\
-f(t-a) & \text{if}\hspace{0.5cm} t>0\\
-\end{cases}
-\] has the transform $\displaystyle{e^{-as}F(s)}$.
-
-
-Unit step function is given by 
+\begin{defn}[Unit step function]
+For $a\geq 0$ the \emph{unit step}, or \emph{Heaviside}, function is
 \[ U(t-a) =
 \begin{cases}
 0, & \text{if} \hspace{0.4cm} t<a\\
-1, & \text{if}\hspace{0.4cm} t>a\\
+1, & \text{if}\hspace{0.4cm} t>a .\\
 \end{cases}
 \]
-The unit step function is sometimes called the Heaviside function.
+\end{defn}
 
-
-From this, we see that 
-\[f(t-a)U(t-a) = 
+It is the switch of the subject: multiplying by $U(t-a)$ turns a function off
+until time $a$ and on thereafter. In particular
+\[f(t-a)\,U(t-a) =
 \begin{cases}
 0 & \text{if} \hspace{0.2cm} t<a\\
-f(t-a) & \text{if}\hspace{0.2cm} t>a\\
+f(t-a) & \text{if}\hspace{0.2cm} t>a ,\\
 \end{cases}
 \]
-\vspace{1cm}
+which is the graph of $f$ delayed by $a$ and held at zero before it. Written
+this way the next theorem needs no cases at all.
+
+\begin{thm}[Second shifting theorem]
+Let $f$ have transform $F(s)$, and let $a\geq 0$. Then the delayed function
+$f(t-a)\,U(t-a)$ has transform
+$$\mathcal{L}\big\{f(t-a)\,U(t-a)\big\} = e^{-as}F(s) .$$
 \end{thm}
+
+A delay in $t$ therefore costs a factor $e^{-as}$ in $s$, just as the first
+shifting theorem showed that a factor $e^{at}$ in $t$ costs a shift in $s$. The
+two theorems are the same statement read in opposite directions, which is why
+they are usually met together.
+
 
 \begin{thm}
 
@@ -11090,7 +11167,7 @@ $f(x,y) = x^2+y^2+\dfrac{2}{xy^2}$.
 \end{problem}
 \begin{solution}
 $$f_x = 2x - \frac{2}{x^2y^2} = 0,\qquad f_y = 2y - \frac{4}{xy^3} = 0 .$$
-The first gives $x^3y^2 = 1$ and the second $xy^4 = 2$. Dividing,
+The first gives $x^3y^2 = 1$ and the second $xy^4 = 2$. dividing,
 $$\frac{x^3y^2}{xy^4} = \frac12 \implies \frac{x^2}{y^2} = \frac12
 \implies y^2 = 2x^2 .$$
 Substituting into $x^3y^2 = 1$ gives $2x^5 = 1$, so
@@ -11320,7 +11397,7 @@ At the end of this course, students should be able to :-
 \item Synthesise the key concepts of differential, integral and multivariable calculus.
 \item Use the standard techniques of multivariable calculus, both differential and integral, and utilise them to solve selected applied problems.
 \item Examine 3 dimensional coordinate systems and graph in 3 dimensions.
-\item Use double, triple, line and surface integrals in applications including Green's theorem, Stokes theorem and Divergence theorem.
+\item Use double, triple, line and surface integrals in applications including Green's theorem, Stokes theorem and divergence theorem.
 \item Find solutions to a variety of non-linear differential equations and systems of equations.
 \item Apply Laplace transform methods to solve differential equations.
 \item Use Fourier series and transforms and their properties to solve differential problems.
@@ -11348,7 +11425,7 @@ Quadric surfaces, Normal to a surface, tangent plane to a surface, tangent to a 
 Double integrals over rectangles, Iterated integrals, Double integrals over general regions, change of variables: Jacobians, double integrals in polar coordinates. Triple integrals, integration in cylindrical and spherical coordinates.
 
 \item\textbf{Vector Analysis}
-Scalar and vector fields, the vector operators grad, div , curl and basic operations identities, Vector fields, line integrals, conservative vector fields and independence of path, Green's theorem, Parametric surfaces, surface integrals, Stokes theorem, Divergence theorem.
+Scalar and vector fields, the vector operators grad, div , curl and basic operations identities, Vector fields, line integrals, conservative vector fields and independence of path, Green's theorem, Parametric surfaces, surface integrals, Stokes theorem, divergence theorem.
 
 \item \textbf{Differential Equations}
 Systems of differential equations, power series solution of first and second order equations at ordinary and regular singular points, stability of solutions of non linear differential equations.

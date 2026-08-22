@@ -51,6 +51,10 @@
 \newtheorem*{note}{Note}
 \newtheorem*{remark}{Remark}
 \newtheorem{problemx}{Problem}[section]
+
+% The diameter of a set. It had been written \diam throughout, which is the
+% dimension operator and renders as such.
+\DeclareMathOperator{\diam}{diam}
 \newenvironment{problem}{\begin{problemx}}{\end{problemx}}
 \newenvironment{solution}
   {\renewcommand{\qedsymbol}{}\begin{proof}[\textit{Solution}.]}
@@ -442,10 +446,13 @@ this section is an attempt to say which metric spaces behave like closed
 bounded intervals of $\mathbb{R}$.
 
 The section develops the vocabulary first --- open and closed sets, limits and
-limit points, dense and nowhere dense sets, separability --- and then the three
-descriptions of compactness: every open cover has a finite subcover, every
-sequence has a convergent subsequence, and totally bounded together with
-complete. That these agree is the Heine--Borel theorem.
+limit points, countability, order --- and then the three descriptions of
+compactness: every open cover has a finite subcover, every sequence has a
+convergent subsequence, and totally bounded together with complete. In a metric
+space these three say the same thing, and the proof that they do is the centre
+of the section. The Heine--Borel theorem is the separate statement that in
+$\mathbb{R}^n$, and only in spaces like it, compactness amounts to nothing more
+than being closed and bounded.
 
 The pay-off is at the end. On a compact space a continuous function is
 automatically uniformly continuous and attains its bounds, which are exactly the
@@ -725,10 +732,10 @@ But $\lim\limits_{n\rightarrow \infty}S_n=\lim\limits_{n\rightarrow \infty}\dfra
 \begin{defn}
 A subset $E$ of $(X,d)$ is said to be bounded if $\exists$ a positive real number $M$ such that $$d(x,y)\leq M\hspace{0.5cm} \forall x,y\in E.$$
 
-If $A$ is bounded, then $\dim(A)<\infty$, where $\hspace{0.2cm}\dim(A)=\sup \{d(x,y), x,y\in A\}$
+If $A$ is bounded, then $\diam(A)<\infty$, where $\hspace{0.2cm}\diam(A)=\sup \{d(x,y), x,y\in A\}$
 
 
-If $\dim(A)=\infty$, the set $A$ is unbounded.
+If $\diam(A)=\infty$, the set $A$ is unbounded.
 
 \end{defn}
 
@@ -742,7 +749,7 @@ Any finite set in a metric space is bounded.
 Let $E=\{x_1,x_2,\dots,x_n\}$ be finite and non-empty. The distances
 $d(x_i,x_j)$ form a finite collection of real numbers, so it has a largest
 member; call it $M$. Then $d(x,y)\leq M$ for all $x,y\in E$, which is exactly
-the definition of bounded, and $\dim(E)=M<\infty$.
+the definition of bounded, and $\diam(E)=M<\infty$.
 
 Finiteness is doing all the work: an infinite collection of distances need not
 have a largest member, which is why an infinite set may be unbounded. The empty
@@ -1111,11 +1118,491 @@ We now single out the order relations that have a fourth property:
 \begin{defn}
 A partial order relation with property (iv) is called a totally ordered set.
 Sometimes a totally ordered set is called a chain.
+\end{defn}
+
+\pagebreak
+\subsection{Totally Bounded Sets}
+
+\begin{defn}
+Let $(X,d)$ be a metric space, a subset $E$ of $X$ is said to be totally bounded if given $\varepsilon>0$, $\exists$ a finite number of subsets $E_1,E_2,\dots,E_n$ of $X$ such that \hspace{0.2cm}$\diam(E_k)<\varepsilon \hspace{0.5cm} k=1,2,\dots,n\hspace{0.2cm}$ such that $$E\subset\bigcup^n_{k=1}E_k$$ i.e $E$ can be covered by a finite number of subsets of $X$ whose diameter is less than $\varepsilon$.
+\end{defn}
+
+
+\begin{exa}
+Set $X=[0,10]$ with the usual metric. Consider a subset $\{2,4,5,9\}$ of $X$. $$\diam(E_i)<\varepsilon$$ $$E\subset \bigcup^n_{i=1}E_i$$
+\begin{note}
+Every subset of a totally bounded set is totally bounded.
+\end{note}
+
+\end{exa}
+
+
+\begin{thm}
+If a subset $E$ of a metric space is totally bounded then it is bounded.
+
+\end{thm}
+
+\begin{proof}
+To prove this, we need to show that for any $x,y\in E$, $d(x,y)$ is finite. Choose $\varepsilon =1$, then there is a finite number of non-empty open sets $E_1,E_2,\dots,E_n$ of $X$ such that each $E_i$ has diameter less than $1$ and that $$E\subset \bigcup^n_{i=1}E_i.$$ Choose a point $a_k$ arbitrary in $E_i$,  $i=1,2,\dots,n$.\\ 
+Let $M=d(a_1,a_2)+d(a_2,a_3)+\cdots+d(a_{n-1},a_n)$ since $E_i's$ cover $E$, hence $x,y\in E$ implies $x\in E_i$ and $y\in E_j$ for some $i,j$. Without loss of generality, we assume $i<j$. Now, $$d(x,y)\leq d(x,a_i)+d(a_i,a_{i+1})+\cdots+d(a_{j-1},a_j)+d(a_j,y)$$ Now, $\diam(E_j)<1$,\hspace{0.3cm} $d(x,a_i)<1$,\hspace{0.3cm} $d(a_j,y)<1$.\hspace{0.2cm} 
+Therefore, $$d(x,y)\leq 1+M+1=M+2\hspace{0.5cm} \forall x,y\in E$$ This proves that $E$ is bounded.\\
+
+\end{proof}
+
+
+\begin{defn}[$\varepsilon$-dense]
+A subset $B$ of $E$ is $\varepsilon$-dense in $E$ if for every $x\in E$ there
+exists $y\in B$ with $d(x,y)<\varepsilon$.
+\end{defn}
+
+\begin{thm}
+A subset $E$ of a metric space $(X,d)$ is totally bounded if and only if for every $\varepsilon>0$, $E$ contains a finite subset $B=\{x_1,x_2,\dots,x_n\}$ which is $\varepsilon$-dense in $E$.
 
 
 \pagebreak
-%COMPLETE METRIC SPACES
+\end{thm}
+\begin{proof}
+Assume $E$ is totally bounded, thus \hspace{0.2cm}$\displaystyle{ E\subset \bigcup^n_{i=1}E_i}$\hspace{0.2cm} and\hspace{0.2cm} $\diam(E_i)<\varepsilon$\hspace{0.2cm} for $i=1,2,\dots,n$ for a given $\varepsilon>0$. If $x\in E$, then $x\in E_i$ for some $i$.\\ For some $a_i\in E_i,\hspace{0.5cm} i=1,2,\dots,n$. Then, $B=\{a_1,a_2,\dots,a_n\}$ is $\varepsilon$-dense in $$\bigcup^n_{i=1}E_i$$ Thus, $d(x,a_i)<\varepsilon$. So, if $E$ is totally, then it is a finite $\varepsilon$-dense subset.\\ 
+Conversely, Let $B=\{x_1,x_2,\dots,x_n\}$ be $\varepsilon$/3 dense in $E$. Then let $x\in E$, and we have that there exist $x_i\in B\ni d(x,x_i)<\dfrac{\varepsilon}{3}$. This implies $x\in B_{\frac{\varepsilon}{3}}(x_i)$. Thus \hspace{0.2cm}$\hspace{0.2cm} B_{\frac{\varepsilon}{3}}(x_1), B_{\frac{\varepsilon}{3}}(x_2),\dots,B_{\frac{\varepsilon}{3}}\hspace{0.2cm}$ forms a covering of $E$.
+
+If $y\in E$, then $y\in B_{\frac{\varepsilon}{3}}(x_j)$ for some $x_j\in B$. Now,
+\begin{align*}
+d(x,y) &\leq d(x,x_i)+d(x_i,x_j)+d(x_j,y)\\
+       &\leq \frac{\varepsilon}{3}+\frac{\varepsilon}{3}+\frac{\varepsilon}{3}\\
+       &=\varepsilon
+\end{align*}
+Hence \hspace{0.2cm}$\displaystyle{ E\subset \bigcup^n_{i=1}B_{\frac{\varepsilon}{3}}(x_i)}\hspace{0.2cm}$ and each have diameter less than $\varepsilon$. Thus $E$ is totally bounded.
+
+\end{proof}
+
+
+\begin{exa}
+If $E\subset (X,d)$ is totally bounded, then it is bounded but the converse is not true.
+
+ For instance, take $X=l_2$ for $x,y\in X$, where $x=(x_1,x_2,\dots),\\ y=(y_1,y_2,\dots)$ with the metric \hspace{0.2cm}$\displaystyle{ d(x,y)=\Bigg[\sum^{\infty}_{i=1}|x_i-y_i|^2\Bigg]^{\frac{1}{2}}}.$
+
+ Take $A$ to be a subset of $l_2$ consisting points $e_1=(1,0,0,\dots)$, $e_2=(0,1,0,\dots)$,\dots, $e_n=(0,0,\dots,0,1,0,\dots)$.\\ We shall prove that $A$ is bounded but not totally bounded.\\ For $e_i,e_j$ in $A$, \hspace{0.2cm}$d(e_i,e_j)=\sqrt{2},\hspace{0.5cm} i\neq j.\hspace{0.2cm}$ Hence $A$ is bounded in $X$. Since $\diam(A)=\sqrt{2}$.\\ But it is not totally bounded. Take $\varepsilon =1$, the sets $B_{\frac{1}{2}}$ $$B_{\varepsilon}(x_0)=\{x\in X:d(x,x_0)<\varepsilon \}$$ $$B_{\frac{1}{2}}(e_i)=\{e_j\in A: d(e_i,e_j)<1/2\}$$ The set $B_{\frac{1}{2}}(e_i)$ is a singleton set $\{e_i\}$ because the distance $d(e_i,e_j)=\sqrt{2}$.\\ Hence the infinite set $A$ can not be written as a finite union of disjoint subsets with diameter say less than $1$.\\ Thus $A$ is not totally bounded.
+\end{exa}
+ 
+ 
+ 
+ 
+ 
+
+\begin{exa}
+Let $X=l_{\infty}$ with $\displaystyle{d(x,y)=\sup_{1\leq i<\infty}|x_i-y_i|}$. Show that the set $E=\{e_1,e_2,e_3,\dots\}$ of standard unit sequences is bounded but not totally bounded.
+\end{exa}
+
+\begin{solution}
+Here $e_i$ is the sequence with $1$ in the $i$th place and $0$ elsewhere.
+
+\subhead{The distances}
+For $i\neq j$ the sequences $e_i$ and $e_j$ differ in exactly two places, and in each the difference has modulus $1$, so
+$$d(e_i,e_j)=\sup_k|(e_i)_k-(e_j)_k|=1 .$$
+
+\subhead{Bounded}
+Every pair of points of $E$ is at distance $1$, so $\diam(E)=1<\infty$ and $E$ is bounded.
+
+\subhead{Not totally bounded}
+Take $\varepsilon=\frac12$. Any set of diameter less than $\frac12$ can contain at most one $e_i$, since two of them are a distance $1$ apart. So covering the infinite set $E$ would need infinitely many such sets, and no finite cover by sets of diameter less than $\frac12$ exists.
+
+The contrast with $l_2$, where the same set has $d(e_i,e_j)=\sqrt2$, is only in the constant: in both spaces the unit sequences stay a fixed distance apart no matter how far out one goes, which is exactly what total boundedness forbids. In $\mathbb{R}^n$ this cannot happen --- there, bounded and totally bounded coincide.
+\end{solution}
+
+
+\begin{thm}
+Let $(X,d)$ be a metric space. A subset $A$ of $X$ is totally bounded if and only if every sequence of points of $A$ contains a Cauchy subsequence.
+
+\end{thm}
+
+\begin{proof}
+We prove both directions; the statement is an equivalence, and each half is
+used later.
+
+\subhead{Totally bounded $\implies$ every sequence has a Cauchy subsequence}
+Let $(x_n)$ be a sequence in $A$. For $\varepsilon=1$, cover $A$ by finitely
+many sets of diameter less than $1$; one of them must contain $x_n$ for
+infinitely many $n$, giving a subsequence $(x_n^{(1)})$ all of whose terms lie
+within $1$ of each other. Repeat inside that subsequence with
+$\varepsilon=\frac12$, then $\frac13$, and so on, obtaining nested
+subsequences, the $k$-th having all terms within $\frac1k$.
+
+Take the diagonal sequence whose $k$-th term is the $k$-th term of the $k$-th
+subsequence. Beyond position $k$ it is a subsequence of the $k$-th one, so its
+terms are eventually within $\frac1k$ of each other for every $k$; that is
+precisely the Cauchy condition.
+
+\subhead{Every sequence has a Cauchy subsequence $\implies$ totally bounded}
+Suppose $A$ is \emph{not} totally bounded. Then for some $\varepsilon>0$ no
+finite collection of $\varepsilon$-balls covers $A$. Pick $x_1\in A$; since
+$B(x_1;\varepsilon)$ does not cover $A$, pick $x_2\in A$ outside it; since
+$B(x_1;\varepsilon)\cup B(x_2;\varepsilon)$ does not cover $A$, pick $x_3$
+outside both, and so on. The resulting sequence has $d(x_m,x_n)\geq\varepsilon$
+for all $m\neq n$, so no subsequence of it is Cauchy --- contradicting the
+hypothesis.
+\end{proof}
+
+\begin{remark}
+Note what is \emph{not} claimed: the Cauchy subsequence need not converge. It
+does exactly when the space is complete, and total boundedness together with
+completeness is one of the equivalent forms of compactness.
+\end{remark}
+
+
+\begin{coro}
+Any bounded subset of $\mathbb{R}$ is totally bounded in the usual metric.
+
+\end{coro}
+
+\begin{proof}
+Let $A$ be a bounded subset of $\mathbb{R}$. Let $(x_n)$ be a sequence in $A$. Since $A$ is bounded, $(x_n)$ is bounded. i.e $|x_n|<M$.
+
+Since $(x_n)$ is bounded, it contains a convergent sub-sequence $(x_{n_k})$. We know that every convergent sequence is a Cauchy sequence. Therefore $(x_{n_k})$ is a Cauchy sequence. So, every sequence $(x_n)$ of $A$ has a Cauchy sub-sequence. Thus by the previous theorem, $A$ is totally bounded.
+
+\end{proof}
+
+
+
+\subsection{Compact Sets in a Metric Space}
+
+Boundedness says a set does not run off to infinity. Total boundedness says
+more: it can be pinned down by finitely many small pieces at every scale. The
+notion in this section is stronger again, and it is the one that makes the
+theorems of analysis work.
+
+\begin{defn}
+Let $X$ be any set. A family $\xi$ of subsets $\{G_i\}$ of $X$ is said to form
+a covering of $X$ if $$X\subset \bigcup_{G_i\in \xi}G_i.$$ If $X$ is a metric
+space and each $G_i$ is an open set, then $\xi$ is called an open covering
+of $X$.
 \end{defn}
+
+\begin{defn}
+A metric space $X$ is said to be \emph{compact} if every open covering of $X$
+has a finite sub-cover. A subset $K$ of $X$ is compact if it is compact as a
+metric space in its own right, with the metric inherited from $X$.
+\end{defn}
+
+\begin{note}
+The definition is easy to misread. It does not say that $X$ has \emph{some}
+finite open cover --- every space has one, namely $\{X\}$. It says that
+\emph{however} the space is covered by open sets, finitely many of them already
+suffice. The force of the definition is that it applies to every cover at once,
+which is why it is so often used by producing an awkward cover and seeing what
+a finite subcover of it must give.
+\end{note}
+
+\begin{thm}
+Every compact subset $K$ of a metric space $(X,d)$ is closed and bounded.
+\end{thm}
+
+\begin{proof}
+\subhead{Bounded}
+Fix any $x_0\in X$. The open balls $B(x_0;n)$, for $n=1,2,3,\dots$, cover the
+whole of $X$ and in particular cover $K$. By compactness finitely many of them
+cover $K$, and since the balls increase with $n$ the largest of that finite
+collection contains the rest: $K\subset B(x_0;N)$ for some $N$. Hence $K$ is
+bounded.
+
+\subhead{Closed}
+We show the complement is open. Let $x\in X\setminus K$. For each $y\in K$ put
+$$r_y = \tfrac12\, d(x,y) > 0 ,$$
+which is positive precisely because $x\notin K$ and so $x \neq y$. The balls
+$B(y;r_y)$, as $y$ runs over $K$, form an open cover of $K$, so finitely many
+of them cover it, say $B(y_1;r_1),\dots,B(y_n;r_n)$ with $r_i = r_{y_i}$. Put
+$$r = \min\{r_1,\dots,r_n\} > 0 .$$
+Then $B(x;r)$ meets none of these balls. For if $z\in B(x;r)\cap B(y_i;r_i)$
+then
+$$d(x,y_i)\leq d(x,z)+d(z,y_i) < r + r_i \leq 2r_i = d(x,y_i),$$
+which is absurd. So $B(x;r)$ misses $K$ entirely, that is
+$B(x;r)\subset X\setminus K$. As $x$ was arbitrary, $X\setminus K$ is open and
+$K$ is closed.
+\end{proof}
+
+\begin{remark}
+The converse is false, and the counterexample is one already met. In $l_2$ the
+set $A=\{e_1,e_2,e_3,\dots\}$ of standard unit vectors is closed and bounded,
+every pair of its points being at distance $\sqrt2$; but it is not totally
+bounded, and by the theorem of the previous subsection no sequence in it has a
+Cauchy subsequence. It is therefore not compact. In an infinite-dimensional
+space, closed and bounded is simply not enough.
+\end{remark}
+
+\begin{thm}[Heine--Borel property]
+Let $E$ be a bounded and closed set in $\mathbb{R}$, then every open covering
+of $E$ has a finite sub covering.
+\end{thm}
+
+\begin{proof}
+Since $E$ is bounded, we have $E\subset I_1=[a,b]$, $(a,b)$. We proceed by
+contradiction on $I_1$.
+
+Suppose (if possible) there is an open covering $\{G_i\}$ of $I_1$ i.e
+$I_1\subset \bigcup G_i$ which has no finite sub covering. Bisect $I_1$ into two
+closed intervals $I_2$ and $I'_2$. At least one of these must have no finite sub
+covering. Let $I_2$ be the part without a finite sub covering. Bisect $I_2$ into
+$I_3$ and $I'_3$. Continuing in this way, we have a nested sequence of intervals
+$I_n$ such that $I_n$ has no finite subcover for each $n$.
+
+By nested sequence interval theorem
+\hspace{0.2cm}$\displaystyle{\bigcap_{n=1}^{\infty}I_n\neq \emptyset}.$
+Let $x\in I_n$. Then
+\hspace{0.2cm}$\displaystyle{ x\in I_1\subset \bigcup^{\infty}_{i=1}G_i},\hspace{0.2cm}$
+so, $x\in G_i$ for some $i$. Since $G_i$ is open there exist an open ball
+\hspace{0.2cm}$B_r(x)=(x-r,x+r)\subset G_i.$ Taking $n$ large enough, we have
+\hspace{0.2cm}$I_n\subset B_r(x)=(x-r,x+r)\subset G_i.$ This means that $I_n$ is
+covered by a single set $G_i$. This contradicts that $I_n$ has no finite sub
+covering. Thus our early assumption is not true. Therefore $E$ has a finite sub
+covering.
+\end{proof}
+
+\begin{coro}[Heine--Borel theorem]
+A subset of $\mathbb{R}^n$ is compact if and only if it is closed and bounded.
+\end{coro}
+
+\begin{proof}
+One direction is the theorem above, applied coordinatewise: a closed bounded
+subset of $\mathbb{R}^n$ lies in a closed box $[a_1,b_1]\times\cdots\times[a_n,b_n]$,
+which is compact by repeating the bisection argument in $n$ dimensions, and a
+closed subset of a compact set is compact. The other direction is the previous
+theorem, which holds in any metric space.
+\end{proof}
+
+\begin{remark}
+It is worth being clear about what is special here. \emph{Compact implies closed
+and bounded} is true in every metric space. The converse is a property of
+$\mathbb{R}^n$ and fails as soon as the space is infinite-dimensional. Much of
+functional analysis is a response to that failure.
+\end{remark}
+
+\begin{exa}
+Find an open covering of $[a,b]$ and show that it contains a finite sub covering
+in the absolute value metric.
+\end{exa}
+
+\begin{solution}
+Consider \hspace{0.2cm}$G_n=\Big(a-\dfrac{1}{n},b+\dfrac{1}{n}\Big)\hspace{0.2cm}$
+then \hspace{0.2cm}$\displaystyle{[a,b]\subset \bigcup^{\infty}_{n=1}G_n}\hspace{0.2cm}$
+and that \hspace{0.2cm}$[a,b]\subset (a-1,b+1)=G_1,\hspace{0.2cm}$ thus
+$\{G_1\}$ is a finite sub cover of $[a,b]$.
+\end{solution}
+
+\begin{exa}
+Show that $(0,1]$ is not compact in the usual metric on $\mathbb{R}$.
+\end{exa}
+
+\begin{solution}
+Take $\displaystyle{G_n = \Big(\frac1n , 2\Big)}$ for $n=1,2,3,\dots$ Each is
+open, and every $x\in(0,1]$ satisfies $x>\frac1n$ for some $n$, so
+$\{G_n\}$ is an open cover. Any finite subfamily has a largest index $N$, and
+the union of the subfamily is then $\Big(\dfrac1N,2\Big)$, which omits
+$\dfrac{1}{N+1}$. No finite subcover exists.
+
+The set is bounded but not closed, and the cover exhibits exactly the point that
+is missing. This is the standard way to prove non-compactness: produce one cover
+whose finite subfamilies visibly fail.
+\end{solution}
+
+\pagebreak
+
+\subsection{Sequential Compactness}
+
+There is a second description of compactness, phrased in sequences rather than
+covers, and in metric spaces it says exactly the same thing. Sequences are
+usually the easier of the two to work with.
+
+\begin{defn}
+A metric space $X$ is \emph{sequentially compact} if every sequence in $X$ has a
+subsequence converging to a point of $X$.
+\end{defn}
+
+\begin{lem}[Lebesgue number lemma]
+Let $X$ be sequentially compact and let $\xi$ be an open covering of $X$. Then
+there is a number $\delta>0$, called a \emph{Lebesgue number} for the cover,
+such that every subset of $X$ of diameter less than $\delta$ is contained in a
+single member of $\xi$.
+\end{lem}
+
+\begin{proof}
+Suppose no such $\delta$ exists. Then for each $n$ the number $\frac1n$ fails,
+so there is a set $A_n\subset X$ with $\diam(A_n)<\frac1n$ lying inside no
+member of $\xi$. Choose $x_n\in A_n$.
+
+By sequential compactness some subsequence $x_{n_k}\rightarrow x$. Now $x$ lies
+in some $G\in\xi$, and $G$ is open, so $B(x;\varepsilon)\subset G$ for some
+$\varepsilon>0$. Choose $k$ so large that
+$$d(x_{n_k},x)<\frac{\varepsilon}{2}\qquad\text{and}\qquad
+\frac{1}{n_k}<\frac{\varepsilon}{2}.$$
+Every point of $A_{n_k}$ is within $\frac{1}{n_k}$ of $x_{n_k}$, hence within
+$\varepsilon$ of $x$, so
+$$A_{n_k}\subset B(x;\varepsilon)\subset G ,$$
+contradicting the choice of $A_{n_k}$ as lying inside no member of $\xi$.
+\end{proof}
+
+\begin{thm}
+For a metric space $X$ the following are equivalent.
+\begin{enumerate}
+\item[(i)] $X$ is compact.
+\item[(ii)] $X$ is sequentially compact.
+\item[(iii)] $X$ is complete and totally bounded.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+\subhead{(i) $\implies$ (ii)}
+Let $(x_n)$ be a sequence in $X$ with no convergent subsequence. Then no point
+$x$ of $X$ is a limit of a subsequence, so each $x$ has a ball $B(x;r_x)$
+containing $x_n$ for only finitely many indices $n$. These balls form an open
+cover; a finite subcover $B(y_1;r_1),\dots,B(y_m;r_m)$ would then contain
+$x_n$ for only finitely many $n$ in total, yet it must contain every term of the
+sequence. That is impossible, so some subsequence converges.
+
+\subhead{(ii) $\implies$ (iii)}
+Total boundedness is the theorem of the previous subsection: every sequence in a
+sequentially compact space has a convergent, hence Cauchy, subsequence, and that
+is equivalent to total boundedness. For completeness, let $(x_n)$ be Cauchy. By
+hypothesis it has a subsequence converging to some $x$. A Cauchy sequence with a
+convergent subsequence converges to the same limit, since given $\varepsilon>0$
+one may choose $N$ with $d(x_m,x_n)<\frac{\varepsilon}{2}$ for $m,n\geq N$ and
+then a term $x_{n_k}$ of the subsequence with $n_k\geq N$ and
+$d(x_{n_k},x)<\frac{\varepsilon}{2}$; the triangle inequality gives
+$d(x_n,x)<\varepsilon$ for all $n\geq N$.
+
+\subhead{(iii) $\implies$ (ii)}
+Let $(x_n)$ be a sequence. Total boundedness gives a Cauchy subsequence, and
+completeness makes it converge.
+
+\subhead{(ii) $\implies$ (i)}
+Let $\xi$ be an open cover of $X$ and let $\delta>0$ be a Lebesgue number for
+it. By the implication already proved, $X$ is totally bounded, so it can be
+covered by finitely many sets $E_1,\dots,E_n$ each of diameter less than
+$\delta$. By the choice of $\delta$ each $E_k$ lies in some $G_k\in\xi$, and
+then
+$$X = \bigcup_{k=1}^{n}E_k \subset \bigcup_{k=1}^{n}G_k .$$
+So $\{G_1,\dots,G_n\}$ is a finite subcover.
+\end{proof}
+
+\begin{note}
+The equivalence is a metric-space phenomenon. In general topological spaces
+compactness and sequential compactness are different conditions, neither
+implying the other. Everything in this course takes place in metric spaces, so
+the two may be used interchangeably --- but it is worth knowing that the licence
+to do so has a reason behind it.
+\end{note}
+
+\begin{exa}
+Show that a closed subset of a compact metric space is compact.
+\end{exa}
+
+\begin{solution}
+Let $F$ be closed in the compact space $X$, and let $(x_n)$ be a sequence in
+$F$. Regarded as a sequence in $X$ it has a subsequence converging to some
+$x\in X$, by sequential compactness. Since $F$ is closed and every term of the
+subsequence lies in $F$, the limit $x$ lies in $F$. So every sequence in $F$ has
+a subsequence converging in $F$, and $F$ is sequentially compact, hence compact.
+
+The cover argument is just as short, and either is acceptable; the point of
+having both descriptions is that one of them is usually the easier.
+\end{solution}
+
+\pagebreak
+
+\subsection{Compactness and Continuity}
+
+The reason compactness is worth the trouble is what it does to continuous
+functions. The three results below are the ones used repeatedly in the rest of
+the course.
+
+\begin{thm}
+Let $f:X\rightarrow Y$ be continuous and let $X$ be compact. Then $f(X)$ is
+compact.
+\end{thm}
+
+\begin{proof}
+Let $\xi=\{G_i\}$ be an open cover of $f(X)$ by sets open in $Y$. Since $f$ is
+continuous each $f^{-1}(G_i)$ is open in $X$, and these sets cover $X$: any
+$x\in X$ has $f(x)\in G_i$ for some $i$, so $x\in f^{-1}(G_i)$. By compactness
+finitely many suffice,
+$$X = f^{-1}(G_1)\cup\cdots\cup f^{-1}(G_n) .$$
+Applying $f$, every point of $f(X)$ lies in one of $G_1,\dots,G_n$, so these
+finitely many sets cover $f(X)$.
+\end{proof}
+
+\begin{coro}[Extreme value theorem]
+Let $X$ be a non-empty compact metric space and $f:X\rightarrow\mathbb{R}$
+continuous. Then $f$ is bounded and attains both its supremum and its infimum:
+there exist $p,q\in X$ with
+$$f(p) = \sup_{x\in X}f(x),\qquad f(q) = \inf_{x\in X}f(x).$$
+\end{coro}
+
+\begin{proof}
+By the theorem $f(X)$ is a compact subset of $\mathbb{R}$, hence closed and
+bounded. Bounded and non-empty, it has a finite supremum $M$; and $M$ is a limit
+of points of $f(X)$, so $M\in f(X)$ because $f(X)$ is closed. Thus $M=f(p)$ for
+some $p\in X$. The infimum is identical with the inequalities reversed.
+\end{proof}
+
+\begin{remark}
+This is the theorem behind every argument of the form ``choose the point where
+the function is largest''. On a non-compact domain the point need not exist:
+$f(x)=x$ on $(0,1)$ is bounded and attains neither bound, and $f(x)=x$ on
+$\mathbb{R}$ is not even bounded.
+\end{remark}
+
+\begin{thm}
+Let $X$ be compact and $f:X\rightarrow Y$ continuous. Then $f$ is uniformly
+continuous: given $\varepsilon>0$ there is $\delta>0$, depending on
+$\varepsilon$ alone, such that
+$$d(p,q)<\delta \implies d\big(f(p),f(q)\big)<\varepsilon
+\qquad\text{for all } p,q\in X .$$
+\end{thm}
+
+\begin{proof}
+Let $\varepsilon>0$. By continuity, each $x\in X$ has a $\delta_x>0$ with
+$$d(x,z)<2\delta_x \implies d\big(f(x),f(z)\big)<\frac{\varepsilon}{2}.$$
+The balls $B(x;\delta_x)$ cover $X$, so by compactness finitely many do, say
+$B(x_1;\delta_1),\dots,B(x_n;\delta_n)$ with $\delta_i=\delta_{x_i}$. Put
+$$\delta = \min\{\delta_1,\dots,\delta_n\}>0 ,$$
+a number depending only on $\varepsilon$, since the $x_i$ were chosen once and
+for all.
+
+Now suppose $d(p,q)<\delta$. The point $p$ lies in some $B(x_i;\delta_i)$, so
+$d(p,x_i)<\delta_i$, and then
+$$d(q,x_i)\leq d(q,p)+d(p,x_i) < \delta + \delta_i \leq 2\delta_i .$$
+Both $p$ and $q$ are therefore within $2\delta_i$ of $x_i$, so
+$$d\big(f(p),f(q)\big)\leq d\big(f(p),f(x_i)\big)+d\big(f(x_i),f(q)\big)
+< \frac{\varepsilon}{2}+\frac{\varepsilon}{2} = \varepsilon .$$
+\end{proof}
+
+\begin{note}
+The whole content of the word \emph{uniformly} is that $\delta$ does not depend
+on the point. Compactness is what converts the pointwise $\delta_x$ into a single
+$\delta$: finitely many numbers have a smallest member, infinitely many need
+not. That is the entire proof, and it is the pattern of most compactness
+arguments --- a local statement, made global by taking a finite subcover.
+\end{note}
+
+\begin{exa}
+Show that $\displaystyle{f(x)=\frac1x}$ is continuous on $(0,1]$ but not
+uniformly continuous there, and reconcile this with the theorem.
+\end{exa}
+
+\begin{solution}
+Continuity at each point is standard. For uniform continuity, take
+$\varepsilon=1$ and consider
+$$p_n = \frac1n,\qquad q_n = \frac{1}{n+1} .$$
+Then $d(p_n,q_n)=\dfrac{1}{n(n+1)}\rightarrow 0$, yet
+$$\big|f(p_n)-f(q_n)\big| = \big|n-(n+1)\big| = 1$$
+for every $n$. So no $\delta$ can work for $\varepsilon=1$, and $f$ is not
+uniformly continuous.
+
+There is no contradiction: $(0,1]$ is not compact, as shown above. The theorem
+requires compactness, and this example shows the requirement is not decorative.
+\end{solution}
+
+
+
+
 \subsection{Practice Problems}
 
 \begin{problem}
@@ -1277,6 +1764,92 @@ uncountable.
 In a strong sense almost every real number is irrational, even though the
 rationals are dense.
 \end{solution}
+
+\begin{problem}
+Show directly from the definition that a finite subset of a metric space is
+compact.
+\end{problem}
+\begin{solution}
+Let $F=\{p_1,\dots,p_m\}$ and let $\xi$ be an open cover of $F$. Each $p_k$ lies
+in some $G_k\in\xi$, and then $\{G_1,\dots,G_m\}$ is a subfamily of $\xi$ with
+at most $m$ members covering $F$. It is finite because $F$ is.
+
+Nothing about the metric was used. Finiteness is the trivial case of
+compactness, and it is worth noticing that the argument is the one every
+compactness proof imitates: produce the finite subcover by making one choice per
+point of a finite set.
+\end{solution}
+
+\begin{problem}
+Show that the union of two compact subsets of a metric space is compact, and
+give an example showing that the union of infinitely many compact sets need not
+be.
+\end{problem}
+\begin{solution}
+Let $K$ and $L$ be compact and let $\xi$ be an open cover of $K\cup L$. It
+covers $K$, so finitely many members $G_1,\dots,G_m$ cover $K$; it also covers
+$L$, so finitely many members $H_1,\dots,H_n$ cover $L$. Then
+$$K\cup L \subset G_1\cup\cdots\cup G_m\cup H_1\cup\cdots\cup H_n ,$$
+a union of $m+n$ members of $\xi$.
+
+For the second part take $K_n=\Big[\dfrac1n,1\Big]$ in $\mathbb{R}$. Each is
+closed and bounded, hence compact, but
+$$\bigcup_{n=1}^{\infty}K_n = (0,1] ,$$
+which was shown above not to be compact. The proof above breaks down at exactly
+the right place: $m+n$ is finite, but an infinite union of finite collections
+need not be finite.
+\end{solution}
+
+\begin{problem}
+Let $(X,d)$ be compact and let $f:X\rightarrow\mathbb{R}$ be continuous and
+strictly positive. Show that $\displaystyle{\inf_{x\in X}f(x)>0}$, and give an
+example on a non-compact space where the infimum is $0$ although $f$ is strictly
+positive throughout.
+\end{problem}
+\begin{solution}
+By the extreme value theorem $f$ attains its infimum: there is $q\in X$ with
+$f(q)=\inf f$. Since $f$ is strictly positive, $f(q)>0$, so the infimum is
+positive.
+
+On $(0,1]$, which is not compact, take $f(x)=x$. It is continuous and strictly
+positive at every point, yet $\inf f = 0$ and the value $0$ is never attained.
+The infimum has escaped to a point that is not in the space --- which is the
+whole difference compactness makes.
+\end{solution}
+
+\begin{problem}
+Show that a compact metric space is separable.
+\end{problem}
+\begin{solution}
+A compact space is totally bounded, so for each $n$ it can be covered by
+finitely many balls of radius $\dfrac1n$; let $D_n$ be the set of their centres,
+a finite set. Put $D=\bigcup_{n=1}^{\infty}D_n$, a countable union of finite
+sets and therefore countable.
+
+$D$ is dense: given $x\in X$ and $\varepsilon>0$, choose $n$ with
+$\dfrac1n<\varepsilon$; the point $x$ lies in one of the radius-$\dfrac1n$ balls,
+whose centre belongs to $D_n\subset D$ and is within $\varepsilon$ of $x$. So
+$X$ has a countable dense subset.
+\end{solution}
+
+\begin{problem}
+Let $K$ be a compact subset of a metric space $X$ and let $x\in X$. Show that
+there is a point of $K$ nearest to $x$, that is, a $p\in K$ with
+$$d(x,p) = \inf_{y\in K}d(x,y).$$
+\end{problem}
+\begin{solution}
+The function $f:K\rightarrow\mathbb{R}$ given by $f(y)=d(x,y)$ is continuous;
+indeed the triangle inequality gives
+$\big|d(x,y)-d(x,z)\big|\leq d(y,z)$, so $f$ is even non-expansive. A continuous
+real function on a non-empty compact space attains its infimum, so the infimum
+is $f(p)=d(x,p)$ for some $p\in K$.
+
+Nearest points need not exist without compactness, and need not be unique with
+it: in $\mathbb{R}^2$ every point of the unit circle is nearest to the origin.
+Existence is what compactness buys; uniqueness is a separate question, answered
+in Section~4 for convex sets in an inner product space.
+\end{solution}
+
 
 
 \section{Complete Metric Spaces}
@@ -1544,145 +2117,12 @@ The set of all polynomials with rational coefficients is countable thus $C[a,b]$
 \end{proof}
 
 
-\subsection{Totally Bounded Sets}
+\subsection{Closed Subspaces and the Nested Set Theorem}
 
-\begin{defn}
-Let $(X,d)$ be a metric space, a subset $E$ of $X$ is said to be totally bounded if given $\varepsilon>0$, $\exists$ a finite number of subsets $E_1,E_2,\dots,E_n$ of $X$ such that \hspace{0.2cm}$\dim(E_k)<\varepsilon \hspace{0.5cm} k=1,2,\dots,n\hspace{0.2cm}$ such that $$E\subset\bigcup^n_{k=1}E_k$$ i.e $E$ can be covered by a finite number of subsets of $X$ whose diameter is less than $\varepsilon$.
-\end{defn}
-
-
-\begin{exa}
-Set $X=[0,10]$ with the usual metric. Consider a subset $\{2,4,5,9\}$ of $X$. $$\dim(E_i)<\varepsilon$$ $$E\subset \bigcup^n_{i=1}E_i$$
-\begin{note}
-Every subset of a totally bounded set is totally bounded.
-\end{note}
-
-\end{exa}
-
-
-\begin{thm}
-If a subset $E$ of a metric space is totally bounded then it is bounded.
-
-\end{thm}
-
-\begin{proof}
-To prove this, we need to show that for any $x,y\in E$, $d(x,y)$ is finite. Choose $\varepsilon =1$, then there is a finite number of non-empty open sets $E_1,E_2,\dots,E_n$ of $X$ such that each $E_i$ has diameter less than $1$ and that $$E\subset \bigcup^n_{i=1}E_i.$$ Choose a point $a_k$ arbitrary in $E_i$,  $i=1,2,\dots,n$.\\ 
-Let $M=d(a_1,a_2)+d(a_2,a_3)+\cdots+d(a_{n-1},a_n)$ since $E_i's$ cover $E$, hence $x,y\in E$ implies $x\in E_i$ and $y\in E_j$ for some $i,j$. Without loss of generality, we assume $i<j$. Now, $$d(x,y)\leq d(x,a_i)+d(a_i,a_{i+1})+\cdots+d(a_{j-1},a_j)+d(a_j,y)$$ Now, $\dim(E_j)<1$,\hspace{0.3cm} $d(x,a_i)<1$,\hspace{0.3cm} $d(a_j,y)<1$.\hspace{0.2cm} 
-Therefore, $$d(x,y)\leq 1+M+1=M+2\hspace{0.5cm} \forall x,y\in E$$ This proves that $E$ is bounded.\\
-
-
-Recall ($\varepsilon$-dense)
-
-A subset $B$ of $E$ is $\varepsilon$-dense in $E$ if for every $x\in E, \exists y\in B\ni d(x,y)<\varepsilon$.
-
-\end{proof}
-
-
-\begin{thm}
-A subset $E$ of a metric space $(X,d)$ is totally bounded if and only if for every $\varepsilon>0$, $E$ contains a finite subset $B=\{x_1,x_2,\dots,x_n\}$ which is $\varepsilon$-dense in $E$.
-
-
-\pagebreak
-\end{thm}
-\begin{proof}
-Assume $E$ is totally bounded, thus \hspace{0.2cm}$\displaystyle{ E\subset \bigcup^n_{i=1}E_i}$\hspace{0.2cm} and\hspace{0.2cm} $\dim(E_i)<\varepsilon$\hspace{0.2cm} for $i=1,2,\dots,n$ for a given $\varepsilon>0$. If $x\in E$, then $x\in E_i$ for some $i$.\\ For some $a_i\in E_i,\hspace{0.5cm} i=1,2,\dots,n$. Then, $B=\{a_1,a_2,\dots,a_n\}$ is $\varepsilon$-dense in $$\bigcup^n_{i=1}E_i$$ Thus, $d(x,a_i)<\varepsilon$. So, if $E$ is totally, then it is a finite $\varepsilon$-dense subset.\\ 
-Conversely, Let $B=\{x_1,x_2,\dots,x_n\}$ be $\varepsilon$/3 dense in $E$. Then let $x\in E$, and we have that there exist $x_i\in B\ni d(x,x_i)<\dfrac{\varepsilon}{3}$. This implies $x\in B_{\frac{\varepsilon}{3}}(x_i)$. Thus \hspace{0.2cm}$\hspace{0.2cm} B_{\frac{\varepsilon}{3}}(x_1), B_{\frac{\varepsilon}{3}}(x_2),\dots,B_{\frac{\varepsilon}{3}}\hspace{0.2cm}$ forms a covering of $E$.
-
-If $y\in E$, then $y\in B_{\frac{\varepsilon}{3}}(x_j)$ for some $x_j\in B$. Now,
-\begin{align*}
-d(x,y) &\leq d(x,x_i)+d(x_i,x_j)+d(x_j,y)\\
-       &\leq \frac{\varepsilon}{3}+\frac{\varepsilon}{3}+\frac{\varepsilon}{3}\\
-       &=\varepsilon
-\end{align*}
-Hence \hspace{0.2cm}$\displaystyle{ E\subset \bigcup^n_{i=1}B_{\frac{\varepsilon}{3}}(x_i)}\hspace{0.2cm}$ and each have diameter less than $\varepsilon$. Thus $E$ is totally bounded.
-
-\end{proof}
-
-
-\begin{exa}
-If $E\subset (X,d)$ is totally bounded, then it is bounded but the converse is not true.
-
- For instance, take $X=l_2$ for $x,y\in X$, where $x=(x_1,x_2,\dots),\\ y=(y_1,y_2,\dots)$ with the metric \hspace{0.2cm}$\displaystyle{ d(x,y)=\Bigg[\sum^{\infty}_{i=1}|x_i-y_i|^2\Bigg]^{\frac{1}{2}}}.$
-
- Take $A$ to be a subset of $l_2$ consisting points $e_1=(1,0,0,\dots)$, $e_2=(0,1,0,\dots)$,\dots, $e_n=(0,0,\dots,0,1,0,\dots)$.\\ We shall prove that $A$ is bounded but not totally bounded.\\ For $e_i,e_j$ in $A$, \hspace{0.2cm}$d(e_i,e_j)=\sqrt{2},\hspace{0.5cm} i\neq j.\hspace{0.2cm}$ Hence $A$ is bounded in $X$. Since $\dim(A)=\sqrt{2}$.\\ But it is not totally bounded. Take $\varepsilon =1$, the sets $B_{\frac{1}{2}}$ $$B_{\varepsilon}(x_0)=\{x\in X:d(x,x_0)<\varepsilon \}$$ $$B_{\frac{1}{2}}(e_i)=\{e_j\in A: d(e_i,e_j)<1/2\}$$ The set $B_{\frac{1}{2}}(e_i)$ is a singleton set $\{e_i\}$ because the distance $d(e_i,e_j)=\sqrt{2}$.\\ Hence the infinite set $A$ can not be written as a finite union of disjoint subsets with diameter say less than $1$.\\ Thus $A$ is not totally bounded.
-\end{exa}
- 
- 
- 
- 
- 
-
-\begin{exa}
-Let $X=l_{\infty}$ with $\displaystyle{d(x,y)=\sup_{1\leq i<\infty}|x_i-y_i|}$. Show that the set $E=\{e_1,e_2,e_3,\dots\}$ of standard unit sequences is bounded but not totally bounded.
-\end{exa}
-
-\begin{solution}
-Here $e_i$ is the sequence with $1$ in the $i$th place and $0$ elsewhere.
-
-\subhead{The distances}
-For $i\neq j$ the sequences $e_i$ and $e_j$ differ in exactly two places, and in each the difference has modulus $1$, so
-$$d(e_i,e_j)=\sup_k|(e_i)_k-(e_j)_k|=1 .$$
-
-\subhead{Bounded}
-Every pair of points of $E$ is at distance $1$, so $\dim(E)=1<\infty$ and $E$ is bounded.
-
-\subhead{Not totally bounded}
-Take $\varepsilon=\frac12$. Any set of diameter less than $\frac12$ can contain at most one $e_i$, since two of them are a distance $1$ apart. So covering the infinite set $E$ would need infinitely many such sets, and no finite cover by sets of diameter less than $\frac12$ exists.
-
-The contrast with $l_2$, where the same set has $d(e_i,e_j)=\sqrt2$, is only in the constant: in both spaces the unit sequences stay a fixed distance apart no matter how far out one goes, which is exactly what total boundedness forbids. In $\mathbb{R}^n$ this cannot happen --- there, bounded and totally bounded coincide.
-\end{solution}
-
-
-\begin{thm}
-Let $(X,d)$ be a metric space. A subset $A$ of $X$ is totally bounded if every sequence of points of $A$ contains a Cauchy sequence.
-
-\end{thm}
-
-\begin{proof}
-We prove both directions; the statement is an equivalence, and each half is
-used later.
-
-\subhead{Totally bounded $\implies$ every sequence has a Cauchy subsequence}
-Let $(x_n)$ be a sequence in $A$. For $\varepsilon=1$, cover $A$ by finitely
-many sets of diameter less than $1$; one of them must contain $x_n$ for
-infinitely many $n$, giving a subsequence $(x_n^{(1)})$ all of whose terms lie
-within $1$ of each other. Repeat inside that subsequence with
-$\varepsilon=\frac12$, then $\frac13$, and so on, obtaining nested
-subsequences, the $k$-th having all terms within $\frac1k$.
-
-Take the diagonal sequence whose $k$-th term is the $k$-th term of the $k$-th
-subsequence. Beyond position $k$ it is a subsequence of the $k$-th one, so its
-terms are eventually within $\frac1k$ of each other for every $k$; that is
-precisely the Cauchy condition.
-
-\subhead{Every sequence has a Cauchy subsequence $\implies$ totally bounded}
-Suppose $A$ is \emph{not} totally bounded. Then for some $\varepsilon>0$ no
-finite collection of $\varepsilon$-balls covers $A$. Pick $x_1\in A$; since
-$B(x_1;\varepsilon)$ does not cover $A$, pick $x_2\in A$ outside it; since
-$B(x_1;\varepsilon)\cup B(x_2;\varepsilon)$ does not cover $A$, pick $x_3$
-outside both, and so on. The resulting sequence has $d(x_m,x_n)\geq\varepsilon$
-for all $m\neq n$, so no subsequence of it is Cauchy --- contradicting the
-hypothesis.
-\end{proof}
-
-\begin{remark}
-Note what is \emph{not} claimed: the Cauchy subsequence need not converge. It
-does exactly when the space is complete, and total boundedness together with
-completeness is one of the equivalent forms of compactness.
-\end{remark}
-
-
-\begin{coro}
-Any bounded subset of $\mathbb{R}$ is totally bounded in the usual metric.
-
-\end{coro}
-
-\begin{proof}
-Let $A$ be a bounded subset of $\mathbb{R}$. Let $(x_n)$ be a sequence in $A$. Since $A$ is bounded, $(x_n)$ is bounded. i.e $|x_n|<M$.
-
-Since $(x_n)$ is bounded, it contains a convergent sub-sequence $(x_{n_k})$. We know that every convergent sequence is a Cauchy sequence. Therefore $(x_{n_k})$ is a Cauchy sequence. So, every sequence $(x_n)$ of $A$ has a Cauchy sub-sequence. Thus by the previous theorem, $A$ is totally bounded.
-
-\end{proof}
+Two consequences of completeness, both used in the fixed point arguments later
+in this section. The first says completeness is inherited by closed subsets; the
+second is the metric-space form of the nested interval property of
+$\mathbb{R}$.
 
 
 \begin{thm}
@@ -1697,55 +2137,16 @@ Let $(x_n)$ be a Cauchy sequence in $A\subset X$. Then $(x_n)$ is also a Cauchy 
 
 
 \begin{thm}
-Let $(X,d)$ be a complete metric space. Let $\{F_n\}$ be a sequence of nested closed sets in $X$ with $\dim(F_n)\rightarrow 0$ as $n\rightarrow \infty$. Then \hspace{0.2cm}$\displaystyle{\bigcap^{\infty}_{i=1}F_i} \hspace{0.2cm}$ is a singleton element.
+Let $(X,d)$ be a complete metric space. Let $\{F_n\}$ be a sequence of nested closed sets in $X$ with $\diam(F_n)\rightarrow 0$ as $n\rightarrow \infty$. Then \hspace{0.2cm}$\displaystyle{\bigcap^{\infty}_{i=1}F_i} \hspace{0.2cm}$ is a singleton element.
 
 \end{thm}
 
 \begin{proof}
-Suppose $\{F_n\}$ is a sequence of nested intervals each of which are non-empty such that $\dim\{F_n\}>0$ as $n\rightarrow \infty$.\\ Let $x_n\in F_n$, if $m>n$, $F_n\supset F_m$ also $x_n,x_m\in F_n$. Using the definition of diameter of a set, we have $d(x_m,x_n)\leq \dim\{F_n\}$.\\ Now, since $\dim\{F_n\}\rightarrow 0$ as $n\rightarrow \infty$, it follows that $d(x_m,x_n)\rightarrow 0$ as $m,n\rightarrow \infty$.\\ Thus $(x_n)$ is a Cauchy sequence in $X$. Since $X$ is complete, $x_n\rightarrow x\in X$.\\ $\{x_m,x_{m+1},x_{m+2},\dots\}\subset F_m$ and this sequence converges to $x$. Hence $x\in F_n$ for every $n$. i.e \hspace{0.2cm}$\displaystyle{\bigcap^{\infty}_{n=1}F_n}\hspace{0.2cm}$ is a singleton $x$.
+Suppose $\{F_n\}$ is a sequence of nested intervals each of which are non-empty such that $\diam\{F_n\}>0$ as $n\rightarrow \infty$.\\ Let $x_n\in F_n$, if $m>n$, $F_n\supset F_m$ also $x_n,x_m\in F_n$. Using the definition of diameter of a set, we have $d(x_m,x_n)\leq \diam\{F_n\}$.\\ Now, since $\diam\{F_n\}\rightarrow 0$ as $n\rightarrow \infty$, it follows that $d(x_m,x_n)\rightarrow 0$ as $m,n\rightarrow \infty$.\\ Thus $(x_n)$ is a Cauchy sequence in $X$. Since $X$ is complete, $x_n\rightarrow x\in X$.\\ $\{x_m,x_{m+1},x_{m+2},\dots\}\subset F_m$ and this sequence converges to $x$. Hence $x\in F_n$ for every $n$. i.e \hspace{0.2cm}$\displaystyle{\bigcap^{\infty}_{n=1}F_n}\hspace{0.2cm}$ is a singleton $x$.
 \end{proof}
 
 
 \pagebreak
-\subsection{Compact Sets in a Metric Space}
-
-\begin{defn}
-Let $X$ be any set. A  family $\xi$ of subsets $\{G_i\}$ of $X$ is said to form a covering of $X$ if $$X\subset \bigcup_{G_i\in \xi}G_i.$$ If $X$ is a metric space and that each $G_i$ is an open set, then $\xi$ is called an open covering of $X$.
-\end{defn}
-
-
-\begin{defn}
-A metric space $X$ is said to be compact if every open covering of $X$ has a finite sub-cover.
-
-\end{defn}
-
-
-\begin{thm}[Heine-Borel property]
-Let $E$ be a bounded and closed set in $\mathbb{R}$, then every open covering of $E$ has a finite sub covering.
-
-\end{thm}
-
-\begin{proof}
-Since $E$ is bounded, we have $E\subset I_1=[a,b]$, $(a,b)$. We proceed by contradiction on $I_1$.
-
-Suppose (if possible) there is an open covering $\{G_i\}$ of $I_1$ i.e $I_1\subset \bigcup G_i$ which has no finite sub covering. Bisect $I_1$ into two closed intervals $I_2$ and $I'_2$. At least one of these must have no finite sub covering. Let $I_2$ be the part without a finite sub covering. Bisect $I_2$ into $I_3$ and $I'_3$. Continuing in this way, we have a nested sequence of intervals $I_n$ such that $I_n$ has no finite subcover for each $n$.
-
-By nested sequence interval theorem \hspace{0.2cm}$\displaystyle{\bigcap_{n=1}^{\infty}I_n\neq \emptyset}.$
-Let $x\in I_n$. Then \hspace{0.2cm}$\displaystyle{ x\in I_1\subset \bigcup^{\infty}_{i=1}G_i},\hspace{0.2cm}$  so, $x\in G_i$ for some $i$. Since $G_i$ is open there exist an open ball \hspace{0.2cm}$B_r(x)=(x-r,x+r)\subset G_i.$ Taking $n$ large enough, we have \hspace{0.2cm}$I_n\subset B_r(x)=(x-r,x+r)\subset G_i.$ This means that $I_n$ is covered by a single set $G_i$. This contradicts that $I_n$ has no finite sub covering. Thus our early assumption is not true. Therefore $E$ has a finite sub covering.
-
-\end{proof}
-
-
-\begin{exa}
-Find an open covering of $[a,b]$ and show that it contains a finite sub covering in the absolute value metric.
-
-\end{exa}
-
-\begin{solution}
-Consider \hspace{0.2cm}$G_n=\Big(a-\dfrac{1}{n},b+\dfrac{1}{n}\Big)\hspace{0.2cm}$ then \hspace{0.2cm}$\displaystyle{[a,b]\subset \bigcup^{\infty}_{n=1}G_n}\hspace{0.2cm}$ and that \hspace{0.2cm}$[a,b]\subset (a-1,b+1)=G_1,\hspace{0.2cm}$ thus $\{G_i\}$ is a finite sub cover of $[a,b]$.
-\end{solution}
-
-
 \pagebreak
 
 \subsection{Completion of Metric Spaces}
