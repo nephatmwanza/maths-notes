@@ -1728,9 +1728,67 @@ Since none of $\binom{n}{t}$ terms is 0, this implies $h(t) = 0, \, t = 0, \, 1,
 Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $UNIF(0,\theta)$ distribution. Show that $T(X) = X_{(n)}$ is a complete statistic for $\{f_{\theta}(x);\, \theta \in \Omega\}$.
 \end{problem}
 
+\begin{solution}
+The maximum has density
+$$f_T(t) = \frac{n\,t^{\,n-1}}{\theta^{n}},\qquad 0<t<\theta .$$
+Suppose $h$ is a function with $E_{\theta}\left[h(T)\right]=0$ for every
+$\theta>0$. Then
+$$\frac{n}{\theta^{n}}\int_0^{\theta} h(t)\,t^{\,n-1}\,dt = 0
+\qquad\Longrightarrow\qquad \int_0^{\theta} h(t)\,t^{\,n-1}\,dt = 0
+\quad\text{for every }\theta>0 ,$$
+since $n/\theta^{n}\neq 0$. The left-hand side is a function of its upper limit
+which vanishes identically, so differentiating with respect to $\theta$ by the
+fundamental theorem of calculus gives
+$$h(\theta)\,\theta^{\,n-1} = 0 \qquad\text{for almost every }\theta>0 .$$
+As $\theta^{n-1}\neq0$ on $(0,\infty)$, this forces $h(\theta)=0$ almost
+everywhere, which is exactly completeness.
+
+\begin{note}
+The whole argument is that the family of intervals $(0,\theta)$ grows to fill
+$(0,\infty)$ as $\theta$ varies. Completeness here is a statement about the
+richness of the parameter set, not about the shape of the density --- which is
+why restricting $\theta$ to a finite set would destroy it.
+\end{note}
+\end{solution}
+
+
 \begin{problem}
 Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $N(\theta, a\theta^2)$ distribution where $a>0$ is a known constant and $\theta >0$. Show that the minimal sufficient statistic is not complete.
 \end{problem}
+
+\begin{solution}
+\subhead{The minimal sufficient statistic}
+Expanding the exponent,
+$$-\frac{1}{2a\theta^{2}}\sum_{i=1}^{n}(x_i-\theta)^{2}
+= -\frac{1}{2a\theta^{2}}\sum_{i=1}^{n}x_i^{2}
+  + \frac{1}{a\theta}\sum_{i=1}^{n}x_i - \frac{n}{2a},$$
+so the density depends on the data only through
+$T = \left(\sum_i X_i,\ \sum_i X_i^{2}\right)$, and the ratio criterion shows no
+further reduction is possible: the two coefficients $1/(2a\theta^{2})$ and
+$1/(a\theta)$ move independently enough that matching the ratio for all $\theta$
+forces both components to agree. So $T$ is minimal sufficient.
+
+\subhead{Why it is not complete}
+Both components can be scaled to estimate $\theta^{2}$ unbiasedly. Since
+$E(X_i)=\theta$ and $\var(X_i)=a\theta^{2}$,
+$$E\left(\sum_i X_i^{2}\right) = n\left(a\theta^{2}+\theta^{2}\right) = n(1+a)\theta^{2},$$
+$$E\left[\left(\sum_i X_i\right)^{2}\right] = \var\left(\sum_i X_i\right) + \left[E\left(\sum_i X_i\right)\right]^{2}
+= na\theta^{2} + n^{2}\theta^{2} = n(a+n)\theta^{2}.$$
+Hence the non-zero function
+$$h(T) = \frac{\sum_i X_i^{2}}{n(1+a)} - \frac{\left(\sum_i X_i\right)^{2}}{n(a+n)}$$
+satisfies $E_{\theta}\left[h(T)\right] = \theta^{2}-\theta^{2} = 0$ for every
+$\theta>0$, while $h$ is not identically zero. So $T$ is not complete.
+
+\begin{remark}
+The model has one parameter but a two-dimensional minimal sufficient statistic,
+and that mismatch is the whole reason completeness fails: there are two separate
+routes to $\theta^{2}$ and their difference is a non-trivial function of $T$
+with zero mean. It also means the Lehmann--Scheff\'e theorem is unavailable
+here, so an unbiased estimator based on $T$ carries no guarantee of being the
+UMVUE.
+\end{remark}
+\end{solution}
+
 
 \begin{thm}
 If $T(X)$ is a complete and sufficient statistic for the model $\{f_{\theta}(x);\, \theta \in \Omega\}$, then $T(X)$ is a minimal sufficient statistic.
@@ -1768,15 +1826,90 @@ counterexample.
 The converse of the above theorem is not true. Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $UNIF(\theta - 1, \theta + 1)$ distribution. Show that $T(X) = \left(X_{(1)}, X_{(n)}\right)$ is minimal sufficient. Show also that for the nonzero function $$h(T) = \frac{X_{(n)} - X_{(1)}}{2} - \frac{n - 1}{n  + 1}$$ $E_{\theta}\left[h(T)\right] =0$ for all $\theta \in \Omega$ and therefore $T$ is not a complete statistic.
 \end{problem}
 
+\begin{solution}
+\subhead{Minimal sufficiency}
+The joint density is one exactly when every observation lies in
+$(\theta-1,\theta+1)$:
+$$f_{\theta}(x) = \prod_{i=1}^{n} \frac{1}{2}\,I\left(\theta-1<x_i<\theta+1\right)
+= 2^{-n}\,I\left(x_{(n)}-1<\theta<x_{(1)}+1\right).$$
+For two samples the ratio $f_{\theta}(x)/f_{\theta}(y)$ is a constant function of
+$\theta$ precisely when the intervals
+$\left(x_{(n)}-1,\ x_{(1)}+1\right)$ and $\left(y_{(n)}-1,\ y_{(1)}+1\right)$
+coincide, that is when $x_{(1)}=y_{(1)}$ and $x_{(n)}=y_{(n)}$. So
+$T=\left(X_{(1)},X_{(n)}\right)$ is minimal sufficient.
+
+\subhead{It is not complete}
+Put $R = X_{(n)}-X_{(1)}$, the sample range. The observations are uniform on an
+interval of length $2$, and the range of $n$ independent uniforms on an interval
+of length $L$ has mean $L(n-1)/(n+1)$. With $L=2$,
+$$E_{\theta}(R) = \frac{2(n-1)}{n+1}\qquad\text{for every }\theta ,$$
+the value being free of $\theta$ because the range is invariant under the shift
+$x\mapsto x+c$ that carries one parameter value to another. Therefore
+$$E_{\theta}\left[h(T)\right]
+= E_{\theta}\left[\frac{X_{(n)}-X_{(1)}}{2}\right] - \frac{n-1}{n+1}
+= \frac{n-1}{n+1} - \frac{n-1}{n+1} = 0
+\qquad\text{for all }\theta\in\Omega ,$$
+while $h$ is plainly not the zero function --- the range is genuinely random. So
+$T$ is minimal sufficient but not complete, which is the promised counterexample
+to the converse.
+
+\begin{note}
+The mechanism is worth naming. The range is an \emph{ancillary} statistic: its
+distribution does not involve $\theta$ at all. Any non-constant ancillary
+function of a statistic destroys completeness immediately, by centring it. This
+is the same phenomenon Basu's theorem exploits from the other direction.
+\end{note}
+\end{solution}
+
+
 
 \begin{problem}
 Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $UNIF(0,\theta)$ distribution. prove that $T(X) = X_{(n)}$ is a minimal sufficient statistic for this model.
 \end{problem}
 
+\begin{solution}
+For the UNIF$(0,\theta)$ model the joint density is
+$$f_{\theta}(x) = \frac{1}{\theta^{n}}\prod_{i=1}^{n}I\left(0<x_i<\theta\right)
+= \frac{1}{\theta^{n}}\,I\left(x_{(1)}>0\right)\,I\left(x_{(n)}<\theta\right).$$
+Sufficiency of $X_{(n)}$ follows from the factorisation criterion at once, with
+$g\left(x_{(n)},\theta\right)=\theta^{-n}I\left(x_{(n)}<\theta\right)$ and
+$h(x)=I\left(x_{(1)}>0\right)$.
+
+For minimality, take two samples in the support and form
+$$\frac{f_{\theta}(x)}{f_{\theta}(y)}
+= \frac{I\left(x_{(n)}<\theta\right)}{I\left(y_{(n)}<\theta\right)} .$$
+Viewed as a function of $\theta$, this is constant only if the two indicators
+change value at the same point, that is only if $x_{(n)} = y_{(n)}$. Hence
+$X_{(n)}$ is minimal sufficient.
+
+Combined with the completeness shown above, $X_{(n)}$ is complete and sufficient,
+so by Bahadur's theorem its minimality also follows without this calculation ---
+but the direct argument is shorter than the theorem it instantiates.
+\end{solution}
+
+
 
 \begin{problem}
 Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $EXP(1, \theta)$ distribution. Show that $T(X) = X_{(1)}$ is a minimal sufficient statistic for the model.
 \end{problem}
+
+\begin{solution}
+This is the calculation already carried out in the previous section, and it is
+worth recording that the two are the same problem. The joint density is
+$$f_{\theta}(x) = e^{n\theta}\,I\left(x_{(1)}>\theta\right)\cdot e^{-\sum_i x_i},$$
+so $X_{(1)}$ is sufficient by factorisation, and the ratio
+$$\frac{f_{\theta}(x)}{f_{\theta}(y)}
+= e^{\sum_i y_i-\sum_i x_i}\cdot\frac{I\left(x_{(1)}>\theta\right)}{I\left(y_{(1)}>\theta\right)}$$
+is free of $\theta$ only when the two indicators switch at the same place, that
+is only when $x_{(1)}=y_{(1)}$. Hence $X_{(1)}$ is minimal sufficient.
+
+Completeness holds as well, by the same upper-limit differentiation used for the
+UNIF$(0,\theta)$ maximum: $X_{(1)}$ has density $n\,e^{-n(t-\theta)}$ on
+$(\theta,\infty)$, and $\int_{\theta}^{\infty}h(t)e^{-nt}\,dt = 0$ for every
+$\theta$ forces $h=0$ almost everywhere. So $X_{(1)}$ is complete and sufficient,
+which is what the next problem needs.
+\end{solution}
+
 
 \begin{thm}
 For any random variables $X$ and $Y,\,$ $E_{\theta}(X) = E_{\theta}\left[E_{\theta}(X \mid Y)\right]$ and\\ $\var (X) = E_{\theta}\left[\var _{\theta}(X \mid Y)\right] \, + \, \var _{\theta}\left[E_{\theta}(X \mid Y)\right].$
@@ -1898,9 +2031,65 @@ Therefore $\, \dfrac{n + 1}{n}\, T\,$ is the $UMVUE$ of $\tau(\theta) = \theta$.
 Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the Bernoulli$(\theta)$ distribution. Find the $UMVUE$ of $\tau(\theta) = \theta(1 -\theta)$.
 \end{problem}
 
+\begin{solution}
+$T=\sum_{i=1}^{n}X_i\sim$ BIN$(n,\theta)$ is complete and sufficient, so by
+Lehmann--Scheff\'e it is enough to find \emph{any} function of $T$ that is
+unbiased for $\theta(1-\theta)$; it is then automatically the UMVUE.
+
+Try $T(n-T)$. Using $E(T)=n\theta$ and
+$E\left(T^{2}\right)=n\theta(1-\theta)+n^{2}\theta^{2}$,
+\begin{align*}
+E\left[T(n-T)\right] &= nE(T) - E\left(T^{2}\right)\\
+&= n^{2}\theta - n\theta(1-\theta) - n^{2}\theta^{2}\\
+&= n^{2}\theta(1-\theta) - n\theta(1-\theta)
+ = n(n-1)\,\theta(1-\theta).
+\end{align*}
+Dividing by the constant $n(n-1)$,
+$$\widehat{\tau} = \frac{T(n-T)}{n(n-1)}
+= \frac{n}{n-1}\,\overline{X}\left(1-\overline{X}\right)$$
+is unbiased, and therefore is the UMVUE of $\theta(1-\theta)$.
+
+\begin{note}
+The naive estimator $\overline{X}\left(1-\overline{X}\right)$ is biased
+downwards by exactly the factor $(n-1)/n$. The correction is the same one that
+turns the sample variance into its unbiased form, and for the same reason: a
+product of an estimator with itself underestimates the product of the
+parameters, because it inherits the estimator's own variability.
+\end{note}
+\end{solution}
+
+
 \begin{problem}
 Let $X_1, \, X_2, \, \cdots\, , \, X_n$ be a random sample from the $EXP(1,\theta)$ distribution. Find the $UMVUE$ of $\tau(\theta) = \theta^2$.
 \end{problem}
+
+\begin{solution}
+$T=X_{(1)}$ is complete and sufficient for this model, as shown above. Its
+density is $n\,e^{-n(t-\theta)}$ on $(\theta,\infty)$, so $T-\theta$ is
+exponential with rate $n$ and
+$$E(T) = \theta + \frac{1}{n},\qquad
+\var(T) = \frac{1}{n^{2}},\qquad
+E\left(T^{2}\right) = \frac{1}{n^{2}} + \left(\theta+\frac1n\right)^{2}
+= \theta^{2} + \frac{2\theta}{n} + \frac{2}{n^{2}} .$$
+Look for an unbiased estimator of the form $g(T)=T^{2}+\alpha T+\beta$:
+$$E\left[g(T)\right]
+= \theta^{2} + \left(\frac{2}{n}+\alpha\right)\theta
+  + \left(\frac{2}{n^{2}} + \frac{\alpha}{n} + \beta\right).$$
+Matching $\theta^{2}$ requires the coefficient of $\theta$ and the constant to
+vanish, giving $\alpha=-2/n$ and then $\beta=0$. Hence
+$$\widehat{\theta^{2}} = X_{(1)}^{2} - \frac{2X_{(1)}}{n},$$
+and by Lehmann--Scheff\'e this is the UMVUE of $\theta^{2}$.
+
+\begin{remark}
+Note the estimator can be negative --- it is negative whenever
+$0<X_{(1)}<2/n$ --- even though $\theta^{2}\geq0$ always. This is not an error.
+Unbiasedness is a statement about an average over repeated samples and carries
+no promise that individual values land in the parameter space, and the UMVUE can
+be inadmissible for exactly this reason. Truncating at zero would reduce the
+mean square error while destroying unbiasedness.
+\end{remark}
+\end{solution}
+
 
 \begin{thm}[Lehmman - Scheffe']
 If $T(X)$ is a complete sufficient statistic for the model $\{f_{\theta}(x):\, \theta \in \Omega\}$ and $U(X)$ is any unbiased estimator of $\tau(\theta)$, then $E\left(U \mid T\right)$ is the $UMVUE$ of $\tau(\theta)$.
