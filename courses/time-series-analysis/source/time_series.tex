@@ -1,0 +1,958 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsfonts,amssymb,amsmath}
+\usepackage[margin=1in]{geometry}
+\usepackage[none]{hyphenat}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{polynom}
+\usepackage{bigints}
+\usepackage{esint}
+\usepackage[nottoc,notlot,notlof]{tocbibind}
+
+\usetikzlibrary{quotes,angles,graphs,patterns,fadings,arrows.meta,shapes,trees,bending}
+
+% grad, div and curl are operator NAMES. Set as bare letters in maths they come
+% out italic, so "grad" reads as the product g.r.a.d - the same defect as a bare
+% \cos. These give them upright type and the correct spacing.
+\DeclareMathOperator{\grad}{grad}
+\DeclareMathOperator{\dive}{div}
+\DeclareMathOperator{\curl}{curl}
+
+\parindent 0ex
+\setlength{\parskip}{0.55\baselineskip}
+% Displays carry their own skips; with a non-zero \parskip on top of them,
+% consecutive displays drift apart. Tighten them so a derivation reads as one
+% argument rather than as a column of disconnected formulae.
+\setlength{\abovedisplayskip}{0.5\baselineskip}
+\setlength{\belowdisplayskip}{0.5\baselineskip}
+\setlength{\abovedisplayshortskip}{0.25\baselineskip}
+\setlength{\belowdisplayshortskip}{0.25\baselineskip}
+
+\pagestyle{fancy}
+\fancyfoot[C]{\thepage}
+\fancyhead{}
+\fancyhead[R]{\rightmark}
+\renewcommand{\headrulewidth}{0pt}
+
+% Theorem environments. The source declared none: its 125 examples, 91
+% solutions, 21 definitions and 30 theorems were set as red bold text with the
+% number typed by hand, so LaTeX numbered nothing and inserting an example meant
+% renumbering the rest of the subsection.
+\usepackage{amsthm}
+\theoremstyle{definition}
+% One shared counter running section.subsection.n, as in the other courses here.
+\newtheorem{thm}{Theorem}[subsection]
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{exa}[thm]{Example}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{coro}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{result}[thm]{Result}
+\newtheorem{exe}[thm]{Exercise}
+\newtheorem*{note}{Note}
+\newtheorem*{remark}{Remark}
+\newtheorem{problemx}{Problem}[subsection]
+\newenvironment{problem}{\begin{problemx}}{\end{problemx}}
+\newenvironment{solution}
+  {\renewcommand{\qedsymbol}{}\begin{proof}[\textit{Solution}.]}
+  {\end{proof}}
+\usepackage{enumitem}
+% A heading that is legal inside a theorem body, a list or a float, where
+% \subsubsection is not. Same weight as \subsubsection* so the two read alike.
+\newcommand{\subhead}[1]{%
+  \par\medskip\noindent\textbf{#1}\par\nobreak\smallskip}
+
+
+% Time series notation.
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Corr}{Corr}
+
+\begin{document}
+% Title page depersonalised for the web, as with every other course here.
+% The identity kept below is the autocorrelation function, which is what makes a
+% time series a subject of its own rather than a sample of independent points.
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{center}
+\vspace*{3cm}
+{\Huge\bfseries Time Series Analysis}\\[1.2cm]
+{\large Lecture Notes}\\[2.5cm]
+\line(1,0){300}\\[1.5cm]
+$$\rho(\tau) = \frac{\gamma(\tau)}{\gamma(0)},
+\qquad \gamma(\tau) = \Cov\left(X_t,\,X_{t+\tau}\right)$$
+\end{center}
+\end{titlepage}
+
+\tableofcontents
+\thispagestyle{empty}
+\clearpage
+\setcounter{page}{1}
+
+
+\title{\textbf{TIME SERIES ANALYSIS}}
+\author{NEPHAT JESHURUN MWANZA}
+\maketitle
+
+\begin{center}
+\hrulefill
+\end{center}
+
+$Def^n$:\\
+A time series is an ordered sequence of observations.\\
+The ordering is usually in time or other dimensions e.g space.\\
+
+
+
+
+\begin{center}
+APPLICATION OF TIME SERIES
+\end{center}
+\begin{enumerate}
+
+\item \textbf{Agriculture}
+      \begin{enumerate}
+      \item Observation of annual crops production
+      \item Annual livestock
+      \item Prices of crops over time
+      \end{enumerate}
+
+\item \textbf{Business and Economics}
+      \begin{enumerate}
+      \item Annual sales of a product
+      \item Price of commodity
+      \item Price induces (inflation e.t.c)
+      \item Annual earnings at a stock exchange market
+      \item Exchange rate
+      \end{enumerate}
+      
+\item \textbf{Engineering}
+      \begin{enumerate}
+      \item Electrical signals
+      \item Voltage
+      \item Sound monitoring
+      \end{enumerate}
+      
+\item \textbf{Geophysics}
+      \begin{enumerate}
+      \item turbulence of waves (ocean)\\\\
+      \end{enumerate}
+      
+\item \textbf{Meteorology}
+      \begin{enumerate}
+      \item Sea surface temperatures
+      \item Wind speed
+      \end{enumerate}
+      
+\item \textbf{Medical Studies}
+      \begin{enumerate}
+      \item Mortality rate (Annual)
+      \item Failure rate of surgery
+      \end{enumerate}
+      
+\item \textbf{Quality Control}
+      \begin{enumerate}
+      \item Monitor a production process
+      \end{enumerate}
+      
+\item \textbf{Social Sciences}
+      \begin{enumerate}
+      \item Annual birthrate
+      \item Mortality rate
+      \item Accident rates
+      \item Crime rates\\
+      \end{enumerate}
+\end{enumerate}
+
+
+
+
+
+\subsection{Types of Time Series}
+\begin{enumerate}
+\item A time series which can be reordered continuously in time is said to be continuous e.g electrical signals and voltage.
+\item A time series taken only at specific time intervals is said to be discrete e.g interest rate, yields, value of calls e.t.c\\\\
+\end{enumerate}
+
+
+
+
+
+
+
+
+\pagebreak
+\subsection{Objectives of Time Series}
+One of the major objectives of time series is to understand and describe the generating mechanism.\\
+The interesting nature of time series is that the observations are depended and correlated, thus the order of the observations is important.
+
+
+
+
+\begin{enumerate}
+\item \textbf{Description}:
+to compute descriptive majors of a time series, this helps to characterize a time series.
+\item \textbf{Explanation}: when a time series is taken on two or more variable it may be possible to use variation in one time series to explain the variation in the other series.
+\item \textbf{Prediction}: given a time series one may wish to predict the future values.
+\item \textbf{Control}: especially in quality control in a manufacturing process.\\\\
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+\subsection{Descriptive Techniques}
+These help in classifying the main properties of a time series.\\
+Traditionally time series are analyzed by first decomposition of its components, namely: trends, seasonal effects, cycling effects and irregular (or residues).\\
+These components constitute the sources of variation of a time series.
+
+\begin{enumerate}
+\item \textbf{Seasonal effects}: this exhibits variation which is annual in period.
+\item \textbf{Cyclic effects}: time series may exhibit variation in a fixed period due to some other physical causes.
+may have a period variation in between 5-7 years.
+\item \textbf{Trend}: this is a long term change in mean level.
+\item \textbf{Irregular fluctuations}: after trend seasonal the cyclic variation are removed from a series. We are left with a series of residuals which may or may not be random.\\\\\\
+\end{enumerate}
+
+
+
+
+
+
+
+\pagebreak
+\subsection{Stationary Time Series}
+A time series is said to be stationary if there is change in mean and no change in the variance and if strictly periodicity variations have been removed.\\
+\begin{note}
+The first and most important step in many time series is to observe what the graph may show.
+\end{note}
+\begin{enumerate}
+\item important features of a time series such as trend seasonality and out lies and discontinuities
+\item describe the data and help in formulating sensible model.\\
+\end{enumerate} 
+
+
+
+
+
+
+
+\subsection{Transformation}
+Once a time series is plotted, it may suggest transforming a series e.g taking logs, squares. There a three many reasons for doing this:
+\begin{enumerate}
+\item to make the variance stable
+\item to make the seasonal effects adjectives 
+\item to make the data normally distributed\\
+\end{enumerate}
+
+
+
+
+
+
+
+\subsection{Auto correlation}
+A sample auto correlation co-efficiency are an important guide to the properties of a time series.\\
+A sample auto correlation measures the correlation between observations of different time apart.\\\\
+\begin{note}
+Since $n$ pairs of observations on $x$ and $y$ the correlation co efficient is given by
+\end{note}
+
+$$r = \frac{\sum(x-\overline{x})(y-\overline{y})}{\sqrt{\sum(x-\overline{x})^2\sum(y-\overline{y})^2}}$$
+
+Now, given n observations $x_1,x_2,.........,x_n$. We can form $n-1$ pairs of observations, $(x_1-x_2), (x_2-x_3),............., (x_{t-1}-x_t)$ and the correlation coefficient between $x_t$ and $x_{t-1}$
+
+$$r_1 = \frac{\sum\limits^{n-1}_{t=1}(x_t-\overline{x_1})(x_{t+1}-\overline{x_2})}{\sqrt{\sum\limits^{n-1}_{t=1}(x_t-\overline{x_1})\sum\limits^{n-1}_{t=1}(x_{t+1}-\overline{x_2})}}$$
+
+on the assumption that $\overline{x_1}=\overline{x_2}$
+
+$$r_1 = \frac{\sum\limits^{n-1}_{t=1}(x_t-\overline{x})(x_{t+1}-\overline{x})}{(n-1)\frac{\sum\limits^n_{t=1}(x_t-\overline{x})^2}{n}}$$
+
+for large n, we have
+
+$$r_1 = \frac{\sum\limits^{n-1}_{t=1}(x_t-\overline{x})(x_{t+1}-\overline{x})}{\sum\limits^n_{t=1}(x_t-\overline{x})^2}$$
+
+This is the formula used to compute the auto correlation coefficient.\\\\
+In the similar manner we can find the correlation between observation at distance k as
+
+$$r_k = \frac{\sum\limits^{n-k}_{t=1}(x_t-\overline{x})(x_{t+k}-\overline{x})}{\sum\limits^n_{t=1}(x_t-\overline{x})^2}$$
+
+this the auto correlation coefficient at lag k.\\\\\
+The auto correlation coefficients are usually calculated using the auto ca variance and defined as
+
+$$c_k = \frac{1}{n}\sum^{n-k}_{t=1}(x_t-\overline{x})(x_{t+1}-\overline{x})$$
+This is the auto  co variance at lag k.\\\\
+We can the compute the auto-correlation co efficiency as\\
+\begin{center}
+ $r_k = \frac{c_k}{c_0} $ 
+\end{center}
+for k = 1,2, ......,n  where k < n.\\
+
+
+
+
+
+
+
+
+\pagebreak
+
+\section{Stochastic Process}
+Are random process.\\
+Stochastic process is a family of time indexed variables X(w,t) where w belongs to a sample space and t belongs to an indexed set. For a fixed t X(w,t) is a random variable. For a given w, X(w,t) as function of t is called a sample function or a realization. The population of that consists of all possible realization is called ensemble in stochastic process and time series analysis. Thus a time series is a realization of a sample space of a stochastic process.\\
+Consider a finite set of random variables $X_{t_1},X_{t_2},........,X_{t_n}$. The n- dimensional distribution is given by F($X_{t_1},........,X_{t_n}$).\\
+A simpler way of describing a stochastic process is to give the moments of the first and second moments. i.e mean and variance.\\
+
+
+Mean $f^n:   \mu(t)= E(X_t)$ \\
+
+
+Variance $f^n$
+\begin{align*}
+var(X_t)&= E(X_t-\mu(t))^2\\
+         &=\sigma^2(t)
+\end{align*}
+
+The auto co variance function is another, can be used to describe stochastic process defined
+$$\varphi(t_1,t_2)= E[[X_{t_1}-\mu(t_1)][X_{t_2}-\mu(t_2)]]$$
+
+
+
+A process is said to be first order stationary in the distribution in time if its one time variable
+i.e $F(X_{t_1})= F(X_{t_{1}+k})$ for any integers $ t_1,t_{1}+k$
+ and second order stationary in distribution if $F(X_{t_1},X_{t_2})= F(X_{t_{1}+k},X_{t_{2}+k})$ for the integers $t_1, t_2, t_{1}+k, t_{2}+k$\\\\
+ and an n- order stationary if\\
+ $F(X_{t_1},X_{t_2},.....,X_{t_n})= F(X_{t_{1}+k},X_{t_{2}+k},.....,X_{t_{n}+k})$ for integers $t_1, t_2,......, t_n,t_{1}+k,......., t_{n}+k$\\
+ 
+ A process is said to be strictly stationary if $F(X_{t_1},X_{t_2},.....,X_{t_n})= F(X_{t_{1}+k},.......,X_{t_{n}+k})$ for integers $t_1, t_2,.......,t_n, k$ and it is true for $n= 1,2,......$\\
+in other words s.t means that the joint distribution of $X_{t_1},X_{t_2},......,X_{t_n}$ is the same as the joint distribution of $X_{t_1+k},X_{t_{2}+k},..........,X_{t_{n}+k}$ for every $t_1, t_2,........., t_n, k$. This means shifting the origin by the amount k has no effect on the distribution.\\
+ In particular if $n=1$ it implies that the distribution of $X(t)$ must be the same $\forall t$ so that $\mu(t)= \mu$ and $\sigma^2(t)= \sigma^2$ are constants and do not depend on t.\\\\
+ 
+ 
+ 
+ 
+If $n= 2$, the joint distribution of $X_{t_1}$ and $X_{t_2}$ depends only on $t_1, t_2$ which is a lag and $\varphi(t_1,t_2)$ depends on $t_1-t_2$ and we write
+\begin{align*}
+\varphi(k)&= E[[X_t-\mu][x_{t+k}-\mu]]\\
+          &= Cov(X_t,X_{t+k})
+\end{align*}
+
+
+
+and this is the co variance at lag k.\\
+The auto correlation $f^n$ can now be given as.
+\begin{center}
+$\rho(k)= \frac{\varphi(k)}{\varphi(0)}$
+\end{center}  
+which measures the correlation between $X_t$ and $X_{t+k}$.\\\\\\
+
+
+
+
+
+
+\subsection{Second Order Stationary}
+A process is second order stationary or (weakly) if its mean is constant and its auto co variance function depends only on its lag
+i.e $E(X_t)= \mu$ and $Cov(x_t,X_{t+k})= \varphi(k)$\\
+
+if $\tau= 0$ it implies that the mean and variance is constant.\\
+\begin{note}
+The variance and the mean must be finite.\\
+The auto correlation coefficients are important for describing time series.\\ 
+Suppose $X_t$ has mean $\mu$ and variance $\sigma^2$ acv.f $\varphi(k)$, and ac.f $\rho(\tau)$.\\\\
+\end{note}
+
+Then
+ \begin{align*} 
+ \rho(\tau)&= \frac{\varphi(\tau)}{\varphi(\tau)}\\
+           &= \frac{\varphi(\tau)}{\sigma^2}
+\end{align*}
+\begin{note}
+$\rho(0)= 1$, also the ac.f is an even function $\rho(\tau)= \rho(-\tau)$.\\
+$\implies  (X_t,X_{t+\tau})= (X_t,X_{t-\tau})$\\\\\\\\
+\end{note}
+
+\vspace{3cm}
+
+
+
+\begin{note}
+\begin{enumerate}
+\item \begin{align*}
+\varphi(\tau)&= \rho(\tau)\,\cdot\,\sigma^2\\
+             &= Cov(X_t,X_{t+\tau})\\
+             &= Cov(X_{t-\tau},X_t)\\
+             &= V(-\tau)\\
+\end{align*}
+\item $|\rho(\tau)|<1$ 
+\item The ac.f lacks uniqueness.
+Several processes can have the same auto co variance.\\\\\\
+\end{enumerate}
+\end{note}
+
+\section{Random Process}
+Def: \\
+A discrete random process is called purely random.\\
+-A discrete random is purely random if it consists of random variables $\{Z_t\}$, which are mutually and independent.\\
+-Mean is constant\\
+-Variance is constant.\\
+
+\begin{align*}
+\varphi(\tau)&= Cov(X_t,X_{t+\tau})\\
+             &= 0,                                        k= \pm1, \pm2,.........\\
+\end{align*} 
+
+-Since the mean and the variance do not depend on time, the process is second order.\\
+
+The auto correlation function for a purely random process is\\
+\[ \rho(k) = 
+\begin{cases}
+1, &k = 0\\
+0, &k = \pm1, \pm2, .....\\
+\end{cases}
+\]\\
+
+$\{Z_t\}$- White noise\\\\
+
+
+
+
+
+\section{Random Walk}
+Let $\{Z_t\}$ be a purely random process with mean $\mu$, variance $\sigma^2$. Then the process $\{X_t\}$ is called a random walk if $X_t = X_{t-1} + Z_t$. We usually start at $t = 1$, so that $X_1 = Z_t$ and $X_t = \sum\limits^t_{i=1}Z_i$\hspace{0.3cm}, in this regard $E(X_t) = t\mu$ and $var(X_t) = t\sigma^2$\\
+ 
+Since mean and variance change with time the process is non-stationary. However the difference of $X_t-X_{t-1}$ is purely random\\
+ i.e $\nabla X_t = X_t - X_{t-1} = Z_t$.\\\\\\
+ 
+ 
+ 
+ 
+\section{Moving Average (Ma)}
+Let $\{Z_t\}$ be a purely random process with mean $\mu = 0$ and variance $\sigma^2$. Then $\{X_t\}$ is a moving average process of order q written as
+$$X_t = \beta_0Z_t + \beta_1Z_{t-1} + \beta_2Z_{t-2} + ............... + \beta_qZ_{t-q}$$
+where $\{\beta_{j's}\}$ are constants. We normally assume $\beta_0 = 1$\\\\
+
+We write MA(q) to denote Moving Average of order q.\\
+$E(X_t) = 0$\hspace{0.2cm}   since \hspace{0.2cm}$E(\beta_0Z_t) + E(\beta_1Z_{t-2}) + ......+ E(\beta_qZ_{t-q}) = 0 + 0 + \cdots+ 0$\\
+$var(X_t) = \sum\limits^2_Z\sum\limits^q_{j=0}\beta^2_j$\\
+
+Since $Z_{t's}$ are independent
+\begin{align*}
+\varphi(k) &= Cov(X_t,X_{t+k})\\
+           &= Cov(\beta_0Z_t + \beta_1Z_{t-1} +\cdots\cdots+ \beta_qZ_{t-q},\beta_0Z_{t+k} + \beta_1Z_{t+k-1} +\cdots\cdots+ \beta_qZ_{t+k-q})\\
+\end{align*}           
+\[\implies\hspace{0.6cm}\varphi(k) =
+\begin{cases}
+0, &k>q\\\\
+\sigma^2_Z\sum\limits^{q-k}_{i=0}\beta_i\beta_{i+k}, &k = 0, 1, 2,\cdots\cdots, q\\\\
+\varphi(-k),& k<0.\\
+\end{cases} 
+\]\\ 
+
+ 
+\[\text{Since}\hspace{1cm} Cov(Z_s,Z_t) =
+\begin{cases}
+\sigma^2_Z, &s=t\\
+0, &s\neq t\\
+\end{cases}
+\]\\
+
+As $\varphi(k)$ does not depend on t and the mean is constant, the process is second order stationary for all values $\{\beta_i\}$.\\\\
+ac.f of MA(q) is
+\[ \rho(\mu) =
+\begin{cases}
+1, &k = 0\\\\
+\dfrac{\sum\limits^{q-k}_{i=0}\beta_i\beta_{i+k}}{\sum\limits^q_{i=0}\beta^2_i}, &k = 1, \cdots\cdots, q\\\\
+\rho(-k), &k<0
+\end{cases}
+\]\\
+
+In particular the MA(1) with $\beta_0 = 1$ is $X_t = Z_t + \beta_1Z_{t-1}$. We have that
+\[ \rho(k) = 
+\begin{cases}
+1, &k = 0\\
+\dfrac{\beta_1}{1 + \beta^2_1}, &k = 1, 2,\cdots\cdots, q\\
+0, & \text{otherwise}
+\end{cases}
+\]\\\\\\
+
+
+
+
+
+
+
+
+
+\pagebreak
+\section{Invertibility}
+This imposes restrictions on the $\{\beta_i\}$ to ensure that the process satisfies the invertibility conditions.\\
+
+Consider the first order MA(1)
+$$\text{A}: X_t = Z_t + \theta Z_{t-1}$$
+$$\text{B}: X_t = Z_t + \frac{1}{\theta} Z_{t-1}$$
+these functions have the same auto correlation function. Thus we can't classify many MA uniquely from a given auto correlation function.\\
+
+
+We express A and B in terms of $X_t$ and $X_{t-1}$
+$$\text{A}: Z_t = X_t - \theta X_{t-1} + \theta^2 X_{t-2}$$
+$$\text{B}: Z_t = X_t - \frac{1}{\theta} X_{t-1} + \frac{1}{\theta^2} X_{t-2}$$
+If $|\theta| < 1$ the process A converges while the series B diverges.\\
+Thus, if $|\theta| < 1$ the model A is convertible while B is not.\\
+The impression of the invertibility condition ensures that there is a unique process for a given auto correlation.\\
+To compute the invertibility condition for MA. We express it by the use of the backward shift given by\\
+
+$\beta^j X_t = X_{t-j},    \hspace{1cm}\forall j$\\
+
+$\beta^2 X_t = X_{t-2}$, $\hspace{1cm}\beta X_t = X_{t-1}$\\
+
+Thus $\hspace{0.2cm} X_t = \beta_0Z_t + \beta_1Z_{t-1} + \cdots\cdots+ \beta_qZ_{t-q}\hspace{0.2cm}$ can be written as
+\begin{align*}
+X_t &= (\beta_0 + \beta_1B + \beta_2B^2 + \cdots\cdots + \beta_qB^q)Z_t\\        
+    &= \theta(B)Z_t\\
+\end{align*}   
+
+ 
+Where $\theta(B)$ is a polynomial of order q in B.\\
+An MA(q) is invertible if the roots of the equation $\theta(B) = 0$\\
+i.e $\hspace{0.2cm}\beta_0 + \beta_1B + \beta_2B^2 + .......... + \beta_qB_q = 0$ \hspace{0.2cm},\hspace{0.2cm} lie outside a unit circle.\\\\
+
+
+
+
+\vspace{3cm}
+
+EXAMPLE:\\
+MA(1) , $\hspace{0.2cm} X_t = Z_t + \theta Z_{t-1}= (1 + \theta B)Z_t$ or $\theta(B) = 1 + \theta B$\\ 
+The roots of $\theta (B) = 0$ are $B = \dfrac{-1}{\theta}$\hspace{0.2cm},\hspace{0.2cm}
+the root is outside the unit circle provided $|\theta| < 1$.\\
+
+
+
+
+
+
+\pagebreak
+
+
+\section{Autoregressive Process}
+Let $\{Z_t\}$ be a process with mean zero and variance $\sigma^2_Z$. Then $\{X_t\}$ is said to be an AR of order p or AR(p) if $X_t = \alpha_1 X_{t-1} + \alpha_2 X_{t-2} + \cdots\cdots + \alpha_p X_{t-p} + Z_t$\\
+
+
+
+The first order process i.e AR(1) or $p = 1$\\
+$X_t = \alpha X_{t-1} + Z_t$, $\hfill( X_{t-1} = \alpha X_{t-2} + Z_{t-1})$\\
+or\\
+$X_t = \alpha (\alpha X_{t-3} + Z_{t-1}) + Z_t$\\
+$X_t = \alpha^2 (\alpha X_{t-3} + Z_{t-2}) + \alpha Z_{t-1} + Z_t$\\
+
+so that $X_t$ is expressed in terms of $Z_t$ or an infinite order MA process provided $|\alpha| < 1$.
+$$X_t = Z_t + \alpha Z_{t-1} + \alpha^2 Z_{t-2} + \alpha^3 Z_{t-3} +\cdots +\cdots$$
+this is the duality between AR and MA process.\\\\
+
+
+
+\begin{note}
+$X_t = \alpha X_{t-1} + Z_t$ can be written as $(1 - \alpha B)X_t = Z_t$ using the backward shift operator. Therefore,
+\begin{align*}
+X_t &= \frac{Z_t}{1 - \alpha B}\\
+    &= (1 + \alpha B + \alpha^2 B^2+ \alpha^3 B^3 + ............ +...)Z_t\\
+    &= Z_t + \alpha Z_{t-1} + \alpha^2 Z_{t-2} + .................. \\
+\end{align*}
+Thus $E(X_t) = 0$ because $X_t$ is a purely random process and
+
+
+
+\begin{align*}
+var(X_t) &= (1 + \alpha^2 + \alpha^4 + .............)\sigma^2_Z\\
+         &= \frac{\sigma^2_Z}{1 - \alpha^2}
+\end{align*}
+provided $|\alpha| < 1$\\\\
+
+
+
+
+\vspace{4cm}
+
+The acv.f is given by
+\begin{align*}
+\varphi(k) &= E(X_t,X_{t+k})\\
+           &= E\Big[\Big(\sum\alpha^i Z_{t-i}\Big)\Big(\sum\alpha^i Z_{t+k-i}\Big)\Big]\\
+           &= \sigma^2_Z \sum^{\infty}_{i=0} \alpha^i \alpha^{k+i}, \hspace{2cm} for \hspace{0.3cm} k\geq 0      
+\end{align*}
+which converges for $|\alpha| < 1$ to
+\begin{align*}
+\varphi(k) &= \frac{\alpha^k \sigma^2_Z}{1 - \alpha^2}\\
+           &= \alpha^k \sigma^2_x\hspace{0.5cm},   \hspace{1.5cm} var(X_t) = \sigma^2_x = \frac{\sigma^2_Z}{1 - \alpha^k}
+\end{align*}
+for $\hspace{0.2cm} k < 0\hspace{0.3cm}$, $\hspace{0.3cm} \varphi(k) = \varphi(-k)$\\
+$\varphi(k)$ does not depend on $t$, an AR(1) is second order stationary provided $|\alpha| < 1$. The ac.f is given by\\
+$$\rho(k) = \alpha^k, \hspace{1cm} k = 0, \pm1, \pm2, \cdots\cdots$$\\
+
+
+
+
+
+For $X_t = \alpha X_{t-1} + Z_t,  \hspace{1cm}(AR(1)) $, we can multiply this by $X_{t-k}$ to obtain\\
+$$X_{t-k}X_t = \alpha X{t-k}\,\cdot \, X_{t-1} + X_{t-k}\,\cdot\, Z_t$$
+taking the expectation, we have
+$\hspace{0.3cm}\boxed{\varphi(-k) = \alpha \varphi(-k+1)}\hspace{0.3cm}$ on the assumption that $E(X_{t-k}\,\cdot\, Z_t) = 0$, for $k>0$.\\
+
+Since $\varphi(-k) = \varphi(k)$ we have $\varphi(k) = \alpha \varphi(k-1)$ for $k > 0$.\\
+Since $\varphi(0) = \sigma^2_X$, thus $\varphi(k) = \alpha^k \sigma^2_X$ for $k\geq0$,
+thus 
+$$\rho(k) = \frac{\varphi(k)}{\varphi(0)} = \frac{\alpha^k \sigma^2_X}{\sigma^2_X} = \alpha^k\hspace{0.2cm},\hspace{0.2cm} \text{for}\hspace{0.2cm} k\geq0.$$
+
+Since, $|\rho(k)|<1$ we must have $|\alpha|<1$.\\
+If $|\alpha|=1$, then $|\rho(k)|=1$,for all  k this is a degenerate case. Thus $|\alpha|<1$ for a proper, stationary time series.\\\\\\
+
+
+
+
+
+
+\vspace{3cm}
+\end{note}
+\subsection{General Order Of an AR Process}
+Let AR be expressed as an MA Process. Consider the equation
+$$X_t = \alpha_1 X_{t-1} + \alpha_2 X_{t-2} + \cdots\cdots + \alpha_p X_{t-p} + Z_t, \hspace{1cm} AR(p)$$
+
+$$\text{or}\hspace{0.5cm}(1 - \alpha_1 B - \alpha_2 B^2 --------- \alpha_p B^p)X_t = Z_t$$
+
+
+
+\begin{align*}
+\text{or}\hspace{0.5cm} X_t & = \frac{Z_t}{1 - \alpha_1 B - \alpha_2 B^2 --------- \alpha_p B^p}\\
+X_t & = f(B)Z_t
+\end{align*}
+
+where
+\begin{align*}
+f(B) &= (1 - \alpha_1 B - \alpha_2 B^2 ----------\alpha_p B^p)^{-1}\\
+     &= 1 + \beta_1 B + \beta_2 B^2 + \cdots\cdots
+\end{align*}
+the $\alpha_i$ and $\beta_i$ can be found.\\
+
+
+
+Since $X_t$ is in terms of an MA, $E(X_t)=0$ and the variance is finite provided $\sum\limits^{\infty}_{i=0} \beta^2_i$ converge.\\
+
+The acv.f is given by
+$$\varphi(k)= \sigma^2_Z \,\sum^{\infty}_{i=0} \beta_i \beta_{i+k}\hspace{0.3cm},\hspace{0.3cm} \text{where}\hspace{0.3cm} \beta_0=1$$ the sufficient condition for this to converge , $\Sigma|\beta_i|$ converge\\
+
+
+
+
+To find the ac.f, we assume as stationality we multiply $$X_t= \alpha_1 X_{t-1} + \alpha_2 X_{t-2} + \cdots\cdots+ \alpha_p X_{t-p}$$ by $X_{t-k}$ and take expectations and divide by $\sigma^2_X$. Assuming $var(X_t)$ is finite. We have
+$$\rho(k)= \alpha_1 \rho(k-1) + \cdots\cdots + \alpha_p \rho(k-p)\hspace{0.3cm},\hspace{0.3cm} \forall k\geq0$$
+This is called Yule Walker equations and this has a general solution
+$$\rho(k)= A_1\pi^{|k|}_1 + A_2\pi^{|k|}_2 + \cdots\cdots+ A_p\pi^{|k|}_p$$
+and the $\{\pi_i\}$ are the roots of the auxiliary equation.
+$$Y^p - \alpha_1 Y^{p-1} - \alpha_2 Y^{p-2} -------- \alpha_p = 0$$
+Then the $A_{i's}$ are chosen to satisfy the initial conditions depending on $\rho(0)=1$, i.e $\sum A_i=1$.\\
+This first Yule Walker equations provide several routes to estimating the parameters of AR(p) model, by replacing the theoretical covariances with estimated values. Further restrictions on the $\{A_{i's}\}$ using $\rho(0)=1$ and $\rho(-k) = \rho(k)$.The general form of $\rho(k)$ tends to zero as $k\rightarrow \infty$ (increases) provided $|\pi_i|<1$, this is a necessary and sufficient condition for the process to be stationary.\\
+
+
+
+
+
+An equivalent way to express stationality of AR(p) is to express the roots as $\phi(B) = 1 -\alpha_1 B -\alpha_2 B^2 --------- \alpha_p B^p=0$ must lie outside the unit circle.\\\\
+
+\subsection{Example}
+Consider the AR(2) process $X_t=\alpha_1 X_{t-1}+\alpha_2 X_{t-2}+Z_t$ when $\pi_1$ and $\pi_2$ are the roots of the quadratic equation
+$$Y^2- \alpha_1 Y- \alpha_2=0$$
+We have $|\pi_i|<1$ if $\Bigg|\dfrac{\alpha_1 \pm\sqrt{\alpha^2_1 +4\alpha_2}}{2}\Bigg|<1$
+the stationality region is in the triangular region such that $\alpha_1 +\alpha_2<1,\hspace{0.3cm} \alpha_1- \alpha_2>-1,\hspace{0.3cm} \alpha_2>-1$ the roots are real if $\alpha^2_1 +4\alpha_2>0$ and complex if $\alpha^2_1 + 4\alpha_2 <0$.\\
+
+When the roots are real $A_1$ and $A_2$ can be found as follows, since $\rho(0)=1$\\
+from $\rho(k)= A_1\pi^{|k|}_1 +A_2\pi^{|k|}_2 +...............+ A_p\pi^{|k|}_p$
+
+
+\begin{align*}
+\rho(0) &= A_1\pi^{|0|}_1 + A_2\pi^{|0|}_2\\
+         &= A_1 + A_2\\
+         1&=A_1 + A_2
+\end{align*}
+from the Yule Walker equation\\
+$\rho(k)=\alpha_1 \rho(k-1) +\alpha_2 \rho(k-2) + ..........+ \alpha_p \rho(k-p), \forall k\geq0$\\
+
+we have\\
+\begin{align*}
+\rho(1) &=\alpha_1 \rho(1-1) + \alpha_2 \rho(1-2)\\
+        &=\alpha_1 \rho(0) +\alpha_2 \rho(-1)\\
+        &=\alpha_1 \rho(0) +\alpha_2 \rho(1)\\\\
+ \implies \rho(1)       &=\alpha_1 +\alpha_2 \rho(1)\\\\
+ \implies \rho(1) &=\frac{\alpha_1}{1-\alpha_2}\\
+\end{align*}
+
+$\rho(1)= A_1\pi_1 + A_2\pi_2$\\
+But $1= A_1+A_2$ or $1-A_1=A_2$ \hspace{0.2cm},\hspace{0.2cm} Therefore
+\begin{align*}
+\rho(1) &= A_1\pi_1 +A_2\pi_2\\
+        &= A_1\pi_1 +(1-A_1)\pi_2\\\\
+\implies \frac{\alpha_1}{1-\alpha_2} &=A_1\pi_1 +(1-A_1)\pi_2 \\\\
+\implies A_1 &= \frac{\Big[\dfrac{\alpha_1}{1-\alpha_2}-\pi_2\Big]}{\pi_1 -\pi_2}\\\\
+\implies A_2 &= 1-A_1\\
+             &= \frac{\pi_1 -\pi_2 -\Big[\dfrac{\alpha_1}{1-\alpha_2}-\pi_2\Big]}{\pi_1 -\pi_2}\\      
+\end{align*}
+
+
+
+
+
+
+
+
+
+
+\subsection{Example}
+Consider an AR(2)\hspace{0.2cm},\hspace{0.3cm} $X_t=X_{t-1}-\dfrac{1}{2}X_{t-2}+Z_t$. Is this process stationary and if so what is its ac.f.\\
+
+
+\subsection{Solution}
+We find the roots of $\phi(B) =1-B+\frac{1}{2}B^2=0$.   The roots are $1\pm2$,the modules of both roots exceed one, therefore there are outside the unit circle. Thus the process is stationary.\\ To find the ac.f, we use the first Yule- Walker equation 
+$$\rho(1)= \rho(0)-\frac{1}{2}\rho(-1)$$ Giving $\hspace{0.2cm}\rho(1)=\dfrac{2}{3}$\\
+
+for $k\geq2$,\\ $\rho(k) =\rho(k-1)-\dfrac{1}{2}\rho(k-2)$ and $\rho(2), \rho(3)$ can be found by successive substitution.\\\\\\
+
+
+
+
+
+
+\section{Mixed Arma Models}
+The MA and AR models can be combined to obtain an ARMA model.  A mixed ARMA with p AR terms and q MA terms is an ARMA process of order $(p,q)$
+$$X_t=\alpha_1 X_{t-1}+\alpha_2 X_{t-2}+\cdots\cdots+\alpha_{p} X_{t-p}+Z_t+\beta_1 Z_{t-1}+\cdots\cdots+\beta_q Z_{t-q}$$ or\\
+$\phi(B) X_t=\theta(B) Z_t $ where $\phi(B)$ and $\theta(B)$ are polynomials of order p and q respectively and
+$$\phi(B)= 1-\alpha_1 B-\alpha_2 B^2- ------\alpha_p B^p$$
+$$\theta(B)=1+\beta_1 B+\beta_2B^2 +.........+\beta_q B^q$$
+For AR the values of $\{\alpha_i \}$ which makes the process stationary are such that the roots of $\phi(B) =0$ lie outside the unit circle.\\
+Similarly for the MA process, the values of $\{\beta_i \}$ which make the process stationary are such that the roots of $\theta(B) =0$ lie outside the unit circle.\\
+ARMA process are important in that a stationary time series may be described by an ARMA model involving few parameters than the pure MA or AR by itself.\\It is useful to express ARMA as pure MA process in the form $X_t=\psi(B) Z_t$, where $\psi(B) =\sum\psi_i \beta^i$. $\psi(B)$ is an MA operator and maybe of finite or infinite order.\\
+
+From $\phi(B) X_t=\theta(B) Z_t$\hspace{0.2cm} we have \hspace{0.2cm}$\psi(B) =\dfrac{\theta(B)}{\phi(B)}$\hspace{0.2cm} and\hspace{0.2cm} $\pi(B) X_t=Z_t$\hspace{0.2cm} where\hspace{0.2cm} $\pi(B) =\dfrac{\phi(B)}{\theta(B)}$\\
+
+That $\pi(B) =1- \sum\pi_i B^i $, since $X_t=\sum\limits^{\infty}_{i=0} \pi_i X_{t-i}+Z_t$\\
+
+
+Thus from $X_t=\psi(B) Z_t$ and $\pi(B) X_t=Z_t$, we have $\psi(B)\,\cdot\,\pi(B) =1$
+$$\implies\hspace{1cm}\frac{\theta(B)}{\phi(B)}\,\cdot\,\frac{\phi(B)}{\theta(B)}=1$$
+the $\psi$ weight and $\pi$ weight maybe computed by equating the process of B in the equation $\psi(B) \phi(B) =\theta(B)$.\\\\
+
+
+
+
+
+
+
+
+\subsection{Example}
+Find the $\psi$ and $\pi$ weights for this ARMA(1,1) given by $$X_t =0.5X_{t-1}+Z_t-0.3Z_{t-1}$$
+Here\\ $\phi(B) =1-0.5B.........(1)$\\
+
+$\phi(B)X_t=(1-0.5B)X_t=X_t-0.5X_t$\\
+
+$\theta(B) =1-0.3............(2)$\\ 
+
+$\phi(B) =0$ and $\theta(B) =0$ have roots outside the unit circle, so the process is stationary and invertible.\\\\
+
+(1)  $\phi(B) =1-0.5B=0$\\
+
+$\implies B=\dfrac{1}{0.5}=2$\\
+
+$\psi(B)=\dfrac{\theta(B)}{\phi(B)}=\dfrac{1-0.3B}{1-0.5B}$\\
+
+$\psi(B) =(1-0.3B)(1-0.5B)^{-1}$\\
+
+$\psi(B)=(1-0.3B)(1+0.5B+ 0.5^2B^2 +0.5^3B^3+\cdots\cdots)$\\
+
+$\implies \psi(B)=1+0.2B+0.1B^2+0.005B^3+\cdots\cdots$\\ 
+
+Hence $\psi_i = 0.2\times0.5^{i-1}$ for\hspace{0.3cm}$i=1,2,3\cdots\cdots\cdots$\\\\ 
+
+Similarly show that(2) $\pi_i =0.2\times 0.3^{i-1}$ for $i= 1,2,\cdots\cdots$\\
+
+
+
+
+
+
+\pagebreak
+
+\section{Integrated Arma}
+When a process is non- stationary it is necessary to remove non-stationary sources of variation. In the process
+ $$X_t + \alpha_1 X_{t-1} + \alpha_2 X_{t-2} + \cdots\cdots + \alpha_p X_{t-p} + Z_t + \beta_1 Z_{t-1} + \cdots\cdots + \beta_q Z_{t-q}$$
+$X_t$ is replaced by $\nabla^d X_t$ then the model is capable of describing a certain type of non-stationary series. This model is called an integrated model, written as $W_t= \nabla^d X_t=(1 - B)^d X_t$ then the ARMA process is of the form
+ $$W_t= \alpha_1 W_{t-1} +\alpha_2 W_{t-2} +\cdots\cdots+\alpha_p W_{t-p} +Z_t +\beta_1 Z_{t-1} +\cdots\cdots+\beta_q Z_{t-q}$$
+ 
+or\\ $\phi(B) W_t =\theta(B) Z_t$\\or \\ $\phi(B) (1-B)^dX_t=\theta(B) Z_t$\\
+
+Thus we have an ARMA of order $(p,q)$ for $W_t$. While the equation $$\phi(B) (1-B)^dX_t =\theta(B) Z_t$$ describes    the $d^{th}$ difference of $X_t$ it is an ARIMA process of order $(p,d,q)$. The $X_t$ model is non-stationary as the AR operator $\phi(B) (1-B)^d$ has d roots outside the unit circle. In particular the value of $d$ is 1.
+ \begin{align*}
+ \nabla^2 X_t &=\nabla (X_t-X_{t-1})\\
+                        &=(X_t-X_{t-1})-(X_{t-1}-X_{t-2})\\
+                        &=X_t-2X_{t-1}+X_{t-2}\\\\\
+ \end{align*}
+ 
+ 
+ 
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+\pagebreak 
+\section{Forecasting}
+ Let $X_1,X_2,..............,X_n$ be an observed time series. The problem is to estimate further values $X_{t+k}$, $\hspace{0.2cm} k $is called lead time. The forecast $X_{n+k}$ at time $n$ at $k$ steps ahead can be denoted by $\widehat{x}(n,k)$. Various methods for forecasting exist. No single method is universally available.\\ Forecasting is of the form of extrapolation condition of a characteristic of a time series.\\
+ 
+ 
+ 
+ Forecasting Methods:  Are broadly based on
+ \begin{enumerate}
+ \item Subjective\\-judgment\\-intuition\\-business knowledge\\or any other relevant information.
+ \item Univariate\\based on a model fitted only the passed observation of $\{X_t\}$ so that $\widehat{x}(n,k)$ depends only on $X_t,X_t,........,X_n$
+ \item Multivariate\\Used for non-seasonal time series showing no trends. For time series with trends or seasonal patterns these need to be removed to produce stationarity.\\
+ \end{enumerate}
+ 
+ Suppose $X_1,X_2,.......,X_n$ is a non-seasonal time series with no trend. We take $X_{n+1}$ as a waited a sum of passed observations
+ $$\widehat{x}(n,1)= C_0X_n+C_1X_{n-1}+C_2X_{n-2}+\cdots\cdots$$
+ then $\{C_i\}$ are the weights (Geometric weights) are used so that\\ $C_i=\alpha (1-\alpha )^i, \hspace{0.5cm}i=1,2,....$ where $\alpha$ is such that $0<\alpha <1.$\\\\
+ The $\hspace{0.3cm}\widehat{x}(n,1)=C_0X_n+C_1X_{n-1}+C_2X_{n-2}+\cdots\cdots$\\\\
+becomes $\hspace{0.3cm}\widehat{x}(n,1)=\alpha X_n+\alpha (1-\alpha )X_{n-1}+\alpha (1-\alpha )^2X_{n-2}+\cdots\cdots\cdots$\\or
+
+$$\widehat{x}(n,1)=\alpha X_n+(1-\alpha )\Big[\alpha X_{n-1}+\alpha (1-\alpha )X_{n-2}+\alpha (1-\alpha )^2X_{n-3}+\cdots\cdots\Big]$$ Therefore\hspace{0.3cm} $\widehat{x}(n,1)=\alpha X_n+(1-\alpha )\widehat{x}(n-1,1)$.\\
+ 
+ 
+If $\widehat{x}(1,1)=X_1$, the equation can be used recursively to compute forecasting, this is called exponential smoothing.\\
+
+We can also write
+\begin{align*}
+\widehat{x}(n,1) &=\alpha X_n+(1-\alpha )\widehat{x}(n-1,1)\\
+             &=\alpha \Big[X_n-\widehat{x}(n-1,1)\Big] +\widehat{x}(n-1,1)\\
+             &=\alpha e_n +\widehat{x}(n-1,1)
+\end{align*} 
+where $e$ is the prediction error at time n. The values of $\alpha$ depend on the time series properties, usually the values of $\alpha$ are taken $0.1\leq \alpha \leq0.3$.\\\\
+
+
+
+
+
+
+
+
+\section{Estimation Of Models}
+To effectively use the model for forecasting the parameters of the model ought to be estimated\\
+
+
+\subsection{Fitting an AR Model}
+-what is the order of the process\\
+-how can we estimate the parameters of the process\\
+
+
+Suppose we have an AR(p) with mean $\mu$ given by
+$$X_t-\mu =\alpha_1 (X_{t-1}-\mu)+\alpha_2 (X_{t-2}-\mu)+\cdots\cdots+\alpha_p (X_{t-p}-\mu)+Z_t$$
+
+
+If $X_1,X_2,\cdots\cdots,X_n$ are the observations of a time series. The parameter i.e $\alpha_1 ,\alpha_2 ,\cdots\cdots,\alpha_p$ can be estimated by least square, by minimizing\\
+$$S=\sum^{n}_{t=p+1}\Big[X_t-\mu -\alpha_1 (X_{t-1}-\mu )-\alpha_2 (X_{t-2}-\mu )-\,\cdots\cdots\,-\alpha_p (X_{t-p}-\mu)\Big]^2$$
+with respect to $\mu ,\alpha_1 ,\alpha_2 ,..........., \alpha_p$.\\\\
+
+
+
+\subsection{Fitting an MA Process}
+Finding an MA process is more complex than the AR because the least squares method cannot be applied to the ARMA and the ARIMA.\\
+
+
+
+\subsection{Box-Jenkins Seasonal (SARIMA) Model}
+In practice main time series contain a seasonal periodic component which repeats every 's' observations. e.g with monthly observations $s=12$. $X_t$ depends on terms such that $X_{t-12}$ and perhaps $X_{t-24}$. As well as $X_{t-1},X_{t-2},\cdots\cdots$\\\\
+
+
+Box-Jenkins have generalized the ARIMA model to deal with seasonality and find the general multiplicative ARIMA model (SARIMA)as
+$$\phi_p(B) \Phi_P(B^s) W_t=\theta_q(B) \Theta_Q(B^s)Z_t$$
+where $\hspace{0.3cm} W_t=\nabla^d\, \nabla^D_s X_t$, B denotes the backward shift operator, $\,\phi_p \,,\,\Phi_P ,\,\theta_q \,\text{and} \hspace{0.2cm}\Theta_Q$ are polynomials of order p,P,q,Q respectively. $Z_t$ denotes a purely random process.\\
+If $P=1$ the term $\Phi_p(B^s)$ will be $(1- \text{constant}\, XB^s)$ which means that $W_t$ will depend on $W_{t-s}$ since $B^s\,W_t=W_{t-s}$. The variables $\{W_t\}$ are formed from the original series $\{X_t\}$ not only by simple difference to remove trend but also by seasonal difference to remove seasonality.\\
+
+If $d=D=1$ and $s=12$
+\begin{align*}
+W_t &=\bigtriangledown \bigtriangledown_{12} X_t\\
+    &=\bigtriangledown_{12} X_t-\bigtriangledown_{12} X_{t-1}\\
+    &=(X_t-X_{t-12})-(X_{t-1}-X_{t-13})\\
+\end{align*}
+
+
+The model equation $\,\phi_p(B) \Phi_P(B^s) W_t=\theta_q(B) \Theta_Q(B^s) Z_t\,$ and $\,W_t=\nabla^d \,\nabla^D_s X_t$ is said to be a SARIMA model of order $\,(p,d,q)\times(P,D,Q)_s$.\\\\
+
+
+
+\subsection{Example}
+Consider the SARIMA $(1,0,0)\times(0,1,1)_{12}$\\
+
+So we note that $s=12$ then the model\\
+$\phi_p(B) \Phi_P(B^s) W_t=\theta_q(B) \Theta_Q(B^s) Z_t$ and $W_t=\nabla^d\, \nabla^D X_t$ can be written as\\\\ $(1-\alpha B)W_t=(1+\theta B^{12})$ where $W_t=\nabla_{12} X_t$\\\\we find $X_t=X_{t-12}+\alpha (X_{t-1}-X_{t-13})+Z_t+\theta Z_{t-12}$ so that $X_t$ depends on $X_{t-1},X_{t-12},X_{t-13}$ as the innovation time.\\
+
+
+
+
+
+\pagebreak
+
+\subsection{Forecasting: (Box-Jenkins Procedure)}
+The main stages of the the Box-Jenkins procedure,
+\begin{enumerate}
+\item Identification: examining the data to identify a model
+\item Estimation: Estimating parameters of the model
+\item Diagnostic checking: examining residuals from the the fitted model to see if the model is adequate
+\item Consideration of an alternative model. This is done when the first model appears to be inadequate.\\
+\end{enumerate}
+
+
+
+
+
+
+\subsection{Computation of Forecast}
+Use of difference equations, if the model equation is known then $\widehat{x}(n,1)$ can be obtained from the model equation by replacing,\\- future values of $Z$ by zero.\\- future values of $X$ by there conditional expectation.\\- past values of $X$ and $Z$ by their observed values.\\
+
+
+
+
+
+
+\subsection{Example}
+Consider the SARIMA $(0,0,1)\times(1,1,0)_{12}$ used where
+$$X_t=X_{t-12}-\alpha(X_{t-1}-X_{t-13})+Z_t+\theta Z_{t-12}$$
+
+$$\widehat{x}(n,1)=X_{n-11}-\alpha (X_n-X_{n-12})+\theta Z_{n-11}$$
+
+and
+
+\begin{align*}
+\widehat{x}(n,2) &=X_{n-10}-\alpha (X_{t+1}-X_{n-11})+\theta Z_{n-10}\\
+             &=X_{n-10}+\alpha (\widehat{x}(n,1)-X_{n-11})+\theta Z_{n-10}
+\end{align*} 
+forecasting further in the future can be calculated recursively when $X_{n+1}$ is known.
+
+
+\begin{align*}
+\widehat{x}(n+1,1) &=X_{n-10}+\alpha (X_{n+1}-X_{n-11})+\theta Z_{n-10}\\
+               &=\widehat{x}(n,2)+\alpha (X_{n+1}-\widehat{x}(n,1))+\theta Z_{n-10}\\
+               &=\widehat{x}(n,2)+\alpha Z_{n+1}
+\end{align*}
+\end{document}
