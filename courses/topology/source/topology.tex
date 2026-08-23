@@ -711,6 +711,30 @@ Let $Y=(0,1]$ be a subset of $\mathbb{R}$. The metric $(Y,d)$, where $d$ is the 
 Suppose that $(Y,d)$ is a metric subspace of a metric space $(X,d)$ and $A$ is a subset of $X$. If $A$ is open (closed) in $X$, and $A\subseteq Y$, then $A$ is open (closed) in $Y$.\\\\\\
 \end{prop}
 
+\begin{proof}
+Recall that the open sets of the subspace $Y$ are exactly the sets $U\cap Y$
+with $U$ open in $X$ --- that is the definition of the subspace topology.
+
+Suppose $A$ is open in $X$ and $A\subseteq Y$. Then
+$$A = A\cap Y,$$
+which exhibits $A$ as the intersection of a set open in $X$ with $Y$, so $A$ is
+open in $Y$.
+
+For the closed case, suppose $A$ is closed in $X$ and $A\subseteq Y$. Then
+$X\setminus A$ is open in $X$, so
+$$\left(X\setminus A\right)\cap Y = Y\setminus A$$
+is open in $Y$, and therefore $A$ is closed in $Y$.
+\end{proof}
+
+\begin{remark}
+The converse fails, and the failure is the point of the subspace topology. The
+set $[0,1)$ is open in the subspace $[0,2]$ of $\mathbb{R}$, because it equals
+$(-1,1)\cap[0,2]$, but it is not open in $\mathbb{R}$. Openness is not a
+property a set has on its own; it is a property it has \emph{relative to a
+space}, and a set can gain or lose it by changing the space it is regarded as
+sitting in.
+\end{remark}
+
 
 
 
@@ -850,10 +874,43 @@ From previous courses on real analysis, you have discussed the following theorem
 \end{defn}
 
 \begin{thm}
-A sequence of real numbers $(x_n)$ is a Cauchy sequence if and only if it is convergent.\\\\
-
-From the above theorem, we can immediately deduce that the set of real numbers with the usual metric is a complete metric space.\\\\
+A sequence of real numbers $(x_n)$ is a Cauchy sequence if and only if it is
+convergent.
 \end{thm}
+
+\begin{proof}
+\subhead{Convergent implies Cauchy}
+If $x_n\rightarrow x$ then given $\varepsilon>0$ choose $N$ with
+$\left|x_n-x\right|<\varepsilon/2$ for $n\geq N$. For $m,n\geq N$,
+$$\left|x_m-x_n\right| \leq \left|x_m-x\right| + \left|x-x_n\right| < \varepsilon .$$
+This direction holds in \emph{every} metric space.
+
+\subhead{Cauchy implies convergent}
+This direction is special to $\mathbb{R}$ and rests on its completeness axiom.
+A Cauchy sequence is bounded: taking $\varepsilon=1$ gives an $N$ with
+$\left|x_n-x_N\right|<1$ for $n\geq N$, so every term lies within
+$\max\left\{\left|x_1\right|,\dots,\left|x_{N-1}\right|,\left|x_N\right|+1\right\}$
+of the origin. By the Bolzano--Weierstrass theorem a bounded real sequence has a
+convergent subsequence, say $x_{n_k}\rightarrow x$.
+
+A Cauchy sequence with a convergent subsequence converges to the same limit.
+Given $\varepsilon>0$, choose $N$ with $\left|x_m-x_n\right|<\varepsilon/2$ for
+$m,n\geq N$, and then $n_k\geq N$ with $\left|x_{n_k}-x\right|<\varepsilon/2$.
+For any $n\geq N$,
+$$\left|x_n-x\right| \leq \left|x_n-x_{n_k}\right| + \left|x_{n_k}-x\right| < \varepsilon .$$
+\end{proof}
+
+It follows immediately that $\mathbb{R}$ with the usual metric is a complete
+metric space.
+
+\begin{note}
+Only the second direction used a property of $\mathbb{R}$. In a general metric
+space Cauchy sequences need not converge --- the rationals with the usual metric
+are the standard example, where a sequence of rational approximations to
+$\sqrt2$ is Cauchy with no rational limit. Completeness is precisely the
+assertion that this cannot happen, and it is a property of the space, not of the
+sequences.
+\end{note}
 
 \begin{thm}
 The metric space $(\mathbb{R}^2,d)$ where $d(x,y)=\sqrt{(x_1-y_1)^2+(x_2-y_2)^2}$,\\ $x=(x_1,x_2)$, $y=(y_1,y_2)$ is a complete metric space.\\
@@ -1165,6 +1222,34 @@ Let $X$ be a topological space. Then the collection of closed sets in $X$ has th
 \item[iii] the union of any finite collection of closed sets in $X$ is itself a closed set in $X$.\\\\
 \end{enumerate}
 \end{prop}
+
+\begin{proof}
+Each part is the complement of the corresponding axiom for open sets, via De
+Morgan's laws.
+
+\subhead{(i)}
+$X$ is closed because its complement $\emptyset$ is open, and $\emptyset$ is
+closed because its complement $X$ is open.
+
+\subhead{(ii)}
+Let $\{F_i\}$ be any collection of closed sets. Then
+$$X\setminus\bigcap_i F_i = \bigcup_i \left(X\setminus F_i\right),$$
+a union of open sets, which is open. Hence $\bigcap_i F_i$ is closed.
+
+\subhead{(iii)}
+For finitely many closed sets $F_1,\dots,F_n$,
+$$X\setminus\bigcup_{k=1}^{n}F_k = \bigcap_{k=1}^{n}\left(X\setminus F_k\right),$$
+a finite intersection of open sets, which is open. Hence the union is closed.
+\end{proof}
+
+\begin{note}
+The asymmetry is worth noticing and is not an accident of the proof.
+\emph{Arbitrary} intersections of closed sets are closed but only \emph{finite}
+unions are, exactly mirroring the axioms for open sets, where arbitrary unions
+and finite intersections are permitted. The standard witness is
+$$\bigcup_{n=1}^{\infty}\left[\frac1n,\,1\right] = (0,1],$$
+an infinite union of closed sets that is not closed.
+\end{note}
 
 
 
@@ -1820,16 +1905,56 @@ Let $A=f(X)$, so that $f:X\rightarrow A$. If $A$ is not connected, there exists 
 A subset of $\mathbb{R}$ is connected if and only if it is an interval.\\\\
 \end{coro}
 
+\begin{proof}
+\subhead{An interval is connected}
+Suppose an interval $I$ were disconnected, so $I = A\cup B$ with $A,B$ non-empty,
+open in $I$ and disjoint. Pick $a\in A$ and $b\in B$ with $a<b$; since $I$ is an
+interval, $[a,b]\subseteq I$. Let
+$$c = \sup\left\{x\in[a,b] : x\in A\right\}.$$
+If $c\in A$ then, $A$ being open, some interval $(c-\delta,c+\delta)$ lies in
+$A$, and as $c<b$ this puts points above $c$ in $A$, contradicting the
+supremum. If $c\in B$ then, $B$ being open, some $(c-\delta,c+\delta)$ lies in
+$B$, so no point of $A$ exceeds $c-\delta$, again contradicting the supremum.
+As $c$ lies in $A\cup B$, both cases are impossible and $I$ is connected.
+
+\subhead{A connected set is an interval}
+If $S\subseteq\mathbb{R}$ is not an interval there are $a<c<b$ with
+$a,b\in S$ and $c\notin S$. Then
+$$S = \left(S\cap(-\infty,c)\right)\ \cup\ \left(S\cap(c,\infty)\right)$$
+splits $S$ into two non-empty disjoint relatively open sets, so $S$ is
+disconnected.
+\end{proof}
 
 
 
 
-\begin{thm}[Intermediate Value theorem]
-Let f be a continuous real valued function on the closed, bounded interval $I=[a,b]$, we need to show that if $f(a)<f(b)$ and $C$ is any number such that $f(a)<C<f(b)$, then there is a point $x\in [a,b]$ such that $f(x)=C$. By the previous corollary, $[a,b]$ is a connected subset of $\mathbb{R}$. Since f is continuous, the previous Lemma implies that $f([a,b])$ is a connected subset of $\mathbb{R}$. It follows from the corollary that $f([a,b])$ is an interval. Therefore, if $f(a)<C<f(b)$, then there exists a point $x\in [a,b]$ such that $f(x)=C$.\\\\
 
+\begin{thm}[Intermediate Value Theorem]
+Let $f$ be a continuous real-valued function on the closed bounded interval
+$[a,b]$. Then $f$ takes every value between $f(a)$ and $f(b)$: for any $C$
+strictly between $f(a)$ and $f(b)$ there exists $c\in(a,b)$ with $f(c)=C$.
+\end{thm}
 
+\begin{proof}
+Suppose $f(a)<C<f(b)$; the other case follows by applying this one to $-f$.
+The interval $[a,b]$ is connected, and the continuous image of a connected set is
+connected, so $f\left([a,b]\right)$ is a connected subset of $\mathbb{R}$. By the
+corollary above, a connected subset of $\mathbb{R}$ is an interval. Since
+$f(a)$ and $f(b)$ both lie in $f\left([a,b]\right)$ and an interval contains
+every point between any two of its points, $C \in f\left([a,b]\right)$. So
+$C=f(c)$ for some $c\in[a,b]$, and $c$ is neither $a$ nor $b$ because
+$f(a)\neq C \neq f(b)$.
+\end{proof}
 
-If $f$ is a continuous real valued function on the closed, bounded interval $[a,b]$, then f takes every value between $f(a)$ and $f(b)$.\\
+\begin{remark}
+The theorem is usually proved in a first analysis course by bisection, which
+requires the completeness of $\mathbb{R}$ directly. The proof above uses no
+estimates at all: it needs only that $[a,b]$ is connected, that continuity
+preserves connectedness, and that connected subsets of $\mathbb{R}$ are
+intervals. That is the case for doing topology --- a theorem about real numbers
+turns out to be a theorem about connectedness, and the same argument proves the
+corresponding statement on any connected domain.
+\end{remark}
 
 The following result, known as the fixed point theorem, follows, from the intermediate value theorem.\\\\
 
@@ -1837,7 +1962,6 @@ The following result, known as the fixed point theorem, follows, from the interm
 
 
 \pagebreak
-\end{thm}
 \begin{coro}[Fixed Point theorem]
 If $f:[a,b]\rightarrow [a,b]$ is a continuous function, then there exists a point $x_0\in [a,b]$ such that $f(x_0)=x_0$.\\\\
 \end{coro}
