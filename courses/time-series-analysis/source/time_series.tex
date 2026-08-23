@@ -860,6 +860,89 @@ where $e$ is the prediction error at time n. The values of $\alpha$ depend on th
 
 
 
+
+\subsection{The Partial Autocorrelation Function}
+
+The autocorrelation function alone cannot identify an autoregressive model. For
+an AR$(1)$ process the correlation between $X_t$ and $X_{t+2}$ is
+$\rho(2)=\phi^{2}$, which is not zero --- but none of it is direct. It is
+entirely inherited through $X_{t+1}$. The partial autocorrelation is what
+removes that inheritance.
+
+\begin{defn}
+The \emph{partial autocorrelation} at lag $k$, written $\phi_{kk}$, is the
+correlation between $X_t$ and $X_{t+k}$ after removing the linear effect of the
+intervening values $X_{t+1},\dots,X_{t+k-1}$:
+$$\phi_{kk} = \Corr\left(X_t,\ X_{t+k} \;\middle|\; X_{t+1},\dots,X_{t+k-1}\right).$$
+Equivalently, $\phi_{kk}$ is the coefficient of $X_{t-k}$ in the best linear
+predictor of $X_t$ from the previous $k$ values.
+\end{defn}
+
+\begin{result}[Yule--Walker]
+The partial autocorrelations solve
+$$\rho(j) = \sum_{i=1}^{k}\phi_{ki}\,\rho(j-i),\qquad j=1,\dots,k,$$
+and $\phi_{kk}$ is the last coefficient of that system. In matrix form, with
+$R_k$ the $k\times k$ matrix of $\rho(i-j)$,
+$$R_k\,\boldsymbol{\phi}_k = \boldsymbol{\rho}_k .$$
+\end{result}
+
+\begin{exa}
+Compute $\phi_{11}$ and $\phi_{22}$ for a general stationary process.
+\end{exa}
+
+\begin{solution}
+At $k=1$ the system is $\rho(1) = \phi_{11}$, so
+$$\phi_{11} = \rho(1).$$
+At $k=2$,
+$$\rho(1) = \phi_{21} + \phi_{22}\rho(1),\qquad
+\rho(2) = \phi_{21}\rho(1) + \phi_{22}.$$
+Eliminating $\phi_{21}$,
+$$\phi_{22} = \frac{\rho(2)-\rho(1)^{2}}{1-\rho(1)^{2}} .$$
+
+For an AR$(1)$ process $\rho(k)=\phi^{k}$, so
+$$\phi_{22} = \frac{\phi^{2}-\phi^{2}}{1-\phi^{2}} = 0 ,$$
+exactly as the definition promises: once $X_{t+1}$ is accounted for, nothing
+direct connects $X_t$ to $X_{t+2}$.
+\end{solution}
+
+\begin{result}[Identification]
+The two functions cut off for opposite models, and this is what makes them
+usable together:
+$$\begin{array}{lll}
+\text{Model} & \text{ACF} & \text{PACF}\\ \hline
+\text{AR}(p) & \text{tails off} & \text{cuts off after lag } p\\
+\text{MA}(q) & \text{cuts off after lag } q & \text{tails off}\\
+\text{ARMA}(p,q) & \text{tails off} & \text{tails off}
+\end{array}$$
+\end{result}
+
+\begin{note}
+The duality is not a coincidence. An AR$(p)$ process is a finite regression on
+its own past, so beyond lag $p$ there is no direct effect left to find and the
+PACF is zero. An MA$(q)$ process is a finite sum of $q+1$ shocks, so beyond lag
+$q$ the two windows share no shock at all and the ACF is zero. Each model is
+finite in one representation and infinite in the other --- which is the
+invertibility discussion of the previous section seen from the other side.
+
+In practice both functions are estimated from data and neither cuts off exactly.
+The usual rule is to treat a sample value as zero when it lies within
+$\pm 1.96/\sqrt{n}$, since under the null that the true value is zero the sample
+autocorrelation is approximately $N(0,1/n)$. With $n=100$ that band is about
+$\pm0.2$, which is wide --- identification is a judgement, not a calculation,
+and the reason Box--Jenkins insists on the verification step.
+\end{note}
+
+\begin{remark}
+When both functions tail off, the process is ARMA and the orders cannot be read
+off directly. The practical route is then to fit several candidate models and
+compare them by an information criterion, penalising parameters:
+$$\text{AIC} = -2\log L + 2r,\qquad \text{BIC} = -2\log L + r\log n ,$$
+where $r$ is the number of estimated parameters. BIC penalises more heavily and
+tends to choose the smaller model, which for forecasting is usually the safer
+error to make.
+\end{remark}
+
+
 \section{Estimation Of Models}
 To effectively use the model for forecasting the parameters of the model ought to be estimated\\
 
