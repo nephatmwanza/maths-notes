@@ -2250,7 +2250,7 @@ $$\therefore \hspace{0.5cm} M_{Z_n}(t)=\Big(M_X(t/\sqrt{n})\Big)^n$$\\ Let $L(t)
  L'(t) &=\frac{M'(t)}{M(t)}\hspace{1cm} M(0)=1\\\\
  L'(0) &=\frac{M'(0)}{M(0)}=\mu\\\\
  L''(t) &=\frac{M''(t)M(t)-(M'(t))^2}{(M(t))^2}\\\\
- L''(0) &=\frac{E(Y^2)-(E(y))^2}{1^2}=\Var(Y).
+ L''(0) &=\frac{E(X^2)-\big(E(X)\big)^2}{1^2}=\Var(X).
 \end{align*}
 $$\text{We want to show that}\hspace{0.4cm}\lim_{n\rightarrow \infty}M_{Z_n}(t)=e^{t^2/2}\hspace{0.4cm}\text{or equivalently we show that}$$ $$\lim_{n\rightarrow \infty}\ln M_{Z_n}(t)=\frac{t^2}{2}.$$\\
 $$\ln M_{Z_n}(t)=n\ln M_X(t/\sqrt{n})=nL(t/\sqrt{n}).$$
@@ -2266,6 +2266,22 @@ $$\therefore \hspace{0.5cm} \lim_{n\rightarrow \infty}M_{Z_n}(t)=e^{\frac{1}{2}t
 The result now follows in the general case by considering the standardized random variable $Y_i=\frac{X_{i}-\mu}{\sigma}$ and apply the result above $$M_{\sqrt{n}\overline{X}}=e^{\frac{1}{2}t^2}$$ $$\sqrt{n}.\overline{Y}=\sqrt{n}.\frac{\sum\limits_{i=1}^nY_i}{n}=\sqrt{n}.\frac{\sum (X_i-\mu)}{n.\sigma}$$
 $$M_{\sqrt{n}.\overline{Y}}(t)\rightarrow e^{\frac{1}{2}t^2}.$$\\
 \end{proof}
+
+\begin{note}
+The proof shows that the moment generating function of $Z_n$ converges to
+$e^{t^{2}/2}$, which is that of the standard normal. That alone is a statement
+about \emph{functions}; what turns it into a statement about \emph{distributions}
+is the continuity theorem of the chapter on generating functions. Without that
+theorem the calculation above would establish nothing about $P(Z_n\leq z)$, and
+it is worth being explicit that the last step of the proof is an appeal to it
+rather than an observation.
+
+The argument also assumes the moment generating function exists in a
+neighbourhood of the origin, which is more than the theorem needs. The general
+proof replaces $M$ by the characteristic function $\varphi(t)=E(e^{itX})$, which
+always exists, and appeals to L\'evy's continuity theorem in its place. The
+structure is identical.
+\end{note}
 
 
 
@@ -2426,6 +2442,82 @@ Q.E.D
 
 
 
+
+
+
+\subsection{Slutsky's Theorem}
+
+The limit theorems above concern a single sequence. In practice one almost
+always meets a combination --- a quantity converging in distribution, divided by
+an estimate of its standard deviation which converges in probability to a
+constant. Slutsky's theorem is what licenses treating the second as though it
+already were that constant, and almost every asymptotic argument in statistics
+uses it.
+
+\begin{thm}[Slutsky]
+Suppose $X_n \underset{D}{\longrightarrow} X$ and
+$Y_n \underset{P}{\longrightarrow} c$, where $c$ is a constant. Then
+\begin{enumerate}
+\item[(a)] $X_n + Y_n \underset{D}{\longrightarrow} X + c$;
+\item[(b)] $X_nY_n \underset{D}{\longrightarrow} cX$;
+\item[(c)] $\dfrac{X_n}{Y_n} \underset{D}{\longrightarrow} \dfrac{X}{c}$, provided $c\neq0$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+Because the limit $c$ is a constant, $Y_n \underset{P}{\longrightarrow} c$ gives
+joint convergence $(X_n,Y_n)\underset{D}{\longrightarrow}(X,c)$ --- this is the
+step that fails for a non-constant limit, since the marginal behaviour of two
+sequences does not determine their joint behaviour. Each of the three maps
+$$(x,y)\mapsto x+y,\qquad (x,y)\mapsto xy,\qquad (x,y)\mapsto x/y$$
+is continuous at every point of the form $(x,c)$, the last provided $c\neq0$.
+The continuous mapping theorem applied to the pair then gives the three
+conclusions.
+\end{proof}
+
+\begin{note}
+The requirement that $c$ be a \emph{constant} is not a technicality that can be
+relaxed. If $X_n\underset{D}{\longrightarrow}X$ and
+$Y_n\underset{D}{\longrightarrow}Y$ with $Y$ non-degenerate, then nothing
+follows about $X_n+Y_n$ at all: take $X_n\sim N(0,1)$ and $Y_n=-X_n$, so that
+each converges in distribution to $N(0,1)$, while $X_n+Y_n=0$ identically.
+Taking instead $Y_n$ independent of $X_n$ gives $X_n+Y_n\sim N(0,2)$. The
+marginals are the same in both cases and the limits differ, which is precisely
+the point.
+\end{note}
+
+\begin{exa}
+Let $X_1,\dots,X_n$ be independent and identically distributed with mean $\mu$
+and finite variance $\sigma^{2}$, and let $S_n^{2}$ be the sample variance. Show
+that
+$$\frac{\sqrt{n}\left(\overline{X}-\mu\right)}{S_n}
+\underset{D}{\longrightarrow} Z\sim N(0,1).$$
+\end{exa}
+
+\begin{solution}
+By the central limit theorem,
+$$\frac{\sqrt{n}\left(\overline{X}-\mu\right)}{\sigma}
+\underset{D}{\longrightarrow} Z\sim N(0,1).$$
+By the weak law applied to $X_i^{2}$ and to $X_i$, together with the continuous
+mapping theorem, $S_n^{2}\underset{P}{\longrightarrow}\sigma^{2}$ and hence
+$\sigma/S_n \underset{P}{\longrightarrow} 1$, the square root and the reciprocal
+both being continuous at $\sigma^{2}>0$. Writing
+$$\frac{\sqrt{n}\left(\overline{X}-\mu\right)}{S_n}
+= \underbrace{\frac{\sqrt{n}\left(\overline{X}-\mu\right)}{\sigma}}_{\underset{D}{\longrightarrow}\,Z}
+\ \cdot\ \underbrace{\frac{\sigma}{S_n}}_{\underset{P}{\longrightarrow}\,1},$$
+part (b) of Slutsky's theorem gives the product converging in distribution to
+$1\cdot Z = Z$.
+\end{solution}
+
+\begin{remark}
+This example is the reason the theorem matters. The unknown $\sigma$ has been
+replaced by an estimate at no asymptotic cost, and that substitution is what
+makes large-sample confidence intervals and tests usable --- one does not need
+to know the variance to use the normal approximation, only to estimate it
+consistently. For finite $n$ under normality the exact distribution is $t$ with
+$n-1$ degrees of freedom; Slutsky's theorem says the difference washes out as
+$n$ grows, which is why the $t$ and normal tables agree in their lower rows.
+\end{remark}
 
 
 \subsection{Other Inequalities}
