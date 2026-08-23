@@ -763,6 +763,163 @@ expectations, and the result fails.
 Everything above extracts information \emph{from} a generating function. Two
 theorems in the other direction are what make the tool legitimate, and neither
 is usually stated explicitly --- although the proof of the central limit theorem
+
+\subsection{The Moment Generating Function}
+
+The probability generating function is confined to non-negative integer-valued
+variables, because $t^{X}$ only makes sense there. Substituting $e^{t}$ for $t$
+removes the restriction and gives a tool that works for any random variable,
+discrete or continuous.
+
+\begin{defn}
+The \emph{moment generating function} of a random variable $X$ is
+$$M_X(t) = E\left(e^{tX}\right),$$
+defined for every real $t$ for which the expectation is finite.
+\end{defn}
+
+\begin{note}
+Unlike the probability generating function, which always exists at least on
+$[-1,1]$, the moment generating function need not exist anywhere except at
+$t=0$, where it trivially equals one. The Cauchy distribution is the standard
+example: $E\left(e^{tX}\right)$ is infinite for every $t\neq0$. This is why the
+general theory is built on the \emph{characteristic} function
+$\varphi_X(t)=E\left(e^{itX}\right)$, which always exists.
+\end{note}
+
+\begin{result}
+$M_X(t) = G_X\!\left(e^{t}\right)$ and, conversely, $G_X(t) = M_X\left(\log t\right)$
+for $t>0$, whenever both are defined.
+\end{result}
+
+\begin{proof}
+$$M_X(t) = E\left(e^{tX}\right) = E\left[\left(e^{t}\right)^{X}\right] = G_X\!\left(e^{t}\right),$$
+and running the substitution the other way,
+$$G_X(t) = E\left(t^{X}\right) = E\left(e^{X\log t}\right) = M_X\left(\log t\right).$$
+\end{proof}
+
+\subhead{Why it generates moments}
+Expanding the exponential inside the expectation,
+$$M_X(t) = E\left(e^{tX}\right)
+= E\left(1 + tX + \frac{t^{2}X^{2}}{2!} + \frac{t^{3}X^{3}}{3!} + \cdots\right)
+= 1 + tE(X) + \frac{t^{2}}{2!}E\left(X^{2}\right) + \frac{t^{3}}{3!}E\left(X^{3}\right) + \cdots$$
+So $E\left(X^{k}\right)$ is the coefficient of $t^{k}/k!$, and equivalently
+$$E\left(X^{k}\right) = M_X^{(k)}(0),\qquad
+\Var(X) = M_X''(0) - \left[M_X'(0)\right]^{2}.$$
+
+\begin{note}
+The moments are read off at $t=0$ here, whereas the probability generating
+function gave the mean and variance at $t=1$. The two are consistent --- $t=1$
+for $G$ corresponds to $t=0$ for $M$ under $t\mapsto e^{t}$ --- but the
+substitution is worth keeping straight, because evaluating at the wrong point is
+a silent error that produces a plausible number.
+\end{note}
+
+\begin{exa}
+A continuous random variable $X$ has density $f(x) = \dfrac{x}{50}$ for
+$0<x<10$. Find $M_X(t)$.
+\end{exa}
+
+\begin{solution}
+$$M_X(t) = \int_0^{10} e^{tx}\,\frac{x}{50}\,dx = \frac{1}{50}\int_0^{10} x\,e^{tx}\,dx .$$
+Integrating by parts with $u=x$ and $dv=e^{tx}dx$,
+$$\int x\,e^{tx}\,dx = \frac{x\,e^{tx}}{t} - \frac{e^{tx}}{t^{2}},$$
+so evaluating between $0$ and $10$,
+$$\int_0^{10} x\,e^{tx}\,dx = \frac{10\,e^{10t}}{t} - \frac{e^{10t}}{t^{2}} + \frac{1}{t^{2}} .$$
+Dividing by $50$,
+$$M_X(t) = \frac{e^{10t}}{5t} - \frac{e^{10t}}{50t^{2}} + \frac{1}{50t^{2}},
+\qquad t\neq 0 .$$
+The value at $t=0$ is $M_X(0)=1$, which the expression does not show directly
+--- all three terms are singular there and the singularities cancel.
+\end{solution}
+
+\begin{exa}
+A continuous random variable $X$ has $M_X(t) = e^{5t + \frac12 t^{2}}$.
+Calculate the mean and variance of $X$.
+\end{exa}
+
+\begin{solution}
+$$M_X'(t) = (5+t)\,e^{5t+\frac12t^{2}},\qquad M_X'(0) = 5 ,$$
+$$M_X''(t) = e^{5t+\frac12t^{2}} + (5+t)^{2}e^{5t+\frac12t^{2}},\qquad
+M_X''(0) = 1 + 25 = 26 .$$
+Hence
+$$E(X) = 5,\qquad \Var(X) = 26 - 5^{2} = 1 .$$
+
+This is the moment generating function of the $N\left(5,1\right)$ distribution,
+which the general form $M_X(t)=e^{\mu t + \frac12\sigma^{2}t^{2}}$ makes plain,
+and by the uniqueness theorem $X$ is normal --- not merely a variable with the
+right first two moments.
+\end{solution}
+
+\begin{exa}
+A random variable $X$ has $M_X(t) = (1-2t)^{-1}$. Use a series expansion to
+obtain $E\left(X^{3}\right)$.
+\end{exa}
+
+\begin{solution}
+Expanding by the binomial series,
+$$(1-2t)^{-1} = 1 + 2t + 4t^{2} + 8t^{3} + \cdots = \sum_{k=0}^{\infty}(2t)^{k},$$
+valid for $\left|t\right|<\tfrac12$. The coefficient of $t^{3}$ is $8$, and the
+expansion above identifies that coefficient as $E\left(X^{3}\right)/3!$, so
+$$E\left(X^{3}\right) = 3!\times 8 = 48 .$$
+Here $M_X$ is the moment generating function of the exponential distribution
+with mean $2$, for which $E\left(X^{k}\right)=k!\,2^{k}$; at $k=3$ that is
+$6\times 8 = 48$, confirming the answer.
+\end{solution}
+
+\begin{result}
+If $Y = a+bX$ then $M_Y(t) = e^{at}M_X(bt)$. If $X_1,\dots,X_n$ are
+independent, then
+$$M_{X_1+\cdots+X_n}(t) = \prod_{i=1}^{n}M_{X_i}(t).$$
+\end{result}
+
+\begin{proof}
+$M_Y(t)=E\left(e^{t(a+bX)}\right)=e^{at}E\left(e^{(bt)X}\right)=e^{at}M_X(bt)$.
+For the sum, independence makes the expectation of the product the product of
+the expectations, exactly as for the probability generating function.
+\end{proof}
+
+\subsection{The Cumulant Generating Function}
+
+\begin{defn}
+The \emph{cumulant generating function} of $X$ is
+$$K_X(t) = \log M_X(t),$$
+and the \emph{cumulants} $\kappa_1,\kappa_2,\dots$ are its coefficients:
+$$K_X(t) = \sum_{k=1}^{\infty}\kappa_k\,\frac{t^{k}}{k!} .$$
+\end{defn}
+
+\begin{result}
+$\kappa_1 = E(X) = K_X'(0)$ and $\kappa_2 = \Var(X) = K_X''(0)$.
+\end{result}
+
+\begin{proof}
+Differentiating $K_X = \log M_X$,
+$$K_X'(t) = \frac{M_X'(t)}{M_X(t)},\qquad
+K_X''(t) = \frac{M_X''(t)M_X(t) - \left[M_X'(t)\right]^{2}}{\left[M_X(t)\right]^{2}} .$$
+Since $M_X(0)=1$, $M_X'(0)=E(X)$ and $M_X''(0)=E\left(X^{2}\right)$,
+$$K_X'(0) = E(X),\qquad
+K_X''(0) = E\left(X^{2}\right) - \left[E(X)\right]^{2} = \Var(X).$$
+\end{proof}
+
+\begin{remark}
+The point of taking a logarithm is what it does to sums. For independent $X$ and
+$Y$ the moment generating functions multiply, so the cumulant generating
+functions \emph{add}:
+$$K_{X+Y}(t) = \log\left[M_X(t)M_Y(t)\right] = K_X(t) + K_Y(t).$$
+Every cumulant is therefore additive over independent summands. For $\kappa_1$
+and $\kappa_2$ this is the familiar statement that means and variances add; the
+content of the definition is that the same holds at every order, which is not
+true of the ordinary moments --- $E\left[(X+Y)^{3}\right]$ is not
+$E\left(X^{3}\right)+E\left(Y^{3}\right)$.
+
+The third and fourth cumulants give the standard shape measures,
+$$\text{skewness} = \frac{\kappa_3}{\kappa_2^{3/2}},\qquad
+\text{excess kurtosis} = \frac{\kappa_4}{\kappa_2^{2}} .$$
+For the normal distribution $K_X(t)=\mu t + \frac12\sigma^{2}t^{2}$ exactly, so
+every cumulant beyond the second is zero --- which is the cleanest statement of
+what makes the normal distribution special, and why both shape measures are
+calibrated to vanish there.
+\end{remark}
+
 later in these notes depends on the second of them entirely.
 
 \begin{thm}[Uniqueness]
