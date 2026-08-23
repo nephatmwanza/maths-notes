@@ -557,6 +557,60 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-23 (evening) — Real Analysis published; Time Series merge planned
+
+Real Analysis live: **19 available, 1 in preparation**. Topology live earlier the
+same day.
+
+#### Where the six courses stand
+| Course | Converted | Proved | Problems | Live |
+|---|---|---|---|---|
+| Topology | yes | 42/42 | 6 | **yes** |
+| Real Analysis | yes | 98/98 | 6 | **yes** |
+| Abstract Algebra | yes | 62/62 | 6 | building |
+| Stochastic Processes | yes | 9/9 | 4 | queued |
+| Time Series | yes | — | — | merge pending |
+
+#### Time Series is a MERGE, not a conversion
+Two sources in `TIME SERIES ANALYSIS/`:
+- **Local**, `Time Series Analysi.tex`, 896 lines, Feb 2020. Already converted:
+  types and objectives, descriptive techniques, stationarity, transformation,
+  autocorrelation, stochastic processes, random walk, invertibility, AR, ARMA,
+  ARIMA, estimation, SARIMA, forecasting. 26 pages.
+- **`notesht08.pdf`** — Prof. Gesine Reinert, Oxford, Hilary Term 2008,
+  **161 pages**. Far broader and more rigorous.
+
+**What only the Oxford notes have:** the partial autocorrelation function; tests
+on sample autocorrelations; the whole frequency domain — spectrum, periodogram,
+smoothing, filters; state space models and the **Kalman filter**; and nonlinear
+models — **ARCH and stochastic volatility**. None of that exists in the local
+notes, and the last three are what a modern time series course is largely for.
+
+**What only the local notes have:** the worked SARIMA and Box–Jenkins forecasting
+examples, which are the applied end.
+
+Suggested merged spine: definitions and stationarity → linear processes, AR, MA,
+ARMA, backshift → differencing and ARIMA → ACF and PACF with sample tests →
+Box–Jenkins identification, estimation, verification → frequency domain →
+state space and Kalman → ARCH and stochastic volatility.
+
+#### A converter bug of mine, and the rule it gives
+The Time Series source writes headings in capitals for major topics and title
+case beneath, so I converted on case. That worked for 29 headings and **wrongly
+promoted six `\textbf{Example:}` and `\textbf{Solution:}` markers into
+subsections** — they are title case too. They are now environments again.
+
+The rule: when converting bold runs by case or position, **exclude the marker
+vocabulary first** (Example, Solution, Proof, Note, Remark, Definition,
+Theorem…), then convert what is left. Deciding level by appearance alone will
+always catch the markers.
+
+#### Operator names: four hand-written sources out of four
+grad/div/curl in Multivariate Calculus, var/cov/bias/MSE in Statistical
+Inference, var in Probability Theory, Var/Cov/Corr here. **Assume it is present
+and grep for it before building**, rather than waiting for the rendering to look
+wrong.
+
 ### 2026-08-23 (later) — Topology published; Real Analysis and Abstract Algebra done
 
 Topology is live: **18 available, 2 in preparation**.
