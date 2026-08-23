@@ -576,6 +576,58 @@ $$X_i\thicksim g(1,\lambda)$$\\ $$Y_n=X_1+X_2+..........+X_n\thicksim g(n,\lambd
 
 \pagebreak
 
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Let $X\sim$ UNIF$(0,1)$ and $Y = -2\log X$. Find the density of $Y$ and name the
+distribution.
+\end{problem}
+\begin{solution}
+The map $y = -2\log x$ is decreasing on $(0,1)$ with inverse $x = e^{-y/2}$ and
+$$\left|\frac{dx}{dy}\right| = \frac12 e^{-y/2}.$$
+Since $f_X(x)=1$ on $(0,1)$ and $x\in(0,1)$ corresponds to $y>0$,
+$$f_Y(y) = 1\cdot\frac12 e^{-y/2} = \frac12 e^{-y/2},\qquad y>0 ,$$
+which is EXP$\left(\tfrac12\right)$, equivalently $\chi^{2}_{(2)}$. This is the
+step behind the Box--Muller construction of the simulation chapter.
+\end{solution}
+
+\begin{problem}
+Let $X$ have density $f_X(x) = 3x^{2}$ on $(0,1)$ and let $Y = X^{3}$. Find the
+density of $Y$.
+\end{problem}
+\begin{solution}
+The map is increasing with $x = y^{1/3}$ and
+$\dfrac{dx}{dy} = \tfrac13 y^{-2/3}$. Hence for $0<y<1$,
+$$f_Y(y) = 3\left(y^{1/3}\right)^{2}\cdot\frac13 y^{-2/3}
+= 3y^{2/3}\cdot\frac13 y^{-2/3} = 1 ,$$
+so $Y\sim$ UNIF$(0,1)$. This is the probability integral transform in action:
+$F_X(x) = x^{3}$, so $Y = F_X(X)$, and the answer had to be uniform.
+\end{solution}
+
+\begin{problem}
+Let $X_1,\dots,X_n$ be independent UNIF$(0,\theta)$ variables. Find the density
+of $X_{(n)}$ and of the range $R = X_{(n)}-X_{(1)}$.
+\end{problem}
+\begin{solution}
+\subhead{The maximum}
+$P\left(X_{(n)}\leq t\right) = \left(t/\theta\right)^{n}$ for $0<t<\theta$, so
+differentiating,
+$$f_{X_{(n)}}(t) = \frac{n\,t^{n-1}}{\theta^{n}},\qquad 0<t<\theta .$$
+
+\subhead{The range}
+The joint density of the extremes is
+$$f(u,v) = n(n-1)\left[F(v)-F(u)\right]^{n-2}f(u)f(v)
+= \frac{n(n-1)}{\theta^{n}}\left(v-u\right)^{n-2},\qquad 0<u<v<\theta .$$
+Putting $v = u+r$ and integrating out $u$ over $0<u<\theta-r$,
+$$f_R(r) = \frac{n(n-1)}{\theta^{n}}\,r^{n-2}\int_0^{\theta-r}du
+= \frac{n(n-1)}{\theta^{n}}\,r^{n-2}\left(\theta-r\right),\qquad 0<r<\theta .$$
+As a check, $E(R) = \theta(n-1)/(n+1)$, which is the value quoted in the
+completeness discussion of a related model, and it tends to $\theta$ as $n$
+grows --- the sample eventually spans the whole interval.
+\end{solution}
+
+
 \section{GENERATING FUNCTIONS}
 
 A generating function packs a whole distribution into a single function of an
@@ -1847,6 +1899,43 @@ M_Y(t) &=E\Big(e^{ty}\Big)
 
 \pagebreak
 
+
+\subsection{Practice Problems}
+
+\begin{problem}
+A fair die is rolled. If the result is $N$, a fair coin is then tossed $N$
+times. Let $H$ be the number of heads. Find $E(H)$ and $\Var(H)$.
+\end{problem}
+\begin{solution}
+Given $N=n$, $H\sim$ BIN$\left(n,\tfrac12\right)$, so
+$$E\left(H\mid N\right) = \frac{N}{2},\qquad
+\Var\left(H\mid N\right) = \frac{N}{4}.$$
+For a fair die $E(N) = 3.5$ and $\Var(N) = \tfrac{35}{12}$. Hence
+$$E(H) = E\left[\frac{N}{2}\right] = 1.75 ,$$
+and by the conditional variance formula,
+$$\Var(H) = E\left[\frac{N}{4}\right] + \Var\left[\frac{N}{2}\right]
+= \frac{3.5}{4} + \frac{1}{4}\cdot\frac{35}{12}
+= 0.875 + 0.7292 = 1.6042 .$$
+Both terms are needed: the first is the coin's randomness, the second the die's.
+\end{solution}
+
+\begin{problem}
+Let $X$ and $Y$ have joint density $f(x,y) = 2$ on $0<x<y<1$. Find
+$E\left(X\mid Y=y\right)$ and verify that $E\left[E\left(X\mid Y\right)\right] = E(X)$.
+\end{problem}
+\begin{solution}
+The marginal of $Y$ is $f_Y(y) = \int_0^{y}2\,dx = 2y$ on $(0,1)$, so the
+conditional density is
+$$f_{X\mid Y}(x\mid y) = \frac{2}{2y} = \frac{1}{y},\qquad 0<x<y,$$
+which is UNIF$(0,y)$. Hence $E\left(X\mid Y=y\right) = y/2$.
+
+Now $E(Y) = \int_0^{1}y\cdot 2y\,dy = \tfrac23$, so
+$$E\left[E\left(X\mid Y\right)\right] = E\left(\frac{Y}{2}\right) = \frac13 .$$
+Directly, $f_X(x) = \int_x^{1}2\,dy = 2(1-x)$, giving
+$E(X) = \int_0^{1}2x(1-x)\,dx = 1 - \tfrac23 = \tfrac13$. The two agree.
+\end{solution}
+
+
 \section{COMPOUND DISTRIBUTIONS}
 
 A compound distribution arises when a random number of random quantities are
@@ -2842,6 +2931,30 @@ E\Big(g(X)\Big) &\geq g(\mu)+0\\\\
 
 \pagebreak
 \end{proof}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Let $X_1,\dots,X_n$ be independent with mean $\mu$ and variance $\sigma^{2}$.
+Use Chebyshev's inequality to show that $\overline{X}\underset{P}{\longrightarrow}\mu$,
+and find how large $n$ must be so that
+$P\left(\left|\overline{X}-\mu\right|\geq 0.1\sigma\right)\leq 0.05$.
+\end{problem}
+\begin{solution}
+Since $\Var\left(\overline{X}\right) = \sigma^{2}/n$, Chebyshev gives
+$$P\left(\left|\overline{X}-\mu\right|\geq\varepsilon\right)
+\leq \frac{\sigma^{2}}{n\varepsilon^{2}} \longrightarrow 0 ,$$
+which is the weak law. Setting $\varepsilon = 0.1\sigma$,
+$$\frac{\sigma^{2}}{n(0.1\sigma)^{2}} = \frac{100}{n} \leq 0.05
+\quad\Longrightarrow\quad n \geq 2000 .$$
+
+Chebyshev is deliberately crude. The central limit theorem gives
+$1.96\sigma/\sqrt{n} = 0.1\sigma$, that is $n\approx 385$ --- about a fifth as
+many. The bound holds for every distribution with finite variance, which is what
+it is paying for.
+\end{solution}
+
+
 \section{ADDITIONAL TOPICS IN PROBABILITY}
 \vspace{0.5cm}
 \subsection{Stochastic Processes}
