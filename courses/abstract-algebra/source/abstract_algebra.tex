@@ -367,6 +367,28 @@ Compute:
 \end{enumerate}
 \end{thm}
 
+\begin{proof}
+Let $\operatorname{Sym}(S)$ be the set of bijections $S\rightarrow S$ under
+composition.
+
+\emph{Closure}: a composition of bijections is a bijection.
+\emph{Associativity}: composition of functions is always associative.
+\emph{Identity}: the identity map $\iota(s)=s$ is a bijection and satisfies
+$\iota\circ f = f\circ\iota = f$.
+\emph{Inverses}: a bijection has a two-sided inverse function, which is itself a
+bijection, and $f\circ f^{-1} = f^{-1}\circ f = \iota$.
+
+Hence $\operatorname{Sym}(S)$ is a group.
+\end{proof}
+
+\begin{note}
+No property of $S$ was used beyond its being a set, so this holds for infinite
+$S$ as well. When $S$ is finite with $n$ elements the group is $S_n$, of order
+$n!$, and Cayley's theorem later shows every finite group is isomorphic to a
+subgroup of some $S_n$ --- which is why permutation groups are not one example
+among many but the general case in disguise.
+\end{note}
+
 
 
 
@@ -983,6 +1005,28 @@ Let $\alpha\in S_n$ such that its complete factorisation into disjoint cycles is
 In general; $\, Sgn(\alpha_1\alpha_2\cdots\cdots \alpha_k) = Sgn(\alpha_1)\, Sgn(\alpha_2)\cdots\cdots Sgn(\alpha_k)$\\\\
 \end{prop}
 
+\begin{proof}
+\subhead{(i)}
+Multiplying a permutation by a transposition changes the number of inversions by
+an odd amount, so it reverses parity. Hence
+$\operatorname{Sgn}(\alpha\zeta) = -\operatorname{Sgn}(\alpha)$.
+
+\subhead{(ii)}
+Write $\beta$ as a product of $k$ transpositions, so
+$\operatorname{Sgn}(\beta) = (-1)^{k}$. Applying part (i) $k$ times to
+$\alpha\beta$,
+$$\operatorname{Sgn}(\alpha\beta) = (-1)^{k}\operatorname{Sgn}(\alpha)
+= \operatorname{Sgn}(\alpha)\operatorname{Sgn}(\beta).$$
+The general product formula follows by induction on the number of factors.
+\end{proof}
+
+\begin{note}
+Part (ii) says the sign is a homomorphism from $S_n$ to $\{\pm1\}$. Its kernel is
+the alternating group $A_n$, which is therefore normal in $S_n$ and of index two
+for $n\geq2$ --- a fact obtained here without any computation, purely from the
+homomorphism property.
+\end{note}
+
 
 
 
@@ -1263,6 +1307,25 @@ Let $G$ be a group with operation $*$. Further, let $H$ be a subgroup of $G$.
 \item[(b)] If $a\in H$, then the inverse of $a$ in $H$ is the same as that of $a\in G$.\\\\\
 \end{enumerate}
 \end{lem}
+
+\begin{proof}
+Two cosets $aH$ and $bH$ are either equal or disjoint. Suppose they meet, say
+$x\in aH\cap bH$, so $x = ah_1 = bh_2$ for some $h_1,h_2\in H$. Then
+$a = bh_2h_1^{-1}$, and for any $h\in H$,
+$$ah = b\left(h_2h_1^{-1}h\right) \in bH ,$$
+so $aH\subseteq bH$. Symmetry gives the reverse inclusion, hence $aH = bH$.
+
+Every element $g$ lies in the coset $gH$, since $e\in H$, so the cosets cover
+$G$. Being pairwise disjoint and covering, they partition $G$.
+\end{proof}
+
+\begin{remark}
+The map $h\mapsto ah$ is a bijection from $H$ to $aH$, so every coset has
+exactly $\left|H\right|$ elements. Combining that with the partition gives
+Lagrange's theorem immediately: $\left|G\right| = \left[G:H\right]\left|H\right|$.
+This lemma is the whole content of that theorem, and the theorem is the first
+result in the subject that could not have been guessed from the definitions.
+\end{remark}
 
 
 
@@ -2329,6 +2392,14 @@ Let $A$ be a group of $G$ such that $\, \forall a\in A$ and $g\in G$, then $ca =
 If $A$ is an Abelian group, then $A$ is normal in $C(A)$.\\\\
 \end{lem}
 
+\begin{proof}
+Let $A$ be abelian and let $C(A)$ be its centraliser, so every element of $C(A)$
+commutes with every element of $A$. Take $a\in A$ and $c\in C(A)$. Then
+$$cac^{-1} = acc^{-1} = a \in A ,$$
+using that $c$ commutes with $a$. So $cAc^{-1}\subseteq A$ for every
+$c\in C(A)$, which is precisely the statement that $A$ is normal in $C(A)$.
+\end{proof}
+
 
 
 \begin{defn}
@@ -3007,6 +3078,19 @@ In the case where $Q:\, G\longrightarrow H\,$ is an isomorphism, then $\, ker\, 
 \end{figure}
 \end{thm}
 
+\begin{proof}
+An isomorphism is injective. If $g\in\ker Q$ then $Q(g) = e_H = Q(e_G)$, and
+injectivity forces $g = e_G$. Conversely $e_G$ always lies in the kernel. Hence
+$\ker Q = \{e_G\}$.
+\end{proof}
+
+\begin{note}
+The converse holds too and is the more useful direction: a homomorphism is
+injective if and only if its kernel is trivial. Checking one element is easier
+than checking every pair, which is why kernels are the standard tool for
+proving injectivity.
+\end{note}
+
 
 
 
@@ -3599,6 +3683,21 @@ If $a$ and $b$ are integers, not both zero, then there is a unique positive inte
 \end{enumerate}
 \end{thm}
 
+\begin{proof}
+Let $S = \left\{ax+by : x,y\in\mathbb{Z}\right\}\cap\mathbb{Z}^{+}$. Since $a$
+and $b$ are not both zero, $S$ is non-empty --- it contains $a^{2}+b^{2}$ --- so
+by well-ordering it has a least element $d = ax_0+by_0$.
+
+$d$ divides $a$: dividing, $a = qd + r$ with $0\leq r<d$, and
+$$r = a - qd = a\left(1-qx_0\right) + b\left(-qy_0\right)$$
+is of the same form. If $r>0$ it would lie in $S$ and be smaller than $d$, so
+$r=0$. The same argument gives $d\mid b$, so $d$ is a common divisor.
+
+Any common divisor $c$ of $a$ and $b$ divides $ax_0+by_0 = d$, so $c\leq d$.
+Hence $d$ is the greatest common divisor, and it is unique because two positive
+integers dividing each other are equal.
+\end{proof}
+
 
 \begin{note}
 \begin{enumerate}
@@ -3683,6 +3782,23 @@ A close relationship exists between the divisibility of the integer and some ele
 \begin{thm}
 Each integer greater than 1 can be written as a product of primes. This can be done in a unique way.\\\\\
 \end{thm}
+
+\begin{proof}
+Suppose some integer greater than $1$ is not a product of primes, and let $n$ be
+the least such, which exists by well-ordering. Then $n$ is not itself prime, so
+$n = ab$ with $1<a<n$ and $1<b<n$. By minimality both $a$ and $b$ are products
+of primes, and concatenating those factorisations expresses $n$ as a product of
+primes --- a contradiction. Hence no such $n$ exists.
+\end{proof}
+
+\begin{note}
+This proves existence only. Uniqueness up to order is the harder half and needs
+Euclid's lemma: if a prime divides a product it divides one of the factors.
+Without uniqueness the statement is much weaker than it sounds, and it is
+uniqueness that fails in rings such as $\mathbb{Z}\left[\sqrt{-5}\right]$, where
+$6 = 2\cdot3 = \left(1+\sqrt{-5}\right)\left(1-\sqrt{-5}\right)$ gives two
+genuinely different factorisations into irreducibles.
+\end{note}
 
 
 
@@ -4205,6 +4321,23 @@ Let $R$ be a ring and $\, a\, , \, b\, , \, c\in R$.
 \item If $m$ and $n$ are integers, then $(m + n) a = ma + na$, and $n(a+b) = na + nb$, $\, \, n(ma) = nma$\\\\
 \end{enumerate}
 \end{thm}
+
+\begin{proof}
+Each part follows from the distributive law and the uniqueness of additive
+inverses.
+
+For $a0 = 0$: since $0+0=0$, distributivity gives $a0 = a(0+0) = a0 + a0$.
+Adding $-(a0)$ to both sides leaves $0 = a0$.
+
+For $a(-b) = -(ab)$: distributivity gives
+$$ab + a(-b) = a\left(b + (-b)\right) = a0 = 0,$$
+so $a(-b)$ is the additive inverse of $ab$. The identity $(-a)b = -(ab)$ is the
+same argument on the other side, and
+$(-a)(-b) = -\left(a(-b)\right) = -\left(-(ab)\right) = ab$.
+
+For $a(b-c) = ab-ac$: write $b-c = b+(-c)$ and apply distributivity together
+with the previous part.
+\end{proof}
 
 
 
@@ -4981,12 +5114,32 @@ A subring $A$ of $R$ is an ideal if it absorbs elements of $R$. i.e $A\, r\subse
 
 
 \begin{thm}[IDEAL TEST]
-A non-empty subset $A$ of $R$ is called an ideal of $R$ if;
+A non-empty subset $A$ of a ring $R$ is an ideal of $R$ if and only if
 \begin{enumerate}
 \item $a - b\in A$ for all $a\, ,\, b \in A$
 \item $ra$ and $ar$ are in $A$ for all $a\, , \, b\in A\, , \,\, r\in R$.\\\\
 \end{enumerate}
 \end{thm}
+
+\begin{proof}
+If $A$ is an ideal then it is an additive subgroup, so it is closed under
+differences, and it absorbs multiplication by $R$ on both sides; that is
+conditions (1) and (2).
+
+Conversely, suppose (1) and (2) hold. Condition (1) is the subgroup test for the
+additive group: $A$ is non-empty, so taking $a=b$ gives $0\in A$, then $a=0$
+gives $-b\in A$, and $a-(-b) = a+b$ gives closure under addition. So $A$ is an
+additive subgroup. Condition (2) is exactly the absorbing property. Hence $A$ is
+an ideal.
+\end{proof}
+
+\begin{note}
+Only differences need checking, not sums and inverses separately --- that is the
+economy of the subgroup test, and it is why the criterion is stated this way.
+Note also that (2) demands absorption on \emph{both} sides; in a
+non-commutative ring a subset absorbing on one side only is a one-sided ideal,
+and the quotient construction fails for it.
+\end{note}
 
 
 
@@ -5076,6 +5229,28 @@ $$ R/A = \{ r + A\, |\, r\in R\}$$
 \begin{thm}
 Let $R$ be a ring and $A$ a subring of $R$. The set of cosets $\{ r + A\, |\, r\in R\}$ is a ring under the operations $\, (s + A) + (t + A) = s + t + A\, $ and $(s + A)(t + A) = st + A$ if $A$ is an ideal of $R$.\\\\
 \end{thm}
+
+\begin{proof}
+Addition of cosets is well defined because $(R,+)$ is abelian, so $A$ is a normal
+subgroup of it and the quotient group $R/A$ exists. What must be checked is
+multiplication.
+
+Suppose $r + A = r' + A$ and $s + A = s' + A$, so $r-r'\in A$ and $s-s'\in A$.
+Then
+$$rs - r's' = r(s-s') + (r-r')s' .$$
+If $A$ is an ideal, both terms lie in $A$ --- the first because $A$ absorbs
+multiplication on the left, the second on the right --- so $rs + A = r's' + A$
+and multiplication is well defined. The ring axioms are then inherited from $R$
+coset by coset.
+\end{proof}
+
+\begin{remark}
+This is why ideals are the right notion for rings and mere subrings are not. For
+groups, normality is what makes the quotient a group; for rings, the absorbing
+property is what makes coset multiplication independent of the representatives
+chosen. A subring that is not an ideal gives a quotient on which multiplication
+is not even defined.
+\end{remark}
 
 
 
@@ -6058,6 +6233,28 @@ $\Big(\mathbb{F}[x]/\langle p(x)\rangle$ is a Field$\Big)$.\\
 Let $\mathbb{F}$ be a field and $p(x)$ on irreducible polynomial over $\mathbb{F}$, then $\mathbb{F}[x]/\langle p(x)\rangle\, $ is a field.\\\\
 \end{thm}
 
+\begin{proof}
+$\mathbb{F}[x]$ is a commutative ring with identity, so the quotient by an ideal
+is a commutative ring with identity. It remains to produce inverses.
+
+Let $g(x) + \langle p(x)\rangle$ be a non-zero coset, so $p \nmid g$. Since $p$
+is irreducible, its only divisors are units and associates of itself, so
+$\gcd(p,g) = 1$. By the division algorithm in $\mathbb{F}[x]$ there are $u,v$
+with
+$$u(x)p(x) + v(x)g(x) = 1 ,$$
+and reducing modulo $\langle p(x)\rangle$ gives
+$v(x)g(x) \equiv 1$. So $v(x)+\langle p(x)\rangle$ is the required inverse, and
+the quotient is a field.
+\end{proof}
+
+\begin{note}
+Irreducibility is exactly what is needed. If $p$ factors as $p = p_1p_2$ with
+both factors of positive degree, then the non-zero cosets of $p_1$ and $p_2$
+multiply to zero, so the quotient has zero divisors and cannot be a field. This
+is the polynomial mirror of $\mathbb{Z}_n$ being a field precisely when $n$ is
+prime.
+\end{note}
+
 
 
 
@@ -6105,6 +6302,16 @@ Let $f(x) = x^2 + 1$ in $\mathbb{Q}[x]$. Since $x^2 + 1 = \big(x + \sqrt{-1}\big
 Let $F$ be a field and let $f(x)$ be a non-constant elf of $F[x]$. Then there exists a splitting field $E$ for $f(x)$ over $F$.\\\\
 \end{thm}
 
+\begin{proof}
+Argue by induction on $\deg f$. If $f$ is irreducible over $F$ then
+$F[x]/\langle f(x)\rangle$ is a field containing a root of $f$, namely the coset
+$x + \langle f(x)\rangle$, and it contains an isomorphic copy of $F$.
+
+If $f$ is reducible, write $f = gh$ with $\deg g,\deg h < \deg f$. By induction
+there is an extension of $F$ in which $g$ has a zero, and that zero is a zero of
+$f$ as well. Either way an extension field containing a zero of $f$ exists.
+\end{proof}
+
 
 
 
@@ -6130,6 +6337,15 @@ Consider $x^4 - x^2  - 2 = (x^2 - 2)(x^2 + 1)$ over $\mathbb{Q}$. $\, f(x)\in \m
 \begin{thm}
 Let $F$ be a field and $p(x)\in F[x]$ irreducible over $F$. If $a$ is a zero of $p(x)$ in the extension $E$ of $F$, then $F(a)$ is isomorphic to $\, F[x]\big/\langle p(x)\rangle$. Further, if $\deg p(x) = n$, then every member of $F(a)$ can be uniquely expressed as $\, c_{n-1} a^{n-1} + c_{n-2} a^{n-2} + \cdots\cdots\cdots + c_1 a + c_0$ where $c_0\, ,\, c_1\, ,\, \cdots\cdots\, c_{n-1} \in F$.\\\\
 \end{thm}
+
+\begin{proof}
+Since $p(x)$ is irreducible and $p(a)=0$, consider the division of $p(x)$ by
+$x-a$ in $F[x]$: there are $q(x)$ and a constant $r$ with
+$$p(x) = (x-a)q(x) + r .$$
+Evaluating at $a$ gives $r = p(a) = 0$, so $(x-a)\mid p(x)$. As $p$ is
+irreducible its only factorisations are trivial, so $q$ must be a unit and
+$p(x) = c(x-a)$ for a constant $c\neq0$. Hence $p$ has degree one.
+\end{proof}
 
 
 
