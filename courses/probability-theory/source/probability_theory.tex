@@ -962,6 +962,79 @@ calculation would say nothing at all about the distributions themselves.
 
 \pagebreak
 
+
+\subsection{Practice Problems}
+
+\begin{problem}
+A discrete random variable has $P(X=x) = \dfrac{1}{2^{x}}$ for $x=1,2,3,\dots$
+Find $G_X(t)$, state where it converges, and use it to obtain $E(X)$ and
+$\Var(X)$.
+\end{problem}
+\begin{solution}
+$$G_X(t) = \sum_{x=1}^{\infty} t^{x}\,2^{-x}
+= \sum_{x=1}^{\infty}\left(\frac{t}{2}\right)^{x}
+= \frac{t/2}{1-t/2} = \frac{t}{2-t},$$
+a geometric series converging for $\left|t/2\right|<1$, that is
+$\left|t\right|<2$. Check: $G_X(1) = 1/(2-1) = 1$.
+
+Differentiating by the quotient rule,
+$$G_X'(t) = \frac{(2-t) + t}{(2-t)^{2}} = \frac{2}{(2-t)^{2}},
+\qquad G_X'(1) = 2 ,$$
+$$G_X''(t) = \frac{4}{(2-t)^{3}},\qquad G_X''(1) = 4 .$$
+Hence $E(X) = 2$ and
+$$\Var(X) = G_X''(1) + G_X'(1) - \left[G_X'(1)\right]^{2} = 4 + 2 - 4 = 2 .$$
+This is the geometric distribution with success probability $\tfrac12$ counted
+from one, for which the mean is $1/p = 2$ and the variance
+$(1-p)/p^{2} = 2$ --- agreeing with both.
+\end{solution}
+
+\begin{problem}
+Show that the probability generating function of the BIN$(n,\theta)$
+distribution is $\left(1-\theta+\theta t\right)^{n}$, and deduce that the sum of
+independent BIN$(m,\theta)$ and BIN$(n,\theta)$ variables is BIN$(m+n,\theta)$.
+Explain why the argument fails if the success probabilities differ.
+\end{problem}
+\begin{solution}
+$$G_X(t) = \sum_{x=0}^{n}t^{x}\binom{n}{x}\theta^{x}(1-\theta)^{n-x}
+= \sum_{x=0}^{n}\binom{n}{x}\left(\theta t\right)^{x}(1-\theta)^{n-x}
+= \left(1-\theta+\theta t\right)^{n}$$
+by the binomial theorem. For independent $X\sim$ BIN$(m,\theta)$ and
+$Y\sim$ BIN$(n,\theta)$,
+$$G_{X+Y}(t) = \left(1-\theta+\theta t\right)^{m}\left(1-\theta+\theta t\right)^{n}
+= \left(1-\theta+\theta t\right)^{m+n},$$
+which is the generating function of BIN$(m+n,\theta)$, so by uniqueness that is
+the distribution.
+
+If the success probabilities differ the product is
+$\left(1-\theta_1+\theta_1t\right)^{m}\left(1-\theta_2+\theta_2t\right)^{n}$,
+which is not of the form $\left(1-\theta+\theta t\right)^{k}$ for any single
+$\theta$: the two bases are different polynomials in $t$ and cannot be combined.
+The sum is then not binomial at all.
+\end{solution}
+
+\begin{problem}
+A random variable has moment generating function
+$M_X(t) = \left(1-3t\right)^{-2}$ for $t<\tfrac13$. Identify the distribution
+and find its mean, variance and third cumulant.
+\end{problem}
+\begin{solution}
+The GAM$(\alpha,\beta)$ distribution with shape $\alpha$ and scale $\beta$ has
+$M(t) = (1-\beta t)^{-\alpha}$, so matching gives $\alpha=2$ and $\beta=3$: by
+uniqueness $X\sim$ GAM$(2,3)$.
+
+Using the cumulant generating function is quicker than differentiating $M$
+twice:
+$$K_X(t) = \log M_X(t) = -2\log(1-3t),$$
+$$K_X'(t) = \frac{6}{1-3t},\qquad
+K_X''(t) = \frac{18}{(1-3t)^{2}},\qquad
+K_X'''(t) = \frac{108}{(1-3t)^{3}} .$$
+Evaluating at $t=0$,
+$$\kappa_1 = E(X) = 6,\qquad \kappa_2 = \Var(X) = 18,\qquad \kappa_3 = 108 .$$
+These agree with $\alpha\beta = 6$ and $\alpha\beta^{2} = 18$ for the gamma, and
+the third cumulant $2\alpha\beta^{3} = 108$.
+\end{solution}
+
+
 \section{CONVOLUTIONS}
 
 The distribution of a sum of independent random variables is called their
@@ -1137,6 +1210,28 @@ quote these closure results without their conditions.
 
 
 \pagebreak
+
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Let $X$ and $Y$ be independent, each geometric with $P(X=x) = pq^{x}$ for
+$x=0,1,2,\dots$ where $q=1-p$. Use convolution to find the distribution of
+$Z=X+Y$, and confirm the answer with generating functions.
+\end{problem}
+\begin{solution}
+\subhead{By convolution}
+$$P(Z=z) = \sum_{x=0}^{z} pq^{x}\cdot pq^{z-x}
+= p^{2}q^{z}\sum_{x=0}^{z}1 = (z+1)\,p^{2}q^{z},\qquad z=0,1,2,\dots$$
+the summand being free of $x$, so the sum simply counts its $z+1$ terms. This is
+the negative binomial with $k=2$.
+
+\subhead{By generating functions}
+$$G_X(t) = \sum_{x=0}^{\infty}t^{x}pq^{x} = \frac{p}{1-qt},$$
+so $G_Z(t) = p^{2}/(1-qt)^{2}$, which is the generating function of NBIN$(2,p)$.
+The two agree, and the second route needed no summation.
+\end{solution}
+
 
 \section{CONDITIONAL EXPECTATION}
 \vspace{0.5cm}
@@ -1900,6 +1995,34 @@ deviation by more than a fifth.
 
 \pagebreak
 
+
+\subsection{Practice Problems}
+
+\begin{problem}
+The number of claims $N$ in a month is Poisson with mean $4$, and claim sizes
+are independent of $N$ and of each other, each exponential with mean $500$.
+Find the mean and variance of the monthly total, and state what proportion of
+the variance is due to uncertainty in the number of claims.
+\end{problem}
+\begin{solution}
+For the exponential with mean $\mu=500$, $\sigma=500$, so
+$E\left(X^{2}\right) = \sigma^{2}+\mu^{2} = 500{,}000$.
+
+By the compound Poisson results,
+$$E(S) = \lambda\mu = 4(500) = 2{,}000 ,$$
+$$\Var(S) = \lambda E\left(X^{2}\right) = 4(500{,}000) = 2{,}000{,}000 ,$$
+so the standard deviation is $\$1{,}414$.
+
+Splitting the general formula,
+$$\Var(S) = \underbrace{\lambda\sigma^{2}}_{1{,}000{,}000}
++ \underbrace{\Var(N)\mu^{2}}_{1{,}000{,}000},$$
+so exactly half the variance comes from not knowing how many claims there will
+be. The two halves are equal here because the exponential has
+$\sigma=\mu$; for a less variable claim size the count term would dominate
+still further.
+\end{solution}
+
+
 \section{MODES OF STOCHASTIC CONVERGENCE}
 
 A sequence of random variables can approach a limit in more than one sense, and
@@ -2067,6 +2190,57 @@ statement about a constant limit, checkable by whichever of the two is easier.
 
 
 \pagebreak
+
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Let $X_n$ take the value $1$ with probability $\dfrac1n$ and $0$ otherwise.
+Determine which of the four modes of convergence hold, with reasons.
+\end{problem}
+\begin{solution}
+\subhead{In probability}
+For $0<\varepsilon<1$, $P\left(\left|X_n\right|\geq\varepsilon\right)
+= \tfrac1n\rightarrow0$, so $X_n\underset{P}{\longrightarrow}0$.
+
+\subhead{In quadratic mean}
+$E\left(X_n^{2}\right) = 1^{2}\cdot\tfrac1n = \tfrac1n\rightarrow0$, so
+$X_n\underset{QM}{\longrightarrow}0$ as well. Note the contrast with the example
+in the text, where the value was $n$ rather than $1$: there the second moment
+diverged. Boundedness is what makes the difference.
+
+\subhead{In distribution}
+It follows from convergence in probability.
+
+\subhead{Almost surely}
+This depends on information not given. If the $X_n$ are independent then
+$\sum_n P(X_n=1) = \sum_n \tfrac1n$ diverges, so by the second Borel--Cantelli
+lemma $X_n=1$ infinitely often with probability one and there is \emph{no}
+almost sure convergence. If instead $X_n = I\left(U<\tfrac1n\right)$ for a
+single uniform $U$, the sequence is eventually zero for every $U>0$ and
+converges almost surely.
+
+The moral is that the first three modes are determined by the marginal
+distributions alone, while almost sure convergence is not --- it is a property
+of the joint behaviour, which is why it sits apart in the hierarchy.
+\end{solution}
+
+\begin{problem}
+Suppose $\overline{X}_n \underset{P}{\longrightarrow} \mu$ with $\mu>0$. Show
+that $\sqrt{\overline{X}_n} \underset{P}{\longrightarrow} \sqrt{\mu}$ and that
+$1/\overline{X}_n \underset{P}{\longrightarrow} 1/\mu$.
+\end{problem}
+\begin{solution}
+Both are instances of the continuous mapping theorem. The function
+$g(x)=\sqrt{x}$ is continuous at every $x>0$, and $\mu>0$, so
+$g\left(\overline{X}_n\right)\underset{P}{\longrightarrow}g(\mu)$. The same
+argument with $h(x)=1/x$, continuous at every $x\neq0$, gives the second.
+
+The hypothesis $\mu>0$ is doing real work: at $\mu=0$ the reciprocal is not
+continuous and the conclusion fails. This is the same proviso that appears in
+part (c) of Slutsky's theorem, and for the same reason.
+\end{solution}
+
 
 \section{LIMIT THEOREMS}
 \vspace{0.5cm}
@@ -3377,6 +3551,60 @@ game is fair at every finite stage, and the limit is not fair at all.
 
 
 \pagebreak
+
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Let $X_1, X_2, \dots$ be independent with $P\left(X_i=1\right)=P\left(X_i=-1\right)=\tfrac12$,
+and let $S_n = \sum_{i=1}^{n}X_i$. Show that $\{S_n\}$ is a martingale, that
+$\left\{S_n^{2}-n\right\}$ is also a martingale, and use the second to find
+$\Var(S_n)$.
+\end{problem}
+\begin{solution}
+\subhead{$S_n$ is a martingale}
+$E\left|S_n\right|\leq n<\infty$, and
+$$E\left(S_{n+1}\mid X_1,\dots,X_n\right) = S_n + E\left(X_{n+1}\right) = S_n ,$$
+since $X_{n+1}$ is independent of the past with mean zero.
+
+\subhead{$S_n^{2}-n$ is a martingale}
+Expanding $S_{n+1}^{2} = S_n^{2} + 2S_nX_{n+1} + X_{n+1}^{2}$ and noting
+$X_{n+1}^{2}=1$ always,
+$$E\left(S_{n+1}^{2}\mid X_1,\dots,X_n\right)
+= S_n^{2} + 2S_n\,E\left(X_{n+1}\right) + 1 = S_n^{2}+1 .$$
+Subtracting $n+1$ from both sides,
+$$E\left(S_{n+1}^{2}-(n+1)\mid X_1,\dots,X_n\right) = S_n^{2}-n ,$$
+which is the martingale property.
+
+\subhead{The variance}
+A martingale has constant expectation, so
+$E\left(S_n^{2}-n\right) = E\left(S_0^{2}-0\right) = 0$, giving
+$E\left(S_n^{2}\right) = n$. Since $E(S_n)=0$,
+$$\Var(S_n) = n .$$
+The direct route --- $n$ independent terms each of variance one --- gives the
+same answer, but the martingale argument is the one that survives when the steps
+are dependent.
+\end{solution}
+
+\begin{problem}
+A gambler starts with $\$10$ and bets $\$1$ on each toss of a fair coin,
+stopping at $\$0$ or $\$20$. Let $X_n$ be the fortune after $n$ tosses. Use the
+martingale property to find the probability of reaching $\$20$ before ruin.
+\end{problem}
+\begin{solution}
+The fortune is a martingale, so $E(X_n) = X_0 = 10$ for every $n$. Let $p$ be
+the probability of reaching $\$20$ first. At the stopping time the fortune is
+$\$20$ with probability $p$ and $\$0$ with probability $1-p$, and the optional
+stopping theorem --- applicable because the fortune is bounded between $0$ and
+$20$ --- gives
+$$10 = 20p + 0(1-p) \quad\Longrightarrow\quad p = \frac12 .$$
+
+The boundedness matters. Without an upper barrier the game is the doubling
+example in disguise: the fortune remains a martingale with constant expectation
+at every finite time, yet ruin occurs with probability one, and the expectation
+of the limit is not the limit of the expectations.
+\end{solution}
+
 
 \section{SIMULATION}
 
