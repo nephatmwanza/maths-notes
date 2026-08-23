@@ -3226,4 +3226,153 @@ The expected value of $X_n$ given the past and present values of $X_0,X_1,\dots,
 \item Sheldon R. (2012) A first course in probability. $9^{th}$ Edition, ISBN: 1 292 02492 9.
 \item Bain L.J. and Engelhardt M. (2000) introduction to probability and mathematical Statistics, $2^{nd}$ Edition ISBN: 0 534 38020 5. 
 \end{enumerate}
+
+\pagebreak
+
+\section{MARTINGALES}
+
+The course outline promises martingale theory, and it belongs here: a martingale
+is a stochastic process defined by a conditional expectation, so it draws on the
+conditioning of Chapter~4 and the convergence modes of Chapter~6 at once. The
+idea is the mathematical form of a fair game.
+
+\subsection{Definition and First Examples}
+
+\begin{defn}
+A sequence $\{X_n : n\geq0\}$ of random variables with $E\left|X_n\right|<\infty$
+for every $n$ is a \emph{martingale} with respect to a sequence $\{Y_n\}$ if
+$$E\left(X_{n+1} \mid Y_0, Y_1, \dots, Y_n\right) = X_n \qquad\text{for every } n .$$
+If the equality is replaced by $\geq$ the sequence is a \emph{submartingale},
+and by $\leq$ a \emph{supermartingale}. When no $\{Y_n\}$ is named, the
+conditioning is on $X_0,\dots,X_n$ themselves.
+\end{defn}
+
+\begin{note}
+Read the definition as a statement about a gambler's fortune. $X_n$ is the
+capital after $n$ plays; the condition says that, given the entire history, the
+expected capital after the next play is exactly what is held now. A martingale
+is a fair game, a submartingale one favourable to the player, a supermartingale
+one favourable to the house. The prefixes are the opposite way round from what
+most people first guess, and it is worth fixing them by that reading.
+\end{note}
+
+\begin{result}
+If $\{X_n\}$ is a martingale then $E(X_n) = E(X_0)$ for every $n$.
+\end{result}
+
+\begin{proof}
+By the tower property and the defining relation,
+$$E\left(X_{n+1}\right) = E\left[E\left(X_{n+1}\mid Y_0,\dots,Y_n\right)\right]
+= E\left(X_n\right),$$
+so the expectation is the same at every step, and induction from $n=0$ gives the
+result.
+\end{proof}
+
+\begin{exa}[Sums of independent centred variables]
+Let $Z_1,Z_2,\dots$ be independent with $E(Z_i)=0$, and put
+$X_n = \sum_{i=1}^{n}Z_i$ with $X_0=0$. Then
+$$E\left(X_{n+1}\mid Z_1,\dots,Z_n\right)
+= E\left(X_n + Z_{n+1}\mid Z_1,\dots,Z_n\right)
+= X_n + E\left(Z_{n+1}\right) = X_n ,$$
+using that $X_n$ is determined by the conditioning variables and that
+$Z_{n+1}$ is independent of them. So the centred random walk is a martingale.
+\end{exa}
+
+\begin{exa}[Products of independent unit-mean variables]
+Let $W_1,W_2,\dots$ be independent, positive, with $E(W_i)=1$, and put
+$X_n = \prod_{i=1}^{n}W_i$, $X_0=1$. Then
+$$E\left(X_{n+1}\mid W_1,\dots,W_n\right) = X_n\,E\left(W_{n+1}\right) = X_n ,$$
+so $\{X_n\}$ is a martingale. This is the model of a fortune multiplied by
+independent random returns, and it is the reason the next remark matters.
+\end{exa}
+
+\begin{remark}
+The second example is worth pausing on. Take $W_i$ equal to $2$ or $0$ with
+probability $\tfrac12$ each, so $E(W_i)=1$ and $\{X_n\}$ is a martingale with
+$E(X_n)=1$ for every $n$. But $X_n=0$ as soon as a single zero appears, which
+happens with probability one eventually, so
+$$X_n \underset{a.s.}{\longrightarrow} 0 \qquad\text{while}\qquad E(X_n)=1
+\ \text{ for all } n .$$
+The expectation does not converge to the expectation of the limit. This is the
+sharpest illustration in the course of why the convergence modes of Chapter~6
+had to be separated: almost sure convergence says nothing on its own about
+means, and the extra hypothesis needed --- uniform integrability --- is exactly
+what the martingale convergence theorem below supplies in its stronger form.
+\end{remark}
+
+\subsection{Martingale Differences and Hoeffding's Inequality}
+
+\begin{defn}
+The \emph{martingale differences} of $\{X_n\}$ are
+$$D_n = X_n - X_{n-1},\qquad n\geq 1,$$
+so that $X_n = X_0 + \sum_{i=1}^{n}D_i$. The martingale property says exactly
+that $E\left(D_{n+1}\mid Y_0,\dots,Y_n\right)=0$: each increment is
+conditionally centred given the past.
+\end{defn}
+
+\begin{result}
+Martingale differences are uncorrelated, and if $E\left(X_n^{2}\right)<\infty$
+then
+$$\Var(X_n) = \Var(X_0) + \sum_{i=1}^{n}E\left(D_i^{2}\right).$$
+\end{result}
+
+\begin{proof}
+For $i<j$, conditioning on the history up to $j-1$ and using that $D_i$ is
+determined by it,
+$$E\left(D_iD_j\right) = E\left[D_i\,E\left(D_j\mid Y_0,\dots,Y_{j-1}\right)\right] = 0 .$$
+Uncorrelated terms have additive variances, which gives the display.
+\end{proof}
+
+\begin{note}
+The variances add exactly as they would for independent summands, even though
+the differences need not be independent --- only conditionally centred. This is
+the practical value of the martingale property: it buys the variance
+calculation without the much stronger assumption of independence, which is why
+martingales appear wherever dependence cannot be assumed away.
+\end{note}
+
+\begin{thm}[Azuma--Hoeffding inequality]
+Let $\{X_n\}$ be a martingale whose differences are bounded,
+$\left|D_i\right|\leq c_i$ almost surely. Then for every $t>0$
+$$P\left(\left|X_n - X_0\right| \geq t\right)
+\;\leq\; 2\exp\left\{-\frac{t^{2}}{2\sum_{i=1}^{n}c_i^{2}}\right\}.$$
+\end{thm}
+
+\begin{remark}
+Compare this with Chebyshev's inequality, which under the same variance would
+give a bound decaying like $t^{-2}$. Azuma--Hoeffding decays like
+$e^{-t^{2}}$ --- incomparably faster --- and the price is the assumption that
+the increments are bounded. It is the martingale generalisation of the Chernoff
+bounds met earlier in these notes, and it is proved the same way, by bounding
+the moment generating function of each increment and multiplying.
+
+With all $c_i=c$ the bound reads
+$2\exp\left\{-t^{2}/2nc^{2}\right\}$, so deviations of order $\sqrt{n}$ are the
+natural scale --- which is the central limit theorem's scale, arrived at here
+without any distributional assumption at all.
+\end{remark}
+
+\subsection{Convergence}
+
+\begin{thm}[Martingale convergence theorem]
+Let $\{X_n\}$ be a martingale with $\sup_n E\left|X_n\right| < \infty$. Then
+there is a random variable $X$ with $E\left|X\right|<\infty$ such that
+$$X_n \underset{a.s.}{\longrightarrow} X .$$
+If in addition $\sup_n E\left(X_n^{2}\right)<\infty$, the convergence also holds
+in quadratic mean and $E(X) = E(X_0)$.
+\end{thm}
+
+\begin{note}
+The two halves of the theorem are the two halves of the remark above. Bounded
+expectations give almost sure convergence and nothing more --- the doubling
+example satisfies $E\left|X_n\right|=1$ for every $n$ and converges almost
+surely to $0$ while its mean stays at $1$. Bounded \emph{second} moments give
+quadratic mean convergence as well, and only then does the limit inherit the
+mean. The doubling example fails that second condition:
+$E\left(X_n^{2}\right)=2^{n}$.
+
+This is the cleanest statement of why a fair game can be a certain ruin. The
+game is fair at every finite stage, and the limit is not fair at all.
+\end{note}
+
 \end{document}
