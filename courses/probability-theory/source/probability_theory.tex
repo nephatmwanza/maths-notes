@@ -959,6 +959,185 @@ calculation would say nothing at all about the distributions themselves.
 
 \pagebreak
 
+
+\pagebreak
+
+\section{CONVOLUTIONS}
+
+The distribution of a sum of independent random variables is called their
+\emph{convolution}. This section computes it directly, and then shows how the
+previous chapter makes the same computation almost trivial --- which is the
+argument for having introduced generating functions at all.
+
+\subsection{The Discrete Case}
+
+\begin{defn}
+Let $X$ and $Y$ be independent discrete random variables and $Z = X+Y$. Then
+$$P(Z=z) = \sum_{x} P(X=x)\,P(Y=z-x),$$
+the sum running over all $x$ for which both terms are positive. The function
+$p_Z$ is called the \emph{convolution} of $p_X$ and $p_Y$.
+\end{defn}
+
+\begin{proof}
+The event $\{Z=z\}$ is the disjoint union over $x$ of the events
+$\{X=x\}\cap\{Y=z-x\}$, so
+$$P(Z=z) = \sum_x P\left(X=x,\ Y=z-x\right) = \sum_x P(X=x)P(Y=z-x),$$
+the last step by independence.
+\end{proof}
+
+\begin{exa}
+If $X\sim$ POI$(\mu)$ and $Y\sim$ POI$(\lambda)$ are independent, derive the
+distribution of $Z = X+Y$.
+\end{exa}
+
+\begin{solution}
+Since $X$ and $Y$ are non-negative, $x$ runs from $0$ to $z$:
+$$P(Z=z) = \sum_{x=0}^{z}\frac{e^{-\mu}\mu^{x}}{x!}\cdot
+\frac{e^{-\lambda}\lambda^{z-x}}{(z-x)!}
+= \frac{e^{-(\mu+\lambda)}}{z!}\sum_{x=0}^{z}\frac{z!}{x!\,(z-x)!}\,\mu^{x}\lambda^{z-x}.$$
+The sum is a binomial expansion:
+$$\sum_{x=0}^{z}\binom{z}{x}\mu^{x}\lambda^{z-x} = (\mu+\lambda)^{z},$$
+so
+$$P(Z=z) = \frac{e^{-(\mu+\lambda)}(\mu+\lambda)^{z}}{z!},\qquad z=0,1,2,\dots$$
+which is the probability function of POI$(\mu+\lambda)$. Hence
+$Z\sim$ POI$(\mu+\lambda)$.
+\end{solution}
+
+\subsection{The Continuous Case}
+
+\begin{thm}[Convolution formula]
+Let $X$ and $Y$ be independent continuous random variables with densities $f_X$
+and $f_Y$. Then $Z = X+Y$ has density
+$$f_Z(z) = \int_{-\infty}^{\infty} f_X(z-y)\,f_Y(y)\,dy .$$
+\end{thm}
+
+\begin{proof}
+Make the change of variables
+$$z = x+y,\qquad v = y,\qquad\text{so that}\qquad x = z-v,\quad y = v .$$
+The Jacobian of the inverse transformation is
+$$\left|\frac{\partial(x,y)}{\partial(z,v)}\right|
+= \left|\begin{matrix} 1 & -1\\ 0 & 1\end{matrix}\right| = 1 ,$$
+so the joint density of $(Z,V)$ is
+$$f_{Z,V}(z,v) = f_{X,Y}(z-v,\ v) = f_X(z-v)\,f_Y(v),$$
+the factorisation being independence. Integrating out the variable that is not
+wanted,
+$$f_Z(z) = \int_{-\infty}^{\infty} f_{Z,V}(z,v)\,dv
+= \int_{-\infty}^{\infty} f_X(z-v)\,f_Y(v)\,dv,$$
+which is the stated formula with $v$ renamed $y$.
+\end{proof}
+
+\begin{note}
+The formula is symmetric in $X$ and $Y$ --- substituting $u=z-y$ turns it into
+$\int f_X(u)f_Y(z-u)\,du$ --- so either variable may be the one integrated out.
+Choose whichever has the simpler density, or the simpler range: in practice the
+limits of integration cause more difficulty than the integrand, because the
+requirement that \emph{both} $f_X(z-y)$ and $f_Y(y)$ be non-zero restricts $y$
+to an interval that usually depends on $z$.
+\end{note}
+
+\begin{exa}
+Let $X$ and $Y$ be independent, each uniform on $(0,1)$. Find the density of
+$Z=X+Y$.
+\end{exa}
+
+\begin{solution}
+Both densities equal $1$ on $(0,1)$ and vanish elsewhere, so the integrand is
+$1$ exactly when $0<y<1$ and $0<z-y<1$, that is when
+$$\max(0,\ z-1) < y < \min(1,\ z),$$
+and $z$ ranges over $(0,2)$. The density is therefore the length of that
+interval:
+$$f_Z(z) = \begin{cases}
+z, & 0<z\leq 1,\\
+2-z, & 1<z<2,\\
+0, & \text{otherwise.}
+\end{cases}$$
+This is the triangular density on $(0,2)$. It is worth noticing that the sum of
+two \emph{flat} densities is not flat --- values near $1$ arise in many ways and
+values near $0$ or $2$ in few --- which is the simplest instance of the
+concentrating effect that the central limit theorem describes in general.
+\end{solution}
+
+\subsection{The Generating Function Shortcut}
+
+\begin{result}
+If $X$ and $Y$ are independent then
+$$G_{X+Y}(t) = G_X(t)\,G_Y(t),\qquad M_{X+Y}(t) = M_X(t)\,M_Y(t),\qquad
+K_{X+Y}(t) = K_X(t) + K_Y(t).$$
+\end{result}
+
+Combined with uniqueness, this replaces the convolution sum or integral by a
+multiplication. The Poisson example above is a one-line calculation this way:
+$$G_X(t) = e^{\mu(t-1)},\qquad G_Y(t) = e^{\lambda(t-1)},$$
+$$G_{X+Y}(t) = e^{\mu(t-1)}e^{\lambda(t-1)} = e^{(\mu+\lambda)(t-1)},$$
+which is the probability generating function of POI$(\mu+\lambda)$, so by
+uniqueness $X+Y$ has that distribution. No binomial expansion is needed.
+
+\begin{exa}
+Show that the sum of independent normal variables is normal, and identify its
+parameters.
+\end{exa}
+
+\begin{solution}
+Let $X\sim N\left(\mu_1,\sigma_1^{2}\right)$ and
+$Y\sim N\left(\mu_2,\sigma_2^{2}\right)$ be independent, with moment generating
+functions $M_X(t)=e^{\mu_1 t + \frac12\sigma_1^{2}t^{2}}$ and similarly for $Y$.
+Then
+$$M_{X+Y}(t) = e^{\mu_1 t + \frac12\sigma_1^{2}t^{2}}\;
+e^{\mu_2 t + \frac12\sigma_2^{2}t^{2}}
+= e^{(\mu_1+\mu_2)t + \frac12\left(\sigma_1^{2}+\sigma_2^{2}\right)t^{2}},$$
+which is the moment generating function of
+$N\left(\mu_1+\mu_2,\ \sigma_1^{2}+\sigma_2^{2}\right)$. By uniqueness that is
+the distribution of $X+Y$.
+
+The convolution integral for this case is a completion of the square inside an
+exponential and takes most of a page; the generating function argument takes two
+lines. That contrast is the whole reason the previous chapter came first.
+\end{solution}
+
+\begin{remark}
+The departmental notes justify this step by saying that a distribution is
+uniquely determined by its probabilities, its moments or its cumulants. The
+first is a definition and the third follows from the second, but \textbf{the
+statement about moments is false in general}. There exist distinct
+distributions with identical moments of every order --- the lognormal is the
+standard example, and a whole family of densities shares its moment sequence.
+
+What is true, and what is being used here, is the uniqueness theorem of the
+previous chapter: if two moment generating \emph{functions} agree on an interval
+about the origin, the distributions agree. That is a stronger hypothesis than
+having the same moments, because it requires the series to converge, and it is
+exactly the hypothesis that fails for the lognormal --- whose moment generating
+function is infinite for every $t>0$. The distinction is not pedantry; it is the
+difference between a theorem and a false statement.
+\end{remark}
+
+\begin{result}[Closure under addition]
+The following families are closed under the addition of independent members,
+each provable in one line by multiplying generating functions:
+\begin{enumerate}
+\item[$-$] $\text{POI}(\mu) + \text{POI}(\lambda) = \text{POI}(\mu+\lambda)$;
+\item[$-$] $\text{BIN}(m,\theta) + \text{BIN}(n,\theta) = \text{BIN}(m+n,\theta)$,
+provided the success probability is the same;
+\item[$-$] $\text{GAM}(\alpha_1,\beta) + \text{GAM}(\alpha_2,\beta)
+= \text{GAM}(\alpha_1+\alpha_2,\beta)$, provided the scale is the same;
+\item[$-$] $N\left(\mu_1,\sigma_1^{2}\right) + N\left(\mu_2,\sigma_2^{2}\right)
+= N\left(\mu_1+\mu_2,\sigma_1^{2}+\sigma_2^{2}\right)$;
+\item[$-$] $\chi^{2}_{(m)} + \chi^{2}_{(n)} = \chi^{2}_{(m+n)}$, a special case
+of the gamma.
+\end{enumerate}
+\end{result}
+
+\begin{note}
+The provisos matter. Two binomials with different success probabilities do not
+add to a binomial, and two gammas with different scales do not add to a gamma;
+in each case the generating functions fail to combine because the parameter that
+must match appears in the base rather than the exponent. It is a common error to
+quote these closure results without their conditions.
+\end{note}
+
+
+\pagebreak
+
 \section{CONDITIONAL EXPECTATION}
 \vspace{0.5cm}
 \subsection{Introduction}
