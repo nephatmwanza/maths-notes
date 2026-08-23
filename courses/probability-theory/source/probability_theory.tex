@@ -1897,6 +1897,177 @@ deviation by more than a fifth.
 
 \pagebreak
 
+
+\pagebreak
+
+\section{MODES OF STOCHASTIC CONVERGENCE}
+
+A sequence of random variables can approach a limit in more than one sense, and
+the senses are genuinely different. Four are in standard use. This section
+defines them, establishes which implies which, and --- what matters as much ---
+gives an example showing that each converse fails.
+
+\subsection{The Four Definitions}
+
+\begin{defn}[Convergence in probability]
+$X_n \underset{P}{\longrightarrow} X$ if for every $\varepsilon>0$
+$$\lim_{n\rightarrow\infty} P\left(\left|X_n - X\right| \geq \varepsilon\right) = 0 .$$
+\end{defn}
+
+\begin{defn}[Convergence in distribution]
+$X_n \underset{D}{\longrightarrow} X$ if
+$$\lim_{n\rightarrow\infty} F_{X_n}(x) = F_X(x)$$
+at every point $x$ where $F_X$ is continuous.
+\end{defn}
+
+\begin{defn}[Convergence in quadratic mean]
+$X_n \underset{QM}{\longrightarrow} X$ if
+$$\lim_{n\rightarrow\infty} E\left[\left(X_n - X\right)^{2}\right] = 0 .$$
+More generally $X_n \underset{L^p}{\longrightarrow} X$ if
+$E\left|X_n-X\right|^{p}\rightarrow 0$; the case $p=2$ is the one used here.
+\end{defn}
+
+\begin{defn}[Almost sure convergence]
+$X_n \underset{a.s.}{\longrightarrow} X$ if
+$$P\left(\lim_{n\rightarrow\infty} X_n = X\right) = 1 .$$
+\end{defn}
+
+\begin{note}
+The difference between the first and the last is worth dwelling on, because it
+is the one students most often collapse. Convergence in probability says that at
+each large $n$, the chance of $X_n$ being far from $X$ is small --- but it
+allows $X_n$ to stray far infinitely often, provided the occasions become rare.
+Almost sure convergence says that for almost every outcome the sequence
+eventually settles and stays. The first is a statement about each $n$
+separately; the second is a statement about whole paths.
+\end{note}
+
+\subsection{The Hierarchy}
+
+\begin{thm}
+For any sequence of random variables,
+$$X_n \underset{a.s.}{\longrightarrow} X
+\quad\Longrightarrow\quad X_n \underset{P}{\longrightarrow} X
+\quad\Longrightarrow\quad X_n \underset{D}{\longrightarrow} X,$$
+$$X_n \underset{QM}{\longrightarrow} X
+\quad\Longrightarrow\quad X_n \underset{P}{\longrightarrow} X .$$
+If the limit is a constant $c$, then $X_n \underset{D}{\longrightarrow} c$ also
+implies $X_n \underset{P}{\longrightarrow} c$, so at a constant limit those two
+are equivalent.
+\end{thm}
+
+\begin{proof}
+\subhead{Quadratic mean implies probability}
+By Markov's inequality applied to $\left(X_n-X\right)^{2}$, for any
+$\varepsilon>0$,
+$$P\left(\left|X_n-X\right|\geq\varepsilon\right)
+= P\left[\left(X_n-X\right)^{2}\geq\varepsilon^{2}\right]
+\leq \frac{E\left[\left(X_n-X\right)^{2}\right]}{\varepsilon^{2}}
+\longrightarrow 0 .$$
+
+\subhead{Probability implies distribution}
+This is part (3) of the limit theorems of the next chapter, proved there by
+squeezing $F_{X_n}(x)$ between $F_X(x\pm\varepsilon)$ and letting
+$\varepsilon\downarrow0$ at a continuity point.
+
+\subhead{Almost sure implies probability}
+Fix $\varepsilon>0$ and set
+$A_n = \bigcup_{m\geq n}\left\{\left|X_m-X\right|\geq\varepsilon\right\}$. The
+sets $A_n$ decrease, and on the event $\{X_n\rightarrow X\}$ --- which has
+probability one --- every outcome lies outside $A_n$ for all large $n$. Hence
+$P\left(\bigcap_n A_n\right)=0$, and by continuity of measure from above
+$P(A_n)\rightarrow0$. Since
+$\left\{\left|X_n-X\right|\geq\varepsilon\right\}\subseteq A_n$, the probability
+of the former tends to zero as well.
+
+\subhead{Distribution to a constant implies probability}
+Suppose $X_n\underset{D}{\longrightarrow}c$. The limiting distribution function
+is the step at $c$, continuous everywhere except at $c$ itself, so for any
+$\varepsilon>0$
+$$P\left(\left|X_n-c\right|\geq\varepsilon\right)
+\leq P\left(X_n \leq c-\varepsilon\right) + P\left(X_n > c+\tfrac{\varepsilon}{2}\right)
+= F_{X_n}\left(c-\varepsilon\right) + 1 - F_{X_n}\left(c+\tfrac{\varepsilon}{2}\right),$$
+and both terms converge to $0 + 1 - 1 = 0$, the points $c\pm$ being continuity
+points of the limit.
+\end{proof}
+
+\subsection{Every Converse Fails}
+
+The implications above run one way only. Each of the following examples settles
+one converse, and together they show the four modes are genuinely distinct
+rather than notational variants.
+
+\begin{exa}[Distribution does not imply probability]
+Let $X\sim N(0,1)$ and put $X_n = X$ for every $n$, with $Y=-X$. By symmetry
+$Y\sim N(0,1)$ too, so $F_{X_n} = F_Y$ for every $n$ and trivially
+$X_n\underset{D}{\longrightarrow}Y$. But
+$$\left|X_n - Y\right| = \left|X - (-X)\right| = 2\left|X\right| ,$$
+which does not become small: $P\left(\left|X_n-Y\right|\geq1\right)
+= P\left(\left|X\right|\geq\tfrac12\right)\approx 0.617$ for every $n$. So there
+is no convergence in probability.
+\end{exa}
+
+\begin{note}
+The example shows what convergence in distribution does and does not say. It is
+a statement about the \emph{laws} of the variables, not about the variables
+themselves, and two variables can have identical laws while being as far apart
+as $X$ and $-X$. This is exactly why Slutsky's theorem insists that one of its
+limits be a constant.
+\end{note}
+
+\begin{exa}[Probability does not imply quadratic mean]
+Let
+$$X_n = \begin{cases} n, & \text{with probability } \dfrac1n,\\[4pt]
+0, & \text{with probability } 1-\dfrac1n.\end{cases}$$
+For any $0<\varepsilon<1$, $P\left(\left|X_n\right|\geq\varepsilon\right)=\frac1n\rightarrow0$,
+so $X_n\underset{P}{\longrightarrow}0$. But
+$$E\left(X_n^{2}\right) = n^{2}\cdot\frac1n = n \longrightarrow \infty ,$$
+so there is no convergence in quadratic mean. The rare values are rare enough to
+vanish in probability and large enough to dominate the second moment.
+\end{exa}
+
+\begin{exa}[Almost sure does not imply quadratic mean]
+Take $X_n = n$ with probability $\dfrac{1}{n^{2}}$ and $0$ otherwise,
+independently across $n$. Since $\sum_n \frac{1}{n^{2}}<\infty$, the
+Borel--Cantelli lemma gives $P\left(X_n\neq0 \text{ infinitely often}\right)=0$,
+so $X_n\underset{a.s.}{\longrightarrow}0$. Yet
+$$E\left(X_n^{2}\right) = n^{2}\cdot\frac{1}{n^{2}} = 1$$
+for every $n$, which does not tend to zero.
+\end{exa}
+
+\begin{exa}[Probability does not imply almost sure]
+Partition $[0,1]$ into blocks: one interval of length $1$, then two of length
+$\tfrac12$, then four of length $\tfrac14$, and so on. Let $X_n$ be the
+indicator of the $n$-th interval in this list, with $U$ uniform on $[0,1]$.
+The lengths tend to zero, so $P\left(X_n=1\right)\rightarrow0$ and
+$X_n\underset{P}{\longrightarrow}0$. But every point of $[0,1]$ lies in
+infinitely many of the intervals, so for every outcome the sequence
+$X_n$ takes the value $1$ infinitely often and never settles. There is no
+almost sure convergence anywhere.
+\end{exa}
+
+\begin{remark}
+Collecting the four examples, the picture is
+$$\begin{array}{ccc}
+\text{almost sure} & \Longrightarrow & \\
+ & \searrow & \\
+ & & \text{in probability} \ \Longrightarrow\ \text{in distribution}\\
+ & \nearrow & \\
+\text{quadratic mean} & \Longrightarrow &
+\end{array}$$
+with no arrow reversible, and with almost sure and quadratic mean convergence
+neither implying the other in either direction. The only reversal permitted
+anywhere is the last one when the limit is a constant.
+
+That exception is not a curiosity. It is what allows the weak law of large
+numbers to be proved by Chebyshev's inequality --- which delivers convergence in
+quadratic mean --- and it is what makes the consistency of an estimator, a
+statement about a constant limit, checkable by whichever of the two is easier.
+\end{remark}
+
+
+\pagebreak
+
 \section{LIMIT THEOREMS}
 \vspace{0.5cm}
 \subsection{Introduction}
