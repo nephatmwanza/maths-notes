@@ -557,6 +557,74 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-23 (later) — Topology published; Real Analysis and Abstract Algebra done
+
+Topology is live: **18 available, 2 in preparation**.
+
+#### State of the four courses requested
+| Course | Results proved | Practice problems | Built | Live |
+|---|---|---|---|---|
+| Topology | 42 / 42 | 6 | yes | **yes** |
+| Real Analysis | 98 / 98 | 6 | rebuilding | not yet |
+| Abstract Algebra | 62 / 62 | **none yet** | not yet | not yet |
+| Stochastic Processes | not started | — | — | — |
+
+Sources: `TOPOLOGY/`, `REAL ANALYSIS/`, `ABSTRACT ALGEBRA/`, `STOCHASTIC PROCESS/`,
+each with an exam bank alongside. No newer departmental versions exist for any of
+them, so these are conversions, not merges like Probability Theory.
+
+#### Three defect classes, each now seen more than once
+**Starred, hand-numbered sections.** Topology had `\section*{1 METRIC SPACES}`.
+Starred sections get no numbering, no ToC entry and **no discussion key** — the
+same defect found live on Analytic Geometry and Functional Analysis. Always check
+`grep -c '\\section\*'` before building.
+
+**Sectioning commands wrapped in `center`.** Probability Theory had `\section`
+inside `center`; Topology had four `\subsection`s. tex4ht opens the centre div
+on one page and closes it on the next, giving unbalanced divs across many pages.
+**Neither check-envs.py nor pdflatex can see this** — the LaTeX is balanced and
+the PDF is fine. Only `build.py`'s div check finds it, after a full build.
+
+**Missing packages.** Abstract Algebra needs `multirow` (Cayley tables) and
+`cancel` (coset arguments); the shared preamble carries neither, and pdflatex
+reports only "Undefined control sequence" without naming what is absent.
+
+#### Two mistakes of my own worth not repeating
+**A proof under the wrong theorem is worse than a missing proof.** In Real
+Analysis I anchored inserted proofs on the next `\end{thm}`. Two of the thirteen
+targets were a `lem` and a `coro`, so those proofs landed under a *later*
+theorem — reading as if they proved a statement they have nothing to do with.
+check-envs.py stayed clean throughout. Found only by re-running the coverage
+check and seeing the same line still listed. **Anchor on the environment's own
+closer, not on `thm`.**
+
+**Converting inline `\textbf{}` markers inside maths splits matrices.** The first
+Abstract Algebra pass produced 18 balance errors including `\end{proof}` closing
+a `\begin{bmatrix}`. The working version tracks depth through every maths
+environment and only converts at a paragraph start outside them.
+
+Also: `\textbf{Note:}` carries the colon **inside** the braces in some sources, so
+a pattern matching `\textbf{Note}` finds nothing and silently converts zero.
+
+#### Statements that were not statements
+Recurring across all three courses, and only found by reading:
+- Topology's **Intermediate Value Theorem** was written as "we need to show
+  that…" — proof language inside a statement, so it asserted nothing, while the
+  real statement sat loose in the prose below.
+- Topology's **Cauchy criterion** had commentary trailing inside the theorem.
+- Abstract Algebra's **IDEAL TEST** was a definition dressed as a theorem.
+- Abstract Algebra's **sign proposition** had no statement at all, opening
+  directly with `\begin{enumerate}`.
+- Real Analysis: "f ∈ [a,b] and [c,c] ⊂ [a,b]" for "f ∈ R[a,b] and [c,d]", and
+  "the continuous image of an interval **in** an interval".
+
+#### Next
+1. Deploy Real Analysis once the rebuild is clean.
+2. Abstract Algebra practice problems, then build and deploy.
+3. Stochastic Processes from scratch.
+4. Still open: tutorial sheets 1–2 for Probability Theory; the 182-item PT exam
+   bank; the split-level decision on the five `report`-class courses.
+
 ### 2026-08-23 — Statistical Inference published; Probability Theory merge planned
 
 Sixteenth course live. Statistical Inference: every one of its 34 results proved
