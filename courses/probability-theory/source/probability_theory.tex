@@ -573,6 +573,235 @@ $$X_i\thicksim g(1,\lambda)$$\\ $$Y_n=X_1+X_2+..........+X_n\thicksim g(n,\lambd
 
 
 \pagebreak
+
+\pagebreak
+
+\section{GENERATING FUNCTIONS}
+
+A generating function packs a whole distribution into a single function of an
+auxiliary variable. Nothing is lost in the packing --- the distribution can
+always be read back out --- and what is gained is that operations which are
+awkward on distributions become easy on functions. The one that matters most is
+addition: the distribution of a sum of independent variables is a convolution,
+which is a genuinely difficult integral or sum, but the generating function of
+the sum is simply the \emph{product} of the generating functions. That single
+fact carries most of the next three sections.
+
+Three versions are in use, and they differ only in what is substituted for the
+auxiliary variable.
+
+\subsection{The Probability Generating Function}
+
+\begin{defn}
+Let $X$ be a discrete random variable taking values in
+$\{0,1,2,\dots\}$. Its \emph{probability generating function} is
+$$G_X(t) = E\left(t^{X}\right) = \sum_{x=0}^{\infty} t^{x}\,P(X=x),$$
+defined for every real $t$ for which the series converges.
+\end{defn}
+
+The series always converges for $\left|t\right|\leq 1$, because the
+probabilities sum to one; how much further it converges depends on the
+distribution.
+
+\begin{note}
+The name is literal. The coefficient of $t^{x}$ in the power series is
+$P(X=x)$, so the function \emph{generates} the probabilities, and reading them
+off is a matter of expanding the series.
+\end{note}
+
+\begin{exa}
+A discrete random variable $X$ has probability function
+$$P(X=x) = \frac{x}{15},\qquad x = 1,2,3,4,5 .$$
+Derive a formula for $G_X(t)$.
+\end{exa}
+
+\begin{solution}
+Substituting directly into the definition,
+$$G_X(t) = \sum_{x=1}^{5} t^{x}\,\frac{x}{15}
+= \frac{1}{15}t + \frac{2}{15}t^{2} + \frac{3}{15}t^{3}
++ \frac{4}{15}t^{4} + \frac{5}{15}t^{5}.$$
+The coefficients are the probabilities, as the definition promises, and they
+sum to $15/15 = 1$ --- which is the check $G_X(1)=1$ below.
+\end{solution}
+
+\subhead{Recovering the probabilities}
+Writing the series out,
+$$G_X(t) = t^{0}P(X=0) + t^{1}P(X=1) + t^{2}P(X=2) + t^{3}P(X=3) + t^{4}P(X=4) + \cdots$$
+Differentiating and setting $t=0$ kills every term but one at each stage:
+$$G_X'(t) = P(X=1) + 2t\,P(X=2) + 3t^{2}P(X=3) + \cdots
+\quad\Longrightarrow\quad G_X'(0) = P(X=1),$$
+$$G_X''(t) = 2P(X=2) + 6t\,P(X=3) + \cdots
+\quad\Longrightarrow\quad G_X''(0) = 2\,P(X=2),$$
+and in general
+$$P(X=n) = \frac{1}{n!}\,G_X^{(n)}(0),\qquad n = 0,1,2,\dots$$
+
+\begin{exa}
+A random variable $X$ has $G_X(t) = 0.3 + 0.2t^{2} + 0.5t^{3}$. Write down its
+probability distribution.
+\end{exa}
+
+\begin{solution}
+Insert the missing powers explicitly:
+$$G_X(t) = 0.3\,t^{0} + 0\,t^{1} + 0.2\,t^{2} + 0.5\,t^{3},$$
+and read off the coefficients.
+$$\begin{array}{c|cccc}
+x & 0 & 1 & 2 & 3\\ \hline
+P(X=x) & 0.3 & 0 & 0.2 & 0.5
+\end{array}$$
+No differentiation is needed when the generating function is already a
+polynomial; the coefficients \emph{are} the answer.
+\end{solution}
+
+\subsection{Properties of the Probability Generating Function}
+
+\begin{result}
+For any probability generating function,
+\begin{enumerate}
+\item[(i)] $G_X(0) = P(X=0)$;
+\item[(ii)] $G_X(1) = 1$;
+\item[(iii)] $E(X) = G_X'(1)$;
+\item[(iv)] $\Var(X) = G_X''(1) + G_X'(1) - \left[G_X'(1)\right]^{2}$.
+\end{enumerate}
+\end{result}
+
+\begin{proof}
+\subhead{(i)}
+Substituting $t=0$ into the series, and using the convention $0^{0}=1$,
+$$G_X(0) = 0^{0}P(X=0) + 0^{1}P(X=1) + 0^{2}P(X=2) + \cdots = P(X=0),$$
+since every term after the first has a factor $0$.
+
+\subhead{(ii)}
+$$G_X(1) = \sum_{x=0}^{\infty}1^{x}P(X=x) = \sum_{x=0}^{\infty}P(X=x) = 1 .$$
+This is the standard check on any candidate generating function.
+
+\subhead{(iii)}
+Differentiating under the expectation,
+$$G_X'(t) = E\left(X\,t^{X-1}\right)
+\quad\Longrightarrow\quad G_X'(1) = E(X).$$
+
+\subhead{(iv)}
+Differentiating once more,
+$$G_X''(t) = E\left(X(X-1)\,t^{X-2}\right)
+\quad\Longrightarrow\quad G_X''(1) = E\left[X(X-1)\right] = E\left(X^{2}\right) - E(X).$$
+Hence $E\left(X^{2}\right) = G_X''(1) + G_X'(1)$, and
+$$\Var(X) = E\left(X^{2}\right) - \left[E(X)\right]^{2}
+= G_X''(1) + G_X'(1) - \left[G_X'(1)\right]^{2}.$$
+\end{proof}
+
+\begin{note}
+$G_X''(1)$ is the second \emph{factorial} moment $E\left[X(X-1)\right]$, not the
+second moment. Forgetting to add $G_X'(1)$ back is the commonest error in this
+section, and it always makes the variance come out too small.
+\end{note}
+
+\begin{exa}
+A random variable $X$ has $G_X(t) = 0.0001\left(1-0.9t\right)^{-4}$. Calculate
+$E(X)$ and $\Var(X)$.
+\end{exa}
+
+\begin{solution}
+$$G_X'(t) = (-4)(-0.9)(0.0001)\left(1-0.9t\right)^{-5}
+= 0.00036\left(1-0.9t\right)^{-5},$$
+and since $1-0.9(1) = 0.1$, we have $\left(0.1\right)^{-5} = 10^{5}$, so
+$$G_X'(1) = 0.00036 \times 10^{5} = 36 .$$
+Similarly
+$$G_X''(t) = (-4)(-5)(-0.9)^{2}(0.0001)\left(1-0.9t\right)^{-6}
+= 0.00162\left(1-0.9t\right)^{-6},$$
+$$G_X''(1) = 0.00162 \times 10^{6} = 1620 .$$
+Therefore
+$$E(X) = 36,\qquad
+\Var(X) = 1620 + 36 - 36^{2} = 1656 - 1296 = 360 .$$
+\end{solution}
+
+\subsection{Sums and Linear Functions}
+
+\begin{result}
+If $Y = a + bX$ with $a$ and $b$ constants, then
+$$G_Y(t) = t^{a}\,G_X\!\left(t^{b}\right).$$
+\end{result}
+
+\begin{proof}
+$$G_Y(t) = E\left(t^{a+bX}\right) = t^{a}E\left(t^{bX}\right)
+= t^{a}E\left[\left(t^{b}\right)^{X}\right] = t^{a}G_X\!\left(t^{b}\right),$$
+the constant $t^{a}$ coming outside the expectation because it does not depend
+on $X$.
+\end{proof}
+
+\begin{result}
+Let $X_1,\dots,X_n$ be independent non-negative integer-valued random variables
+and let $c_1,\dots,c_n$ be constants. Then
+$$G_{\sum_{i=1}^{n}c_iX_i}(t) = \prod_{i=1}^{n} G_{X_i}\!\left(t^{c_i}\right).$$
+\end{result}
+
+\begin{proof}
+Put $Y = \sum_{i=1}^{n}c_iX_i$. Then
+$$G_Y(t) = E\left(t^{Y}\right)
+= E\left(t^{c_1X_1 + c_2X_2 + \cdots + c_nX_n}\right)
+= E\left(t^{c_1X_1}\,t^{c_2X_2}\cdots t^{c_nX_n}\right).$$
+The variables are independent, so the expectation of the product is the product
+of the expectations:
+$$G_Y(t) = \prod_{i=1}^{n}E\left(t^{c_iX_i}\right)
+= \prod_{i=1}^{n}E\left[\left(t^{c_i}\right)^{X_i}\right]
+= \prod_{i=1}^{n}G_{X_i}\!\left(t^{c_i}\right).$$
+\end{proof}
+
+\begin{remark}
+Taking every $c_i = 1$ gives the case that matters most:
+$$G_{X_1+\cdots+X_n}(t) = \prod_{i=1}^{n}G_{X_i}(t).$$
+Convolution has become multiplication. This is the reason generating functions
+are introduced at all, and the next section makes the point concrete: it is far
+easier to multiply two polynomials than to evaluate
+$P(X+Y=k) = \sum_j P(X=j)P(Y=k-j)$ term by term.
+
+Independence is essential and is the only place it is used. For dependent
+variables the expectation of the product is not the product of the
+expectations, and the result fails.
+\end{remark}
+
+\subsection{Uniqueness and Continuity}
+
+Everything above extracts information \emph{from} a generating function. Two
+theorems in the other direction are what make the tool legitimate, and neither
+is usually stated explicitly --- although the proof of the central limit theorem
+later in these notes depends on the second of them entirely.
+
+\begin{thm}[Uniqueness]
+If two non-negative integer-valued random variables $X$ and $Y$ satisfy
+$G_X(t) = G_Y(t)$ for all $t$ in some interval containing the origin, then $X$
+and $Y$ have the same distribution.
+\end{thm}
+
+\begin{proof}
+A power series that converges on an interval about the origin determines its
+coefficients uniquely, by repeated differentiation at $0$. Applying
+$P(X=n) = G_X^{(n)}(0)/n!$ to each series gives $P(X=n)=P(Y=n)$ for every $n$.
+\end{proof}
+
+\begin{note}
+This is what licenses the standard argument ``the generating function is that of
+a Poisson distribution, therefore the variable is Poisson''. Without uniqueness
+the conclusion would not follow, and that argument is used repeatedly from here
+on.
+\end{note}
+
+\begin{thm}[Continuity]
+Let $X_1, X_2, \dots$ be a sequence of random variables and $X$ another, all
+non-negative and integer-valued. If $G_{X_n}(t) \rightarrow G_X(t)$ for every
+$t\in(0,1)$, then $X_n \underset{D}{\longrightarrow} X$.
+\end{thm}
+
+\begin{remark}
+The continuity theorem is the bridge between generating functions and limits:
+convergence of the functions gives convergence of the distributions. Its proof
+belongs to analysis and is not given here, but its role should be clear. The
+central limit theorem is proved later by showing that a moment generating
+function converges to $e^{t^{2}/2}$; without a continuity theorem that
+calculation would say nothing at all about the distributions themselves.
+\end{remark}
+
+
+\pagebreak
+
 \section{CONDITIONAL EXPECTATION}
 \vspace{0.5cm}
 \subsection{Introduction}
