@@ -1602,7 +1602,7 @@ $$\Var(X \mid Y)= E(X^2 \mid Y)-\Big(E(X \mid Y)\Big)^2$$ $$\Var(X \mid Y)=E\Big
 
 
 \begin{result}
-Let $X$ and $Y$ be random variables with joint probability function. Then the variance of denoted by var$(X)$ is given as $$\Var(X)=E(\Var(X \mid Y))+\Var(E(X \mid Y)).$$
+Let $X$ and $Y$ be random variables with joint probability function. Then the variance of $X$, written $\Var(X)$, is given by $$\Var(X)=E(\Var(X \mid Y))+\Var(E(X \mid Y)).$$
 \end{result}
 
 
@@ -1749,6 +1749,154 @@ M_Y(t) &=E\Big(e^{ty}\Big)
 
 \pagebreak
 \end{exa}
+
+\pagebreak
+
+\section{COMPOUND DISTRIBUTIONS}
+
+A compound distribution arises when a random number of random quantities are
+added together. The number of insurance claims in a year is random; so is the
+size of each claim; the total paid out is the sum of a random number of random
+terms. Write
+$$S = X_1 + X_2 + \cdots + X_N ,$$
+where $N$ is a non-negative integer-valued random variable, the $X_i$ are
+independent and identically distributed, and $N$ is independent of the $X_i$.
+The empty sum is zero, so $S=0$ when $N=0$.
+
+Everything in this section follows from conditioning on $N$, which is why it
+sits immediately after the previous chapter.
+
+\subsection{Mean, Variance and Generating Function}
+
+\begin{thm}
+For the compound sum $S$ above, writing $\mu = E(X_i)$ and
+$\sigma^{2} = \Var(X_i)$,
+$$E(S) = E(N)\,\mu,$$
+$$\Var(S) = E(N)\,\sigma^{2} + \Var(N)\,\mu^{2},$$
+$$M_S(t) = G_N\!\left(M_X(t)\right).$$
+\end{thm}
+
+\begin{proof}
+\subhead{The mean}
+Condition on $N$ and use the tower property. Given $N=n$ the sum has exactly $n$
+terms, so
+$$E\left(S \mid N=n\right) = E\left(X_1+\cdots+X_n\right) = n\mu,
+\qquad\text{that is}\qquad E\left(S\mid N\right) = N\mu .$$
+Hence
+$$E(S) = E\left[E\left(S\mid N\right)\right] = E(N\mu) = E(N)\,\mu .$$
+
+\subhead{The variance}
+Given $N=n$ the terms are independent, so their variances add:
+$$\Var\left(S \mid N\right) = N\sigma^{2}.$$
+Applying the conditional variance formula of the previous chapter,
+\begin{align*}
+\Var(S) &= E\left[\Var\left(S\mid N\right)\right] + \Var\left[E\left(S\mid N\right)\right]\\
+        &= E\left(N\sigma^{2}\right) + \Var\left(N\mu\right)\\
+        &= E(N)\,\sigma^{2} + \Var(N)\,\mu^{2},
+\end{align*}
+the constants $\sigma^{2}$ and $\mu^{2}$ coming out of the expectation and the
+variance respectively.
+
+\subhead{The moment generating function}
+Again conditioning on $N$, and using that the $X_i$ are independent with common
+moment generating function $M_X$,
+$$E\left(e^{tS} \mid N=n\right) = E\left(e^{t(X_1+\cdots+X_n)}\right)
+= \left[M_X(t)\right]^{n}.$$
+Therefore
+$$M_S(t) = E\left[E\left(e^{tS}\mid N\right)\right]
+= E\left(\left[M_X(t)\right]^{N}\right)
+= G_N\!\left(M_X(t)\right),$$
+the last step being the definition of the probability generating function of $N$
+evaluated at the number $M_X(t)$.
+\end{proof}
+
+\begin{note}
+The variance formula has two terms and both are needed. The first,
+$E(N)\sigma^{2}$, is the variability of the claim sizes; the second,
+$\Var(N)\mu^{2}$, is the variability in how many there are. Setting $N$ equal to
+a constant $n$ kills the second term and returns the familiar $n\sigma^{2}$.
+Forgetting it is the standard error here, and it understates the variance badly
+whenever $N$ is itself highly variable.
+\end{note}
+
+\begin{remark}
+The formula $M_S = G_N \circ M_X$ deserves attention. It is a \emph{composition}
+of generating functions, not a product --- the product rule of the earlier
+chapter applies to a fixed number of summands, and here the number is random.
+The outer function is the probability generating function of the counting
+variable and the inner is the moment generating function of the terms, which is
+exactly what makes the units work: $M_X(t)$ is a number, and $G_N$ takes
+numbers.
+\end{remark}
+
+\subsection{The Compound Poisson}
+
+\begin{result}
+If $N\sim$ POI$(\lambda)$ then
+$$E(S) = \lambda\mu,\qquad
+\Var(S) = \lambda\,E\left(X^{2}\right),\qquad
+M_S(t) = \exp\left\{\lambda\left[M_X(t)-1\right]\right\}.$$
+\end{result}
+
+\begin{proof}
+For a Poisson variable $E(N)=\Var(N)=\lambda$ and
+$G_N(t)=e^{\lambda(t-1)}$. Substituting into the theorem,
+$$\Var(S) = \lambda\sigma^{2} + \lambda\mu^{2}
+= \lambda\left(\sigma^{2}+\mu^{2}\right) = \lambda\,E\left(X^{2}\right),$$
+and $M_S(t) = G_N\left(M_X(t)\right) = \exp\left\{\lambda\left[M_X(t)-1\right]\right\}$.
+\end{proof}
+
+\begin{note}
+The variance collapsing to $\lambda E\left(X^{2}\right)$ is a genuine
+simplification, and it is peculiar to the Poisson: it happens because the mean
+and variance of a Poisson variable coincide, so the two terms combine into the
+second moment. It is worth remembering as a check --- if a compound Poisson
+calculation does not reduce to $\lambda E\left(X^{2}\right)$, something has gone
+wrong.
+\end{note}
+
+\begin{exa}
+Let $S = X_1+\cdots+X_N$ where $N\sim$ POI$(15)$ and each $X_i$ has the
+GAM$(\alpha,\beta)$ distribution with shape $\alpha$ and scale $\beta$,
+independently of $N$. Find $E(S)$ and $\Var(S)$.
+\end{exa}
+
+\begin{solution}
+For the gamma, $\mu = \alpha\beta$ and $\sigma^{2} = \alpha\beta^{2}$, so
+$$E\left(X^{2}\right) = \sigma^{2}+\mu^{2}
+= \alpha\beta^{2} + \alpha^{2}\beta^{2} = \alpha(\alpha+1)\beta^{2}.$$
+Hence
+$$E(S) = 15\,\alpha\beta,\qquad
+\Var(S) = 15\,\alpha(\alpha+1)\beta^{2}.$$
+As a check, the general formula gives
+$15\alpha\beta^{2} + 15\alpha^{2}\beta^{2}$, which is the same.
+\end{solution}
+
+\begin{exa}
+An insurer expects $200$ claims a year, the number following a Poisson
+distribution. Individual claims have mean $\$1{,}500$ and standard deviation
+$\$2{,}000$. Find the mean and standard deviation of the annual total.
+\end{exa}
+
+\begin{solution}
+Here $\lambda = 200$, $\mu = 1500$ and $\sigma = 2000$, so
+$$E(S) = 200(1500) = \$300{,}000 ,$$
+$$E\left(X^{2}\right) = 2000^{2} + 1500^{2} = 4{,}000{,}000 + 2{,}250{,}000
+= 6{,}250{,}000 ,$$
+$$\Var(S) = 200\times 6{,}250{,}000 = 1{,}250{,}000{,}000 ,
+\qquad \text{sd}(S) = \$35{,}355 .$$
+
+The standard deviation is about $12\%$ of the mean, and it is worth seeing where
+it comes from: the claim-size term contributes $200\times2000^{2}$ and the
+claim-number term $200\times1500^{2}$, so uncertainty about \emph{how many}
+claims occur accounts for over a third of the total variance. An insurer that
+modelled the claim count as fixed at $200$ would understate the standard
+deviation by more than a fifth.
+\end{solution}
+
+
+\pagebreak
+
 \section{LIMIT THEOREMS}
 \vspace{0.5cm}
 \subsection{Introduction}
