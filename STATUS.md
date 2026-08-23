@@ -557,6 +557,93 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-23 — Statistical Inference published; Probability Theory merge planned
+
+Sixteenth course live. Statistical Inference: every one of its 34 results proved
+and all 56 problems worked, 155 pages against 106 in the source, 16 subsections
+added at real topic boundaries.
+
+#### A correction worth keeping
+I reported Statistical Inference's pages as unusually long. They are not — 58 KB
+at the largest, against 101 KB in Mathematical Statistics. What differs is the
+page COUNT, and the cause is the document class rather than the writing:
+**make4ht's split level 3 means subsection for an `article` and section for a
+`report`**, so the four report-class courses here (Statistical Inference,
+Introduction to Probability, Mathematical Statistics, Theory of Nonparametric
+Statistics, Topics in Mathematical Methods) split one level coarser than the
+rest. Raising it per course is a change to `site/make-course.sh`, affects those
+courses' page counts and keys, and is a decision for the user rather than a
+drive-by.
+
+#### Two defects only pdflatex catches
+Three `note` environments opened with a bare `\\` as their first line, left by
+my own bold-Note conversion. `make4ht` accepted them silently; `pdflatex` gives
+"There's no line here to end." **Compile with both** — the web build alone will
+not tell you.
+
+#### Probability Theory — the merge, and what each source is
+Two sources, and they are complementary rather than duplicates.
+
+- **Old**: `Probality_Theory_Notes/Probability Theory.pdf`, 53 pages, 2016, the
+  user's own notes with Dr N. Ngwengwe. Already converted to
+  `courses/probability-theory/source/`.
+- **New, departmental**: `MAT 3902 Probability theory.ver6.pdf`, 126 pages,
+  Banda Kacheta Alick, August 2024. This is what is taught now. Word-produced,
+  Unicode mathematics, extractable with `pdftotext -layout` but everything must
+  be re-set as LaTeX by hand.
+- **Tutorial sheets 3, 4 and 5** from 2024 are present. **Sheets 1 and 2 are
+  missing** and should be requested from the department.
+
+**What only the old notes have:** Functions of Random Variables — the cdf
+technique, sums of independent variables, the distribution of the range, joint
+distributions. The new notes drop this entirely, although convolutions and order
+statistics both rest on it.
+
+**What only the new notes have:** generating functions (PGF, MGF, CGF),
+convolutions, unconditional moments, compound distributions, the four modes of
+stochastic convergence, and a far fuller treatment of stochastic processes,
+counting processes and Markov chains.
+
+**What NEITHER has, though the old notes' own outline promises it.** The 2016
+outline lists six topics and the notes deliver four. Missing outright:
+*Martingale theory* (definition, martingale differences, Hoeffding's inequality,
+convergence) and *Simulation*. Also promised and thin or absent: transformation
+methods with the Jacobian, the probability integral transformation, one-sided
+Chebyshev, and Chernoff bounds.
+
+**What I judge should be added on top:** the uniqueness and continuity theorems
+for generating functions — which is precisely what licenses the MGF proof of the
+central limit theorem the old notes already give, and which neither source
+states; and the implication hierarchy between the four convergence modes, which
+the new notes define separately without ever relating.
+
+**Errors already found in the departmental notes:** the PGF series expansion
+ends `t^4 P(X = 2)` where it must be `P(X = 4)`, and its summation is indexed
+over `X` rather than `x`. In the old notes, the derivation of the density of the
+range of n exponentials carries a stray `e^{-2 lambda u}` outside the integral,
+leaving a free `u` in a function of `r` alone.
+
+#### Merged structure agreed
+Departmental spine, old material folded in where it adds, gaps filled:
+1. Functions of Random Variables (old, plus the Jacobian technique and the
+   probability integral transform)
+2. Generating Functions (new, plus uniqueness and continuity)
+3. Convolutions (new)
+4. Conditional Expectation (both)
+5. Compound Distributions and Unconditional Moments (new)
+6. Modes of Stochastic Convergence (new, plus the implication hierarchy)
+7. Limit Theorems (both: Markov, Chebyshev, one-sided Chebyshev, Chernoff,
+   Slutsky, WLLN, SLLN, CLT)
+8. Stochastic Processes (new)
+9. Counting Processes and the Poisson Process (both)
+10. Markov Chains (both)
+11. Martingales (missing from both, promised by the outline)
+12. Simulation (missing from both, promised by the outline)
+
+House preamble ported, title page depersonalised, compiles at 58 pages. The
+transcription of the 126-page departmental PDF is the bulk of the remaining
+work.
+
 ### 2026-08-18 — Multivariate Calculus proofread; a site-wide MathJax overflow fixed
 
 The course went live on the 17th. This is the pass after it: the overflow sweep, a
