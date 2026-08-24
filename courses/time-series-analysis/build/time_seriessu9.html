@@ -1,0 +1,150 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>10.1 The Partial Autocorrelation Function — Time Series Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='time_series.css' rel='stylesheet' type='text/css' /> 
+<meta content='time_series.tex' name='src' /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Time Series Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="time_seriesse1.html">Introduction</a></li>
+<li class="sub"><a class="" href="time_seriessu1.html">Types of Time Series</a></li>
+<li class="sub"><a class="" href="time_seriessu2.html">Objectives of Time Series</a></li>
+<li class="sub"><a class="" href="time_seriessu3.html">Descriptive Techniques</a></li>
+<li class="sub"><a class="" href="time_seriessu4.html">Stationary Time Series</a></li>
+<li class="sub"><a class="" href="time_seriessu5.html">Transformation</a></li>
+<li class="sub"><a class="" href="time_seriessu6.html">Auto correlation</a></li>
+<li class="ch"><a class="" href="time_seriesse2.html">Stochastic Process</a></li>
+<li class="sub"><a class="" href="time_seriessu7.html">Second Order Stationary</a></li>
+<li class="ch"><a class="" href="time_seriesse3.html">Random Process</a></li>
+<li class="ch"><a class="" href="time_seriesse4.html">Random Walk</a></li>
+<li class="ch"><a class="" href="time_seriesse5.html">Moving Average (Ma)</a></li>
+<li class="ch"><a class="" href="time_seriesse6.html">Invertibility</a></li>
+<li class="ch"><a class="" href="time_seriesse7.html">Autoregressive Process</a></li>
+<li class="sub"><a class="" href="time_seriessu8.html">General Order Of an AR Process</a></li>
+<li class="ch"><a class="" href="time_seriesse8.html">Mixed Arma Models</a></li>
+<li class="ch"><a class="" href="time_seriesse9.html">Integrated Arma</a></li>
+<li class="ch"><a class="" href="time_seriesse10.html">Forecasting</a></li>
+<li class="sub"><a class="current" href="time_seriessu9.html">The Partial Autocorrelation Function</a></li>
+<li class="ch"><a class="" href="time_seriesse11.html">Estimation Of Models</a></li>
+<li class="sub"><a class="" href="time_seriessu10.html">Fitting an AR Model</a></li>
+<li class="sub"><a class="" href="time_seriessu11.html">Fitting an MA Process</a></li>
+<li class="sub"><a class="" href="time_seriessu12.html">Box-Jenkins Seasonal (SARIMA) Model</a></li>
+<li class="sub"><a class="" href="time_seriessu13.html">Forecasting: (Box-Jenkins Procedure)</a></li>
+<li class="sub"><a class="" href="time_seriessu14.html">Computation of Forecast</a></li>
+<li class="ch"><a class="" href="time_seriesse12.html">The Frequency Domain</a></li>
+<li class="sub"><a class="" href="time_seriessu15.html">The Spectral Density</a></li>
+<li class="sub"><a class="" href="time_seriessu16.html">The Periodogram</a></li>
+<li class="ch"><a class="" href="time_seriesse13.html">State Space Models And The Kalman Filter</a></li>
+<li class="sub"><a class="" href="time_seriessu17.html">The Linear Model</a></li>
+<li class="sub"><a class="" href="time_seriessu18.html">The Kalman Filter</a></li>
+<li class="ch"><a class="" href="time_seriesse14.html">Nonlinear Models: ARCH And Volatility</a></li>
+<li class="ch"><a class="" href="time_seriesse15.html">Practice Problems</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 866 --><div class='crosslinks'><p class='noindent'>[<a href='#tailtime_seriessu9.html'>tail</a>] [<a href='time_seriesse10.html#time_seriessu9.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>10.1   </span> <a id='x21-2000010.1'></a>The Partial Autocorrelation Function</h4>
+<!-- l. 868 --><p class='noindent'>The autocorrelation function alone cannot identify an autoregressive model. For an AR\((1)\) process the
+correlation between \(X_t\) and \(X_{t+2}\) is \(\rho (2)=\phi ^{2}\), which is not zero — but none of it is direct. It is entirely inherited
+through \(X_{t+1}\). The partial autocorrelation is what removes that inheritance.
+</p>
+<div class='newtheorem nt-definition'>
+                                                                                      
+                                                                                      
+<!-- l. 874 --><p class='noindent'><span class='head'>
+<a id='x21-20001r1'></a>
+<span class='cmbx-10x-x-109'>Definition 10.1.1.</span>  </span>The <span class='cmti-10x-x-109'>partial autocorrelation </span>at lag \(k\), written \(\phi _{kk}\), is the correlation between \(X_t\)
+and \(X_{t+k}\) after removing the linear effect of the intervening values \(X_{t+1},\dots ,X_{t+k-1}\):
+                                           \[\phi _{kk} = \Corr \left (X_t,\ X_{t+k} \;\middle |\; X_{t+1},\dots ,X_{t+k-1}\right ).\]
+ Equivalently, \(\phi _{kk}\) is the coefficient of \(X_{t-k}\) in the best linear predictor of \(X_t\) from the previous \(k\) values.
+</p>
+</div>
+<!-- l. 881 --><p class='noindent'>
+</p>
+<div class='newtheorem'>
+<!-- l. 883 --><p class='noindent'><span class='head'>
+<a id='x21-20002r2'></a>
+<span class='cmbx-10x-x-109'>Result 10.1.2 </span>(Yule–Walker)<span class='cmbx-10x-x-109'>.</span>  </span>The partial autocorrelations solve
+                                           \[\rho (j) = \sum _{i=1}^{k}\phi _{ki}\,\rho (j-i),\qquad j=1,\dots ,k,\]
+ and \(\phi _{kk}\) is the last coefficient of that system. In matrix form, with \(R_k\) the \(k\times k\) matrix of \(\rho (i-j)\),
+                                           \[R_k\,\boldsymbol {\phi }_k = \boldsymbol {\rho }_k .\]
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 889 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 891 --><p class='noindent'><span class='head'>
+<a id='x21-20003r3'></a>
+<span class='cmbx-10x-x-109'>Example 10.1.3.</span>  </span>Compute \(\phi _{11}\) and \(\phi _{22}\) for a general stationary process.
+</p>
+</div>
+<!-- l. 893 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 895 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> At \(k=1\) the system is \(\rho (1) = \phi _{11}\), so
+                                           \[\phi _{11} = \rho (1).\]
+ At \(k=2\),
+                                           \[\rho (1) = \phi _{21} + \phi _{22}\rho (1),\qquad \rho (2) = \phi _{21}\rho (1) + \phi _{22}.\]
+ Eliminating \(\phi _{21}\),
+                                                                                      
+                                                                                      
+                                           \[\phi _{22} = \frac {\rho (2)-\rho (1)^{2}}{1-\rho (1)^{2}} .\]
+</p><!-- l. 904 --><p class='noindent'>For an AR\((1)\) process \(\rho (k)=\phi ^{k}\), so
+                                           \[\phi _{22} = \frac {\phi ^{2}-\phi ^{2}}{1-\phi ^{2}} = 0 ,\]
+ exactly as the definition promises: once \(X_{t+1}\) is accounted for, nothing direct connects \(X_t\) to \(X_{t+2}\).
+</p>
+</div>
+<div class='newtheorem'>
+<!-- l. 910 --><p class='noindent'><span class='head'>
+<a id='x21-20004r4'></a>
+<span class='cmbx-10x-x-109'>Result 10.1.4 </span>(Identification)<span class='cmbx-10x-x-109'>.</span>  </span>The two functions cut off for opposite models, and this is what
+makes them usable together:
+                                           \[\begin {array}{lll} \text {Model} &amp; \text {ACF} &amp; \text {PACF}\\ \hline \text {AR}(p) &amp; \text {tails off} &amp; \text {cuts off after lag } p\\ \text {MA}(q) &amp; \text {cuts off after lag } q &amp; \text {tails off}\\ \text {ARMA}(p,q) &amp; \text {tails off} &amp; \text {tails off} \end {array}\]
+</p>
+</div>
+<!-- l. 919 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-note'>
+                                                                                      
+                                                                                      
+<!-- l. 921 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>The duality is not a coincidence. An AR\((p)\) process is a finite regression on its own past,
+so beyond lag \(p\) there is no direct effect left to find and the PACF is zero. An MA\((q)\) process is a
+finite sum of \(q+1\) shocks, so beyond lag \(q\) the two windows share no shock at all and the ACF is zero.
+Each model is finite in one representation and infinite in the other — which is the invertibility
+discussion of the previous section seen from the other side.
+</p><!-- l. 929 --><p class='noindent'>In practice both functions are estimated from data and neither cuts off exactly. The usual rule
+is to treat a sample value as zero when it lies within \(\pm 1.96/\sqrt {n}\), since under the null that the true value
+is zero the sample autocorrelation is approximately \(N(0,1/n)\). With \(n=100\) that band is about \(\pm 0.2\), which is wide
+— identification is a judgement, not a calculation, and the reason Box–Jenkins insists on the
+verification step.
+</p>
+</div>
+<!-- l. 935 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-remark'>
+<!-- l. 937 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Remark.</span>  </span>When both functions tail off, the process is ARMA and the orders cannot be read
+off directly. The practical route is then to fit several candidate models and compare them by
+an information criterion, penalising parameters:
+                                           \[\text {AIC} = -2\log L + 2r,\qquad \text {BIC} = -2\log L + r\log n ,\]
+ where \(r\) is the number of estimated parameters. BIC penalises more heavily and tends to choose
+the smaller model, which for forecasting is usually the safer error to make.
+</p>
+</div>
+<!-- l. 945 --><p class='noindent'>
+</p>
+<!-- l. 948 --><div class='crosslinks'><p class='noindent'>[<a href='time_seriessu9.html'>front</a>] [<a href='time_seriesse10.html#time_seriessu9.html'>up</a>] </p></div>
+<!-- l. 948 --><p class='noindent'><a id='tailtime_seriessu9.html'></a> </p> 
+<nav class="pagenav"><a class="up" href="time_seriesse10.html#time_seriessu9.html">Contents</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="time-series-analysis/10-1-the-partial-autocorrelation-function" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
