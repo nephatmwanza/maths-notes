@@ -557,6 +557,94 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-08-24 — Introduction to Statistics: tutorial sheets 3, 4 and 5 worked
+
+Three new sheets were sitting in `~/LaTeX_Projects/Tutorial/` — `MAT2602 tutorial 3`,
+`tutorial sheet 4` and `tutorial sheet 5`, scanned 20 August. They are **this**
+semester's (August and September 2026), so newer than the `Dept/Tutorial_Sheet_1.pdf`
+and `_2.pdf` (May/June) the course was built from. **32 questions, all worked in full.**
+Practice problems 85 → 117; the course is now 43 pages and 63 diagrams.
+
+| Sheet | Topic | Questions | Went to |
+|---|---|---|---|
+| 3 (Aug 2026) | Two-sample confidence intervals | 10 | §2 Estimation |
+| 4 (Aug 2026) | Hypothesis testing, $\chi^2$ | 15 | §3 Hypothesis Testing |
+| 5 (Sept 2026) | ANOVA (1–5), regression (6–7) | 7 | §4 ANOVA, §5 Regression |
+
+ANOVA went 4 → 9 problems and Regression 7 → 9 — the two thinnest sections in the
+course, and sheet 5 fills exactly those.
+
+#### The sheets exposed a gap the course had been carrying
+**§3 never stated a single two-sample test.** Not the pooled $t$, not the paired $t$,
+not two proportions, not the $F$-test for two variances — yet two of its existing
+practice problems (the typists, the Lusaka smokers) already *used* two of them. Sheet 4
+leans on all five. Written as new §3.5, **Tests Comparing Two Populations**, with a
+choosing-between-them table, the pooling rule for proportions, and the tail-selection
+rule for $F$ that tables make easy to get wrong.
+
+Three cases were added to §2's confidence-interval list for the same reason: the
+**paired** difference, a **single variance** ($\chi^2$), and the **ratio of two
+variances** ($F$) — the last is what sheet 3 Q7(b) and Q10(b) ask for outright, and it
+is also the check that decides whether pooling was legitimate. The Smith–Satterthwaite
+(Welch) form is stated there as the remedy when it is not; sheet 3 Q10 is a case where
+the ratio interval is $(0.016,\ 0.454)$, wholly below 1, so the question's own
+instruction to assume equal variances is contradicted by its own data.
+
+#### A TikZ trap in the house preamble — only the rendered SVG shows it
+The house figure style opens `\begin{tikzpicture}[->,>=stealth]`, which makes `->` the
+default for **every** `\draw` in the picture. Existing diagrams get away with it because
+their bodies are `\draw[-Stealth]` axes and `\draw(x,y)node{$\ast$}` points — a node
+places no path, so no arrowhead appears. My two scatter diagrams added **tick marks and
+a dashed regression line**, which are paths, and every one of them sprouted an
+arrowhead: ticks pointing off the axes, and the fitted line ending in an arrow.
+
+`check-envs.py` was clean, `pdflatex` compiled without a murmur, the build reported no
+missing diagrams. The only thing that showed it was looking at the SVG. **Any plain
+`\draw` added to a figure in this document needs an explicit `[-]`.**
+
+**A corollary about how to look.** `convert`/ImageMagick renders these SVGs *without
+their text* — every axis label and tick number vanished, which looked like a second,
+worse defect. It is not: the labels are in the file and Chrome draws them. Rasterise a
+tex4ht SVG in a **browser**, not in ImageMagick, or you will chase a bug that is not
+there.
+
+#### Two more defects of my own, both invisible to the compiler
+**A tabular with more columns in the spec than cells in the rows.** Five ANOVA tables
+were written `{lccccc}` — six columns — against rows of five cells. LaTeX accepts this
+silently and the PDF looks fine; the HTML renders a spurious empty column on the right
+of every ANOVA table. Found by reading the rendered page.
+
+**Display maths wider than the text block.** Five of the new displays ran overfull, the
+worst by 42pt. The site-wide rule at `site/assets/notes.css:221` gives display maths
+`overflow-x:auto`, so nothing is truly lost on the web — but they were broken across
+lines or into `align*` anyway, because a formula the reader must scroll to finish is a
+formula they will not finish.
+
+#### One discussion key orphaned, deliberately
+Inserting §3.5 renumbered the section's practice problems from 3.5 to 3.6, so
+`introduction-to-statistics/3-5-practice-problems` is gone and
+`3-6-practice-problems` replaces it. The methods subsection has to come *before* the
+problems that use it, so the churn is unavoidable; snapshot updated, `check-site.py`
+back to OK at 1110 keys.
+
+#### Errors and oddities in the sheets themselves
+- **Sheet 4 Q4(b)** asks whether "the variance of the contents is $0.03$ **litres**". A
+  variance is in squared units — it should read litres$^2$. Noted in the solution.
+- **Sheet 3 Q3** gives ten students tested under method A and then under method B, calls
+  them two samples, and asks in (c) for the assumptions required. The independence
+  assumption is false: they are ten pairs. The solution states all three assumptions and
+  then says which one fails, since that is plainly what the part is for.
+- **Sheet 5 Q1** presents five plants sampled on four days as a completely randomised
+  design, but every plant's first day is its highest. If those are the same four days,
+  it is a randomised block design, and blocking moves $F$ from $2.64$ (not significant)
+  to $35.4$ (overwhelming). The question does not say, so both readings are given.
+
+#### Verification
+Every number computed before being written — exact binomial sums, `scipy` for the $t$,
+$\chi^2$ and $F$ tails, sums of squares rebuilt from the raw data and cross-checked
+against $SS_{\text{Total}}$. `check-envs.py` clean, `pdflatex` clean at 192 pages,
+`make4ht` clean, no missing diagrams, `check-site.py` OK.
+
 ### 2026-08-23 (evening) — Real Analysis published; Time Series merge planned
 
 Real Analysis live: **19 available, 1 in preparation**. Topology live earlier the

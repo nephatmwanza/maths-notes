@@ -4798,6 +4798,43 @@ The multiplier is $t$, not $Z$, because $\sigma$ is unknown -- the same rule as 
 and the degrees of freedom are $n_1+n_2-2$, one lost from each sample. Pooling is only
 reasonable if the two variances really are close; a common rough check is
 $$\frac{1}{2}<\frac{\hat{S}^2_1}{\hat{S}^2_2}<2.$$
+
+\item C.I.\ for a \textbf{paired} mean difference. When the two samples consist of the same
+units measured twice --- before and after, two treatments on one subject, two machines used
+by the same operators --- the samples are \emph{not} independent and none of the forms above
+applies. Reduce each pair to its difference $d=X_1-X_2$ and treat the $n$ differences as one
+sample:
+$$\overline{d}\pm t_{n-1,\,\alpha/2}\times \frac{\hat{S}_d}{\sqrt{n}},
+\hspace{0.5cm}\text{where}\hspace{0.5cm}
+\hat{S}^2_d=\frac{\sum d^2-(\sum d)^2/n}{n-1}.$$
+The degrees of freedom are $n-1$, one for each \emph{pair}, not $n_1+n_2-2$. Deciding
+between this and case 7 is a question about the experiment, never about the numbers: ask
+whether each value in the first sample is tied to one particular value in the second.
+
+\item C.I.\ for a single variance $\sigma^2$, from a normal population. Since
+$(n-1)\hat{S}^2/\sigma^2\sim\chi^2_{n-1}$,
+$$\frac{(n-1)\hat{S}^2}{\chi^2_{n-1,\,\alpha/2}}<\sigma^2<
+\frac{(n-1)\hat{S}^2}{\chi^2_{n-1,\,1-\alpha/2}}.$$
+The interval is \textbf{not} symmetric about $\hat{S}^2$, because the $\chi^2$ distribution
+is not symmetric; the two tails must be looked up separately. Taking square roots throughout
+gives an interval for $\sigma$, which is legitimate because every quantity is positive.
+
+\item C.I.\ for the ratio of two variances $\sigma_1^2/\sigma_2^2$, from independent normal
+populations:
+$$\frac{\hat{S}_1^2}{\hat{S}_2^2}\cdot\frac{1}{F_{\alpha/2,\,v_1,v_2}}
+<\frac{\sigma_1^2}{\sigma_2^2}<
+\frac{\hat{S}_1^2}{\hat{S}_2^2}\cdot F_{\alpha/2,\,v_2,v_1},
+\hspace{0.4cm}v_1=n_1-1,\ v_2=n_2-1.$$
+Note that the degrees of freedom \textbf{swap} between the two limits. This interval is what
+settles whether the pooling in case 7 was legitimate: if it \textbf{contains 1}, then
+$\sigma_1^2=\sigma_2^2$ is a plausible value and pooling is justified; if it excludes 1, the
+equal-variance assumption is contradicted and the Smith--Satterthwaite (Welch) form should be
+used instead,
+$$(\overline{X}_1-\overline{X}_2)\pm t_{v,\,\alpha/2}
+\sqrt{\frac{\hat{S}_1^2}{n_1}+\frac{\hat{S}_2^2}{n_2}},\qquad
+v=\frac{\left(\hat{S}_1^2/n_1+\hat{S}_2^2/n_2\right)^2}
+{\dfrac{(\hat{S}_1^2/n_1)^2}{n_1-1}+\dfrac{(\hat{S}_2^2/n_2)^2}{n_2-1}},$$
+with $v$ rounded down to a whole number.
 \end{enumerate}
 
 
@@ -6096,6 +6133,431 @@ question. The variety result, at $F=0.94$, needs no such caution: it is close to
 $1$ expected when a factor does nothing at all.
 \end{solution}
 
+\begin{problem}
+To study the effect of a special study programme, $14$ students were selected and paired
+according to IQ and scholastic performance. One student from each pair was randomly
+selected for the special programme, the other took the standard programme. Shortly
+afterwards all took the national examination:
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccccccc}
+Special programme & 66 & 82 & 96 & 72 & 78 & 82 & 67\\
+Standard programme & 60 & 79 & 92 & 73 & 75 & 80 & 69\\
+\end{tabular}
+\end{table}
+Assume normality for the population of differences.
+\begin{enumerate}
+\item[(a).] Find a $95\%$ confidence interval for the population mean difference of the
+scores under the two programmes.
+\item[(b).] Based on your answer in (a), is there a difference in the mean scores under the
+two programmes? Why?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The students were \emph{paired} on IQ and scholastic performance, so the two
+rows are not independent samples. The interval must be built from the seven differences,
+not from the two means separately.
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccccccc}
+$d$ = special $-$ standard & 6 & 3 & 4 & $-1$ & 3 & 2 & $-2$\\
+\end{tabular}
+\caption{Paired differences, special programme minus standard.}
+\end{table}
+With $n=7$, $\sum d=15$ and $\sum d^2=79$:
+$$\overline{d}=\frac{15}{7}=2.143,\qquad
+\hat{S}_d^2=\frac{\sum d^2-(\sum d)^2/n}{n-1}=\frac{79-225/7}{6}=\frac{46.857}{6}=7.810,$$
+so $\hat{S}_d=2.795$. This is one sample of seven differences with $\sigma$ unknown, so the
+multiplier is $t$ on $n-1=6$ degrees of freedom, $t_{6,\,0.025}=2.447$:
+$$\overline{d}\pm t_{6,\,0.025}\frac{\hat{S}_d}{\sqrt{n}}
+=2.143\pm 2.447\times\frac{2.795}{\sqrt{7}}
+=2.143\pm 2.447(1.056)
+=2.143\pm 2.585.$$
+$$-0.44<\mu_d<4.73$$
+
+\textbf{(b).} The interval \textbf{contains zero}. A mean difference of $0$ --- the two
+programmes performing identically --- is among the values the data leave plausible, so at
+the $5\%$ level there is \textbf{no evidence of a difference} between the programmes.
+
+That verdict deserves qualifying rather than simply recording. The point estimate is
+$+2.14$ marks in favour of the special programme, and six of the seven differences are
+positive; the interval fails to exclude zero mainly because seven pairs is very little
+data. The honest reading is not ``the programmes are the same'' but ``seven pairs cannot
+tell them apart''. Note also what the pairing bought: the raw scores range from $60$ to
+$96$, while the differences range only from $-2$ to $6$. Almost all the variation is
+between students, and pairing removes it from the comparison entirely.
+\end{solution}
+
+\begin{problem}
+An administrator at a large university stated that there was a difference in the mean grade
+point average of graduating males and females. A random sample of $45$ graduating males
+gave a mean grade point average of $2.10$ and a variance of $0.64$, while a random sample of
+$50$ graduating females gave a mean of $2.45$ and a variance of $0.70$.
+\begin{enumerate}
+\item[(a).] Construct a $95\%$ confidence interval for the difference in the mean grade
+point average of all male and female graduating students.
+\item[(b).] Using the confidence interval in (a), do the data support the administrator's
+belief?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} Both samples are large ($45$ and $50$), so the sample variances may be used in
+place of the unknown population variances and the multiplier is $Z$:
+$$(\overline{X}_1-\overline{X}_2)\pm Z_{\alpha/2}
+\sqrt{\frac{\hat{S}_1^2}{n_1}+\frac{\hat{S}_2^2}{n_2}}.$$
+With $\overline{X}_1-\overline{X}_2=2.10-2.45=-0.35$ and $Z_{0.025}=1.96$:
+$$\sqrt{\frac{0.64}{45}+\frac{0.70}{50}}=\sqrt{0.014222+0.014000}=\sqrt{0.028222}=0.1680,$$
+$$-0.35\pm 1.96(0.1680)=-0.35\pm 0.3293.$$
+$$-0.679<\mu_1-\mu_2<-0.021$$
+
+\textbf{(b).} The interval lies \textbf{entirely below zero}, so zero is not a plausible
+value for $\mu_1-\mu_2$. The data \textbf{do support} the administrator: at the $5\%$ level
+there is a difference, and its direction is settled too --- the whole interval is negative,
+so the female mean is the larger, by somewhere between $0.02$ and $0.68$ of a grade point.
+
+The lower end of that range is worth a second look. An interval that only just excludes zero
+is statistically significant and practically almost empty: a difference of $0.02$ of a grade
+point would matter to nobody. Significance answers ``is there a difference?'', not ``is the
+difference large enough to care about?'', and the interval --- unlike a bare test --- lets
+you answer both.
+\end{solution}
+
+\begin{problem}
+A typing instructor wanted to compare two methods of teaching, methods A and B. She tested
+her $10$ students under the current method A. Another typing test was given following four
+weeks of instruction under a new method B. The results, in words per minute, are:
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccccccccc}
+Method A & 58 & 63 & 66 & 69 & 70 & 70 & 70 & 76 & 77 & 86\\
+Method B & 60 & 64 & 67 & 69 & 71 & 72 & 74 & 76 & 75 & 85\\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item[(a).] Find a $90\%$ confidence interval for $\mu_B-\mu_A$.
+\item[(b).] Are the two methods different? Why?
+\item[(c).] State the assumption(s) required for (a) and (b) to be valid.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The two samples are small and the population variances unknown, so this is the
+pooled $t$ interval. From the data,
+$$\overline{X}_A=\frac{705}{10}=70.5,\qquad \overline{X}_B=\frac{713}{10}=71.3,$$
+$$\hat{S}_A^2=60.944,\qquad \hat{S}_B^2=48.456.$$
+Pooling,
+$$S_p^2=\frac{(n_A-1)\hat{S}_A^2+(n_B-1)\hat{S}_B^2}{n_A+n_B-2}
+=\frac{9(60.944)+9(48.456)}{18}=\frac{109.400}{2}=54.700,$$
+so $S_p=7.396$. With $t_{18,\,0.05}=1.734$ and $\overline{X}_B-\overline{X}_A=0.8$:
+$$0.8\pm 1.734\times 7.396\sqrt{\tfrac{1}{10}+\tfrac{1}{10}}
+=0.8\pm 1.734(3.308)=0.8\pm 5.736.$$
+$$-4.94<\mu_B-\mu_A<6.54$$
+
+\textbf{(b).} The interval contains zero, so there is \textbf{no evidence} at the $10\%$
+level that the two methods differ. The estimated advantage of method B is $0.8$ words per
+minute, against an interval more than eleven words wide --- the estimate is swamped by its
+own uncertainty.
+
+\textbf{(c).} Three assumptions:
+\begin{enumerate}
+\item[(i).] Both populations of typing speeds are approximately \textbf{normal}. With
+$n=10$ in each sample the Central Limit Theorem is no help, so this is a real requirement.
+\item[(ii).] The population variances are \textbf{equal}, $\sigma_A^2=\sigma_B^2$ --- this is
+what licenses pooling. The rough check holds: $\hat{S}_A^2/\hat{S}_B^2=60.944/48.456=1.26$,
+comfortably inside $(\frac{1}{2},2)$.
+\item[(iii).] The two samples are \textbf{independent}.
+\end{enumerate}
+
+Assumption (iii) is the one this question is really about, and it is false. The \emph{same
+ten students} were tested under both methods, so the data are ten pairs, not two independent
+samples, and the paired interval of Problem 1 is the correct tool. Treating them as
+independent leaves the enormous student-to-student variation --- speeds run from $58$ to
+$86$ --- inside the standard error, which is exactly why the interval came out so wide.
+The question asks you to state the assumptions precisely so that you notice one of them
+does not hold.
+\end{solution}
+
+\begin{problem}
+A random sample of size $n_1=25$ taken from a normal population with standard deviation
+$\sigma_1=5$ has a mean $\overline{X}_1=80$. A second random sample of size $n_2=36$, taken
+from a different normal population with standard deviation $\sigma_2=3$, has a mean
+$\overline{X}_2=75$. Find a $94\%$ confidence interval for $\mu_1-\mu_2$.
+\end{problem}
+
+\begin{solution}
+Both population standard deviations are \textbf{known}, so the multiplier is $Z$ regardless
+of the sample sizes:
+$$(\overline{X}_1-\overline{X}_2)\pm Z_{\alpha/2}
+\sqrt{\frac{\sigma_1^2}{n_1}+\frac{\sigma_2^2}{n_2}}.$$
+For $94\%$ confidence, $\alpha=0.06$ and $\alpha/2=0.03$, so we need the value cutting off
+$3\%$ in the upper tail: $Z_{0.03}=1.88$. Then
+$$\sqrt{\frac{25}{25}+\frac{9}{36}}=\sqrt{1+0.25}=\sqrt{1.25}=1.118,$$
+$$(80-75)\pm 1.88(1.118)=5\pm 2.10.$$
+$$2.90<\mu_1-\mu_2<7.10$$
+The interval is wholly positive, so the first population mean is the larger.
+
+Two points of technique. First, the confidence level is $94\%$, not one of the three
+familiar ones, and $Z_{0.03}=1.88$ must be read from the body of the normal table rather
+than recalled. Second, $n_1=25$ is small, but that does not call for $t$: $t$ exists to pay
+for \emph{estimating} $\sigma$, and here nothing is estimated. What the small sample does
+require is the stated normality of the first population, and the question supplies it.
+\end{solution}
+
+\begin{problem}
+The following data, recorded in days, represent the length of time to recovery for patients
+randomly treated with one of two medications to clear up severe bladder infections:
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccc}
+& $n$ & $\overline{x}$ & $s^2$\\
+\hline
+Medication 1 & 14 & 17 & 1.5\\
+Medication 2 & 16 & 19 & 1.8\\
+\end{tabular}
+\end{table}
+Find a $99\%$ confidence interval for the difference $\mu_2-\mu_1$ in the mean recovery time
+for the two medications, assuming normal populations with equal variances.
+\end{problem}
+
+\begin{solution}
+Equal variances are assumed and both are unknown, so the pooled $t$ interval applies:
+$$S_p^2=\frac{(n_1-1)\hat{S}_1^2+(n_2-1)\hat{S}_2^2}{n_1+n_2-2}
+=\frac{13(1.5)+15(1.8)}{28}=\frac{19.5+27.0}{28}=\frac{46.5}{28}=1.6607,$$
+so $S_p=1.2887$ on $n_1+n_2-2=28$ degrees of freedom, and $t_{28,\,0.005}=2.763$.
+$$S_p\sqrt{\frac{1}{n_1}+\frac{1}{n_2}}=1.2887\sqrt{\frac{1}{14}+\frac{1}{16}}
+=1.2887\sqrt{0.13393}=1.2887(0.36596)=0.4716.$$
+With $\overline{X}_2-\overline{X}_1=19-17=2$,
+$$2\pm 2.763(0.4716)=2\pm 1.303.$$
+$$0.70<\mu_2-\mu_1<3.30$$
+
+The whole interval is positive, so even at $99\%$ confidence medication 2 takes longer:
+patients on it recover between about $0.7$ and $3.3$ days later than those on medication 1.
+Note the direction the question asked for --- $\mu_2-\mu_1$, not $\mu_1-\mu_2$. Reversing
+the subtraction reverses the interval to $(-3.30,-0.70)$, which says exactly the same thing;
+what would be wrong is to quote $(0.70,3.30)$ while describing medication 1 as the slower.
+Note also that the pooled estimate $S_p^2=1.66$ lies between the two sample variances $1.5$
+and $1.8$, as it must: it is a weighted average of them, leaning towards $1.8$ because the
+second sample is the larger.
+\end{solution}
+
+\begin{problem}
+A certain geneticist is interested in the proportion of males and females in the population
+that have a certain minor blood disorder. In a random sample of $1000$ males, $250$ are
+found to be afflicted, whereas $275$ of $1000$ females tested appear to have the disorder.
+Compute a $95\%$ confidence interval for the difference between the proportion of males and
+females that have the blood disorder.
+\end{problem}
+
+\begin{solution}
+The sample proportions are
+$$\hat{P}_1=\frac{250}{1000}=0.25\quad\text{(males)},\qquad
+\hat{P}_2=\frac{275}{1000}=0.275\quad\text{(females)}.$$
+All four counts are far above $5$, so the normal approximation is sound and
+$$(\hat{P}_1-\hat{P}_2)\pm Z_{\alpha/2}
+\sqrt{\frac{\hat{P}_1(1-\hat{P}_1)}{n_1}+\frac{\hat{P}_2(1-\hat{P}_2)}{n_2}}.$$
+$$\sqrt{\frac{0.25(0.75)}{1000}+\frac{0.275(0.725)}{1000}}
+=\sqrt{0.0001875+0.00019938}=\sqrt{0.00038688}=0.01967,$$
+$$(0.25-0.275)\pm 1.96(0.01967)=-0.025\pm 0.0386.$$
+$$-0.0636<P_1-P_2<0.0136$$
+
+The interval contains zero, so there is no evidence at the $5\%$ level that the disorder
+strikes the sexes at different rates. Observe that here --- unlike a \emph{test} of
+$P_1=P_2$ --- each sample supplies its own $\hat{P}$ to the standard error. There is no
+pooling, because a confidence interval makes no null hypothesis of equality to compute
+under; it simply estimates a difference. Pooling belongs to the test of Sheet 4, not to the
+interval.
+\end{solution}
+
+\begin{problem}
+A study compared fuel economies for two types of trucks. Twelve Volkswagen trucks used in
+the study gave an average of $16$ km per litre with a standard deviation of $1.0$ km per
+litre, while $10$ Toyota trucks gave an average of $11$ km per litre with a standard
+deviation of $0.8$ km per litre. Assume the distances per litre for each truck model are
+approximately normally distributed.
+\begin{enumerate}
+\item[(a).] Construct a $90\%$ confidence interval for the difference between the average
+kilometres per litre of these two trucks, assuming the population variances are equal.
+\item[(b).] Construct a $98\%$ confidence interval for $\sigma_1/\sigma_2$, where
+$\sigma_1$ and $\sigma_2$ are the standard deviations for the Volkswagen and Toyota trucks
+respectively.
+\item[(c).] Were we justified in assuming that the population variances are equal in
+part (a)? Why?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} Pooling with $n_1=12$, $\hat{S}_1=1.0$, $n_2=10$, $\hat{S}_2=0.8$:
+$$S_p^2=\frac{11(1.00)+9(0.64)}{20}=\frac{11.00+5.76}{20}=\frac{16.76}{20}=0.838,
+\qquad S_p=0.9154,$$
+on $20$ degrees of freedom, with $t_{20,\,0.05}=1.725$.
+$$S_p\sqrt{\frac{1}{12}+\frac{1}{10}}=0.9154\sqrt{0.18333}=0.9154(0.42817)=0.3920,$$
+$$(16-11)\pm 1.725(0.3920)=5\pm 0.676.$$
+$$4.32<\mu_1-\mu_2<5.68$$
+
+\textbf{(b).} A ratio of variances calls for the $F$-distribution. The $100(1-\alpha)\%$
+interval for $\sigma_1^2/\sigma_2^2$ is
+$$\frac{\hat{S}_1^2}{\hat{S}_2^2}\cdot\frac{1}{F_{\alpha/2,\,v_1,v_2}}
+\;<\;\frac{\sigma_1^2}{\sigma_2^2}\;<\;
+\frac{\hat{S}_1^2}{\hat{S}_2^2}\cdot F_{\alpha/2,\,v_2,v_1},$$
+with $v_1=n_1-1=11$ and $v_2=n_2-1=9$ --- and note that the degrees of freedom
+\textbf{swap} in the upper limit. Here $\hat{S}_1^2/\hat{S}_2^2=1.00/0.64=1.5625$, and for
+$98\%$ confidence $\alpha/2=0.01$, so $F_{0.01,\,11,9}=5.178$ and $F_{0.01,\,9,11}=4.632$:
+$$\frac{1.5625}{5.178}<\frac{\sigma_1^2}{\sigma_2^2}<1.5625(4.632)
+\quad\implies\quad 0.302<\frac{\sigma_1^2}{\sigma_2^2}<7.237.$$
+Taking square roots throughout --- legitimate because every quantity is positive ---
+$$0.549<\frac{\sigma_1}{\sigma_2}<2.690$$
+
+\textbf{(c).} \textbf{Yes.} The interval in (b) \textbf{contains 1}, and
+$\sigma_1/\sigma_2=1$ is precisely the statement $\sigma_1=\sigma_2$. Equal variances are
+therefore consistent with the data, and the pooling in (a) is justified.
+
+The width of that interval is itself the lesson: from $0.55$ to $2.69$, one standard
+deviation could plausibly be half the other or nearly three times it. Variances are
+estimated far less precisely than means from the same data, which is why the equal-variance
+assumption is so rarely rejected on small samples --- and why part (c) is a check that the
+assumption is \emph{not contradicted}, rather than a demonstration that it is true.
+\end{solution}
+
+\begin{problem}
+A taxi company is trying to decide whether to purchase brand A or brand B tyres for its
+fleet. To estimate the difference in the two brands, an experiment is conducted using $12$
+tyres of each brand, run until they wear out:
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+Brand A: & $\overline{X}_1=36{,}300$ km & $\hat{S}_1=5000$ km\\
+Brand B: & $\overline{X}_2=38{,}100$ km & $\hat{S}_2=6100$ km\\
+\end{tabular}
+\end{table}
+Compute a $95\%$ confidence interval for $\mu_1-\mu_2$, assuming the populations to be
+approximately normally distributed.
+\end{problem}
+
+\begin{solution}
+Pooling the two variances, with $n_1=n_2=12$:
+$$S_p^2=\frac{11(5000)^2+11(6100)^2}{22}=\frac{(5000)^2+(6100)^2}{2}
+=\frac{25{,}000{,}000+37{,}210{,}000}{2}=31{,}105{,}000,$$
+so $S_p=5577.2$ km on $22$ degrees of freedom, and $t_{22,\,0.025}=2.074$.
+$$S_p\sqrt{\frac{1}{12}+\frac{1}{12}}=5577.2\sqrt{0.16667}=5577.2(0.40825)=2276.9,$$
+$$(36{,}300-38{,}100)\pm 2.074(2276.9)=-1800\pm 4722.$$
+$$-6522<\mu_1-\mu_2<2922\ \text{km}$$
+
+The interval contains zero, so there is no evidence that the two brands differ in average
+life. Brand B outlasted brand A by $1800$ km in the samples, but with tyre lives varying by
+five or six thousand kilometres within each brand, twelve tyres apiece cannot establish a
+difference of that size.
+
+When the sample sizes are equal the pooled variance simplifies to the plain average of the
+two sample variances, as above --- the weights $n_1-1$ and $n_2-1$ are the same and cancel.
+That shortcut only works for $n_1=n_2$; with unequal samples the larger one must carry the
+greater weight.
+\end{solution}
+
+\begin{problem}
+A railroad company used two types of wheel mounts that differ in the way they handle track
+irregularities: Type A (spring equalised) and Type B (frame equalised). The following data
+give the repair records for the two types over a one-year period:
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+& Number of cars & Number needing service\\
+\hline
+Type A & 150 & 20\\
+Type B & 180 & 18\\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item[(a).] Find a $95\%$ confidence interval for the difference in the population
+proportions $P_A-P_B$.
+\item[(b).] Based on your results in (a), do you think there is a difference between $P_A$
+and $P_B$?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The sample proportions needing service are
+$$\hat{P}_A=\frac{20}{150}=0.1333,\qquad \hat{P}_B=\frac{18}{180}=0.1000.$$
+Each sample has at least five successes and five failures, so
+$$\sqrt{\frac{0.1333(0.8667)}{150}+\frac{0.1000(0.9000)}{180}}
+=\sqrt{0.00077037+0.00050000}=\sqrt{0.00127037}=0.03564,$$
+$$(0.1333-0.1000)\pm 1.96(0.03564)=0.0333\pm 0.0699.$$
+$$-0.0365<P_A-P_B<0.1032$$
+
+\textbf{(b).} The interval \textbf{contains zero}, so there is \textbf{no evidence} of a
+difference between the two types of mount at the $5\%$ level. Type A needed service a third
+more often in relative terms ($13.3\%$ against $10.0\%$), but with only $20$ and $18$
+failures observed, that gap is well within sampling variation.
+
+This is worth contrasting with Problem 6. There the difference in proportions was
+\emph{smaller} ($0.025$ against $0.033$) yet the conclusion was the same only by a narrow
+margin --- because the samples were $1000$ each rather than $150$ and $180$. Precision in
+estimating a proportion is governed by the number of \emph{events}, not by how striking the
+percentages look; $20$ failures is simply not many.
+\end{solution}
+
+\begin{problem}
+The following data represent the running times of films produced by two motion picture
+companies:
+\begin{table}[H]
+\centering
+\begin{tabular}{l|l}
+Company & Time (in minutes)\\
+\hline
+I & 103\quad 94\quad 110\quad 87\quad 98\\
+II & 97\quad 82\quad 123\quad 92\quad 175\quad 88\quad 118\\
+\end{tabular}
+\end{table}
+Assume that the running times are approximately normally distributed.
+\begin{enumerate}
+\item[(a).] Compute a $90\%$ confidence interval for the difference between the average
+running times of the films produced by the two companies.
+\item[(b).] Construct a $90\%$ confidence interval for $\sigma_1^2/\sigma_2^2$.
+\item[(c).] Should we have assumed $\sigma_1^2=\sigma_2^2$ in constructing a confidence
+interval for $\mu_{II}-\mu_{I}$? Why?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a).} The summary statistics are
+$$n_1=5,\quad \overline{X}_1=98.4,\quad \hat{S}_1^2=76.30;\qquad
+n_2=7,\quad \overline{X}_2=110.71,\quad \hat{S}_2^2=1035.90.$$
+Taking the equal-variance assumption as instructed,
+$$S_p^2=\frac{4(76.30)+6(1035.90)}{10}=\frac{305.2+6215.4}{10}=652.06,
+\qquad S_p=25.54,$$
+on $10$ degrees of freedom with $t_{10,\,0.05}=1.812$.
+$$S_p\sqrt{\frac{1}{5}+\frac{1}{7}}=25.54\sqrt{0.34286}=25.54(0.58554)=14.95,$$
+$$(98.4-110.71)\pm 1.812(14.95)=-12.31\pm 27.10.$$
+$$-39.41<\mu_1-\mu_2<14.79\ \text{minutes}$$
+
+\textbf{(b).} With $\hat{S}_1^2/\hat{S}_2^2=76.30/1035.90=0.07366$, $v_1=4$, $v_2=6$, and
+$\alpha/2=0.05$ for a $90\%$ interval: $F_{0.05,\,4,6}=4.534$ and $F_{0.05,\,6,4}=6.163$.
+$$\frac{0.07366}{4.534}<\frac{\sigma_1^2}{\sigma_2^2}<0.07366(6.163)$$
+$$0.016<\frac{\sigma_1^2}{\sigma_2^2}<0.454$$
+
+\textbf{(c).} \textbf{No.} The interval in (b) lies \textbf{entirely below 1}, so
+$\sigma_1^2=\sigma_2^2$ is not a plausible value: company II's running times are between
+about twice and sixty times as variable as company I's. Pooling was therefore not
+justified, and the interval in (a) rests on a false assumption.
+
+The data show why without any arithmetic. Company I's five films run from $87$ to $110$
+minutes; company II's seven run from $82$ to $175$, with one film nearly an hour longer
+than any other. Pooling forces a single $S_p^2=652$ on both companies --- eight times
+company I's own variance --- which inflates the standard error for company I and deflates
+it for company II.
+
+The proper remedy is the Smith--Satterthwaite (Welch) interval, which does not pool:
+$$(\overline{X}_1-\overline{X}_2)\pm t_{v,\,\alpha/2}
+\sqrt{\frac{\hat{S}_1^2}{n_1}+\frac{\hat{S}_2^2}{n_2}},\qquad
+v=\frac{\left(\hat{S}_1^2/n_1+\hat{S}_2^2/n_2\right)^2}
+{\dfrac{(\hat{S}_1^2/n_1)^2}{n_1-1}+\dfrac{(\hat{S}_2^2/n_2)^2}{n_2-1}}.$$
+Here $v=7.19$, rounded down to $7$, giving $-12.31\pm 1.895(12.78)$, or
+$(-36.5,\ 11.9)$ --- a narrower interval than the pooled one, and the defensible answer.
+This estimate of $v$ is generally not a whole number and is rounded \emph{down}, which
+is the conservative choice.
+\end{solution}
+
 
 % THE END
 
@@ -6998,6 +7460,101 @@ Since P -value is greater than 0.025 $\implies$ We accept $H_0$ and reject $H_1$
 \end{solution}
 % THE END
 
+\pagebreak
+\subsection{Tests Comparing Two Populations}
+
+Everything so far has tested a single population against a stated value. Most practical
+questions are comparisons instead: is this method better than that one, does this brand
+outlast the other, do men and women differ. The machinery is the same --- the four steps do
+not change --- and only the standard error in the denominator is new. The whole difficulty
+is choosing the right one, so the cases are set out together.
+
+\subsubsection{Two means, $\sigma_1$ and $\sigma_2$ known}
+$$Z=\frac{(\overline{X}_1-\overline{X}_2)-(\mu_1-\mu_2)_0}
+{\sqrt{\dfrac{\sigma_1^2}{n_1}+\dfrac{\sigma_2^2}{n_2}}}$$
+where $(\mu_1-\mu_2)_0$ is the difference asserted by $H_0$, almost always zero. As with a
+single mean, $Z$ is used because $\sigma$ is known, whatever the sample sizes. For large
+samples with $\sigma$ unknown, $\hat{S}_1$ and $\hat{S}_2$ may replace them.
+
+\subsubsection{Two means, $\sigma_1=\sigma_2$ unknown --- the pooled $t$-test}
+$$t=\frac{(\overline{X}_1-\overline{X}_2)-(\mu_1-\mu_2)_0}
+{S_p\sqrt{\dfrac{1}{n_1}+\dfrac{1}{n_2}}},
+\hspace{0.5cm}
+S_p^2=\frac{(n_1-1)\hat{S}_1^2+(n_2-1)\hat{S}_2^2}{n_1+n_2-2},$$
+on $n_1+n_2-2$ degrees of freedom. The two samples are pooled into one estimate of the
+common variance, each weighted by its own degrees of freedom, so the larger sample counts
+for more. Both populations must be approximately normal, and the equal-variance assumption
+should be checked by the $F$-test below.
+
+\subsubsection{Paired samples --- the paired $t$-test}
+When the same units are measured twice, the two samples are not independent and the tests
+above do not apply. Work with the $n$ differences $d=X_1-X_2$:
+$$t=\frac{\overline{d}-\mu_{d0}}{\hat{S}_d/\sqrt{n}}$$
+on $n-1$ degrees of freedom. This is the one-sample $t$-test applied to the differences, and
+nothing more.
+
+Pairing is not a complication to be tolerated but the reason such experiments are run. If
+the units differ greatly among themselves --- twelve cars, eight typists, fourteen students
+matched on ability --- that variation is irrelevant to the comparison, and differencing
+removes it entirely. Treating paired data as two independent samples leaves it inside the
+standard error, where it can hide the very effect the experiment was designed to find.
+
+Which test applies is decided by the \emph{design}, never by the data: ask whether each
+observation in the first sample is tied to one particular observation in the second.
+
+\subsubsection{Two proportions}
+$$Z=\frac{\hat{P}_1-\hat{P}_2}
+{\sqrt{\hat{P}(1-\hat{P})\left(\dfrac{1}{n_1}+\dfrac{1}{n_2}\right)}},
+\hspace{0.5cm}
+\hat{P}=\frac{X_1+X_2}{n_1+n_2},$$
+where $X_1$ and $X_2$ are the numbers of successes. The \textbf{pooled} estimate $\hat{P}$
+is used because $H_0$ asserts that the two proportions are one and the same number, and every
+quantity in a test is computed under $H_0$. This is exactly where the test differs from the
+confidence interval for $P_1-P_2$, which assumes no equality and lets each sample supply its
+own $\hat{P}$.
+
+\subsubsection{Two variances --- the $F$-test}
+$$F=\frac{\hat{S}_1^2}{\hat{S}_2^2}\sim F_{v_1,\,v_2},\qquad v_1=n_1-1,\quad v_2=n_2-1,$$
+under $H_0:\sigma_1^2=\sigma_2^2$. Both populations must be normal --- the $F$-test is
+notably sensitive to that, more so than the $t$-test is.
+
+Choosing the critical value needs care, since tables usually print only the upper tail:
+\begin{enumerate}
+\item[$\bullet$] $H_1:\sigma_1^2>\sigma_2^2$ --- reject if $F>F_{\alpha,\,v_1,v_2}$.
+\item[$\bullet$] $H_1:\sigma_1^2<\sigma_2^2$ --- the critical region is the \emph{lower}
+tail: reject if $F<F_{1-\alpha,\,v_1,v_2}=1/F_{\alpha,\,v_2,v_1}$, the degrees of freedom
+swapping.
+\item[$\bullet$] $H_1:\sigma_1^2\neq\sigma_2^2$ --- reject if $F>F_{\alpha/2,\,v_1,v_2}$ or
+$F<1/F_{\alpha/2,\,v_2,v_1}$.
+\end{enumerate}
+For a two-tailed test there is a standard shortcut: put the \emph{larger} sample variance on
+top, so that $F\geq 1$ automatically, and compare with the upper critical value alone.
+
+This test has two uses. It answers questions about variability in their own right --- is one
+machine more consistent than another --- and it is the check that licenses the pooled
+$t$-test of the previous case. Where both are wanted, the $F$-test is done first.
+
+\subsubsection{Choosing between them}
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+Question & Statistic & Degrees of freedom\\
+\hline
+Two means, $\sigma$'s known & $Z$ & --\\
+Two means, $\sigma$'s unknown, $n$ large & $Z$ & --\\
+Two means, $\sigma$'s unknown and equal & $t$ (pooled) & $n_1+n_2-2$\\
+Two means, same units measured twice & $t$ (paired) & $n-1$\\
+Two proportions & $Z$ (pooled $\hat{P}$) & --\\
+Two variances & $F$ & $n_1-1,\ n_2-1$\\
+\end{tabular}
+\end{table}
+
+One warning that applies to all of them. A test that fails to reject $H_0$ has \emph{not}
+shown the two populations to be the same; it has shown that this experiment could not tell
+them apart. With small samples that is usually a statement about the sample size rather than
+about the populations, and the confidence interval --- which displays how large the
+difference might still be --- is the more honest way to report it.
+
 
 
 
@@ -7573,6 +8130,763 @@ third of the time. The power, $1-\beta=0.941$, is excellent; the size, $\alpha=0
 unacceptable for most purposes. Requiring all four draws to be black is simply too strict a
 condition to impose on the null hypothesis, and drawing more counters --- or accepting $H_0$
 on three blacks out of four --- would balance it better.
+\end{solution}
+
+\begin{problem}
+A manufacturer claims that his new fishing line has a mean breaking strength of $15$ kg and
+a standard deviation of $0.5$ kg. To test the hypothesis that $\mu=15$ against the
+alternative that $\mu<15$, a random sample of $50$ lines is tested. The critical region is
+defined to be $\overline{X}<14.9$.
+\begin{enumerate}
+\item[(a).] Explain how one can commit a type I error.
+\item[(b).] Explain how one can commit a type II error.
+\item[(c).] Find the probability of committing a type I error when $H_0$ is true.
+\item[(d).] Evaluate $\beta$ for the alternative $\mu=14.8$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Throughout, $\sigma=0.5$ is known and $n=50$, so the sample mean has standard error
+$$\sigma_{\overline{X}}=\frac{\sigma}{\sqrt{n}}=\frac{0.5}{\sqrt{50}}=0.0707\ \text{kg}.$$
+
+\textbf{(a).} A \textbf{type I error} is rejecting $H_0$ when it is true. Here that means
+the $50$ lines tested happen to give a mean breaking strength below $14.9$ kg --- so we
+declare the line weaker than advertised --- when the true mean really is the claimed $15$
+kg. The manufacturer is wronged by an unlucky sample.
+
+\textbf{(b).} A \textbf{type II error} is failing to reject $H_0$ when it is false. Here
+that means the sample gives a mean of $14.9$ kg or more --- so we let the claim stand ---
+when the true mean is in fact below $15$ kg. A weak line passes.
+
+\textbf{(c).} $\alpha$ is computed \emph{under $H_0$}, taking $\mu=15$:
+\begin{align*}
+\alpha &=P(\overline{X}<14.9 \mid \mu=15)\\
+       &=P\!\left(Z<\frac{14.9-15}{0.0707}\right)\\
+       &=P(Z<-1.41)\\
+       &=0.0793.
+\end{align*}
+About eight tests in a hundred would condemn a line that meets its specification exactly.
+
+\textbf{(d).} $\beta$ is computed under the \emph{alternative}, taking $\mu=14.8$. A type II
+error occurs when the sample mean falls outside the critical region, that is when
+$\overline{X}\geq 14.9$:
+\begin{align*}
+\beta &=P(\overline{X}\geq 14.9 \mid \mu=14.8)\\
+      &=P\!\left(Z\geq\frac{14.9-14.8}{0.0707}\right)\\
+      &=P(Z\geq 1.41)\\
+      &=0.0793.
+\end{align*}
+The power of the test against this alternative is $1-\beta=0.9207$.
+
+The two answers agreeing is not a coincidence and is worth seeing. The boundary $14.9$ sits
+exactly $0.1$ kg below $15$ and exactly $0.1$ kg above $14.8$, so in standard-error units it
+is $1.41$ from each. The normal curve is symmetric, so the tail beyond it has the same area
+in both directions. Move the boundary and the symmetry breaks at once: a boundary at $14.95$
+would raise $\alpha$ to $0.24$ and drop $\beta$ to $0.017$. This is the trade-off in its
+plainest form --- $\alpha$ and $\beta$ are two tails of two curves separated by a fixed
+distance, and sliding the boundary can only shrink one at the other's expense. Only a larger
+$n$, which pulls the curves apart in standard-error units, improves both.
+\end{solution}
+
+\begin{problem}
+The proportion of adults living in a small town who are university graduates is estimated to
+be $p=0.3$. To test this hypothesis, a random sample of $15$ adults is selected. If the
+number of university graduates in our sample is anywhere from $2$ to $7$, we accept the null
+hypothesis that $p=0.3$; otherwise we conclude that $p\neq 0.3$.
+\begin{enumerate}
+\item[(a).] Evaluate $\alpha$ assuming that $p=0.3$.
+\item[(b).] Evaluate $\beta$ for the alternative $p=0.2$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+The sample size is $15$, far too small for a normal approximation to a proportion, so the
+\textbf{binomial distribution is used exactly}: $X\sim B(15,p)$, where $X$ is the number of
+graduates. The acceptance region is $2\leq X\leq 7$; the critical region is
+$X\leq 1$ or $X\geq 8$.
+
+\textbf{(a).} $\alpha$ is the probability of landing in the critical region when $p=0.3$:
+\begin{align*}
+\alpha &=P(X\leq 1)+P(X\geq 8)\ \big|\ p=0.3\\
+       &=\big[P(0)+P(1)\big]+\big[1-P(X\leq 7)\big].
+\end{align*}
+With $P(x)=\binom{15}{x}(0.3)^x(0.7)^{15-x}$:
+$$P(0)=0.0047,\qquad P(1)=0.0305\quad\implies\quad P(X\leq 1)=0.0353,$$
+$$P(X\leq 7)=0.9500\quad\implies\quad P(X\geq 8)=0.0500.$$
+$$\alpha=0.0353+0.0500=0.0853.$$
+
+\textbf{(b).} $\beta$ is the probability of landing in the \emph{acceptance} region when the
+alternative $p=0.2$ holds:
+\begin{align*}
+\beta &=P(2\leq X\leq 7)\ \big|\ p=0.2\\
+      &=P(X\leq 7)-P(X\leq 1)\\
+      &=0.9958-0.1671\\
+      &=0.8287.
+\end{align*}
+The power against $p=0.2$ is therefore only $1-\beta=0.1713$.
+
+Two things this problem is designed to show. First, with a discrete test statistic you
+cannot choose $\alpha$ freely: the acceptance region $2$ to $7$ delivers $\alpha=0.0853$,
+and no rearrangement of whole numbers will produce exactly $0.05$. That is why binomial
+tests are usually reported by their $P$-value rather than against a tidy critical region.
+
+Second, $\beta=0.83$ is dreadful. A true proportion of $0.20$ against a hypothesised $0.30$
+is a large error in any practical sense, and this test misses it five times in six. Fifteen
+adults cannot distinguish those two populations, and no adjustment of the acceptance region
+would fix it --- the fault is the sample size.
+\end{solution}
+
+\begin{problem}
+A random sample of $36$ drinks from a soft-drink machine has an average content of
+$21.9$ ml, with a standard deviation of $1.42$ ml. Is there evidence to suggest that the
+average content is less than $22.2$ ml? Use the $0.05$ level of significance.
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item $H_0:\ \mu=22.2$ ml (the machine delivers as specified); $H_1:\ \mu<22.2$ ml. The
+question asks only about \emph{under}-filling, so the test is one-tailed to the left.
+\item $\alpha=0.05$.
+\item $\sigma$ is unknown but $n=36\geq 30$, so $\hat{S}=1.42$ replaces it and the statistic
+is $Z$:
+$$Z=\frac{\overline{X}-\mu_0}{\hat{S}/\sqrt{n}}
+=\frac{21.9-22.2}{1.42/\sqrt{36}}
+=\frac{-0.3}{0.2367}=-1.27.$$
+\item Critical region: $-z_{0.05}=-1.645$, so reject $H_0$ if $Z<-1.645$.
+\item $-1.27>-1.645$, so we \textbf{fail to reject} $H_0$. There is \textbf{no evidence} at
+the $5\%$ level that the average content is less than $22.2$ ml.
+\end{enumerate}
+
+The $P$-value makes the verdict less abrupt: $P=P(Z<-1.27)=0.1020$. Roughly one machine in
+ten filling correctly to $22.2$ ml would produce a sample this low or lower, which is not
+rare enough to call the setting into question --- but nor is it comfortable. A shortfall of
+$0.3$ ml on every drink is a real loss to a customer, and the sensible response to
+$P=0.10$ is to take a larger sample rather than to record ``no evidence'' and stop.
+\end{solution}
+
+\begin{problem}
+A random sample of $10$ containers of a particular lubricant are found to be $10.2$, $9.7$,
+$10.1$, $10.3$, $10.1$, $9.8$, $9.9$, $10.4$, $10.3$ and $9.8$ litres. Assuming that the
+distribution of the contents is normal, use a $0.01$ level of significance to test the
+hypothesis that the
+\begin{enumerate}
+\item[(a).] average content of this particular lubricant is $10$ litres.
+\item[(b).] variance of the contents of this particular lubricant is $0.03$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+From the ten values, $\sum X=100.6$ and $\sum X^2=1012.58$, so
+$$\overline{X}=\frac{100.6}{10}=10.06,\qquad
+\hat{S}^2=\frac{\sum X^2-(\sum X)^2/n}{n-1}=\frac{1012.58-1012.036}{9}=0.0604,$$
+giving $\hat{S}=0.2459$.
+
+\textbf{(a). The mean.}
+\begin{enumerate}
+\item $H_0:\ \mu=10$; $H_1:\ \mu\neq 10$ (two-tailed --- the question asks whether the
+content \emph{is} $10$ litres, not whether it is short).
+\item $\alpha=0.01$.
+\item $n=10$ is small and $\sigma$ is unknown, so the statistic is $t$ on $n-1=9$ degrees of
+freedom:
+$$t=\frac{\overline{X}-\mu_0}{\hat{S}/\sqrt{n}}
+=\frac{10.06-10}{0.2459/\sqrt{10}}=\frac{0.06}{0.0777}=0.77.$$
+\item Critical region: $t_{9,\,0.005}=3.250$, so reject if $|t|>3.250$.
+\item $0.77<3.250$, so we \textbf{fail to reject} $H_0$. The containers are consistent with
+an average content of $10$ litres.
+\end{enumerate}
+
+\textbf{(b). The variance.}
+\begin{enumerate}
+\item $H_0:\ \sigma^2=0.03$; $H_1:\ \sigma^2\neq 0.03$.
+\item $\alpha=0.01$.
+\item The statistic for a single variance from a normal population is
+$$\chi^2=\frac{(n-1)\hat{S}^2}{\sigma_0^2}=\frac{9(0.0604)}{0.03}
+=\frac{0.5440}{0.03}=18.13$$
+on $9$ degrees of freedom.
+\item Critical region: the $\chi^2$ distribution is not symmetric, so the two tails must be
+looked up separately --- $\chi^2_{9,\,0.995}=1.735$ and $\chi^2_{9,\,0.005}=23.589$. Reject
+if $\chi^2<1.735$ or $\chi^2>23.589$.
+\item $1.735<18.13<23.589$, so we \textbf{fail to reject} $H_0$. There is no evidence that
+the variance differs from $0.03$.
+\end{enumerate}
+
+Two remarks. The sample variance is $0.0604$, double the hypothesised $0.03$, and the test
+still does not reject --- which shows how little nine degrees of freedom can settle about a
+variance. The acceptance region runs from $\chi^2=1.735$ to $23.589$, a range of true
+variances from about $0.023$ to $0.31$.
+
+Note also that the question says ``variance $\ldots$ is $0.03$ litres''. A variance is in
+squared units: it should read $0.03$ litres$^2$, equivalently a standard deviation of about
+$0.17$ litres. The arithmetic is unaffected, but the units as printed are wrong.
+\end{solution}
+
+\begin{problem}
+A random sample of $8$ cigarettes of a certain brand has an average nicotine content of
+$4.2$ mg and a standard deviation of $1.4$ mg. Assume the distribution of the nicotine
+contents is normal.
+\begin{enumerate}
+\item[(a).] Is this in line with a smoker's claim that the average nicotine content exceeds
+$4.9$ mg?
+\item[(b).] Is the standard deviation of the nicotine content of the brand less than
+$1.2$ mg?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+Take $\alpha=0.05$ throughout, since none is stated.
+
+\textbf{(a). The mean.}
+\begin{enumerate}
+\item $H_0:\ \mu=4.9$ mg; $H_1:\ \mu>4.9$ mg. The claim to be examined is that the content
+\emph{exceeds} $4.9$, so it belongs in $H_1$ and the test is one-tailed to the right.
+\item $\alpha=0.05$.
+\item $n=8$, $\sigma$ unknown, population normal, so $t$ on $7$ degrees of freedom:
+$$t=\frac{4.2-4.9}{1.4/\sqrt{8}}=\frac{-0.7}{0.4950}=-1.41.$$
+\item Critical region: $t_{7,\,0.05}=1.895$, so reject if $t>1.895$.
+\item $-1.41<1.895$, so we \textbf{fail to reject} $H_0$. The data are \textbf{not} in line
+with the smoker's claim.
+\end{enumerate}
+
+The arithmetic here is almost beside the point. The sample mean is $4.2$ mg, which is
+\emph{below} the $4.9$ mg being claimed, so the evidence points in the opposite direction to
+the alternative and no sample of this kind could ever support it. Whenever the test
+statistic has the wrong sign for a one-tailed alternative, the conclusion is settled before
+the critical value is looked up.
+
+\textbf{(b). The standard deviation.}
+\begin{enumerate}
+\item $H_0:\ \sigma=1.2$ mg; $H_1:\ \sigma<1.2$ mg --- one-tailed to the left.
+\item $\alpha=0.05$.
+\item
+$$\chi^2=\frac{(n-1)\hat{S}^2}{\sigma_0^2}=\frac{7(1.4)^2}{(1.2)^2}
+=\frac{7(1.96)}{1.44}=\frac{13.72}{1.44}=9.53$$
+on $7$ degrees of freedom.
+\item Critical region: a \emph{small} variance gives a small $\chi^2$, so the rejection
+region is the lower tail, $\chi^2<\chi^2_{7,\,0.95}=2.167$.
+\item $9.53>2.167$, so we \textbf{fail to reject} $H_0$. There is no evidence that the
+standard deviation is less than $1.2$ mg.
+\end{enumerate}
+
+Again the direction settles it: the observed $\hat{S}=1.4$ mg is \emph{larger} than the
+$1.2$ mg in the hypothesis, so it cannot be evidence that the true value is smaller. Note
+which tail belongs to which alternative --- $H_1:\sigma<\sigma_0$ puts the critical region
+in the \emph{lower} tail, and $\chi^2_{7,\,0.95}$ (the value with $95\%$ of the area above
+it) is the cut-off, not $\chi^2_{7,\,0.05}$.
+\end{solution}
+
+\begin{problem}
+A random sample of size $n_1=25$, taken from a normal population with standard deviation
+$\sigma_1=5.2$, has a mean $\overline{X}_1=81$. A second random sample of size $n_2=36$,
+taken from a different normal population with standard deviation $\sigma_2=3.4$, has a mean
+$\overline{X}_2=76$. Test the hypothesis that $\mu_1=\mu_2$ against the alternative
+$\mu_1\neq\mu_2$.
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item $H_0:\ \mu_1=\mu_2$, equivalently $\mu_1-\mu_2=0$; $H_1:\ \mu_1\neq\mu_2$.
+\item $\alpha=0.05$ (none is stated).
+\item Both population standard deviations are \textbf{known}, so the statistic is $Z$
+whatever the sample sizes:
+$$Z=\frac{(\overline{X}_1-\overline{X}_2)-0}
+{\sqrt{\dfrac{\sigma_1^2}{n_1}+\dfrac{\sigma_2^2}{n_2}}}
+=\frac{81-76}{\sqrt{\dfrac{27.04}{25}+\dfrac{11.56}{36}}}
+=\frac{5}{\sqrt{1.0816+0.3211}}=\frac{5}{1.1844}=4.22.$$
+\item Critical region: $\pm z_{0.025}=\pm 1.96$, so reject if $|Z|>1.96$.
+\item $4.22>1.96$, so we \textbf{reject} $H_0$. The two population means differ.
+\end{enumerate}
+
+The evidence is overwhelming rather than marginal: $P=2\,P(Z>4.22)<0.0001$, so a difference
+this large would arise by chance about twice in a hundred thousand repetitions if the means
+were really equal. Compare this with Sheet 3, Problem 4, which used the same structure with
+$\sigma_1=5$, $\sigma_2=3$ and produced the interval $(2.90,\ 7.10)$ for $\mu_1-\mu_2$. The
+interval excluded zero; this test rejects $\mu_1-\mu_2=0$. They are the same statement in
+two forms, and that correspondence is exact: a two-tailed test at level $\alpha$ rejects
+$\mu_1-\mu_2=0$ precisely when the $100(1-\alpha)\%$ interval fails to contain zero.
+\end{solution}
+
+\begin{problem}
+A cigarette manufacturing firm distributes two brands of cigarettes. If it is found that
+$56$ of $200$ smokers prefer brand A and that $29$ of $150$ smokers prefer brand B, can we
+conclude at the $0.06$ level of significance that brand A outsells brand B?
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item $H_0:\ P_A=P_B$; $H_1:\ P_A>P_B$ --- ``outsells'' is directional, so the test is
+one-tailed.
+\item $\alpha=0.06$.
+\item The sample proportions are
+$$\hat{P}_A=\frac{56}{200}=0.28,\qquad \hat{P}_B=\frac{29}{150}=0.1933.$$
+Because $H_0$ asserts the two proportions are \emph{equal}, the common value is estimated by
+\textbf{pooling} both samples:
+$$\hat{P}=\frac{56+29}{200+150}=\frac{85}{350}=0.2429.$$
+\begin{align*}
+Z&=\frac{\hat{P}_A-\hat{P}_B}
+{\sqrt{\hat{P}(1-\hat{P})\left(\dfrac{1}{n_A}+\dfrac{1}{n_B}\right)}}\\
+&=\frac{0.0867}{\sqrt{0.2429(0.7571)\left(\dfrac{1}{200}+\dfrac{1}{150}\right)}}\\
+&=\frac{0.0867}{\sqrt{0.002145}}=\frac{0.0867}{0.0463}=1.87.
+\end{align*}
+\item Critical region: $\alpha=0.06$ in one tail gives $z_{0.06}=1.55$, so reject if
+$Z>1.55$.
+\item $1.87>1.55$, so we \textbf{reject} $H_0$. At the $6\%$ level we conclude that brand A
+does outsell brand B.
+\end{enumerate}
+
+The pooling deserves emphasis, because it is exactly what separates this test from the
+confidence interval of Sheet 3, Problem 6. A test computes everything \emph{under $H_0$},
+and $H_0$ here says the two proportions are one and the same number --- so the best estimate
+of it uses all $350$ smokers. A confidence interval assumes no such equality and lets each
+sample supply its own $\hat{P}$.
+
+Note also the level. $P=P(Z>1.87)=0.0307$, so this result is significant at $6\%$, at $5\%$,
+and even at $3.1\%$ --- but not at $1\%$. Choosing $\alpha=0.06$ rather than the customary
+$0.05$ is unusual and, strictly, ought to be justified before the data are seen rather than
+after.
+\end{solution}
+
+\begin{problem}
+To find out whether a new serum will arrest leukaemia, $9$ mice which have all reached an
+advanced stage of the disease are selected. Five mice receive the treatment and four do not.
+The survival times, in years, from the time the experiment commenced are:
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccccc}
+Treatment & 2.1 & 5.3 & 1.4 & 4.6 & 0.9\\
+No treatment & 1.9 & 0.5 & 2.8 & 3.1 & \\
+\end{tabular}
+\end{table}
+Assume that the two distributions are normally distributed.
+\begin{enumerate}
+\item[(a).] Can the serum be said to be effective? Assume the variances are equal.
+\item[(b).] Is the assumption of equal variances made in (a) justified?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+The summary statistics are
+$$n_1=5,\quad \overline{X}_1=\frac{14.3}{5}=2.86,\quad \hat{S}_1^2=3.883;\qquad
+n_2=4,\quad \overline{X}_2=\frac{8.3}{4}=2.075,\quad \hat{S}_2^2=1.3625.$$
+
+\textbf{(a). Is the serum effective?}
+\begin{enumerate}
+\item $H_0:\ \mu_1=\mu_2$ (the serum makes no difference); $H_1:\ \mu_1>\mu_2$ (treated mice
+survive longer). ``Effective'' means longer survival, so the test is one-tailed.
+\item $\alpha=0.05$.
+\item Small samples, unknown but assumed equal variances, so the pooled $t$:
+$$S_p^2=\frac{4(3.883)+3(1.3625)}{5+4-2}=\frac{15.532+4.0875}{7}=2.803,
+\qquad S_p=1.674,$$
+$$t=\frac{\overline{X}_1-\overline{X}_2}{S_p\sqrt{\dfrac{1}{n_1}+\dfrac{1}{n_2}}}
+=\frac{2.86-2.075}{1.674\sqrt{\dfrac{1}{5}+\dfrac{1}{4}}}
+=\frac{0.785}{1.674(0.6708)}=\frac{0.785}{1.123}=0.70$$
+on $n_1+n_2-2=7$ degrees of freedom.
+\item Critical region: $t_{7,\,0.05}=1.895$, so reject if $t>1.895$.
+\item $0.70<1.895$, so we \textbf{fail to reject} $H_0$. The serum \textbf{cannot} be said
+to be effective.
+\end{enumerate}
+
+\textbf{(b). Are the variances equal?}
+\begin{enumerate}
+\item $H_0:\ \sigma_1^2=\sigma_2^2$; $H_1:\ \sigma_1^2\neq\sigma_2^2$.
+\item $\alpha=0.05$.
+\item The statistic is the ratio of the two sample variances, larger over smaller:
+$$F=\frac{\hat{S}_1^2}{\hat{S}_2^2}=\frac{3.883}{1.3625}=2.85$$
+on $v_1=n_1-1=4$ and $v_2=n_2-1=3$ degrees of freedom.
+\item Critical region: $F_{0.025,\,4,3}=15.10$ in the upper tail, and in the lower tail
+$$F_{0.975,\,4,3}=\frac{1}{F_{0.025,\,3,4}}=\frac{1}{9.979}=0.100.$$
+Reject if $F>15.10$ or $F<0.100$.
+\item $0.100<2.85<15.10$, so we \textbf{fail to reject} $H_0$. The assumption of equal
+variances is \textbf{justified} --- or, more precisely, not contradicted by these data.
+\end{enumerate}
+
+The critical values in (b) tell the real story: with four and three degrees of freedom, one
+variance would have to be fifteen times the other before the test noticed. Almost no
+equal-variance assumption is ever rejected on samples this small, so passing this check is
+weak reassurance, not proof.
+
+The result in (a) is also worth reading carefully. Treated mice survived $0.785$ years
+longer on average, an increase of nearly $40\%$ --- but with five mice and four, and
+survival times ranging from $0.9$ to $5.3$ years, that is well inside chance variation.
+``Not proved effective'' is not the same as ``proved ineffective''; here it means the
+experiment was too small to settle the question either way.
+\end{solution}
+
+\begin{problem}
+A taxi company is trying to decide whether to purchase brand A or brand B tyres for its
+fleet. To help arrive at a decision, an experiment is conducted using $12$ tyres of each
+brand, run until they wear out:
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+Brand A: & $\overline{X}_1=37{,}900$ km & $\hat{S}_1=5100$ km\\
+Brand B: & $\overline{X}_2=39{,}800$ km & $\hat{S}_2=5900$ km\\
+\end{tabular}
+\end{table}
+Assume the populations to be approximately normal.
+\begin{enumerate}
+\item[(a).] Is there a difference in the two brands of tyres?
+\item[(b).] Is the standard deviation of the distances of brand A tyres smaller?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a). The means.}
+\begin{enumerate}
+\item $H_0:\ \mu_1=\mu_2$; $H_1:\ \mu_1\neq\mu_2$ --- ``is there a difference'' is
+two-tailed.
+\item $\alpha=0.05$.
+\item With $n_1=n_2=12$ the pooled variance is the plain average of the two:
+$$S_p^2=\frac{(5100)^2+(5900)^2}{2}=\frac{26{,}010{,}000+34{,}810{,}000}{2}=30{,}410{,}000,$$
+so $S_p=5514.5$ km, and
+$$t=\frac{37{,}900-39{,}800}{5514.5\sqrt{\dfrac{1}{12}+\dfrac{1}{12}}}
+=\frac{-1900}{5514.5(0.4082)}=\frac{-1900}{2251.3}=-0.84$$
+on $22$ degrees of freedom.
+\item Critical region: $t_{22,\,0.025}=2.074$, so reject if $|t|>2.074$.
+\item $0.84<2.074$, so we \textbf{fail to reject} $H_0$. There is no evidence of a
+difference between the two brands.
+\end{enumerate}
+
+\textbf{(b). The standard deviations.}
+\begin{enumerate}
+\item $H_0:\ \sigma_1^2=\sigma_2^2$; $H_1:\ \sigma_1^2<\sigma_2^2$ --- the question asks
+whether brand A is \emph{less} variable, so this is one-tailed.
+\item $\alpha=0.05$.
+\item
+$$F=\frac{\hat{S}_1^2}{\hat{S}_2^2}=\frac{26{,}010{,}000}{34{,}810{,}000}=0.747$$
+on $v_1=11$, $v_2=11$ degrees of freedom.
+\item Critical region: the alternative says the numerator variance is the smaller, so
+\emph{small} values of $F$ are the evidence and the critical region is the lower tail:
+$$F_{0.95,\,11,11}=\frac{1}{F_{0.05,\,11,11}}=\frac{1}{2.818}=0.355.$$
+Reject if $F<0.355$.
+\item $0.747>0.355$, so we \textbf{fail to reject} $H_0$. There is no evidence that brand A
+tyres are less variable in the distance they last.
+\end{enumerate}
+
+Part (b) is the check that part (a) quietly assumed: pooling in (a) requires
+$\sigma_1=\sigma_2$, and (b) confirms that assumption survives. In practice the
+variance test is done \emph{first}, and its outcome decides whether the pooled $t$ or the
+Welch alternative is used for the means.
+
+Note how the tail was chosen in (b). Putting the smaller variance on top produced $F<1$, and
+the alternative pointed to the lower tail. Had the ratio been taken the other way round,
+$F=1/0.747=1.34$ with the same degrees of freedom, the alternative would have pointed to the
+upper tail, and the critical value would have been $2.818$ --- the same test, and the same
+conclusion, written upside down.
+\end{solution}
+
+\begin{problem}
+A taxi company is trying to decide whether to use radial or belted tyres to improve fuel
+economy. Twelve cars were equipped with radial tyres and driven over a prescribed test
+course. Without changing drivers, the same cars were then equipped with belted tyres and
+driven once again over the test course. The fuel consumption in km per litre was recorded:
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccccccccccc}
+Car & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12\\
+\hline
+Radial tyres & 4.2 & 4.7 & 6.6 & 7.0 & 6.7 & 4.5 & 5.7 & 6.0 & 7.4 & 4.9 & 6.1 & 5.2\\
+Belted tyres & 4.1 & 4.9 & 6.2 & 6.9 & 6.8 & 4.4 & 5.7 & 5.8 & 6.9 & 4.7 & 6.0 & 4.9\\
+\end{tabular}
+\end{table}
+Assume the populations to be normally distributed. Can we conclude that cars equipped with
+radial tyres give better fuel economy than those equipped with belted tyres? Use a $0.025$
+level of significance.
+\end{problem}
+
+\begin{solution}
+\textbf{The same twelve cars} were driven on both sets of tyres, with the same drivers over
+the same course. The two rows are therefore twelve \emph{pairs}, not two independent
+samples, and the test is applied to the differences.
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccccccccccc}
+Car & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12\\
+\hline
+$d$ = radial $-$ belted & 0.1 & $-0.2$ & 0.4 & 0.1 & $-0.1$ & 0.1 & 0.0 & 0.2 & 0.5 & 0.2 & 0.1 & 0.3\\
+\end{tabular}
+\caption{Differences in fuel consumption, km per litre, radial minus belted.}
+\end{table}
+\begin{enumerate}
+\item $H_0:\ \mu_d=0$ (the two types of tyre give the same fuel economy);
+$H_1:\ \mu_d>0$ (radial is better) --- one-tailed.
+\item $\alpha=0.025$.
+\item From the twelve differences, $\sum d=1.7$ and $\sum d^2=0.67$, so
+$$\overline{d}=\frac{1.7}{12}=0.1417,\qquad
+\hat{S}_d^2=\frac{0.67-(1.7)^2/12}{11}=\frac{0.4292}{11}=0.03902,$$
+giving $\hat{S}_d=0.1975$ and
+$$t=\frac{\overline{d}}{\hat{S}_d/\sqrt{n}}=\frac{0.1417}{0.1975/\sqrt{12}}
+=\frac{0.1417}{0.0570}=2.48$$
+on $n-1=11$ degrees of freedom.
+\item Critical region: $t_{11,\,0.025}=2.201$, so reject if $t>2.201$.
+\item $2.48>2.201$, so we \textbf{reject} $H_0$. We conclude that radial tyres do give
+better fuel economy.
+\end{enumerate}
+
+The pairing is what makes this result possible. Fuel consumption across the twelve cars runs
+from $4.2$ to $7.4$ km per litre --- a spread of over $3$ --- while the tyre effect is about
+$0.14$. Treated as two independent samples of twelve, the between-car variation would sit in
+the standard error and produce $t=0.18$: nothing at all. Pairing removes every car's own
+characteristics from the comparison, leaving a difference of $0.14$ against a
+\emph{difference} standard deviation of only $0.20$.
+
+The design detail matters as much as the arithmetic. Keeping the same drivers and the same
+course removes two further sources of variation that would otherwise be confounded with the
+tyres. That is deliberate experimental design, not luck.
+\end{solution}
+
+\begin{problem}
+A coin is tossed $20$ times, resulting in $5$ heads. Is this sufficient evidence to suggest
+that heads occur less than $50\%$ of the time?
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item $H_0:\ P=0.5$ (the coin is fair); $H_1:\ P<0.5$ --- one-tailed.
+\item $\alpha=0.05$.
+\item With $n=20$ the binomial can be used exactly. If $X$ is the number of heads,
+$X\sim B(20,0.5)$ under $H_0$, and the evidence against $H_0$ is a small $X$:
+$$P(X\leq 5)=\sum_{x=0}^{5}\binom{20}{x}(0.5)^{20}
+=\frac{1+20+190+1140+4845+15504}{1{,}048{,}576}
+=\frac{21{,}700}{1{,}048{,}576}=0.0207.$$
+\item Decision rule: reject $H_0$ if this probability is below $\alpha=0.05$.
+\item $0.0207<0.05$, so we \textbf{reject} $H_0$. There is sufficient evidence that heads
+occur less than half the time.
+\end{enumerate}
+
+The normal approximation is available as a check, since $nP=nQ=10\geq 5$. Without a
+continuity correction,
+$$Z=\frac{X-nP}{\sqrt{nPQ}}=\frac{5-10}{\sqrt{5}}=-2.24,\qquad P=0.0125,$$
+and with the correction, using $5.5$ in place of $5$,
+$$Z=\frac{5.5-10}{2.236}=-2.01,\qquad P=0.0222.$$
+The corrected value is much the closer to the exact $0.0207$, which is the point of the
+correction: a discrete count is being approximated by a continuous curve, and the half-unit
+compensates for the difference. When $n$ is small enough to sum the binomial directly, as it
+is here, do that instead --- the approximation is a convenience, not an improvement.
+\end{solution}
+
+\begin{problem}
+A die is tossed $180$ times with the following results:
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccccc}
+$x$ & 1 & 2 & 3 & 4 & 5 & 6\\
+\hline
+$f$ & 28 & 36 & 36 & 30 & 27 & 23\\
+\end{tabular}
+\end{table}
+Is this a balanced die? Use a $0.01$ level of significance.
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item $H_0:$ the die is balanced, $P(1)=P(2)=\cdots=P(6)=\frac{1}{6}$;
+$H_1:$ the die is not balanced.
+\item $\alpha=0.01$.
+\item If the die is balanced, each face is expected $E=180\times\frac{1}{6}=30$ times:
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccccc|c}
+Face & 1 & 2 & 3 & 4 & 5 & 6 & Total\\
+\hline
+Observed $O$ & 28 & 36 & 36 & 30 & 27 & 23 & 180\\
+Expected $E$ & 30 & 30 & 30 & 30 & 30 & 30 & 180\\
+$(O-E)^2/E$ & 0.133 & 1.200 & 1.200 & 0.000 & 0.300 & 1.633 & 4.467\\
+\end{tabular}
+\end{table}
+$$\chi^2=\sum\frac{(O-E)^2}{E}=\frac{134}{30}=4.47$$
+on $k-1=5$ degrees of freedom. One degree of freedom is lost because the total, $180$, is
+fixed: once five of the counts are known the sixth follows.
+\item Critical region: $\chi^2_{5,\,0.01}=15.086$, so reject if $\chi^2>15.086$.
+\item $4.47<15.086$, so we \textbf{fail to reject} $H_0$. The die may be regarded as
+balanced.
+\end{enumerate}
+
+The $P$-value is $0.48$: a fair die would produce a set of counts at least this uneven about
+half the time. The observed range from $23$ to $36$ looks lopsided to the eye, but random
+counts around a mean of $30$ have a standard deviation of $\sqrt{180\cdot\frac{1}{6}\cdot
+\frac{5}{6}}=5$, so departures of five or six from $30$ are entirely routine. The
+$\chi^2$ test exists precisely because unaided intuition reads too much into that kind of
+scatter.
+\end{solution}
+
+\begin{problem}
+A machine is supposed to mix peanuts, hazelnuts, cashews and pecans in the ratio
+$5:2:2:1$. A can containing $500$ of these mixed nuts was found to have $269$ peanuts,
+$112$ hazelnuts, $74$ cashews and $45$ pecans. At the $0.05$ level of significance, test the
+hypothesis that the machine is mixing the nuts in the ratio $5:2:2:1$.
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item $H_0:$ the nuts are mixed in the ratio $5:2:2:1$, that is
+$P_1=\frac{5}{10}$, $P_2=P_3=\frac{2}{10}$, $P_4=\frac{1}{10}$;
+$H_1:$ the mixing ratio is not $5:2:2:1$.
+\item $\alpha=0.05$.
+\item The ratio parts sum to $5+2+2+1=10$, so the expected counts out of $500$ are
+$$E_1=500\times\tfrac{5}{10}=250,\quad E_2=E_3=500\times\tfrac{2}{10}=100,\quad
+E_4=500\times\tfrac{1}{10}=50.$$
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cccc|c}
+& Peanuts & Hazelnuts & Cashews & Pecans & Total\\
+\hline
+Observed $O$ & 269 & 112 & 74 & 45 & 500\\
+Expected $E$ & 250 & 100 & 100 & 50 & 500\\
+$(O-E)^2/E$ & 1.444 & 1.440 & 6.760 & 0.500 & 10.144\\
+\end{tabular}
+\end{table}
+$$\chi^2=10.144$$
+on $k-1=3$ degrees of freedom.
+\item Critical region: $\chi^2_{3,\,0.05}=7.815$, so reject if $\chi^2>7.815$.
+\item $10.144>7.815$, so we \textbf{reject} $H_0$. The machine is \textbf{not} mixing the
+nuts in the ratio $5:2:2:1$.
+\end{enumerate}
+
+The table also says \emph{where} the fault lies, which the single statistic does not. The
+cashews alone contribute $6.76$ of the $10.14$ --- two-thirds of the total --- with $74$
+observed against $100$ expected. Every other category is close to its expectation. An
+engineer told only that ``the ratio is wrong'' learns much less than one told that the
+machine is short-changing the cashews specifically. Always inspect the individual
+contributions after a significant $\chi^2$; the test locates a discrepancy, and the table
+names it.
+\end{solution}
+
+\begin{problem}
+A random sample of $90$ adults is classified according to sex and the number of hours they
+watch television during the week:
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cc}
+& Male & Female\\
+\hline
+Over 25 hours & 15 & 29\\
+Under 25 hours & 27 & 19\\
+\end{tabular}
+\end{table}
+Use a $0.01$ level of significance and test the hypothesis that time spent watching
+television is independent of whether the viewer is male or female.
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item $H_0:$ viewing time and sex are independent;
+$H_1:$ viewing time and sex are not independent.
+\item $\alpha=0.01$.
+\item Under independence the expected count in a cell is
+$$E=\frac{(\text{row total})\times(\text{column total})}{\text{grand total}}.$$
+The row totals are $44$ and $46$; the column totals are $42$ and $48$; the grand total
+is $90$.
+\begin{table}[H]
+\centering
+\begin{tabular}{l|cc|c}
+& Male & Female & Row total\\
+\hline
+Over 25 hours & 15\ \ (20.53) & 29\ \ (23.47) & 44\\
+Under 25 hours & 27\ \ (21.47) & 19\ \ (24.53) & 46\\
+\hline
+Column total & 42 & 48 & 90\\
+\end{tabular}
+\caption{Observed counts with expected counts in brackets.}
+\end{table}
+For example $E_{11}=\frac{44\times 42}{90}=20.53$. Then
+\begin{align*}
+\chi^2&=\frac{(15-20.53)^2}{20.53}+\frac{(29-23.47)^2}{23.47}
++\frac{(27-21.47)^2}{21.47}+\frac{(19-24.53)^2}{24.53}\\
+&=1.491+1.305+1.426+1.248\\
+&=5.47
+\end{align*}
+on $(r-1)(c-1)=(2-1)(2-1)=1$ degree of freedom.
+\item Critical region: $\chi^2_{1,\,0.01}=6.635$, so reject if $\chi^2>6.635$.
+\item $5.47<6.635$, so we \textbf{fail to reject} $H_0$. At the $1\%$ level, viewing time
+is independent of sex.
+\end{enumerate}
+
+Notice how close this is. The $P$-value is $0.019$, so the same data \emph{would} reject
+independence at the $5\%$ level and fail to at the $1\%$ level. The verdict is a property of
+the significance level chosen as much as of the data, which is the argument for reporting
+the $P$-value rather than a bare accept-or-reject.
+
+One technical point about $2\times 2$ tables. With a single degree of freedom the
+continuous $\chi^2$ curve is a poorer approximation to a discrete set of counts, and Yates'
+continuity correction
+$$\chi^2_{\text{Yates}}=\sum\frac{\left(|O-E|-0.5\right)^2}{E}$$
+is sometimes applied. Here it gives $4.53$ instead of $5.47$, which does not change the
+conclusion at $1\%$ but would change it at $5\%$. The correction applies only to $2\times 2$
+tables; for anything larger it is neither needed nor correct.
+\end{solution}
+
+\begin{problem}
+A random sample of $200$ married men, all retired, were classified according to education
+and number of children:
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccc}
+& \multicolumn{3}{c}{Number of children}\\
+Education & $0-1$ & $2-3$ & over 3\\
+\hline
+Primary & 14 & 37 & 32\\
+Secondary & 19 & 42 & 17\\
+College & 12 & 17 & 10\\
+\end{tabular}
+\end{table}
+Are family size and level of education attained by the father independent? Use a $0.05$
+level of significance.
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item $H_0:$ family size and level of education are independent;
+$H_1:$ they are not independent.
+\item $\alpha=0.05$.
+\item The row totals are $83$, $78$ and $39$; the column totals are $45$, $96$ and $59$;
+the grand total is $200$. Each expected count is (row total)$\times$(column
+total)$/200$ --- for instance $E_{11}=\frac{83\times 45}{200}=18.675$.
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccc|c}
+& $0-1$ & $2-3$ & over 3 & Row total\\
+\hline
+Primary & 14\ \ (18.675) & 37\ \ (39.840) & 32\ \ (24.485) & 83\\
+Secondary & 19\ \ (17.550) & 42\ \ (37.440) & 17\ \ (23.010) & 78\\
+College & 12\ \ \ (8.775) & 17\ \ (18.720) & 10\ \ (11.505) & 39\\
+\hline
+Column total & 45 & 96 & 59 & 200\\
+\end{tabular}
+\caption{Observed counts with expected counts in brackets.}
+\end{table}
+The individual contributions $(O-E)^2/E$ are
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccc}
+& $0-1$ & $2-3$ & over 3\\
+\hline
+Primary & 1.170 & 0.202 & 2.307\\
+Secondary & 0.120 & 0.555 & 1.570\\
+College & 1.185 & 0.158 & 0.197\\
+\end{tabular}
+\end{table}
+$$\chi^2=\sum\frac{(O-E)^2}{E}=7.46$$
+on $(r-1)(c-1)=(3-1)(3-1)=4$ degrees of freedom.
+\item Critical region: $\chi^2_{4,\,0.05}=9.488$, so reject if $\chi^2>9.488$.
+\item $7.46<9.488$, so we \textbf{fail to reject} $H_0$. There is no evidence at the $5\%$
+level that family size and the father's level of education are related.
+\end{enumerate}
+
+The largest contributions come from the corners of the table --- primary-educated fathers
+with more than three children ($32$ observed against $24.5$ expected) and secondary-educated
+fathers with more than three ($17$ against $23.0$) --- so the data lean in the expected
+direction, with less education accompanying larger families. The test simply says that lean
+is not pronounced enough, on $200$ men, to rule out chance.
+
+A caution on the degrees of freedom. They are $(r-1)(c-1)=4$, \emph{not} the number of cells
+minus one. Nine cells with fixed row and column totals leave only four free: fill in any
+$2\times 2$ corner and the remaining five cells are determined. Using $k-1=8$ here would
+give a critical value of $15.51$ and could reverse a genuine result.
+
+Finally, a condition to check before trusting any $\chi^2$ table test: no expected count
+should fall below $5$. The smallest here is $8.775$, so the test is valid. Had a category
+been sparser, the usual remedy is to combine adjacent categories --- here, for example,
+merging ``$2-3$'' with ``over 3'' --- and recompute with fewer degrees of freedom.
 \end{solution}
 
 
@@ -8772,6 +10086,376 @@ $F_{3,9}=3.86$ --- barely significant instead of decisively so. Removing a known
 interest visible.
 \end{solution}
 
+\begin{problem}
+The owner of a large company wanted to compare the mean daily output of a particular item
+for five plants. For each plant, a random sample of $4$ days gave the data below:
+\begin{table}[H]
+\centering
+\begin{tabular}{c|ccccc}
+Plants & A & B & C & D & E\\
+\hline
+& 29 & 22 & 24 & 23 & 15\\
+& 18 & 17 & 16 & 15 & 8\\
+& 18 & 12 & 14 & 14 & 9\\
+& 18 & 11 & 12 & 10 & 4\\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item[(a).] Write down a model for the above design. Define all the terms in your model.
+\item[(b).] Do the sample data indicate a difference in the population means for the five
+plants?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a). The model.} Five plants are compared and the four days within each plant are a
+random sample from that plant alone, so this is a \textbf{completely randomised design} with
+one factor at five levels:
+$$Y_{ij}=\mu+\tau_i+\varepsilon_{ij},\qquad i=1,\ldots,5;\quad j=1,\ldots,4,$$
+where
+\begin{enumerate}
+\item[$\bullet$] $Y_{ij}$ is the output on the $j$th day at the $i$th plant;
+\item[$\bullet$] $\mu$ is the overall mean output, common to all plants;
+\item[$\bullet$] $\tau_i$ is the effect of the $i$th plant --- the amount by which that
+plant's mean departs from $\mu$, subject to $\sum\tau_i=0$;
+\item[$\bullet$] $\varepsilon_{ij}$ is the random error, assumed independent and
+$N(0,\sigma^2)$ for every plant.
+\end{enumerate}
+The hypothesis of no difference between plants is $\tau_1=\tau_2=\cdots=\tau_5=0$.
+
+\textbf{(b). The analysis of variance.} The plant totals are $83$, $62$, $66$, $62$ and
+$36$, each from $n_i=4$ days, with grand total $G=309$ and $N=20$ observations.
+$$CF=\frac{G^2}{N}=\frac{309^2}{20}=\frac{95{,}481}{20}=4774.05,$$
+$$SS_{\text{Total}}=\sum Y_{ij}^2-CF=5459-4774.05=684.95,$$
+$$SS_{\text{Plants}}=\sum\frac{T_i^2}{n_i}-CF
+=\frac{83^2+62^2+66^2+62^2+36^2}{4}-4774.05=5057.25-4774.05=283.20,$$
+$$SS_{\text{Error}}=684.95-283.20=401.75.$$
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+Source & $SS$ & df & $MS$ & $F$\\
+\hline
+Between plants & 283.20 & 4 & 70.80 & 2.64\\
+Error & 401.75 & 15 & 26.78 & \\
+\hline
+Total & 684.95 & 19 & & \\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item $H_0:\ \mu_A=\mu_B=\mu_C=\mu_D=\mu_E$; $H_1:$ at least two plant means differ.
+\item $\alpha=0.05$.
+\item $F=\dfrac{MS_{\text{Plants}}}{MS_{\text{Error}}}=\dfrac{70.80}{26.78}=2.64$ on
+$(4,15)$ degrees of freedom.
+\item Critical region: $F_{4,15,\,0.05}=3.06$, so reject if $F>3.06$.
+\item $2.64<3.06$, so we \textbf{fail to reject} $H_0$. The data do \textbf{not} indicate a
+difference in the mean daily output of the five plants at the $5\%$ level.
+\end{enumerate}
+
+This is a close call --- $P=0.075$ --- and the reason is visible in the data rather than the
+table. Every plant has one unusually high first day ($29$, $22$, $24$, $23$, $15$) and three
+lower ones, which inflates the within-plant variation and hence $MS_{\text{Error}}$. That
+common pattern suggests the day is itself a source of variation: if the four days were the
+\emph{same} four days at every plant, this is not a completely randomised design at all but
+a randomised block design with days as blocks. Treating them so gives
+$SS_{\text{Days}}=377.75$ on $3$ degrees of freedom, leaving $SS_{\text{Error}}=24.00$ on
+$12$ --- so $MS_{\text{Error}}$ falls from $26.78$ to $2.00$ and the plant $F$ rises from
+$2.64$ to $35.4$, overwhelmingly significant. Problems 3 and 4 do exactly this. Which
+analysis is correct depends on a fact about how the data were collected that the question
+does not supply, and the two answers could hardly differ more.
+\end{solution}
+
+\begin{problem}
+The data in the following table represent final grades given by three professors in an
+advanced statistics course.
+\begin{table}[H]
+\centering
+\begin{tabular}{ccc}
+A & B & C\\
+\hline
+63 & 67 & 97\\
+45 & 45 & 97\\
+73 & 76 & 87\\
+77 & 80 & 87\\
+72 & 70 & 84\\
+& 70 & 74\\
+& & 74\\
+& & 64\\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item[(a).] Write down a model for the above design, explaining all the terms in the model.
+\item[(b).] Is there sufficient evidence to indicate that not all population means are the
+same?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a). The model.} The three professors have $5$, $6$ and $8$ students, and there is
+nothing pairing one professor's students with another's. This is a completely randomised
+design with \textbf{unequal group sizes}:
+$$Y_{ij}=\mu+\tau_i+\varepsilon_{ij},\qquad i=1,2,3;\quad j=1,\ldots,n_i,$$
+with $n_1=5$, $n_2=6$, $n_3=8$, where $Y_{ij}$ is the grade of the $j$th student of the
+$i$th professor, $\mu$ the overall mean grade, $\tau_i$ the effect of the $i$th professor,
+and $\varepsilon_{ij}\sim N(0,\sigma^2)$ independent errors. Unequal $n_i$ change nothing in
+the structure of the model; they only change the divisors in the sums of squares.
+
+\textbf{(b). The analysis of variance.} The professor totals are $330$, $408$ and $664$,
+from $5$, $6$ and $8$ students, with $G=1402$ and $N=19$.
+$$CF=\frac{1402^2}{19}=\frac{1{,}965{,}604}{19}=103{,}452.84,$$
+$$SS_{\text{Total}}=\sum Y_{ij}^2-CF=106{,}986-103{,}452.84=3533.16,$$
+$$SS_{\text{Professors}}=\frac{330^2}{5}+\frac{408^2}{6}+\frac{664^2}{8}-CF
+=21{,}780+27{,}744+55{,}112-103{,}452.84=1183.16,$$
+$$SS_{\text{Error}}=3533.16-1183.16=2350.00.$$
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+Source & $SS$ & df & $MS$ & $F$\\
+\hline
+Between professors & 1183.16 & 2 & 591.58 & 4.03\\
+Error & 2350.00 & 16 & 146.88 & \\
+\hline
+Total & 3533.16 & 18 & & \\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item $H_0:\ \mu_A=\mu_B=\mu_C$; $H_1:$ at least two professor means differ.
+\item $\alpha=0.05$.
+\item $F=\dfrac{591.58}{146.88}=4.03$ on $(2,16)$ degrees of freedom.
+\item Critical region: $F_{2,16,\,0.05}=3.63$, so reject if $F>3.63$.
+\item $4.03>3.63$, so we \textbf{reject} $H_0$. There is sufficient evidence that not all
+three population means are the same.
+\end{enumerate}
+
+Note where the degrees of freedom come from with unequal groups: $k-1=2$ between, and
+$N-k=19-3=16$ within --- not $k(n-1)$, which only applies when every group has the same $n$.
+
+The verdict is level-dependent again: $P=0.038$, so this rejects at $5\%$ but not at $1\%$
+(where the critical value is $6.23$). And the ANOVA says only that the three means are not
+all equal, not \emph{which} differ. The group means are $66.0$, $68.0$ and $83.0$, so
+professor C is the obvious candidate, but establishing that formally needs a multiple
+comparison procedure rather than the $F$-test.
+\end{solution}
+
+\begin{problem}
+In a certain study, $3$ diets were assigned to each of $6$ subjects in a randomised block
+design. At the end of the study each subject was put on a treadmill and the time to
+exhaustion, in seconds, was measured:
+\begin{table}[H]
+\centering
+\begin{tabular}{c|cccccc}
+& \multicolumn{6}{c}{Subject}\\
+Diet & 1 & 2 & 3 & 4 & 5 & 6\\
+\hline
+1 & 84 & 35 & 91 & 57 & 56 & 45\\
+2 & 91 & 48 & 71 & 45 & 61 & 61\\
+3 & 122 & 53 & 110 & 71 & 91 & 122\\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item[(a).] Write down a model for the above design. Explain each term in the model.
+\item[(b).] Perform the analysis of variance, separating out the diet, subject and error
+sum of squares. Use a $0.01$ level of significance to determine if there are significant
+differences among the diets.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a). The model.} Every subject received every diet, so subjects are \textbf{blocks}:
+$$Y_{ij}=\mu+\tau_i+\beta_j+\varepsilon_{ij},\qquad i=1,2,3;\quad j=1,\ldots,6,$$
+where
+\begin{enumerate}
+\item[$\bullet$] $Y_{ij}$ is the time to exhaustion of subject $j$ on diet $i$;
+\item[$\bullet$] $\mu$ is the overall mean time;
+\item[$\bullet$] $\tau_i$ is the effect of the $i$th diet, with $\sum\tau_i=0$ --- the
+treatment effect, and the object of the study;
+\item[$\bullet$] $\beta_j$ is the effect of the $j$th subject, with $\sum\beta_j=0$ --- the
+block effect, a nuisance to be removed rather than a question of interest;
+\item[$\bullet$] $\varepsilon_{ij}\sim N(0,\sigma^2)$ are independent errors.
+\end{enumerate}
+There is one observation per cell, so no diet-by-subject interaction can be estimated; the
+model assumes there is none.
+
+\textbf{(b). The analysis of variance.} The diet totals are $368$, $377$ and $569$; the
+subject totals are $297$, $136$, $272$, $173$, $208$ and $228$. With $G=1314$ and $N=18$,
+$$CF=\frac{1314^2}{18}=\frac{1{,}726{,}596}{18}=95{,}922,$$
+$$SS_{\text{Total}}=\sum Y_{ij}^2-CF=108{,}064-95{,}922=12{,}142,$$
+$$SS_{\text{Diets}}=\frac{368^2+377^2+569^2}{6}-CF=100{,}219-95{,}922=4297,$$
+$$SS_{\text{Subjects}}=\frac{297^2+136^2+272^2+173^2+208^2+228^2}{3}-CF
+=101{,}955.33-95{,}922=6033.33,$$
+$$SS_{\text{Error}}=12{,}142-4297-6033.33=1811.67.$$
+The error degrees of freedom are $(r-1)(c-1)=(3-1)(6-1)=10$.
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+Source & $SS$ & df & $MS$ & $F$\\
+\hline
+Diets & 4297.00 & 2 & 2148.50 & 11.86\\
+Subjects (blocks) & 6033.33 & 5 & 1206.67 & 6.66\\
+Error & 1811.67 & 10 & 181.17 & \\
+\hline
+Total & 12{,}142.00 & 17 & & \\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item $H_0:\ \tau_1=\tau_2=\tau_3=0$ (the three diets have the same mean time);
+$H_1:$ at least two diets differ.
+\item $\alpha=0.01$.
+\item $F=\dfrac{2148.50}{181.17}=11.86$ on $(2,10)$ degrees of freedom.
+\item Critical region: $F_{2,10,\,0.01}=7.56$, so reject if $F>7.56$.
+\item $11.86>7.56$, so we \textbf{reject} $H_0$. There are significant differences among the
+diets, and the diet totals ($368$, $377$, $569$) point to diet 3 as the one producing the
+longest times.
+\end{enumerate}
+
+The blocking earned its place. Subjects differ enormously --- subject 1 totals $297$ seconds
+against subject 2's $136$ --- and that variation has nothing to do with diet. Blocking sends
+it to its own line of the table, where $F=6.66$ against $F_{5,10,\,0.01}=5.64$ confirms it is
+real. Had subjects been ignored, that $6033$ would have joined the error, giving
+$MS_{\text{Error}}=(6033.33+1811.67)/15=523.0$ and a diet $F$ of only $4.11$ --- short of
+$F_{2,15,\,0.01}=6.36$, and the study would have concluded nothing. Pairing each subject
+with themselves across all three diets is what makes the experiment work.
+\end{solution}
+
+\begin{problem}
+Four kinds of fertilizer $f_1$, $f_2$, $f_3$ and $f_4$ are used to study the yield of beans.
+The soil is divided into $3$ blocks each containing $4$ homogeneous plots. The yields in
+kilograms per plot and the corresponding treatments are:
+\begin{table}[H]
+\centering
+\begin{tabular}{ccc}
+Block 1 & Block 2 & Block 3\\
+\hline
+$f_1=42.7$ & $f_3=50.9$ & $f_4=51.1$\\
+$f_3=48.5$ & $f_1=50.0$ & $f_2=46.3$\\
+$f_4=32.8$ & $f_2=38.0$ & $f_1=51.9$\\
+$f_2=39.3$ & $f_4=40.2$ & $f_3=53.5$\\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item[(a).] Write down a model for the above design, explaining all the terms in the model.
+\item[(b).] Conduct an analysis of variance at the $0.01$ level of significance using the
+randomised block model. What is your conclusion?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\textbf{(a). The model.} Each block contains all four fertilizers, one per plot, and the
+order within a block is randomised --- a \textbf{randomised block design}:
+$$Y_{ij}=\mu+\tau_i+\beta_j+\varepsilon_{ij},\qquad i=1,\ldots,4;\quad j=1,2,3,$$
+where $Y_{ij}$ is the yield of fertilizer $i$ in block $j$, $\mu$ the overall mean yield,
+$\tau_i$ the effect of the $i$th fertilizer ($\sum\tau_i=0$), $\beta_j$ the effect of the
+$j$th block ($\sum\beta_j=0$), and $\varepsilon_{ij}\sim N(0,\sigma^2)$ independent errors.
+Blocks are strips of soil expected to differ in fertility; the design removes that
+difference from the comparison of fertilizers.
+
+\textbf{(b). The analysis of variance.} Rearranged by treatment, the fertilizer totals are
+$$T_1=42.7+50.0+51.9=144.6,\qquad T_2=39.3+38.0+46.3=123.6,$$
+$$T_3=48.5+50.9+53.5=152.9,\qquad T_4=32.8+40.2+51.1=124.1,$$
+and the block totals are $B_1=163.3$, $B_2=179.1$, $B_3=202.8$. With $G=545.2$ and $N=12$,
+$$CF=\frac{(545.2)^2}{12}=\frac{297{,}243.04}{12}=24{,}770.25,$$
+$$SS_{\text{Total}}=\sum Y_{ij}^2-CF=25{,}257.48-24{,}770.25=487.23,$$
+$$SS_{\text{Fertilizer}}=\frac{T_1^2+T_2^2+T_3^2+T_4^2}{3}-CF=24{,}988.45-24{,}770.25=218.19,$$
+$$SS_{\text{Blocks}}=\frac{B_1^2+B_2^2+B_3^2}{4}-CF=24{,}967.89-24{,}770.25=197.63,$$
+$$SS_{\text{Error}}=487.23-218.19-197.63=71.40,$$
+on $(4-1)(3-1)=6$ error degrees of freedom.
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+Source & $SS$ & df & $MS$ & $F$\\
+\hline
+Fertilizers & 218.19 & 3 & 72.73 & 6.11\\
+Blocks & 197.63 & 2 & 98.82 & 8.30\\
+Error & 71.40 & 6 & 11.90 & \\
+\hline
+Total & 487.23 & 11 & & \\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item $H_0:\ \tau_1=\tau_2=\tau_3=\tau_4=0$ (all four fertilizers give the same mean yield);
+$H_1:$ at least two differ.
+\item $\alpha=0.01$.
+\item $F=\dfrac{72.73}{11.90}=6.11$ on $(3,6)$ degrees of freedom.
+\item Critical region: $F_{3,6,\,0.01}=9.78$, so reject if $F>9.78$.
+\item $6.11<9.78$, so we \textbf{fail to reject} $H_0$. At the $1\%$ level there is
+\textbf{no significant difference} between the four fertilizers.
+\end{enumerate}
+
+The conclusion turns entirely on the level demanded. At $5\%$ the critical value is
+$F_{3,6,\,0.05}=4.76$, and $6.11$ exceeds it comfortably; the $P$-value is $0.030$. So these
+data \emph{do} distinguish the fertilizers at the conventional $5\%$ level and fail only
+against the stricter $1\%$ the question imposes. With six error degrees of freedom that is
+unsurprising: a $1\%$ test on so little data is a demanding standard.
+
+The blocks were worth having. Their $F=8.30$ against $F_{2,6,\,0.01}=10.92$ falls just short
+of significance at $1\%$, but the block totals climb steadily --- $163.3$, $179.1$, $202.8$
+--- so block 3 is plainly the better soil. Ignoring blocks would put that $197.63$ into the
+error term, giving $MS_{\text{Error}}=(197.63+71.40)/8=33.63$ and a fertilizer $F$ of only
+$2.16$: nothing at all. The design rescued a real effect that a completely randomised
+experiment on the same twelve plots would have buried.
+\end{solution}
+
+\begin{problem}
+A biology professor was interested in whether there was a difference in the mean heart rate
+maximum after exercise on a treadmill between highly trained male and female runners. Do the
+following data indicate a difference in the population means? Use analysis of variance with
+a $1\%$ level of significance.
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccc}
+& sample size & $\overline{x}$ & $s$\\
+\hline
+Males & 10 & 180.3 & 7.2\\
+Females & 10 & 190.8 & 10.7\\
+\end{tabular}
+\end{table}
+\end{problem}
+
+\begin{solution}
+Only summary statistics are given, so the sums of squares must be rebuilt from them. With
+$k=2$ groups of $n=10$, the grand mean is
+$$\overline{\overline{X}}=\frac{10(180.3)+10(190.8)}{20}=\frac{1803+1908}{20}=185.55.$$
+The between-groups sum of squares measures how far the group means sit from that:
+$$SS_{\text{Between}}=\sum n_i(\overline{X}_i-\overline{\overline{X}})^2
+=10(-5.25)^2+10(5.25)^2=551.25.$$
+The within-groups sum of squares is recovered from the sample variances, since
+$\hat{S}_i^2=SS_i/(n_i-1)$:
+$$SS_{\text{Within}}=\sum(n_i-1)\hat{S}_i^2=9(51.84)+9(114.49)=1496.97.$$
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+Source & $SS$ & df & $MS$ & $F$\\
+\hline
+Between sexes & 551.25 & 1 & 551.25 & 6.63\\
+Within (error) & 1496.97 & 18 & 83.17 & \\
+\hline
+Total & 2048.22 & 19 & & \\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item $H_0:\ \mu_M=\mu_F$; $H_1:\ \mu_M\neq\mu_F$.
+\item $\alpha=0.01$.
+\item $F=\dfrac{551.25}{83.17}=6.63$ on $(1,18)$ degrees of freedom.
+\item Critical region: $F_{1,18,\,0.01}=8.29$, so reject if $F>8.29$.
+\item $6.63<8.29$, so we \textbf{fail to reject} $H_0$. At the $1\%$ level the data do not
+indicate a difference in the mean maximum heart rate of male and female runners.
+\end{enumerate}
+
+With exactly two groups, ANOVA and the pooled two-sample $t$-test are the same test. Here
+$$t=\frac{190.8-180.3}{\sqrt{83.17\left(\frac{1}{10}+\frac{1}{10}\right)}}
+=\frac{10.5}{4.078}=2.57,$$
+and $t^2=(2.57)^2=6.63=F$, while the critical values obey the same relation:
+$t_{18,\,0.005}^2=(2.878)^2=8.28=F_{1,18,\,0.01}$. The identity $F_{1,v}=t_v^2$ holds
+generally, and it is why the $F$-test is described as the extension of the two-sample
+$t$-test to more than two groups. Note that the equivalence is with the \emph{two-tailed}
+$t$-test: $F$ is always one-tailed in appearance because squaring destroys the sign, so a
+large $F$ covers a difference in either direction.
+
+The verdict is again close: $P=0.019$, significant at $5\%$ but not at the $1\%$ demanded.
+Note also that ANOVA assumes equal variances across groups, and the female runners'
+$s=10.7$ against the males' $7.2$ gives $F=114.49/51.84=2.21$ on $(9,9)$ degrees of freedom
+against a critical $F_{0.025,\,9,9}=4.03$ --- so the assumption stands.
+\end{solution}
+
 
 \section{Linear Regression and Correlation Analysis}
 
@@ -9926,6 +11610,239 @@ $$-1\pm 2.064(0.0668)=-1\pm 0.138\quad\implies\quad (-1.138,\ -0.862).$$
 The interval is comfortably clear of zero, so the effect of training is significant. The fit
 is very tight --- of the total $62$ in $Y$, all but $6$ is explained by $x$, giving
 $r=-0.950$.
+\end{solution}
+
+\begin{problem}
+A state official was investigating the relationship between salary ($x$) and the number of
+absences ($y$) for state employees. The variable $y$ in the following table represents the
+average number of absences per year for employees at that salary.
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccccccccc}
+Salary in \$ thousands ($x$) & 20.0 & 22.5 & 25.0 & 27.5 & 30.0 & 32.5 & 35.0 & 37.5 & 40.0\\
+Number of absences ($y$) & 2.3 & 2.0 & 2.0 & 1.8 & 2.2 & 1.5 & 1.2 & 1.3 & 0.6\\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item[(a).] Draw a scatter diagram. Does a linear relationship between $x$ and $y$ seem
+appropriate?
+\item[(b).] Estimate the simple linear regression line. Interpret the parameters in the
+model.
+\item[(c).] Estimate the average number of absences for employees earning \$29,000.
+\item[(d).] At the $5\%$ level of significance would you conclude that there is a linear
+relationship between $x$ and $y$?
+\item[(e).] Construct a $95\%$ confidence interval for the slope parameter $\beta$.
+\item[(f).] Find the coefficient of determination and interpret the value.
+\item[(g).] Find the correlation coefficient.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+All seven parts run off the same five sums, so they are computed once at the start. With
+$n=9$,
+$$\sum x=270,\quad \sum y=14.9,\quad \sum xy=420,\quad \sum x^2=8475,\quad \sum y^2=27.11,$$
+$$\overline{x}=30.0,\qquad \overline{y}=1.6556,$$
+\begin{align*}
+S_{xx}&=\sum x^2-\frac{(\sum x)^2}{n}=8475-\frac{72{,}900}{9}=8475-8100=375,\\
+S_{yy}&=\sum y^2-\frac{(\sum y)^2}{n}=27.11-\frac{222.01}{9}=27.11-24.6678=2.4422,\\
+S_{xy}&=\sum xy-\frac{(\sum x)(\sum y)}{n}=420-\frac{(270)(14.9)}{9}=420-447=-27.
+\end{align*}
+
+\textbf{(a). The scatter diagram.}
+
+% Diagram 34
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[->,>=stealth]
+\draw[-Stealth](-0.5,0)--(9.5,0)node[right]{$x$ (\$ thousands)};
+\draw[-Stealth](0,-0.5)--(0,5.6)node[above]{$y$ (absences)};
+\draw[-](0,0)--(0,-0.15)node[below]{20}
+(2,0)--(2,-0.15)node[below]{25}
+(4,0)--(4,-0.15)node[below]{30}
+(6,0)--(6,-0.15)node[below]{35}
+(8,0)--(8,-0.15)node[below]{40};
+\draw[-](0,2)--(-0.15,2)node[left]{1.0}
+(0,4)--(-0.15,4)node[left]{2.0};
+\draw[dashed,-](0,4.751)--(8,1.871);
+\draw(0,4.6)node[]{$\ast$}
+(1,4.0)node[]{$\ast$}
+(2,4.0)node[]{$\ast$}
+(3,3.6)node[]{$\ast$}
+(4,4.4)node[]{$\ast$}
+(5,3.0)node[]{$\ast$}
+(6,2.4)node[]{$\ast$}
+(7,2.6)node[]{$\ast$}
+(8,1.2)node[]{$\ast$};
+\end{tikzpicture}
+\caption{Absences against salary, with the fitted line $\hat{y}=3.816-0.072x$.}
+\end{figure}
+
+The points fall steadily from left to right and stay close to a straight line, so a
+\textbf{linear relationship is appropriate}. The trend is \textbf{negative}: employees on
+higher salaries are absent less often. Only the point at $x=30$ ($y=2.2$) sits noticeably
+above the pattern.
+
+\textbf{(b). The regression line.}
+$$b=\frac{S_{xy}}{S_{xx}}=\frac{-27}{375}=-0.072,\qquad
+a=\overline{y}-b\overline{x}=1.6556-(-0.072)(30)=1.6556+2.16=3.8156,$$
+$$\hat{y}=3.816-0.072x.$$
+\begin{enumerate}
+\item[$\bullet$] \textbf{The slope}, $b=-0.072$: each additional \$1000 of salary is
+associated with $0.072$ fewer absences per year --- about one fewer day of absence for every
+\$14,000 of salary.
+\item[$\bullet$] \textbf{The intercept}, $a=3.816$: the predicted absences for an employee
+earning nothing. No such employee exists, and $x=0$ lies far outside the observed range
+$20$ to $40$, so this number is an \emph{extrapolation} with no interpretation of its own.
+It positions the line; it does not describe anybody.
+\end{enumerate}
+
+\textbf{(c). Prediction at \$29,000.} The salary is in thousands, so $x=29$:
+$$\hat{y}=3.816-0.072(29)=3.816-2.088=1.73\ \text{absences per year}.$$
+This is a legitimate prediction because $29$ lies inside the range of the data.
+
+\textbf{(d). Is there a linear relationship?} Partition the variation first:
+$$SS_{\text{Regression}}=bS_{xy}=(-0.072)(-27)=1.944,$$
+$$SS_{\text{Error}}=S_{yy}-SS_{\text{Regression}}=2.4422-1.944=0.4982,$$
+$$\hat{\sigma}^2=MS_{\text{Error}}=\frac{SS_{\text{Error}}}{n-2}=\frac{0.4982}{7}=0.07117,
+\qquad \hat{\sigma}=0.2668.$$
+\begin{enumerate}
+\item $H_0:\ \beta=0$ (no linear relationship); $H_1:\ \beta\neq 0$.
+\item $\alpha=0.05$.
+\item The standard error of the slope is
+$$\text{S.E}(b)=\frac{\hat{\sigma}}{\sqrt{S_{xx}}}=\frac{0.2668}{\sqrt{375}}
+=\frac{0.2668}{19.365}=0.01378,$$
+$$t=\frac{b-0}{\text{S.E}(b)}=\frac{-0.072}{0.01378}=-5.23$$
+on $n-2=7$ degrees of freedom.
+\item Critical region: $t_{7,\,0.025}=2.365$, so reject if $|t|>2.365$.
+\item $5.23>2.365$, so we \textbf{reject} $H_0$. There \textbf{is} a linear relationship
+between salary and absences at the $5\%$ level ($P=0.0012$).
+\end{enumerate}
+
+\textbf{(e). Confidence interval for $\beta$.}
+$$b\pm t_{n-2,\,\alpha/2}\,\text{S.E}(b)=-0.072\pm 2.365(0.01378)=-0.072\pm 0.0326$$
+$$-0.105<\beta<-0.039.$$
+The interval lies entirely below zero, which is the same conclusion as (d) --- as it must
+be, since the test and the interval are built from the same $t$.
+
+\textbf{(f). Coefficient of determination.}
+$$r^2=\frac{SS_{\text{Regression}}}{S_{yy}}=\frac{1.944}{2.4422}=0.796.$$
+\textbf{Interpretation:} $79.6\%$ of the variation in the number of absences is explained by
+the linear relationship with salary. The remaining $20.4\%$ is due to everything else ---
+health, distance from work, type of job --- and to random variation.
+
+\textbf{(g). Correlation coefficient.}
+$$r=\frac{S_{xy}}{\sqrt{S_{xx}S_{yy}}}=\frac{-27}{\sqrt{375(2.4422)}}=\frac{-27}{30.26}=-0.892.$$
+It is negative, matching the downward slope: $r$ always carries the sign of $b$, since both
+are built from $S_{xy}$ and the other factors are positive. Note that $r=-\sqrt{0.796}$, so
+(f) and (g) are two views of the same quantity --- but $r^2$ loses the sign, which is why
+both are asked for.
+
+A closing caution the numbers cannot supply. Every result here is about
+\emph{association}. Nothing in this data set shows that paying an employee more would cause
+them to attend more often; higher-paid posts differ from lower-paid ones in seniority,
+responsibility and job type, any of which could produce the same pattern. Regression
+measures how two variables move together, and the causal question is settled by the design
+of the study, not by the arithmetic.
+\end{solution}
+
+\begin{problem}
+Consider the following table:
+\begin{table}[H]
+\centering
+\begin{tabular}{l|ccccccc}
+$x$ & 0 & 0 & 0 & 1 & 2 & 2 & 2\\
+$y$ & 0 & 3 & 6 & 6 & 6 & 9 & 12\\
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item[(a).] Is there a negative or positive correlation between $x$ and $y$?
+\item[(b).] Fit the simple linear regression line. Interpret the parameters in the model.
+\item[(c).] Is there a positive linear relationship between $x$ and $y$? Test at the $1\%$
+level of significance.
+\item[(d).] Find a $99\%$ confidence interval for the slope $\beta$.
+\item[(e).] Find the correlation coefficient.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+With $n=7$,
+$$\sum x=7,\quad \sum y=42,\quad \sum xy=60,\quad \sum x^2=13,\quad \sum y^2=342,$$
+$$\overline{x}=1,\qquad \overline{y}=6,$$
+$$S_{xx}=13-\frac{49}{7}=6,\qquad S_{yy}=342-\frac{1764}{7}=90,\qquad
+S_{xy}=60-\frac{(7)(42)}{7}=18.$$
+
+\textbf{(a). Direction of the correlation.} $S_{xy}=+18$ is positive, so the correlation is
+\textbf{positive}: larger $x$ goes with larger $y$. The scatter diagram shows it, and shows
+how loosely.
+
+% Diagram 35
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[->,>=stealth]
+\draw[-Stealth](-0.5,0)--(5.5,0)node[right]{$x$};
+\draw[-Stealth](0,-0.5)--(0,5.6)node[above]{$y$};
+\draw[-](2,0)--(2,-0.15)node[below]{1}
+(4,0)--(4,-0.15)node[below]{2};
+\draw[-](0,1.2)--(-0.15,1.2)node[left]{3}
+(0,2.4)--(-0.15,2.4)node[left]{6}
+(0,3.6)--(-0.15,3.6)node[left]{9}
+(0,4.8)--(-0.15,4.8)node[left]{12};
+\draw[dashed,-](0,1.2)--(4,3.6);
+\draw(0,0)node[]{$\ast$}
+(0,1.2)node[]{$\ast$}
+(0,2.4)node[]{$\ast$}
+(2,2.4)node[]{$\ast$}
+(4,2.4)node[]{$\ast$}
+(4,3.6)node[]{$\ast$}
+(4,4.8)node[]{$\ast$};
+\end{tikzpicture}
+\caption{The seven points, with the fitted line $\hat{y}=3+3x$. Only three distinct $x$
+values occur, and $y$ ranges widely at each.}
+\end{figure}
+
+\textbf{(b). The regression line.}
+$$b=\frac{S_{xy}}{S_{xx}}=\frac{18}{6}=3,\qquad a=\overline{y}-b\overline{x}=6-3(1)=3,$$
+$$\hat{y}=3+3x.$$
+\begin{enumerate}
+\item[$\bullet$] \textbf{The slope}, $b=3$: a one-unit increase in $x$ is associated with an
+increase of $3$ units in $y$ on average.
+\item[$\bullet$] \textbf{The intercept}, $a=3$: the predicted value of $y$ when $x=0$. Here
+--- unlike the previous problem --- $x=0$ is genuinely in the data, three times over, so the
+intercept does mean something. The three observed values at $x=0$ are $0$, $3$ and $6$,
+whose mean is exactly $3$.
+\end{enumerate}
+
+\textbf{(c). Testing for a positive linear relationship.}
+$$SS_{\text{Regression}}=bS_{xy}=3(18)=54,\qquad SS_{\text{Error}}=90-54=36,$$
+$$\hat{\sigma}^2=\frac{36}{n-2}=\frac{36}{5}=7.2,\qquad \hat{\sigma}=2.683,$$
+$$\text{S.E}(b)=\frac{\hat{\sigma}}{\sqrt{S_{xx}}}=\frac{2.683}{\sqrt{6}}=1.095.$$
+\begin{enumerate}
+\item $H_0:\ \beta=0$; $H_1:\ \beta>0$ --- ``positive'' is directional, so one-tailed.
+\item $\alpha=0.01$.
+\item $t=\dfrac{3}{1.095}=2.74$ on $n-2=5$ degrees of freedom.
+\item Critical region: $t_{5,\,0.01}=3.365$, so reject if $t>3.365$.
+\item $2.74<3.365$, so we \textbf{fail to reject} $H_0$. At the $1\%$ level there is no
+evidence of a positive linear relationship.
+\end{enumerate}
+
+\textbf{(d). Confidence interval for $\beta$.} With $t_{5,\,0.005}=4.032$,
+$$3\pm 4.032(1.095)=3\pm 4.42\quad\implies\quad -1.42<\beta<7.42.$$
+The interval contains zero, agreeing with (c).
+
+\textbf{(e). Correlation coefficient.}
+$$r=\frac{S_{xy}}{\sqrt{S_{xx}S_{yy}}}=\frac{18}{\sqrt{6(90)}}=\frac{18}{\sqrt{540}}
+=\frac{18}{23.24}=0.775.$$
+
+This problem is a useful counterweight to the last one. There $r=-0.892$ and the slope was
+decisively significant; here $r=0.775$, which still sounds like a strong correlation, and yet
+the slope cannot be distinguished from zero. Three things explain the difference: only
+seven observations rather than nine; only \emph{three distinct} values of $x$, which makes
+$S_{xx}=6$ against $375$ and so inflates the standard error of the slope; and a much stricter
+one-tailed test at $1\%$. A large $r$ is not by itself evidence of a relationship --- what
+matters is $r$ judged against the sample size and the spread of the $x$ values, and that
+judgement is exactly what the $t$-test performs.
 \end{solution}
 
 
