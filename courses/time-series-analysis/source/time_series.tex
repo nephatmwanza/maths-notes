@@ -1044,4 +1044,301 @@ forecasting further in the future can be calculated recursively when $X_{n+1}$ i
                &=\widehat{x}(n,2)+\alpha (X_{n+1}-\widehat{x}(n,1))+\theta Z_{n-10}\\
                &=\widehat{x}(n,2)+\alpha Z_{n+1}
 \end{align*}
+
+\pagebreak
+
+
+\section{The Frequency Domain}
+
+Everything so far has described a series by how each value relates to the ones
+before it. The frequency domain describes the same series by which
+\emph{cycles} it is made of. Neither view adds information the other lacks ---
+they are Fourier transforms of one another --- but each makes different things
+obvious, and periodicity is far easier to see as a peak than as a pattern in the
+autocorrelations.
+
+\subsection{The Spectral Density}
+
+\begin{defn}
+For a stationary process with autocovariance $\gamma(\tau)$ satisfying
+$\sum_{\tau}\left|\gamma(\tau)\right|<\infty$, the \emph{spectral density} is
+$$f(\omega) = \frac{1}{2\pi}\sum_{\tau=-\infty}^{\infty}\gamma(\tau)\,e^{-i\omega\tau},
+\qquad -\pi \leq \omega \leq \pi .$$
+\end{defn}
+
+\begin{result}
+The autocovariance is recovered by inversion,
+$$\gamma(\tau) = \int_{-\pi}^{\pi} f(\omega)\,e^{i\omega\tau}\,d\omega ,$$
+and in particular
+$$\gamma(0) = \Var(X_t) = \int_{-\pi}^{\pi} f(\omega)\,d\omega .$$
+\end{result}
+
+\begin{note}
+The last line is the interpretation. The total variance of the series is
+distributed across frequencies, and $f(\omega)\,d\omega$ is the share
+contributed by cycles near frequency $\omega$. A peak in the spectrum is a
+frequency band doing a disproportionate amount of the work --- which is exactly
+what a seasonal effect looks like, and it is visible at a glance where the
+autocorrelation function would show only a slow ripple.
+\end{note}
+
+\begin{exa}
+Find the spectral density of white noise, and of the AR$(1)$ process
+$X_t = \phi X_{t-1} + \varepsilon_t$.
+\end{exa}
+
+\begin{solution}
+\subhead{White noise}
+Here $\gamma(0)=\sigma^{2}$ and $\gamma(\tau)=0$ otherwise, so only one term
+survives:
+$$f(\omega) = \frac{\sigma^{2}}{2\pi},$$
+constant in $\omega$. Every frequency contributes equally --- which is what the
+name means, by analogy with white light.
+
+\subhead{AR(1)}
+For the AR$(1)$, $\gamma(\tau) = \dfrac{\sigma^{2}\phi^{|\tau|}}{1-\phi^{2}}$.
+Summing two geometric series,
+$$f(\omega) = \frac{\sigma^{2}}{2\pi}\cdot\frac{1}{\left|1-\phi e^{-i\omega}\right|^{2}}
+= \frac{\sigma^{2}}{2\pi\left(1 - 2\phi\cos\omega + \phi^{2}\right)} .$$
+For $\phi>0$ this is largest at $\omega=0$: the series is dominated by slow
+movement, which is what positive autocorrelation means. For $\phi<0$ the peak
+moves to $\omega=\pi$, the fastest representable oscillation --- alternation
+from one observation to the next.
+\end{solution}
+
+\subsection{The Periodogram}
+
+\begin{defn}
+Given data $x_1,\dots,x_n$, the \emph{periodogram} at the Fourier frequencies
+$\omega_j = 2\pi j/n$ is
+$$I(\omega_j) = \frac{1}{2\pi n}\left|\sum_{t=1}^{n} x_t e^{-i\omega_j t}\right|^{2}.$$
+\end{defn}
+
+\begin{remark}
+The periodogram is the natural estimate of the spectral density and it is a bad
+one. It is asymptotically unbiased, but its variance does \emph{not} fall as $n$
+grows: at each frequency $I(\omega_j)$ is approximately
+$f(\omega_j)\chi^{2}_{2}/2$, whose variance is $f(\omega_j)^{2}$ however long the
+series. Lengthening the record adds more frequencies rather than improving any
+one of them.
+
+The cure is smoothing --- averaging the periodogram over a window of
+neighbouring frequencies. Averaging $m$ approximately independent ordinates cuts
+the variance by a factor $m$ at the cost of blurring detail across the window,
+which is the usual bias-variance trade and is chosen by how sharp the features
+of interest are expected to be.
+\end{remark}
+
+\begin{note}
+This is worth stating plainly because it is counter-intuitive: an estimator can
+be consistent for the whole function in an integrated sense while being
+inconsistent at every single point. The periodogram is the standard example, and
+it is why raw periodograms look so ragged.
+\end{note}
+
+\section{State Space Models And The Kalman Filter}
+
+An ARMA model describes a series directly. A state space model instead supposes
+an unobserved process driving it, and the observations are a noisy view of that
+process. The framework is more general --- every ARMA model can be written in
+state space form --- and it handles missing data and time-varying parameters,
+which ARMA cannot.
+
+\subsection{The Linear Model}
+
+\begin{defn}
+A \emph{linear state space model} consists of two equations:
+$$\textbf{x}_t = F\,\textbf{x}_{t-1} + \textbf{w}_t \qquad\text{(state equation)},$$
+$$\textbf{y}_t = H\,\textbf{x}_t + \textbf{v}_t \qquad\text{(observation equation)},$$
+where $\textbf{x}_t$ is the unobserved state, $\textbf{y}_t$ the observation, and
+$\textbf{w}_t$, $\textbf{v}_t$ independent white noise with covariance matrices
+$Q$ and $R$.
+\end{defn}
+
+\begin{note}
+The state equation says the system evolves by its own dynamics; the observation
+equation says we see it imperfectly. Separating the two is the whole idea. A
+random walk observed with error --- $x_t = x_{t-1}+w_t$, $y_t = x_t+v_t$ --- is
+the simplest non-trivial case, and it already cannot be written as an ARMA model
+without first working out what its observable autocorrelation structure is.
+\end{note}
+
+\subsection{The Kalman Filter}
+
+\begin{result}
+Write $\widehat{\textbf{x}}_{t\mid s}$ for the expectation of $\textbf{x}_t$
+given observations up to time $s$, and $P_{t\mid s}$ for its error covariance.
+The Kalman filter alternates two steps.
+
+\subhead{Predict}
+$$\widehat{\textbf{x}}_{t\mid t-1} = F\,\widehat{\textbf{x}}_{t-1\mid t-1},
+\qquad P_{t\mid t-1} = F\,P_{t-1\mid t-1}F^{t} + Q .$$
+
+\subhead{Update}
+With the \emph{innovation} $e_t = \textbf{y}_t - H\widehat{\textbf{x}}_{t\mid t-1}$
+and the Kalman gain
+$$K_t = P_{t\mid t-1}H^{t}\left(H P_{t\mid t-1}H^{t} + R\right)^{-1},$$
+$$\widehat{\textbf{x}}_{t\mid t} = \widehat{\textbf{x}}_{t\mid t-1} + K_t e_t,
+\qquad P_{t\mid t} = \left(I - K_tH\right)P_{t\mid t-1} .$$
+\end{result}
+
+\begin{remark}
+Read the update as a weighted compromise. The innovation $e_t$ is the part of
+the new observation the model did not anticipate, and the gain $K_t$ decides how
+much of it to believe. If the observation noise $R$ is large the gain is small
+and the filter trusts its own prediction; if the state noise $Q$ is large the
+prediction is uncertain, the gain is near one, and the filter follows the data.
+Everything the filter does is that trade, applied recursively.
+
+The recursion is what makes it usable. Each step needs only the previous
+estimate and the current observation, not the whole history, so the cost per
+observation is constant and the filter runs in real time. That is why it is used
+in navigation and tracking as much as in statistics.
+\end{remark}
+
+\begin{note}
+The filter is optimal in two distinct senses that are worth keeping apart. If the
+noise is Gaussian, $\widehat{\textbf{x}}_{t\mid t}$ is the conditional
+expectation and therefore the best estimator of any kind. Without normality it
+is still the best \emph{linear} estimator --- the same distinction as between
+conditional expectation and linear regression.
+\end{note}
+
+\section{Nonlinear Models: ARCH And Volatility}
+
+Every model so far has assumed constant variance. Financial series violate this
+plainly: quiet periods and turbulent periods cluster, so the variance is itself
+serially dependent even when the series is uncorrelated. ARCH models that
+directly.
+
+\begin{defn}
+A process follows an \emph{ARCH}$(p)$ model if
+$$X_t = \sigma_t\,\varepsilon_t,\qquad
+\sigma_t^{2} = \alpha_0 + \sum_{i=1}^{p}\alpha_i X_{t-i}^{2},$$
+where $\varepsilon_t$ is independent white noise with unit variance,
+$\alpha_0>0$ and $\alpha_i\geq0$. The \emph{GARCH}$(p,q)$ extension adds lagged
+variances,
+$$\sigma_t^{2} = \alpha_0 + \sum_{i=1}^{p}\alpha_i X_{t-i}^{2}
++ \sum_{j=1}^{q}\beta_j \sigma_{t-j}^{2}.$$
+\end{defn}
+
+\begin{result}
+For the ARCH$(1)$ model with $0\leq\alpha_1<1$:
+$$E(X_t) = 0,\qquad \Var(X_t) = \frac{\alpha_0}{1-\alpha_1},
+\qquad \Corr\left(X_t,\,X_{t+\tau}\right) = 0 \ \text{ for } \tau\neq0,$$
+but $X_t^{2}$ is autocorrelated, following an AR$(1)$ in the squares.
+\end{result}
+
+\begin{proof}
+Conditioning on the past, $E\left(X_t \mid \mathcal{F}_{t-1}\right)
+= \sigma_t E(\varepsilon_t) = 0$, so $E(X_t)=0$ by the tower property and
+$X_t$ is uncorrelated with anything earlier --- which gives the zero
+autocorrelation.
+
+For the variance, $E\left(X_t^{2}\right) = E\left(\sigma_t^{2}\right)
+= \alpha_0 + \alpha_1E\left(X_{t-1}^{2}\right)$. Stationarity makes both
+expectations equal, so $E\left(X_t^{2}\right)(1-\alpha_1) = \alpha_0$, giving the
+stated variance and requiring $\alpha_1<1$ for it to be finite and positive.
+
+Writing $\eta_t = X_t^{2}-\sigma_t^{2}$, which has mean zero, the definition
+rearranges to
+$$X_t^{2} = \alpha_0 + \alpha_1 X_{t-1}^{2} + \eta_t ,$$
+an AR$(1)$ for the squared series.
+\end{proof}
+
+\begin{remark}
+The last line is the whole point. The series itself is uncorrelated --- it passes
+every test built on the autocorrelation function --- while its squares are
+strongly correlated. A series can therefore be unpredictable in level and
+entirely predictable in volatility, which is what makes returns look random
+while their risk does not.
+
+This is also the practical diagnostic: plot the ACF of the squared residuals
+after fitting an ARMA model. If it is flat the constant-variance assumption
+stands; if it decays slowly, an ARCH or GARCH term is needed. Nothing in the
+ordinary residual ACF would have revealed it.
+\end{remark}
+
+\section{Practice Problems}
+
+\begin{problem}
+Show that the MA$(1)$ process $X_t = \varepsilon_t + \theta\varepsilon_{t-1}$ has
+$\rho(1) = \theta/(1+\theta^{2})$ and $\rho(\tau)=0$ for $\tau\geq2$. Deduce the
+largest value $\left|\rho(1)\right|$ can take.
+\end{problem}
+\begin{solution}
+With $\Var(\varepsilon)=\sigma^{2}$,
+$$\gamma(0) = \left(1+\theta^{2}\right)\sigma^{2},\qquad
+\gamma(1) = \theta\sigma^{2},\qquad \gamma(\tau)=0 \ (\tau\geq2),$$
+the last because $X_t$ and $X_{t+\tau}$ then share no shock. Dividing,
+$$\rho(1) = \frac{\theta}{1+\theta^{2}},\qquad \rho(\tau)=0 \ (\tau\geq2).$$
+Differentiating, $\rho(1)$ is extremised at $\theta=\pm1$, giving
+$$\left|\rho(1)\right| \leq \tfrac12 .$$
+So a sample first autocorrelation beyond $0.5$ in magnitude rules out an MA$(1)$
+outright, whatever $\theta$ is chosen --- a genuine identification constraint,
+not merely a guideline.
+
+Note also that $\theta$ and $1/\theta$ give the same $\rho(1)$: the
+autocorrelations do not determine the model, which is why invertibility is
+imposed to pick the root inside the unit circle.
+\end{solution}
+
+\begin{problem}
+An AR$(2)$ process is $X_t = 0.5X_{t-1} + 0.3X_{t-2} + \varepsilon_t$. Determine
+whether it is stationary, and find $\rho(1)$ and $\rho(2)$.
+\end{problem}
+\begin{solution}
+Stationarity requires the roots of the characteristic equation
+$1 - 0.5z - 0.3z^{2} = 0$ to lie outside the unit circle. Solving,
+$$z = \frac{0.5 \pm \sqrt{0.25 + 1.2}}{-0.6}
+= \frac{0.5 \pm 1.204}{-0.6},$$
+giving $z \approx -2.84$ and $z \approx 1.17$. Both exceed one in modulus, so the
+process is stationary.
+
+The Yule--Walker equations give
+$$\rho(1) = \frac{\phi_1}{1-\phi_2} = \frac{0.5}{0.7} \approx 0.714 ,$$
+$$\rho(2) = \phi_1\rho(1) + \phi_2 = 0.5(0.714) + 0.3 \approx 0.657 .$$
+The slow decay is characteristic of an AR process: the ACF tails off rather than
+cutting, and it is the PACF that would cut off after lag two.
+\end{solution}
+
+\begin{problem}
+A series shows a clear upward trend and yearly seasonality in monthly data.
+Describe the differencing needed before an ARMA model is fitted, and say what
+model class results.
+\end{problem}
+\begin{solution}
+A trend is removed by first differencing, $\nabla X_t = X_t - X_{t-1}$. Yearly
+seasonality in monthly data is removed by seasonal differencing at lag twelve,
+$\nabla_{12}X_t = X_t - X_{t-12}$. Applying both,
+$$\nabla\nabla_{12}X_t = \left(X_t - X_{t-1}\right) - \left(X_{t-12}-X_{t-13}\right).$$
+Fitting an ARMA model to the result is a SARIMA$(p,1,q)\times(P,1,Q)_{12}$ model.
+
+Two cautions. Differencing more than necessary inflates the variance and
+introduces artificial negative autocorrelation, so one difference of each kind is
+usually enough and the ACF should be inspected before applying a second. And a
+deterministic trend is better removed by regression than by differencing --- the
+two are different models, and differencing a deterministic trend leaves a
+non-invertible moving-average term behind.
+\end{solution}
+
+\begin{problem}
+After fitting an ARMA model, the residual autocorrelations look like white noise
+but the autocorrelations of the \emph{squared} residuals decay slowly. What does
+this indicate and what should be done?
+\end{problem}
+\begin{solution}
+Uncorrelated residuals mean the model has captured the conditional \emph{mean}
+correctly, so the ARMA orders need no revision. Correlated squared residuals mean
+the conditional \emph{variance} is not constant --- large errors follow large
+errors --- which violates the homoscedasticity the ARMA model assumed.
+
+The remedy is to add a variance model: fit an ARCH or GARCH term to the
+residuals, so the mean follows the ARMA structure and the variance follows the
+volatility structure. Ignoring it does not bias the point forecasts, but every
+interval built from the model will be wrong --- too wide in quiet periods and far
+too narrow in turbulent ones, which is precisely when the interval matters.
+\end{solution}
+
+
 \end{document}
