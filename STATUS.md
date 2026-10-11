@@ -557,6 +557,24 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-10-11 — Topology: editorial pass with the author
+
+Started from the author's own edits to the usual-metric example (commits `8c68a2e`,
+`115f91f`, `9b34688`, all pushed).
+
+- **Typed-out dots:** 83 runs of `.......` replaced. `\cdots` between operators
+  (`A_1\cup\cdots\cup A_n`), `\ldots` in comma lists. This is the rule for every course.
+- **Proofs corrected:** usual metric on ℝ (proved d(x,y) instead of d(x,z)); ℝ² is
+  complete (rewritten — mixed two sequences, never bounded d(x_n,x)); topology axioms
+  (A_k for A_n, A_k for A_λ); (0,1) not compact (intervals missing their right end).
+- **Stray paragraphs:** 31 linking sentences, remarks and named terms sat inside the
+  proof/example/definition box before them. Moved out. Found by listing every box with
+  more than one blank-line-separated paragraph — a stray sentence *in the same paragraph*
+  as the box's last line is not caught by that and may remain.
+- **Still open in Topology:** the long `align` in Example 2.2.10 scrolls sideways; the
+  proof of Example 2.1.4 ends with an empty gap before ∎.
+- **Next:** the same stray-paragraph and dots pass on the other courses.
+
 ### 2026-08-24 — Introduction to Statistics: tutorial sheets 3, 4 and 5 worked
 
 Three new sheets were sitting in `~/LaTeX_Projects/Tutorial/` — `MAT2602 tutorial 3`,
