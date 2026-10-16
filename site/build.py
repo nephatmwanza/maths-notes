@@ -30,6 +30,7 @@ Usage:  python3 build.py <course-dir>
 """
 from __future__ import annotations
 
+import json
 import re
 import sys
 from html import escape, unescape
@@ -415,8 +416,27 @@ def qa_block(page_id: str) -> str:
 MARKER = "<!-- built by site/build.py -->"
 
 
+OPERATOR = re.compile(r"^[^%\n]*?\\DeclareMathOperator(\*?)\{\\(\w+)\}\{([^{}]*)\}", re.M)
+
+
+def math_operators(build: Path) -> dict[str, str]:
+    """The source's \\DeclareMathOperator definitions, as MathJax macros.
+
+    tex4ht leaves the maths as source for MathJax, which has never seen the
+    preamble. Without these, \\Var in a formula is an unknown control sequence
+    and MathJax prints it literally, in red, in the middle of the equation.
+    """
+    ops = {}
+    for tex in build.glob("*.tex"):
+        for star, name, text in OPERATOR.findall(
+                tex.read_text(encoding="utf-8", errors="replace")):
+            ops[name] = f"\\operatorname{star}{{{text}}}"
+    return ops
+
+
 def process(path: Path, items: list[dict], course_title: str, course_slug: str,
-            numbering: tuple[int, int] | None = None) -> bool:
+            numbering: tuple[int, int] | None = None,
+            operators: dict[str, str] | None = None) -> bool:
     html = path.read_text(encoding="utf-8", errors="replace")
 
     # Not idempotent: a second pass would nest another layout shell and a second
@@ -458,6 +478,11 @@ def process(path: Path, items: list[dict], course_title: str, course_slug: str,
             f"number: (n) => `{chapter}.` + (n + {offset}) "
             "} }, };",
         )
+
+    # Operators declared in the preamble. See math_operators().
+    if operators:
+        html = html.replace("MathJax = { tex: {",
+                            f"MathJax = {{ tex: {{ macros: {json.dumps(operators)},", 1)
 
     # The page's own heading keys its discussion thread. Use the *numbered*
     # heading ("1.1 Introduction"), not the bare <title>: two sections in this
@@ -575,9 +600,10 @@ def main() -> int:
     # Must be computed before any page is rewritten: it counts equations in the
     # raw conversion output, in document order.
     eqnums = equation_numbering(build, items)
+    operators = math_operators(build)
 
     pages = sorted(build.glob("*.html"))
-    done = sum(process(p, items, title, course.name, eqnums.get(p.name))
+    done = sum(process(p, items, title, course.name, eqnums.get(p.name), operators)
                for p in pages)
     skipped = len(pages) - done
     print(f"processed {done} pages, {len(items)} sidebar entries")
