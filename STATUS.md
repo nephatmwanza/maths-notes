@@ -557,6 +557,40 @@ two sides of the identity did not balance.
 
 *(most recent first — append new entries, never rewrite old ones)*
 
+### 2026-10-16 — Probability Theory: a marked test's questions and key added by topic
+
+The user supplied a scan of a test they were marking (7 questions plus their
+handwritten marking key). Every question and its solution went into the notes,
+placed by topic with no source label (a test, not an exam — see the provenance rule).
+The scan was deleted from `source/` afterwards, at the user's request.
+
+| Question | Topic | Went to |
+|---|---|---|
+| 1(a) | define convergence in probability | §6 Practice Problems |
+| 2, 3 | min of shifted exponentials →P a; geometric/n →D exponential | §6 Practice Problems |
+| 1(b)–(e) | Markov, Chebyshev, WLLN, Bernoulli WLLN (one problem each) | §7 Practice Problems |
+| 4 | CLT for a sum of 20 uniforms | §7 Practice Problems |
+| 6 | E max of exponential/exponential and exponential/Gamma(2) | §1 Practice Problems |
+| 5, 7 | Poisson process: definition, interarrivals, S_n; bus waiting times | §8, **new** Practice Problems subsection |
+
+Every final answer was checked by simulation; all of the key's results hold. Slips
+corrected in transcription: Φ⁻¹(0.90) read as 1.285 (it is 1.2816: 11.654, not
+11.659); `(X−μ)² ≥ k² iff (X−μ) ≥ k` (needs |X−μ|); a λ₂e^{−λ₁y} typo in 6(a);
+`2!/(λ₁+λ₂)²` for `2!/(λ₁+λ₂)³` in 6(b), whose final answer was right anyway.
+Question defects stated in the solution: 1(e) printed Y_n as the *sum* with limit
+μ (it must be the mean, limit p); 1(d) gives only a finite mean but the proof uses
+a finite variance. Q3 now carries the floor ⌊ny⌋ the key dropped. Q7 relies on
+"arrival times given N(t)=n are uniform order statistics", which §8 never states;
+the solution names it. **Worth adding to §8's Poisson section.**
+
+**Site-wide bug found on the rendered page: `\DeclareMathOperator` never reached
+MathJax.** `\Var`, `\var`, `\cov`, `\plim`, `\grad`... printed literally, in red, in
+every course that declares them (9 courses, 36 operators). `build.py` now reads them
+from the source and passes them as MathJax `macros`. **Only Probability Theory has been
+rebuilt with the fix**; the other eight (abstract-algebra, functional analysis,
+multivariate-calculus, real-analysis, statistical-inference, stochastic-processes,
+time-series, topology) still show the bug until each is rebuilt.
+
 ### 2026-10-11 — Topology: editorial pass with the author
 
 Started from the author's own edits to the usual-metric example (commits `8c68a2e`,

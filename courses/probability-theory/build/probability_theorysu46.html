@@ -1,12 +1,12 @@
 <!DOCTYPE html> 
 <html lang='en-US' xml:lang='en-US'> 
-<head><title>10.3 Rejection Sampling — Probability Theory</title> 
+<head><title>10.2 The Inverse Transform Method — Probability Theory</title> 
 <meta charset='utf-8' /> 
 <meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
 <meta content='width=device-width,initial-scale=1' name='viewport' /> 
 <link href='probability_theory.css' rel='stylesheet' type='text/css' /> 
 <meta content='probability_theory.tex' name='src' /> 
-<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+<script>window.MathJax = { tex: { macros: {"grad": "\\operatorname{grad}", "dive": "\\operatorname{div}", "curl": "\\operatorname{curl}", "Var": "\\operatorname{Var}", "Cov": "\\operatorname{Cov}", "Corr": "\\operatorname{Corr}", "plim": "\\operatorname*{plim}"}, tags: "ams", }, }; </script> 
  <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
 <link rel="stylesheet" href="../../../site/assets/notes.css">
 <script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
@@ -62,59 +62,62 @@ Random Variables</a></li>
 <li class="sub"><a class="" href="probability_theorysu37.html">Poisson Process</a></li>
 <li class="sub"><a class="" href="probability_theorysu38.html">Markov Chains (Sequence of Dependent Trials)</a></li>
 <li class="sub"><a class="" href="probability_theorysu39.html">Transient and Recurrent States</a></li>
+<li class="sub"><a class="" href="probability_theorysu40.html">Practice Problems</a></li>
 <li class="ch"><a class="" href="probability_theoryse9.html">MARTINGALES</a></li>
-<li class="sub"><a class="" href="probability_theorysu40.html">Definition and First Examples</a></li>
-<li class="sub"><a class="" href="probability_theorysu41.html">Martingale Differences and Hoeffding’s Inequality</a></li>
-<li class="sub"><a class="" href="probability_theorysu42.html">Convergence</a></li>
-<li class="sub"><a class="" href="probability_theorysu43.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="probability_theorysu41.html">Definition and First Examples</a></li>
+<li class="sub"><a class="" href="probability_theorysu42.html">Martingale Differences and Hoeffding’s Inequality</a></li>
+<li class="sub"><a class="" href="probability_theorysu43.html">Convergence</a></li>
+<li class="sub"><a class="" href="probability_theorysu44.html">Practice Problems</a></li>
 <li class="ch"><a class="" href="probability_theoryse10.html">SIMULATION</a></li>
-<li class="sub"><a class="" href="probability_theorysu44.html">The Probability Integral Transform</a></li>
-<li class="sub"><a class="" href="probability_theorysu45.html">The Inverse Transform Method</a></li>
-<li class="sub"><a class="current" href="probability_theorysu46.html">Rejection Sampling</a></li>
-<li class="sub"><a class="" href="probability_theorysu47.html">Simulating the Normal Distribution</a></li>
-<li class="sub"><a class="" href="probability_theorysu48.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="probability_theorysu45.html">The Probability Integral Transform</a></li>
+<li class="sub"><a class="current" href="probability_theorysu46.html">The Inverse Transform Method</a></li>
+<li class="sub"><a class="" href="probability_theorysu47.html">Rejection Sampling</a></li>
+<li class="sub"><a class="" href="probability_theorysu48.html">Simulating the Normal Distribution</a></li>
+<li class="sub"><a class="" href="probability_theorysu49.html">Practice Problems</a></li>
 </ul>
 </aside><main class="content"><div class="inner">
-<!-- l. 3819 --><div class='crosslinks'><p class='noindent'>[<a href='probability_theorysu47.html'>next</a>] [<a href='probability_theorysu45.html'>prev</a>] [<a href='probability_theorysu45.html#tailprobability_theorysu45.html'>prev-tail</a>] [<a href='#tailprobability_theorysu46.html'>tail</a>] [<a href='probability_theoryse10.html#probability_theorysu46.html'>up</a>] </p></div>
-<h4 class='subsectionHead'><span class='titlemark'>10.3   </span> <a id='x58-5700010.3'></a>Rejection Sampling</h4>
+<!-- l. 4126 --><div class='crosslinks'><p class='noindent'>[<a href='probability_theorysu47.html'>next</a>] [<a href='probability_theorysu45.html'>prev</a>] [<a href='probability_theorysu45.html#tailprobability_theorysu45.html'>prev-tail</a>] [<a href='#tailprobability_theorysu46.html'>tail</a>] [<a href='probability_theoryse10.html#probability_theorysu46.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>10.2   </span> <a id='x58-5700010.2'></a>The Inverse Transform Method</h4>
 <div class='newtheorem'>
-<!-- l. 3821 --><p class='noindent'><span class='head'>
+<!-- l. 4128 --><p class='noindent'><span class='head'>
 <a id='x58-57001r1'></a>
-<span class='cmbx-10x-x-109'>Result 10.3.1.</span>  </span>Suppose the target density \(f\) satisfies \(f(x)\leq c\,g(x)\) for all \(x\), where \(g\) is a density that can
-already be simulated and \(c\geq 1\) is constant. Repeat: draw \(Y\) from \(g\) and \(U\sim \) UNIF\((0,1)\) independently; accept \(X=Y\)
-if
-                                           \[U \leq \frac {f(Y)}{c\,g(Y)},\]
- otherwise discard and start again. The accepted value has density \(f\), and the expected number
-of attempts per acceptance is \(c\).
+<span class='cmbx-10x-x-109'>Result 10.2.1.</span>  </span>To simulate \(X\) with distribution function \(F\): generate \(U\sim \) UNIF\((0,1)\) and return \(X = F^{-1}(U)\). For a
+discrete distribution taking values \(x_1&lt;x_2&lt;\cdots \) with probabilities \(p_1,p_2,\dots \), return the smallest \(x_k\) for which \(p_1+\cdots +p_k \geq U\).
 </p>
 </div>
-<!-- l. 3828 --><p class='noindent'>
+<!-- l. 4133 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 4135 --><p class='noindent'><span class='head'>
+<a id='x58-57002r2'></a>
+<span class='cmbx-10x-x-109'>Example 10.2.2.</span>  </span>Give an algorithm to simulate an EXP\((\lambda )\) variable, where \(\lambda \) is the rate.
+</p>
+</div>
+<!-- l. 4138 --><p class='noindent'>
 </p>
 <div class='proof'>
-<!-- l. 3831 --><p class='noindent'><span class='head'>
-<span class='cmti-10x-x-109'>Proof.</span> </span>Conditioning on acceptance,
+<!-- l. 4140 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> Here \(F(x) = 1-e^{-\lambda x}\) for \(x&gt;0\). Solving \(u = 1-e^{-\lambda x}\),
                                                                                       
                                                                                       
-                                           \[P\left (Y\leq x,\ \text {accept}\right ) = \int _{-\infty }^{x} \frac {f(y)}{c\,g(y)}\,g(y)\,dy = \frac {1}{c}\int _{-\infty }^{x} f(y)\,dy .\]
- Taking \(x\rightarrow \infty \) gives \(P(\text {accept}) = 1/c\), so the expected number of trials is \(c\), and dividing,
-                                           \[P\left (Y\leq x \mid \text {accept}\right ) = \int _{-\infty }^{x}f(y)\,dy ,\]
- which is the required distribution function.                                                                 □
+                                           \[e^{-\lambda x} = 1-u \quad \Longrightarrow \quad x = -\frac {1}{\lambda }\log (1-u).\]
+ So generate \(U\) and return \(X = -\lambda ^{-1}\log (1-U)\). Since \(1-U\) is also uniform on \((0,1)\), the simpler \(X=-\lambda ^{-1}\log U\) has the same distribution and
+is what is normally used — one subtraction saved per observation, which matters when millions
+are drawn.
 </p>
 </div>
-<div class='newtheorem nt-remark'>
-<!-- l. 3841 --><p class='noindent'><span class='head'>
-<span class='cmbx-10x-x-109'>Remark.</span>  </span>The constant \(c\) is the cost of the method: it is the expected number of draws per
-accepted value, so an envelope that fits badly is expensive. Since \(c \geq \sup _x f(x)/g(x)\), the art is choosing \(g\) with
-the same shape and heavier tails than \(f\). A normal envelope for a Cauchy target fails outright,
-because the ratio is unbounded — the tails of the target are heavier than the envelope’s, and
-no finite \(c\) exists.
+<div class='newtheorem nt-note'>
+<!-- l. 4150 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>The method needs \(F^{-1}\) in closed form, which is why it suits the exponential, the Weibull
+and the Cauchy, and does not suit the normal — whose distribution function has no elementary
+inverse. That gap is what the next two methods fill.
 </p>
 </div>
-<!-- l. 3848 --><p class='noindent'>
+<!-- l. 4154 --><p class='noindent'>
                                                                                       
                                                                                       
 </p>
-<!-- l. 3850 --><div class='crosslinks'><p class='noindent'>[<a href='probability_theorysu47.html'>next</a>] [<a href='probability_theorysu45.html'>prev</a>] [<a href='probability_theorysu45.html#tailprobability_theorysu45.html'>prev-tail</a>] [<a href='probability_theorysu46.html'>front</a>] [<a href='probability_theoryse10.html#probability_theorysu46.html'>up</a>] </p></div>
-<!-- l. 3850 --><p class='noindent'><a id='tailprobability_theorysu46.html'></a> </p> 
-<nav class="pagenav"><a class="prev" href="probability_theorysu45.html">&larr; Previous</a><a class="up" href="probability_theoryse10.html#probability_theorysu46.html">Contents</a><a class="next" href="probability_theorysu47.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="probability-theory/10-3-rejection-sampling" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+<!-- l. 4156 --><div class='crosslinks'><p class='noindent'>[<a href='probability_theorysu47.html'>next</a>] [<a href='probability_theorysu45.html'>prev</a>] [<a href='probability_theorysu45.html#tailprobability_theorysu45.html'>prev-tail</a>] [<a href='probability_theorysu46.html'>front</a>] [<a href='probability_theoryse10.html#probability_theorysu46.html'>up</a>] </p></div>
+<!-- l. 4156 --><p class='noindent'><a id='tailprobability_theorysu46.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="probability_theorysu45.html">&larr; Previous</a><a class="up" href="probability_theoryse10.html#probability_theorysu46.html">Contents</a><a class="next" href="probability_theorysu47.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="probability-theory/10-2-the-inverse-transform-method" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
 </html>

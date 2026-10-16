@@ -633,6 +633,74 @@ completeness discussion of a related model, and it tends to $\theta$ as $n$
 grows --- the sample eventually spans the whole interval.
 \end{solution}
 
+\begin{problem}
+\begin{enumerate}[label=(\alph*)]
+\item Let $X_1$ and $X_2$ be independent and exponentially distributed with
+parameters $\lambda_1$ and $\lambda_2$ respectively. Find the expected value of
+$\max\{X_1,X_2\}$.
+\item Let $Y$ be exponentially distributed with parameter $\lambda_1$, and let
+$Z$ be Gamma$(2,\lambda_2)$, independent of $Y$. Find the expected value of
+$\max\{Y,Z\}$.
+\end{enumerate}
+\end{problem}
+\begin{solution}
+\subhead{(a)}
+Let $Y = \max\{X_1,X_2\}$. The maximum is at most $y$ exactly when both
+variables are, so by independence
+\begin{align*}
+P(Y>y) &= 1-P(X_1\leq y,\ X_2\leq y) = 1-P(X_1\leq y)\,P(X_2\leq y)\\
+&= 1-\left(1-e^{-\lambda_1y}\right)\left(1-e^{-\lambda_2y}\right)\\
+&= e^{-\lambda_1y}+e^{-\lambda_2y}-e^{-(\lambda_1+\lambda_2)y},\qquad y>0 .
+\end{align*}
+Hence $F_Y(y) = 1-e^{-\lambda_1y}-e^{-\lambda_2y}+e^{-(\lambda_1+\lambda_2)y}$
+and
+$$f_Y(y) = \lambda_1e^{-\lambda_1y}+\lambda_2e^{-\lambda_2y}
+-(\lambda_1+\lambda_2)e^{-(\lambda_1+\lambda_2)y}.$$
+Each term is an exponential density, so $E(Y)$ is the corresponding combination
+of exponential means. For $X$ exponential with parameter $\lambda$, integrating
+by parts,
+\begin{align*}
+E(X) &= \lambda\int_0^{\infty}xe^{-\lambda x}\,dx\\
+&= \lambda\left\{\left[-\frac{x}{\lambda}e^{-\lambda x}\right]_0^{\infty}
++ \frac{1}{\lambda}\int_0^{\infty}e^{-\lambda x}\,dx\right\}\\
+&= \lambda\cdot\frac{1}{\lambda^{2}} = \frac{1}{\lambda}.
+\end{align*}
+Therefore
+$$E\left(\max\{X_1,X_2\}\right)
+= \frac{1}{\lambda_1}+\frac{1}{\lambda_2}-\frac{1}{\lambda_1+\lambda_2}.$$
+
+\subhead{(b)}
+Here $f_Y(x) = \lambda_1e^{-\lambda_1x}$ and $F_Y(x) = 1-e^{-\lambda_1x}$, while
+$Z$ has shape $2$ and rate $\lambda_2$ (an Erlang variable):
+$$f_Z(x) = \lambda_2^{2}xe^{-\lambda_2x},\qquad
+F_Z(x) = 1-(1+\lambda_2x)e^{-\lambda_2x}.$$
+Let $X = \max\{Y,Z\}$. As in (a),
+\begin{align*}
+P(X\leq x) &= P(Y\leq x)\,P(Z\leq x)
+= \left(1-e^{-\lambda_1x}\right)\left(1-(1+\lambda_2x)e^{-\lambda_2x}\right)\\
+&= 1-e^{-\lambda_1x}-(1+\lambda_2x)e^{-\lambda_2x}
++(1+\lambda_2x)e^{-(\lambda_1+\lambda_2)x}.
+\end{align*}
+Differentiating,
+\begin{align*}
+f_X(x) &= \lambda_1e^{-\lambda_1x}+\lambda_2^{2}xe^{-\lambda_2x}\\
+&\quad -\lambda_1e^{-(\lambda_1+\lambda_2)x}
+-\lambda_2(\lambda_1+\lambda_2)xe^{-(\lambda_1+\lambda_2)x}.
+\end{align*}
+Using $\int_0^{\infty}x^{n}e^{-\lambda x}\,dx = \frac{n!}{\lambda^{n+1}}$,
+\begin{align*}
+E(X) &= \lambda_1\cdot\frac{1!}{\lambda_1^{2}}
++ \lambda_2^{2}\cdot\frac{2!}{\lambda_2^{3}}\\
+&\quad - \lambda_1\cdot\frac{1!}{(\lambda_1+\lambda_2)^{2}}
+- \lambda_2(\lambda_1+\lambda_2)\cdot\frac{2!}{(\lambda_1+\lambda_2)^{3}}\\
+&= \frac{1}{\lambda_1}+\frac{2}{\lambda_2}
+-\frac{\lambda_1}{(\lambda_1+\lambda_2)^{2}}
+-\frac{2\lambda_2}{(\lambda_1+\lambda_2)^{2}}\\
+&= \frac{1}{\lambda_1}+\frac{2}{\lambda_2}
+-\frac{\lambda_1+2\lambda_2}{(\lambda_1+\lambda_2)^{2}}.
+\end{align*}
+\end{solution}
+
 
 \section{GENERATING FUNCTIONS}
 
@@ -2336,6 +2404,73 @@ continuous and the conclusion fails. This is the same proviso that appears in
 part (c) of Slutsky's theorem, and for the same reason.
 \end{solution}
 
+\begin{problem}
+Define convergence in probability.
+\end{problem}
+\begin{solution}
+A sequence of random variables $\{X_n\}_{n\geq1}$ converges to $X$ in
+probability, written $X_n\underset{P}{\longrightarrow}X$, if for every
+$\varepsilon>0$
+$$\lim_{n\rightarrow\infty}P\left(|X_n-X|\geq\varepsilon\right) = 0 ,$$
+or equivalently
+$$\lim_{n\rightarrow\infty}P\left(|X_n-X|<\varepsilon\right) = 1 .$$
+\end{solution}
+
+\begin{problem}
+Let $\{X_n,\ n\geq1\}$ be a sequence of independent and identically distributed
+random variables with density
+$$f(x) = \begin{cases} e^{-(x-a)}, & x\geq a,\\ 0, & x<a.\end{cases}$$
+Set $Y_n=\min\{X_1,X_2,\dots,X_n\}$. Show that
+$Y_n\underset{P}{\longrightarrow}a$ as $n\rightarrow\infty$.
+\end{problem}
+\begin{solution}
+Every $X_i\geq a$, so $Y_n\geq a$: the density puts no mass below $a$, and
+$|Y_n-a| = Y_n-a$. For $\varepsilon>0$, the minimum is at least $a+\varepsilon$
+exactly when every $X_i$ is, so by independence
+\begin{align*}
+P\left(|Y_n-a|\geq\varepsilon\right) &= P\left(Y_n\geq a+\varepsilon\right)\\
+&= P\left(X_1\geq a+\varepsilon,\ X_2\geq a+\varepsilon,\ \dots,\
+X_n\geq a+\varepsilon\right)\\
+&= \left[P\left(X_1\geq a+\varepsilon\right)\right]^{n}.
+\end{align*}
+Now
+$$P\left(X_1\geq a+\varepsilon\right) = \int_{a+\varepsilon}^{\infty}e^{-(x-a)}\,dx
+= e^{a}\left[-e^{-x}\right]_{a+\varepsilon}^{\infty}
+= e^{a}e^{-(a+\varepsilon)} = e^{-\varepsilon},$$
+so
+$$P\left(|Y_n-a|\geq\varepsilon\right) = e^{-n\varepsilon}\longrightarrow0
+\qquad(n\rightarrow\infty).$$
+Therefore $Y_n\underset{P}{\longrightarrow}a$.
+\end{solution}
+
+\begin{problem}
+Suppose that $X_n$ is geometric with success probability
+$\frac{\lambda}{n+\lambda}$, $n=1,2,\dots$, where $\lambda$ is a positive
+constant. Show that $X_n/n$ converges in distribution to an exponential
+distribution as $n\rightarrow\infty$, and determine the parameter of the limit
+distribution.
+\end{problem}
+\begin{solution}
+Let $p_n = \frac{\lambda}{n+\lambda}$, so that
+$$1-p_n = \frac{n}{n+\lambda} = \frac{1}{1+\lambda/n}.$$
+$X_n$ counts the trials up to the first success, so $X_n>k$ exactly when the
+first $k$ trials all fail:
+$$P(X_n>k) = (1-p_n)^{k},\qquad k=0,1,2,\dots$$
+Let $Y_n = X_n/n$ and $y>0$. Then
+$$P(Y_n>y) = P(X_n>ny) = (1-p_n)^{\lfloor ny\rfloor}
+= \left(1+\frac{\lambda}{n}\right)^{-\lfloor ny\rfloor}.$$
+Since $ny-1<\lfloor ny\rfloor\leq ny$ and $1+\lambda/n\rightarrow1$, the floor
+makes no difference in the limit, and
+$$\lim_{n\rightarrow\infty}P(Y_n>y)
+= \lim_{n\rightarrow\infty}\left[\left(1+\frac{\lambda}{n}\right)^{n}\right]^{-y}
+= \left(e^{\lambda}\right)^{-y} = e^{-\lambda y}.$$
+Hence
+$$F_{Y_n}(y) = 1-P(Y_n>y)\longrightarrow1-e^{-\lambda y},\qquad y>0 ,$$
+which is the distribution function of the density $\lambda e^{-\lambda y}$. So
+$X_n/n\underset{D}{\longrightarrow}Y$ where $Y$ is exponential with parameter
+$\lambda$, that is, with mean $1/\lambda$.
+\end{solution}
+
 
 \section{LIMIT THEOREMS}
 \vspace{0.5cm}
@@ -2988,6 +3123,113 @@ many. The bound holds for every distribution with finite variance, which is what
 it is paying for.
 \end{solution}
 
+\begin{problem}
+Let $X$ be a random variable that takes only nonnegative values. Prove that for
+any $a>0$,
+$$P(X\geq a)\leq\frac{E(X)}{a}.$$
+\end{problem}
+\begin{solution}
+Take $X$ continuous with density $f$, which is zero on $x<0$. Then
+\begin{align*}
+E(X) &= \int_0^{\infty}xf(x)\,dx
+= \int_0^{a}xf(x)\,dx + \int_a^{\infty}xf(x)\,dx\\
+&\geq \int_a^{\infty}xf(x)\,dx\\
+&\geq \int_a^{\infty}af(x)\,dx = aP(X\geq a).
+\end{align*}
+The first inequality drops a nonnegative integral; the second uses $x\geq a$ on
+the range of integration. Dividing by $a>0$,
+$$P(X\geq a)\leq\frac{E(X)}{a}.$$
+The discrete case is the same argument with sums in place of integrals; the
+indicator proof given for Markov's inequality in the text covers both at once.
+\end{solution}
+
+\begin{problem}
+Let $X$ be a random variable with mean $\mu$ and variance $\sigma^{2}$. Prove
+that for any $k>0$,
+$$P\left(|X-\mu|\geq k\right)\leq\frac{\sigma^{2}}{k^{2}}.$$
+\end{problem}
+\begin{solution}
+Since $(X-\mu)^{2}\geq0$, Markov's inequality applies to it with $a=k^{2}$:
+$$P\left((X-\mu)^{2}\geq k^{2}\right)\leq\frac{E\left[(X-\mu)^{2}\right]}{k^{2}}.$$
+Since $(X-\mu)^{2}\geq k^{2}$ if and only if $|X-\mu|\geq k$,
+$$P\left(|X-\mu|\geq k\right)\leq\frac{E\left[(X-\mu)^{2}\right]}{k^{2}}
+= \frac{\sigma^{2}}{k^{2}}.$$
+\end{solution}
+
+\begin{problem}
+Let $X_1,X_2,\dots,X_n$ be independent and identically distributed random
+variables with a finite mean $\mu$. Prove that the sample mean $\overline{X}_n$
+converges in probability to $\mu$.
+\end{problem}
+\begin{solution}
+Write $\sigma^{2}$ for the common variance, taken to be finite. Then
+$$\overline{X}_n = \frac{X_1+X_2+\cdots+X_n}{n},\qquad
+\Var\left(\overline{X}_n\right) = \frac{\sigma^{2}}{n}.$$
+By Chebyshev's inequality, for any $\varepsilon>0$,
+$$P\left(\left|\overline{X}_n-\mu\right|\geq\varepsilon\right)
+\leq\frac{E\left[\left(\overline{X}_n-\mu\right)^{2}\right]}{\varepsilon^{2}}
+= \frac{\Var\left(\overline{X}_n\right)}{\varepsilon^{2}}
+= \frac{\sigma^{2}}{n\varepsilon^{2}}.$$
+Therefore
+$$\lim_{n\rightarrow\infty}P\left(\left|\overline{X}_n-\mu\right|\geq\varepsilon\right)
+\leq\lim_{n\rightarrow\infty}\frac{\sigma^{2}}{n\varepsilon^{2}} = 0 ,$$
+that is, $\overline{X}_n\underset{P}{\longrightarrow}\mu$.
+
+The question assumes only a finite mean. The conclusion still holds then ---
+that is Khinchin's form of the weak law --- but its proof needs a truncation
+argument. A finite variance is what lets Chebyshev do all the work here.
+\end{solution}
+
+\begin{problem}
+Let $X_1,X_2,\dots,X_n$ be independent Bernoulli random variables with
+probability $p$, and let $Y_n = \frac1n\sum_{k=1}^{n}X_k$. Show that
+$Y_n\underset{P}{\longrightarrow}p$.
+\end{problem}
+\begin{solution}
+Since $E(X_k)=p$ and $\Var(X_k)=p(1-p)$,
+$$E(Y_n) = \frac1n\sum_{k=1}^{n}E(X_k) = \frac{np}{n} = p$$
+and
+$$\Var(Y_n) = \frac{1}{n^{2}}\sum_{k=1}^{n}\Var(X_k)
+= \frac{1}{n^{2}}\,np(1-p) = \frac{p(1-p)}{n}.$$
+By Chebyshev's inequality, for any $\varepsilon>0$,
+$$P\left(|Y_n-p|\geq\varepsilon\right)\leq\frac{\Var(Y_n)}{\varepsilon^{2}}
+= \frac{p(1-p)}{n\varepsilon^{2}}\longrightarrow0\qquad(n\rightarrow\infty).$$
+Therefore $Y_n\underset{P}{\longrightarrow}p$: the proportion of successes
+converges to the probability of success.
+
+As set, the question wrote $Y_n=\sum_{k=1}^{n}X_k$ with limit $\mu$. The sum
+itself has mean $np$ and does not converge; it is the average that does, and its
+limit is the common mean $p$.
+\end{solution}
+
+\begin{problem}
+Let $X_1,X_2,\dots,X_{20}$ be independent UNIF$(0,1)$ random variables. Find
+normal approximations for each of the following:
+\begin{enumerate}[label=(\alph*)]
+\item $P\left(\sum_{i=1}^{20}X_i\leq12\right)$;
+\item the 90th percentile of $\sum_{i=1}^{20}X_i$.
+\end{enumerate}
+\end{problem}
+\begin{solution}
+Let $S=\sum_{i=1}^{20}X_i$. Each $X_i$ has
+$$E(X_i) = \frac{0+1}{2} = \frac12,\qquad
+\Var(X_i) = \frac{(1-0)^{2}}{12} = \frac{1}{12},$$
+so $E(S) = 20\times\frac12 = 10$ and $\Var(S) = 20\times\frac{1}{12} = \frac53$.
+
+\subhead{(a)}
+By the central limit theorem,
+$$P(S\leq12) = P\left(\frac{S-E(S)}{\sigma_S}\leq\frac{12-10}{\sqrt{5/3}}\right)
+\approx P(Z\leq1.549)\approx0.9393 .$$
+
+\subhead{(b)}
+We want the $x$ with $P(S\leq x) = 0.90$:
+$$P\left(Z\leq\frac{x-10}{\sqrt{5/3}}\right) = 0.90
+\quad\Longrightarrow\quad
+\frac{x-10}{\sqrt{5/3}} = \Phi^{-1}(0.90) = 1.2816 .$$
+Hence
+$$x = 10+1.2816\sqrt{5/3}\approx11.65 .$$
+\end{solution}
+
 
 \section{ADDITIONAL TOPICS IN PROBABILITY}
 \vspace{0.5cm}
@@ -3545,8 +3787,103 @@ The expected value of $X_n$ given the past and present values of $X_0,X_1,\dots,
 \textbf{Recommended Readings}
 \begin{enumerate}
 \item Sheldon R. (2012) A first course in probability. $9^{th}$ Edition, ISBN: 1 292 02492 9.
-\item Bain L.J. and Engelhardt M. (2000) introduction to probability and mathematical Statistics, $2^{nd}$ Edition ISBN: 0 534 38020 5. 
+\item Bain L.J. and Engelhardt M. (2000) introduction to probability and mathematical Statistics, $2^{nd}$ Edition ISBN: 0 534 38020 5.
 \end{enumerate}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Let $\{N(t)\}_{t\geq0}$ be a Poisson process with rate $\lambda$, and let
+$S_1,S_2,\dots$ be the successive arrival times. Set $X_1=S_1$ and
+$X_k=S_k-S_{k-1}$ for $k\geq2$.
+\begin{enumerate}[label=(\alph*)]
+\item Define a Poisson process.
+\item Show that the durations $\{X_k,\ k\geq1\}$ are exponentially distributed.
+\item Find the distribution of the arrival time of the $n$th event, $S_n$.
+\end{enumerate}
+\end{problem}
+\begin{solution}
+\subhead{(a)}
+A counting process $\{N(t),\ t\geq0\}$ is a Poisson process with rate
+$\lambda>0$ if
+\begin{enumerate}[label=(\roman*)]
+\item $N(0)=0$;
+\item it has independent increments: for any $0<t_1<t_2<t_3<t_4$,
+$N(t_2)-N(t_1)$ is independent of $N(t_4)-N(t_3)$;
+\item it has stationary increments: the distribution of the number of events in
+an interval depends only on the length of the interval;
+\item the number of events in an interval of length $t$ is Poisson with mean
+$\lambda t$:
+$$P\left(N(t+s)-N(s)=k\right) = \frac{(\lambda t)^{k}}{k!}e^{-\lambda t},
+\qquad k=0,1,2,\dots$$
+\end{enumerate}
+
+\subhead{(b)}
+The first arrival comes after time $t$ exactly when there is no event in
+$[0,t]$, so
+$$P(X_1>t) = P\left(N(t)=0\right) = e^{-\lambda t}.$$
+Hence $P(X_1\leq t) = 1-e^{-\lambda t}$ and $f_{X_1}(t) = \lambda e^{-\lambda t}$
+for $t>0$: $X_1$ is exponential with parameter $\lambda$.
+
+For $X_2$, condition on the first arrival. By independent increments and then
+stationary increments,
+\begin{align*}
+P(X_2>t\mid X_1=s) &= P\left(\text{no arrival in }(s,s+t]\mid X_1=s\right)\\
+&= P\left(\text{no arrival in }(s,s+t]\right)\\
+&= P\left(\text{no arrival in }(0,t]\right)\\
+&= P\left(N(t)=0\right) = e^{-\lambda t}.
+\end{align*}
+This does not depend on $s$, so $P(X_2\leq t) = 1-e^{-\lambda t}$ and $X_2$ is
+exponential with parameter $\lambda$, independent of $X_1$. Conditioning on
+$S_{k-1}$ in the same way gives the result for every $X_k$, by induction.
+
+\subhead{(c)}
+The $n$th event has happened by time $t$ exactly when at least $n$ events have
+occurred in $[0,t]$: $N(t)\geq n$ if and only if $S_n\leq t$. Hence
+$$F_{S_n}(t) = P(S_n\leq t) = P\left(N(t)\geq n\right)
+= \sum_{k=n}^{\infty}e^{-\lambda t}\frac{(\lambda t)^{k}}{k!}.$$
+Differentiating term by term,
+\begin{align*}
+f_{S_n}(t) &= \sum_{k=n}^{\infty}\lambda e^{-\lambda t}\frac{(\lambda t)^{k-1}}{(k-1)!}
+- \sum_{k=n}^{\infty}\lambda e^{-\lambda t}\frac{(\lambda t)^{k}}{k!}\\
+&= \lambda e^{-\lambda t}\left[\frac{(\lambda t)^{n-1}}{(n-1)!}
++ \sum_{k=n+1}^{\infty}\frac{(\lambda t)^{k-1}}{(k-1)!}
+- \sum_{k=n}^{\infty}\frac{(\lambda t)^{k}}{k!}\right].
+\end{align*}
+The two remaining sums are the same series term for term, so they cancel, and
+$$f_{S_n}(t) = \lambda e^{-\lambda t}\frac{(\lambda t)^{n-1}}{(n-1)!},
+\qquad t>0 ,$$
+the gamma density with shape $n$ and rate $\lambda$. This agrees with (b):
+$S_n = X_1+X_2+\cdots+X_n$ is a sum of $n$ independent exponentials.
+\end{solution}
+
+\begin{problem}
+Travellers arrive at a bus station according to a Poisson process with rate
+$\lambda$. If the bus departs at time $t$, what is the expected sum of the
+waiting times of the travellers arriving in $(0,t)$? That is, find
+$$E\left[\sum_{k=1}^{N(t)}\left(t-S_k\right)\right],$$
+where $S_k$ is the arrival time of the $k$th traveller.
+\end{problem}
+\begin{solution}
+Condition on $N(t)$. Given $N(t)=n$,
+$$E\left[\sum_{k=1}^{N(t)}(t-S_k)\,\middle|\,N(t)=n\right]
+= nt - E\left[\sum_{k=1}^{n}S_k\,\middle|\,N(t)=n\right].$$
+Given $N(t)=n$, the arrival times $S_1,\dots,S_n$ are distributed as the order
+statistics of $n$ independent uniform variables on $(0,t)$. So with
+$U_1,\dots,U_n$ independent UNIF$(0,1)$,
+$$E\left[\sum_{k=1}^{n}S_k\,\middle|\,N(t)=n\right]
+= tE\left[\sum_{k=1}^{n}U_{(k)}\right]
+= tE\left[\sum_{k=1}^{n}U_k\right]
+= t\sum_{k=1}^{n}\frac12 = \frac{nt}{2},$$
+the middle step because putting the $U_k$ in order does not change their sum.
+Hence
+$$E\left[\sum_{k=1}^{N(t)}(t-S_k)\,\middle|\,N(t)=n\right]
+= nt-\frac{nt}{2} = \frac{nt}{2},$$
+and taking the expectation over $N(t)$, which has mean $\lambda t$,
+$$E\left[\sum_{k=1}^{N(t)}(t-S_k)\right]
+= E\left[\frac{t}{2}N(t)\right] = \frac{t}{2}E\left[N(t)\right]
+= \frac{\lambda t^{2}}{2}.$$
+\end{solution}
 
 \pagebreak
 
