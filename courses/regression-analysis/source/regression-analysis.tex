@@ -68,7 +68,7 @@
 {\Huge\bfseries Regression Analysis}\\[1.2cm]
 {\large Lecture Notes}\\[2.5cm]
 \line(1,0){300}\\[1.5cm]
-$$\hat{\boldsymbol\beta} = (X^\top X)^{-1} X^\top \mathbf{y}$$
+$$\hat{\boldsymbol\beta} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}$$
 \end{center}
 \end{titlepage}
 
@@ -1696,6 +1696,1312 @@ instance, divides $\hat\beta_1$ by $1000$ and leaves $R^2$ alone.
 
 
 \section{Multiple linear regression}
+Most responses depend on more than one variable. Crop yield depends on fertiliser and on
+rainfall; the time to make a delivery depends on the number of items and on the distance.
+A \textbf{multiple linear regression model} with $k$ regressors is
+\begin{equation}\label{eq:mlr}
+y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_k x_k + \varepsilon .
+\end{equation}
+It has $p = k + 1$ parameters $\beta_0, \beta_1, \dots, \beta_k$, called the
+\textbf{regression coefficients}.
+
+\begin{remark}
+$\beta_j$ is the change in the mean response $E(y)$ per unit increase in $x_j$
+\emph{when all the other regressors are held fixed}. For this reason the $\beta_j$ are
+called \textbf{partial regression coefficients}. With one regressor, $E(y)$ is a line; with
+two it is a plane, as in Figure~\ref{fig:plane}; with more it is a \emph{hyperplane}, which
+cannot be drawn but is handled in exactly the same way.
+\end{remark}
+
+As in the last section, ``linear'' refers to the parameters. A model such as
+$y = \beta_0 + \beta_1 x + \beta_2 x^2 + \varepsilon$ is a multiple linear regression model
+with $x_1 = x$ and $x_2 = x^2$, and everything in this section applies to it.
+
+Multiple regression is carried out with matrices. The formulas of simple linear regression
+were already long with one regressor; written out term by term for $k$ regressors they would
+be unmanageable. In matrix form, one formula covers every $k$, and simple linear regression
+becomes the special case $k = 1$.
+
+\subsection{Matrix results we shall need}
+Vectors are columns and are printed in bold: $\mathbf{y}$, $\boldsymbol\beta$. The
+transpose of $\mathbf{A}$ is $\mathbf{A}^\top$, and $(\mathbf{AB})^\top = \mathbf{B}^\top \mathbf{A}^\top$.
+The \textbf{trace} of a square matrix is the sum of its diagonal entries,
+$\operatorname{tr}(\mathbf{A}) = \sum_i a_{ii}$.
+
+\begin{lem}[Trace]\label{lem:trace}
+If $\mathbf{A}$ is $m \times n$ and $\mathbf{B}$ is $n \times m$, then
+$\operatorname{tr}(\mathbf{AB}) = \operatorname{tr}(\mathbf{BA})$.
+\end{lem}
+
+\begin{proof}
+$\operatorname{tr}(\mathbf{AB}) = \sum_{i=1}^m (\mathbf{AB})_{ii} = \sum_{i=1}^m \sum_{j=1}^n a_{ij} b_{ji}$
+and $\operatorname{tr}(\mathbf{BA}) = \sum_{j=1}^n \sum_{i=1}^m b_{ji} a_{ij}$. These are the
+same sum taken in a different order.
+\end{proof}
+
+\begin{lem}[Differentiation]\label{lem:diff}
+For a vector $\boldsymbol\beta = (\beta_0, \dots, \beta_k)^\top$, let
+$\partial f / \partial \boldsymbol\beta$ denote the vector of partial derivatives
+$\partial f / \partial \beta_j$. Then, for a constant vector $\mathbf{a}$ and a constant
+symmetric matrix $\mathbf{A}$,
+\[
+\frac{\partial (\mathbf{a}^\top \boldsymbol\beta)}{\partial \boldsymbol\beta} = \mathbf{a},
+\qquad
+\frac{\partial (\boldsymbol\beta^\top \mathbf{A} \boldsymbol\beta)}{\partial \boldsymbol\beta} = 2\mathbf{A}\boldsymbol\beta .
+\]
+\end{lem}
+
+\begin{proof}
+$\mathbf{a}^\top \boldsymbol\beta = \sum_j a_j \beta_j$, whose derivative with respect to
+$\beta_m$ is $a_m$. Next,
+\[
+\boldsymbol\beta^\top \mathbf{A} \boldsymbol\beta = \sum_i \sum_j a_{ij} \beta_i \beta_j .
+\]
+Differentiating with respect to $\beta_m$, the terms with $i = m$ give $\sum_j a_{mj}\beta_j$
+and the terms with $j = m$ give $\sum_i a_{im}\beta_i$. Since $a_{im} = a_{mi}$, both equal
+the $m$th entry of $\mathbf{A}\boldsymbol\beta$, so the derivative is
+$2(\mathbf{A}\boldsymbol\beta)_m$.
+\end{proof}
+
+For a random vector $\mathbf{y} = (y_1, \dots, y_n)^\top$, the \textbf{mean vector}
+$E(\mathbf{y})$ has entries $E(y_i)$, and the \textbf{covariance matrix}
+\[
+\operatorname{Var}(\mathbf{y}) = E\left[ (\mathbf{y} - E\mathbf{y})(\mathbf{y} - E\mathbf{y})^\top \right]
+\]
+has $(i,j)$ entry $\operatorname{Cov}(y_i, y_j)$, and so has the variances
+$\operatorname{Var}(y_i)$ down its diagonal.
+
+\begin{lem}[Linear functions of a random vector]\label{lem:linear-rv}
+If $\mathbf{A}$ is a constant matrix and $\mathbf{b}$ a constant vector, then
+\[
+E(\mathbf{A}\mathbf{y} + \mathbf{b}) = \mathbf{A}E(\mathbf{y}) + \mathbf{b},
+\qquad
+\operatorname{Var}(\mathbf{A}\mathbf{y} + \mathbf{b}) = \mathbf{A} \operatorname{Var}(\mathbf{y}) \mathbf{A}^\top .
+\]
+\end{lem}
+
+\begin{proof}
+The $i$th entry of $\mathbf{Ay} + \mathbf{b}$ is $\sum_j a_{ij} y_j + b_i$, whose expectation
+is $\sum_j a_{ij} E(y_j) + b_i$, the $i$th entry of $\mathbf{A}E(\mathbf{y}) + \mathbf{b}$.
+Writing $\boldsymbol\mu = E(\mathbf{y})$, we have
+$\mathbf{Ay} + \mathbf{b} - E(\mathbf{Ay} + \mathbf{b}) = \mathbf{A}(\mathbf{y} - \boldsymbol\mu)$, so
+\[
+\operatorname{Var}(\mathbf{Ay} + \mathbf{b})
+= E\left[ \mathbf{A}(\mathbf{y} - \boldsymbol\mu)(\mathbf{y} - \boldsymbol\mu)^\top \mathbf{A}^\top \right]
+= \mathbf{A} \operatorname{Var}(\mathbf{y}) \mathbf{A}^\top ,
+\]
+taking the constant matrices outside the expectation.
+\end{proof}
+
+\begin{lem}[Expected quadratic form]\label{lem:quad-form}
+If $E(\mathbf{y}) = \boldsymbol\mu$, $\operatorname{Var}(\mathbf{y}) = \mathbf{V}$ and
+$\mathbf{A}$ is a constant matrix, then
+\[
+E(\mathbf{y}^\top \mathbf{A} \mathbf{y}) = \operatorname{tr}(\mathbf{AV}) + \boldsymbol\mu^\top \mathbf{A} \boldsymbol\mu .
+\]
+\end{lem}
+
+\begin{proof}
+Write $\mathbf{y} = \boldsymbol\mu + \mathbf{z}$, where $E(\mathbf{z}) = \mathbf{0}$ and
+$E(\mathbf{z}\mathbf{z}^\top) = \mathbf{V}$. Then
+\[
+\mathbf{y}^\top \mathbf{A} \mathbf{y}
+= \boldsymbol\mu^\top \mathbf{A} \boldsymbol\mu + \boldsymbol\mu^\top \mathbf{A} \mathbf{z}
+  + \mathbf{z}^\top \mathbf{A} \boldsymbol\mu + \mathbf{z}^\top \mathbf{A} \mathbf{z} .
+\]
+The two middle terms have expectation $0$. The last is a $1 \times 1$ matrix, so equals its
+own trace, and by Lemma~\ref{lem:trace}
+$\mathbf{z}^\top \mathbf{A} \mathbf{z} = \operatorname{tr}(\mathbf{z}^\top \mathbf{A} \mathbf{z}) = \operatorname{tr}(\mathbf{A} \mathbf{z}\mathbf{z}^\top)$.
+Since the trace is a sum of entries, it can be taken through the expectation:
+$E\operatorname{tr}(\mathbf{A}\mathbf{z}\mathbf{z}^\top) = \operatorname{tr}(\mathbf{A}\,E(\mathbf{z}\mathbf{z}^\top)) = \operatorname{tr}(\mathbf{AV})$.
+\end{proof}
+
+Finally, from linear algebra: a square matrix $\mathbf{A}$ has an inverse exactly when
+$\det \mathbf{A} \neq 0$, and then
+\[
+\mathbf{A}^{-1} = \frac{1}{\det \mathbf{A}} \operatorname{adj}(\mathbf{A}),
+\]
+where the \textbf{adjugate} $\operatorname{adj}(\mathbf{A})$ is the transpose of the matrix
+of cofactors. The cofactor of $a_{ij}$ is $(-1)^{i+j}$ times the determinant of the matrix
+left when row $i$ and column $j$ are deleted. For a symmetric matrix, such as the ones met
+in regression, the matrix of cofactors is itself symmetric and no transposing is needed.
+
+\subsection{The model in matrix form}
+For a sample of $n$ observations, the model~\eqref{eq:mlr} says
+$y_i = \beta_0 + \beta_1 x_{i1} + \cdots + \beta_k x_{ik} + \varepsilon_i$, for
+$i = 1, \dots, n$, where $x_{ij}$ is the value of the $j$th regressor in the $i$th
+observation. Stack these $n$ equations:
+\[
+\underbrace{\begin{bmatrix} y_1 \\ y_2 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}}
+=
+\underbrace{\begin{bmatrix}
+1 & x_{11} & \cdots & x_{1k} \\
+1 & x_{21} & \cdots & x_{2k} \\
+\vdots & \vdots & & \vdots \\
+1 & x_{n1} & \cdots & x_{nk}
+\end{bmatrix}}_{\mathbf{X}}
+\underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_k \end{bmatrix}}_{\boldsymbol\beta}
++
+\underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol\varepsilon},
+\]
+that is,
+\[
+\boxed{\;\mathbf{y} = \mathbf{X}\boldsymbol\beta + \boldsymbol\varepsilon\;}
+\]
+The $n \times p$ matrix $\mathbf{X}$ is the \textbf{model matrix} (or design matrix). Its
+first column of ones carries the intercept, and each further column holds the values of one
+regressor.
+
+The assumptions A1--A4 of simple regression become:
+\begin{enumerate}[label=\textbf{A\arabic*.}]
+\item $E(\boldsymbol\varepsilon) = \mathbf{0}$;
+\item[\textbf{A2--3.}] $\operatorname{Var}(\boldsymbol\varepsilon) = \sigma^2 \mathbf{I}$: the
+diagonal says every error has variance $\sigma^2$, the zeros off the diagonal say the errors
+are uncorrelated;
+\setcounter{enumi}{3}
+\item $\boldsymbol\varepsilon \sim N_n(\mathbf{0}, \sigma^2\mathbf{I})$: the errors are
+independent normal variables.
+\end{enumerate}
+We also assume that $\mathbf{X}$ has \textbf{full column rank} $p$: no column is a linear
+combination of the others. This is the analogue of ``the $x_i$ are not all equal'' in simple
+regression. By Lemma~\ref{lem:linear-rv}, A1--A3 give
+$E(\mathbf{y}) = \mathbf{X}\boldsymbol\beta$ and $\operatorname{Var}(\mathbf{y}) = \sigma^2\mathbf{I}$.
+
+\begin{exa}\label{exa:crop}
+An agronomist records the yield $y$ (tonnes per hectare) on six plots, with the fertiliser
+applied, $x_1$ (in 100\,kg per hectare), and the rainfall, $x_2$ (in 100\,mm):
+\begin{center}
+\begin{tabular}{c|cccccc}
+Plot & 1 & 2 & 3 & 4 & 5 & 6 \\
+\hline
+Fertiliser $x_1$ & 1 & 2 & 2 & 3 & 4 & 6 \\
+Rainfall $x_2$ & 2 & 1 & 3 & 2 & 4 & 3 \\
+Yield $y$ & 6 & 9 & 11 & 10 & 15 & 18 \\
+\end{tabular}
+\end{center}
+For the model $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \varepsilon$, $n = 6$, $k = 2$,
+$p = 3$, and
+\[
+\mathbf{y} = \begin{bmatrix} 6 \\ 9 \\ 11 \\ 10 \\ 15 \\ 18 \end{bmatrix}, \qquad
+\mathbf{X} = \begin{bmatrix}
+1 & 1 & 2 \\ 1 & 2 & 1 \\ 1 & 2 & 3 \\ 1 & 3 & 2 \\ 1 & 4 & 4 \\ 1 & 6 & 3
+\end{bmatrix} .
+\]
+\end{exa}
+
+\subsection{Least-squares estimation}
+The least-squares criterion is again the sum of squared errors, now written
+\[
+S(\boldsymbol\beta) = \sum_{i=1}^n \varepsilon_i^2 = \boldsymbol\varepsilon^\top \boldsymbol\varepsilon
+= (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^\top (\mathbf{y} - \mathbf{X}\boldsymbol\beta) .
+\]
+
+\begin{thm}[Least-squares estimator]\label{thm:ls-matrix}
+If $\mathbf{X}$ has full column rank, $\mathbf{X}^\top \mathbf{X}$ is invertible and the
+unique least-squares estimator of $\boldsymbol\beta$ is
+\[
+\boxed{\;\hat{\boldsymbol\beta} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}\;}
+\]
+It is the solution of the \textbf{normal equations}
+$\mathbf{X}^\top \mathbf{X} \hat{\boldsymbol\beta} = \mathbf{X}^\top \mathbf{y}$.
+\end{thm}
+
+\begin{proof}
+\emph{$\mathbf{X}^\top\mathbf{X}$ is invertible.} If $\mathbf{X}^\top\mathbf{X}\mathbf{v} = \mathbf{0}$
+then $0 = \mathbf{v}^\top \mathbf{X}^\top \mathbf{X} \mathbf{v} = (\mathbf{Xv})^\top (\mathbf{Xv}) = \sum_i (\mathbf{Xv})_i^2$,
+so $\mathbf{Xv} = \mathbf{0}$. Full column rank means this happens only for
+$\mathbf{v} = \mathbf{0}$. So the square matrix $\mathbf{X}^\top\mathbf{X}$ sends no
+non-zero vector to zero, and is invertible.
+
+\emph{The stationary point.} Expanding, and using the fact that the $1\times1$ matrix
+$\boldsymbol\beta^\top \mathbf{X}^\top \mathbf{y}$ equals its transpose $\mathbf{y}^\top \mathbf{X}\boldsymbol\beta$,
+\[
+S(\boldsymbol\beta) = \mathbf{y}^\top\mathbf{y} - 2\boldsymbol\beta^\top \mathbf{X}^\top \mathbf{y}
+  + \boldsymbol\beta^\top \mathbf{X}^\top \mathbf{X} \boldsymbol\beta .
+\]
+$\mathbf{X}^\top\mathbf{X}$ is symmetric, so by Lemma~\ref{lem:diff}
+\[
+\frac{\partial S}{\partial \boldsymbol\beta} = -2\mathbf{X}^\top\mathbf{y} + 2\mathbf{X}^\top\mathbf{X}\boldsymbol\beta ,
+\]
+which is zero exactly when $\mathbf{X}^\top\mathbf{X}\boldsymbol\beta = \mathbf{X}^\top\mathbf{y}$,
+that is, at $\hat{\boldsymbol\beta}$.
+
+\emph{It is the minimum.} For any $\boldsymbol\beta$, write
+$\mathbf{y} - \mathbf{X}\boldsymbol\beta = (\mathbf{y} - \mathbf{X}\hat{\boldsymbol\beta}) + \mathbf{X}(\hat{\boldsymbol\beta} - \boldsymbol\beta)$.
+The cross term vanishes, because
+$\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\hat{\boldsymbol\beta}) = \mathbf{X}^\top\mathbf{y} - \mathbf{X}^\top\mathbf{X}\hat{\boldsymbol\beta} = \mathbf{0}$
+by the normal equations. Hence
+\[
+S(\boldsymbol\beta) = S(\hat{\boldsymbol\beta})
+  + (\hat{\boldsymbol\beta} - \boldsymbol\beta)^\top \mathbf{X}^\top \mathbf{X} (\hat{\boldsymbol\beta} - \boldsymbol\beta) .
+\]
+The last term is $\sum_i \bigl(\mathbf{X}(\hat{\boldsymbol\beta} - \boldsymbol\beta)\bigr)_i^2 \ge 0$,
+and by the first part it is zero only when $\boldsymbol\beta = \hat{\boldsymbol\beta}$.
+So $S(\boldsymbol\beta) > S(\hat{\boldsymbol\beta})$ for every other $\boldsymbol\beta$.
+\end{proof}
+
+The entries of $\mathbf{X}^\top\mathbf{X}$ and $\mathbf{X}^\top\mathbf{y}$ are the familiar
+sums. With two regressors,
+\[
+\mathbf{X}^\top\mathbf{X} = \begin{bmatrix}
+n & \sum x_{i1} & \sum x_{i2} \\
+\sum x_{i1} & \sum x_{i1}^2 & \sum x_{i1}x_{i2} \\
+\sum x_{i2} & \sum x_{i1}x_{i2} & \sum x_{i2}^2
+\end{bmatrix},
+\qquad
+\mathbf{X}^\top\mathbf{y} = \begin{bmatrix} \sum y_i \\ \sum x_{i1} y_i \\ \sum x_{i2} y_i \end{bmatrix} .
+\]
+So the hand calculation starts, as before, with a table of column totals.
+
+\begin{exa}[Simple regression as a special case]\label{exa:slr-matrix}
+With one regressor, $\mathbf{X}$ has columns $\mathbf{1}$ and $(x_1, \dots, x_n)^\top$, and
+\[
+\mathbf{X}^\top\mathbf{X} = \begin{bmatrix} n & \sum x_i \\ \sum x_i & \sum x_i^2 \end{bmatrix},
+\]
+\[
+\det(\mathbf{X}^\top\mathbf{X}) = n\sum x_i^2 - \left(\sum x_i\right)^2 = nS_{xx} .
+\]
+For a $2 \times 2$ matrix the adjugate swaps the diagonal entries and changes the sign of the
+others, so
+\[
+(\mathbf{X}^\top\mathbf{X})^{-1} = \frac{1}{nS_{xx}} \begin{bmatrix} \sum x_i^2 & -\sum x_i \\ -\sum x_i & n \end{bmatrix} .
+\]
+The second entry of $\hat{\boldsymbol\beta} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$ is
+\[
+\hat\beta_1 = \frac{n\sum x_i y_i - \sum x_i \sum y_i}{nS_{xx}}
+= \frac{\sum x_i y_i - n\bar x \bar y}{S_{xx}} = \frac{S_{xy}}{S_{xx}} ,
+\]
+the formula of Theorem~\ref{thm:ls}. The first entry gives $\hat\beta_0 = \bar y - \hat\beta_1\bar x$
+in the same way (Problem~\ref{prob:slr-matrix}).
+\end{exa}
+
+\begin{exa}\label{exa:crop-fit}
+Fit the model to the crop data of Example~\ref{exa:crop}.
+\end{exa}
+
+\begin{solution}
+\emph{Step 1: the sums.}
+\begin{center}
+\begin{tabular}{c|cccccccc}
+$i$ & $x_{i1}$ & $x_{i2}$ & $y_i$ & $x_{i1}^2$ & $x_{i2}^2$ & $x_{i1}x_{i2}$ & $x_{i1}y_i$ & $x_{i2}y_i$ \\
+\hline
+1 & 1 & 2 & 6 & 1 & 4 & 2 & 6 & 12 \\
+2 & 2 & 1 & 9 & 4 & 1 & 2 & 18 & 9 \\
+3 & 2 & 3 & 11 & 4 & 9 & 6 & 22 & 33 \\
+4 & 3 & 2 & 10 & 9 & 4 & 6 & 30 & 20 \\
+5 & 4 & 4 & 15 & 16 & 16 & 16 & 60 & 60 \\
+6 & 6 & 3 & 18 & 36 & 9 & 18 & 108 & 54 \\
+\hline
+$\sum$ & 18 & 15 & 69 & 70 & 43 & 50 & 244 & 188 \\
+\end{tabular}
+\end{center}
+so
+\[
+\mathbf{X}^\top\mathbf{X} = \begin{bmatrix} 6 & 18 & 15 \\ 18 & 70 & 50 \\ 15 & 50 & 43 \end{bmatrix},
+\qquad
+\mathbf{X}^\top\mathbf{y} = \begin{bmatrix} 69 \\ 244 \\ 188 \end{bmatrix} .
+\]
+\emph{Step 2: the cofactors.} Deleting row $i$ and column $j$ and taking the determinant of
+what is left:
+\begin{align*}
+C_{11} &= +(70 \cdot 43 - 50 \cdot 50) = 3010 - 2500 = 510, \\
+C_{12} &= -(18 \cdot 43 - 50 \cdot 15) = -(774 - 750) = -24, \\
+C_{13} &= +(18 \cdot 50 - 70 \cdot 15) = 900 - 1050 = -150, \\
+C_{22} &= +(6 \cdot 43 - 15 \cdot 15) = 258 - 225 = 33, \\
+C_{23} &= -(6 \cdot 50 - 18 \cdot 15) = -(300 - 270) = -30, \\
+C_{33} &= +(6 \cdot 70 - 18 \cdot 18) = 420 - 324 = 96 ,
+\end{align*}
+and by symmetry $C_{21} = C_{12}$, $C_{31} = C_{13}$, $C_{32} = C_{23}$.
+
+\emph{Step 3: the determinant}, expanding along the first row:
+\[
+\det(\mathbf{X}^\top\mathbf{X}) = 6(510) + 18(-24) + 15(-150) = 3060 - 432 - 2250 = 378 .
+\]
+\emph{Step 4: the inverse.}
+\[
+(\mathbf{X}^\top\mathbf{X})^{-1} = \frac{1}{378}
+\begin{bmatrix} 510 & -24 & -150 \\ -24 & 33 & -30 \\ -150 & -30 & 96 \end{bmatrix} .
+\]
+A check: the first row of $\mathbf{X}^\top\mathbf{X}$ times the first column of the adjugate
+should give $378$, and times the second column $0$:
+$6(510) + 18(-24) + 15(-150) = 378$ and $6(-24) + 18(33) + 15(-30) = -144 + 594 - 450 = 0$.
+
+\emph{Step 5: the estimates.}
+\[
+\hat{\boldsymbol\beta} = \frac{1}{378}
+\begin{bmatrix} 510(69) - 24(244) - 150(188) \\ -24(69) + 33(244) - 30(188) \\ -150(69) - 30(244) + 96(188) \end{bmatrix}
+= \frac{1}{378} \begin{bmatrix} 1134 \\ 756 \\ 378 \end{bmatrix}
+= \begin{bmatrix} 3 \\ 2 \\ 1 \end{bmatrix} .
+\]
+The fitted model is
+\[
+\hat y = 3 + 2x_1 + x_2 .
+\]
+\textbf{Interpretation.} At a fixed rainfall, each extra 100\,kg of fertiliser per hectare
+raises the mean yield by $2$ tonnes per hectare; at a fixed fertiliser rate, each extra
+100\,mm of rain raises it by $1$ tonne per hectare.
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x={(1cm,0cm)},y={(0.55cm,0.45cm)},z={(0cm,0.22cm)},scale=0.95]
+\draw[-Stealth] (0,0,0) -- (7,0,0) node[right] {$x_1$};
+\draw[-Stealth] (0,0,0) -- (0,5,0) node[above right] {$x_2$};
+\draw[-Stealth] (0,0,0) -- (0,0,22) node[above] {$y$};
+\filldraw[fill=blue!15,draw=blue,opacity=0.8] (0,0,3) -- (6.5,0,16) -- (6.5,4.5,20.5) -- (0,4.5,7.5) -- cycle;
+\foreach \a/\b/\c in {1/2/6,2/1/9,2/3/11,3/2/10,4/4/15,6/3/18} {
+  \draw[red,thick] (\a,\b,\c) -- (\a,\b,{3+2*\a+\b});
+  \fill (\a,\b,\c) circle (2.2pt);
+}
+\node[blue,right] at (6.5,4.5,20.5) {\small $\hat y = 3 + 2x_1 + x_2$};
+\end{tikzpicture}
+\caption{The fitted regression plane for the crop data. The red segments are the residuals.}
+\label{fig:plane}
+\end{figure}
+
+\subsection{Fitted values, residuals and the hat matrix}
+The fitted values are
+$\hat{\mathbf{y}} = \mathbf{X}\hat{\boldsymbol\beta} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$,
+and the residuals are $\mathbf{e} = \mathbf{y} - \hat{\mathbf{y}}$.
+
+\begin{defn}
+The \textbf{hat matrix} is the $n \times n$ matrix
+$\mathbf{H} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$. It ``puts the hat on
+$\mathbf{y}$'': $\hat{\mathbf{y}} = \mathbf{Hy}$ and $\mathbf{e} = (\mathbf{I} - \mathbf{H})\mathbf{y}$.
+Its diagonal entries $h_{ii}$ are called the \textbf{leverages}.
+\end{defn}
+
+\begin{thm}\label{thm:hat}
+\begin{enumerate}[label=(\roman*)]
+\item $\mathbf{H}$ and $\mathbf{I} - \mathbf{H}$ are symmetric and \textbf{idempotent}:
+$\mathbf{H}^2 = \mathbf{H}$ and $(\mathbf{I} - \mathbf{H})^2 = \mathbf{I} - \mathbf{H}$.
+\item $\mathbf{HX} = \mathbf{X}$ and $(\mathbf{I} - \mathbf{H})\mathbf{X} = \mathbf{0}$.
+\item $\mathbf{X}^\top\mathbf{e} = \mathbf{0}$ and $\hat{\mathbf{y}}^\top\mathbf{e} = 0$.
+\item $\operatorname{tr}(\mathbf{H}) = p$ and $\operatorname{tr}(\mathbf{I} - \mathbf{H}) = n - p$.
+\item $0 \le h_{ii} \le 1$ for every $i$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+Write $\mathbf{C} = (\mathbf{X}^\top\mathbf{X})^{-1}$, which is symmetric because
+$\mathbf{X}^\top\mathbf{X}$ is.
+
+(i) $\mathbf{H}^\top = \mathbf{X}\mathbf{C}^\top\mathbf{X}^\top = \mathbf{H}$, and
+$\mathbf{H}^2 = \mathbf{X}\mathbf{C}(\mathbf{X}^\top\mathbf{X})\mathbf{C}\mathbf{X}^\top = \mathbf{X}\mathbf{C}\mathbf{X}^\top = \mathbf{H}$.
+Then $(\mathbf{I} - \mathbf{H})^2 = \mathbf{I} - 2\mathbf{H} + \mathbf{H}^2 = \mathbf{I} - \mathbf{H}$.
+
+(ii) $\mathbf{HX} = \mathbf{X}\mathbf{C}(\mathbf{X}^\top\mathbf{X}) = \mathbf{X}$, so
+$(\mathbf{I} - \mathbf{H})\mathbf{X} = \mathbf{X} - \mathbf{X} = \mathbf{0}$.
+
+(iii) $\mathbf{X}^\top\mathbf{e} = \mathbf{X}^\top(\mathbf{I} - \mathbf{H})\mathbf{y} = \bigl((\mathbf{I} - \mathbf{H})\mathbf{X}\bigr)^\top\mathbf{y} = \mathbf{0}$
+by (ii) and symmetry. Then $\hat{\mathbf{y}}^\top\mathbf{e} = \hat{\boldsymbol\beta}^\top\mathbf{X}^\top\mathbf{e} = 0$.
+
+(iv) By Lemma~\ref{lem:trace},
+$\operatorname{tr}(\mathbf{H}) = \operatorname{tr}\bigl(\mathbf{X}\mathbf{C}\mathbf{X}^\top\bigr) = \operatorname{tr}\bigl(\mathbf{C}\mathbf{X}^\top\mathbf{X}\bigr) = \operatorname{tr}(\mathbf{I}_p) = p$,
+and $\operatorname{tr}(\mathbf{I}_n - \mathbf{H}) = n - p$.
+
+(v) By (i), $h_{ii} = (\mathbf{H}^2)_{ii} = \sum_j h_{ij}h_{ji} = \sum_j h_{ij}^2 = h_{ii}^2 + \sum_{j \neq i} h_{ij}^2$.
+So $h_{ii} \ge h_{ii}^2 \ge 0$, and $h_{ii} \ge h_{ii}^2$ gives $h_{ii} \le 1$.
+\end{proof}
+
+Part (iii) contains the residual identities of Theorem~\ref{thm:resid-props}. Row $0$ of
+$\mathbf{X}^\top\mathbf{e} = \mathbf{0}$ is $\sum e_i = 0$, because the first column of
+$\mathbf{X}$ is all ones, and row $j$ is $\sum x_{ij} e_i = 0$. Part (v) will matter in the
+section on influential observations: a point with $h_{ii}$ near $1$ pulls the fitted surface
+almost through itself.
+
+\begin{remark}[Geometry of least squares]
+The vectors $\mathbf{X}\boldsymbol\beta$, for all possible $\boldsymbol\beta$, form a
+$p$-dimensional subspace of $\mathbb{R}^n$, the \textbf{column space} of $\mathbf{X}$.
+Least squares picks the point $\hat{\mathbf{y}}$ of that subspace closest to $\mathbf{y}$, and
+part (iii) says the residual vector $\mathbf{e}$ is perpendicular to the subspace. So
+$\hat{\mathbf{y}} = \mathbf{Hy}$ is the \emph{orthogonal projection} of $\mathbf{y}$ onto the
+column space, and $\mathbf{H}$ is the matrix of that projection (Figure~\ref{fig:projection}).
+Projecting twice is the same as projecting once, which is why $\mathbf{H}^2 = \mathbf{H}$.
+\end{remark}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.1]
+\filldraw[fill=blue!10,draw=blue!60] (-0.5,-0.6) -- (4.6,-0.6) -- (5.8,1.4) -- (0.7,1.4) -- cycle;
+\node[blue!70!black] at (1.3,-0.3) {\small column space of $\mathbf{X}$};
+\coordinate (O) at (0.6,0.1);
+\coordinate (Y) at (3.6,3.2);
+\coordinate (P) at (3.6,0.75);
+\draw[-Stealth,thick] (O) -- (Y) node[above] {$\mathbf{y}$};
+\draw[-Stealth,thick,blue] (O) -- (P) node[below right] {$\hat{\mathbf{y}} = \mathbf{Hy}$};
+\draw[-Stealth,thick,red] (P) -- (Y) node[midway,right] {$\mathbf{e} = (\mathbf{I} - \mathbf{H})\mathbf{y}$};
+\draw (3.6,0.98) -- (3.38,0.98) -- (3.38,0.75);
+\fill (O) circle (1.5pt) node[left] {$\mathbf{0}$};
+\end{tikzpicture}
+\caption{Least squares as projection: $\hat{\mathbf{y}}$ is the foot of the perpendicular from
+$\mathbf{y}$ to the column space of $\mathbf{X}$, and $\mathbf{e}$ is perpendicular to it.}
+\label{fig:projection}
+\end{figure}
+
+\begin{exa}\label{exa:crop-resid}
+Find the fitted values and residuals for the crop data and check
+$\mathbf{X}^\top\mathbf{e} = \mathbf{0}$.
+\end{exa}
+
+\begin{solution}
+From $\hat y = 3 + 2x_1 + x_2$:
+\begin{center}
+\begin{tabular}{c|cccccc}
+Plot & 1 & 2 & 3 & 4 & 5 & 6 \\
+\hline
+$y_i$ & 6 & 9 & 11 & 10 & 15 & 18 \\
+$\hat y_i$ & 7 & 8 & 10 & 11 & 15 & 18 \\
+$e_i$ & $-1$ & $1$ & $1$ & $-1$ & $0$ & $0$ \\
+\end{tabular}
+\end{center}
+The three rows of $\mathbf{X}^\top\mathbf{e}$ are
+\begin{align*}
+\textstyle\sum e_i &= -1 + 1 + 1 - 1 + 0 + 0 = 0, \\
+\textstyle\sum x_{i1} e_i &= -1 + 2 + 2 - 3 + 0 + 0 = 0, \\
+\textstyle\sum x_{i2} e_i &= -2 + 1 + 3 - 2 + 0 + 0 = 0 .
+\end{align*}
+The leverages $h_{ii} = \mathbf{x}_i^\top(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{x}_i$, where
+$\mathbf{x}_i^\top$ is the $i$th row of $\mathbf{X}$, work out as
+\[
+0.421, \quad 0.587, \quad 0.397, \quad 0.230, \quad 0.587, \quad 0.778 .
+\]
+They lie between $0$ and $1$ and add up to $3 = p$, as Theorem~\ref{thm:hat} requires. Plot~6,
+with by far the most fertiliser, has the largest leverage.
+\end{solution}
+
+\subsection{Properties of the least-squares estimator}
+\begin{thm}\label{thm:beta-props}
+Under A1--A3, $\hat{\boldsymbol\beta}$ is unbiased, with covariance matrix
+\[
+E(\hat{\boldsymbol\beta}) = \boldsymbol\beta, \qquad
+\operatorname{Var}(\hat{\boldsymbol\beta}) = \sigma^2(\mathbf{X}^\top\mathbf{X})^{-1} = \sigma^2\mathbf{C} .
+\]
+So $\operatorname{Var}(\hat\beta_j) = \sigma^2 C_{jj}$ and
+$\operatorname{Cov}(\hat\beta_i, \hat\beta_j) = \sigma^2 C_{ij}$, where the rows and columns of
+$\mathbf{C}$ are numbered $0, 1, \dots, k$ to match the coefficients.
+\end{thm}
+
+\begin{proof}
+$\hat{\boldsymbol\beta} = \mathbf{C}\mathbf{X}^\top\mathbf{y}$ is a linear function of
+$\mathbf{y}$. By Lemma~\ref{lem:linear-rv},
+$E(\hat{\boldsymbol\beta}) = \mathbf{C}\mathbf{X}^\top\mathbf{X}\boldsymbol\beta = \boldsymbol\beta$, and
+\[
+\operatorname{Var}(\hat{\boldsymbol\beta}) = \mathbf{C}\mathbf{X}^\top(\sigma^2\mathbf{I})\mathbf{X}\mathbf{C}^\top
+= \sigma^2\mathbf{C}(\mathbf{X}^\top\mathbf{X})\mathbf{C} = \sigma^2\mathbf{C} . \qedhere
+\]
+\end{proof}
+
+For simple regression, $\sigma^2\mathbf{C}$ is $\sigma^2/(nS_{xx})$ times the matrix in
+Example~\ref{exa:slr-matrix}, and its entries are exactly the variances and covariance of
+Theorems~\ref{thm:b1} and~\ref{thm:b0} (Problem~\ref{prob:slr-matrix}).
+
+\begin{thm}[Gauss--Markov]\label{thm:gauss-markov-general}
+Under A1--A3, let $\mathbf{c}$ be any constant vector. Among all estimators of
+$\mathbf{c}^\top\boldsymbol\beta$ that are linear in $\mathbf{y}$ and unbiased,
+$\mathbf{c}^\top\hat{\boldsymbol\beta}$ has the smallest variance. In particular each
+$\hat\beta_j$ is the best linear unbiased estimator of $\beta_j$.
+\end{thm}
+
+\begin{proof}
+Let $\mathbf{a}^\top\mathbf{y}$ be linear and unbiased for $\mathbf{c}^\top\boldsymbol\beta$:
+$E(\mathbf{a}^\top\mathbf{y}) = \mathbf{a}^\top\mathbf{X}\boldsymbol\beta = \mathbf{c}^\top\boldsymbol\beta$
+for every $\boldsymbol\beta$, which forces $\mathbf{X}^\top\mathbf{a} = \mathbf{c}$.
+The least-squares estimator is $\mathbf{c}^\top\hat{\boldsymbol\beta} = \mathbf{a}_0^\top\mathbf{y}$
+with $\mathbf{a}_0 = \mathbf{X}\mathbf{C}\mathbf{c}$. Let $\mathbf{d} = \mathbf{a} - \mathbf{a}_0$. Then
+\[
+\mathbf{X}^\top\mathbf{d} = \mathbf{c} - \mathbf{X}^\top\mathbf{X}\mathbf{C}\mathbf{c} = \mathbf{c} - \mathbf{c} = \mathbf{0},
+\qquad\text{so}\qquad
+\mathbf{a}_0^\top\mathbf{d} = \mathbf{c}^\top\mathbf{C}\mathbf{X}^\top\mathbf{d} = 0 .
+\]
+Since $\operatorname{Var}(\mathbf{y}) = \sigma^2\mathbf{I}$, Lemma~\ref{lem:linear-rv} gives
+$\operatorname{Var}(\mathbf{a}^\top\mathbf{y}) = \sigma^2\mathbf{a}^\top\mathbf{a}$, and
+\[
+\mathbf{a}^\top\mathbf{a} = (\mathbf{a}_0 + \mathbf{d})^\top(\mathbf{a}_0 + \mathbf{d})
+= \mathbf{a}_0^\top\mathbf{a}_0 + \mathbf{d}^\top\mathbf{d} \ge \mathbf{a}_0^\top\mathbf{a}_0 .
+\]
+So $\operatorname{Var}(\mathbf{a}^\top\mathbf{y}) \ge \operatorname{Var}(\mathbf{c}^\top\hat{\boldsymbol\beta})$,
+with equality only when $\mathbf{d} = \mathbf{0}$. Taking $\mathbf{c}$ with a $1$ in place $j$
+and zeros elsewhere gives the statement about $\hat\beta_j$.
+\end{proof}
+
+This also settles the claim made after Theorem~\ref{thm:gauss-markov}: in simple regression
+$\hat\beta_0$, as well as $\hat\beta_1$, is best linear unbiased.
+
+\subsection{Estimation of $\sigma^2$ in multiple regression}
+\begin{thm}\label{thm:ssres-matrix}
+\begin{enumerate}[label=(\roman*)]
+\item $SS_{\mathrm{Res}} = \mathbf{e}^\top\mathbf{e} = \mathbf{y}^\top(\mathbf{I} - \mathbf{H})\mathbf{y}
+= \mathbf{y}^\top\mathbf{y} - \hat{\boldsymbol\beta}^\top\mathbf{X}^\top\mathbf{y}$.
+\item Under A1--A3, $E(SS_{\mathrm{Res}}) = (n - p)\sigma^2$, so
+\[
+\hat\sigma^2 = MS_{\mathrm{Res}} = \frac{SS_{\mathrm{Res}}}{n - p}
+\]
+is unbiased for $\sigma^2$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) By Theorem~\ref{thm:hat}(i),
+$\mathbf{e}^\top\mathbf{e} = \mathbf{y}^\top(\mathbf{I} - \mathbf{H})^\top(\mathbf{I} - \mathbf{H})\mathbf{y} = \mathbf{y}^\top(\mathbf{I} - \mathbf{H})\mathbf{y}$.
+And $\mathbf{y}^\top\mathbf{H}\mathbf{y} = \mathbf{y}^\top\mathbf{X}\mathbf{C}\mathbf{X}^\top\mathbf{y} = \mathbf{y}^\top\mathbf{X}\hat{\boldsymbol\beta} = \hat{\boldsymbol\beta}^\top\mathbf{X}^\top\mathbf{y}$.
+
+(ii) By Lemma~\ref{lem:quad-form} with $\mathbf{A} = \mathbf{I} - \mathbf{H}$,
+$\boldsymbol\mu = \mathbf{X}\boldsymbol\beta$ and $\mathbf{V} = \sigma^2\mathbf{I}$,
+\[
+E(SS_{\mathrm{Res}}) = \sigma^2\operatorname{tr}(\mathbf{I} - \mathbf{H})
+  + \boldsymbol\beta^\top\mathbf{X}^\top(\mathbf{I} - \mathbf{H})\mathbf{X}\boldsymbol\beta
+= \sigma^2(n - p) + 0 ,
+\]
+by Theorem~\ref{thm:hat}(iv) and (ii).
+\end{proof}
+
+With $k = 1$, $p = 2$ and this is Theorem~\ref{thm:e-ssres}, proved now in two lines. One
+degree of freedom is lost for each estimated coefficient. The \textbf{standard error} of
+$\hat\beta_j$ is
+\[
+\operatorname{se}(\hat\beta_j) = \sqrt{\hat\sigma^2 C_{jj}} .
+\]
+
+\begin{exa}\label{exa:crop-sigma}
+Estimate $\sigma^2$ for the crop data, and find the standard errors of the coefficients.
+\end{exa}
+
+\begin{solution}
+From the residuals, $SS_{\mathrm{Res}} = 1 + 1 + 1 + 1 + 0 + 0 = 4$. Check with
+Theorem~\ref{thm:ssres-matrix}(i): $\mathbf{y}^\top\mathbf{y} = \sum y_i^2 = 887$ and
+\[
+\hat{\boldsymbol\beta}^\top\mathbf{X}^\top\mathbf{y} = 3(69) + 2(244) + 1(188) = 207 + 488 + 188 = 883,
+\]
+so $SS_{\mathrm{Res}} = 887 - 883 = 4$. With $n - p = 6 - 3 = 3$,
+\[
+\hat\sigma^2 = \frac43 = 1.3333 .
+\]
+The diagonal of $\mathbf{C}$ is $C_{00} = 510/378$, $C_{11} = 33/378$, $C_{22} = 96/378$, so
+\begin{align*}
+\operatorname{se}(\hat\beta_0) &= \sqrt{1.3333 \times 510/378} = 1.341, \\
+\operatorname{se}(\hat\beta_1) &= \sqrt{1.3333 \times 33/378} = 0.341, \\
+\operatorname{se}(\hat\beta_2) &= \sqrt{1.3333 \times 96/378} = 0.582 .
+\end{align*}
+The estimated covariance of $\hat\beta_1$ and $\hat\beta_2$ is
+$\hat\sigma^2 C_{12} = 1.3333 \times (-30/378) = -0.106$. It is negative because, in these
+data, fertiliser and rainfall tend to rise together: credit for a high yield can be shifted
+from one to the other, so an overestimate of one coefficient tends to go with an
+underestimate of the other.
+\end{solution}
+
+\subsection{Distribution theory under normality}
+From here on A4 is assumed: $\boldsymbol\varepsilon \sim N_n(\mathbf{0}, \sigma^2\mathbf{I})$.
+The distributional facts (F1)--(F3) of Subsection~\ref{ssec:distributions} are used again,
+together with one result from linear algebra, the \textbf{spectral theorem}: a symmetric
+matrix $\mathbf{A}$ can be written $\mathbf{A} = \mathbf{P}\boldsymbol\Lambda\mathbf{P}^\top$,
+where $\boldsymbol\Lambda$ is the diagonal matrix of its eigenvalues and $\mathbf{P}$ is
+orthogonal, $\mathbf{P}^\top\mathbf{P} = \mathbf{I}$.
+
+\begin{lem}\label{lem:idempotent-chisq}
+Let $\mathbf{z} \sim N_n(\mathbf{0}, \sigma^2\mathbf{I})$ and let $\mathbf{A}$ be symmetric
+and idempotent.
+\begin{enumerate}[label=(\roman*)]
+\item The eigenvalues of $\mathbf{A}$ are $0$ or $1$, and the number equal to $1$ is
+$r = \operatorname{tr}(\mathbf{A})$, the rank of $\mathbf{A}$.
+\item $\mathbf{z}^\top\mathbf{A}\mathbf{z}/\sigma^2 \sim \chi^2_r$.
+\item If $\mathbf{B}$ is also symmetric and idempotent and $\mathbf{AB} = \mathbf{0}$, then
+$\mathbf{z}^\top\mathbf{A}\mathbf{z}$ and $\mathbf{z}^\top\mathbf{B}\mathbf{z}$ are independent.
+\end{enumerate}
+\end{lem}
+
+\begin{proof}
+(i) If $\mathbf{Av} = \lambda\mathbf{v}$ with $\mathbf{v} \neq \mathbf{0}$, then
+$\lambda\mathbf{v} = \mathbf{Av} = \mathbf{A}^2\mathbf{v} = \lambda^2\mathbf{v}$, so
+$\lambda^2 = \lambda$ and $\lambda$ is $0$ or $1$. The trace of
+$\mathbf{P}\boldsymbol\Lambda\mathbf{P}^\top$ is
+$\operatorname{tr}(\boldsymbol\Lambda\mathbf{P}^\top\mathbf{P}) = \operatorname{tr}(\boldsymbol\Lambda)$
+by Lemma~\ref{lem:trace}, the sum of the eigenvalues, which here is the number of ones.
+
+(ii) Let $\mathbf{w} = \mathbf{P}^\top\mathbf{z}/\sigma$. By Lemma~\ref{lem:linear-rv} it is
+normal with mean $\mathbf{0}$ and covariance
+$\mathbf{P}^\top(\sigma^2\mathbf{I})\mathbf{P}/\sigma^2 = \mathbf{I}$, so its entries are
+independent $N(0,1)$. Then
+\[
+\frac{\mathbf{z}^\top\mathbf{A}\mathbf{z}}{\sigma^2}
+= \mathbf{w}^\top\mathbf{P}^\top\mathbf{A}\mathbf{P}\mathbf{w} = \mathbf{w}^\top\boldsymbol\Lambda\mathbf{w}
+= \sum_{i\colon \lambda_i = 1} w_i^2 ,
+\]
+a sum of $r$ squared independent standard normals, which is $\chi^2_r$ by (F2).
+
+(iii) $\mathbf{Az}$ and $\mathbf{Bz}$ are jointly normal, with
+$\operatorname{Cov}(\mathbf{Az}, \mathbf{Bz}) = \mathbf{A}(\sigma^2\mathbf{I})\mathbf{B}^\top = \sigma^2\mathbf{AB} = \mathbf{0}$,
+so they are independent by (F1). And
+$\mathbf{z}^\top\mathbf{A}\mathbf{z} = \mathbf{z}^\top\mathbf{A}^\top\mathbf{A}\mathbf{z} = (\mathbf{Az})^\top(\mathbf{Az})$
+is a function of $\mathbf{Az}$ alone; likewise $\mathbf{z}^\top\mathbf{B}\mathbf{z}$ of $\mathbf{Bz}$.
+\end{proof}
+
+\begin{thm}\label{thm:mlr-dist}
+Under A1--A4,
+\begin{enumerate}[label=(\roman*)]
+\item $\hat{\boldsymbol\beta} \sim N_p\bigl(\boldsymbol\beta, \sigma^2\mathbf{C}\bigr)$, so each $\hat\beta_j \sim N(\beta_j, \sigma^2 C_{jj})$;
+\item $SS_{\mathrm{Res}}/\sigma^2 \sim \chi^2_{n-p}$;
+\item $SS_{\mathrm{Res}}$ is independent of $\hat{\boldsymbol\beta}$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $\hat{\boldsymbol\beta}$ is linear in $\mathbf{y}$, hence normal by (F1), with the mean
+and covariance of Theorem~\ref{thm:beta-props}.
+
+(ii) $(\mathbf{I} - \mathbf{H})\mathbf{y} = (\mathbf{I} - \mathbf{H})\boldsymbol\varepsilon$
+because $(\mathbf{I} - \mathbf{H})\mathbf{X} = \mathbf{0}$, so
+$SS_{\mathrm{Res}} = \boldsymbol\varepsilon^\top(\mathbf{I} - \mathbf{H})\boldsymbol\varepsilon$.
+$\mathbf{I} - \mathbf{H}$ is symmetric and idempotent with trace $n - p$
+(Theorem~\ref{thm:hat}), so Lemma~\ref{lem:idempotent-chisq}(ii) applies.
+
+(iii) $\hat{\boldsymbol\beta} - \boldsymbol\beta = \mathbf{C}\mathbf{X}^\top\boldsymbol\varepsilon$
+and $\mathbf{e} = (\mathbf{I} - \mathbf{H})\boldsymbol\varepsilon$ are jointly normal, with
+\[
+\operatorname{Cov}\bigl(\mathbf{C}\mathbf{X}^\top\boldsymbol\varepsilon,\ (\mathbf{I} - \mathbf{H})\boldsymbol\varepsilon\bigr)
+= \sigma^2\mathbf{C}\bigl((\mathbf{I} - \mathbf{H})\mathbf{X}\bigr)^\top = \mathbf{0} .
+\]
+So $\hat{\boldsymbol\beta}$ is independent of $\mathbf{e}$, and hence of
+$SS_{\mathrm{Res}} = \mathbf{e}^\top\mathbf{e}$.
+\end{proof}
+
+\subsection{Test for significance of regression}
+The first question about a fitted model is whether it is of any use at all: is there a
+linear relationship between $y$ and \emph{any} of the regressors? The hypotheses are
+\[
+H_0\colon \beta_1 = \beta_2 = \cdots = \beta_k = 0
+\qquad\text{against}\qquad
+H_1\colon \beta_j \neq 0 \text{ for at least one } j .
+\]
+The intercept is not included: $H_0$ says that $E(y) = \beta_0$ whatever the regressors are.
+
+As in simple regression, the total sum of squares splits as
+$SS_T = SS_R + SS_{\mathrm{Res}}$ (Problem~\ref{prob:anova-matrix}), where
+\begin{align*}
+SS_T &= \mathbf{y}^\top\mathbf{y} - \frac{\left(\sum y_i\right)^2}{n}, \\
+SS_R &= \hat{\boldsymbol\beta}^\top\mathbf{X}^\top\mathbf{y} - \frac{\left(\sum y_i\right)^2}{n}, \\
+SS_{\mathrm{Res}} &= \mathbf{y}^\top\mathbf{y} - \hat{\boldsymbol\beta}^\top\mathbf{X}^\top\mathbf{y} .
+\end{align*}
+$SS_R$ has $k$ degrees of freedom, one for each slope, and $SS_{\mathrm{Res}}$ has $n - p$.
+
+\begin{thm}\label{thm:overall-F}
+Under A1--A4, when $H_0\colon \beta_1 = \cdots = \beta_k = 0$ is true,
+\[
+F_0 = \frac{SS_R/k}{SS_{\mathrm{Res}}/(n-p)} = \frac{MS_R}{MS_{\mathrm{Res}}} \sim F_{k, n-p} .
+\]
+When $H_0$ is false, $E(SS_R) > k\sigma^2$, so large values of $F_0$ are evidence against $H_0$.
+\end{thm}
+
+\begin{proof}
+Let $\mathbf{1}$ be the vector of ones and $\bar{\mathbf{J}} = \frac1n\mathbf{1}\mathbf{1}^\top$,
+the $n \times n$ matrix with every entry $1/n$. Then $\mathbf{y}^\top\bar{\mathbf{J}}\mathbf{y} = \left(\sum y_i\right)^2/n$,
+and $\mathbf{y}^\top\mathbf{H}\mathbf{y} = \hat{\boldsymbol\beta}^\top\mathbf{X}^\top\mathbf{y}$
+(proof of Theorem~\ref{thm:ssres-matrix}), so
+$SS_R = \mathbf{y}^\top(\mathbf{H} - \bar{\mathbf{J}})\mathbf{y}$.
+
+\emph{Properties of $\mathbf{H} - \bar{\mathbf{J}}$.} $\mathbf{1}$ is the first column of
+$\mathbf{X}$, so $\mathbf{H}\mathbf{1} = \mathbf{1}$ by Theorem~\ref{thm:hat}(ii). Hence
+$\mathbf{H}\bar{\mathbf{J}} = \bar{\mathbf{J}}$, and transposing, $\bar{\mathbf{J}}\mathbf{H} = \bar{\mathbf{J}}$.
+Also $\bar{\mathbf{J}}^2 = \frac{1}{n^2}\mathbf{1}(\mathbf{1}^\top\mathbf{1})\mathbf{1}^\top = \bar{\mathbf{J}}$. So
+\begin{align*}
+(\mathbf{H} - \bar{\mathbf{J}})^2 &= \mathbf{H} - \bar{\mathbf{J}} - \bar{\mathbf{J}} + \bar{\mathbf{J}} = \mathbf{H} - \bar{\mathbf{J}}, \\
+(\mathbf{H} - \bar{\mathbf{J}})(\mathbf{I} - \mathbf{H}) &= \mathbf{H} - \mathbf{H} - \bar{\mathbf{J}} + \bar{\mathbf{J}} = \mathbf{0},
+\end{align*}
+and $\operatorname{tr}(\mathbf{H} - \bar{\mathbf{J}}) = p - 1 = k$. It is symmetric and
+idempotent of rank $k$.
+
+\emph{Under $H_0$}, $\mathbf{X}\boldsymbol\beta = \beta_0\mathbf{1}$, and
+$(\mathbf{H} - \bar{\mathbf{J}})\mathbf{1} = \mathbf{1} - \mathbf{1} = \mathbf{0}$. So
+$(\mathbf{H} - \bar{\mathbf{J}})\mathbf{y} = (\mathbf{H} - \bar{\mathbf{J}})\boldsymbol\varepsilon$ and
+$SS_R = \boldsymbol\varepsilon^\top(\mathbf{H} - \bar{\mathbf{J}})\boldsymbol\varepsilon$. Since also
+$SS_{\mathrm{Res}} = \boldsymbol\varepsilon^\top(\mathbf{I} - \mathbf{H})\boldsymbol\varepsilon$,
+Lemma~\ref{lem:idempotent-chisq} gives $SS_R/\sigma^2 \sim \chi^2_k$ and
+$SS_{\mathrm{Res}}/\sigma^2 \sim \chi^2_{n-p}$, independently, and (F3) gives the $F$ distribution.
+
+\emph{When $H_0$ is false.} By Lemma~\ref{lem:quad-form},
+$E(SS_R) = \sigma^2\operatorname{tr}(\mathbf{H} - \bar{\mathbf{J}}) + \boldsymbol\mu^\top(\mathbf{H} - \bar{\mathbf{J}})\boldsymbol\mu$
+with $\boldsymbol\mu = \mathbf{X}\boldsymbol\beta$. Since $\mathbf{H}\boldsymbol\mu = \boldsymbol\mu$,
+the second term is $\boldsymbol\mu^\top(\mathbf{I} - \bar{\mathbf{J}})\boldsymbol\mu = \sum (\mu_i - \bar\mu)^2$,
+which is positive unless all the $\mu_i$ are equal. With $\mathbf{X}$ of full rank that happens
+only when $\beta_1 = \cdots = \beta_k = 0$.
+\end{proof}
+
+Reject $H_0$ at level $\alpha$ when $F_0 > F_{\alpha, k, n-p}$. The working goes in an
+ANOVA table:
+\begin{center}
+\begin{tabular}{lcccc}
+\hline
+Source & Sum of squares & df & Mean square & $F_0$ \\
+\hline
+Regression & $SS_R$ & $k$ & $MS_R = SS_R/k$ & $MS_R/MS_{\mathrm{Res}}$ \\
+Residual & $SS_{\mathrm{Res}}$ & $n - p$ & $MS_{\mathrm{Res}}$ & \\
+\hline
+Total & $SS_T$ & $n - 1$ & & \\
+\hline
+\end{tabular}
+\end{center}
+With $k = 1$ this is exactly the table of Subsection~\ref{ssec:anova}.
+
+\begin{exa}\label{exa:crop-anova}
+Test significance of regression for the crop data at the 5\% level.
+\end{exa}
+
+\begin{solution}
+From Examples~\ref{exa:crop-fit} and~\ref{exa:crop-sigma}: $\sum y_i = 69$,
+$\mathbf{y}^\top\mathbf{y} = 887$ and $\hat{\boldsymbol\beta}^\top\mathbf{X}^\top\mathbf{y} = 883$.
+The correction term is $69^2/6 = 793.5$, so
+\begin{align*}
+SS_T &= 887 - 793.5 = 93.5, \\
+SS_R &= 883 - 793.5 = 89.5, \\
+SS_{\mathrm{Res}} &= 887 - 883 = 4 .
+\end{align*}
+\begin{center}
+\begin{tabular}{lcccc}
+\hline
+Source & SS & df & MS & $F_0$ \\
+\hline
+Regression & 89.5 & 2 & 44.75 & 33.56 \\
+Residual & 4.0 & 3 & 1.3333 & \\
+\hline
+Total & 93.5 & 5 & & \\
+\hline
+\end{tabular}
+\end{center}
+$F_{0.05,2,3} = 9.55$, and $33.56 > 9.55$, so reject $H_0\colon \beta_1 = \beta_2 = 0$
+($p = 0.009$). Yield is linearly related to at least one of fertiliser and rainfall.
+\end{solution}
+
+\subsection{$R^2$ and adjusted $R^2$}
+The coefficient of determination is defined as before, $R^2 = SS_R/SS_T = 1 - SS_{\mathrm{Res}}/SS_T$.
+For the crop data, $R^2 = 89.5/93.5 = 0.957$.
+
+\begin{thm}\label{thm:r2-increase}
+Adding a regressor to a model never decreases $R^2$.
+\end{thm}
+
+\begin{proof}
+$SS_T$ does not depend on the model. The larger model can reproduce any fit of the smaller
+one by setting the new coefficient to zero, so its minimum of $S(\boldsymbol\beta)$, which
+is its $SS_{\mathrm{Res}}$, is no greater. So $1 - SS_{\mathrm{Res}}/SS_T$ cannot fall.
+\end{proof}
+
+So $R^2$ always favours the bigger model, even when the added regressor is pure noise. To
+compare models with different numbers of parameters, $R^2$ is adjusted by replacing each sum
+of squares with its mean square:
+\[
+R^2_{\mathrm{adj}} = 1 - \frac{SS_{\mathrm{Res}}/(n - p)}{SS_T/(n - 1)} .
+\]
+An extra regressor lowers $SS_{\mathrm{Res}}$ but also lowers $n - p$, so $R^2_{\mathrm{adj}}$
+rises only if the regressor earns its degree of freedom. For the crop data,
+\[
+R^2_{\mathrm{adj}} = 1 - \frac{4/3}{93.5/5} = 1 - \frac{1.3333}{18.7} = 0.929 .
+\]
+
+\subsection{Tests on individual coefficients}
+\begin{thm}\label{thm:t-mlr}
+Under A1--A4,
+\[
+\frac{\hat\beta_j - \beta_j}{\operatorname{se}(\hat\beta_j)} \sim t_{n-p},
+\qquad \operatorname{se}(\hat\beta_j) = \sqrt{\hat\sigma^2 C_{jj}} .
+\]
+\end{thm}
+
+\begin{proof}
+$(\hat\beta_j - \beta_j)/\sqrt{\sigma^2 C_{jj}} \sim N(0,1)$ and
+$(n-p)\hat\sigma^2/\sigma^2 \sim \chi^2_{n-p}$, independently, by Theorem~\ref{thm:mlr-dist}.
+By (F3) their ratio, $Z/\sqrt{V/(n-p)}$, is $t_{n-p}$, and $\sigma$ cancels as in
+Theorem~\ref{thm:t-slope}.
+\end{proof}
+
+To test $H_0\colon \beta_j = 0$, use $t_0 = \hat\beta_j/\operatorname{se}(\hat\beta_j)$ and
+reject when $|t_0| > t_{\alpha/2, n-p}$.
+
+\begin{remark}
+This is a \textbf{marginal} or \textbf{partial} test: it asks whether $x_j$ adds anything
+\emph{given that all the other regressors are in the model}. Its verdict can change when other
+regressors are added or removed.
+\end{remark}
+
+\begin{exa}\label{exa:crop-t}
+Test the significance of each regressor in the crop model at the 5\% level.
+\end{exa}
+
+\begin{solution}
+With $t_{0.025,3} = 3.182$ and the standard errors of Example~\ref{exa:crop-sigma}:
+\begin{center}
+\begin{tabular}{lcccc}
+\hline
+Coefficient & Estimate & se & $t_0$ & Decision \\
+\hline
+$\beta_1$ (fertiliser) & 2 & 0.3412 & 5.862 & reject $H_0$ ($p = 0.010$) \\
+$\beta_2$ (rainfall) & 1 & 0.5819 & 1.719 & do not reject ($p = 0.184$) \\
+\hline
+\end{tabular}
+\end{center}
+Fertiliser is significant. Once fertiliser is in the model, rainfall does not add a
+significant amount; that is not the same as saying rainfall does not affect yield.
+\end{solution}
+
+\subsection{The extra-sum-of-squares principle}\label{ssec:extra-ss}
+The overall $F$-test asks about all the slopes; the $t$-test asks about one. Often the
+question is about a \emph{group} of coefficients: for instance, whether two weather variables
+together add anything to a model that already contains the fertiliser and soil variables.
+
+Split the coefficients as $\boldsymbol\beta = (\boldsymbol\beta_1^\top, \boldsymbol\beta_2^\top)^\top$,
+where $\boldsymbol\beta_2$ holds the $r$ coefficients being tested, and split
+$\mathbf{X} = [\mathbf{X}_1 \ \mathbf{X}_2]$ to match, so that
+$\mathbf{X}\boldsymbol\beta = \mathbf{X}_1\boldsymbol\beta_1 + \mathbf{X}_2\boldsymbol\beta_2$.
+We test $H_0\colon \boldsymbol\beta_2 = \mathbf{0}$.
+
+\begin{defn}
+Let $SS_R(\boldsymbol\beta)$ be the regression sum of squares of the full model and
+$SS_R(\boldsymbol\beta_1)$ that of the \textbf{reduced model} $\mathbf{y} = \mathbf{X}_1\boldsymbol\beta_1 + \boldsymbol\varepsilon$.
+The \textbf{extra sum of squares} due to $\boldsymbol\beta_2$, given $\boldsymbol\beta_1$, is
+\[
+SS_R(\boldsymbol\beta_2 \mid \boldsymbol\beta_1) = SS_R(\boldsymbol\beta) - SS_R(\boldsymbol\beta_1),
+\]
+the increase in the regression sum of squares, or equivalently the decrease in $SS_{\mathrm{Res}}$,
+from adding $\mathbf{X}_2$ to the model.
+\end{defn}
+
+\begin{thm}[Partial $F$-test]\label{thm:partial-F}
+Under A1--A4, when $H_0\colon \boldsymbol\beta_2 = \mathbf{0}$ is true,
+\[
+F_0 = \frac{SS_R(\boldsymbol\beta_2 \mid \boldsymbol\beta_1)/r}{MS_{\mathrm{Res}}} \sim F_{r, n-p},
+\]
+where $MS_{\mathrm{Res}}$ is from the full model.
+\end{thm}
+
+\begin{proof}
+Let $\mathbf{H}_1 = \mathbf{X}_1(\mathbf{X}_1^\top\mathbf{X}_1)^{-1}\mathbf{X}_1^\top$ be the
+hat matrix of the reduced model. The correction term $\left(\sum y_i\right)^2/n$ is the same in
+both regression sums of squares and cancels, so
+$SS_R(\boldsymbol\beta_2 \mid \boldsymbol\beta_1) = \mathbf{y}^\top(\mathbf{H} - \mathbf{H}_1)\mathbf{y}$.
+
+The columns of $\mathbf{X}_1$ are columns of $\mathbf{X}$, so $\mathbf{H}\mathbf{X}_1 = \mathbf{X}_1$
+by Theorem~\ref{thm:hat}(ii), hence $\mathbf{H}\mathbf{H}_1 = \mathbf{H}_1$ and, transposing,
+$\mathbf{H}_1\mathbf{H} = \mathbf{H}_1$. Exactly as for $\mathbf{H} - \bar{\mathbf{J}}$ in
+Theorem~\ref{thm:overall-F}, it follows that $\mathbf{H} - \mathbf{H}_1$ is symmetric and
+idempotent, that $(\mathbf{H} - \mathbf{H}_1)(\mathbf{I} - \mathbf{H}) = \mathbf{0}$, and that
+its rank is $\operatorname{tr}(\mathbf{H}) - \operatorname{tr}(\mathbf{H}_1) = p - (p - r) = r$.
+
+Under $H_0$, $\mathbf{X}\boldsymbol\beta = \mathbf{X}_1\boldsymbol\beta_1$, and
+$(\mathbf{H} - \mathbf{H}_1)\mathbf{X}_1 = \mathbf{X}_1 - \mathbf{X}_1 = \mathbf{0}$. So
+$SS_R(\boldsymbol\beta_2 \mid \boldsymbol\beta_1) = \boldsymbol\varepsilon^\top(\mathbf{H} - \mathbf{H}_1)\boldsymbol\varepsilon$,
+and Lemma~\ref{lem:idempotent-chisq} and (F3) finish the proof as before.
+\end{proof}
+
+The overall test of Theorem~\ref{thm:overall-F} is the case where $\mathbf{X}_1 = \mathbf{1}$,
+so that $\mathbf{H}_1 = \bar{\mathbf{J}}$.
+
+\begin{exa}\label{exa:crop-partial}
+For the crop data, use the extra-sum-of-squares principle to test whether rainfall adds to a
+model that already contains fertiliser.
+\end{exa}
+
+\begin{solution}
+\emph{Reduced model:} $y = \beta_0 + \beta_1 x_1 + \varepsilon$, a simple regression. From the
+table of Example~\ref{exa:crop-fit},
+\[
+S_{x_1x_1} = 70 - \frac{18^2}{6} = 16, \qquad S_{x_1y} = 244 - \frac{18 \times 69}{6} = 37,
+\]
+so $SS_R(\beta_1) = S_{x_1y}^2/S_{x_1x_1} = 37^2/16 = 85.5625$.
+
+\emph{Extra sum of squares:}
+$SS_R(\beta_2 \mid \beta_1) = 89.5 - 85.5625 = 3.9375$, on $r = 1$ degree of freedom.
+
+\emph{Test:}
+\[
+F_0 = \frac{3.9375/1}{1.3333} = 2.953 < F_{0.05,1,3} = 10.13 ,
+\]
+so do not reject $H_0\colon \beta_2 = 0$. This agrees with the $t$-test of
+Example~\ref{exa:crop-t}, and $t_0^2 = 1.7185^2 = 2.953 = F_0$: when $r = 1$, the partial
+$F$-test and the $t$-test are the same test (Theorem~\ref{thm:added-variable}).
+
+The order in which regressors are added matters. Fitting rainfall alone gives
+$SS_R(\beta_2) = 43.68$, so $SS_R(\beta_1 \mid \beta_2) = 89.5 - 43.68 = 45.82$: fertiliser
+added to rainfall explains far more than rainfall added to fertiliser.
+\end{solution}
+
+The next result explains why a partial $F$-test on one coefficient is the same as its
+$t$-test, and gives a picture of what a single coefficient in a multiple regression measures.
+
+\begin{thm}[Added-variable, or Frisch--Waugh, theorem]\label{thm:added-variable}
+Let $\mathbf{x}$ be the column of $\mathbf{X}$ belonging to $\beta_j$, and let $\mathbf{X}_1$
+hold the other columns, with hat matrix $\mathbf{H}_1$. Let
+$\mathbf{u} = (\mathbf{I} - \mathbf{H}_1)\mathbf{x}$, the residuals from regressing $x_j$ on
+the other regressors. Then
+\[
+\hat\beta_j = \frac{\mathbf{u}^\top\mathbf{y}}{\mathbf{u}^\top\mathbf{u}}, \qquad
+C_{jj} = \frac{1}{\mathbf{u}^\top\mathbf{u}}, \qquad
+SS_R(\beta_j \mid \text{others}) = \frac{(\mathbf{u}^\top\mathbf{y})^2}{\mathbf{u}^\top\mathbf{u}} = \frac{\hat\beta_j^2}{C_{jj}} .
+\]
+Consequently the partial $F$ statistic for $\beta_j$ equals $t_0^2$.
+\end{thm}
+
+\begin{proof}
+$\mathbf{u} \neq \mathbf{0}$, since $\mathbf{x}$ is not a combination of the columns of
+$\mathbf{X}_1$ (full rank), and $\mathbf{X}_1^\top\mathbf{u} = \mathbf{0}$ by
+Theorem~\ref{thm:hat}(iii) applied to the regression of $\mathbf{x}$ on $\mathbf{X}_1$; also
+$\mathbf{H}_1\mathbf{u} = \mathbf{0}$. Put
+\[
+\mathbf{P} = \mathbf{H}_1 + \frac{\mathbf{u}\mathbf{u}^\top}{\mathbf{u}^\top\mathbf{u}} .
+\]
+We show that $\mathbf{Py}$ is the least-squares fit $\hat{\mathbf{y}}$. First, $\mathbf{Py}$
+lies in the column space of $\mathbf{X}$, since $\mathbf{H}_1\mathbf{y}$ is a combination of
+the columns of $\mathbf{X}_1$ and $\mathbf{u} = \mathbf{x} - \mathbf{H}_1\mathbf{x}$ is a
+combination of $\mathbf{x}$ and those columns. Second, $\mathbf{y} - \mathbf{Py}$ is
+perpendicular to every column of $\mathbf{X}$:
+\begin{align*}
+\mathbf{X}_1^\top(\mathbf{y} - \mathbf{Py}) &= \mathbf{X}_1^\top\mathbf{y} - \mathbf{X}_1^\top\mathbf{y} - \mathbf{0} = \mathbf{0}, \\
+\mathbf{u}^\top(\mathbf{y} - \mathbf{Py}) &= \mathbf{u}^\top\mathbf{y} - 0 - \mathbf{u}^\top\mathbf{y} = 0 ,
+\end{align*}
+using $\mathbf{X}_1^\top\mathbf{H}_1 = \mathbf{X}_1^\top$, $\mathbf{X}_1^\top\mathbf{u} = \mathbf{0}$
+and $\mathbf{u}^\top\mathbf{H}_1 = \mathbf{0}^\top$; and $\mathbf{x} = \mathbf{H}_1\mathbf{x} + \mathbf{u}$
+is a combination of these. So $\mathbf{Py}$ satisfies the normal equations, and since the
+least-squares fit is unique, $\hat{\mathbf{y}} = \mathbf{Py}$.
+
+Now compare two ways of writing $\hat{\mathbf{y}}$. On one hand
+$\hat{\mathbf{y}} = \mathbf{X}_1\hat{\boldsymbol\beta}_1 + \mathbf{x}\hat\beta_j
+= (\mathbf{X}_1\hat{\boldsymbol\beta}_1 + \mathbf{H}_1\mathbf{x}\hat\beta_j) + \mathbf{u}\hat\beta_j$;
+on the other, $\hat{\mathbf{y}} = \mathbf{H}_1\mathbf{y} + \mathbf{u}(\mathbf{u}^\top\mathbf{y})/(\mathbf{u}^\top\mathbf{u})$.
+In each, the bracketed part lies in the column space of $\mathbf{X}_1$, which is perpendicular to
+$\mathbf{u}$. Taking the inner product of both with $\mathbf{u}$ gives
+$\mathbf{u}^\top\mathbf{u}\,\hat\beta_j = \mathbf{u}^\top\mathbf{y}$, the first formula.
+
+It is linear in $\mathbf{y}$, so
+$\operatorname{Var}(\hat\beta_j) = \sigma^2\mathbf{u}^\top\mathbf{u}/(\mathbf{u}^\top\mathbf{u})^2 = \sigma^2/\mathbf{u}^\top\mathbf{u}$,
+and comparing with $\sigma^2 C_{jj}$ gives the second. Finally
+$\mathbf{H} = \mathbf{P}$ (both give the fit of every $\mathbf{y}$), so
+$\mathbf{H} - \mathbf{H}_1 = \mathbf{u}\mathbf{u}^\top/\mathbf{u}^\top\mathbf{u}$ and
+$SS_R(\beta_j \mid \text{others}) = \mathbf{y}^\top(\mathbf{H} - \mathbf{H}_1)\mathbf{y} = (\mathbf{u}^\top\mathbf{y})^2/\mathbf{u}^\top\mathbf{u}$.
+Dividing by $MS_{\mathrm{Res}}$,
+\[
+F_0 = \frac{\hat\beta_j^2/C_{jj}}{\hat\sigma^2} = \left( \frac{\hat\beta_j}{\sqrt{\hat\sigma^2 C_{jj}}} \right)^2 = t_0^2 . \qedhere
+\]
+\end{proof}
+
+So $\hat\beta_j$ is the slope of a simple regression of $y$ on $\mathbf{u}$, the part of $x_j$
+that the other regressors cannot explain. Only that part carries information about $\beta_j$.
+When $x_j$ is nearly a combination of the other regressors, $\mathbf{u}$ is small,
+$C_{jj} = 1/\mathbf{u}^\top\mathbf{u}$ is large, and $\hat\beta_j$ is imprecise. This is the
+problem of \emph{multicollinearity}, which has a section of its own. For the crop data,
+$C_{22} = 96/378$, and indeed $\hat\beta_2^2/C_{22} = 1 \times 378/96 = 3.9375$, the extra sum of
+squares found in Example~\ref{exa:crop-partial}.
+
+\subsection{Confidence and prediction intervals}
+\begin{thm}\label{thm:mlr-intervals}
+Under A1--A4, $100(1 - \alpha)\%$ intervals are:
+\begin{enumerate}[label=(\roman*)]
+\item for a coefficient $\beta_j$: $\hat\beta_j \pm t_{\alpha/2, n-p}\sqrt{\hat\sigma^2 C_{jj}}$;
+\item for the mean response at $\mathbf{x}_0 = (1, x_{01}, \dots, x_{0k})^\top$:
+\[
+\hat y_0 \pm t_{\alpha/2, n-p}\sqrt{\hat\sigma^2\, \mathbf{x}_0^\top\mathbf{C}\mathbf{x}_0},
+\qquad \hat y_0 = \mathbf{x}_0^\top\hat{\boldsymbol\beta} ;
+\]
+\item for a new observation at $\mathbf{x}_0$:
+\[
+\hat y_0 \pm t_{\alpha/2, n-p}\sqrt{\hat\sigma^2 \left(1 + \mathbf{x}_0^\top\mathbf{C}\mathbf{x}_0\right)} .
+\]
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) follows from Theorem~\ref{thm:t-mlr} exactly as in simple regression.
+
+(ii) $\hat y_0 = \mathbf{x}_0^\top\hat{\boldsymbol\beta}$ is normal with mean
+$\mathbf{x}_0^\top\boldsymbol\beta = E(y \mid \mathbf{x}_0)$ and, by Lemma~\ref{lem:linear-rv},
+variance $\mathbf{x}_0^\top(\sigma^2\mathbf{C})\mathbf{x}_0$. It is a function of
+$\hat{\boldsymbol\beta}$, so is independent of $SS_{\mathrm{Res}}$, and the $t$ argument applies.
+
+(iii) A new observation $y_0 = \mathbf{x}_0^\top\boldsymbol\beta + \varepsilon_0$ is independent
+of the sample, so $y_0 - \hat y_0$ has mean $0$ and variance
+$\sigma^2 + \sigma^2\mathbf{x}_0^\top\mathbf{C}\mathbf{x}_0$, and the $t$ argument applies again.
+\end{proof}
+
+With $k = 1$, $\mathbf{x}_0^\top\mathbf{C}\mathbf{x}_0 = \frac1n + \frac{(x_0 - \bar x)^2}{S_{xx}}$,
+recovering Theorems~\ref{thm:mean-response} and~\ref{thm:prediction}. Note that
+$\mathbf{x}_0^\top\mathbf{C}\mathbf{x}_0$ is the leverage that the point $\mathbf{x}_0$ would
+have if it were added to the data.
+
+\begin{exa}\label{exa:crop-intervals}
+For the crop data, find 95\% confidence intervals for $\beta_1$ and $\beta_2$. Then, for a plot
+with $300$\,kg of fertiliser per hectare and $300$\,mm of rain, find a 95\% confidence interval
+for the mean yield and a 95\% prediction interval for the yield of a single plot.
+\end{exa}
+
+\begin{solution}
+With $t_{0.025,3} = 3.182$:
+\begin{align*}
+\beta_1&\colon\ 2 \pm 3.182 \times 0.3412 = 2 \pm 1.086, \quad\text{that is, } (0.914,\ 3.086); \\
+\beta_2&\colon\ 1 \pm 3.182 \times 0.5819 = 1 \pm 1.852, \quad\text{that is, } (-0.852,\ 2.852).
+\end{align*}
+The interval for $\beta_2$ contains $0$, matching the $t$-test.
+
+For the new plot, $\mathbf{x}_0 = (1, 3, 3)^\top$ and $\hat y_0 = 3 + 2(3) + 3 = 12$. Next,
+\[
+\mathbf{C}\mathbf{x}_0 = \frac{1}{378}\begin{bmatrix} 510 - 72 - 450 \\ -24 + 99 - 90 \\ -150 - 90 + 288 \end{bmatrix}
+= \frac{1}{378}\begin{bmatrix} -12 \\ -15 \\ 48 \end{bmatrix},
+\]
+so
+\[
+\mathbf{x}_0^\top\mathbf{C}\mathbf{x}_0 = \frac{1}{378}\bigl(-12 + 3(-15) + 3(48)\bigr) = \frac{87}{378} = 0.2302 .
+\]
+\begin{itemize}
+\item Mean yield: $12 \pm 3.182\sqrt{1.3333 \times 0.2302} = 12 \pm 3.182 \times 0.5540 = 12 \pm 1.763$,
+that is, $(10.24,\ 13.76)$ tonnes per hectare.
+\item A single plot: $12 \pm 3.182\sqrt{1.3333 \times 1.2302} = 12 \pm 3.182 \times 1.2807 = 12 \pm 4.076$,
+that is, $(7.92,\ 16.08)$ tonnes per hectare.
+\end{itemize}
+\end{solution}
+
+\begin{remark}[Hidden extrapolation]
+With several regressors it is easy to extrapolate without noticing. A point can lie inside the
+range of each regressor separately and still be far from the data jointly: here, a plot with
+$x_1 = 6$ and $x_2 = 1$ is within both ranges, but no plot combined so much fertiliser with so
+little rain, and indeed $\mathbf{x}_0^\top\mathbf{C}\mathbf{x}_0 = 846/378 = 2.24$ there.
+A useful check is to compare $\mathbf{x}_0^\top\mathbf{C}\mathbf{x}_0$ with the
+largest leverage in the data, $h_{\max}$; if it is larger, the prediction is an extrapolation.
+For $\mathbf{x}_0 = (1, 3, 3)^\top$, $0.2302 < h_{\max} = 0.778$, so the intervals above are
+safe.
+\end{remark}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:orth}
+A $2^2$ experiment with two centre points gave
+\begin{center}
+\begin{tabular}{c|cccccc}
+$x_1$ & $-1$ & $1$ & $-1$ & $1$ & $0$ & $0$ \\
+$x_2$ & $-1$ & $-1$ & $1$ & $1$ & $0$ & $0$ \\
+\hline
+$y$ & 20 & 30 & 26 & 38 & 29 & 31 \\
+\end{tabular}
+\end{center}
+\begin{enumerate}[label=(\alph*)]
+\item Form $\mathbf{X}^\top\mathbf{X}$ and $\mathbf{X}^\top\mathbf{y}$, and fit
+$y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \varepsilon$.
+\item Find the residuals, $\hat\sigma^2$ and the standard errors.
+\item Show that the three estimates are uncorrelated. What feature of the design causes this?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\sum x_{i1} = \sum x_{i2} = \sum x_{i1}x_{i2} = 0$ and $\sum x_{i1}^2 = \sum x_{i2}^2 = 4$, so
+\[
+\mathbf{X}^\top\mathbf{X} = \begin{bmatrix} 6 & 0 & 0 \\ 0 & 4 & 0 \\ 0 & 0 & 4 \end{bmatrix},
+\qquad
+\mathbf{X}^\top\mathbf{y} = \begin{bmatrix} 174 \\ 22 \\ 14 \end{bmatrix} .
+\]
+Here $\sum x_{i1}y_i = -20 + 30 - 26 + 38 = 22$ and $\sum x_{i2}y_i = -20 - 30 + 26 + 38 = 14$.
+A diagonal matrix is inverted by inverting its diagonal, so
+\[
+\hat{\boldsymbol\beta} = \begin{bmatrix} 174/6 \\ 22/4 \\ 14/4 \end{bmatrix} = \begin{bmatrix} 29 \\ 5.5 \\ 3.5 \end{bmatrix},
+\qquad \hat y = 29 + 5.5x_1 + 3.5x_2 .
+\]
+(b) The fitted values are $20, 31, 27, 38, 29, 29$, and the residuals $0, -1, -1, 0, 0, 2$.
+$SS_{\mathrm{Res}} = 0 + 1 + 1 + 0 + 0 + 4 = 6$ (check: $\mathbf{y}^\top\mathbf{y} - \hat{\boldsymbol\beta}^\top\mathbf{X}^\top\mathbf{y} = 5222 - 5216 = 6$),
+so $\hat\sigma^2 = 6/3 = 2$. Then $\operatorname{se}(\hat\beta_0) = \sqrt{2/6} = 0.577$ and
+$\operatorname{se}(\hat\beta_1) = \operatorname{se}(\hat\beta_2) = \sqrt{2/4} = 0.707$.
+
+(c) $\operatorname{Var}(\hat{\boldsymbol\beta}) = \sigma^2\operatorname{diag}(1/6, 1/4, 1/4)$
+has zeros off the diagonal. The cause is that the columns of $\mathbf{X}$ are
+\emph{orthogonal}: each pair has zero inner product. This is the main reason designed
+experiments use such patterns of $x$ values: each effect is estimated separately from the
+others, and the calculation is trivial.
+\end{solution}
+
+\begin{problem}
+Show that $\mathbf{e} = (\mathbf{I} - \mathbf{H})\boldsymbol\varepsilon$, and deduce that
+under A1--A3, $E(\mathbf{e}) = \mathbf{0}$ and $\operatorname{Var}(\mathbf{e}) = \sigma^2(\mathbf{I} - \mathbf{H})$.
+For the crop data, what is $\operatorname{Var}(e_6)$, and why is it so much smaller than
+$\sigma^2$?
+\end{problem}
+
+\begin{solution}
+$\mathbf{e} = (\mathbf{I} - \mathbf{H})\mathbf{y} = (\mathbf{I} - \mathbf{H})(\mathbf{X}\boldsymbol\beta + \boldsymbol\varepsilon) = (\mathbf{I} - \mathbf{H})\boldsymbol\varepsilon$,
+since $(\mathbf{I} - \mathbf{H})\mathbf{X} = \mathbf{0}$. By Lemma~\ref{lem:linear-rv},
+$E(\mathbf{e}) = (\mathbf{I} - \mathbf{H})\mathbf{0} = \mathbf{0}$ and
+\[
+\operatorname{Var}(\mathbf{e}) = (\mathbf{I} - \mathbf{H})\sigma^2\mathbf{I}(\mathbf{I} - \mathbf{H})^\top = \sigma^2(\mathbf{I} - \mathbf{H})^2 = \sigma^2(\mathbf{I} - \mathbf{H}) .
+\]
+So $\operatorname{Var}(e_i) = \sigma^2(1 - h_{ii})$. For plot 6, $h_{66} = 7/9$, so
+$\operatorname{Var}(e_6) = \frac29\sigma^2$. Plot 6 has high leverage: the fitted plane is
+pulled close to it, so its residual is small whatever its error was. Residuals do not all have
+the same variance, even though the errors do. This is why, in the section on model adequacy,
+residuals are scaled before they are compared.
+\end{solution}
+
+\begin{problem}\label{prob:slr-matrix}
+For simple regression, use $(\mathbf{X}^\top\mathbf{X})^{-1}$ from
+Example~\ref{exa:slr-matrix} to show that
+(a) $\hat\beta_0 = \bar y - \hat\beta_1\bar x$, and
+(b) $\sigma^2(\mathbf{X}^\top\mathbf{X})^{-1}$ has entries
+$\operatorname{Var}(\hat\beta_0) = \sigma^2\bigl(\frac1n + \frac{\bar x^2}{S_{xx}}\bigr)$,
+$\operatorname{Var}(\hat\beta_1) = \sigma^2/S_{xx}$ and
+$\operatorname{Cov}(\hat\beta_0,\hat\beta_1) = -\bar x\sigma^2/S_{xx}$.
+\end{problem}
+
+\begin{solution}
+(a) The first entry of $(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$ is
+\[
+\hat\beta_0 = \frac{\sum x_i^2 \sum y_i - \sum x_i \sum x_i y_i}{nS_{xx}} .
+\]
+Put $\sum x_i^2 = S_{xx} + n\bar x^2$ and $\sum x_i y_i = S_{xy} + n\bar x\bar y$, with
+$\sum x_i = n\bar x$ and $\sum y_i = n\bar y$. The numerator becomes
+\[
+(S_{xx} + n\bar x^2)n\bar y - n\bar x(S_{xy} + n\bar x\bar y) = nS_{xx}\bar y - n\bar x S_{xy},
+\]
+and dividing by $nS_{xx}$ gives $\bar y - \bar x S_{xy}/S_{xx} = \bar y - \hat\beta_1\bar x$.
+
+(b) The $(1,1)$ entry is $\sigma^2\sum x_i^2/(nS_{xx}) = \sigma^2(S_{xx} + n\bar x^2)/(nS_{xx}) = \sigma^2\bigl(\frac1n + \frac{\bar x^2}{S_{xx}}\bigr)$;
+the $(2,2)$ entry is $\sigma^2 n/(nS_{xx}) = \sigma^2/S_{xx}$; and the off-diagonal entry is
+$-\sigma^2\sum x_i/(nS_{xx}) = -\sigma^2 n\bar x/(nS_{xx}) = -\bar x\sigma^2/S_{xx}$.
+\end{solution}
+
+\begin{problem}
+Suppose each regressor is measured in different units, so that $\mathbf{X}$ is replaced by
+$\mathbf{XD}$, where $\mathbf{D}$ is an invertible diagonal $p \times p$ matrix (with
+$D_{00} = 1$, so the column of ones is unchanged). Show that the fitted values and residuals
+are unchanged, and that the new coefficient vector is $\mathbf{D}^{-1}\hat{\boldsymbol\beta}$.
+\end{problem}
+
+\begin{solution}
+The new hat matrix is
+\[
+\mathbf{XD}\bigl((\mathbf{XD})^\top\mathbf{XD}\bigr)^{-1}(\mathbf{XD})^\top
+= \mathbf{XD}\,\mathbf{D}^{-1}(\mathbf{X}^\top\mathbf{X})^{-1}(\mathbf{D}^\top)^{-1}\mathbf{D}^\top\mathbf{X}^\top
+= \mathbf{H},
+\]
+using $(\mathbf{ABC})^{-1} = \mathbf{C}^{-1}\mathbf{B}^{-1}\mathbf{A}^{-1}$. So
+$\hat{\mathbf{y}} = \mathbf{Hy}$ and $\mathbf{e} = (\mathbf{I} - \mathbf{H})\mathbf{y}$ are
+unchanged. The new coefficients are
+\[
+\bigl((\mathbf{XD})^\top\mathbf{XD}\bigr)^{-1}(\mathbf{XD})^\top\mathbf{y}
+= \mathbf{D}^{-1}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y} = \mathbf{D}^{-1}\hat{\boldsymbol\beta} .
+\]
+Measuring fertiliser in kg instead of 100\,kg multiplies its column by $100$ and divides its
+coefficient by $100$; the fit itself is untouched.
+\end{solution}
+
+\begin{problem}\label{prob:anova-matrix}
+Show that $SS_T = \mathbf{y}^\top(\mathbf{I} - \bar{\mathbf{J}})\mathbf{y} = \sum (y_i - \bar y)^2$,
+and deduce the identity $SS_T = SS_R + SS_{\mathrm{Res}}$.
+\end{problem}
+
+\begin{solution}
+$\mathbf{y}^\top\bar{\mathbf{J}}\mathbf{y} = \frac1n(\mathbf{1}^\top\mathbf{y})^2 = \frac1n\left(\sum y_i\right)^2 = n\bar y^2$,
+so $\mathbf{y}^\top(\mathbf{I} - \bar{\mathbf{J}})\mathbf{y} = \sum y_i^2 - n\bar y^2 = \sum (y_i - \bar y)^2$
+by Lemma~\ref{lem:sxx}. Then, writing $\mathbf{I} - \bar{\mathbf{J}} = (\mathbf{H} - \bar{\mathbf{J}}) + (\mathbf{I} - \mathbf{H})$,
+\[
+SS_T = \mathbf{y}^\top(\mathbf{H} - \bar{\mathbf{J}})\mathbf{y} + \mathbf{y}^\top(\mathbf{I} - \mathbf{H})\mathbf{y} = SS_R + SS_{\mathrm{Res}} ,
+\]
+using the forms of $SS_R$ and $SS_{\mathrm{Res}}$ found in the proofs of
+Theorems~\ref{thm:overall-F} and~\ref{thm:ssres-matrix}.
+\end{solution}
+
+\begin{problem}\label{prob:orth-inference}
+Continue with the designed experiment of Problem~\ref{prob:orth}, assuming A1--A4.
+\begin{enumerate}[label=(\alph*)]
+\item Set out the ANOVA table and test significance of regression at the 5\% level.
+\item Test each of $\beta_1$ and $\beta_2$ separately at the 5\% level.
+\item Find $R^2$ and $R^2_{\mathrm{adj}}$.
+\item Find $SS_R(\beta_2 \mid \beta_1)$ and $SS_R(\beta_1 \mid \beta_2)$. Why, unlike in the crop
+data, does the order not matter?
+\item At $x_1 = x_2 = 0.5$, give a 95\% confidence interval for the mean response and a 95\%
+prediction interval for a new observation.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+From Problem~\ref{prob:orth}: $\hat y = 29 + 5.5x_1 + 3.5x_2$, $SS_{\mathrm{Res}} = 6$,
+$\hat\sigma^2 = 2$ with $3$ degrees of freedom, $\mathbf{C} = \operatorname{diag}(1/6, 1/4, 1/4)$,
+$\mathbf{y}^\top\mathbf{y} = 5222$ and $\hat{\boldsymbol\beta}^\top\mathbf{X}^\top\mathbf{y} = 5216$.
+
+(a) $(\sum y_i)^2/n = 174^2/6 = 5046$, so $SS_T = 5222 - 5046 = 176$ and
+$SS_R = 5216 - 5046 = 170$.
+\begin{center}
+\begin{tabular}{lcccc}
+\hline
+Source & SS & df & MS & $F_0$ \\
+\hline
+Regression & 170 & 2 & 85 & 42.5 \\
+Residual & 6 & 3 & 2 & \\
+\hline
+Total & 176 & 5 & & \\
+\hline
+\end{tabular}
+\end{center}
+$42.5 > F_{0.05,2,3} = 9.55$: reject $H_0\colon \beta_1 = \beta_2 = 0$.
+
+(b) $t_1 = 5.5/0.7071 = 7.78$ and $t_2 = 3.5/0.7071 = 4.95$. Both exceed
+$t_{0.025,3} = 3.182$, so both regressors are significant.
+
+(c) $R^2 = 170/176 = 0.966$, and $R^2_{\mathrm{adj}} = 1 - \dfrac{2}{176/5} = 1 - 0.0568 = 0.943$.
+
+(d) For the model with $x_1$ alone, $\mathbf{X}_1$ has orthogonal columns too, and
+$\hat\beta_1 = 22/4 = 5.5$ as before, so $SS_R(\beta_1) = \hat\beta_1 \sum x_{i1}y_i = 5.5 \times 22 = 121$.
+Then $SS_R(\beta_2 \mid \beta_1) = 170 - 121 = 49$. In the same way
+$SS_R(\beta_2) = 3.5 \times 14 = 49$, so $SS_R(\beta_1 \mid \beta_2) = 170 - 49 = 121$. Each
+regressor contributes the same amount whatever else is in the model, because with orthogonal
+columns the estimate of one coefficient does not change when another regressor is added or
+removed. In the crop data, fertiliser and rainfall are correlated, and they share credit for
+the yield.
+
+(e) $\mathbf{x}_0 = (1, 0.5, 0.5)^\top$, $\hat y_0 = 29 + 2.75 + 1.75 = 33.5$, and
+$\mathbf{x}_0^\top\mathbf{C}\mathbf{x}_0 = \frac16 + \frac{0.25}{4} + \frac{0.25}{4} = 0.2917$.
+\begin{itemize}
+\item Mean: $33.5 \pm 3.182\sqrt{2 \times 0.2917} = 33.5 \pm 2.431$, that is, $(31.07,\ 35.93)$.
+\item New observation: $33.5 \pm 3.182\sqrt{2 \times 1.2917} = 33.5 \pm 5.115$, that is, $(28.38,\ 38.62)$.
+\end{itemize}
+\end{solution}
+
+\begin{problem}
+For the crop data, the supplier of the fertiliser claims that each extra 100\,kg per hectare
+raises the mean yield by more than $1.5$ tonnes per hectare, at fixed rainfall. Test the claim
+at the 5\% level.
+\end{problem}
+
+\begin{solution}
+$H_0\colon \beta_1 = 1.5$ against $H_1\colon \beta_1 > 1.5$.
+$t_0 = (2 - 1.5)/0.3412 = 1.466$. The test is one-sided with $3$ degrees of freedom, so the
+critical value is $t_{0.05,3} = 2.353$. As $1.466 < 2.353$, do not reject $H_0$: six plots are
+not enough to establish the claim, although the estimate $\hat\beta_1 = 2$ is in its favour.
+\end{solution}
+
+\begin{problem}
+\begin{enumerate}[label=(\alph*)]
+\item Show that $R^2_{\mathrm{adj}} = 1 - \dfrac{n-1}{n-p}\,(1 - R^2)$, and deduce that
+$R^2_{\mathrm{adj}} \le R^2$, and that $R^2_{\mathrm{adj}}$ can be negative.
+\item For the crop data, compare $R^2$ and $R^2_{\mathrm{adj}}$ for the model with $x_1$ alone
+and the model with both regressors.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $R^2_{\mathrm{adj}} = 1 - \dfrac{SS_{\mathrm{Res}}/(n-p)}{SS_T/(n-1)} = 1 - \dfrac{n-1}{n-p}\cdot\dfrac{SS_{\mathrm{Res}}}{SS_T}$
+and $SS_{\mathrm{Res}}/SS_T = 1 - R^2$. Since $\frac{n-1}{n-p} \ge 1$, we subtract at least
+$1 - R^2$ from $1$, so $R^2_{\mathrm{adj}} \le R^2$. With $n = 6$, $p = 3$ and $R^2 = 0.1$,
+$R^2_{\mathrm{adj}} = 1 - \frac53 \times 0.9 = -0.5$: a weak model with many parameters scores
+below zero.
+
+(b) With $x_1$ alone (Example~\ref{exa:crop-partial}), $SS_{\mathrm{Res}} = 7.9375$ on $4$
+degrees of freedom, so $R^2 = 85.5625/93.5 = 0.915$ and
+$R^2_{\mathrm{adj}} = 1 - \frac54(0.0849) = 0.894$. With both,
+$R^2 = 0.957$ and $R^2_{\mathrm{adj}} = 0.929$. Both measures prefer the larger model here,
+even though the $t$-test did not find $x_2$ significant.
+
+In fact $R^2_{\mathrm{adj}}$ rises exactly when the partial $F$ statistic for the added term
+exceeds $1$. Adding one term to a model with $p$ parameters takes $SS_{\mathrm{Res}}$ from
+$S_0$ to $S_1$, and $R^2_{\mathrm{adj}}$ rises exactly when the residual mean square falls:
+\begin{align*}
+\frac{S_1}{n-p-1} < \frac{S_0}{n-p}
+&\iff (n-p)S_1 < (n-p-1)S_0 \\
+&\iff S_1 < (n-p-1)(S_0 - S_1) \\
+&\iff F_0 = \frac{S_0 - S_1}{S_1/(n-p-1)} > 1 .
+\end{align*}
+Here $F_0 = 2.95 > 1$. That is a much weaker requirement than significance, which needed
+$F_0 > 10.13$.
+\end{solution}
 
 \section{Selecting the Best Regression Model}
 

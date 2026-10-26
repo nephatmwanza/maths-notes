@@ -1,0 +1,165 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>3.4 Fitted values, residuals and the hat matrix — Regression Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='regression-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='regression-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Regression Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="regression-analysisse1.html">Introduction</a></li>
+<li class="sub"><a class="" href="regression-analysissu1.html">Scatter plot</a></li>
+<li class="sub"><a class="" href="regression-analysissu2.html">Statistical and deterministic relationships</a></li>
+<li class="sub"><a class="" href="regression-analysissu3.html">What “linear” means</a></li>
+<li class="sub"><a class="" href="regression-analysissu4.html">Uses of regression</a></li>
+<li class="sub"><a class="" href="regression-analysissu5.html">Steps in a regression analysis</a></li>
+<li class="ch"><a class="" href="regression-analysisse2.html">Simple linear regression</a></li>
+<li class="sub"><a class="" href="regression-analysissu6.html">The model and its assumptions</a></li>
+<li class="sub"><a class="" href="regression-analysissu7.html">Least-squares estimation of the parameters</a></li>
+<li class="sub"><a class="" href="regression-analysissu8.html">Properties of the fitted line</a></li>
+<li class="sub"><a class="" href="regression-analysissu9.html">Properties of the least-squares estimators</a></li>
+<li class="sub"><a class="" href="regression-analysissu10.html">Estimation of \(\sigma ^2\)</a></li>
+<li class="sub"><a class="" href="regression-analysissu11.html">Maximum likelihood estimation</a></li>
+<li class="sub"><a class="" href="regression-analysissu12.html">Sampling distributions under normality</a></li>
+<li class="sub"><a class="" href="regression-analysissu13.html">Hypothesis tests on the slope and intercept</a></li>
+<li class="sub"><a class="" href="regression-analysissu14.html">Analysis of variance</a></li>
+<li class="sub"><a class="" href="regression-analysissu15.html">The coefficient of determination</a></li>
+<li class="sub"><a class="" href="regression-analysissu16.html">Interval estimation</a></li>
+<li class="sub"><a class="" href="regression-analysissu17.html">Correlation</a></li>
+<li class="sub"><a class="" href="regression-analysissu18.html">Practice problems</a></li>
+<li class="ch"><a class="" href="regression-analysisse3.html">Multiple linear regression</a></li>
+<li class="sub"><a class="" href="regression-analysissu19.html">Matrix results we shall need</a></li>
+<li class="sub"><a class="" href="regression-analysissu20.html">The model in matrix form</a></li>
+<li class="sub"><a class="" href="regression-analysissu21.html">Least-squares estimation</a></li>
+<li class="sub"><a class="current" href="regression-analysissu22.html">Fitted values, residuals and the hat matrix</a></li>
+<li class="sub"><a class="" href="regression-analysissu23.html">Properties of the least-squares estimator</a></li>
+<li class="sub"><a class="" href="regression-analysissu24.html">Estimation of \(\sigma ^2\) in multiple regression</a></li>
+<li class="sub"><a class="" href="regression-analysissu25.html">Distribution theory under normality</a></li>
+<li class="sub"><a class="" href="regression-analysissu26.html">Test for significance of regression</a></li>
+<li class="sub"><a class="" href="regression-analysissu27.html">\(R^2\) and adjusted \(R^2\)</a></li>
+<li class="sub"><a class="" href="regression-analysissu28.html">Tests on individual coefficients</a></li>
+<li class="sub"><a class="" href="regression-analysissu29.html">The extra-sum-of-squares principle</a></li>
+<li class="sub"><a class="" href="regression-analysissu30.html">Confidence and prediction intervals</a></li>
+<li class="sub"><a class="" href="regression-analysissu31.html">Practice problems</a></li>
+<li class="ch"><a class="" href="regression-analysisse4.html">Selecting the Best Regression Model</a></li>
+<li class="ch"><a class="" href="regression-analysisse5.html">Multicollinearity</a></li>
+<li class="ch"><a class="" href="regression-analysisse6.html">Model adequacy checking</a></li>
+<li class="ch"><a class="" href="regression-analysisse7.html">Test for influential observations</a></li>
+<li class="ch"><a class="" href="regression-analysisse8.html">Transformation & weighting to correct model inadequacies</a></li>
+<li class="ch"><a class="" href="regression-analysisse9.html">Dummy variables</a></li>
+<li class="ch"><a class="" href="regression-analysisse10.html">Polynomial regression</a></li>
+<li class="ch"><a class="" href="regression-analysisse11.html">Generalized linear models</a></li>
+<li class="ch"><a class="" href="regression-analysisse12.html">Non linear estimation</a></li>
+<li class="ch"><a class="" href="regression-analysisse13.html">Regression models with autocorrelated errors</a></li>
+<li class="ch"><a class="" href="regression-analysisse14.html">Measurement errors & calibration problem</a></li>
+<li class="sub"><a class="" href="regression-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 2062 --><div class='crosslinks'><p class='noindent'>[<a href='regression-analysissu23.html'>next</a>] [<a href='regression-analysissu21.html'>prev</a>] [<a href='regression-analysissu21.html#tailregression-analysissu21.html'>prev-tail</a>] [<a href='#tailregression-analysissu22.html'>tail</a>] [<a href='regression-analysisse3.html#regression-analysissu22.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>3.4   </span> <a id='x27-260003.4'></a>Fitted values, residuals and the hat matrix</h4>
+<!-- l. 2063 --><p class='noindent'>The fitted values are \(\hat {\mathbf {y}} = \mathbf {X}\hat {\boldsymbol \beta } = \mathbf {X}(\mathbf {X}^\top \mathbf {X})^{-1}\mathbf {X}^\top \mathbf {y}\), and the residuals are \(\mathbf {e} = \mathbf {y} - \hat {\mathbf {y}}\).
+</p>
+<div class='newtheorem nt-definition'>
+<!-- l. 2067 --><p class='noindent'><span class='head'>
+<a id='x27-26001r1'></a>
+<span class='cmbx-10x-x-109'>Definition 3.4.1.</span>  </span>The <span class='cmbx-10x-x-109'>hat matrix </span>is the \(n \times n\) matrix \(\mathbf {H} = \mathbf {X}(\mathbf {X}^\top \mathbf {X})^{-1}\mathbf {X}^\top \). It “puts the hat on \(\mathbf {y}\)”: \(\hat {\mathbf {y}} = \mathbf {Hy}\) and \(\mathbf {e} = (\mathbf {I} - \mathbf {H})\mathbf {y}\). Its diagonal
+entries \(h_{ii}\) are called the <span class='cmbx-10x-x-109'>leverages</span>.
+</p>
+</div>
+<!-- l. 2072 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 2074 --><p class='noindent'><span class='head'>
+<a id='x27-26002r2'></a>
+<span class='cmbx-10x-x-109'>Theorem 3.4.2.</span>  </span>
+     </p><dl class='enumerate-enumitem'><dt class='enumerate-enumitem'>
+  (i) </dt><dd class='enumerate-enumitem'>\(\mathbf {H}\) and \(\mathbf {I} - \mathbf {H}\) are symmetric and <span class='cmbx-10x-x-109'>idempotent</span>: \(\mathbf {H}^2 = \mathbf {H}\) and \((\mathbf {I} - \mathbf {H})^2 = \mathbf {I} - \mathbf {H}\).
+     </dd><dt class='enumerate-enumitem'>
+ (ii) </dt><dd class='enumerate-enumitem'>\(\mathbf {HX} = \mathbf {X}\) and \((\mathbf {I} - \mathbf {H})\mathbf {X} = \mathbf {0}\).
+     </dd><dt class='enumerate-enumitem'>
+ (iii) </dt><dd class='enumerate-enumitem'>\(\mathbf {X}^\top \mathbf {e} = \mathbf {0}\) and \(\hat {\mathbf {y}}^\top \mathbf {e} = 0\).
+     </dd><dt class='enumerate-enumitem'>
+ (iv) </dt><dd class='enumerate-enumitem'>\(\operatorname {tr}(\mathbf {H}) = p\) and \(\operatorname {tr}(\mathbf {I} - \mathbf {H}) = n - p\).
+     </dd><dt class='enumerate-enumitem'>
+ (v) </dt><dd class='enumerate-enumitem'>\(0 \le h_{ii} \le 1\) for every \(i\).</dd></dl>
+</div>
+                                                                                      
+                                                                                      
+<!-- l. 2083 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2086 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>Write \(\mathbf {C} = (\mathbf {X}^\top \mathbf {X})^{-1}\), which is symmetric because \(\mathbf {X}^\top \mathbf {X}\) is.
+</p><!-- l. 2089 --><p class='noindent'>(i) \(\mathbf {H}^\top = \mathbf {X}\mathbf {C}^\top \mathbf {X}^\top = \mathbf {H}\), and \(\mathbf {H}^2 = \mathbf {X}\mathbf {C}(\mathbf {X}^\top \mathbf {X})\mathbf {C}\mathbf {X}^\top = \mathbf {X}\mathbf {C}\mathbf {X}^\top = \mathbf {H}\). Then \((\mathbf {I} - \mathbf {H})^2 = \mathbf {I} - 2\mathbf {H} + \mathbf {H}^2 = \mathbf {I} - \mathbf {H}\).
+</p><!-- l. 2093 --><p class='noindent'>(ii) \(\mathbf {HX} = \mathbf {X}\mathbf {C}(\mathbf {X}^\top \mathbf {X}) = \mathbf {X}\), so \((\mathbf {I} - \mathbf {H})\mathbf {X} = \mathbf {X} - \mathbf {X} = \mathbf {0}\).
+</p><!-- l. 2096 --><p class='noindent'>(iii) \(\mathbf {X}^\top \mathbf {e} = \mathbf {X}^\top (\mathbf {I} - \mathbf {H})\mathbf {y} = \bigl ((\mathbf {I} - \mathbf {H})\mathbf {X}\bigr )^\top \mathbf {y} = \mathbf {0}\) by (ii) and symmetry. Then \(\hat {\mathbf {y}}^\top \mathbf {e} = \hat {\boldsymbol \beta }^\top \mathbf {X}^\top \mathbf {e} = 0\).
+</p><!-- l. 2099 --><p class='noindent'>(iv) By Lemma <a href='regression-analysissu19.html#x24-23001r1'>3.1.1<!-- tex4ht:ref: lem:trace  --></a>, \(\operatorname {tr}(\mathbf {H}) = \operatorname {tr}\bigl (\mathbf {X}\mathbf {C}\mathbf {X}^\top \bigr ) = \operatorname {tr}\bigl (\mathbf {C}\mathbf {X}^\top \mathbf {X}\bigr ) = \operatorname {tr}(\mathbf {I}_p) = p\), and \(\operatorname {tr}(\mathbf {I}_n - \mathbf {H}) = n - p\).
+</p><!-- l. 2103 --><p class='noindent'>(v) By (i), \(h_{ii} = (\mathbf {H}^2)_{ii} = \sum _j h_{ij}h_{ji} = \sum _j h_{ij}^2 = h_{ii}^2 + \sum _{j \neq i} h_{ij}^2\). So \(h_{ii} \ge h_{ii}^2 \ge 0\), and \(h_{ii} \ge h_{ii}^2\) gives \(h_{ii} \le 1\).                                                                                     □
+</p>
+</div>
+<!-- l. 2107 --><p class='noindent'>Part (iii) contains the residual identities of Theorem <a href='regression-analysissu8.html#x12-11001r1'>2.3.1<!-- tex4ht:ref: thm:resid-props  --></a>. Row \(0\) of \(\mathbf {X}^\top \mathbf {e} = \mathbf {0}\) is \(\sum e_i = 0\), because the first column of \(\mathbf {X}\) is
+all ones, and row \(j\) is \(\sum x_{ij} e_i = 0\). Part (v) will matter in the section on influential observations: a point with \(h_{ii}\) near
+\(1\) pulls the fitted surface almost through itself.
+</p>
+<div class='newtheorem nt-remark'>
+<!-- l. 2113 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Remark </span>(Geometry of least squares)<span class='cmbx-10x-x-109'>.</span>  </span>The  vectors  \(\mathbf {X}\boldsymbol \beta \),  for  all  possible  \(\boldsymbol \beta \),  form  a  \(p\)-dimensional
+subspace of \(\mathbb {R}^n\), the <span class='cmbx-10x-x-109'>column space </span>of \(\mathbf {X}\). Least squares picks the point \(\hat {\mathbf {y}}\) of that subspace closest to
+\(\mathbf {y}\), and part (iii) says the residual vector \(\mathbf {e}\) is perpendicular to the subspace. So \(\hat {\mathbf {y}} = \mathbf {Hy}\) is the <span class='cmti-10x-x-109'>orthogonal
+projection </span>of \(\mathbf {y}\) onto the column space, and \(\mathbf {H}\) is the matrix of that projection (Figure <a href='#x27-26008r6'>6<!-- tex4ht:ref: fig:projection  --></a>). Projecting
+twice is the same as projecting once, which is why \(\mathbf {H}^2 = \mathbf {H}\).
+</p>
+</div>
+<!-- l. 2121 --><p class='noindent'>
+</p>
+<figure class='figure'> 
+
+                                                                                      
+                                                                                      
+<a id='x27-26008r6'></a>
+                                                                                      
+                                                                                      
+<!-- l. 2125 --><p class='noindent'><img alt='cyˆye0olu==mnH(yI−spaHce)yof X  ' src='regression-analysis5x.svg' />
+</p>
+<figcaption class='caption'><span class='id'>Figure 6: </span><span class='content'>Least squares as projection: \(\hat {\mathbf {y}}\) is the foot of the perpendicular from \(\mathbf {y}\) to the column
+space of \(\mathbf {X}\), and \(\mathbf {e}\) is perpendicular to it.</span></figcaption><!-- tex4ht:label?: x27-26008r6  -->
+                                                                                      
+                                                                                      
+</figure>
+<div class='newtheorem nt-example'>
+<!-- l. 2142 --><p class='noindent'><span class='head'>
+<a id='x27-26009r3'></a>
+<span class='cmbx-10x-x-109'>Example 3.4.3.</span>  </span> Find the fitted values and residuals for the crop data and check \(\mathbf {X}^\top \mathbf {e} = \mathbf {0}\).
+</p>
+</div>
+<!-- l. 2145 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2147 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> From \(\hat y = 3 + 2x_1 + x_2\): </p>
+<div class='center'>
+<!-- l. 2149 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-15'><colgroup id='TBL-15-1g'><col id='TBL-15-1' /></colgroup><colgroup id='TBL-15-2g'><col id='TBL-15-2' /><col id='TBL-15-3' /><col id='TBL-15-4' /><col id='TBL-15-5' /><col id='TBL-15-6' /><col id='TBL-15-7' /></colgroup><tr id='TBL-15-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-15-1-1' style='white-space:nowrap; text-align:center;'> Plot  </td><td class='td11' id='TBL-15-1-2' style='white-space:nowrap; text-align:center;'> 1  </td><td class='td11' id='TBL-15-1-3' style='white-space:nowrap; text-align:center;'> 2  </td><td class='td11' id='TBL-15-1-4' style='white-space:nowrap; text-align:center;'>  3  </td><td class='td11' id='TBL-15-1-5' style='white-space:nowrap; text-align:center;'>  4  </td><td class='td11' id='TBL-15-1-6' style='white-space:nowrap; text-align:center;'>  5  </td><td class='td11' id='TBL-15-1-7' style='white-space:nowrap; text-align:center;'>  6  </td></tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-15-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-15-2-1' style='white-space:nowrap; text-align:center;'>  \(y_i\) </td><td class='td11' id='TBL-15-2-2' style='white-space:nowrap; text-align:center;'> 6 </td><td class='td11' id='TBL-15-2-3' style='white-space:nowrap; text-align:center;'> 9 </td><td class='td11' id='TBL-15-2-4' style='white-space:nowrap; text-align:center;'> 11 </td><td class='td11' id='TBL-15-2-5' style='white-space:nowrap; text-align:center;'> 10 </td><td class='td11' id='TBL-15-2-6' style='white-space:nowrap; text-align:center;'> 15 </td><td class='td11' id='TBL-15-2-7' style='white-space:nowrap; text-align:center;'> 18</td>
+</tr><tr id='TBL-15-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-15-3-1' style='white-space:nowrap; text-align:center;'>   \(\hat y_i\)   </td><td class='td11' id='TBL-15-3-2' style='white-space:nowrap; text-align:center;'> 7  </td><td class='td11' id='TBL-15-3-3' style='white-space:nowrap; text-align:center;'> 8  </td><td class='td11' id='TBL-15-3-4' style='white-space:nowrap; text-align:center;'> 10  </td><td class='td11' id='TBL-15-3-5' style='white-space:nowrap; text-align:center;'> 11  </td><td class='td11' id='TBL-15-3-6' style='white-space:nowrap; text-align:center;'> 15  </td><td class='td11' id='TBL-15-3-7' style='white-space:nowrap; text-align:center;'> 18  </td>
+</tr><tr id='TBL-15-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-15-4-1' style='white-space:nowrap; text-align:center;'>   \(e_i\)   </td><td class='td11' id='TBL-15-4-2' style='white-space:nowrap; text-align:center;'>  \(-1\)  </td><td class='td11' id='TBL-15-4-3' style='white-space:nowrap; text-align:center;'>  \(1\)  </td><td class='td11' id='TBL-15-4-4' style='white-space:nowrap; text-align:center;'>  \(1\)  </td><td class='td11' id='TBL-15-4-5' style='white-space:nowrap; text-align:center;'>  \(-1\)  </td><td class='td11' id='TBL-15-4-6' style='white-space:nowrap; text-align:center;'>  \(0\)  </td><td class='td11' id='TBL-15-4-7' style='white-space:nowrap; text-align:center;'>  \(0\)  </td>
+</tr></table>                                                                                      </div></div>
+<!-- l. 2158 --><p class='noindent'>The three rows of \(\mathbf {X}^\top \mathbf {e}\) are \begin {align*}  \textstyle \sum e_i &amp;= -1 + 1 + 1 - 1 + 0 + 0 = 0, \\ \textstyle \sum x_{i1} e_i &amp;= -1 + 2 + 2 - 3 + 0 + 0 = 0, \\ \textstyle \sum x_{i2} e_i &amp;= -2 + 1 + 3 - 2 + 0 + 0 = 0 .  \end {align*}
+</p><!-- l. 2164 --><p class='noindent'>The leverages \(h_{ii} = \mathbf {x}_i^\top (\mathbf {X}^\top \mathbf {X})^{-1}\mathbf {x}_i\), where \(\mathbf {x}_i^\top \) is the \(i\)th row of \(\mathbf {X}\), work out as \[ 0.421, \quad 0.587, \quad 0.397, \quad 0.230, \quad 0.587, \quad 0.778 . \] They lie between \(0\) and \(1\) and add
+up to \(3 = p\), as Theorem <a href='#x27-26002r2'>3.4.2<!-- tex4ht:ref: thm:hat  --></a> requires. Plot 6, with by far the most fertiliser, has the largest
+leverage.
+</p>
+</div>
+                                                                                      
+                                                                                      
+<!-- l. 2173 --><div class='crosslinks'><p class='noindent'>[<a href='regression-analysissu23.html'>next</a>] [<a href='regression-analysissu21.html'>prev</a>] [<a href='regression-analysissu21.html#tailregression-analysissu21.html'>prev-tail</a>] [<a href='regression-analysissu22.html'>front</a>] [<a href='regression-analysisse3.html#regression-analysissu22.html'>up</a>] </p></div>
+<!-- l. 2173 --><p class='noindent'><a id='tailregression-analysissu22.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="regression-analysissu21.html">&larr; Previous</a><a class="up" href="regression-analysisse3.html#regression-analysissu22.html">Contents</a><a class="next" href="regression-analysissu23.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="regression-analysis/3-4-fitted-values-residuals-and-the-hat-matrix" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
