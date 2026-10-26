@@ -291,7 +291,12 @@ def read_toc(build: Path) -> list[dict]:
 NUMBERED_EQ = re.compile(r"\\begin\s*\{(equation|align|gather|multline)\}")
 
 
-def equation_numbering(build: Path, items: list[dict]) -> dict[str, tuple[int, int]]:
+EQ_WITHIN_SECTION = re.compile(r"\\numberwithin\s*\{equation\}\s*\{section\}")
+SECTION_MARK = re.compile(
+    r"<h\d class=['\"]sectionHead['\"]><span class=['\"]titlemark['\"]>\s*(\w+)")
+
+
+def equation_numbering(build: Path, items: list[dict]) -> dict[str, tuple[str, int]]:
     """Work out what number LaTeX gives each page's equations.
 
     Splitting the document hands MathJax a problem it cannot see: it numbers
@@ -301,10 +306,16 @@ def equation_numbering(build: Path, items: list[dict]) -> dict[str, tuple[int, i
     it - which tex4ht resolves using LaTeX's number - says 2.2. The two
     disagree on the same page.
 
-    Returns {page: (chapter_number, offset)} so each page can be told which
-    chapter it is in and how many numbered equations came before it.
+    An `article` has no chapters, and this used to prefix every equation in one
+    with "1." regardless: the second section's first display read (1.1) where
+    the PDF says (1). An article numbers its equations straight through, with
+    no prefix - unless the source asks for \\numberwithin{equation}{section},
+    in which case the prefix is the section number, read off the page heading.
+
+    Returns {page: (prefix, offset)} so each page can be told what goes before
+    its equation numbers and how many numbered equations came before it.
     """
-    chapter_of: dict[str, int] = {}
+    chapter_of: dict[str, str] = {}
     order: list[str] = []
     chapter = 0
     for it in items:
@@ -312,19 +323,31 @@ def equation_numbering(build: Path, items: list[dict]) -> dict[str, tuple[int, i
         if re.match(r".*ch\d+\.html$", href):
             chapter += 1
         if href not in chapter_of:
-            chapter_of[href] = max(chapter, 1)
+            chapter_of[href] = f"{max(chapter, 1)}."
             order.append(href)
 
+    by_section = not chapter and any(
+        EQ_WITHIN_SECTION.search(tex.read_text(encoding="utf-8", errors="replace"))
+        for tex in build.glob("*.tex"))
+
     numbering, seen = {}, {}
+    prefix = ""
     for href in order:
         page = build / href
         if not page.is_file():
             continue
-        ch = chapter_of[href]
-        count = len(NUMBERED_EQ.findall(
-            page.read_text(encoding="utf-8", errors="replace")))
-        numbering[href] = (ch, seen.get(ch, 0))
-        seen[ch] = seen.get(ch, 0) + count
+        html = page.read_text(encoding="utf-8", errors="replace")
+        if chapter:
+            prefix = chapter_of[href]
+        elif by_section:
+            # A subsection page has no section heading of its own and keeps
+            # the prefix of the section it follows.
+            mark = SECTION_MARK.search(html)
+            if mark:
+                prefix = f"{mark.group(1)}."
+        count = len(NUMBERED_EQ.findall(html))
+        numbering[href] = (prefix, seen.get(prefix, 0))
+        seen[prefix] = seen.get(prefix, 0) + count
     return numbering
 
 
@@ -435,7 +458,7 @@ def math_operators(build: Path) -> dict[str, str]:
 
 
 def process(path: Path, items: list[dict], course_title: str, course_slug: str,
-            numbering: tuple[int, int] | None = None,
+            numbering: tuple[str, int] | None = None,
             operators: dict[str, str] | None = None) -> bool:
     html = path.read_text(encoding="utf-8", errors="replace")
 
@@ -471,11 +494,11 @@ def process(path: Path, items: list[dict], course_title: str, course_slug: str,
     # Make MathJax's equation tags agree with the numbers LaTeX assigned (and
     # that \eqref links already use). See equation_numbering().
     if numbering and NUMBERED_EQ.search(html):
-        chapter, offset = numbering
+        prefix, offset = numbering
         html = html.replace(
             'MathJax = { tex: { tags: "ams", }, };',
             "MathJax = { tex: { tags: \"ams\", tagformat: { "
-            f"number: (n) => `{chapter}.` + (n + {offset}) "
+            f"number: (n) => `{prefix}` + (n + {offset}) "
             "} }, };",
         )
 
