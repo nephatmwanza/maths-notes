@@ -1,0 +1,1739 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsfonts,amssymb,amsmath}
+\usepackage[margin=1in]{geometry}
+\usepackage[none]{hyphenat}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage[nottoc,notlot,notlof]{tocbibind}
+
+\usetikzlibrary{arrows.meta,patterns,shapes}
+
+\parindent 0ex
+\setlength{\parskip}{0.55\baselineskip}
+% Displays carry their own skips; with a non-zero \parskip on top of them,
+% consecutive displays drift apart. Tighten them so a derivation reads as one
+% argument rather than as a column of disconnected formulae.
+\setlength{\abovedisplayskip}{0.5\baselineskip}
+\setlength{\belowdisplayskip}{0.5\baselineskip}
+\setlength{\abovedisplayshortskip}{0.25\baselineskip}
+\setlength{\belowdisplayshortskip}{0.25\baselineskip}
+% Equations numbered within sections, (2.1), (2.2), ..., to sit with the
+% section.subsection.n numbering of the theorem environments below.
+\numberwithin{equation}{section}
+
+\pagestyle{fancy}
+\fancyfoot[C]{\thepage}
+\fancyhead{}
+\fancyhead[R]{\rightmark}
+\renewcommand{\headrulewidth}{0pt}
+
+% Theorem environments.
+\usepackage{amsthm}
+\theoremstyle{definition}
+% One shared counter running section.subsection.n, as in the other courses here.
+\newtheorem{thm}{Theorem}[subsection]
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{exa}[thm]{Example}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{coro}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{result}[thm]{Result}
+\newtheorem{exe}[thm]{Exercise}
+\newtheorem*{note}{Note}
+\newtheorem*{remark}{Remark}
+\newtheorem{problemx}{Problem}[subsection]
+\newenvironment{problem}{\begin{problemx}}{\end{problemx}}
+\newenvironment{solution}
+  {\renewcommand{\qedsymbol}{}\begin{proof}[\textit{Solution}.]}
+  {\end{proof}}
+\usepackage{enumitem}
+% A heading that is legal inside a theorem body, a list or a float, where
+% \subsubsection is not. Same weight as \subsubsection* so the two read alike.
+\newcommand{\subhead}[1]{%
+  \par\medskip\noindent\textbf{#1}\par\nobreak\smallskip}
+
+\begin{document}
+% Title page depersonalised for the web, as with every other course here: no
+% university, no lecturers, no author, no year. The identity kept below is the
+% least-squares estimator, which the whole course builds towards and then tests.
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{center}
+\vspace*{3cm}
+{\Huge\bfseries Regression Analysis}\\[1.2cm]
+{\large Lecture Notes}\\[2.5cm]
+\line(1,0){300}\\[1.5cm]
+$$\hat{\boldsymbol\beta} = (X^\top X)^{-1} X^\top \mathbf{y}$$
+\end{center}
+\end{titlepage}
+
+\tableofcontents
+\thispagestyle{empty}
+\clearpage
+\setcounter{page}{1}
+
+
+
+
+
+
+
+
+\section{Introduction}
+Regression Analysis is a statistical tool for investigating the relationship between a dependent variable and one or more independent variables.
+
+Regression analysis is widely used for prediction and forecasting.
+
+
+\begin{exa}\label{exa:disney}
+You are a marketing analyst for Disney Toys. You gather the following data:
+\begin{center}
+\begin{tabular}{l|ccccc}
+Ad (\$) & 1 & 2 & 3 & 4 & 5 \\
+\hline
+Sales (units) & 1 & 1 & 2 & 2 & 4 \\
+\end{tabular}
+\end{center}
+We let
+\begin{itemize}
+\item advertising $X$ be the regressor variable (independent);
+\item sales $Y$ be the response variable (dependent).
+\end{itemize}
+What is the relationship between sales and advertising?
+\end{exa}
+
+\begin{note}
+We can control the advertising $X$; the sales $Y$ we can only observe.
+\end{note}
+
+
+\subsection{Scatter plot}
+A scatter plot is a diagram that displays the values of two variables for a set of data,
+one point $(X_i, Y_i)$ for each observation. For the advertising data of
+Example~\ref{exa:disney}:
+
+% The data columns are drawn inside the picture rather than set as a tabular in
+% a second minipage: on the web, minipages stack, and the table landed under
+% the diagram instead of beside it.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.9]
+\draw[step=1,gray!30,very thin] (0,0) grid (5.5,4.5);
+\draw[-Stealth] (0,0) -- (5.8,0) node[right] {$X$};
+\draw[-Stealth] (0,0) -- (0,4.8) node[above] {$Y$};
+\foreach \x in {1,...,5} \draw (\x,0.08) -- (\x,-0.08) node[below] {\small $\x$};
+\foreach \y in {1,...,4} \draw (0.08,\y) -- (-0.08,\y) node[left] {\small $\y$};
+\foreach \p in {(1,1),(2,1),(3,2),(4,2),(5,4)} \fill[blue] \p circle (2.5pt);
+\node[below] at (2.9,-0.6) {\small Advertising (\$)};
+\node[rotate=90] at (-0.9,2.25) {\small Sales (units)};
+% The data, in columns to the right of the axes.
+\node at (7.5,4.2) {$X_i$};
+\node at (8.5,4.2) {$Y_i$};
+\draw (7,3.85) -- (9,3.85);
+\foreach \x/\y [count=\r] in {1/1,2/1,3/2,4/2,5/4} {
+  \node at (7.5,3.85-0.6*\r) {$\x$};
+  \node at (8.5,3.85-0.6*\r) {$\y$};
+}
+\end{tikzpicture}
+\caption{Scatter plot of sales against advertising.}
+\end{figure}
+
+Scatter plots are used to investigate the possible relationship between the variables.
+Here the points rise from left to right, roughly along a straight line: more advertising
+goes with more sales.
+
+A scatter plot should always be drawn before any model is fitted. It shows at a glance
+whether a straight line is sensible at all, and points that do not fit the pattern.
+
+\subsection{Statistical and deterministic relationships}
+A relationship such as $F = \frac95 C + 32$ between temperatures in Fahrenheit and Celsius is
+\textbf{deterministic}: given $C$, the value of $F$ is fixed exactly. The relationship between
+advertising and sales is not like that. Two weeks with the same advertising spend will not
+give the same sales, because sales depend on many other things we have not measured. Such a
+relationship is \textbf{statistical}: $x$ determines the \emph{average} value of $y$, and
+individual values scatter about that average. A regression model has two parts accordingly,
+\[
+\text{response} = \underbrace{\text{systematic part}}_{\text{depends on } x}
+               + \underbrace{\text{random error}}_{\text{everything else}} .
+\]
+
+\subsection{What ``linear'' means}
+A regression model is called \textbf{linear} when it is linear in the \emph{parameters}
+$\beta_0, \beta_1, \dots$, not necessarily in $x$. For example,
+\begin{align*}
+y &= \beta_0 + \beta_1 x + \varepsilon && \text{(a straight line: linear)}, \\
+y &= \beta_0 + \beta_1 x + \beta_2 x^2 + \varepsilon && \text{(a parabola: still linear)}, \\
+y &= \beta_0 + \beta_1 \log x + \varepsilon && \text{(linear)}, \\
+y &= \beta_0 e^{\beta_1 x} + \varepsilon && \text{(nonlinear in $\beta_1$)} .
+\end{align*}
+In the first three, each parameter multiplies a known quantity and the terms are added, so
+the same estimation method works for all of them. The last is a \textbf{nonlinear}
+regression model, treated in a later section.
+
+A model with one regressor is a \textbf{simple} regression model; with two or more it is a
+\textbf{multiple} regression model.
+
+\subsection{Uses of regression}
+\begin{enumerate}
+\item \textbf{Description.} Summarising how $y$ changes with $x$, for example by how much mean
+sales rise for each extra dollar of advertising.
+\item \textbf{Prediction and forecasting.} Estimating $y$ for a value of $x$ that has not been
+observed, within the range of the data.
+\item \textbf{Control.} Choosing $x$ to give a desired value of $y$, for example the
+advertising spend needed for a sales target.
+\item \textbf{Estimation of parameters} that have a scientific meaning, such as a rate of
+reaction.
+\end{enumerate}
+
+\begin{remark}
+Regression establishes association, not causation. A strong relationship between $x$ and $y$
+in observational data may be due to a third variable that drives both. Only a designed
+experiment, in which $x$ is set by the investigator, supports a causal conclusion.
+\end{remark}
+
+The name has a history. Francis Galton, studying the heights of parents and their children
+in the 1880s, found that children of unusually tall parents were on average shorter than
+their parents, and children of unusually short parents taller: their heights
+``regressed'' towards the mean. The method he used to describe this kept the name.
+
+\subsection{Steps in a regression analysis}
+\begin{enumerate}
+\item State the problem and choose the response and the regressors.
+\item Collect the data, by a designed experiment where possible.
+\item Plot the data.
+\item Specify a model, and fit it: estimate the parameters.
+\item Check the model: are the assumptions reasonable, and does it fit
+(Model adequacy checking, Test for influential observations)?
+\item If it is inadequate, revise it and fit again (Transformation \& weighting, and the
+sections that follow).
+\item Use the model, for description, prediction or control.
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Simple linear regression}
+A simple linear regression model is a model with a single regressor $X$ that has a linear relationship with a response $Y$. The simple linear regression model is 
+\begin{equation}
+Y = \beta_0 + \beta_1X + \varepsilon
+\end{equation}
+where
+\begin{itemize}
+\item $Y$ is the response variable;
+\item $X$ is the regressor variable;
+\item $\beta_0$ is the intercept;
+\item $\beta_1$ is the slope;
+\item $\varepsilon$ is the random error component.
+\end{itemize}
+
+\begin{note}
+$Y$ is a random variable, because $\varepsilon$ is.
+\end{note}
+
+\begin{remark}
+For a given $X$, the corresponding observation $Y$ consists of the value $\, \beta_0 + \beta_1X\,$ plus an amount $\varepsilon$.
+\end{remark}
+
+\subsection{The model and its assumptions}
+Suppose we have $n$ pairs of observations $(x_1,y_1), (x_2,y_2), \dots, (x_n,y_n)$. From
+here on we follow the usual convention and write the sample values in lower case: the
+$x_i$ are treated as fixed, known constants (we chose them, or we condition on them), and
+each $y_i$ is the value taken by a random variable. The model for the sample is
+\begin{equation}\label{eq:slr-sample}
+y_i = \beta_0 + \beta_1 x_i + \varepsilon_i, \qquad i = 1, 2, \dots, n.
+\end{equation}
+
+We now make some basic assumptions on the errors $\varepsilon_i$:
+\begin{enumerate}[label=\textbf{A\arabic*.}]
+\item $E(\varepsilon_i) = 0$ for every $i$: the errors average out to zero;
+\item $\operatorname{Var}(\varepsilon_i) = \sigma^2$ for every $i$: the spread is the same at every $x$ (\emph{constant variance}, or \emph{homoscedasticity});
+\item $\operatorname{Cov}(\varepsilon_i, \varepsilon_j) = 0$ for $i \neq j$: the errors are \emph{uncorrelated};
+\item $\varepsilon_i \sim N(0, \sigma^2)$: the errors are normally distributed.
+\end{enumerate}
+Assumptions A1--A3 are all that least-squares estimation needs, and the results of the
+next four subsections rest on them alone. The normality assumption A4 is needed for tests
+and confidence intervals, from Subsection~\ref{ssec:distributions} on. Together, A3 and A4
+make the errors independent, since uncorrelated normal variables are independent.
+
+\begin{thm}\label{thm:mean-var-y}
+Under A1--A3, for each $i$,
+\[
+E(y_i) = \beta_0 + \beta_1 x_i, \qquad \operatorname{Var}(y_i) = \sigma^2, \qquad
+\operatorname{Cov}(y_i, y_j) = 0 \quad (i \neq j).
+\]
+\end{thm}
+
+\begin{proof}
+Since $\beta_0 + \beta_1 x_i$ is a constant,
+$E(y_i) = \beta_0 + \beta_1 x_i + E(\varepsilon_i) = \beta_0 + \beta_1 x_i$ by A1. Adding a
+constant does not change a variance or a covariance, so
+$\operatorname{Var}(y_i) = \operatorname{Var}(\varepsilon_i) = \sigma^2$ by A2 and
+$\operatorname{Cov}(y_i,y_j) = \operatorname{Cov}(\varepsilon_i,\varepsilon_j) = 0$ by A3.
+\end{proof}
+
+So the line $\beta_0 + \beta_1 x$ is the line of \emph{means}: at each value of $x$, the
+response is scattered about the point on the line, with the same spread $\sigma$ everywhere.
+With A4 the scatter is normal, as in Figure~\ref{fig:slr-assumptions}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.1]
+\draw[-Stealth] (0,0) -- (6.3,0) node[right] {$x$};
+\draw[-Stealth] (0,0) -- (0,5.2) node[above] {$y$};
+\draw[thick,blue] (0.3,0.68) -- (5.8,3.98)
+  node[right,align=left] {\small $E(y \mid x)$\\ \small $=\beta_0+\beta_1 x$};
+\foreach \xo [count=\k] in {1.5,3,4.5} {
+  \draw[dashed,gray] (\xo,0) -- (\xo,{0.5+0.6*\xo+1.4});
+  \draw[thick,red!70!black] plot[domain=-2.6:2.6,samples=40,smooth]
+    ({\xo+0.9*exp(-0.5*(\x)^2)},{0.5+0.6*\xo+0.45*\x});
+  \fill[blue] (\xo,{0.5+0.6*\xo}) circle (2pt);
+  \node[below] at (\xo,0) {\small $x_{\k}$};
+}
+\end{tikzpicture}
+\caption{The simple linear regression model. At each $x$ the response is normal, centred
+on the line, with the same variance $\sigma^2$.}
+\label{fig:slr-assumptions}
+\end{figure}
+
+\subsection{Least-squares estimation of the parameters}
+The parameters $\beta_0$ and $\beta_1$ are unknown and must be estimated from the data. The
+method of \textbf{least squares} chooses the line that makes the sum of the squared
+vertical distances from the points to the line as small as possible.
+
+\begin{defn}
+The \textbf{least-squares criterion} is
+\[
+S(\beta_0, \beta_1) = \sum_{i=1}^n \left( y_i - \beta_0 - \beta_1 x_i \right)^2 .
+\]
+The \textbf{least-squares estimators} $\hat\beta_0, \hat\beta_1$ are the values of
+$\beta_0, \beta_1$ that minimise $S$.
+\end{defn}
+
+Before solving, we fix some notation that will be used throughout the course.
+
+\begin{defn}
+With $\bar x = \frac1n\sum x_i$ and $\bar y = \frac1n\sum y_i$,
+\begin{align*}
+S_{xx} &= \sum_{i=1}^n (x_i - \bar x)^2, \\
+S_{xy} &= \sum_{i=1}^n (x_i - \bar x)(y_i - \bar y), \\
+S_{yy} &= \sum_{i=1}^n (y_i - \bar y)^2 .
+\end{align*}
+\end{defn}
+
+\begin{lem}\label{lem:sxx}
+\begin{enumerate}[label=(\roman*)]
+\item $\sum_{i=1}^n (x_i - \bar x) = 0$;
+\item $S_{xx} = \sum x_i^2 - n\bar x^2 = \sum x_i^2 - \dfrac{\left(\sum x_i\right)^2}{n}$;
+\item $S_{xy} = \sum (x_i - \bar x) y_i = \sum x_i y_i - n \bar x \bar y
+       = \sum x_i y_i - \dfrac{\left(\sum x_i\right)\left(\sum y_i\right)}{n}$.
+\end{enumerate}
+The same holds for $S_{yy}$ with $y$ in place of $x$.
+\end{lem}
+
+\begin{proof}
+(i) $\sum (x_i - \bar x) = \sum x_i - n\bar x = n\bar x - n\bar x = 0$.
+
+(ii) Expanding the square,
+\begin{align*}
+S_{xx} &= \sum \left(x_i^2 - 2\bar x x_i + \bar x^2\right)
+        = \sum x_i^2 - 2\bar x \sum x_i + n\bar x^2 \\
+       &= \sum x_i^2 - 2n\bar x^2 + n\bar x^2
+        = \sum x_i^2 - n\bar x^2 ,
+\end{align*}
+and $n\bar x^2 = n\left(\sum x_i / n\right)^2 = \left(\sum x_i\right)^2/n$.
+
+(iii) $S_{xy} = \sum (x_i - \bar x) y_i - \bar y \sum (x_i - \bar x) = \sum (x_i - \bar x) y_i$
+by (i). Then
+$\sum (x_i - \bar x) y_i = \sum x_i y_i - \bar x \sum y_i = \sum x_i y_i - n\bar x \bar y$.
+\end{proof}
+
+The forms with $\sum x_i^2$ and $\sum x_i y_i$ are the ones to use by hand: they need only
+the column totals of a table, as in the examples below.
+
+\begin{thm}[Least-squares estimators]\label{thm:ls}
+Provided the $x_i$ are not all equal, the least-squares estimators of $\beta_1$ and $\beta_0$
+are
+\[
+\boxed{\;\hat\beta_1 = \frac{S_{xy}}{S_{xx}}, \qquad \hat\beta_0 = \bar y - \hat\beta_1 \bar x\;}
+\]
+and the \textbf{fitted regression line} is $\hat y = \hat\beta_0 + \hat\beta_1 x$.
+\end{thm}
+
+\begin{proof}
+At a minimum of $S$ both partial derivatives vanish:
+\begin{align*}
+\frac{\partial S}{\partial \beta_0} &= -2 \sum \left( y_i - \beta_0 - \beta_1 x_i \right) = 0, \\
+\frac{\partial S}{\partial \beta_1} &= -2 \sum x_i \left( y_i - \beta_0 - \beta_1 x_i \right) = 0 .
+\end{align*}
+Dividing by $-2$ and rearranging gives the \textbf{normal equations}
+% Unnumbered, and referred to in words: tex4ht cannot resolve a \label inside
+% align on the web, where an \eqref to one prints as (??).
+\begin{align*}
+n\hat\beta_0 + \hat\beta_1 \sum x_i &= \sum y_i, \\
+\hat\beta_0 \sum x_i + \hat\beta_1 \sum x_i^2 &= \sum x_i y_i .
+\end{align*}
+Dividing the first normal equation by $n$ gives $\hat\beta_0 + \hat\beta_1 \bar x = \bar y$,
+that is, $\hat\beta_0 = \bar y - \hat\beta_1 \bar x$. Substituting this into the second,
+\[
+(\bar y - \hat\beta_1 \bar x)\, n\bar x + \hat\beta_1 \sum x_i^2 = \sum x_i y_i ,
+\]
+and collecting the terms in $\hat\beta_1$,
+\[
+\hat\beta_1 \left( \sum x_i^2 - n\bar x^2 \right) = \sum x_i y_i - n\bar x\bar y ,
+\]
+which by Lemma~\ref{lem:sxx} reads $\hat\beta_1 S_{xx} = S_{xy}$. Since the $x_i$ are not all
+equal, $S_{xx} > 0$ and we may divide.
+
+It remains to check that this stationary point is a minimum. The second derivatives are
+\[
+\frac{\partial^2 S}{\partial \beta_0^2} = 2n, \qquad
+\frac{\partial^2 S}{\partial \beta_1^2} = 2\sum x_i^2, \qquad
+\frac{\partial^2 S}{\partial \beta_0 \, \partial \beta_1} = 2\sum x_i ,
+\]
+constants, so the Hessian matrix is the same at every point. Its leading entry $2n$ is
+positive and its determinant is
+\[
+4n\sum x_i^2 - 4\left(\sum x_i\right)^2 = 4n\left( \sum x_i^2 - n\bar x^2 \right) = 4nS_{xx} > 0 .
+\]
+The Hessian is therefore positive definite everywhere, $S$ is a convex function, and the
+stationary point is its global minimum.
+\end{proof}
+
+\begin{note}
+If all the $x_i$ are equal then $S_{xx} = 0$ and the slope cannot be estimated: every line
+through the point $(x_1, \bar y)$ fits equally well. To learn how $y$ changes with $x$, the
+data must contain different values of $x$.
+\end{note}
+
+\begin{defn}
+The \textbf{fitted value} at $x_i$ is $\hat y_i = \hat\beta_0 + \hat\beta_1 x_i$, and the
+\textbf{residual} is $e_i = y_i - \hat y_i$, the vertical distance from the $i$th point to
+the fitted line.
+\end{defn}
+
+The residual $e_i$ is observed; the error $\varepsilon_i = y_i - \beta_0 - \beta_1 x_i$ is
+not, because $\beta_0$ and $\beta_1$ are unknown. The residuals are our estimates of the
+errors.
+
+\begin{exa}\label{exa:disney-fit}
+Fit the least-squares line to the advertising data of Example~\ref{exa:disney}, and interpret
+the estimates.
+\end{exa}
+
+\begin{solution}
+Set out the working in a table, one row per observation, and add up the columns:
+\begin{center}
+\begin{tabular}{c|ccccc}
+$i$ & $x_i$ & $y_i$ & $x_i^2$ & $x_i y_i$ & $y_i^2$ \\
+\hline
+1 & 1 & 1 & 1 & 1 & 1 \\
+2 & 2 & 1 & 4 & 2 & 1 \\
+3 & 3 & 2 & 9 & 6 & 4 \\
+4 & 4 & 2 & 16 & 8 & 4 \\
+5 & 5 & 4 & 25 & 20 & 16 \\
+\hline
+$\sum$ & 15 & 10 & 55 & 37 & 26 \\
+\end{tabular}
+\end{center}
+So $n = 5$, $\bar x = 15/5 = 3$ and $\bar y = 10/5 = 2$. By Lemma~\ref{lem:sxx},
+\begin{align*}
+S_{xx} &= 55 - \frac{15^2}{5} = 55 - 45 = 10, \\
+S_{xy} &= 37 - \frac{15 \times 10}{5} = 37 - 30 = 7 .
+\end{align*}
+By Theorem~\ref{thm:ls},
+\[
+\hat\beta_1 = \frac{S_{xy}}{S_{xx}} = \frac{7}{10} = 0.7, \qquad
+\hat\beta_0 = \bar y - \hat\beta_1 \bar x = 2 - 0.7 \times 3 = -0.1 ,
+\]
+and the fitted line is
+\[
+\hat y = -0.1 + 0.7x .
+\]
+\textbf{Interpretation.} The slope says that each extra dollar of advertising goes with an
+increase of $0.7$ units in \emph{mean} sales. The intercept would be the mean sales with no
+advertising at all, but $x = 0$ lies outside the data, which run from $1$ to $5$, and
+negative sales are impossible. The intercept here is simply where the line has to cross the
+axis to fit the observed range; it should not be read as a prediction. Using a fitted line
+outside the range of the data is called \textbf{extrapolation}, and it is unreliable.
+
+The fitted values and residuals are
+\begin{center}
+\begin{tabular}{c|ccccc}
+$x_i$ & 1 & 2 & 3 & 4 & 5 \\
+\hline
+$y_i$ & 1 & 1 & 2 & 2 & 4 \\
+$\hat y_i = -0.1 + 0.7x_i$ & 0.6 & 1.3 & 2.0 & 2.7 & 3.4 \\
+$e_i = y_i - \hat y_i$ & 0.4 & $-0.3$ & 0.0 & $-0.7$ & 0.6 \\
+\end{tabular}
+\end{center}
+They are shown as the vertical segments in Figure~\ref{fig:disney-fit}.
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.9]
+\draw[step=1,gray!30,very thin] (0,0) grid (5.5,4.5);
+\draw[-Stealth] (0,0) -- (5.8,0) node[right] {$x$};
+\draw[-Stealth] (0,0) -- (0,4.8) node[above] {$y$};
+\foreach \x in {1,...,5} \draw (\x,0.08) -- (\x,-0.08) node[below] {\small $\x$};
+\foreach \y in {1,...,4} \draw (0.08,\y) -- (-0.08,\y) node[left] {\small $\y$};
+\draw[thick,blue] (0.5,0.25) -- (5.5,3.75) node[right] {\small $\hat y = -0.1 + 0.7x$};
+\foreach \x/\y in {1/1,2/1,3/2,4/2,5/4} {
+  \draw[red,thick] (\x,\y) -- (\x,{-0.1+0.7*\x});
+  \fill[black] (\x,\y) circle (2.5pt);
+}
+\node[red,right] at (4,2.35) {\small $e_4 = -0.7$};
+\node[below] at (2.9,-0.6) {\small Advertising (\$)};
+\node[rotate=90] at (-0.9,2.25) {\small Sales (units)};
+\end{tikzpicture}
+\caption{The least-squares line for the advertising data. The red segments are the
+residuals; least squares makes the sum of their squares as small as possible.}
+\label{fig:disney-fit}
+\end{figure}
+
+\begin{exa}\label{exa:yield}
+In a chemical process, the yield $y$ (\%) was recorded at six temperatures $x$ ($^\circ$C):
+\begin{center}
+\begin{tabular}{l|cccccc}
+Temperature $x$ & 10 & 20 & 30 & 40 & 50 & 60 \\
+\hline
+Yield $y$ & 52 & 58 & 63 & 70 & 74 & 81 \\
+\end{tabular}
+\end{center}
+Fit a straight line, and estimate the mean yield at $45^\circ$C.
+\end{exa}
+
+\begin{solution}
+\begin{center}
+\begin{tabular}{c|ccccc}
+$i$ & $x_i$ & $y_i$ & $x_i^2$ & $x_i y_i$ & $y_i^2$ \\
+\hline
+1 & 10 & 52 & 100 & 520 & 2704 \\
+2 & 20 & 58 & 400 & 1160 & 3364 \\
+3 & 30 & 63 & 900 & 1890 & 3969 \\
+4 & 40 & 70 & 1600 & 2800 & 4900 \\
+5 & 50 & 74 & 2500 & 3700 & 5476 \\
+6 & 60 & 81 & 3600 & 4860 & 6561 \\
+\hline
+$\sum$ & 210 & 398 & 9100 & 14930 & 26974 \\
+\end{tabular}
+\end{center}
+Here $n = 6$, $\bar x = 210/6 = 35$ and $\bar y = 398/6 = 66.3333$. Then
+\begin{align*}
+S_{xx} &= 9100 - \frac{210^2}{6} = 9100 - 7350 = 1750, \\
+S_{xy} &= 14930 - \frac{210 \times 398}{6} = 14930 - 13930 = 1000,
+\end{align*}
+so
+\[
+\hat\beta_1 = \frac{1000}{1750} = 0.5714, \qquad
+\hat\beta_0 = 66.3333 - 0.5714 \times 35 = 46.3333 ,
+\]
+and the fitted line is $\hat y = 46.3333 + 0.5714x$. Each extra degree raises the mean
+yield by about $0.57$ percentage points.
+
+At $x = 45$, inside the range of the data,
+$\hat y = 46.3333 + 0.5714 \times 45 = 72.05\%$.
+\end{solution}
+
+\begin{remark}
+Carry plenty of decimal places in intermediate steps, or keep exact fractions. Here
+$\hat\beta_1 = 4/7$ exactly; rounding it to $0.57$ before computing $\hat\beta_0$ would give
+$\hat\beta_0 = 66.3333 - 0.57 \times 35 = 46.38$, already wrong in the second decimal place.
+\end{remark}
+
+\subsection{Properties of the fitted line}
+The normal equations force the residuals to satisfy some exact identities. These are useful
+for checking hand calculations, and they are used repeatedly in the proofs that follow.
+
+\begin{thm}\label{thm:resid-props}
+For the least-squares fit of a model with an intercept:
+\begin{enumerate}[label=(\roman*)]
+\item $\sum e_i = 0$: the residuals sum to zero;
+\item $\sum y_i = \sum \hat y_i$;
+\item $\sum x_i e_i = 0$;
+\item $\sum \hat y_i e_i = 0$;
+\item the fitted line passes through the point $(\bar x, \bar y)$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+The normal equations of Theorem~\ref{thm:ls} are $\sum (y_i - \hat\beta_0 - \hat\beta_1 x_i) = 0$
+and $\sum x_i (y_i - \hat\beta_0 - \hat\beta_1 x_i) = 0$, and the bracket in each is exactly
+$e_i$.
+
+(i) and (iii) are therefore the two normal equations themselves.
+
+(ii) By (i), $0 = \sum (y_i - \hat y_i) = \sum y_i - \sum \hat y_i$.
+
+(iv) $\sum \hat y_i e_i = \sum (\hat\beta_0 + \hat\beta_1 x_i) e_i
+= \hat\beta_0 \sum e_i + \hat\beta_1 \sum x_i e_i = 0$ by (i) and (iii).
+
+(v) At $x = \bar x$ the line gives $\hat\beta_0 + \hat\beta_1 \bar x
+= (\bar y - \hat\beta_1 \bar x) + \hat\beta_1 \bar x = \bar y$.
+\end{proof}
+
+\begin{exa}
+Check (i) and (iii) for the residuals of Example~\ref{exa:disney-fit}.
+\end{exa}
+
+\begin{solution}
+$\sum e_i = 0.4 - 0.3 + 0 - 0.7 + 0.6 = 0$, and
+\begin{align*}
+\sum x_i e_i &= 1(0.4) + 2(-0.3) + 3(0) + 4(-0.7) + 5(0.6) \\
+             &= 0.4 - 0.6 + 0 - 2.8 + 3.0 = 0 .
+\end{align*}
+Both hold. Had either failed, there would be an arithmetic error in $\hat\beta_0$ or
+$\hat\beta_1$.
+\end{solution}
+
+\begin{note}
+(i) and (ii) depend on the model having an intercept: they come from the normal equation
+for $\beta_0$. For a line forced through the origin they fail in general
+(Problem~\ref{prob:origin}).
+\end{note}
+
+\subsection{Properties of the least-squares estimators}
+The estimates $\hat\beta_0$ and $\hat\beta_1$ depend on the $y_i$, which are random; a new
+sample at the same $x_i$ would give different estimates. So $\hat\beta_0$ and $\hat\beta_1$
+are random variables, and we ask for their means and variances. Throughout, A1--A3 hold.
+
+\begin{lem}\label{lem:ci}
+$\hat\beta_1$ is a linear combination of the $y_i$:
+\[
+\hat\beta_1 = \sum_{i=1}^n c_i y_i, \qquad\text{where } c_i = \frac{x_i - \bar x}{S_{xx}} ,
+\]
+and the constants $c_i$ satisfy
+\[
+\sum c_i = 0, \qquad \sum c_i x_i = 1, \qquad \sum c_i^2 = \frac{1}{S_{xx}} .
+\]
+\end{lem}
+
+\begin{proof}
+By Lemma~\ref{lem:sxx}(iii), $\hat\beta_1 = S_{xy}/S_{xx} = \sum (x_i - \bar x) y_i / S_{xx} = \sum c_i y_i$.
+Next, $\sum c_i = \sum (x_i - \bar x)/S_{xx} = 0$ by Lemma~\ref{lem:sxx}(i). For the second,
+\[
+\sum c_i x_i = \frac{\sum (x_i - \bar x) x_i}{S_{xx}} = \frac{S_{xx}}{S_{xx}} = 1 ,
+\]
+using Lemma~\ref{lem:sxx}(iii) with $y$ replaced by $x$, which says
+$\sum (x_i - \bar x) x_i = S_{xx}$. Finally
+$\sum c_i^2 = \sum (x_i - \bar x)^2 / S_{xx}^2 = S_{xx}/S_{xx}^2 = 1/S_{xx}$.
+\end{proof}
+
+\begin{thm}\label{thm:b1}
+$\hat\beta_1$ is an unbiased estimator of $\beta_1$, with variance
+\[
+E(\hat\beta_1) = \beta_1, \qquad \operatorname{Var}(\hat\beta_1) = \frac{\sigma^2}{S_{xx}} .
+\]
+\end{thm}
+
+\begin{proof}
+By Lemma~\ref{lem:ci} and Theorem~\ref{thm:mean-var-y},
+\begin{align*}
+E(\hat\beta_1) &= \sum c_i E(y_i) = \sum c_i (\beta_0 + \beta_1 x_i) \\
+  &= \beta_0 \sum c_i + \beta_1 \sum c_i x_i = \beta_0 \cdot 0 + \beta_1 \cdot 1 = \beta_1 .
+\end{align*}
+The $y_i$ are uncorrelated with common variance $\sigma^2$, so the variance of a linear
+combination is the sum of the squared coefficients times $\sigma^2$:
+\[
+\operatorname{Var}(\hat\beta_1) = \sum c_i^2 \operatorname{Var}(y_i) = \sigma^2 \sum c_i^2 = \frac{\sigma^2}{S_{xx}} . \qedhere
+\]
+\end{proof}
+
+\begin{remark}
+$\operatorname{Var}(\hat\beta_1)$ is small when $S_{xx}$ is large, that is, when the $x_i$
+are spread widely. When we can choose the $x$ values, as with advertising spend, spreading
+them out gives a more precise slope.
+\end{remark}
+
+\begin{lem}\label{lem:cov-ybar}
+$\operatorname{Cov}(\bar y, \hat\beta_1) = 0$.
+\end{lem}
+
+\begin{proof}
+$\bar y = \sum \frac1n y_i$ and $\hat\beta_1 = \sum c_i y_i$. As the $y_i$ are uncorrelated
+with variance $\sigma^2$,
+\[
+\operatorname{Cov}\Bigl(\sum \tfrac1n y_i, \sum c_j y_j\Bigr)
+= \sum_i \tfrac1n c_i \operatorname{Var}(y_i) = \frac{\sigma^2}{n} \sum c_i = 0 . \qedhere
+\]
+\end{proof}
+
+\begin{thm}\label{thm:b0}
+$\hat\beta_0$ is an unbiased estimator of $\beta_0$, and
+\[
+\operatorname{Var}(\hat\beta_0) = \sigma^2 \left( \frac1n + \frac{\bar x^2}{S_{xx}} \right),
+\qquad
+\operatorname{Cov}(\hat\beta_0, \hat\beta_1) = -\frac{\bar x \sigma^2}{S_{xx}} .
+\]
+\end{thm}
+
+\begin{proof}
+$E(\bar y) = \frac1n \sum (\beta_0 + \beta_1 x_i) = \beta_0 + \beta_1 \bar x$, so by
+Theorem~\ref{thm:b1}
+\[
+E(\hat\beta_0) = E(\bar y) - \bar x E(\hat\beta_1) = \beta_0 + \beta_1 \bar x - \bar x \beta_1 = \beta_0 .
+\]
+For the variance, $\operatorname{Var}(\bar y) = \sigma^2/n$, and by Lemma~\ref{lem:cov-ybar}
+the covariance term vanishes:
+\[
+\operatorname{Var}(\hat\beta_0) = \operatorname{Var}(\bar y) + \bar x^2 \operatorname{Var}(\hat\beta_1)
+- 2\bar x \operatorname{Cov}(\bar y, \hat\beta_1)
+= \frac{\sigma^2}{n} + \frac{\bar x^2 \sigma^2}{S_{xx}} .
+\]
+Finally, again using Lemma~\ref{lem:cov-ybar},
+\begin{align*}
+\operatorname{Cov}(\hat\beta_0, \hat\beta_1) &= \operatorname{Cov}(\bar y - \bar x \hat\beta_1, \hat\beta_1)
+  = \operatorname{Cov}(\bar y, \hat\beta_1) - \bar x \operatorname{Var}(\hat\beta_1) \\
+  &= -\frac{\bar x \sigma^2}{S_{xx}} . \qedhere
+\end{align*}
+\end{proof}
+
+When $\bar x > 0$ the covariance is negative. That matches the picture: the line pivots about
+$(\bar x, \bar y)$, so a sample that gives too steep a slope tends to give too low an
+intercept.
+
+The least-squares estimators are not just unbiased; among all unbiased estimators that are
+linear in the $y_i$, they have the smallest variance.
+
+\begin{thm}[Gauss--Markov, for the slope]\label{thm:gauss-markov}
+Under A1--A3, let $\tilde\beta_1 = \sum k_i y_i$ be any linear unbiased estimator of
+$\beta_1$. Then $\operatorname{Var}(\tilde\beta_1) \ge \operatorname{Var}(\hat\beta_1)$, with
+equality only when $k_i = c_i$ for all $i$. That is, $\hat\beta_1$ is the \textbf{best
+linear unbiased estimator} (BLUE) of $\beta_1$.
+\end{thm}
+
+\begin{proof}
+$E(\tilde\beta_1) = \sum k_i(\beta_0 + \beta_1 x_i) = \beta_0 \sum k_i + \beta_1 \sum k_i x_i$.
+For this to equal $\beta_1$ whatever the values of $\beta_0$ and $\beta_1$, we need
+\[
+\sum k_i = 0 \qquad\text{and}\qquad \sum k_i x_i = 1 .
+\]
+Write $k_i = c_i + d_i$, where $d_i = k_i - c_i$. Since the $c_i$ satisfy the same two
+conditions (Lemma~\ref{lem:ci}), $\sum d_i = 0$ and $\sum d_i x_i = 0$. Hence
+\[
+\sum c_i d_i = \frac{1}{S_{xx}} \sum (x_i - \bar x) d_i
+= \frac{1}{S_{xx}} \Bigl( \sum x_i d_i - \bar x \sum d_i \Bigr) = 0 ,
+\]
+and so
+\begin{align*}
+\operatorname{Var}(\tilde\beta_1) &= \sigma^2 \sum k_i^2
+  = \sigma^2 \Bigl( \sum c_i^2 + 2 \sum c_i d_i + \sum d_i^2 \Bigr) \\
+  &= \operatorname{Var}(\hat\beta_1) + \sigma^2 \sum d_i^2 .
+\end{align*}
+The last term is at least zero, and it is zero only when every $d_i = 0$, that is, when
+$k_i = c_i$.
+\end{proof}
+
+The same is true of $\hat\beta_0$; we prove the general result, for any number of regressors,
+in the section on multiple linear regression.
+
+\subsection{Estimation of $\sigma^2$}
+The variances in Theorems~\ref{thm:b1} and~\ref{thm:b0} involve $\sigma^2$, which is
+unknown. It is estimated from the residuals.
+
+\begin{defn}
+The \textbf{residual sum of squares} is
+\[
+SS_{\mathrm{Res}} = \sum_{i=1}^n e_i^2 = \sum_{i=1}^n (y_i - \hat y_i)^2 .
+\]
+\end{defn}
+
+\begin{thm}\label{thm:ssres}
+$SS_{\mathrm{Res}} = S_{yy} - \hat\beta_1 S_{xy}$.
+\end{thm}
+
+\begin{proof}
+Since $\hat\beta_0 = \bar y - \hat\beta_1 \bar x$, each residual can be written
+$e_i = y_i - \bar y + \hat\beta_1 \bar x - \hat\beta_1 x_i = (y_i - \bar y) - \hat\beta_1 (x_i - \bar x)$.
+Squaring and summing,
+\[
+SS_{\mathrm{Res}} = S_{yy} - 2\hat\beta_1 S_{xy} + \hat\beta_1^2 S_{xx} .
+\]
+But $\hat\beta_1 S_{xx} = S_{xy}$, so $\hat\beta_1^2 S_{xx} = \hat\beta_1 S_{xy}$, and the
+last two terms combine to $-\hat\beta_1 S_{xy}$.
+\end{proof}
+
+\begin{thm}\label{thm:e-ssres}
+Under A1--A3, $E(SS_{\mathrm{Res}}) = (n-2)\sigma^2$. Hence
+\[
+\boxed{\;\hat\sigma^2 = MS_{\mathrm{Res}} = \frac{SS_{\mathrm{Res}}}{n-2}\;}
+\]
+is an unbiased estimator of $\sigma^2$. It is called the \textbf{residual mean square}.
+\end{thm}
+
+\begin{proof}
+We find the expectations of the two terms of Theorem~\ref{thm:ssres} in turn.
+
+\emph{The term $S_{yy}$.} Averaging the model over $i$ gives
+$\bar y = \beta_0 + \beta_1 \bar x + \bar\varepsilon$, so
+$y_i - \bar y = \beta_1 (x_i - \bar x) + (\varepsilon_i - \bar\varepsilon)$. Therefore
+\[
+S_{yy} = \beta_1^2 S_{xx} + 2\beta_1 \sum (x_i - \bar x)(\varepsilon_i - \bar\varepsilon)
+       + \sum (\varepsilon_i - \bar\varepsilon)^2 .
+\]
+The middle term has expectation $0$ by A1. For the last, the identity of
+Lemma~\ref{lem:sxx}(ii) gives $\sum (\varepsilon_i - \bar\varepsilon)^2 = \sum \varepsilon_i^2 - n\bar\varepsilon^2$.
+By A1 and A2, $E(\varepsilon_i^2) = \operatorname{Var}(\varepsilon_i) = \sigma^2$, and by A3
+$\operatorname{Var}(\bar\varepsilon) = \sigma^2/n$, so $E(\bar\varepsilon^2) = \sigma^2/n$. Hence
+\[
+E(S_{yy}) = \beta_1^2 S_{xx} + n\sigma^2 - n\cdot\frac{\sigma^2}{n} = \beta_1^2 S_{xx} + (n-1)\sigma^2 .
+\]
+\emph{The term $\hat\beta_1 S_{xy}$.} This equals $\hat\beta_1^2 S_{xx}$. For any random
+variable, $E(W^2) = \operatorname{Var}(W) + \left(E W\right)^2$, so by Theorem~\ref{thm:b1}
+\[
+E(\hat\beta_1 S_{xy}) = S_{xx} \left( \frac{\sigma^2}{S_{xx}} + \beta_1^2 \right) = \sigma^2 + \beta_1^2 S_{xx} .
+\]
+Subtracting,
+$E(SS_{\mathrm{Res}}) = \beta_1^2 S_{xx} + (n-1)\sigma^2 - \sigma^2 - \beta_1^2 S_{xx} = (n-2)\sigma^2$.
+\end{proof}
+
+\begin{remark}
+Why divide by $n - 2$ rather than $n$? The $n$ residuals are not free: they must satisfy the
+two equations $\sum e_i = 0$ and $\sum x_i e_i = 0$ (Theorem~\ref{thm:resid-props}), one for
+each estimated parameter. Only $n - 2$ of them can vary freely, and $SS_{\mathrm{Res}}$ is
+said to have $n - 2$ \textbf{degrees of freedom}.
+\end{remark}
+
+\begin{defn}
+The \textbf{standard error} of an estimator is the estimate of its standard deviation,
+obtained by putting $\hat\sigma^2$ in place of $\sigma^2$:
+\[
+\operatorname{se}(\hat\beta_1) = \sqrt{\frac{\hat\sigma^2}{S_{xx}}}, \qquad
+\operatorname{se}(\hat\beta_0) = \sqrt{\hat\sigma^2 \left( \frac1n + \frac{\bar x^2}{S_{xx}} \right)} .
+\]
+\end{defn}
+
+\begin{exa}\label{exa:disney-sigma}
+For the advertising data, estimate $\sigma^2$ and find the standard errors of $\hat\beta_0$
+and $\hat\beta_1$.
+\end{exa}
+
+\begin{solution}
+From the residuals of Example~\ref{exa:disney-fit},
+\begin{align*}
+SS_{\mathrm{Res}} &= 0.4^2 + (-0.3)^2 + 0^2 + (-0.7)^2 + 0.6^2 \\
+                  &= 0.16 + 0.09 + 0 + 0.49 + 0.36 = 1.10 .
+\end{align*}
+As a check, by Theorem~\ref{thm:ssres}: $S_{yy} = 26 - 10^2/5 = 6$, and
+$S_{yy} - \hat\beta_1 S_{xy} = 6 - 0.7 \times 7 = 6 - 4.9 = 1.10$. The two agree. Then
+\[
+\hat\sigma^2 = \frac{1.10}{5 - 2} = 0.3667,
+\]
+and
+\begin{align*}
+\operatorname{se}(\hat\beta_1) &= \sqrt{\frac{0.3667}{10}} = 0.1915, \\
+\operatorname{se}(\hat\beta_0) &= \sqrt{0.3667 \left( \frac15 + \frac{3^2}{10} \right)} = \sqrt{0.3667 \times 1.1} = 0.6351 .
+\end{align*}
+The slope $0.7$ is more than three times its standard error, which already suggests a real
+relationship. The test of Subsection~\ref{ssec:tests} makes this precise.
+\end{solution}
+
+\begin{exa}
+Estimate $\sigma^2$ for the yield data of Example~\ref{exa:yield}.
+\end{exa}
+
+\begin{solution}
+$S_{yy} = 26974 - 398^2/6 = 26974 - 26400.6667 = 573.3333$ and
+$\hat\beta_1 S_{xy} = (4/7)(1000) = 571.4286$, so
+\[
+SS_{\mathrm{Res}} = 573.3333 - 571.4286 = 1.9048, \qquad
+\hat\sigma^2 = \frac{1.9048}{6 - 2} = 0.4762 .
+\]
+The short-cut formula subtracts two large, nearly equal numbers, so it needs every decimal
+place you can keep: with $\hat\beta_1$ rounded to $0.57$ it would give
+$573.3333 - 570 = 3.33$, nearly double the true value. The residuals themselves are
+\[
+-0.0476, \quad 0.2381, \quad -0.4762, \quad 0.8095, \quad -0.9048, \quad 0.3810,
+\]
+and the sum of their squares is again $1.9048$.
+\end{solution}
+
+\subsection{Maximum likelihood estimation}\label{ssec:mle}
+Least squares needs only A1--A3. If we add the normality assumption A4, we can estimate the
+parameters by the other standard method, maximum likelihood. Reassuringly, it gives the same
+line.
+
+\begin{thm}\label{thm:mle}
+Under A1--A4, the maximum-likelihood estimators of $\beta_0$ and $\beta_1$ are the
+least-squares estimators $\hat\beta_0$ and $\hat\beta_1$, and the maximum-likelihood
+estimator of $\sigma^2$ is
+\[
+\tilde\sigma^2 = \frac{SS_{\mathrm{Res}}}{n} ,
+\]
+which is biased: $E(\tilde\sigma^2) = \dfrac{n-2}{n}\,\sigma^2$.
+\end{thm}
+
+\begin{proof}
+Under A1--A4 the $y_i$ are independent with $y_i \sim N(\beta_0 + \beta_1 x_i, \sigma^2)$, so
+the likelihood is the product of normal densities,
+\begin{align*}
+L(\beta_0, \beta_1, \sigma^2)
+&= \prod_{i=1}^n \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left\{ -\frac{(y_i - \beta_0 - \beta_1 x_i)^2}{2\sigma^2} \right\} \\
+&= (2\pi\sigma^2)^{-n/2} \exp\left\{ -\frac{S(\beta_0, \beta_1)}{2\sigma^2} \right\},
+\end{align*}
+where $S$ is the least-squares criterion. The log-likelihood is
+\[
+\ell = -\frac n2 \log(2\pi) - \frac n2 \log \sigma^2 - \frac{S(\beta_0, \beta_1)}{2\sigma^2} .
+\]
+For any fixed $\sigma^2$, $\ell$ is largest when $S(\beta_0, \beta_1)$ is smallest, that is,
+at $\hat\beta_0, \hat\beta_1$, whatever the value of $\sigma^2$. Putting these in, $S$ becomes
+$SS_{\mathrm{Res}}$, and
+\[
+\frac{\partial \ell}{\partial \sigma^2} = -\frac{n}{2\sigma^2} + \frac{SS_{\mathrm{Res}}}{2\sigma^4} = 0
+\quad\text{gives}\quad \tilde\sigma^2 = \frac{SS_{\mathrm{Res}}}{n} .
+\]
+(The derivative is positive below this value and negative above it, so it is a maximum.)
+Finally, by Theorem~\ref{thm:e-ssres},
+$E(\tilde\sigma^2) = E(SS_{\mathrm{Res}})/n = (n-2)\sigma^2/n$.
+\end{proof}
+
+The bias is small when $n$ is large, but for small samples it matters: with the five
+advertising observations, $\tilde\sigma^2 = 1.10/5 = 0.22$ against
+$\hat\sigma^2 = 0.3667$. We always use the unbiased $\hat\sigma^2 = MS_{\mathrm{Res}}$.
+
+\subsection{Sampling distributions under normality}\label{ssec:distributions}
+To test hypotheses and build confidence intervals we need the \emph{distributions} of
+$\hat\beta_0$, $\hat\beta_1$ and $SS_{\mathrm{Res}}$, not just their means and variances.
+From here to the end of this section, A1--A4 are assumed.
+
+We use three facts from distribution theory:
+\begin{enumerate}[label=(F\arabic*)]
+\item A linear combination of independent normal variables is normal. More generally,
+variables that are all linear combinations of the same independent normal variables are
+\emph{jointly} normal, and jointly normal variables that are uncorrelated are independent.
+\item If $Z \sim N(0,1)$ then $Z^2 \sim \chi^2_1$. The $\chi^2_\nu$ distribution has moment
+generating function $(1 - 2t)^{-\nu/2}$, and the sum of independent $\chi^2$ variables is
+$\chi^2$ with the degrees of freedom added.
+\item If $Z \sim N(0,1)$ and $V \sim \chi^2_\nu$ are independent, then
+$Z \big/ \sqrt{V/\nu} \sim t_\nu$; and if $V_1 \sim \chi^2_{\nu_1}$ and $V_2 \sim \chi^2_{\nu_2}$
+are independent, then $\dfrac{V_1/\nu_1}{V_2/\nu_2} \sim F_{\nu_1, \nu_2}$.
+\end{enumerate}
+
+\begin{thm}\label{thm:normal-b}
+$\hat\beta_1 \sim N\!\left(\beta_1, \dfrac{\sigma^2}{S_{xx}}\right)$ and
+$\hat\beta_0 \sim N\!\left(\beta_0, \sigma^2\left(\dfrac1n + \dfrac{\bar x^2}{S_{xx}}\right)\right)$.
+\end{thm}
+
+\begin{proof}
+Both are linear combinations of the independent normal $y_i$ (Lemma~\ref{lem:ci}, and
+$\hat\beta_0 = \bar y - \bar x \hat\beta_1$), so both are normal by (F1). Their means and
+variances are those of Theorems~\ref{thm:b1} and~\ref{thm:b0}.
+\end{proof}
+
+\begin{lem}\label{lem:resid-indep}
+The residuals $e_1, \dots, e_n$ are independent of the pair $(\bar y, \hat\beta_1)$, and $\bar y$
+is independent of $\hat\beta_1$.
+\end{lem}
+
+\begin{proof}
+Every $e_i$, together with $\bar y$ and $\hat\beta_1$, is a linear combination of the
+independent normal $y_j$, so by (F1) it is enough to show that the covariances are zero.
+Lemma~\ref{lem:cov-ybar} gives $\operatorname{Cov}(\bar y, \hat\beta_1) = 0$. Next,
+$e_i = y_i - \bar y - \hat\beta_1 (x_i - \bar x)$. From $\hat\beta_1 = \sum c_j y_j$,
+$\operatorname{Cov}(y_i, \hat\beta_1) = c_i \sigma^2$, and from $\bar y = \sum y_j/n$,
+$\operatorname{Cov}(y_i, \bar y) = \sigma^2/n$. So
+\begin{align*}
+\operatorname{Cov}(e_i, \hat\beta_1) &= c_i\sigma^2 - 0 - (x_i - \bar x)\frac{\sigma^2}{S_{xx}}
+  = \frac{(x_i - \bar x)\sigma^2}{S_{xx}} - \frac{(x_i - \bar x)\sigma^2}{S_{xx}} = 0, \\
+\operatorname{Cov}(e_i, \bar y) &= \frac{\sigma^2}{n} - \frac{\sigma^2}{n} - (x_i - \bar x) \cdot 0 = 0 . \qedhere
+\end{align*}
+\end{proof}
+
+\begin{thm}\label{thm:chisq}
+$\dfrac{SS_{\mathrm{Res}}}{\sigma^2} \sim \chi^2_{n-2}$, and $SS_{\mathrm{Res}}$ is independent
+of $\hat\beta_0$ and $\hat\beta_1$.
+\end{thm}
+
+\begin{proof}
+$SS_{\mathrm{Res}} = \sum e_i^2$ is a function of the residuals alone, and $\hat\beta_0$ and
+$\hat\beta_1$ are functions of $(\bar y, \hat\beta_1)$, so the independence follows from
+Lemma~\ref{lem:resid-indep}.
+
+For the distribution, split each error into three parts. Since
+$\hat\beta_0 = \bar y - \hat\beta_1 \bar x$,
+\[
+\varepsilon_i = y_i - \beta_0 - \beta_1 x_i
+= e_i + (\bar y - \beta_0 - \beta_1 \bar x) + (\hat\beta_1 - \beta_1)(x_i - \bar x) ,
+\]
+as can be checked by expanding $e_i = y_i - \bar y - \hat\beta_1(x_i - \bar x)$. Square
+and sum over $i$. All three cross terms vanish, because $\sum e_i = 0$,
+$\sum (x_i - \bar x) e_i = \sum x_i e_i - \bar x \sum e_i = 0$ (Theorem~\ref{thm:resid-props})
+and $\sum (x_i - \bar x) = 0$. So
+\[
+\sum \varepsilon_i^2 = SS_{\mathrm{Res}} + n(\bar y - \beta_0 - \beta_1 \bar x)^2 + (\hat\beta_1 - \beta_1)^2 S_{xx} .
+\]
+Divide by $\sigma^2$ and look at each term.
+\begin{itemize}
+\item Left side: $\varepsilon_i/\sigma \sim N(0,1)$ independently, so $\sum \varepsilon_i^2/\sigma^2 \sim \chi^2_n$ by (F2).
+\item $\bar y \sim N(\beta_0 + \beta_1 \bar x, \sigma^2/n)$, so $n(\bar y - \beta_0 - \beta_1 \bar x)^2/\sigma^2 = Z_1^2 \sim \chi^2_1$.
+\item By Theorem~\ref{thm:normal-b}, $(\hat\beta_1 - \beta_1)^2 S_{xx}/\sigma^2 = Z_2^2 \sim \chi^2_1$.
+\end{itemize}
+By Lemma~\ref{lem:resid-indep} the three terms on the right are independent. Taking moment
+generating functions, with $M(t)$ that of $SS_{\mathrm{Res}}/\sigma^2$,
+\[
+(1 - 2t)^{-n/2} = M(t)\,(1 - 2t)^{-1/2}(1 - 2t)^{-1/2},
+\]
+so that
+\[
+M(t) = (1 - 2t)^{-(n-2)/2},
+\]
+which is the moment generating function of $\chi^2_{n-2}$.
+\end{proof}
+
+\subsection{Hypothesis tests on the slope and intercept}\label{ssec:tests}
+\begin{thm}\label{thm:t-slope}
+\[
+\frac{\hat\beta_1 - \beta_1}{\operatorname{se}(\hat\beta_1)} \sim t_{n-2}
+\qquad\text{and}\qquad
+\frac{\hat\beta_0 - \beta_0}{\operatorname{se}(\hat\beta_0)} \sim t_{n-2} .
+\]
+\end{thm}
+
+\begin{proof}
+For the slope, $Z = (\hat\beta_1 - \beta_1)\big/\sqrt{\sigma^2/S_{xx}} \sim N(0,1)$ by
+Theorem~\ref{thm:normal-b}, and $V = SS_{\mathrm{Res}}/\sigma^2 = (n-2)\hat\sigma^2/\sigma^2 \sim \chi^2_{n-2}$
+independently of it, by Theorem~\ref{thm:chisq}. By (F3),
+\[
+\frac{Z}{\sqrt{V/(n-2)}} = \frac{(\hat\beta_1 - \beta_1)\big/\sqrt{\sigma^2/S_{xx}}}{\sqrt{\hat\sigma^2/\sigma^2}}
+= \frac{\hat\beta_1 - \beta_1}{\sqrt{\hat\sigma^2/S_{xx}}} \sim t_{n-2} .
+\]
+The unknown $\sigma$ cancels. The intercept is the same with
+$\sigma^2\left(\frac1n + \frac{\bar x^2}{S_{xx}}\right)$ in place of $\sigma^2/S_{xx}$.
+\end{proof}
+
+To test $H_0\colon \beta_1 = \beta_{10}$ for a given value $\beta_{10}$, compute
+\[
+t_0 = \frac{\hat\beta_1 - \beta_{10}}{\operatorname{se}(\hat\beta_1)} .
+\]
+Under $H_0$, $t_0 \sim t_{n-2}$. Writing $t_{\alpha, \nu}$ for the point with probability
+$\alpha$ above it in the $t_\nu$ distribution, at significance level $\alpha$:
+\begin{center}
+\begin{tabular}{ll}
+\hline
+Alternative & Reject $H_0$ when \\
+\hline
+$H_1\colon \beta_1 \neq \beta_{10}$ & $|t_0| > t_{\alpha/2, n-2}$ \\
+$H_1\colon \beta_1 > \beta_{10}$ & $t_0 > t_{\alpha, n-2}$ \\
+$H_1\colon \beta_1 < \beta_{10}$ & $t_0 < -t_{\alpha, n-2}$ \\
+\hline
+\end{tabular}
+\end{center}
+Tests on $\beta_0$ are the same, with $\operatorname{se}(\hat\beta_0)$.
+
+The most important case is $H_0\colon \beta_1 = 0$, the \textbf{test of significance of
+regression}. If $\beta_1 = 0$ then $E(y) = \beta_0$ whatever $x$ is: $x$ is of no use in
+explaining $y$, at least through a straight line. Failing to reject it can mean that there
+is no relationship, or that the relationship is not linear (draw the scatter plot), or simply
+that there are too few data to detect it.
+
+\begin{exa}\label{exa:disney-test}
+For the advertising data, test at the 5\% level whether sales are linearly related to
+advertising, and whether the intercept is zero.
+\end{exa}
+
+\begin{solution}
+From Examples~\ref{exa:disney-fit} and~\ref{exa:disney-sigma}: $\hat\beta_1 = 0.7$,
+$\operatorname{se}(\hat\beta_1) = 0.1915$, $\hat\beta_0 = -0.1$,
+$\operatorname{se}(\hat\beta_0) = 0.6351$, with $n - 2 = 3$ degrees of freedom.
+From tables, $t_{0.025,3} = 3.182$.
+
+\emph{Slope.} $H_0\colon \beta_1 = 0$ against $H_1\colon \beta_1 \neq 0$.
+\[
+t_0 = \frac{0.7 - 0}{0.1915} = 3.656 .
+\]
+Since $|t_0| = 3.656 > 3.182$, reject $H_0$ at the 5\% level (the $p$-value is $0.035$).
+Advertising and sales are linearly related.
+
+\emph{Intercept.} $H_0\colon \beta_0 = 0$ against $H_1\colon \beta_0 \neq 0$.
+\[
+t_0 = \frac{-0.1 - 0}{0.6351} = -0.157 .
+\]
+$|t_0| < 3.182$, so do not reject ($p = 0.885$). The data are consistent with a line through
+the origin.
+\end{solution}
+
+\subsection{Analysis of variance}\label{ssec:anova}
+A second way to test significance of regression splits the total variation in $y$ into a
+part explained by the line and a part left over.
+
+\begin{thm}[Fundamental identity]\label{thm:anova}
+\[
+\underbrace{\sum (y_i - \bar y)^2}_{SS_T}
+= \underbrace{\sum (\hat y_i - \bar y)^2}_{SS_R}
++ \underbrace{\sum (y_i - \hat y_i)^2}_{SS_{\mathrm{Res}}} ,
+\]
+and $SS_R = \hat\beta_1 S_{xy} = \hat\beta_1^2 S_{xx}$.
+\end{thm}
+
+\begin{proof}
+Write $y_i - \bar y = (\hat y_i - \bar y) + e_i$, square and sum:
+\[
+SS_T = SS_R + SS_{\mathrm{Res}} + 2\sum (\hat y_i - \bar y) e_i .
+\]
+The cross term is $2\sum \hat y_i e_i - 2\bar y \sum e_i = 0$ by
+Theorem~\ref{thm:resid-props}(i) and (iv). For the second statement,
+$\hat y_i - \bar y = \hat\beta_0 + \hat\beta_1 x_i - \bar y = \hat\beta_1 (x_i - \bar x)$,
+so $SS_R = \hat\beta_1^2 S_{xx} = \hat\beta_1 (\hat\beta_1 S_{xx}) = \hat\beta_1 S_{xy}$.
+\end{proof}
+
+$SS_T = S_{yy}$ is the \textbf{total sum of squares}, with $n-1$ degrees of freedom;
+$SS_R$ is the \textbf{regression sum of squares}, with $1$ degree of freedom (one slope); and
+$SS_{\mathrm{Res}}$ has the remaining $n - 2$. Each mean square is a sum of squares divided by
+its degrees of freedom: $MS_R = SS_R/1$ and $MS_{\mathrm{Res}} = SS_{\mathrm{Res}}/(n-2)$.
+
+\begin{thm}\label{thm:F}
+$E(MS_R) = \sigma^2 + \beta_1^2 S_{xx}$ and $E(MS_{\mathrm{Res}}) = \sigma^2$. When
+$\beta_1 = 0$,
+\[
+F_0 = \frac{MS_R}{MS_{\mathrm{Res}}} \sim F_{1, n-2} .
+\]
+Moreover $F_0 = t_0^2$, where $t_0 = \hat\beta_1 / \operatorname{se}(\hat\beta_1)$.
+\end{thm}
+
+\begin{proof}
+$E(MS_R) = S_{xx} E(\hat\beta_1^2) = S_{xx}\left( \frac{\sigma^2}{S_{xx}} + \beta_1^2 \right)
+= \sigma^2 + \beta_1^2 S_{xx}$, as in the proof of Theorem~\ref{thm:e-ssres}, which also gives
+$E(MS_{\mathrm{Res}}) = \sigma^2$.
+
+When $\beta_1 = 0$, $\hat\beta_1 \sqrt{S_{xx}}/\sigma \sim N(0,1)$, so
+$SS_R/\sigma^2 = \hat\beta_1^2 S_{xx}/\sigma^2 \sim \chi^2_1$. It is a function of
+$\hat\beta_1$, so it is independent of $SS_{\mathrm{Res}}/\sigma^2 \sim \chi^2_{n-2}$
+(Theorem~\ref{thm:chisq}). By (F3),
+\[
+\frac{(SS_R/\sigma^2)/1}{(SS_{\mathrm{Res}}/\sigma^2)/(n-2)} = \frac{MS_R}{MS_{\mathrm{Res}}} \sim F_{1, n-2} .
+\]
+Finally
+$F_0 = \dfrac{\hat\beta_1^2 S_{xx}}{\hat\sigma^2} = \left( \dfrac{\hat\beta_1}{\sqrt{\hat\sigma^2/S_{xx}}} \right)^2 = t_0^2$.
+\end{proof}
+
+The expected mean squares explain the test. When $\beta_1 = 0$ both mean squares estimate
+$\sigma^2$ and $F_0$ should be near $1$; when $\beta_1 \neq 0$, $MS_R$ is inflated by
+$\beta_1^2 S_{xx}$ and $F_0$ tends to be large. So reject $H_0\colon \beta_1 = 0$ when
+$F_0 > F_{\alpha, 1, n-2}$. The working is set out in an \textbf{analysis of variance
+(ANOVA) table}:
+\begin{center}
+\begin{tabular}{lcccc}
+\hline
+Source & Sum of squares & df & Mean square & $F_0$ \\
+\hline
+Regression & $SS_R = \hat\beta_1 S_{xy}$ & $1$ & $MS_R$ & $MS_R / MS_{\mathrm{Res}}$ \\
+Residual & $SS_{\mathrm{Res}} = SS_T - SS_R$ & $n-2$ & $MS_{\mathrm{Res}}$ & \\
+\hline
+Total & $SS_T = S_{yy}$ & $n-1$ & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{exa}\label{exa:disney-anova}
+Set out the ANOVA table for the advertising data and test significance of regression at the
+5\% level.
+\end{exa}
+
+\begin{solution}
+$SS_T = S_{yy} = 6$, $SS_R = \hat\beta_1 S_{xy} = 0.7 \times 7 = 4.9$ and
+$SS_{\mathrm{Res}} = 6 - 4.9 = 1.1$.
+\begin{center}
+\begin{tabular}{lcccc}
+\hline
+Source & SS & df & MS & $F_0$ \\
+\hline
+Regression & 4.9 & 1 & 4.9 & 13.36 \\
+Residual & 1.1 & 3 & 0.3667 & \\
+\hline
+Total & 6.0 & 4 & & \\
+\hline
+\end{tabular}
+\end{center}
+From tables, $F_{0.05,1,3} = 10.13$. Since $13.36 > 10.13$, reject $H_0\colon \beta_1 = 0$.
+This is the same conclusion as the $t$-test of Example~\ref{exa:disney-test}, as it must be:
+$t_0^2 = 3.656^2 = 13.36 = F_0$, and $t_{0.025,3}^2 = 3.182^2 = 10.13 = F_{0.05,1,3}$.
+\end{solution}
+
+\begin{remark}
+In simple regression the two tests are the same test. The $t$-test is more flexible: it can
+be one-sided, and can test $\beta_1$ against values other than $0$. The $F$-test is the one
+that generalises to several regressors at once, in multiple regression.
+\end{remark}
+
+\subsection{The coefficient of determination}
+\begin{defn}
+The \textbf{coefficient of determination} is
+\[
+R^2 = \frac{SS_R}{SS_T} = 1 - \frac{SS_{\mathrm{Res}}}{SS_T} ,
+\]
+the proportion of the variation in $y$ that is explained by the regression on $x$.
+\end{defn}
+
+By Theorem~\ref{thm:anova}, $SS_R$ and $SS_{\mathrm{Res}}$ are both non-negative and add up to
+$SS_T$, so $0 \le R^2 \le 1$. $R^2 = 1$ when every residual is zero, so the points lie
+exactly on a line, and $R^2 = 0$ when $\hat\beta_1 = 0$, so the fitted line is flat.
+
+For the advertising data, $R^2 = 4.9/6 = 0.8167$: about $82\%$ of the variation in sales is
+explained by advertising. For the yield data of Example~\ref{exa:yield},
+$R^2 = 571.4286/573.3333 = 0.9967$.
+
+\begin{remark}
+$R^2$ must be read with care.
+\begin{enumerate}
+\item A large $R^2$ does not mean a straight line is the right model. Points on a gentle
+curve can give $R^2$ above $0.9$; the residual plots of a later section reveal the curvature.
+\item $R^2$ depends on the spread of the $x_i$: since $E(SS_R) = \sigma^2 + \beta_1^2 S_{xx}$,
+spreading the $x$ values out increases $R^2$ even when the model and $\sigma^2$ are unchanged.
+\item $R^2$ says nothing about predictions outside the range of the data.
+\end{enumerate}
+\end{remark}
+
+\subsection{Interval estimation}
+\subhead{Confidence intervals for $\beta_0$, $\beta_1$ and $\sigma^2$}
+\begin{thm}
+$100(1-\alpha)\%$ confidence intervals are
+\begin{align*}
+\beta_1&\colon\quad \hat\beta_1 \pm t_{\alpha/2, n-2}\, \operatorname{se}(\hat\beta_1), \\
+\beta_0&\colon\quad \hat\beta_0 \pm t_{\alpha/2, n-2}\, \operatorname{se}(\hat\beta_0), \\
+\sigma^2&\colon\quad \left( \frac{SS_{\mathrm{Res}}}{\chi^2_{\alpha/2, n-2}},\ \frac{SS_{\mathrm{Res}}}{\chi^2_{1-\alpha/2, n-2}} \right),
+\end{align*}
+where $\chi^2_{\alpha, \nu}$ is the point with probability $\alpha$ above it in the
+$\chi^2_\nu$ distribution.
+\end{thm}
+
+\begin{proof}
+By Theorem~\ref{thm:t-slope},
+\[
+P\left( -t_{\alpha/2,n-2} \le \frac{\hat\beta_1 - \beta_1}{\operatorname{se}(\hat\beta_1)} \le t_{\alpha/2,n-2} \right) = 1 - \alpha .
+\]
+Multiplying through by $\operatorname{se}(\hat\beta_1)$ and rearranging the inequalities to
+isolate $\beta_1$ gives
+\[
+P\left( \hat\beta_1 - t_{\alpha/2,n-2}\operatorname{se}(\hat\beta_1) \le \beta_1
+       \le \hat\beta_1 + t_{\alpha/2,n-2}\operatorname{se}(\hat\beta_1) \right) = 1 - \alpha .
+\]
+The same argument works for $\beta_0$. For $\sigma^2$, Theorem~\ref{thm:chisq} gives
+\[
+P\left( \chi^2_{1-\alpha/2,n-2} \le \frac{SS_{\mathrm{Res}}}{\sigma^2} \le \chi^2_{\alpha/2,n-2} \right) = 1 - \alpha ;
+\]
+taking reciprocals reverses the inequalities, and multiplying by $SS_{\mathrm{Res}}$ isolates
+$\sigma^2$.
+\end{proof}
+
+\begin{exa}\label{exa:disney-ci}
+Find 95\% confidence intervals for $\beta_1$, $\beta_0$ and $\sigma^2$ for the advertising data.
+\end{exa}
+
+\begin{solution}
+With $t_{0.025,3} = 3.182$:
+\begin{align*}
+\beta_1&\colon\ 0.7 \pm 3.182 \times 0.1915 = 0.7 \pm 0.609, \quad\text{that is, } (0.091,\ 1.309); \\
+\beta_0&\colon\ -0.1 \pm 3.182 \times 0.6351 = -0.1 \pm 2.021, \quad\text{that is, } (-2.121,\ 1.921).
+\end{align*}
+The interval for $\beta_1$ excludes $0$ and the interval for $\beta_0$ includes it, matching
+the two tests of Example~\ref{exa:disney-test}. For $\sigma^2$, $\chi^2_{0.025,3} = 9.348$ and
+$\chi^2_{0.975,3} = 0.216$, so the interval is
+\[
+\left( \frac{1.1}{9.348},\ \frac{1.1}{0.216} \right) = (0.118,\ 5.10) .
+\]
+\end{solution}
+
+\subhead{The mean response at a given $x_0$}
+Often the quantity of interest is the mean response $E(y \mid x_0) = \beta_0 + \beta_1 x_0$ at
+a particular $x_0$, for example the mean sales when $\$4$ is spent. Its natural estimator is
+the point on the fitted line, $\hat y_0 = \hat\beta_0 + \hat\beta_1 x_0$.
+
+\begin{thm}\label{thm:mean-response}
+$\hat y_0$ is unbiased for $E(y \mid x_0)$, with
+\[
+\operatorname{Var}(\hat y_0) = \sigma^2 \left( \frac1n + \frac{(x_0 - \bar x)^2}{S_{xx}} \right),
+\]
+and a $100(1-\alpha)\%$ confidence interval for $E(y \mid x_0)$ is
+\[
+\hat y_0 \pm t_{\alpha/2, n-2} \sqrt{\hat\sigma^2 \left( \frac1n + \frac{(x_0 - \bar x)^2}{S_{xx}} \right)} .
+\]
+\end{thm}
+
+\begin{proof}
+Write $\hat y_0 = \bar y - \hat\beta_1 \bar x + \hat\beta_1 x_0 = \bar y + \hat\beta_1 (x_0 - \bar x)$.
+Then $E(\hat y_0) = \beta_0 + \beta_1 \bar x + \beta_1 (x_0 - \bar x) = \beta_0 + \beta_1 x_0$.
+Since $\operatorname{Cov}(\bar y, \hat\beta_1) = 0$ (Lemma~\ref{lem:cov-ybar}),
+\[
+\operatorname{Var}(\hat y_0) = \operatorname{Var}(\bar y) + (x_0 - \bar x)^2 \operatorname{Var}(\hat\beta_1)
+= \frac{\sigma^2}{n} + \frac{(x_0 - \bar x)^2 \sigma^2}{S_{xx}} .
+\]
+$\hat y_0$ is normal, being linear in the $y_i$, and is a function of $(\bar y, \hat\beta_1)$,
+so it is independent of $SS_{\mathrm{Res}}$. The argument of Theorem~\ref{thm:t-slope} then
+shows that $(\hat y_0 - E(y \mid x_0))$ divided by its standard error has the $t_{n-2}$
+distribution, and the interval follows as before.
+\end{proof}
+
+\subhead{Prediction of a new observation}
+A different question is where a single \emph{new} observation $y_0$, taken at $x_0$, is likely
+to fall. Now there are two sources of uncertainty: the line is estimated, and the new
+observation has its own error, $y_0 = \beta_0 + \beta_1 x_0 + \varepsilon_0$.
+
+\begin{thm}\label{thm:prediction}
+A $100(1-\alpha)\%$ prediction interval for a new observation $y_0$ at $x_0$ is
+\[
+\hat y_0 \pm t_{\alpha/2, n-2} \sqrt{\hat\sigma^2 \left( 1 + \frac1n + \frac{(x_0 - \bar x)^2}{S_{xx}} \right)} .
+\]
+\end{thm}
+
+\begin{proof}
+The new observation is independent of the sample, so $y_0$ is independent of $\hat y_0$ and
+of $SS_{\mathrm{Res}}$. The prediction error $y_0 - \hat y_0$ is normal with mean
+$(\beta_0 + \beta_1 x_0) - (\beta_0 + \beta_1 x_0) = 0$ and variance
+\[
+\operatorname{Var}(y_0) + \operatorname{Var}(\hat y_0) = \sigma^2 + \sigma^2 \left( \frac1n + \frac{(x_0 - \bar x)^2}{S_{xx}} \right) .
+\]
+Dividing by the estimated standard deviation gives a $t_{n-2}$ variable, as in
+Theorem~\ref{thm:t-slope}, and
+\[
+P\left(-t_{\alpha/2,n-2} \le \frac{y_0 - \hat y_0}{\operatorname{se}(y_0 - \hat y_0)} \le t_{\alpha/2,n-2}\right) = 1 - \alpha
+\]
+rearranges to the interval.
+\end{proof}
+
+\begin{exa}\label{exa:disney-pi}
+For the advertising data at $x_0 = 4$, find a 95\% confidence interval for the mean sales and a
+95\% prediction interval for the sales in a new week.
+\end{exa}
+
+\begin{solution}
+$\hat y_0 = -0.1 + 0.7 \times 4 = 2.7$, and
+$\frac1n + \frac{(x_0 - \bar x)^2}{S_{xx}} = \frac15 + \frac{(4-3)^2}{10} = 0.3$.
+
+\emph{Mean response.} Standard error $\sqrt{0.3667 \times 0.3} = 0.3317$, so the interval is
+\[
+2.7 \pm 3.182 \times 0.3317 = 2.7 \pm 1.055, \quad\text{that is, } (1.645,\ 3.755) .
+\]
+\emph{New observation.} Standard error $\sqrt{0.3667 \times 1.3} = 0.6904$, so the interval is
+\[
+2.7 \pm 3.182 \times 0.6904 = 2.7 \pm 2.197, \quad\text{that is, } (0.503,\ 4.897) .
+\]
+The prediction interval is about twice as wide: most of the uncertainty about a single week's
+sales comes from $\varepsilon_0$, not from the estimated line.
+\end{solution}
+
+Repeating the calculation over a range of $x_0$ traces out the two bands in
+Figure~\ref{fig:bands}. Both are narrowest at $x_0 = \bar x$ and widen as $x_0$ moves away
+from it, which is another reason extrapolation is risky.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1.1cm,y=0.55cm]
+\fill[red!12] plot[domain=0.5:5.5,samples=40] (\x,{-0.1+0.7*\x+3.1824*sqrt(0.366667*(1.2+(\x-3)^2/10))})
+  -- plot[domain=5.5:0.5,samples=40] (\x,{-0.1+0.7*\x-3.1824*sqrt(0.366667*(1.2+(\x-3)^2/10))}) -- cycle;
+\fill[blue!18] plot[domain=0.5:5.5,samples=40] (\x,{-0.1+0.7*\x+3.1824*sqrt(0.366667*(0.2+(\x-3)^2/10))})
+  -- plot[domain=5.5:0.5,samples=40] (\x,{-0.1+0.7*\x-3.1824*sqrt(0.366667*(0.2+(\x-3)^2/10))}) -- cycle;
+\draw[-Stealth] (0,-3) -- (6,-3) node[right] {$x$};
+\draw[-Stealth] (0,-3) -- (0,7) node[above] {$y$};
+\foreach \x in {1,...,5} \draw (\x,-2.85) -- (\x,-3.15) node[below] {\small $\x$};
+\foreach \y in {-2,0,2,4,6} \draw (0.07,\y) -- (-0.07,\y) node[left] {\small $\y$};
+\draw[thick,blue] (0.5,0.25) -- (5.5,3.75);
+\foreach \p in {(1,1),(2,1),(3,2),(4,2),(5,4)} \fill \p circle (2.5pt);
+\draw[dashed,gray] (3,-3) -- (3,6.3) node[above,black] {\small $\bar x = 3$};
+\fill[red!12] (6.4,5.2) rectangle +(0.4,0.6); \node[right] at (6.85,5.5) {\small prediction interval};
+\fill[blue!18] (6.4,4.0) rectangle +(0.4,0.6); \node[right] at (6.85,4.3) {\small confidence interval for the mean};
+\end{tikzpicture}
+\caption{95\% confidence band for the mean response (inner) and prediction band for a new
+observation (outer), for the advertising data. Both are narrowest at $\bar x$.}
+\label{fig:bands}
+\end{figure}
+
+\begin{exa}
+For the yield data of Example~\ref{exa:yield}, test significance of regression at the 5\%
+level and give a 95\% prediction interval for the yield of a new batch at $45^\circ$C.
+\end{exa}
+
+\begin{solution}
+Here $\hat\sigma^2 = 0.4762$ with $4$ degrees of freedom, and $t_{0.025,4} = 2.776$.
+The standard error of the slope is
+$\operatorname{se}(\hat\beta_1) = \sqrt{0.4762/1750} = 0.01650$, so
+$t_0 = 0.5714/0.01650 = 34.64$, far beyond $2.776$: the regression is highly significant.
+
+At $x_0 = 45$, $\hat y_0 = 72.048$ and
+$1 + \frac16 + \frac{(45 - 35)^2}{1750} = 1.2238$, so
+\begin{align*}
+72.048 \pm 2.776 \sqrt{0.4762 \times 1.2238} &= 72.048 \pm 2.776 \times 0.7634 \\
+&= 72.048 \pm 2.119 ,
+\end{align*}
+that is, $(69.93,\ 74.17)\%$.
+\end{solution}
+
+\subsection{Correlation}\label{ssec:corr}
+In regression, $x$ is fixed and $y$ is random. When both are random, measured together on
+each unit, their linear association is measured by the correlation coefficient.
+
+\begin{defn}
+The \textbf{sample correlation coefficient} is
+\[
+r = \frac{S_{xy}}{\sqrt{S_{xx} S_{yy}}} .
+\]
+\end{defn}
+
+By the Cauchy--Schwarz inequality (Problem~\ref{prob:xony}), $-1 \le r \le 1$.
+It estimates the population correlation $\rho$.
+
+\begin{thm}\label{thm:r2-r}
+\begin{enumerate}[label=(\roman*)]
+\item $R^2 = r^2 = \dfrac{S_{xy}^2}{S_{xx} S_{yy}}$;
+\item $\hat\beta_1 = r \sqrt{S_{yy}/S_{xx}}$, so $\hat\beta_1$ and $r$ have the same sign;
+\item the $t$ statistic for $H_0\colon \beta_1 = 0$ can be written
+$t_0 = \dfrac{r\sqrt{n-2}}{\sqrt{1 - r^2}}$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $R^2 = SS_R/SS_T = \hat\beta_1 S_{xy}/S_{yy} = S_{xy}^2/(S_{xx} S_{yy}) = r^2$.
+
+(ii) $r\sqrt{S_{yy}/S_{xx}} = \dfrac{S_{xy}}{\sqrt{S_{xx}S_{yy}}} \cdot \dfrac{\sqrt{S_{yy}}}{\sqrt{S_{xx}}} = \dfrac{S_{xy}}{S_{xx}} = \hat\beta_1$.
+
+(iii) By (i), $SS_{\mathrm{Res}} = SS_T(1 - R^2) = S_{yy}(1 - r^2)$, so
+$\hat\sigma^2 = S_{yy}(1 - r^2)/(n-2)$. Using (ii),
+\[
+t_0 = \frac{\hat\beta_1}{\sqrt{\hat\sigma^2/S_{xx}}}
+= \frac{r\sqrt{S_{yy}/S_{xx}}\, \sqrt{S_{xx}}\, \sqrt{n-2}}{\sqrt{S_{yy}(1 - r^2)}}
+= \frac{r\sqrt{n-2}}{\sqrt{1 - r^2}} . \qedhere
+\]
+\end{proof}
+
+When $x$ and $y$ are jointly normal, (iii) is the test of $H_0\colon \rho = 0$: under $H_0$ it
+has the $t_{n-2}$ distribution. So testing for zero correlation and testing for zero slope are
+the same test.
+
+\begin{exa}
+Find $r$ for the advertising data and test $H_0\colon \rho = 0$ at the 5\% level.
+\end{exa}
+
+\begin{solution}
+$r = 7/\sqrt{10 \times 6} = 7/\sqrt{60} = 0.9037$, and $r^2 = 0.8167 = R^2$. Then
+\[
+t_0 = \frac{0.9037\sqrt{3}}{\sqrt{1 - 0.8167}} = \frac{1.5652}{0.4282} = 3.656 ,
+\]
+the same value as in Example~\ref{exa:disney-test}. As $3.656 > t_{0.025,3} = 3.182$, reject
+$H_0$: the correlation is significant.
+\end{solution}
+
+\begin{remark}
+Correlation measures \emph{linear} association only. Points lying exactly on the parabola
+$y = x^2$ for $x = -2, -1, 0, 1, 2$ have $S_{xy} = \sum x_i^3 - n\bar x \bar y = 0$, so $r = 0$,
+though $y$ is completely determined by $x$.
+\end{remark}
+
+\subsection{Practice problems}
+Try each problem before reading the solution.
+
+\begin{problem}\label{prob:fit}
+The following data were collected:
+\begin{center}
+\begin{tabular}{l|ccccc}
+$x$ & 2 & 4 & 6 & 8 & 10 \\
+\hline
+$y$ & 3 & 7 & 8 & 12 & 15 \\
+\end{tabular}
+\end{center}
+\begin{enumerate}[label=(\alph*)]
+\item Fit the least-squares line.
+\item Compute the fitted values and residuals, and check that $\sum e_i = 0$ and $\sum x_i e_i = 0$.
+\item Estimate $\sigma^2$ in two ways, and find $\operatorname{se}(\hat\beta_1)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\sum x_i = 30$, $\sum y_i = 45$, $\sum x_i^2 = 220$, $\sum x_i y_i = 328$, $\sum y_i^2 = 491$,
+so $\bar x = 6$ and $\bar y = 9$. Then
+\[
+S_{xx} = 220 - \frac{30^2}{5} = 40, \qquad S_{xy} = 328 - \frac{30 \times 45}{5} = 58,
+\]
+$\hat\beta_1 = 58/40 = 1.45$, $\hat\beta_0 = 9 - 1.45 \times 6 = 0.3$, and $\hat y = 0.3 + 1.45x$.
+
+(b)
+\begin{center}
+\begin{tabular}{c|ccccc}
+$x_i$ & 2 & 4 & 6 & 8 & 10 \\
+\hline
+$\hat y_i$ & 3.2 & 6.1 & 9.0 & 11.9 & 14.8 \\
+$e_i$ & $-0.2$ & 0.9 & $-1.0$ & 0.1 & 0.2 \\
+\end{tabular}
+\end{center}
+$\sum e_i = -0.2 + 0.9 - 1.0 + 0.1 + 0.2 = 0$ and
+$\sum x_i e_i = -0.4 + 3.6 - 6.0 + 0.8 + 2.0 = 0$.
+
+(c) Directly, $SS_{\mathrm{Res}} = 0.04 + 0.81 + 1.00 + 0.01 + 0.04 = 1.90$. By
+Theorem~\ref{thm:ssres}, $S_{yy} = 491 - 45^2/5 = 86$ and
+$SS_{\mathrm{Res}} = 86 - 1.45 \times 58 = 86 - 84.1 = 1.90$. So
+$\hat\sigma^2 = 1.90/3 = 0.6333$ and $\operatorname{se}(\hat\beta_1) = \sqrt{0.6333/40} = 0.1258$.
+\end{solution}
+
+\begin{problem}\label{prob:totals}
+For a sample of $n = 10$ weeks, $x$ is advertising spend (in hundreds of dollars) and $y$ is
+sales (in thousands of units). Only the totals were kept:
+\begin{gather*}
+\sum x_i = 50, \quad \sum y_i = 120, \quad \sum x_i^2 = 310, \\
+\sum x_i y_i = 660, \quad \sum y_i^2 = 1550 .
+\end{gather*}
+Find the fitted line, estimate the mean sales when $\$600$ is spent, and estimate $\sigma.$
+\end{problem}
+
+\begin{solution}
+$\bar x = 5$, $\bar y = 12$, $S_{xx} = 310 - 50^2/10 = 60$, $S_{xy} = 660 - 50 \times 120/10 = 60$
+and $S_{yy} = 1550 - 120^2/10 = 110$. So $\hat\beta_1 = 60/60 = 1$, $\hat\beta_0 = 12 - 1 \times 5 = 7$,
+and $\hat y = 7 + x$.
+
+$\$600$ is $x = 6$, so $\hat y = 13$, that is, $13\,000$ units.
+
+$SS_{\mathrm{Res}} = 110 - 1 \times 60 = 50$, $\hat\sigma^2 = 50/8 = 6.25$, and
+$\hat\sigma = 2.5$ thousand units. Note that the residuals themselves were never needed:
+Theorem~\ref{thm:ssres} works from the totals alone.
+\end{solution}
+
+\begin{problem}\label{prob:origin}
+\textbf{Regression through the origin.} Sometimes theory says the line must pass through the origin, giving the model
+$y_i = \beta_1 x_i + \varepsilon_i$.
+\begin{enumerate}[label=(\alph*)]
+\item Show that the least-squares estimator is $\hat\beta_1 = \sum x_i y_i \big/ \sum x_i^2$.
+\item Under A1--A3, show that $\hat\beta_1$ is unbiased with variance $\sigma^2 \big/ \sum x_i^2$.
+\item Fit the model to the data below, and show that here $\sum e_i \neq 0$ but $\sum x_i e_i = 0$.
+\end{enumerate}
+\begin{center}
+\begin{tabular}{l|cccccc}
+$x$ & 1 & 2 & 3 & 4 & 5 & 6 \\
+\hline
+$y$ & 2.1 & 3.9 & 6.2 & 7.8 & 10.1 & 11.9 \\
+\end{tabular}
+\end{center}
+\end{problem}
+
+\begin{solution}
+(a) $S(\beta_1) = \sum (y_i - \beta_1 x_i)^2$ has
+$S'(\beta_1) = -2\sum x_i (y_i - \beta_1 x_i)$. Setting this to zero gives
+$\sum x_i y_i = \hat\beta_1 \sum x_i^2$. Since $S''(\beta_1) = 2\sum x_i^2 > 0$, this is a
+minimum.
+
+(b) $\hat\beta_1 = \sum k_i y_i$ with $k_i = x_i / \sum x_j^2$. Then
+$E(\hat\beta_1) = \sum k_i \beta_1 x_i = \beta_1 \sum x_i^2 / \sum x_j^2 = \beta_1$, and
+$\operatorname{Var}(\hat\beta_1) = \sigma^2 \sum k_i^2 = \sigma^2 \sum x_i^2 / \left(\sum x_j^2\right)^2 = \sigma^2 / \sum x_i^2$.
+
+(c) $\sum x_i y_i = 2.1 + 7.8 + 18.6 + 31.2 + 50.5 + 71.4 = 181.6$ and $\sum x_i^2 = 91$, so
+$\hat\beta_1 = 181.6/91 = 1.9956$ and $\hat y = 1.9956x$. Then
+\begin{align*}
+\sum e_i &= \sum y_i - \hat\beta_1 \sum x_i = 42 - 1.9956 \times 21 \\
+         &= 42 - 41.9077 = 0.0923 \neq 0 ,
+\end{align*}
+while $\sum x_i e_i = \sum x_i y_i - \hat\beta_1 \sum x_i^2 = 181.6 - 181.6 = 0$.
+The only normal equation is the one for $\beta_1$, which is $\sum x_i e_i = 0$. The equation
+that gave $\sum e_i = 0$ belonged to $\beta_0$, and this model has no $\beta_0$.
+\end{solution}
+
+\begin{problem}\label{prob:xony}
+For the advertising data, fit the regression of $x$ on $y$, that is, the line
+$\hat x = \hat\alpha_0 + \hat\alpha_1 y$ that minimises $\sum (x_i - \alpha_0 - \alpha_1 y_i)^2$.
+Is it the same line as $\hat y = -0.1 + 0.7x$ solved for $x$? Show that in general the
+product of the two slopes, $\hat\beta_1 \hat\alpha_1$, lies between $0$ and $1$.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:ls} with the roles of $x$ and $y$ exchanged,
+$\hat\alpha_1 = S_{xy}/S_{yy} = 7/6 = 1.1667$ and
+$\hat\alpha_0 = \bar x - \hat\alpha_1 \bar y = 3 - (7/6)(2) = 0.6667$.
+
+Solving $\hat y = -0.1 + 0.7x$ for $x$ gives $x = (y + 0.1)/0.7$, with slope
+$1/0.7 = 1.4286$. The two lines are different: one minimises vertical distances, the other
+horizontal ones.
+
+In general
+\[
+\hat\beta_1 \hat\alpha_1 = \frac{S_{xy}}{S_{xx}} \cdot \frac{S_{xy}}{S_{yy}} = \frac{S_{xy}^2}{S_{xx} S_{yy}} \ge 0 .
+\]
+By the Cauchy--Schwarz inequality,
+$\left( \sum a_i b_i \right)^2 \le \sum a_i^2 \sum b_i^2$. With $a_i = x_i - \bar x$ and
+$b_i = y_i - \bar y$ this says $S_{xy}^2 \le S_{xx} S_{yy}$, so the product is at most $1$.
+It equals $1$ exactly when the points lie on a straight line, and only then do the two
+regression lines coincide. Here $\hat\beta_1 \hat\alpha_1 = 49/60 = 0.8167$. This quantity
+is $r^2$, the square of the correlation coefficient of Subsection~\ref{ssec:corr}.
+\end{solution}
+
+\begin{problem}\label{prob:full}
+Continue with the data of Problem~\ref{prob:fit}, assuming A1--A4.
+\begin{enumerate}[label=(\alph*)]
+\item Test $H_0\colon \beta_1 = 0$ against $H_1\colon \beta_1 \neq 0$ at the 5\% level, using the $t$-test.
+\item Set out the analysis of variance table, carry out the $F$-test, and check that $F_0 = t_0^2$.
+\item Find $R^2$ and the correlation coefficient $r$.
+\item Find a 95\% confidence interval for $\beta_1$.
+\item At $x_0 = 7$, find a 95\% confidence interval for the mean response and a 95\% prediction interval for a new observation.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+From Problem~\ref{prob:fit}: $n = 5$, $\bar x = 6$, $S_{xx} = 40$, $S_{xy} = 58$,
+$S_{yy} = 86$, $\hat\beta_1 = 1.45$, $\hat\beta_0 = 0.3$, $SS_{\mathrm{Res}} = 1.90$,
+$\hat\sigma^2 = 0.6333$ and $\operatorname{se}(\hat\beta_1) = 0.1258$. There are $n - 2 = 3$
+degrees of freedom, and $t_{0.025,3} = 3.182$.
+
+(a) $t_0 = 1.45/0.1258 = 11.52$. Since $|t_0| > 3.182$, reject $H_0$: there is a significant
+linear relationship.
+
+(b) $SS_R = \hat\beta_1 S_{xy} = 1.45 \times 58 = 84.1$.
+\begin{center}
+\begin{tabular}{lcccc}
+\hline
+Source & SS & df & MS & $F_0$ \\
+\hline
+Regression & 84.10 & 1 & 84.10 & 132.79 \\
+Residual & 1.90 & 3 & 0.6333 & \\
+\hline
+Total & 86.00 & 4 & & \\
+\hline
+\end{tabular}
+\end{center}
+$F_{0.05,1,3} = 10.13$, and $132.79 > 10.13$, so reject $H_0$. Also
+$t_0^2 = 11.523^2 = 132.79 = F_0$.
+
+(c) $R^2 = 84.1/86 = 0.9779$, so the line explains about $97.8\%$ of the variation in $y$.
+$r = +\sqrt{0.9779} = 0.9889$, positive because $S_{xy} > 0$.
+
+(d) $1.45 \pm 3.182 \times 0.1258 = 1.45 \pm 0.4004$, that is, $(1.0496,\ 1.8504)$.
+
+(e) $\hat y_0 = 0.3 + 1.45 \times 7 = 10.45$, and
+$\frac1n + \frac{(x_0 - \bar x)^2}{S_{xx}} = 0.2 + \frac{1}{40} = 0.225$.
+\begin{itemize}
+\item Mean response: standard error $\sqrt{0.6333 \times 0.225} = 0.3775$; interval
+$10.45 \pm 3.182 \times 0.3775 = 10.45 \pm 1.201$, that is, $(9.249,\ 11.651)$.
+\item New observation: standard error $\sqrt{0.6333 \times 1.225} = 0.8808$; interval
+$10.45 \pm 3.182 \times 0.8808 = 10.45 \pm 2.803$, that is, $(7.647,\ 13.253)$.
+\end{itemize}
+\end{solution}
+
+\begin{problem}
+For the advertising totals of Problem~\ref{prob:totals} ($n = 10$, $\hat y = 7 + x$, $S_{xx} = 60$,
+$S_{yy} = 110$, $\hat\sigma^2 = 6.25$):
+\begin{enumerate}[label=(\alph*)]
+\item test at the 5\% level whether sales are linearly related to advertising;
+\item a manager claims that each extra $\$100$ of advertising raises mean sales by more than
+$500$ units. Test $H_0\colon \beta_1 = 0.5$ against $H_1\colon \beta_1 > 0.5$ at the 5\% level;
+\item find a 95\% confidence interval for $\sigma^2$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+There are $n - 2 = 8$ degrees of freedom, and
+$\operatorname{se}(\hat\beta_1) = \sqrt{6.25/60} = 0.3227$.
+
+(a) $t_0 = 1/0.3227 = 3.098 > t_{0.025,8} = 2.306$: reject $H_0\colon \beta_1 = 0$. Sales are
+significantly related to advertising.
+
+(b) $t_0 = (1 - 0.5)/0.3227 = 1.549$. The test is one-sided, so the critical value is
+$t_{0.05,8} = 1.860$. As $1.549 < 1.860$ we do not reject $H_0$: the data do not support the
+manager's claim, even though the estimate $\hat\beta_1 = 1$ is above $0.5$. The estimate is
+too imprecise for that.
+
+(c) $SS_{\mathrm{Res}} = 50$, $\chi^2_{0.025,8} = 17.535$ and $\chi^2_{0.975,8} = 2.180$, so
+the interval is
+\[
+\left( \frac{50}{17.535},\ \frac{50}{2.180} \right) = (2.85,\ 22.94) .
+\]
+It is very wide: eight degrees of freedom tell us little about a variance.
+\end{solution}
+
+\begin{problem}
+\begin{enumerate}[label=(\alph*)]
+\item Show that the confidence interval for the mean response is narrowest at $x_0 = \bar x$,
+and that the prediction interval at any $x_0$ is wider than the confidence interval there.
+\item As $n \to \infty$, with the $x_i$ spread so that $S_{xx} \to \infty$ and $\bar x$ stays
+bounded, what happens to the width of each interval?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The half-width of the confidence interval is
+$t_{\alpha/2,n-2} \sqrt{\hat\sigma^2 \bigl( \frac1n + \frac{(x_0 - \bar x)^2}{S_{xx}} \bigr)}$.
+Only $(x_0 - \bar x)^2$ depends on $x_0$, and it is least, namely $0$, at $x_0 = \bar x$.
+The prediction interval has $1 + \frac1n + \frac{(x_0 - \bar x)^2}{S_{xx}}$ under the
+square root in place of $\frac1n + \frac{(x_0 - \bar x)^2}{S_{xx}}$, which is larger by $1$,
+with the same $t$ and $\hat\sigma^2$.
+
+(b) $\frac1n \to 0$ and $\frac{(x_0 - \bar x)^2}{S_{xx}} \to 0$, while $\hat\sigma^2 \to \sigma^2$
+and $t_{\alpha/2,n-2} \to z_{\alpha/2}$. So the confidence interval shrinks to the single point
+$E(y \mid x_0)$: with enough data the line is known exactly. The prediction interval tends to
+$E(y \mid x_0) \pm z_{\alpha/2}\sigma$, which does not shrink. However well the line is known,
+a new observation still carries its own error $\varepsilon_0$.
+\end{solution}
+
+\begin{problem}
+Show that $R^2$ is unchanged if every $y_i$ is replaced by $a + b y_i$ and every $x_i$ by
+$c + d x_i$, where $b \neq 0$ and $d \neq 0$. What happens to $\hat\beta_1$?
+\end{problem}
+
+\begin{solution}
+Write $u_i = c + d x_i$ and $v_i = a + b y_i$. Then $\bar u = c + d\bar x$, so
+$u_i - \bar u = d(x_i - \bar x)$, and similarly $v_i - \bar v = b(y_i - \bar y)$. Hence
+\[
+S_{uu} = d^2 S_{xx}, \qquad S_{vv} = b^2 S_{yy}, \qquad S_{uv} = bd\, S_{xy},
+\]
+and by Theorem~\ref{thm:r2-r},
+\[
+R^2_{\text{new}} = \frac{S_{uv}^2}{S_{uu} S_{vv}} = \frac{b^2 d^2 S_{xy}^2}{d^2 S_{xx}\, b^2 S_{yy}} = \frac{S_{xy}^2}{S_{xx} S_{yy}} = R^2 .
+\]
+The slope becomes $S_{uv}/S_{uu} = (b/d)\hat\beta_1$. Changing the units changes the slope
+but not how well the line fits. Measuring sales in thousands of units instead of units, for
+instance, divides $\hat\beta_1$ by $1000$ and leaves $R^2$ alone.
+\end{solution}
+
+
+
+
+
+
+\section{Multiple linear regression}
+
+\section{Selecting the Best Regression Model}
+
+\section{Multicollinearity}
+
+\section{Model adequacy checking}
+
+\section{Test for influential observations}
+
+
+\section{Transformation \& weighting to correct model inadequacies}
+
+\section{Dummy variables}
+
+\section{Polynomial regression}
+
+\section{Generalized linear models}
+
+\section{Non linear estimation}
+
+\section{Regression models with autocorrelated errors}
+
+\section{Measurement errors \& calibration problem}
+
+
+
+
+
+
+
+
+
+\section*{References}
+\addcontentsline{toc}{section}{References}
+
+\begin{enumerate}
+\item Draper, N.R., and Smith, H. (1998), \emph{Applied Regression Analysis} (3rd ed.), New York, Wiley.
+\item Montgomery, D.C., Peck, E.A., and Vining, G.G. (2001), \emph{Introduction to Linear Regression Analysis} (3rd ed.), Hoboken, NJ, Wiley.
+\end{enumerate}
+
+\end{document}
