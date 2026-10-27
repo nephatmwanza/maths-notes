@@ -4243,6 +4243,639 @@ pattern of the residuals as a whole, not only at the largest one.
 \end{solution}
 
 \section{Test for influential observations}
+A least-squares fit treats every observation alike in its criterion, but the observations
+do not have equal say in the result. A few points, usually ones at the edge of the region
+covered by the regressors, can determine the slope almost on their own. If they are sound,
+the model is still at their mercy; if they are wrong, so is the model. This section
+measures how much each observation drives the fit.
+
+Two ideas must be kept apart. An observation has high \textbf{leverage} if its regressor
+values are unusual, far from the bulk of the data in $x$-space. Leverage depends only on
+$\mathbf{X}$, not on $y$. An observation is \textbf{influential} if deleting it would change
+the fitted model substantially. High leverage gives a point the \emph{potential} to be
+influential; whether it is depends on where its response lies. Figure~\ref{fig:influence-types}
+shows the three cases.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\col/\num/\name/\verdict/\sx/\sy/\yb in {
+ 0/orange/1/{Outlier}/{line barely moves}/2.0/2.6/0.25,
+ 4.9/green/2/{High leverage}/{precision gained}/4.0/2.76/0.0,
+ 9.8/red/3/{Influential}/{line is dragged}/4.0/0.45/0.0} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.35,-1.05) rectangle (4.35,3.75);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,3.4) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.25,3.4) {\name};
+  \draw[-Stealth,gray] (0,0) -- (4.2,0);
+  \draw[-Stealth,gray] (0,0) -- (0,3.0);
+  % The bulk of the data, the same in each panel.
+  \foreach \p in {(0.3,0.5),(0.5,0.75),(0.7,0.6),(0.9,0.95),(1.1,0.85),(1.3,1.2),(1.5,1.05),(1.7,1.4)}
+    \fill[gray!70!black] \p circle (1.8pt);
+  % Line without the special point (dashed) and with it (solid).
+  \draw[-,dashed,gray!70!black] (0.1,0.42) -- (4.1,2.82);
+  \ifnum\num=1 \draw[-,thick,\col!60!black] (0.1,0.6) -- (4.1,2.85); \fi
+  \ifnum\num=2 \draw[-,thick,\col!60!black] (0.1,0.42) -- (4.1,2.82); \fi
+  \ifnum\num=3 \draw[-,thick,\col!60!black] (0.1,0.95) -- (4.1,0.65); \fi
+  \fill[\col!60!black] (\sx,\sy) circle (2.6pt);
+  \node[font=\scriptsize,text=\col!50!black] at (2.0,-0.65) {\verdict};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Leverage and influence: (1) an outlier with low leverage, (2) a high-leverage
+point on the trend, (3) a high-leverage point off the trend. The grey points are the same in
+each panel; the coloured point is the one in question. The dashed line is fitted without it, the solid line with it.}
+\label{fig:influence-types}
+\end{figure}
+
+In panel~1 the point has a large residual but sits in the middle of the $x$-range; it raises
+the line a little and leaves the slope almost unchanged. In panel~2 the point is far out in
+$x$ but lies on the trend of the others; it has high leverage, yet the fit is the same with
+or without it, and because it extends the range of $x$ it makes the slope \emph{more}
+precise. In panel~3 the point is far out in $x$ and off the trend. It pulls the line round
+towards itself, and since the line passes close to it, its own residual is small. This last
+point is the dangerous one, and it is the one that residual plots are worst at revealing.
+
+\subsection{Leverage}
+The leverages $h_{ii}$ are the diagonal entries of the hat matrix. By
+Theorem~\ref{thm:hat}, $0 \le h_{ii} \le 1$ and $\sum h_{ii} = p$, so the average leverage
+is $p/n$. The next result shows what $h_{ii}$ measures.
+
+\begin{thm}\label{thm:centred-leverage}
+Suppose the model has an intercept. Let $\mathbf{Z}$ be the $n \times k$ matrix of
+regressor values with each column centred at its mean, and let $\mathbf{z}_i^\top$ be its
+row $i$, the vector of deviations $x_{ij} - \bar x_j$. Then
+\[
+h_{ii} = \frac{1}{n} + \mathbf{z}_i^\top(\mathbf{Z}^\top\mathbf{Z})^{-1}\mathbf{z}_i .
+\]
+In particular $h_{ii} \ge 1/n$, with equality exactly when $\mathbf{x}_i$ is at the centroid
+$(\bar x_1, \dots, \bar x_k)$.
+\end{thm}
+
+\begin{proof}
+Subtracting $\bar x_j$ times the column of ones from column $j$ of $\mathbf{X}$ does not change
+the column space, so the matrix $\mathbf{W} = [\mathbf{1} \;\; \mathbf{Z}]$ has the same column
+space as $\mathbf{X}$. Projection onto a subspace does not depend on which basis is used to
+describe it, so $\mathbf{H}$ is also the hat matrix of $\mathbf{W}$. (Directly: $\mathbf{W} = \mathbf{XA}$
+for an invertible $\mathbf{A}$, and
+$\mathbf{W}(\mathbf{W}^\top\mathbf{W})^{-1}\mathbf{W}^\top = \mathbf{XA}\mathbf{A}^{-1}(\mathbf{X}^\top\mathbf{X})^{-1}(\mathbf{A}^\top)^{-1}\mathbf{A}^\top\mathbf{X}^\top = \mathbf{H}$.)
+The columns of $\mathbf{Z}$ add to zero, so $\mathbf{1}^\top\mathbf{Z} = \mathbf{0}^\top$ and
+\[
+\mathbf{W}^\top\mathbf{W} = \begin{bmatrix} n & \mathbf{0}^\top \\ \mathbf{0} & \mathbf{Z}^\top\mathbf{Z} \end{bmatrix},
+\qquad
+\mathbf{H} = \frac{1}{n}\mathbf{1}\mathbf{1}^\top + \mathbf{Z}(\mathbf{Z}^\top\mathbf{Z})^{-1}\mathbf{Z}^\top .
+\]
+Take the $(i,i)$ entry. $\mathbf{Z}^\top\mathbf{Z}$ is positive definite (it is invertible, and
+$\mathbf{v}^\top\mathbf{Z}^\top\mathbf{Z}\mathbf{v} = \|\mathbf{Zv}\|^2$), and so is its inverse,
+so the second term is $\ge 0$ and is zero only when $\mathbf{z}_i = \mathbf{0}$.
+\end{proof}
+
+So $h_{ii}$ is $1/n$ plus a measure of the distance of $\mathbf{x}_i$ from the centre of the
+data, a distance that takes account of the spread of each regressor and of the correlation
+between them. With one regressor, $\mathbf{Z}^\top\mathbf{Z} = S_{xx}$ and we recover
+$h_{ii} = 1/n + (x_i - \bar x)^2/S_{xx}$ (Example~\ref{exa:slr-leverage}). With two or more
+regressors, the points of equal leverage lie on ellipses (ellipsoids) centred at the
+centroid, so a point can have high leverage even when each of its coordinates, taken alone,
+is ordinary: it is the \emph{combination} that is unusual.
+
+The usual rule calls observation $i$ a \textbf{high-leverage point} if
+\[
+h_{ii} > \frac{2p}{n} ,
+\]
+twice the average. The rule needs $2p/n < 1$ to be of use, and is best used to pick out
+points for a closer look rather than as a test.
+
+\subsection{Cook's distance}
+The most direct measure of influence asks how far the estimates move when observation $i$
+is deleted. A natural scale for movements of $\hat{\boldsymbol\beta}$ comes from its
+confidence region.
+
+\begin{lem}[Joint confidence region]\label{lem:conf-region}
+Under A1--A4,
+\[
+\frac{(\hat{\boldsymbol\beta} - \boldsymbol\beta)^\top\mathbf{X}^\top\mathbf{X}(\hat{\boldsymbol\beta} - \boldsymbol\beta)}{p\,MS_{\mathrm{Res}}} \sim F_{p,\, n - p} ,
+\]
+so the set of $\boldsymbol\beta$ for which this quantity is at most $F_{\alpha, p, n - p}$ is a
+$100(1 - \alpha)\%$ confidence region for $\boldsymbol\beta$. It is an ellipsoid centred at
+$\hat{\boldsymbol\beta}$.
+\end{lem}
+
+\begin{proof}
+$\hat{\boldsymbol\beta} - \boldsymbol\beta = \mathbf{C}\mathbf{X}^\top\boldsymbol\varepsilon$, so
+$\mathbf{X}(\hat{\boldsymbol\beta} - \boldsymbol\beta) = \mathbf{H}\boldsymbol\varepsilon$ and the
+numerator is $\boldsymbol\varepsilon^\top\mathbf{H}^\top\mathbf{H}\boldsymbol\varepsilon = \boldsymbol\varepsilon^\top\mathbf{H}\boldsymbol\varepsilon$.
+$\mathbf{H}$ is symmetric and idempotent with trace $p$, and $\mathbf{H}(\mathbf{I} - \mathbf{H}) = \mathbf{0}$,
+so by Lemma~\ref{lem:idempotent-chisq} the numerator over $\sigma^2$ is $\chi^2_p$,
+independent of $SS_{\mathrm{Res}}/\sigma^2 = \boldsymbol\varepsilon^\top(\mathbf{I} - \mathbf{H})\boldsymbol\varepsilon/\sigma^2 \sim \chi^2_{n - p}$.
+By (F3) the ratio of each to its degrees of freedom is $F_{p, n - p}$.
+\end{proof}
+
+\begin{defn}
+\textbf{Cook's distance} for observation $i$ is
+\[
+D_i = \frac{(\hat{\boldsymbol\beta}_{(i)} - \hat{\boldsymbol\beta})^\top\mathbf{X}^\top\mathbf{X}(\hat{\boldsymbol\beta}_{(i)} - \hat{\boldsymbol\beta})}{p\,MS_{\mathrm{Res}}} ,
+\qquad i = 1, \dots, n .
+\]
+\end{defn}
+
+$D_i$ is the quantity of Lemma~\ref{lem:conf-region} with $\hat{\boldsymbol\beta}_{(i)}$ in place
+of $\boldsymbol\beta$: it says which confidence ellipsoid about $\hat{\boldsymbol\beta}$ the
+deleted estimate lands on. (It is not itself $F$-distributed, since $\hat{\boldsymbol\beta}_{(i)}$
+is not a fixed parameter; the comparison is a yardstick, not a test.) The median of
+$F_{p, n - p}$ is close to $1$ for most $p$ and $n$, so $D_i = 1$ means that deleting the point
+moves the estimate to the edge of a $50\%$ confidence region, a large move. The usual rule is
+to regard points with
+\[
+D_i > 1
+\]
+as influential.
+
+\begin{thm}\label{thm:cook}
+Suppose $h_{ii} < 1$. Then
+\[
+D_i = \frac{r_i^2}{p}\cdot\frac{h_{ii}}{1 - h_{ii}}
+= \frac{\|\hat{\mathbf{y}} - \hat{\mathbf{y}}_{(i)}\|^2}{p\,MS_{\mathrm{Res}}} ,
+\]
+where $\hat{\mathbf{y}}_{(i)} = \mathbf{X}\hat{\boldsymbol\beta}_{(i)}$ is the vector of all $n$
+fitted values from the fit without observation $i$.
+\end{thm}
+
+\begin{proof}
+The second form holds because
+$\mathbf{X}(\hat{\boldsymbol\beta} - \hat{\boldsymbol\beta}_{(i)}) = \hat{\mathbf{y}} - \hat{\mathbf{y}}_{(i)}$
+and $\mathbf{v}^\top\mathbf{X}^\top\mathbf{X}\mathbf{v} = \|\mathbf{Xv}\|^2$. For the first, by
+Theorem~\ref{thm:deletion}(ii), $\hat{\boldsymbol\beta} - \hat{\boldsymbol\beta}_{(i)} = \mathbf{C}\mathbf{x}_i e_i/(1 - h_{ii})$,
+so, using $\mathbf{C}\mathbf{X}^\top\mathbf{X}\mathbf{C} = \mathbf{C}$ and $\mathbf{x}_i^\top\mathbf{C}\mathbf{x}_i = h_{ii}$,
+\[
+(\hat{\boldsymbol\beta} - \hat{\boldsymbol\beta}_{(i)})^\top\mathbf{X}^\top\mathbf{X}(\hat{\boldsymbol\beta} - \hat{\boldsymbol\beta}_{(i)})
+= \frac{e_i^2\,\mathbf{x}_i^\top\mathbf{C}\mathbf{x}_i}{(1 - h_{ii})^2} = \frac{e_i^2 h_{ii}}{(1 - h_{ii})^2} .
+\]
+Divide by $p\,MS_{\mathrm{Res}}$ and recall $r_i^2 = e_i^2/\bigl(MS_{\mathrm{Res}}(1 - h_{ii})\bigr)$:
+\[
+D_i = \frac{e_i^2}{MS_{\mathrm{Res}}(1 - h_{ii})}\cdot\frac{h_{ii}}{p(1 - h_{ii})} = \frac{r_i^2}{p}\cdot\frac{h_{ii}}{1 - h_{ii}} . \qedhere
+\]
+\end{proof}
+
+The theorem is the formal statement of the three panels of
+Figure~\ref{fig:influence-types}. Cook's distance is a product of two factors: $r_i^2$, which
+measures how badly the point fits, and $h_{ii}/(1 - h_{ii})$, which grows without bound as
+$h_{ii} \to 1$ and measures how much leverage the point has. A large $D_i$ needs both, or an
+extreme amount of one. A point with zero residual has $D_i = 0$ whatever its leverage; a point
+with leverage $1/n$ at the centroid has $h_{ii}/(1 - h_{ii}) = 1/(n - 1)$ and so can have a
+large $D_i$ only with a very large residual.
+
+\subsection{DFFITS and DFBETAS}
+Cook's distance summarises the effect of a deletion on all of $\hat{\boldsymbol\beta}$ at once.
+Two further measures look at particular effects: on the fitted value at the deleted point,
+and on each coefficient separately. Both are scaled by the deleted estimate $S^2_{(i)}$, for
+the reason given in the discussion of R-student: a bad point should not be allowed to
+inflate the yardstick used to judge it.
+
+\begin{defn}
+\[
+\mathrm{DFFITS}_i = \frac{\hat y_i - \hat y_{(i)}}{\sqrt{S^2_{(i)}\,h_{ii}}} ,
+\qquad
+\mathrm{DFBETAS}_{j,i} = \frac{\hat\beta_j - \hat\beta_{j(i)}}{\sqrt{S^2_{(i)}\,C_{jj}}} ,
+\]
+where $\hat y_{(i)} = \mathbf{x}_i^\top\hat{\boldsymbol\beta}_{(i)}$ and $\hat\beta_{j(i)}$ is
+entry $j$ of $\hat{\boldsymbol\beta}_{(i)}$.
+\end{defn}
+
+$\mathrm{DFFITS}_i$ is the change in the fitted value at $\mathbf{x}_i$, in units of (an estimate
+of) the standard deviation of $\hat y_i$, which is $\sigma\sqrt{h_{ii}}$. Similarly
+$\mathrm{DFBETAS}_{j,i}$ is the change in $\hat\beta_j$, in units of its standard error. Both
+can be computed from the full fit.
+
+\begin{thm}\label{thm:dffits}
+Suppose $h_{ii} < 1$, and let $\mathbf{R} = \mathbf{C}\mathbf{X}^\top$, a $p \times n$ matrix with
+entries $\rho_{ji}$. Then
+\begin{enumerate}[label=(\roman*)]
+\item $\mathrm{DFFITS}_i = t_i\sqrt{\dfrac{h_{ii}}{1 - h_{ii}}}$;
+\item $\mathrm{DFBETAS}_{j,i} = \dfrac{\rho_{ji}}{\sqrt{C_{jj}}}\cdot\dfrac{t_i}{\sqrt{1 - h_{ii}}}$,
+and $\sum_{i=1}^n \rho_{ji}^2 = C_{jj}$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) By Theorem~\ref{thm:deletion}(iii), $\hat y_i - \hat y_{(i)} = (y_i - \hat y_{(i)}) - (y_i - \hat y_i)$
+$= e_i/(1 - h_{ii}) - e_i = h_{ii}e_i/(1 - h_{ii})$. So
+\begin{align*}
+\mathrm{DFFITS}_i &= \frac{h_{ii}e_i}{(1 - h_{ii})\sqrt{S^2_{(i)}h_{ii}}}
+= \frac{e_i}{\sqrt{S^2_{(i)}(1 - h_{ii})}}\cdot\sqrt{\frac{h_{ii}}{1 - h_{ii}}} \\
+&= t_i\sqrt{\frac{h_{ii}}{1 - h_{ii}}} .
+\end{align*}
+(ii) Column $i$ of $\mathbf{R}$ is $\mathbf{C}\mathbf{x}_i$, so by Theorem~\ref{thm:deletion}(ii),
+$\hat\beta_j - \hat\beta_{j(i)} = \rho_{ji}e_i/(1 - h_{ii})$. Hence
+\[
+\mathrm{DFBETAS}_{j,i} = \frac{\rho_{ji}}{\sqrt{C_{jj}}}\cdot\frac{e_i}{(1 - h_{ii})\sqrt{S^2_{(i)}}}
+= \frac{\rho_{ji}}{\sqrt{C_{jj}}}\cdot\frac{t_i}{\sqrt{1 - h_{ii}}} .
+\]
+Finally $\mathbf{R}\mathbf{R}^\top = \mathbf{C}\mathbf{X}^\top\mathbf{X}\mathbf{C} = \mathbf{C}$, whose
+$(j,j)$ entry is $\sum_i \rho_{ji}^2 = C_{jj}$.
+\end{proof}
+
+DFFITS has the same structure as Cook's distance, a residual times a leverage factor; indeed
+$\mathrm{DFFITS}_i^2 = p\,D_i\,MS_{\mathrm{Res}}/S^2_{(i)}$ (Problem~\ref{prob:dffits-cook}).
+The difference is that it uses R-student, which is not bounded, so DFFITS reacts more
+strongly to a gross outlier. In DFBETAS, the factor $\rho_{ji}/\sqrt{C_{jj}}$ is the share of
+observation $i$ in the estimate $\hat\beta_j = \sum_i \rho_{ji}y_i$: by part (ii) the squares of
+these shares add up to $1$ over $i$.
+
+The usual cut-offs, which allow for the fact that every measure shrinks as $n$ grows, are
+\[
+|\mathrm{DFFITS}_i| > 2\sqrt{p/n} ,
+\qquad
+|\mathrm{DFBETAS}_{j,i}| > 2/\sqrt{n} .
+\]
+
+\subsection{The effect on precision: COVRATIO}
+The measures so far look at the estimates. An observation can also matter through the
+\emph{precision} of the estimates: a sound point at high leverage reduces the variances of
+the coefficients (panel~2 of Figure~\ref{fig:influence-types}), while a wild point inflates
+$MS_{\mathrm{Res}}$ and so the standard errors. A single number for the precision of
+$\hat{\boldsymbol\beta}$ is the determinant of its estimated covariance matrix,
+$\det(MS_{\mathrm{Res}}\mathbf{C})$, the \emph{generalised variance}. It is proportional to the
+squared volume of the confidence ellipsoid of Lemma~\ref{lem:conf-region}.
+
+\begin{defn}
+\[
+\mathrm{COVRATIO}_i = \frac{\det\bigl(S^2_{(i)}(\mathbf{X}_{(i)}^\top\mathbf{X}_{(i)})^{-1}\bigr)}{\det\bigl(MS_{\mathrm{Res}}(\mathbf{X}^\top\mathbf{X})^{-1}\bigr)} .
+\]
+\end{defn}
+
+$\mathrm{COVRATIO}_i > 1$ means the estimates are less precise without observation $i$: the
+point improves precision. $\mathrm{COVRATIO}_i < 1$ means they are more precise without it: the
+point degrades precision. The computation needs one fact about determinants.
+
+\begin{lem}[Matrix determinant lemma]\label{lem:det}
+If $\mathbf{A}$ is an invertible $p \times p$ matrix and $\mathbf{u}$ a $p$-vector, then
+$\det(\mathbf{A} - \mathbf{u}\mathbf{u}^\top) = \det(\mathbf{A})\,(1 - \mathbf{u}^\top\mathbf{A}^{-1}\mathbf{u})$.
+\end{lem}
+
+\begin{proof}
+Factorise the $(p + 1) \times (p + 1)$ matrix
+$\mathbf{M} = \begin{bmatrix} \mathbf{A} & \mathbf{u} \\ \mathbf{u}^\top & 1 \end{bmatrix}$ in two
+ways, by eliminating below the top-left block and above the bottom-right entry:
+\begin{align*}
+\mathbf{M} &= \begin{bmatrix} \mathbf{I} & \mathbf{0} \\ \mathbf{u}^\top\mathbf{A}^{-1} & 1 \end{bmatrix}
+\begin{bmatrix} \mathbf{A} & \mathbf{u} \\ \mathbf{0}^\top & 1 - \mathbf{u}^\top\mathbf{A}^{-1}\mathbf{u} \end{bmatrix} , \\
+\mathbf{M} &= \begin{bmatrix} \mathbf{I} & \mathbf{u} \\ \mathbf{0}^\top & 1 \end{bmatrix}
+\begin{bmatrix} \mathbf{A} - \mathbf{u}\mathbf{u}^\top & \mathbf{0} \\ \mathbf{u}^\top & 1 \end{bmatrix} .
+\end{align*}
+Each factor is block triangular, and the determinant of a block-triangular matrix is the
+product of the determinants of its diagonal blocks. The first line gives
+$\det\mathbf{M} = \det(\mathbf{A})(1 - \mathbf{u}^\top\mathbf{A}^{-1}\mathbf{u})$ and the second
+$\det\mathbf{M} = \det(\mathbf{A} - \mathbf{u}\mathbf{u}^\top)$.
+\end{proof}
+
+\begin{thm}\label{thm:covratio}
+Suppose $h_{ii} < 1$. Then
+\[
+\mathrm{COVRATIO}_i = \left(\frac{S^2_{(i)}}{MS_{\mathrm{Res}}}\right)^p\frac{1}{1 - h_{ii}}
+= \left(\frac{n - p - r_i^2}{n - p - 1}\right)^p\frac{1}{1 - h_{ii}} .
+\]
+\end{thm}
+
+\begin{proof}
+For a $p \times p$ matrix, $\det(c\mathbf{B}) = c^p\det\mathbf{B}$ and
+$\det(\mathbf{B}^{-1}) = 1/\det\mathbf{B}$. By Lemma~\ref{lem:det} with
+$\mathbf{A} = \mathbf{X}^\top\mathbf{X}$ and $\mathbf{u} = \mathbf{x}_i$,
+$\det(\mathbf{X}_{(i)}^\top\mathbf{X}_{(i)}) = \det(\mathbf{X}^\top\mathbf{X} - \mathbf{x}_i\mathbf{x}_i^\top) = \det(\mathbf{X}^\top\mathbf{X})(1 - h_{ii})$.
+So
+\[
+\mathrm{COVRATIO}_i = \frac{(S^2_{(i)})^p\big/\bigl[\det(\mathbf{X}^\top\mathbf{X})(1 - h_{ii})\bigr]}{MS_{\mathrm{Res}}^p\big/\det(\mathbf{X}^\top\mathbf{X})} ,
+\]
+which is the first form. The second follows from
+$(n - p - 1)S^2_{(i)}/MS_{\mathrm{Res}} = n - p - r_i^2$, shown in the proof of
+Theorem~\ref{thm:rstudent}(iii).
+\end{proof}
+
+The two factors pull in opposite directions. High leverage makes $1/(1 - h_{ii})$ large,
+pushing COVRATIO above $1$: the point extends the design and sharpens the estimates. A large
+residual makes $S^2_{(i)}/MS_{\mathrm{Res}}$ small, pushing COVRATIO below $1$. The usual rule
+looks closer at observation $i$ if
+\[
+\mathrm{COVRATIO}_i > 1 + \frac{3p}{n} \quad\text{or}\quad \mathrm{COVRATIO}_i < 1 - \frac{3p}{n} ,
+\]
+the lower limit being of use only when $n > 3p$.
+
+\subsection{Applying the measures}
+\begin{center}
+\begin{tabular}{lll}
+Measure & What it measures & Flag if \\
+\hline
+$h_{ii}$ & remoteness in $x$-space & $h_{ii} > 2p/n$ \\
+$t_i$ & poor fit (outlier) & $|t_i| > t_{\alpha/(2n), n - p - 1}$ \\
+$D_i$ & movement of $\hat{\boldsymbol\beta}$ & $D_i > 1$ \\
+$\mathrm{DFFITS}_i$ & change in own fitted value & $|\mathrm{DFFITS}_i| > 2\sqrt{p/n}$ \\
+$\mathrm{DFBETAS}_{j,i}$ & change in $\hat\beta_j$ & $|\mathrm{DFBETAS}_{j,i}| > 2/\sqrt{n}$ \\
+$\mathrm{COVRATIO}_i$ & change in precision & outside $1 \pm 3p/n$ \\
+\end{tabular}
+\end{center}
+The cut-offs are rules of thumb, not tests, and different measures answer different
+questions: a point can move one coefficient a great deal and leave the others alone, so that
+DFBETAS flags it and Cook's distance does not. In practice all of them are computed, and any
+point that stands out on any of them is examined.
+
+\begin{exa}\label{exa:shops}
+A chain has eight branches. For each, the floor area $x$ (hundreds of m$^2$) and the
+average weekly sales $y$ (thousands of kwacha) are:
+\begin{center}
+\begin{tabular}{l|cccccccc}
+Branch & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\hline
+Area $x$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 20 \\
+Sales $y$ & 3 & 5 & 5 & 8 & 8 & 9 & 11 & 9 \\
+\end{tabular}
+\end{center}
+Branch~8 is a large warehouse store on the edge of town. Fit a straight line and examine the
+influence of each branch.
+\end{exa}
+
+\begin{solution}
+\emph{The fit.} $\sum x_i = 48$, $\sum y_i = 58$, so $\bar x = 6$ and $\bar y = 7.25$. Then
+\begin{align*}
+S_{xx} &= \sum(x_i - 6)^2 = 25 + 16 + 9 + 4 + 1 + 0 + 1 + 196 = 252, \\
+S_{xy} &= \sum(x_i - 6)y_i = -15 - 20 - 15 - 16 - 8 + 0 + 11 + 126 = 63,
+\end{align*}
+so $\hat\beta_1 = 63/252 = 0.25$, $\hat\beta_0 = 7.25 - 0.25 \times 6 = 5.75$, and
+\[
+\hat y = 5.75 + 0.25x .
+\]
+The residuals are $y_i - 5.75 - 0.25x_i$, and $SS_{\mathrm{Res}} = 33.75$, so
+$MS_{\mathrm{Res}} = 33.75/6 = 5.625$. Also $SS_T = 49.5$ and $R^2 = 0.318$.
+
+\emph{Leverage and residuals}, with $h_{ii} = 1/8 + (x_i - 6)^2/252$:
+\begin{center}
+\begin{tabular}{c|rrrrr}
+Branch & $e_i$ & $h_{ii}$ & $r_i$ & $S^2_{(i)}$ & $t_i$ \\
+\hline
+1 & $-3.00$ & 0.224 & $-1.436$ & 4.430 & $-1.618$ \\
+2 & $-1.25$ & 0.188 & $-0.585$ & 6.365 & $-0.550$ \\
+3 & $-1.50$ & 0.161 & $-0.690$ & 6.214 & $-0.657$ \\
+4 & $1.25$ & 0.141 & $0.569$ & 6.386 & $0.534$ \\
+5 & $1.00$ & 0.129 & $0.452$ & 6.520 & $0.420$ \\
+6 & $1.75$ & 0.125 & $0.789$ & 6.050 & $0.761$ \\
+7 & $3.50$ & 0.129 & $1.581$ & 3.937 & $1.890$ \\
+8 & $-1.75$ & 0.903 & $-2.366$ & 0.450 & $-8.367$ \\
+\end{tabular}
+\end{center}
+For branch~8 exactly, $h_{88} = 1/8 + 196/252 = 1/8 + 7/9 = 65/72$, so $1 - h_{88} = 7/72$, and
+\begin{align*}
+r_8^2 &= \frac{1.75^2}{5.625 \times 7/72} = \frac{3.0625}{0.546875} = 5.6, \\
+S^2_{(8)} &= \frac{33.75 - 3.0625/(7/72)}{5} = \frac{33.75 - 31.5}{5} = 0.45, \\
+t_8 &= \frac{-1.75}{\sqrt{0.45 \times 7/72}} = \frac{-1.75}{0.2092} = -8.367 .
+\end{align*}
+Branch~8 has by far the highest leverage, $0.903$ against the cut-off $2p/n = 0.5$. Its raw
+residual, $-1.75$, is smaller than those of branches~1 and~7, and a plot of residuals against
+fitted values would not single it out. Its R-student residual tells a different story:
+$|t_8| = 8.37$ exceeds the Bonferroni value $t_{0.05/16,\,5} = 4.53$.
+
+\emph{Influence measures.} With $p = 2$, $n = 8$, the cut-offs are $D_i > 1$,
+$|\mathrm{DFFITS}_i| > 2\sqrt{2/8} = 1$, $|\mathrm{DFBETAS}_{j,i}| > 2/\sqrt8 = 0.707$ and
+COVRATIO outside $(0.25, 1.75)$. For branch~8, by Theorems~\ref{thm:cook}, \ref{thm:dffits}
+and~\ref{thm:covratio},
+\begin{align*}
+D_8 &= \frac{5.6}{2}\cdot\frac{65/72}{7/72} = 2.8 \times \frac{65}{7} = 26, \\
+\mathrm{DFFITS}_8 &= -8.367\sqrt{65/7} = -8.367 \times 3.047 = -25.5, \\
+\mathrm{COVRATIO}_8 &= \left(\frac{0.45}{5.625}\right)^2\frac{72}{7} = 0.0064 \times 10.29 = 0.066 .
+\end{align*}
+For all eight branches:
+\begin{center}
+\begin{tabular}{c|rrrrr}
+Branch & $D_i$ & DFFITS & DFBETAS$_0$ & DFBETAS$_1$ & COVRATIO \\
+\hline
+1 & 0.298 & $-0.870$ & $-0.866$ & $0.579$ & 0.799 \\
+2 & 0.040 & $-0.265$ & $-0.260$ & $0.154$ & 1.578 \\
+3 & 0.046 & $-0.287$ & $-0.272$ & $0.136$ & 1.454 \\
+4 & 0.027 & $0.216$ & $0.192$ & $-0.073$ & 1.500 \\
+5 & 0.015 & $0.162$ & $0.129$ & $-0.028$ & 1.543 \\
+6 & 0.044 & $0.288$ & $0.196$ & $0.000$ & 1.322 \\
+7 & 0.185 & $0.727$ & $0.396$ & $0.128$ & 0.563 \\
+8 & 26.0 & $-25.5$ & $10.80$ & $-23.66$ & 0.066 \\
+\end{tabular}
+\end{center}
+Branch~8 is flagged by every measure, and overwhelmingly: $D_8 = 26$ is twenty-six times the
+cut-off, and its DFBETAS for the slope says that deleting it changes $\hat\beta_1$ by almost
+$24$ standard errors. The only other flag is a mild one, branch~1's DFBETAS for the intercept
+($-0.87$); branch~1 is the point at the far left, and has the largest residual among the
+others.
+
+\emph{The fit without branch~8.} The other seven give $\bar x = 4$, $\bar y = 7$,
+$S_{xx} = 28$, $S_{xy} = 35$, so
+\[
+\hat y = 2 + 1.25x ,
+\]
+with $SS_{\mathrm{Res}} = 2.25$ on $5$ degrees of freedom (which is $5S^2_{(8)}$, as it should be)
+and $R^2 = 0.951$. The slope is five times as large. This agrees with the deletion
+formula: in simple regression, deleting observation $i$ changes the slope by
+$(x_i - \bar x)e_i/\bigl(S_{xx}(1 - h_{ii})\bigr)$ (Problem~\ref{prob:slope-change}), here
+\[
+\frac{14 \times (-1.75)}{252 \times 7/72} = \frac{-24.5}{24.5} = -1 ,
+\]
+and indeed $0.25 - 1.25 = -1$.
+
+The two lines are drawn in Figure~\ref{fig:shops}. The seven ordinary branches lie close to
+a line of slope $1.25$; the warehouse store, far to the right, sells much less per square
+metre, and on its own it flattens the fitted line until it fits none of the branches well.
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.32cm,y=0.2cm]
+\draw[-Stealth] (0,0) -- (22,0) node[right] {\small $x$};
+\draw[-Stealth] (0,0) -- (0,29) node[above] {\small $y$};
+\foreach \t in {5,10,15,20} \draw[-] (\t,0.3) -- (\t,-0.3) node[below] {\scriptsize $\t$};
+\foreach \t in {5,10,15,20,25} \draw[-] (0.15,\t) -- (-0.15,\t) node[left] {\scriptsize $\t$};
+\draw[-,thick,red!70!black] (0,5.75) -- (21,11.0) node[right,font=\small] {$\hat y = 5.75 + 0.25x$};
+\draw[-,thick,dashed,blue] (0,2) -- (21,28.25) node[right,font=\small] {$\hat y = 2 + 1.25x$};
+\foreach \p in {(1,3),(2,5),(3,5),(4,8),(5,8),(6,9),(7,11)} \fill[blue] \p circle (2.4pt);
+\fill[red!70!black] (20,9) circle (3pt) node[below right,font=\small] {branch 8};
+\end{tikzpicture}
+\caption{The branch data of Example~\ref{exa:shops}. Solid: the fit to all eight branches.
+Dashed: the fit without branch~8.}
+\label{fig:shops}
+\end{figure}
+
+\subsection{What to do about influential observations}
+Influence diagnostics locate the points that drive the fit; they do not say what to do with
+them. The first step is always to check the data: a point that is both influential and wrong
+should be corrected or removed. Beyond that:
+\begin{enumerate}[label=(\roman*)]
+\item A sound influential point may show that the model is inadequate. In
+Example~\ref{exa:shops}, the warehouse store may genuinely behave differently, and the
+right model for the chain may need a regressor for the type of store, or a curve that
+flattens at large areas. One store at $x = 20$ cannot tell these apart.
+\item If the point is sound but different in kind, the honest course may be to restrict the
+model to the range where it is supported, here branches of up to $700$\,m$^2$, and say so.
+\item Never delete a point simply because it is influential. Report the fit with and without
+it. If the conclusions agree, the point does not matter; if they differ, as here, the
+data cannot settle the question and more observations are needed in the gap.
+\end{enumerate}
+A design lesson follows too. A single point far from the others is a weakness in the data, and
+when the $x$ values can be chosen they should be spread so that no one observation carries
+the estimate. Methods of \emph{robust regression}, which limit the weight any one point can
+have, exist for data in which some influential points are unavoidable.
+
+\begin{remark}[Masking]
+All the measures of this section delete one observation at a time. If two bad points sit
+together, deleting either leaves the other to hold the fit in place, and neither looks
+influential: each \emph{masks} the other (Problem~\ref{prob:masking}). Plots of the data, and
+of the leverages, remain essential, and groups of suspect points can be deleted together.
+\end{remark}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:crop-infl}
+For the crop data of Example~\ref{exa:crop}, using the residuals and leverages of
+Example~\ref{exa:crop-scaled}:
+\begin{enumerate}[label=(\alph*)]
+\item compute Cook's distance, DFFITS and COVRATIO for each plot;
+\item which plots have high leverage? Which are influential? Explain the difference for plot~6.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Here $p = 3$, $n = 6$, $n - p = 3$, and from Example~\ref{exa:crop-scaled} we have $r_i$, $t_i$,
+$S^2_{(i)}$ and $h_{ii}$. For plot~2, exactly, $r_2^2 = 189/104$ and $h_{22}/(1 - h_{22}) = 37/26$, so
+\[
+D_2 = \frac{189}{3 \times 104}\cdot\frac{37}{26} = \frac{63}{104}\cdot\frac{37}{26} = \frac{2331}{2704} = 0.862 ,
+\]
+\[
+\mathrm{DFFITS}_2 = 1.753\sqrt{37/26} = 1.753 \times 1.193 = 2.091 ,
+\]
+\[
+\mathrm{COVRATIO}_2 = \left(\frac{0.788}{1.333}\right)^3\frac{63}{26} = 0.2068 \times 2.423 = 0.501 .
+\]
+In full:
+\begin{center}
+\begin{tabular}{c|rrrr}
+Plot & $h_{ii}$ & $D_i$ & DFFITS & COVRATIO \\
+\hline
+1 & 0.421 & 0.313 & $-1.050$ & 1.070 \\
+2 & 0.587 & 0.862 & $2.091$ & 0.501 \\
+3 & 0.397 & 0.273 & $0.965$ & 1.123 \\
+4 & 0.230 & 0.097 & $-0.536$ & 1.350 \\
+5 & 0.587 & 0 & 0 & 8.178 \\
+6 & 0.778 & 0 & 0 & 15.19 \\
+\end{tabular}
+\end{center}
+For plots~5 and~6, $e_i = 0$, so $S^2_{(i)} = 4/2 = 2$ and
+$\mathrm{COVRATIO}_6 = (2/1.333)^3/(2/9) = 3.375 \times 4.5 = 15.19$.
+
+(b) The leverage cut-off is $2p/n = 1$, which no point can exceed: with $p = 3$ and only
+$n = 6$, every point carries a large share of the fit, and the rule is useless. Relative to
+the average $p/n = 0.5$, plots~2, 5 and~6 stand out. No $D_i$ exceeds $1$, but plot~2 comes
+close, and $\mathrm{DFFITS}_2 = 2.09$ exceeds $2\sqrt{3/6} = 1.41$. Plot~2 is the most
+influential observation.
+
+Plot~6 has the highest leverage of all but no influence on the estimates: the plane passes
+exactly through it, so deleting it changes nothing ($D_6 = 0$). Its COVRATIO of $15.2$ shows
+what it does do: without it the generalised variance of the estimates would be fifteen times
+larger. It is a high-leverage point that lies on the trend, panel~2 of
+Figure~\ref{fig:influence-types}, and it is the most valuable observation in the data.
+\end{solution}
+
+\begin{problem}\label{prob:slope-change}
+In simple linear regression, show that deleting observation $i$ changes the estimates by
+\begin{align*}
+\hat\beta_1 - \hat\beta_{1(i)} &= \frac{(x_i - \bar x)\,e_i}{S_{xx}(1 - h_{ii})} , \\
+\hat\beta_0 - \hat\beta_{0(i)} &= \frac{e_i}{1 - h_{ii}}\left(\frac{1}{n} - \frac{\bar x(x_i - \bar x)}{S_{xx}}\right) .
+\end{align*}
+Deduce that an observation at $x_i = \bar x$ cannot change the slope, however large its
+residual.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:deletion}(ii), $\hat{\boldsymbol\beta} - \hat{\boldsymbol\beta}_{(i)} = \mathbf{C}\mathbf{x}_i e_i/(1 - h_{ii})$.
+From Example~\ref{exa:slr-matrix}, with $\sum x_j^2 = S_{xx} + n\bar x^2$,
+\[
+\mathbf{C}\mathbf{x}_i = \frac{1}{nS_{xx}}\begin{bmatrix} \sum x_j^2 - n\bar x x_i \\ -n\bar x + n x_i \end{bmatrix}
+= \begin{bmatrix} \dfrac{1}{n} - \dfrac{\bar x(x_i - \bar x)}{S_{xx}} \\[2mm] \dfrac{x_i - \bar x}{S_{xx}} \end{bmatrix} ,
+\]
+since $\sum x_j^2 - n\bar x x_i = S_{xx} - n\bar x(x_i - \bar x)$. Multiply by $e_i/(1 - h_{ii})$.
+At $x_i = \bar x$ the slope change is $0$; the point moves the line up or down, parallel to
+itself, by $e_i/(n(1 - h_{ii})) = e_i/(n - 1)$, since $h_{ii} = 1/n$ there. This is panel~1 of
+Figure~\ref{fig:influence-types}. The further $x_i$ is from $\bar x$, the larger both factors
+$x_i - \bar x$ and $1/(1 - h_{ii})$ become.
+\end{solution}
+
+\begin{problem}\label{prob:dffits-cook}
+Show that $\mathrm{DFFITS}_i^2 = p\,D_i\,MS_{\mathrm{Res}}/S^2_{(i)}$. Then, for the mistyped
+yield data of Example~\ref{exa:yield-outlier}, compute $D_4$ and $\mathrm{DFFITS}_4$
+and explain why the two measures disagree about observation~4.
+\end{problem}
+
+\begin{solution}
+By Theorems~\ref{thm:cook} and~\ref{thm:dffits},
+\[
+\frac{\mathrm{DFFITS}_i^2}{p\,D_i} = \frac{t_i^2\,h_{ii}/(1 - h_{ii})}{r_i^2\,h_{ii}/(1 - h_{ii})}
+= \frac{t_i^2}{r_i^2} = \frac{e_i^2/\bigl(S^2_{(i)}(1 - h_{ii})\bigr)}{e_i^2/\bigl(MS_{\mathrm{Res}}(1 - h_{ii})\bigr)} = \frac{MS_{\mathrm{Res}}}{S^2_{(i)}} .
+\]
+For observation~4 of Example~\ref{exa:yield-outlier}, $r_4 = 1.989$, $t_4 = 16.39$ and
+$h_{44} = 0.181$, so $h_{44}/(1 - h_{44}) = 0.221$, and with $p = 2$,
+\[
+D_4 = \frac{1.989^2}{2} \times 0.221 = 0.437, \qquad
+\mathrm{DFFITS}_4 = 16.39 \times \sqrt{0.221} = 7.70 .
+\]
+Cook's distance is well below $1$; DFFITS is nearly seven times its cut-off
+$2\sqrt{2/6} = 1.15$. They disagree because $D_i$ is built on the studentized residual, which
+here cannot exceed $\sqrt{n - p} = 2$, while DFFITS is built on R-student, which has no such
+bound. The ratio $MS_{\mathrm{Res}}/S^2_{(4)} = 25/0.368 = 68$ is exactly the factor by which the
+bad value has inflated the residual mean square. Observation~4 is near the middle of the
+$x$-range, so it has little leverage and moves the slope only moderately, which is what $D_4$
+reports; but it is a gross outlier, which is what DFFITS reports.
+\end{solution}
+
+\begin{problem}\label{prob:masking}
+Suppose a ninth branch, identical to branch~8 ($x = 20$, $y = 9$), is added to the data of
+Example~\ref{exa:shops}. The refitted line is $\hat y = 5.94 + 0.199x$, and for each of the two
+large stores $h_{ii} = 0.474$, $r_i = -0.565$, $D_i = 0.144$, $\mathrm{DFFITS}_i = -0.508$.
+\begin{enumerate}[label=(\alph*)]
+\item Which cut-offs do the two stores exceed?
+\item Explain why deleting one of them changes so little, and what would show the
+problem.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) With $n = 9$, $p = 2$: $2p/n = 0.444$, so both have (just) high leverage; but
+$D_i = 0.144 < 1$ and $|\mathrm{DFFITS}_i| = 0.508 < 2\sqrt{2/9} = 0.943$. On the deletion
+measures neither is influential.
+
+(b) Deleting one large store leaves the other at the same point, and it holds the line almost
+exactly where it was: the fit to the remaining eight is the fit of Example~\ref{exa:shops},
+$\hat y = 5.75 + 0.25x$, little different from $5.94 + 0.199x$. Each store masks the other.
+Deleting both together gives $\hat y = 2 + 1.25x$, the dramatic change of the example. The
+problem is plain in a scatter plot, and in the leverages: two points share a leverage of
+almost $0.95$ out of a total of $p = 2$. Deleting the pair, and computing the analogue of
+Cook's distance for the pair, would reveal it.
+\end{solution}
+
+\begin{problem}\label{prob:leverage-design}
+\begin{enumerate}[label=(\alph*)]
+\item In simple linear regression with an intercept, show that $\sum_i (h_{ii} - 1/n) = 1$,
+and hence that at most one observation can have $h_{ii} - 1/n \ge 1/2$.
+\item Five values of $x$ are to be chosen in $[0, 4]$. Compare the leverages of the designs
+$0, 1, 2, 3, 4$ and $0, 0, 0, 0, 4$. Which is safer against a single faulty observation, and why?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) By Example~\ref{exa:slr-leverage}, $h_{ii} - 1/n = (x_i - \bar x)^2/S_{xx}$, and these add
+to $S_{xx}/S_{xx} = 1$. They are all non-negative, so two of them cannot both be at least $1/2$
+unless they are exactly $1/2$ each and the rest are zero.
+
+(b) For $0, 1, 2, 3, 4$: $\bar x = 2$, $S_{xx} = 10$, and $h_{ii} = 0.2 + (x_i - 2)^2/10$, which is
+$0.6, 0.3, 0.2, 0.3, 0.6$. For $0, 0, 0, 0, 4$: $\bar x = 0.8$, $S_{xx} = 4(0.64) + 3.2^2 = 12.8$, and
+$h_{ii} = 0.2 + 0.64/12.8 = 0.25$ for the four points at $0$, but
+$h_{55} = 0.2 + 10.24/12.8 = 1$ for the point at $4$. In the second design the single
+observation at $x = 4$ alone determines the slope: the line must pass through it
+(Problem~\ref{prob:hii-one}), its residual is always zero, and an error in it cannot be
+detected at all. The first design spreads the leverage, so every observation is checked by the
+others. (The second design does have a smaller variance for $\hat\beta_1$,
+$\sigma^2/12.8$ against $\sigma^2/10$, but only by trusting one observation completely; it also
+gives no way of seeing whether the relationship is a straight line.)
+\end{solution}
 
 \section{Transformation \& weighting to correct model inadequacies}
 
