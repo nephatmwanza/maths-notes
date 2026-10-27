@@ -4878,6 +4878,699 @@ gives no way of seeing whether the relationship is a straight line.)
 \end{solution}
 
 \section{Transformation \& weighting to correct model inadequacies}
+The residual analysis of Section~4 diagnoses two common failures: a variance that is not
+constant, and a relationship that is not a straight line. This section gives the two
+standard remedies. The first is to \emph{transform} the response, a regressor, or both, so
+that on the new scale the assumptions hold. The second, for non-constant variance whose form
+is known, is to keep the original scale and fit by \emph{weighted} least squares, giving each
+observation a say in proportion to its precision.
+
+\subsection{Variance-stabilizing transformations}
+Non-constant variance usually arises because the variance of $y$ is a function of its mean.
+Counts have variance equal to their mean; measurements subject to a percentage error have a
+standard deviation proportional to the mean; proportions have variance
+$\pi(1 - \pi)/n$. In each case the remedy is a function $g$ such that $g(y)$ has
+(approximately) constant variance. The tool for finding it is the following approximation.
+
+\begin{lem}[Delta method]\label{lem:delta}
+Let $y$ have mean $\mu$ and small variance $\sigma^2(\mu)$, and let $g$ be differentiable at
+$\mu$. Then, approximately,
+\[
+\operatorname{Var}\bigl(g(y)\bigr) \approx g'(\mu)^2\,\sigma^2(\mu) .
+\]
+\end{lem}
+
+\begin{proof}[Derivation]
+By Taylor's theorem, $g(y) = g(\mu) + g'(\mu)(y - \mu) + R$, where the remainder $R$ is of
+order $(y - \mu)^2$. When $y$ stays close to $\mu$ the remainder is negligible, and
+$g(y) \approx g(\mu) + g'(\mu)(y - \mu)$. The right side is a linear function of $y$, with
+variance $g'(\mu)^2\operatorname{Var}(y)$.
+\end{proof}
+
+To make $\operatorname{Var}(g(y))$ constant we need $g'(\mu) \propto 1/\sigma(\mu)$, that is,
+\[
+g(\mu) = \int \frac{d\mu}{\sigma(\mu)} .
+\]
+
+\begin{thm}\label{thm:stabilize}
+If the standard deviation of $y$ is proportional to a power of its mean, $\sigma(\mu) \propto \mu^a$,
+then $g(y) = y^{1 - a}$ for $a \neq 1$, and $g(y) = \ln y$ for $a = 1$, has approximately constant
+variance. If $y$ is a binomial proportion, with $\sigma^2(\pi) = \pi(1 - \pi)/n$, then
+$g(y) = \arcsin\sqrt{y}$ has approximately constant variance $1/(4n)$.
+\end{thm}
+
+\begin{proof}
+With $\sigma(\mu) = c\mu^a$, $\int \mu^{-a}\,d\mu = \mu^{1 - a}/(1 - a)$ for $a \neq 1$ and
+$\ln\mu$ for $a = 1$; constant multiples do not matter. Check by Lemma~\ref{lem:delta}: for
+$g(y) = y^{1-a}$, $g'(\mu)^2\sigma^2(\mu) = (1 - a)^2\mu^{-2a}c^2\mu^{2a} = (1 - a)^2c^2$, and for
+$g = \ln$, $\mu^{-2}c^2\mu^2 = c^2$, both free of $\mu$.
+
+For a proportion, let $g(\pi) = \arcsin\sqrt\pi$. By the chain rule
+\[
+g'(\pi) = \frac{1}{\sqrt{1 - \pi}}\cdot\frac{1}{2\sqrt\pi} = \frac{1}{2\sqrt{\pi(1 - \pi)}} ,
+\]
+so $g'(\pi)^2\sigma^2(\pi) = \dfrac{1}{4\pi(1 - \pi)}\cdot\dfrac{\pi(1 - \pi)}{n} = \dfrac{1}{4n}$.
+\end{proof}
+
+The common cases are:
+\begin{center}
+\begin{tabular}{lll}
+Relation of $\sigma^2$ to $E(y)$ & Typical data & Transformation \\
+\hline
+$\sigma^2 \propto$ constant & & none \\
+$\sigma^2 \propto E(y)$ & counts (Poisson) & $\sqrt{y}$ \\
+$\sigma^2 \propto E(y)(1 - E(y))$ & proportions & $\arcsin\sqrt{y}$ \\
+$\sigma^2 \propto [E(y)]^2$ & percentage errors & $\ln y$ \\
+$\sigma^2 \propto [E(y)]^3$ & & $y^{-1/2}$ \\
+$\sigma^2 \propto [E(y)]^4$ & & $y^{-1}$ \\
+\end{tabular}
+\end{center}
+The strength of the transformation increases down the table. When the response varies over
+less than a factor of about two or three, the transformations hardly change anything; when
+$y_{\max}/y_{\min}$ is large, they matter a great deal. The form of $\sigma^2(\mu)$ may be known
+from the nature of the data, or it may be suggested by the funnel in a plot of residuals
+against fitted values (Figure~\ref{fig:resid-patterns}).
+
+\begin{remark}
+A model fitted to $g(y)$ predicts $g(y)$. Converting back to the original scale needs care.
+Because $g$ is monotone, an interval for $g(y)$ converts to an interval for $y$ by applying
+$g^{-1}$ to its end points, and a prediction interval keeps its probability. But
+$g^{-1}\bigl(\widehat{g(y)}\bigr)$ is not an estimate of the \emph{mean} of $y$: for
+$g = \ln$, $E(\ln y) \neq \ln E(y)$. If $\ln y$ is normal with mean $m$ and variance $s^2$,
+then $e^m$ is the \emph{median} of $y$, and its mean is $e^{m + s^2/2}$, somewhat larger.
+\end{remark}
+
+\subsection{Transformations to linearize the model}
+A curved relationship can often be made straight. The models in Figure~\ref{fig:linearizable}
+are non-linear in $x$, and some are non-linear in the parameters, but each becomes a straight
+line after transforming $y$, $x$ or both.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\py/\col/\num/\name/\eqn/\todo/\curve in {
+ 0/0/blue/1/{Exponential}/{$y = \beta_0 e^{\beta_1 x}$}/{plot $\ln y$ against $x$}/{plot[domain=0.1:3.8,samples=40,smooth] (\x,{0.3*exp(0.55*\x)})},
+ 5.3/0/orange/2/{Power}/{$y = \beta_0 x^{\beta_1}$}/{plot $\ln y$ against $\ln x$}/{plot[domain=0.05:3.9,samples=40,smooth] (\x,{1.2*sqrt(\x)})},
+ 0/-4.8/green/3/{Reciprocal}/{$y = \beta_0 + \beta_1/x$}/{plot $y$ against $1/x$}/{plot[domain=0.4:3.9,samples=40,smooth] (\x,{2.6-0.7/\x})},
+ 5.3/-4.8/red/4/{Logarithmic}/{$y = \beta_0 + \beta_1\ln x$}/{plot $y$ against $\ln x$}/{plot[domain=0.3:3.9,samples=40,smooth] (\x,{1.0+0.75*ln(\x)})}} {
+ \begin{scope}[shift={(\px,\py)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.4,-1.35) rectangle (4.6,3.2);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (-0.05,2.85) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.2,2.85) {\name};
+  \node[font=\scriptsize,text=\col!50!black] at (2.1,-0.45) {\eqn};
+  \draw[-Stealth,gray] (0,0) -- (4.2,0);
+  \draw[-Stealth,gray] (0,0) -- (0,2.5);
+  \draw[-,thick,\col!60!black] \curve;
+  \node[font=\scriptsize,text=\col!50!black] at (2.1,-0.95) {\todo};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Four curves that become straight lines after a transformation. Each panel shows the
+model, the shape of $y$ against $x$ for a typical choice of parameters, and the plot that is
+linear.}
+\label{fig:linearizable}
+\end{figure}
+
+For the exponential model, $\ln y = \ln\beta_0 + \beta_1 x$, a straight line in $x$ with
+intercept $\beta_0' = \ln\beta_0$. For the power model, $\ln y = \ln\beta_0 + \beta_1\ln x$.
+The reciprocal and logarithmic models are already linear in the parameters, and need only the
+regressor $x$ to be replaced by $x' = 1/x$ or $x' = \ln x$. A reciprocal model has a horizontal
+asymptote, $y \to \beta_0$ as $x \to \infty$, and suits a response that rises and levels off.
+
+The error term needs thought. Fitting $\ln y = \beta_0' + \beta_1 x + \varepsilon'$ by least squares
+assumes that the errors are additive, constant-variance and normal \emph{on the log scale}, so
+that the original model is
+\[
+y = \beta_0 e^{\beta_1 x}\varepsilon, \qquad \varepsilon = e^{\varepsilon'} ,
+\]
+with a \emph{multiplicative} error. That is often realistic: a growth process with errors of a
+roughly constant percentage. If instead the errors are additive on the original scale,
+$y = \beta_0 e^{\beta_1 x} + \varepsilon$, then taking logs destroys the constant variance, and the
+model should be fitted by non-linear least squares, a subject of a later section. The residual
+plots of the transformed fit show which description fits the data.
+
+\begin{exa}\label{exa:catalyst-recip}
+In Example~\ref{exa:catalyst-lof} the straight line failed the lack-of-fit test, the yield
+rising with catalyst concentration and then levelling off. Fit $y = \beta_0 + \beta_1(1/x) + \varepsilon$
+and test it for lack of fit.
+\end{exa}
+
+\begin{solution}
+Let $z = 1/x$, which takes the values $1$, $0.5$, $0.3333$, $0.25$, $0.2$, each twice. Then
+$\bar z = 2(2.2833)/10 = 0.45667$, and
+\[
+S_{zz} = \sum(z_i - \bar z)^2 = 0.84178, \qquad
+S_{zy} = \sum(z_i - \bar z)y_i = -6.7800 ,
+\]
+so $\hat\beta_1 = -6.7800/0.84178 = -8.0544$ and $\hat\beta_0 = 8.7 + 8.0544 \times 0.45667 = 12.378$:
+\[
+\hat y = 12.378 - \frac{8.054}{x} .
+\]
+The fitted values at $x = 1, \dots, 5$ are $4.32$, $8.35$, $9.69$, $10.36$, $10.77$, against group means
+$4.5$, $7.5$, $10.5$, $10.5$, $10.5$. Now $SS_R = \hat\beta_1 S_{zy} = 54.61$, so
+$SS_{\mathrm{Res}} = 60.1 - 54.61 = 5.49$, and with $SS_{\mathrm{PE}} = 2.5$ as before (it does not
+depend on the model), $SS_{\mathrm{LOF}} = 2.99$ on $3$ degrees of freedom:
+\[
+F_0 = \frac{2.99/3}{2.5/5} = \frac{0.997}{0.5} = 1.99 < F_{0.05,3,5} = 5.41 \quad (P = 0.23) .
+\]
+There is no longer evidence of lack of fit. $R^2$ has risen from $0.749$ to $0.909$, with the
+same number of parameters, and $MS_{\mathrm{Res}} = 5.49/8 = 0.69$ is now close to the pure-error
+estimate $0.5$ of $\sigma^2$. The fitted curve levels off at $\hat\beta_0 = 12.4$\,g, the estimated
+yield at very high concentrations.
+\end{solution}
+
+\begin{exa}\label{exa:bacteria}
+The count $y$ of a bacterial culture (thousands of cells per ml) was recorded hourly:
+\begin{center}
+\begin{tabular}{l|cccccccc}
+Hour $t$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\
+\hline
+Count $y$ & 10 & 17 & 25 & 32 & 48 & 70 & 117 & 164 \\
+\end{tabular}
+\end{center}
+Fit a suitable model and predict the count at $t = 8$.
+\end{exa}
+
+\begin{solution}
+\emph{A straight line first.} Least squares gives $\hat y = -11.67 + 20.58t$, with $R^2 = 0.861$. The
+residuals,
+\[
+21.7,\; 8.1,\; -4.5,\; -18.1,\; -22.7,\; -21.3,\; 5.2,\; 31.6 ,
+\]
+are positive at both ends and negative in the middle: the curvature pattern of
+Figure~\ref{fig:resid-patterns}. The residuals also grow in size with the fitted value. A
+culture grows by a roughly constant percentage each hour, which suggests the exponential model
+with multiplicative error, $y = \beta_0 e^{\beta_1 t}\varepsilon$.
+
+\emph{The log model.} Let $y' = \ln y$:
+\begin{center}
+\begin{tabular}{l|cccccccc}
+$t$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\
+\hline
+$\ln y$ & 2.3026 & 2.8332 & 3.2189 & 3.4657 & 3.8712 & 4.2485 & 4.7622 & 5.0999 \\
+\end{tabular}
+\end{center}
+$\sum \ln y_i = 29.8021$, so $\overline{y'} = 3.72527$; $\bar t = 3.5$, $S_{tt} = 42$, and
+$S_{ty'} = \sum(t_i - 3.5)\ln y_i = 16.3600$. Hence
+\[
+\hat\beta_1 = \frac{16.3600}{42} = 0.38952, \qquad
+\hat\beta_0' = 3.72527 - 0.38952 \times 3.5 = 2.36194 ,
+\]
+\[
+\widehat{\ln y} = 2.3619 + 0.3895t .
+\]
+The residuals on the log scale are
+$-0.059$, $0.082$, $0.078$, $-0.065$, $-0.049$, $-0.061$, $0.063$, $0.011$: small, of constant size and
+without a pattern. $SS_{\mathrm{Res}} = 0.03069$, $MS_{\mathrm{Res}} = 0.005115$ and $R^2 = 0.995$.
+
+\emph{Interpretation.} On the original scale the fitted model is
+\[
+\hat y = e^{2.3619}\,e^{0.3895t} = 10.61 \times 1.476^t .
+\]
+The (median) count is multiplied by $e^{0.3895} = 1.476$ each hour: a growth rate of about
+$48\%$ per hour, and a doubling time of $\ln 2/0.3895 = 1.78$ hours.
+
+\emph{Prediction at $t = 8$.} On the log scale, $\widehat{\ln y}_0 = 2.3619 + 0.3895 \times 8 = 5.4781$.
+With $h_0 = 1/8 + (8 - 3.5)^2/42 = 0.6071$ and $t_{0.025,6} = 2.447$, the $95\%$ prediction
+interval of Theorem~\ref{thm:prediction} is
+\begin{align*}
+5.4781 \pm 2.447\sqrt{0.005115 \times 1.6071} &= 5.4781 \pm 0.2219 \\
+&= (5.2563,\ 5.7000) .
+\end{align*}
+Exponentiating the end points, a new count at $t = 8$ will lie between $e^{5.2563} = 192$ and
+$e^{5.7000} = 299$ thousand per ml, with probability $0.95$. The point prediction
+$e^{5.4781} = 239$ is the predicted median; the predicted mean,
+$e^{5.4781 + 0.005115/2} = 240$, is barely different, because the error variance is so small.
+The interval is not symmetric about $239$: on the original scale, the uncertainty is larger
+upwards, as it should be for a quantity that grows by percentages.
+\end{solution}
+
+\subsection{The Box--Cox method}
+Rather than guess a transformation, we can let the data choose one from the family of
+\emph{power transformations} $y^\lambda$. Box and Cox (1964) made this precise. Some care is
+needed, because the residual sums of squares from fits to $y^\lambda$ for different $\lambda$ are
+on different scales and cannot be compared directly. The remedy is to rescale.
+
+\begin{defn}
+For $y_i > 0$, let $\dot y = \bigl(\prod_{i=1}^n y_i\bigr)^{1/n}$ be the geometric mean of the
+responses. The \textbf{Box--Cox transformation} is
+\[
+y^{(\lambda)} = \begin{cases}
+\dfrac{y^\lambda - 1}{\lambda\,\dot y^{\,\lambda - 1}} , & \lambda \neq 0, \\[3mm]
+\dot y\ln y , & \lambda = 0 .
+\end{cases}
+\]
+\end{defn}
+
+Subtracting $1$ and dividing by $\lambda$ does not change the fit, apart from scaling; it makes
+$y^{(\lambda)}$ vary continuously with $\lambda$, with the $\lambda = 0$ case as the limit
+(Problem~\ref{prob:boxcox-limit}). Dividing by $\dot y^{\lambda - 1}$ puts every $\lambda$ on the
+scale of $y$ itself, so that the residual sums of squares can be compared.
+
+\begin{thm}\label{thm:boxcox}
+Suppose that for some $\lambda$, $y_i^{(\lambda)} = \mathbf{x}_i^\top\boldsymbol\beta + \varepsilon_i$ with
+$\varepsilon_i$ independent $N(0, \sigma^2)$. Let $SS_{\mathrm{Res}}(\lambda)$ be the residual sum of
+squares from the least-squares fit of $y^{(\lambda)}$ on $\mathbf{X}$. Then, up to an additive
+constant, the log-likelihood of the observed $y_i$, maximised over $\boldsymbol\beta$ and $\sigma^2$
+for fixed $\lambda$, is
+\[
+L(\lambda) = -\frac{n}{2}\ln SS_{\mathrm{Res}}(\lambda) .
+\]
+So the maximum-likelihood estimate $\hat\lambda$ is the value that minimises $SS_{\mathrm{Res}}(\lambda)$.
+\end{thm}
+
+\begin{proof}
+The density of $w_i = y_i^{(\lambda)}$ is normal; the density of $y_i$ is obtained by the change
+of variables formula, multiplying by the Jacobian $|dw_i/dy_i|$. For $\lambda \neq 0$,
+\[
+\frac{dw_i}{dy_i} = \frac{\lambda y_i^{\lambda - 1}}{\lambda\,\dot y^{\,\lambda - 1}} = \left(\frac{y_i}{\dot y}\right)^{\lambda - 1} ,
+\]
+and for $\lambda = 0$ it is $\dot y/y_i$, the same formula. The product over $i$ is
+\[
+\prod_{i=1}^n\left(\frac{y_i}{\dot y}\right)^{\lambda - 1} = \left(\frac{\prod y_i}{\dot y^{\,n}}\right)^{\lambda - 1} = 1^{\lambda - 1} = 1 ,
+\]
+by the definition of $\dot y$. So the likelihood of the $y_i$ equals the normal likelihood of
+the $w_i$:
+\[
+\ln\ell = -\frac{n}{2}\ln(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^n\bigl(w_i - \mathbf{x}_i^\top\boldsymbol\beta\bigr)^2 .
+\]
+For fixed $\sigma^2$ this is maximised over $\boldsymbol\beta$ by least squares, leaving
+$-\frac{n}{2}\ln(2\pi\sigma^2) - SS_{\mathrm{Res}}(\lambda)/(2\sigma^2)$. Exactly as in
+Theorem~\ref{thm:mle}, this is maximised at $\hat\sigma^2 = SS_{\mathrm{Res}}(\lambda)/n$, where its value is
+\[
+-\frac{n}{2}\ln SS_{\mathrm{Res}}(\lambda) + \frac{n}{2}\ln n - \frac{n}{2}\ln(2\pi) - \frac{n}{2} .
+\]
+The last three terms do not depend on $\lambda$.
+\end{proof}
+
+Without the factor $\dot y^{\lambda - 1}$ the Jacobian would be $\prod y_i^{\lambda - 1}$, which
+depends on $\lambda$, and minimising the raw residual sum of squares would give the wrong answer.
+The normalisation absorbs the Jacobian.
+
+\subhead{A confidence interval for $\lambda$}
+By the large-sample theory of likelihood ratios, $2\bigl[L(\hat\lambda) - L(\lambda)\bigr]$ is
+approximately $\chi^2_1$ when $\lambda$ is the true value. So an approximate $100(1 - \alpha)\%$
+confidence interval is the set of $\lambda$ with $L(\lambda) \ge L(\hat\lambda) - \frac12\chi^2_{\alpha,1}$, that is,
+with
+\[
+SS_{\mathrm{Res}}(\lambda) \le SS^* = SS_{\mathrm{Res}}(\hat\lambda)\, e^{\chi^2_{\alpha,1}/n} .
+\]
+In practice $SS_{\mathrm{Res}}(\lambda)$ is computed for a grid of values, say from $-2$ to $2$, and
+plotted. One then chooses a \emph{simple} $\lambda$ inside the interval, such as $0$, $\frac12$ or $1$,
+in preference to the exact minimiser: a transformation such as $y^{0.43}$ is hard to interpret,
+and the data rarely distinguish it from $\sqrt{y}$. If $1$ is inside the interval, there is no
+evidence that any transformation is needed.
+
+\begin{exa}\label{exa:bacteria-boxcox}
+Apply the Box--Cox method to the bacteria data of Example~\ref{exa:bacteria}.
+\end{exa}
+
+\begin{solution}
+The geometric mean is $\dot y = \exp(\overline{\ln y}) = e^{3.72527} = 41.482$. For each $\lambda$,
+form $y^{(\lambda)}$ and regress it on $t$. For instance, at $\lambda = 0.5$,
+$y^{(0.5)} = (\sqrt{y} - 1)/(0.5 \times 41.482^{-0.5}) = 12.881(\sqrt{y} - 1)$, and at $\lambda = 0$,
+$y^{(0)} = 41.482\ln y$, whose residual sum of squares is $41.482^2 \times 0.03069 = 52.81$. At
+$\lambda = 1$, $y^{(1)} = y - 1$, which has the same residuals as $y$. The results:
+\begin{center}
+\begin{tabular}{c|ccccccc}
+$\lambda$ & $-1$ & $-0.5$ & $-0.25$ & $0$ & $0.25$ & $0.5$ & $1$ \\
+\hline
+$SS_{\mathrm{Res}}(\lambda)$ & 3223.4 & 609.0 & 172.1 & 52.8 & 194.5 & 620.4 & 2871.6 \\
+\end{tabular}
+\end{center}
+A finer search puts the minimum at $\hat\lambda = -0.01$, with $SS_{\mathrm{Res}}(\hat\lambda) = 52.44$.
+With $n = 8$ and $\chi^2_{0.05,1} = 3.841$,
+\[
+SS^* = 52.44\, e^{3.841/8} = 52.44 \times 1.616 = 84.76 ,
+\]
+and $SS_{\mathrm{Res}}(\lambda) \le 84.76$ for $-0.14 \le \lambda \le 0.11$. The interval contains $0$ and
+excludes both $\frac12$ and $1$: the log transformation is the right choice, and neither the
+square root nor the untransformed response is acceptable. This confirms the choice made in
+Example~\ref{exa:bacteria} on physical grounds.
+\end{solution}
+
+\begin{remark}[Transforming the regressors]
+Regressors can be transformed as well (Example~\ref{exa:catalyst-recip}). A
+transformation of $x$ changes the shape of the fitted relationship but not the error structure, so it is the remedy
+for curvature when the variance is already constant, and a transformation of $y$ is the remedy
+when it is not. The partial residual plots of Section~4 are the main guide to the form in which
+each regressor should enter.
+\end{remark}
+
+\subsection{Weighted least squares}
+Suppose the errors are uncorrelated but have unequal variances,
+\[
+\operatorname{Var}(\varepsilon_i) = \frac{\sigma^2}{w_i} , \qquad i = 1, \dots, n ,
+\]
+with known positive \textbf{weights} $w_i$. Observations with large $w_i$ are precise; those
+with small $w_i$ are noisy. Ordinary least squares treats them all alike. It seems right to
+give the precise observations more say, and to minimise the \emph{weighted} sum of squares
+\[
+S_w(\boldsymbol\beta) = \sum_{i=1}^n w_i\bigl(y_i - \mathbf{x}_i^\top\boldsymbol\beta\bigr)^2
+= (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^\top\mathbf{W}(\mathbf{y} - \mathbf{X}\boldsymbol\beta) ,
+\]
+where $\mathbf{W} = \operatorname{diag}(w_1, \dots, w_n)$. In matrix form,
+$\operatorname{Var}(\boldsymbol\varepsilon) = \sigma^2\mathbf{W}^{-1}$.
+
+\begin{thm}[Weighted least squares]\label{thm:wls}
+Under A1, A3 and $\operatorname{Var}(\boldsymbol\varepsilon) = \sigma^2\mathbf{W}^{-1}$, with $\mathbf{X}$ of full
+column rank:
+\begin{enumerate}[label=(\roman*)]
+\item $S_w$ is minimised by
+\[
+\hat{\boldsymbol\beta}_W = (\mathbf{X}^\top\mathbf{W}\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{W}\mathbf{y} ;
+\]
+\item $\hat{\boldsymbol\beta}_W$ is unbiased, with $\operatorname{Var}(\hat{\boldsymbol\beta}_W) = \sigma^2(\mathbf{X}^\top\mathbf{W}\mathbf{X})^{-1}$;
+\item $\hat{\boldsymbol\beta}_W$ has the smallest variance, for every coefficient, among all
+linear unbiased estimators of $\boldsymbol\beta$;
+\item $\hat\sigma^2_W = S_w(\hat{\boldsymbol\beta}_W)/(n - p)$ is unbiased for $\sigma^2$, and under normality all
+the tests and intervals of Section~3 hold with $\mathbf{X}^\top\mathbf{W}\mathbf{X}$ in place of
+$\mathbf{X}^\top\mathbf{X}$ and $\hat\sigma^2_W$ in place of $MS_{\mathrm{Res}}$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+Let $\mathbf{W}^{1/2} = \operatorname{diag}(\sqrt{w_1}, \dots, \sqrt{w_n})$, and transform the model by
+multiplying through by it:
+\[
+\mathbf{z} = \mathbf{W}^{1/2}\mathbf{y}, \qquad \mathbf{B} = \mathbf{W}^{1/2}\mathbf{X}, \qquad
+\mathbf{z} = \mathbf{B}\boldsymbol\beta + \boldsymbol\delta, \quad \boldsymbol\delta = \mathbf{W}^{1/2}\boldsymbol\varepsilon .
+\]
+That is, $z_i = \sqrt{w_i}\,y_i$, and each row of $\mathbf{X}$ is multiplied by $\sqrt{w_i}$. By
+Lemma~\ref{lem:linear-rv}, $E(\boldsymbol\delta) = \mathbf{0}$ and
+\[
+\operatorname{Var}(\boldsymbol\delta) = \mathbf{W}^{1/2}(\sigma^2\mathbf{W}^{-1})\mathbf{W}^{1/2} = \sigma^2\mathbf{I} .
+\]
+So the transformed model satisfies A1--A3, and $\mathbf{B}$ has full column rank because
+$\mathbf{W}^{1/2}$ is invertible. Everything proved for ordinary least squares applies to it.
+
+(i) $S_w(\boldsymbol\beta) = \|\mathbf{W}^{1/2}(\mathbf{y} - \mathbf{X}\boldsymbol\beta)\|^2 = \|\mathbf{z} - \mathbf{B}\boldsymbol\beta\|^2$, the
+ordinary sum of squares of the transformed model, minimised by Theorem~\ref{thm:ls-matrix} at
+$(\mathbf{B}^\top\mathbf{B})^{-1}\mathbf{B}^\top\mathbf{z} = (\mathbf{X}^\top\mathbf{W}\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{W}\mathbf{y}$.
+
+(ii) By Theorem~\ref{thm:beta-props} applied to the transformed model, with
+$(\mathbf{B}^\top\mathbf{B})^{-1} = (\mathbf{X}^\top\mathbf{W}\mathbf{X})^{-1}$.
+
+(iii) A linear estimator $\mathbf{Ay}$ of $\boldsymbol\beta$ is $\mathbf{AW}^{-1/2}\mathbf{z}$, a linear function of
+$\mathbf{z}$, and conversely; unbiasedness means the same in both. So the linear unbiased
+estimators are the same whether written in terms of $\mathbf{y}$ or of $\mathbf{z}$, and
+Theorem~\ref{thm:gauss-markov-general} for the transformed model says that its least-squares
+estimator, $\hat{\boldsymbol\beta}_W$, is best among them.
+
+(iv) $S_w(\hat{\boldsymbol\beta}_W)$ is the residual sum of squares of the transformed model, so
+Theorems~\ref{thm:ssres-matrix} and~\ref{thm:mlr-dist} apply to it directly, and the tests and
+intervals are those of the transformed model.
+\end{proof}
+
+The proof is also the practical recipe: multiply each $y_i$ and each row of $\mathbf{X}$,
+including the column of ones, by $\sqrt{w_i}$, and fit by ordinary least squares
+\emph{without} an intercept (the old intercept column has become $\sqrt{w_i}$, which plays its
+part). Residual analysis should use the \textbf{weighted residuals}
+$\sqrt{w_i}\,(y_i - \hat y_i)$, the residuals of the transformed model, which have constant
+variance if the weights are right.
+
+\begin{remark}[Generalised least squares]
+The same argument works when the errors are correlated, $\operatorname{Var}(\boldsymbol\varepsilon) = \sigma^2\mathbf{V}$
+with $\mathbf{V}$ any known positive definite matrix. By the spectral theorem
+$\mathbf{V} = \mathbf{P}\boldsymbol\Lambda\mathbf{P}^\top$, and $\mathbf{K} = \mathbf{P}\boldsymbol\Lambda^{1/2}\mathbf{P}^\top$
+is a symmetric matrix with $\mathbf{K}^2 = \mathbf{V}$. Multiplying through by $\mathbf{K}^{-1}$ gives a
+model with covariance $\sigma^2\mathbf{I}$, and the best linear unbiased estimator is
+\[
+\hat{\boldsymbol\beta}_{\mathrm{GLS}} = (\mathbf{X}^\top\mathbf{V}^{-1}\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{V}^{-1}\mathbf{y} .
+\]
+Weighted least squares is the case $\mathbf{V} = \mathbf{W}^{-1}$. The case of errors correlated in
+time is taken up in the section on autocorrelated errors.
+\end{remark}
+
+In simple linear regression the weighted estimates have the familiar form, with every mean and
+sum weighted.
+
+\begin{coro}\label{coro:wls-slr}
+For $y = \beta_0 + \beta_1 x + \varepsilon$ with weights $w_i$, let
+$\bar x_w = \sum w_i x_i/\sum w_i$ and $\bar y_w = \sum w_i y_i/\sum w_i$. Then
+\[
+\hat\beta_1 = \frac{\sum w_i(x_i - \bar x_w)(y_i - \bar y_w)}{\sum w_i(x_i - \bar x_w)^2} ,
+\qquad
+\hat\beta_0 = \bar y_w - \hat\beta_1\bar x_w ,
+\]
+and $\operatorname{Var}(\hat\beta_1) = \sigma^2\big/\sum w_i(x_i - \bar x_w)^2$.
+\end{coro}
+
+\begin{proof}
+Setting the partial derivatives of $S_w = \sum w_i(y_i - \beta_0 - \beta_1 x_i)^2$ to zero gives
+$\sum w_i(y_i - \beta_0 - \beta_1 x_i) = 0$, which is $\beta_0 = \bar y_w - \beta_1\bar x_w$, and
+$\sum w_i x_i(y_i - \beta_0 - \beta_1 x_i) = 0$. Substituting the first in the second,
+$\sum w_i x_i\bigl[(y_i - \bar y_w) - \beta_1(x_i - \bar x_w)\bigr] = 0$. Since
+$\sum w_i(y_i - \bar y_w) = \sum w_i(x_i - \bar x_w) = 0$, $x_i$ may be replaced by $x_i - \bar x_w$,
+which gives $\hat\beta_1$. The variance is the $(2,2)$ entry of $\sigma^2(\mathbf{X}^\top\mathbf{W}\mathbf{X})^{-1}$,
+found exactly as in Example~\ref{exa:slr-matrix} with every sum weighted.
+\end{proof}
+
+\subhead{What happens if the weights are ignored}
+Ordinary least squares remains unbiased when the variances are unequal, since unbiasedness used
+only A1. But it is no longer the best linear unbiased estimator, and, more seriously, its usual
+standard errors are wrong. By Lemma~\ref{lem:linear-rv}, with
+$\hat{\boldsymbol\beta} = \mathbf{C}\mathbf{X}^\top\mathbf{y}$,
+\[
+\operatorname{Var}(\hat{\boldsymbol\beta}) = \sigma^2\,\mathbf{C}\mathbf{X}^\top\mathbf{W}^{-1}\mathbf{X}\mathbf{C} ,
+\]
+not $\sigma^2\mathbf{C}$, and $MS_{\mathrm{Res}}$ no longer estimates a common $\sigma^2$. The $t$-tests
+and intervals computed as if the variance were constant can then be badly misleading.
+
+\subhead{Choosing the weights}
+Weighted least squares needs the weights, at least up to a common constant. They come from
+three sources.
+\begin{enumerate}[label=(\roman*)]
+\item \emph{Known from the way the data arose.} If $y_i$ is the mean of $n_i$ independent
+observations, each with variance $\sigma^2$, then $\operatorname{Var}(y_i) = \sigma^2/n_i$ and
+$w_i = n_i$.
+\item \emph{A known form of dependence on a regressor.} If the standard deviation is
+proportional to $x_i$, then $w_i = 1/x_i^2$ (Problem~\ref{prob:wls-x}). The form may be
+suggested by the funnel in a residual plot against $x$.
+\item \emph{Estimated.} Fit by ordinary least squares, regress the absolute residuals (or the
+squared residuals) on $x$ or on $\hat y$ to estimate how the spread changes, take $w_i$ as the
+reciprocal of the fitted variance, and refit. With replicates at each $x$, the sample variance
+at each $x$ can be used. Estimated weights are themselves uncertain, so small samples call for
+caution.
+\end{enumerate}
+
+\begin{thm}\label{thm:means-wls}
+Suppose that at each of $m$ settings $\mathbf{x}_1, \dots, \mathbf{x}_m$ there are $n_i$ observations
+$y_{i1}, \dots, y_{in_i}$, with means $\bar y_i$. The ordinary least-squares fit to all
+$n = \sum n_i$ observations is the same as the weighted least-squares fit to the $m$ means
+with weights $w_i = n_i$.
+\end{thm}
+
+\begin{proof}
+As in the proof of Theorem~\ref{thm:lof-identity}, for any $\boldsymbol\beta$,
+\[
+\sum_{i=1}^m\sum_{j=1}^{n_i}\bigl(y_{ij} - \mathbf{x}_i^\top\boldsymbol\beta\bigr)^2
+= \sum_{i=1}^m\sum_{j=1}^{n_i}(y_{ij} - \bar y_i)^2 + \sum_{i=1}^m n_i\bigl(\bar y_i - \mathbf{x}_i^\top\boldsymbol\beta\bigr)^2 ,
+\]
+the cross term vanishing because deviations from $\bar y_i$ add to zero. The first sum does not
+involve $\boldsymbol\beta$, so the left side and the weighted sum of squares on the right are
+minimised by the same $\boldsymbol\beta$.
+\end{proof}
+
+So when only the group means survive, the individual-level fit can still be recovered exactly,
+provided the means are weighted by the group sizes.
+
+\begin{exa}\label{exa:wls-means}
+A process was run at five temperature settings $x$, with $1$, $4$, $6$, $4$ and $1$ runs, and
+only the mean response $\bar y_i$ at each setting was kept:
+\begin{center}
+\begin{tabular}{l|ccccc}
+Setting $x$ & 1 & 2 & 3 & 4 & 5 \\
+\hline
+Runs $n_i$ & 1 & 4 & 6 & 4 & 1 \\
+Mean $\bar y_i$ & 2 & 7 & 8 & 9 & 14 \\
+\end{tabular}
+\end{center}
+Fit the line by weighted least squares, and compare with ordinary least squares on the five means.
+\end{exa}
+
+\begin{solution}
+\emph{Weighted.} $w_i = n_i$, so $\sum w_i = 16$,
+\[
+\bar x_w = \frac{1 + 8 + 18 + 16 + 5}{16} = 3, \qquad
+\bar y_w = \frac{2 + 28 + 48 + 36 + 14}{16} = 8 ,
+\]
+\begin{align*}
+\textstyle\sum w_i(x_i - 3)^2 &= 1(4) + 4(1) + 0 + 4(1) + 1(4) = 16, \\
+\textstyle\sum w_i(x_i - 3)\bar y_i &= 1(-2)(2) + 4(-1)(7) + 0 + 4(1)(9) + 1(2)(14) = 32 .
+\end{align*}
+So $\hat\beta_1 = 32/16 = 2$, $\hat\beta_0 = 8 - 2 \times 3 = 2$, and
+\[
+\hat y_W = 2 + 2x .
+\]
+The fitted values are $4$, $6$, $8$, $10$, $12$ and the weighted residual sum of squares is
+\[
+S_w = 1(-2)^2 + 4(1)^2 + 6(0)^2 + 4(-1)^2 + 1(2)^2 = 16 ,
+\]
+so $\hat\sigma^2_W = 16/3 = 5.33$, and $\operatorname{se}(\hat\beta_1) = \sqrt{5.33/16} = 0.577$. By
+Theorem~\ref{thm:means-wls}, this is the line that would have been fitted to all sixteen runs.
+
+\emph{Unweighted.} $\bar x = 3$, $\bar y = 8$, $S_{xx} = 10$ and
+$S_{xy} = -2(2) - 1(7) + 0 + 1(9) + 2(14) = 26$, so $\hat\beta_1 = 2.6$, $\hat\beta_0 = 8 - 7.8 = 0.2$:
+\[
+\hat y = 0.2 + 2.6x .
+\]
+\emph{Comparison.} The two end settings, each a single run and so the least reliable, lie
+furthest from the trend of the well-replicated middle three. Ordinary least squares, giving them
+full weight, tilts the line towards them. Weighted least squares gives them a sixth of the
+weight of the middle setting, and follows the precise means. How much precision is at stake? For
+the slope, Corollary~\ref{coro:wls-slr} gives $\operatorname{Var}(\hat\beta_{1W}) = \sigma^2/16 = 0.0625\sigma^2$.
+The ordinary estimator is $\hat\beta_1 = \sum(x_i - 3)\bar y_i/10$, with
+$\operatorname{Var}(\bar y_i) = \sigma^2/n_i$, so
+\[
+\operatorname{Var}(\hat\beta_1) = \frac{\sigma^2}{100}\left(\frac{4}{1} + \frac{1}{4} + 0 + \frac{1}{4} + \frac{4}{1}\right) = 0.085\sigma^2 .
+\]
+Ignoring the weights costs a quarter of the precision: the unweighted estimate behaves as if it
+had been based on $0.0625/0.085 = 74\%$ of the data.
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:delta-poisson}
+\begin{enumerate}[label=(\alph*)]
+\item Use the delta method to show that if $y$ is Poisson with mean $\mu$, then $\sqrt{y}$ has
+variance approximately $\frac14$, whatever $\mu$.
+\item Find a transformation that stabilises the variance when $\sigma^2(\mu) = \mu + \mu^2$
+(counts with extra variation).
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $g(y) = \sqrt y$ has $g'(\mu) = 1/(2\sqrt\mu)$, so by Lemma~\ref{lem:delta}
+$\operatorname{Var}(\sqrt y) \approx \mu/(4\mu) = \frac14$.
+
+(b) We need $g'(\mu) = 1/\sqrt{\mu + \mu^2}$. Substituting $\mu = u^2$, $d\mu = 2u\,du$,
+\[
+g(\mu) = \int\frac{d\mu}{\sqrt{\mu(1 + \mu)}} = \int\frac{2u\,du}{u\sqrt{1 + u^2}} = 2\operatorname{arsinh}u = 2\operatorname{arsinh}\sqrt\mu .
+\]
+So $g(y) = \operatorname{arsinh}\sqrt{y} = \ln\bigl(\sqrt y + \sqrt{1 + y}\bigr)$. For small $\mu$ it
+behaves like $\sqrt y$, and for large $\mu$ like $\frac12\ln y + \ln 2$: between the square root and
+the log, as the variance function is between Poisson and constant-percentage.
+\end{solution}
+
+\begin{problem}\label{prob:boxcox-limit}
+\begin{enumerate}[label=(\alph*)]
+\item Show that $(y^\lambda - 1)/\lambda \to \ln y$ as $\lambda \to 0$, so that the Box--Cox
+transformation is continuous in $\lambda$.
+\item Show that $SS_{\mathrm{Res}}(1)$ equals the residual sum of squares of the
+untransformed fit,
+and that for any $\lambda \neq 0$, $SS_{\mathrm{Res}}(\lambda)$ is $1/(\lambda\dot y^{\lambda - 1})^2$ times the
+residual sum of squares from regressing $y^\lambda$ itself.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Write $y^\lambda = e^{\lambda\ln y}$. The limit is $0/0$, and by l'H\^opital's rule (differentiating
+in $\lambda$) it equals $\lim_{\lambda \to 0}\ln y\,e^{\lambda\ln y} = \ln y$. Since also $\dot y^{\lambda - 1} \to \dot y^{-1}$,
+$y^{(\lambda)} \to \ln y/\dot y^{-1} = \dot y\ln y = y^{(0)}$.
+
+(b) $y^{(1)} = y - 1$. Subtracting a constant from every response changes only the intercept,
+so the residuals, and $SS_{\mathrm{Res}}$, are unchanged. In general
+$y^{(\lambda)} = a y^\lambda + b$ with $a = 1/(\lambda\dot y^{\lambda - 1})$ and $b = -a$. Adding $b$ leaves the
+residuals alone, and multiplying the response by $a$ multiplies $\hat{\boldsymbol\beta}$, the fitted
+values and the residuals by $a$ (the least-squares estimator is linear in $\mathbf{y}$), so
+$SS_{\mathrm{Res}}$ is multiplied by $a^2$.
+\end{solution}
+
+\begin{problem}\label{prob:power}
+The time $y$ (minutes) to dry a coating of thickness $x$ (mm) was measured:
+\begin{center}
+\begin{tabular}{l|ccccc}
+$x$ & 1 & 2 & 4 & 8 & 16 \\
+\hline
+$y$ & 3 & 4 & 6 & 9 & 12 \\
+\end{tabular}
+\end{center}
+Fit the power model $y = \beta_0 x^{\beta_1}\varepsilon$ and interpret $\beta_1$.
+\end{problem}
+
+\begin{solution}
+Let $u = \ln x$ and $v = \ln y$:
+\begin{center}
+\begin{tabular}{l|ccccc}
+$u = \ln x$ & 0 & 0.6931 & 1.3863 & 2.0794 & 2.7726 \\
+$v = \ln y$ & 1.0986 & 1.3863 & 1.7918 & 2.1972 & 2.4849 \\
+\end{tabular}
+\end{center}
+The $u_i$ are $0$, $1$, $2$, $3$, $4$ times $\ln 2 = 0.6931$, so $\bar u = 2\ln 2 = 1.3863$ and
+$S_{uu} = 10(\ln 2)^2 = 4.8045$. Then $\bar v = 8.9588/5 = 1.79176$ and
+\begin{align*}
+S_{uv} &= \ln 2\,\bigl[-2(1.0986) - 1(1.3863) + 0 + 1(2.1972) + 2(2.4849)\bigr] \\
+&= 0.6931 \times 3.5835 = 2.4839 ,
+\end{align*}
+so $\hat\beta_1 = 2.4839/4.8045 = 0.517$, and $\widehat{\ln\beta_0} = 1.79176 - 0.517 \times 1.3863 = 1.0751$,
+giving $\hat\beta_0 = e^{1.0751} = 2.93$:
+\[
+\hat y = 2.93\,x^{0.517} .
+\]
+$\beta_1$ is an \emph{elasticity}: a $1\%$ increase in thickness goes with an increase of about
+$\beta_1\% = 0.52\%$ in drying time; doubling the thickness multiplies the drying time by
+$2^{0.517} = 1.43$. The estimate is close to $\frac12$, which would mean drying time proportional
+to the square root of thickness, a hypothesis that could be tested with the $t$ statistic for
+$\beta_1 = 0.5$.
+\end{solution}
+
+\begin{problem}\label{prob:wls-x}
+Suppose $y_i = \beta_0 + \beta_1 x_i + \varepsilon_i$ with $x_i > 0$ and $\operatorname{Var}(\varepsilon_i) = \sigma^2x_i^2$.
+\begin{enumerate}[label=(\alph*)]
+\item Show that weighted least squares with $w_i = 1/x_i^2$ is the same as ordinary least squares
+for the model $y_i/x_i = \beta_1 + \beta_0(1/x_i) + \delta_i$, in which the roles of intercept and slope
+are exchanged, and that the $\delta_i$ have constant variance.
+\item Fit both ways to the data $x = 1, 2, 3, 4$, $y = 2, 4, 6, 11$, and compare with ordinary least
+squares on the original data.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Dividing the model by $x_i$, which is multiplying by $\sqrt{w_i} = 1/x_i$, gives
+$y_i/x_i = \beta_0/x_i + \beta_1 + \varepsilon_i/x_i$, and $\operatorname{Var}(\varepsilon_i/x_i) = \sigma^2$. This is the
+transformed model in the proof of Theorem~\ref{thm:wls}: its regressor columns are $1/x_i$ (from the
+intercept) and $x_i/x_i = 1$ (from the slope). So the old slope $\beta_1$ is the new intercept, and the
+old intercept $\beta_0$ the new slope.
+
+(b) Let $u = 1/x$ and $v = y/x$: $u = 1, \frac12, \frac13, \frac14$ and $v = 2, 2, 2, 2.75$. Then
+$\bar u = 25/48 = 0.52083$, $\bar v = 2.1875$,
+\begin{align*}
+S_{uu} &= \textstyle\sum u_i^2 - 4\bar u^2 = 1.42361 - 1.08507 = 0.33854, \\
+S_{uv} &= \textstyle\sum (u_i - \bar u)v_i \\
+&= 0.95833 - 0.04167 - 0.37500 - 0.74479 = -0.20313 ,
+\end{align*}
+so the new slope is $-0.20313/0.33854 = -0.600$ and the new intercept
+$2.1875 + 0.600 \times 0.52083 = 2.500$. Hence $\hat\beta_0 = -0.6$, $\hat\beta_1 = 2.5$:
+\[
+\hat y_W = -0.6 + 2.5x .
+\]
+Corollary~\ref{coro:wls-slr} gives the same: with $w = 1, \frac14, \frac19, \frac1{16}$ the weighted means
+are $\bar x_w = 2.0833/1.4236 = 1.4634$ and $\bar y_w = 4.3542/1.4236 = 3.0585$, and the
+slope is $2.5$. Ordinary least squares gives
+$\bar x = 2.5$, $\bar y = 5.75$, $S_{xx} = 5$ and $S_{xy} = 14.5$, so
+$\hat y = -1.5 + 2.9x$. The last
+point, $(4, 11)$, has the largest variance under the model; ordinary least squares lets it raise the
+slope, while the weighted fit discounts it.
+\end{solution}
+
+\begin{problem}\label{prob:wls-resid}
+\begin{enumerate}[label=(\alph*)]
+\item Show that the weighted residuals $e_i = y_i - \hat y_i$ of a weighted fit with an intercept
+satisfy $\sum w_i e_i = 0$ and $\sum w_i x_{ij}e_i = 0$, but in general $\sum e_i \neq 0$.
+\item Check this on Example~\ref{exa:wls-means}.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The normal equations of Theorem~\ref{thm:wls} are $\mathbf{X}^\top\mathbf{W}(\mathbf{y} - \mathbf{X}\hat{\boldsymbol\beta}_W) = \mathbf{0}$,
+whose rows are $\sum w_i x_{ij}e_i = 0$, the first ($x_{i0} = 1$) being $\sum w_i e_i = 0$. These are
+weighted sums; the unweighted sum $\sum e_i$ is not constrained.
+
+(b) The residuals are $-2$, $1$, $0$, $-1$, $2$ with weights $1$, $4$, $6$, $4$, $1$:
+$\sum w_ie_i = -2 + 4 + 0 - 4 + 2 = 0$ and $\sum w_ix_ie_i = -2 + 8 + 0 - 16 + 10 = 0$. Here
+$\sum e_i = 0$ too, by the symmetry of the design, but with the data of Problem~\ref{prob:wls-x} the
+residuals from $-0.6 + 2.5x$ are $0.1$, $-0.4$, $-0.9$, $1.6$, which add to $0.4$.
+\end{solution}
 
 \section{Selecting the Best Regression Model}
 
