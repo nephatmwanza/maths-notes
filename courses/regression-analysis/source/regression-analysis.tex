@@ -3003,11 +3003,1248 @@ Here $F_0 = 2.95 > 1$. That is a much weaker requirement than significance, whic
 $F_0 > 10.13$.
 \end{solution}
 
+\section{Model adequacy checking}
+Every test and interval of the last two sections rested on assumptions:
+\begin{enumerate}[label=(\roman*)]
+\item the relationship between $y$ and the regressors is (approximately) linear, so that
+$E(\mathbf{y}) = \mathbf{X}\boldsymbol\beta$ for the regressors we have used;
+\item the errors have mean zero and the same variance $\sigma^2$ (A1, A2);
+\item the errors are uncorrelated (A3);
+\item the errors are normally distributed (A4).
+\end{enumerate}
+None of these can be confirmed by the summary statistics of a fit. A large $R^2$ and a
+significant $F$ statistic say that the model explains a lot of the variation in $y$; they
+say nothing about whether the explanation has the right form, and they are perfectly
+compatible with a badly wrong model. Gross violations of the assumptions can make the
+fitted model unstable, and the $t$, $F$ and interval statements of the previous sections
+can then be seriously wrong.
+
+The information about the errors is in the residuals. A residual is what the model failed
+to explain, so if the model is right the residuals should look like the errors: centred on
+zero, with no pattern, constant spread, roughly normal. This section develops the
+residuals and their scaled versions, the plots that reveal departures from the
+assumptions, the treatment of outlying observations, a measure of predictive performance,
+and a formal test of whether a straight line (or plane) is the right shape at all.
+
+\subsection{Residuals and their properties}
+Recall that $\mathbf{e} = \mathbf{y} - \hat{\mathbf{y}} = (\mathbf{I} - \mathbf{H})\mathbf{y}$,
+where $\mathbf{H} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$ is the hat
+matrix and $h_{ii}$ its diagonal entries.
+
+\begin{thm}\label{thm:resid-var}
+Under A1--A3,
+\begin{enumerate}[label=(\roman*)]
+\item $E(\mathbf{e}) = \mathbf{0}$;
+\item $\operatorname{Var}(\mathbf{e}) = \sigma^2(\mathbf{I} - \mathbf{H})$, so
+$\operatorname{Var}(e_i) = \sigma^2(1 - h_{ii})$ and
+$\operatorname{Cov}(e_i, e_j) = -\sigma^2 h_{ij}$ for $i \neq j$;
+\item $\operatorname{Cov}(\mathbf{e}, \hat{\mathbf{y}}) = \mathbf{0}$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+Since $(\mathbf{I} - \mathbf{H})\mathbf{X} = \mathbf{0}$ (Theorem~\ref{thm:hat}),
+$\mathbf{e} = (\mathbf{I} - \mathbf{H})(\mathbf{X}\boldsymbol\beta + \boldsymbol\varepsilon)
+= (\mathbf{I} - \mathbf{H})\boldsymbol\varepsilon$.
+
+(i) $E(\mathbf{e}) = (\mathbf{I} - \mathbf{H})E(\boldsymbol\varepsilon) = \mathbf{0}$ by A1.
+
+(ii) By Lemma~\ref{lem:linear-rv} and the symmetry and idempotence of $\mathbf{I} - \mathbf{H}$,
+\[
+\operatorname{Var}(\mathbf{e}) = (\mathbf{I} - \mathbf{H})(\sigma^2\mathbf{I})(\mathbf{I} - \mathbf{H})^\top
+= \sigma^2(\mathbf{I} - \mathbf{H})^2 = \sigma^2(\mathbf{I} - \mathbf{H}) .
+\]
+The diagonal and off-diagonal entries give the rest.
+
+(iii) $\hat{\mathbf{y}} = \mathbf{Hy}$, so
+$\operatorname{Cov}(\mathbf{e}, \hat{\mathbf{y}}) = (\mathbf{I} - \mathbf{H})(\sigma^2\mathbf{I})\mathbf{H}^\top
+= \sigma^2(\mathbf{H} - \mathbf{H}^2) = \mathbf{0}$.
+\end{proof}
+
+Two consequences are worth stating plainly. First, the residuals are \emph{not} independent
+and do \emph{not} have equal variances, even when the errors do. The dependence is mild
+when $n$ is large compared with $p$, because the $h_{ij}$ are then small, but the unequal
+variances matter: a point with high leverage $h_{ii}$ has a residual with small variance.
+The fitted surface is pulled towards such a point, so its residual tends to be small
+whether or not the point fits. Second, the residuals carry only $n - p$ degrees of freedom,
+since they satisfy the $p$ constraints $\mathbf{X}^\top\mathbf{e} = \mathbf{0}$.
+
+\begin{exa}\label{exa:slr-leverage}
+In simple linear regression,
+\[
+h_{ii} = \frac{1}{n} + \frac{(x_i - \bar x)^2}{S_{xx}} ,
+\qquad
+\operatorname{Var}(e_i) = \sigma^2\left[1 - \frac{1}{n} - \frac{(x_i - \bar x)^2}{S_{xx}}\right] .
+\]
+\end{exa}
+
+\begin{solution}
+By Example~\ref{exa:slr-matrix}, with $\mathbf{x}_i = (1, x_i)^\top$,
+\[
+h_{ii} = \mathbf{x}_i^\top(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{x}_i
+= \frac{\sum x_j^2 - 2x_i\sum x_j + n x_i^2}{nS_{xx}} .
+\]
+Write $\sum x_j^2 = S_{xx} + n\bar x^2$ and $\sum x_j = n\bar x$. The numerator becomes
+$S_{xx} + n(\bar x^2 - 2x_i\bar x + x_i^2) = S_{xx} + n(x_i - \bar x)^2$, and dividing by
+$nS_{xx}$ gives the formula. The variance follows from Theorem~\ref{thm:resid-var}.
+\end{solution}
+
+So in simple regression the residuals at the two ends of the $x$-range have the smallest
+variance, and the residuals near $\bar x$ the largest.
+
+\subsection{Scaled residuals}
+Raw residuals are in the units of $y$, which makes it hard to say whether a residual is
+``large''. Scaling puts them on a common footing.
+
+\begin{defn}
+The \textbf{standardized residuals} are
+\[
+d_i = \frac{e_i}{\sqrt{MS_{\mathrm{Res}}}} , \qquad i = 1, \dots, n .
+\]
+The \textbf{studentized residuals} are
+\[
+r_i = \frac{e_i}{\sqrt{MS_{\mathrm{Res}}(1 - h_{ii})}} , \qquad i = 1, \dots, n .
+\]
+\end{defn}
+
+The standardized residuals have mean zero and approximately unit variance; a $d_i$ larger
+than $3$ in size suggests an outlier. But $d_i$ divides every residual by the same estimate
+of $\sigma$, while Theorem~\ref{thm:resid-var} says that $e_i$ has standard deviation
+$\sigma\sqrt{1 - h_{ii}}$. The studentized residual divides by the right thing, and so has
+variance close to $1$ whatever the leverage. When $n$ is large and no point has high
+leverage the two are almost equal; when they differ, $r_i$ is the one to trust, because
+the points where they differ most are exactly the high-leverage points whose raw residuals
+understate how badly they fit.
+
+\subhead{Deleting one observation}
+The most revealing way to judge whether observation $i$ fits is to fit the model
+\emph{without} it, and see how well the result predicts $y_i$. Doing this by refitting $n$
+times would be tedious; the remarkable fact is that it is never necessary. Everything
+about the deleted fit can be read off the full fit. Write $\mathbf{x}_i^\top$ for row $i$
+of $\mathbf{X}$, $\mathbf{X}_{(i)}$ and $\mathbf{y}_{(i)}$ for $\mathbf{X}$ and $\mathbf{y}$
+with row $i$ removed, and $\hat{\boldsymbol\beta}_{(i)}$ and $S^2_{(i)}$ for the estimates
+of $\boldsymbol\beta$ and $\sigma^2$ computed from the remaining $n - 1$ observations.
+
+\begin{lem}[Sherman--Morrison]\label{lem:sherman}
+Let $\mathbf{A}$ be an invertible $p \times p$ matrix and $\mathbf{u}$ a vector with
+$\mathbf{u}^\top\mathbf{A}^{-1}\mathbf{u} \neq 1$. Then $\mathbf{A} - \mathbf{u}\mathbf{u}^\top$ is
+invertible and
+\[
+(\mathbf{A} - \mathbf{u}\mathbf{u}^\top)^{-1}
+= \mathbf{A}^{-1} + \frac{\mathbf{A}^{-1}\mathbf{u}\mathbf{u}^\top\mathbf{A}^{-1}}{1 - \mathbf{u}^\top\mathbf{A}^{-1}\mathbf{u}} .
+\]
+\end{lem}
+
+\begin{proof}
+Write $c = \mathbf{u}^\top\mathbf{A}^{-1}\mathbf{u}$, a number, and multiply out:
+\begin{align*}
+&(\mathbf{A} - \mathbf{u}\mathbf{u}^\top)\left[\mathbf{A}^{-1} + \frac{\mathbf{A}^{-1}\mathbf{u}\mathbf{u}^\top\mathbf{A}^{-1}}{1 - c}\right] \\
+&\quad= \mathbf{I} - \mathbf{u}\mathbf{u}^\top\mathbf{A}^{-1}
+ + \frac{\mathbf{u}\mathbf{u}^\top\mathbf{A}^{-1} - \mathbf{u}(\mathbf{u}^\top\mathbf{A}^{-1}\mathbf{u})\mathbf{u}^\top\mathbf{A}^{-1}}{1 - c} \\
+&\quad= \mathbf{I} - \mathbf{u}\mathbf{u}^\top\mathbf{A}^{-1}
+ + \frac{(1 - c)\,\mathbf{u}\mathbf{u}^\top\mathbf{A}^{-1}}{1 - c}
+= \mathbf{I} .
+\end{align*}
+A square matrix with a right inverse is invertible, and the right inverse is the inverse.
+\end{proof}
+
+\begin{thm}[Deletion formulas]\label{thm:deletion}
+Suppose $h_{ii} < 1$, and write $\mathbf{C} = (\mathbf{X}^\top\mathbf{X})^{-1}$. Then
+\begin{enumerate}[label=(\roman*)]
+\item $\mathbf{x}_i^\top(\mathbf{X}_{(i)}^\top\mathbf{X}_{(i)})^{-1}\mathbf{x}_i = \dfrac{h_{ii}}{1 - h_{ii}}$;
+\item $\hat{\boldsymbol\beta}_{(i)} = \hat{\boldsymbol\beta} - \dfrac{\mathbf{C}\mathbf{x}_i\, e_i}{1 - h_{ii}}$;
+\item the prediction error of $y_i$ from the fit without it is
+$y_i - \mathbf{x}_i^\top\hat{\boldsymbol\beta}_{(i)} = \dfrac{e_i}{1 - h_{ii}}$;
+\item the residual sum of squares without observation $i$ is
+$SS_{\mathrm{Res}} - \dfrac{e_i^2}{1 - h_{ii}}$, so that
+\[
+S^2_{(i)} = \frac{(n - p)MS_{\mathrm{Res}} - e_i^2/(1 - h_{ii})}{n - p - 1} .
+\]
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+Deleting a row removes one term from each of the sums that make up $\mathbf{X}^\top\mathbf{X}$
+and $\mathbf{X}^\top\mathbf{y}$:
+\[
+\mathbf{X}_{(i)}^\top\mathbf{X}_{(i)} = \mathbf{X}^\top\mathbf{X} - \mathbf{x}_i\mathbf{x}_i^\top ,
+\qquad
+\mathbf{X}_{(i)}^\top\mathbf{y}_{(i)} = \mathbf{X}^\top\mathbf{y} - \mathbf{x}_i y_i .
+\]
+Note $\mathbf{x}_i^\top\mathbf{C}\mathbf{x}_i = h_{ii} \neq 1$, so Lemma~\ref{lem:sherman}
+applies with $\mathbf{A} = \mathbf{X}^\top\mathbf{X}$ and $\mathbf{u} = \mathbf{x}_i$:
+\[
+(\mathbf{X}_{(i)}^\top\mathbf{X}_{(i)})^{-1} = \mathbf{C} + \frac{\mathbf{C}\mathbf{x}_i\mathbf{x}_i^\top\mathbf{C}}{1 - h_{ii}} .
+\]
+
+(i) Multiply on the left by $\mathbf{x}_i^\top$ and on the right by $\mathbf{x}_i$:
+$h_{ii} + h_{ii}^2/(1 - h_{ii}) = h_{ii}/(1 - h_{ii})$.
+
+(ii) Using $\mathbf{C}\mathbf{X}^\top\mathbf{y} = \hat{\boldsymbol\beta}$ and
+$\mathbf{x}_i^\top\hat{\boldsymbol\beta} = \hat y_i$,
+\begin{align*}
+\hat{\boldsymbol\beta}_{(i)}
+&= \left[\mathbf{C} + \frac{\mathbf{C}\mathbf{x}_i\mathbf{x}_i^\top\mathbf{C}}{1 - h_{ii}}\right](\mathbf{X}^\top\mathbf{y} - \mathbf{x}_i y_i) \\
+&= \hat{\boldsymbol\beta} - \mathbf{C}\mathbf{x}_i y_i
+ + \frac{\mathbf{C}\mathbf{x}_i\,\hat y_i - \mathbf{C}\mathbf{x}_i\, h_{ii} y_i}{1 - h_{ii}} \\
+&= \hat{\boldsymbol\beta} + \frac{\mathbf{C}\mathbf{x}_i}{1 - h_{ii}}
+ \bigl[-(1 - h_{ii})y_i + \hat y_i - h_{ii}y_i\bigr] \\
+&= \hat{\boldsymbol\beta} - \frac{\mathbf{C}\mathbf{x}_i\, e_i}{1 - h_{ii}} .
+\end{align*}
+
+(iii) Multiply (ii) on the left by $\mathbf{x}_i^\top$:
+$\mathbf{x}_i^\top\hat{\boldsymbol\beta}_{(i)} = \hat y_i - h_{ii}e_i/(1 - h_{ii})$, so
+\[
+y_i - \mathbf{x}_i^\top\hat{\boldsymbol\beta}_{(i)} = e_i + \frac{h_{ii}e_i}{1 - h_{ii}} = \frac{e_i}{1 - h_{ii}} .
+\]
+
+(iv) For any $j$, multiplying (ii) by $\mathbf{x}_j^\top$ and using
+$\mathbf{x}_j^\top\mathbf{C}\mathbf{x}_i = h_{ji}$ gives
+$y_j - \mathbf{x}_j^\top\hat{\boldsymbol\beta}_{(i)} = e_j + h_{ji}e_i/(1 - h_{ii})$.
+Square and add over all $j$, including $j = i$ for the moment:
+\[
+\sum_j \Bigl(e_j + \frac{h_{ji}e_i}{1 - h_{ii}}\Bigr)^2
+= \sum_j e_j^2 + \frac{2e_i}{1 - h_{ii}}\sum_j h_{ij}e_j + \frac{e_i^2}{(1 - h_{ii})^2}\sum_j h_{ij}^2 .
+\]
+Here $\sum_j h_{ij}e_j$ is entry $i$ of $\mathbf{He} = \mathbf{H}(\mathbf{I} - \mathbf{H})\mathbf{y} = \mathbf{0}$,
+and $\sum_j h_{ij}^2 = (\mathbf{H}^2)_{ii} = h_{ii}$. So the sum is
+$SS_{\mathrm{Res}} + h_{ii}e_i^2/(1 - h_{ii})^2$. The deleted fit's residual sum of squares
+leaves out the $j = i$ term, which by (iii) is $e_i^2/(1 - h_{ii})^2$:
+\[
+SS_{\mathrm{Res}(i)} = SS_{\mathrm{Res}} + \frac{(h_{ii} - 1)e_i^2}{(1 - h_{ii})^2}
+= SS_{\mathrm{Res}} - \frac{e_i^2}{1 - h_{ii}} .
+\]
+The deleted fit has $n - 1$ observations and $p$ parameters, so
+$S^2_{(i)} = SS_{\mathrm{Res}(i)}/(n - p - 1)$, and $SS_{\mathrm{Res}} = (n - p)MS_{\mathrm{Res}}$.
+\end{proof}
+
+Part (iii) gives the first of two further residuals.
+
+\begin{defn}
+The \textbf{PRESS residuals} (deleted residuals) are
+\[
+e_{(i)} = y_i - \hat y_{(i)} = \frac{e_i}{1 - h_{ii}} , \qquad i = 1, \dots, n ,
+\]
+where $\hat y_{(i)} = \mathbf{x}_i^\top\hat{\boldsymbol\beta}_{(i)}$ is the prediction of
+$y_i$ from the other $n - 1$ observations. The \textbf{externally studentized residuals},
+or \textbf{R-student} residuals, are
+\[
+t_i = \frac{e_i}{\sqrt{S^2_{(i)}(1 - h_{ii})}} , \qquad i = 1, \dots, n .
+\]
+\end{defn}
+
+The studentized residual $r_i$ estimates $\sigma^2$ by $MS_{\mathrm{Res}}$, which includes
+observation $i$ itself; this is called \emph{internal} scaling. If observation $i$ is
+badly out of line, it inflates $MS_{\mathrm{Res}}$ and so shrinks its own $r_i$. R-student
+uses the estimate $S^2_{(i)}$ from which observation $i$ has been removed, so a wild point
+cannot hide behind the variance it has inflated.
+
+\begin{thm}\label{thm:rstudent}
+\begin{enumerate}[label=(\roman*)]
+\item Under A1--A3, $E(e_{(i)}) = 0$ and $\operatorname{Var}(e_{(i)}) = \sigma^2/(1 - h_{ii})$.
+Divided by its standard deviation, the PRESS residual becomes
+$e_i\big/\sqrt{\sigma^2(1 - h_{ii})}$, the ordinary residual divided by its own.
+\item Under A1--A4, $t_i \sim t_{n - p - 1}$.
+\item $r_i^2 \le n - p$, and
+\[
+t_i = r_i\sqrt{\frac{n - p - 1}{n - p - r_i^2}} ,
+\]
+so $t_i$ is an increasing function of $r_i$, and $|t_i| > |r_i|$ exactly when $|r_i| > 1$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $e_{(i)} = e_i/(1 - h_{ii})$, and by Theorem~\ref{thm:resid-var} $e_i$ has mean $0$
+and variance $\sigma^2(1 - h_{ii})$; divide the variance by $(1 - h_{ii})^2$.
+
+(ii) The deleted fit uses only $\mathbf{y}_{(i)}$, which is independent of $y_i$ by A3 and
+A4. Applied to the deleted data, Theorem~\ref{thm:mlr-dist} gives
+$\hat{\boldsymbol\beta}_{(i)} \sim N_p\bigl(\boldsymbol\beta, \sigma^2(\mathbf{X}_{(i)}^\top\mathbf{X}_{(i)})^{-1}\bigr)$
+and $(n - p - 1)S^2_{(i)}/\sigma^2 \sim \chi^2_{n - p - 1}$, the two independent. So
+$e_{(i)} = y_i - \mathbf{x}_i^\top\hat{\boldsymbol\beta}_{(i)}$ is a difference of independent
+normal quantities, normal with mean $\mathbf{x}_i^\top\boldsymbol\beta - \mathbf{x}_i^\top\boldsymbol\beta = 0$
+and, by Theorem~\ref{thm:deletion}(i), variance
+\[
+\sigma^2 + \sigma^2\,\mathbf{x}_i^\top(\mathbf{X}_{(i)}^\top\mathbf{X}_{(i)})^{-1}\mathbf{x}_i
+= \sigma^2\left(1 + \frac{h_{ii}}{1 - h_{ii}}\right) = \frac{\sigma^2}{1 - h_{ii}} .
+\]
+Both $y_i$ and $\hat{\boldsymbol\beta}_{(i)}$ are independent of $S^2_{(i)}$, hence so is
+$e_{(i)}$. By (F3),
+\[
+\frac{e_{(i)}\sqrt{1 - h_{ii}}/\sigma}{\sqrt{S^2_{(i)}/\sigma^2}}
+= \frac{e_{(i)}\sqrt{1 - h_{ii}}}{S_{(i)}} \sim t_{n - p - 1} ,
+\]
+and since $e_{(i)}\sqrt{1 - h_{ii}} = e_i/\sqrt{1 - h_{ii}}$, the left side is $t_i$.
+
+(iii) The deleted residual sum of squares in Theorem~\ref{thm:deletion}(iv) cannot be
+negative, so $e_i^2/(1 - h_{ii}) \le SS_{\mathrm{Res}} = (n - p)MS_{\mathrm{Res}}$, which is
+$r_i^2 \le n - p$. Dividing that same formula by $MS_{\mathrm{Res}}$,
+\[
+\frac{(n - p - 1)S^2_{(i)}}{MS_{\mathrm{Res}}} = n - p - r_i^2 ,
+\]
+and so
+\[
+t_i^2 = \frac{e_i^2}{(1 - h_{ii})MS_{\mathrm{Res}}}\cdot\frac{MS_{\mathrm{Res}}}{S^2_{(i)}}
+= r_i^2\,\frac{n - p - 1}{n - p - r_i^2} .
+\]
+$t_i$ and $r_i$ have the sign of $e_i$, which gives the formula. The factor
+$(n - p - 1)/(n - p - r_i^2)$ exceeds $1$ exactly when $r_i^2 > 1$.
+\end{proof}
+
+Part (iii) is a warning about studentized residuals in small samples: they are
+\emph{bounded}. With $n - p = 3$, no studentized residual can exceed $\sqrt3 = 1.73$ in
+size however wild the observation, so the rule ``$|r_i| > 3$ is suspicious'' can never
+fire. R-student has no such ceiling, and part (ii) gives it an exact reference
+distribution. For these reasons R-student is the residual of choice for detecting
+outliers.
+
+\begin{exa}\label{exa:crop-scaled}
+Compute the four kinds of scaled residual for the crop data of Example~\ref{exa:crop}.
+\end{exa}
+
+\begin{solution}
+From Examples~\ref{exa:crop-resid} and~\ref{exa:crop-sigma}, $MS_{\mathrm{Res}} = 4/3$
+with $n - p = 3$, the residuals are $-1, 1, 1, -1, 0, 0$, and the leverages are
+$h_{ii} = \mathbf{x}_i^\top(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{x}_i$. Exactly, with the
+adjugate of Example~\ref{exa:crop-fit}: for plot~1, $\mathbf{x}_1 = (1, 1, 2)^\top$ and
+\[
+\mathbf{x}_1^\top
+\begin{bmatrix} 510 & -24 & -150 \\ -24 & 33 & -30 \\ -150 & -30 & 96 \end{bmatrix}
+\mathbf{x}_1 = 159 ,
+\qquad h_{11} = \frac{159}{378} = \frac{53}{126} = 0.4206 .
+\]
+The others are found the same way. For plot~1,
+\begin{align*}
+d_1 &= \frac{-1}{\sqrt{4/3}} = -0.866, \\
+r_1 &= \frac{-1}{\sqrt{(4/3)(0.5794)}} = -1.138, \\
+e_{(1)} &= \frac{-1}{0.5794} = -1.726, \\
+S^2_{(1)} &= \frac{4 - (-1)^2/0.5794}{2} = \frac{4 - 1.726}{2} = 1.137, \\
+t_1 &= \frac{-1}{\sqrt{1.137 \times 0.5794}} = -1.232 .
+\end{align*}
+In full:
+\begin{center}
+\begin{tabular}{c|rrrrrrr}
+Plot & $e_i$ & $h_{ii}$ & $d_i$ & $r_i$ & $e_{(i)}$ & $S^2_{(i)}$ & $t_i$ \\
+\hline
+1 & $-1$ & 0.421 & $-0.866$ & $-1.138$ & $-1.726$ & 1.137 & $-1.232$ \\
+2 & $1$ & 0.587 & $0.866$ & $1.348$ & $2.423$ & 0.788 & $1.753$ \\
+3 & $1$ & 0.397 & $0.866$ & $1.115$ & $1.658$ & 1.171 & $1.190$ \\
+4 & $-1$ & 0.230 & $-0.866$ & $-0.987$ & $-1.299$ & 1.351 & $-0.981$ \\
+5 & $0$ & 0.587 & $0$ & $0$ & $0$ & 2.000 & $0$ \\
+6 & $0$ & 0.778 & $0$ & $0$ & $0$ & 2.000 & $0$ \\
+\end{tabular}
+\end{center}
+The four non-zero raw residuals are equal in size, yet plot~2, with leverage $0.587$, has
+the largest scaled residual and plot~4, with leverage $0.230$, the smallest: the same miss
+counts for more at a point that pulls the plane towards itself. Check on (iii) of
+Theorem~\ref{thm:rstudent} for plot~2: $r_2^2 = 1.817$ and
+$1.348\sqrt{2/(3 - 1.817)} = 1.348 \times 1.300 = 1.753 = t_2$. Every $|r_i|$ is below
+$\sqrt3$, as it must be.
+\end{solution}
+
+\subsection{Residual plots}
+Graphs of the residuals are the main tool of model checking. They show many kinds of
+inadequacy at once, including some no single statistic is designed to detect. Any kind of
+residual can be plotted; the scaled residuals are usually preferred, because their sizes
+can be read on a common scale. The four standard plots are described in turn.
+
+\subhead{The normal probability plot}
+If the errors are normal, the ordered residuals should behave like an ordered sample from
+a normal distribution. Order the residuals,
+$e_{[1]} \le e_{[2]} \le \cdots \le e_{[n]}$. The $i$th smallest of $n$ observations from
+a distribution sits, roughly, at the point below which a fraction
+\[
+P_i = \frac{i - \tfrac12}{n}
+\]
+of the distribution lies. For the standard normal that point is the quantile
+$z_i = \Phi^{-1}(P_i)$. If the residuals are a normal sample with standard deviation
+$\sigma$, then $e_{[i]} \approx \sigma z_i$, and the points $(z_i, e_{[i]})$ lie close to a
+straight line through the origin with slope $\sigma$. This graph is the \textbf{normal
+probability plot}. (Some software plots $P_i$ on a specially scaled vertical axis and the
+residuals across; the straight-line criterion is the same.)
+
+Departures from a straight line have recognisable shapes, shown in
+Figure~\ref{fig:npp-patterns}. With \emph{heavy tails} the extreme residuals are more extreme
+than normal ones, so the ends of the plot bend away from the line: down at the left, up at
+the right. With \emph{light tails} they bend towards it. \emph{Skewness} gives a curve
+that is bent the same way along its whole length. Moderate departures from normality are
+not a serious matter; heavy tails are the more dangerous, because a few large errors can
+pull the least-squares fit a long way.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\py/\col/\num/\name/\verdict/\pts in {
+ 0/0/green/1/{Normal}/{straight: assumption fine}/{(-1.96,-1.96),(-1.44,-1.44),(-1.15,-1.15),(-0.93,-0.93),(-0.76,-0.76),(-0.60,-0.60),(-0.45,-0.45),(-0.32,-0.32),(-0.19,-0.19),(-0.06,-0.06),(0.06,0.06),(0.19,0.19),(0.32,0.32),(0.45,0.45),(0.60,0.60),(0.76,0.76),(0.93,0.93),(1.15,1.15),(1.44,1.44),(1.96,1.96)},
+ 5.3/0/red/2/{Heavy tails}/{ends bend away from the line}/{(-1.96,-2.69),(-1.44,-1.43),(-1.15,-1.00),(-0.93,-0.76),(-0.76,-0.58),(-0.60,-0.45),(-0.45,-0.33),(-0.32,-0.23),(-0.19,-0.13),(-0.06,-0.04),(0.06,0.04),(0.19,0.13),(0.32,0.23),(0.45,0.33),(0.60,0.45),(0.76,0.58),(0.93,0.76),(1.15,1.00),(1.44,1.43),(1.96,2.69)},
+ 0/-4.8/blue/3/{Light tails}/{ends bend towards the line}/{(-1.96,-1.61),(-1.44,-1.44),(-1.15,-1.27),(-0.93,-1.10),(-0.76,-0.94),(-0.60,-0.76),(-0.45,-0.59),(-0.32,-0.42),(-0.19,-0.26),(-0.06,-0.09),(0.06,0.09),(0.19,0.25),(0.32,0.42),(0.45,0.60),(0.60,0.76),(0.76,0.94),(0.93,1.10),(1.15,1.27),(1.44,1.45),(1.96,1.61)},
+ 5.3/-4.8/orange/4/{Right skew}/{bent the same way throughout}/{(-1.96,-1.02),(-1.44,-0.97),(-1.15,-0.91),(-0.93,-0.85),(-0.76,-0.78),(-0.60,-0.71),(-0.45,-0.64),(-0.32,-0.56),(-0.19,-0.47),(-0.06,-0.37),(0.06,-0.27),(0.19,-0.15),(0.32,-0.02),(0.45,0.13),(0.60,0.31),(0.76,0.52),(0.93,0.78),(1.15,1.13),(1.44,1.67),(1.96,2.82)}} {
+ \begin{scope}[shift={(\px,\py)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-2.55,-2.25) rectangle (2.55,2.3);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (-2.2,1.95) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (-1.95,1.95) {\name};
+  \begin{scope}[scale=0.55]
+   \draw[-Stealth,gray] (-2.4,0) -- (2.5,0);
+   \draw[-Stealth,gray] (0,-2.9) -- (0,2.9);
+   \draw[dashed,gray!80!black] (-2.3,-2.3) -- (2.3,2.3);
+   \foreach \p in \pts \fill[\col!60!black] \p circle (3.2pt);
+  \end{scope}
+  \node[font=\scriptsize,text=\col!50!black] at (0,-1.95) {\verdict};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Four normal probability plots of twenty residuals. In each panel the ordered residual
+$e_{[i]}$ is plotted upwards against the normal quantile $z_i$ across, and the dashed line is
+where a normal sample would lie.}
+\label{fig:npp-patterns}
+\end{figure}
+
+Small samples fluctuate a good deal, and a plot of ten or twenty genuinely normal residuals
+often wobbles about the line. Judge the plot by its overall shape, not by individual
+points, and do not over-read it when $n$ is small.
+
+\begin{exa}\label{exa:catalyst}
+A reaction was run twice at each of five catalyst concentrations $x$ (\%), and the yield
+$y$ (g) recorded:
+\begin{center}
+\begin{tabular}{l|cccccccccc}
+$x$ & 1 & 1 & 2 & 2 & 3 & 3 & 4 & 4 & 5 & 5 \\
+\hline
+$y$ & 4 & 5 & 7 & 8 & 10 & 11 & 10 & 11 & 10 & 11 \\
+\end{tabular}
+\end{center}
+Fit a straight line, compute the residuals and draw their normal probability plot.
+\end{exa}
+
+\begin{solution}
+Here $n = 10$, $\sum x_i = 30$, $\sum y_i = 87$, so $\bar x = 3$ and $\bar y = 8.7$. Also
+$S_{xx} = \sum (x_i - 3)^2 = 2(4 + 1 + 0 + 1 + 4) = 20$ and
+\[
+S_{xy} = \sum (x_i - 3)y_i = -2(9) - 1(15) + 0 + 1(21) + 2(21) = 30 ,
+\]
+adding the two yields at each concentration. So $\hat\beta_1 = 30/20 = 1.5$,
+$\hat\beta_0 = 8.7 - 1.5 \times 3 = 4.2$, and
+\[
+\hat y = 4.2 + 1.5x .
+\]
+The fitted values at $x = 1, \dots, 5$ are $5.7, 7.2, 8.7, 10.2, 11.7$. The residuals, and
+the leverages from Example~\ref{exa:slr-leverage}, $h_{ii} = 1/10 + (x_i - 3)^2/20$, are
+\begin{center}
+\begin{tabular}{c|cccc}
+$x$ & $y$ & $\hat y$ & $e$ & $h_{ii}$ \\
+\hline
+1 & 4, 5 & 5.7 & $-1.7$, $-0.7$ & 0.30 \\
+2 & 7, 8 & 7.2 & $-0.2$, $0.8$ & 0.15 \\
+3 & 10, 11 & 8.7 & $1.3$, $2.3$ & 0.10 \\
+4 & 10, 11 & 10.2 & $-0.2$, $0.8$ & 0.15 \\
+5 & 10, 11 & 11.7 & $-1.7$, $-0.7$ & 0.30 \\
+\end{tabular}
+\end{center}
+$SS_{\mathrm{Res}} = \sum e_i^2 = 15.1$ and $MS_{\mathrm{Res}} = 15.1/8 = 1.8875$. (For the
+record, $SS_T = 60.1$, $R^2 = 0.749$ and $F_0 = 45/1.8875 = 23.8$, far beyond
+$F_{0.05,1,8} = 5.32$: by the usual summaries the line is a success.)
+
+For the plot, order the residuals and pair them with the quantiles of
+$P_i = (i - 0.5)/10$:
+\begin{center}
+\begin{tabular}{c|rcr}
+$i$ & $e_{[i]}$ & $P_i$ & $z_i$ \\
+\hline
+1 & $-1.7$ & 0.05 & $-1.64$ \\
+2 & $-1.7$ & 0.15 & $-1.04$ \\
+3 & $-0.7$ & 0.25 & $-0.67$ \\
+4 & $-0.7$ & 0.35 & $-0.39$ \\
+5 & $-0.2$ & 0.45 & $-0.13$ \\
+6 & $-0.2$ & 0.55 & $0.13$ \\
+7 & $0.8$ & 0.65 & $0.39$ \\
+8 & $0.8$ & 0.75 & $0.67$ \\
+9 & $1.3$ & 0.85 & $1.04$ \\
+10 & $2.3$ & 0.95 & $1.64$ \\
+\end{tabular}
+\end{center}
+The quantiles are symmetric, $z_{11 - i} = -z_i$, so only five need looking up. The plot
+is the left panel of Figure~\ref{fig:catalyst-plots}. The points lie near a line of slope
+about $\sqrt{1.8875} = 1.37$, with the usual small-sample wobble: there is no evidence
+against normality.
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.9]
+% Left: normal probability plot.
+\begin{scope}
+\draw[-Stealth] (-2.2,0) -- (2.3,0) node[right] {\small $z_i$};
+\draw[-Stealth] (0,-2.6) -- (0,3.0) node[above] {\small $e_{[i]}$};
+\foreach \t in {-1,1} \draw[-] (\t,0.06) -- (\t,-0.06) node[below] {\scriptsize $\t$};
+\foreach \t in {-2,-1,1,2} \draw[-] (0.06,\t) -- (-0.06,\t) node[left] {\scriptsize $\t$};
+\draw[dashed,gray] (-1.9,-2.6) -- (1.9,2.6);
+\foreach \p in {(-1.64,-1.7),(-1.04,-1.7),(-0.67,-0.7),(-0.39,-0.7),(-0.13,-0.2),(0.13,-0.2),(0.39,0.8),(0.67,0.8),(1.04,1.3),(1.64,2.3)}
+  \fill[blue] \p circle (2.2pt);
+\node[font=\small] at (0.1,-3.5) {Normal probability plot};
+\end{scope}
+% Right: residuals against fitted values.
+\begin{scope}[shift={(4.2,0)}]
+\draw[-Stealth] (0,-2.6) -- (5.0,-2.6) node[right] {\small $\hat y_i$};
+\draw[-Stealth] (0,-2.6) -- (0,3.0) node[above] {\small $e_i$};
+\draw[-,dashed,gray] (0,0) -- (4.7,0);
+\foreach \v [count=\k] in {5.7,7.2,8.7,10.2,11.7} \draw[-] ({0.8*\k},-2.54) -- ({0.8*\k},-2.66) node[below] {\scriptsize $\v$};
+\foreach \t in {-2,-1,0,1,2} \draw[-] (0.06,\t) -- (-0.06,\t) node[left] {\scriptsize $\t$};
+\draw[red!70!black,thick] plot[smooth] coordinates {(0.8,-1.2) (1.6,0.3) (2.4,1.8) (3.2,0.3) (4.0,-1.2)};
+\foreach \p in {(0.8,-1.7),(0.8,-0.7),(1.6,-0.2),(1.6,0.8),(2.4,1.3),(2.4,2.3),(3.2,-0.2),(3.2,0.8),(4.0,-1.7),(4.0,-0.7)}
+  \fill[blue] \p circle (2.2pt);
+\node[font=\small] at (2.4,-3.5) {Residuals against fitted values};
+\end{scope}
+\end{tikzpicture}
+\caption{Residual plots for the catalyst data of Example~\ref{exa:catalyst}. The normal plot
+looks satisfactory; the plot against $\hat y$ has a clear arch, traced in red through the
+mean residual at each concentration.}
+\label{fig:catalyst-plots}
+\end{figure}
+
+\subhead{Residuals against fitted values}
+A plot of the residuals $e_i$ (or $r_i$, or $t_i$) against the fitted values $\hat y_i$ is
+the most useful single plot. Theorem~\ref{thm:resid-var}(iii) is the reason to plot
+against $\hat y_i$: residuals and fitted values are uncorrelated, so when the model is
+right the plot should show no trend at all, just a horizontal band of points centred on
+zero. Plotting against the observed $y_i$ instead would be a mistake; $\mathbf{e}$ and
+$\mathbf{y}$ \emph{are} correlated, and the plot would show a rising trend even for a
+perfect model (Problem~\ref{prob:e-vs-y}).
+
+The common patterns are in Figure~\ref{fig:resid-patterns}:
+\begin{enumerate}[label=(\arabic*)]
+\item a \emph{horizontal band}: no evidence of inadequacy;
+\item a \emph{funnel} opening outwards: the variance grows with the mean, as it often does
+for counts, or when the errors are a percentage of the response;
+\item a \emph{double bow}, wider in the middle: typical of proportions between $0$ and $1$,
+whose variance $\pi(1 - \pi)$ is largest near $\pi = 0.5$;
+\item a \emph{curve}: the model has the wrong shape; terms such as $x^2$, or a
+transformation, or another regressor, are needed.
+\end{enumerate}
+Patterns (2) and (3) are violations of the constant-variance assumption A2. The usual
+remedies, transforming $y$ or fitting by weighted least squares, are the subject of a later
+section. Pattern (4) is a failure of the linear form itself, and is the most serious of the
+three, since then the fitted model is systematically wrong.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\py/\col/\num/\name/\verdict/\pts in {
+ 0/0/green/1/{Band}/{satisfactory}/{(0.15,0.43),(0.29,-0.56),(0.42,0.50),(0.56,-0.23),(0.70,0.27),(0.84,-0.55),(0.97,0.12),(1.11,-0.52),(1.25,0.51),(1.38,-0.35),(1.52,0.27),(1.66,-0.26),(1.79,0.25),(1.93,-0.34),(2.07,0.37),(2.21,-0.39),(2.34,0.61),(2.48,-0.51),(2.62,0.42),(2.75,-0.60),(2.89,0.23),(3.03,-0.20),(3.16,0.42),(3.30,-0.14),(3.44,0.14),(3.58,-0.37),(3.71,0.35),(3.85,-0.57)},
+ 5.2/0/orange/2/{Funnel}/{variance grows with mean}/{(0.15,0.10),(0.29,-0.17),(0.42,0.19),(0.56,-0.10),(0.70,0.14),(0.84,-0.33),(0.97,0.08),(1.11,-0.39),(1.25,0.41),(1.38,-0.31),(1.52,0.26),(1.66,-0.26),(1.79,0.27),(1.93,-0.40),(2.07,0.46),(2.21,-0.52),(2.34,0.84),(2.48,-0.74),(2.62,0.65),(2.75,-0.97),(2.89,0.38),(3.03,-0.35),(3.16,0.77),(3.30,-0.27),(3.44,0.27),(3.58,-0.76),(3.71,0.74),(3.85,-1.24)},
+ 0/-4.0/blue/3/{Double bow}/{variance largest mid-range}/{(0.15,0.23),(0.29,-0.42),(0.42,0.44),(0.56,-0.23),(0.70,0.29),(0.84,-0.64),(0.97,0.15),(1.11,-0.68),(1.25,0.68),(1.38,-0.48),(1.52,0.38),(1.66,-0.37),(1.79,0.35),(1.93,-0.49),(2.07,0.53),(2.21,-0.56),(2.34,0.86),(2.48,-0.71),(2.62,0.58),(2.75,-0.81),(2.89,0.29),(3.03,-0.25),(3.16,0.49),(3.30,-0.16),(3.44,0.14),(3.58,-0.33),(3.71,0.26),(3.85,-0.31)},
+ 5.2/-4.0/red/4/{Curve}/{wrong form of model}/{(0.15,1.30),(0.29,0.64),(0.42,0.81),(0.56,0.30),(0.70,0.29),(0.84,-0.22),(0.97,-0.12),(1.11,-0.52),(1.25,-0.24),(1.38,-0.68),(1.52,-0.52),(1.66,-0.79),(1.79,-0.63),(1.93,-0.88),(2.07,-0.60),(2.21,-0.88),(2.34,-0.45),(2.48,-0.82),(2.62,-0.37),(2.75,-0.68),(2.89,-0.22),(3.03,-0.25),(3.16,0.16),(3.30,0.13),(3.44,0.44),(3.58,0.47),(3.71,1.00),(3.85,0.91)}} {
+ \begin{scope}[shift={(\px,\py)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.4,-1.9) rectangle (4.5,1.85);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (-0.05,1.5) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.2,1.5) {\name};
+  \draw[-Stealth,gray] (0,0) -- (4.3,0);
+  \draw[-Stealth,gray] (0,-1.15) -- (0,1.15);
+  \begin{scope}[yscale=0.8]
+   \foreach \p in \pts \fill[\col!60!black] \p circle (1.9pt);
+  \end{scope}
+  \node[font=\scriptsize,text=\col!50!black] at (2.05,-1.6) {\verdict};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Patterns in plots of residuals $e_i$ (upwards) against fitted values $\hat y_i$ (across).}
+\label{fig:resid-patterns}
+\end{figure}
+
+For the catalyst data the right panel of Figure~\ref{fig:catalyst-plots} is pattern (4):
+the residuals are negative at both ends and positive in the middle. The yield rises with
+concentration and then levels off, and a straight line, forced to compromise, runs above
+the data at the ends and below it in the middle. The normal plot did not detect this, nor
+did $R^2$ or the $F$-test. Subsection~\ref{ssec:lof} gives a formal test that confirms
+it.
+
+\subhead{Residuals against the regressors}
+In multiple regression, also plot the residuals against each regressor $x_j$ in turn. The
+patterns mean what they did before: a funnel indicates non-constant variance, a curve that
+$x_j$ enters the model non-linearly (perhaps needing $x_j^2$, or a transformation of
+$x_j$). It is also worth plotting the residuals against variables \emph{not} in the model.
+Any visible trend means the omitted variable carries information about $y$ that the model
+is missing.
+
+\subhead{Residuals in time order}
+If the observations were collected one after another, plot the residuals in the order of
+collection. Under A3 the plot should be patternless. Long runs of residuals of the same
+sign indicate \emph{positive autocorrelation}, successive errors that tend to be alike;
+rapid alternation of sign indicates negative autocorrelation. Correlated errors are common
+when data are recorded over time, and they invalidate the variance formulas on which every
+test so far depends. A formal test, and models for correlated errors, are given in the
+section on autocorrelated errors.
+
+\subhead{Partial regression and partial residual plots}
+A plot of $e_i$ against $x_j$ shows whether $x_j$ is correctly represented, but it does not
+show the effect of $x_j$ itself, because $x_j$ is correlated with the other regressors.
+Theorem~\ref{thm:added-variable} gives a plot that does.
+
+\begin{defn}
+Let $\mathbf{X}_1$ be the columns of $\mathbf{X}$ other than the one for $x_j$, with hat
+matrix $\mathbf{H}_1$. The \textbf{partial regression plot} (or \emph{added-variable plot})
+for $x_j$ plots
+\[
+\mathbf{v} = (\mathbf{I} - \mathbf{H}_1)\mathbf{y}
+\quad\text{against}\quad
+\mathbf{u} = (\mathbf{I} - \mathbf{H}_1)\mathbf{x}_j ,
+\]
+the residuals from regressing $y$ on the other regressors against the residuals from
+regressing $x_j$ on them.
+\end{defn}
+
+\begin{thm}\label{thm:added-variable-plot}
+In the partial regression plot for $x_j$, the least-squares line through the origin has
+slope $\hat\beta_j$, the coefficient of $x_j$ in the full model, and its residuals are the
+residuals $\mathbf{e}$ of the full model.
+\end{thm}
+
+\begin{proof}
+The slope of the line through the origin is $\mathbf{u}^\top\mathbf{v}/\mathbf{u}^\top\mathbf{u}$.
+Since $\mathbf{I} - \mathbf{H}_1$ is symmetric and idempotent,
+$\mathbf{u}^\top\mathbf{v} = \mathbf{x}_j^\top(\mathbf{I} - \mathbf{H}_1)\mathbf{y} = \mathbf{u}^\top\mathbf{y}$,
+so the slope is $\mathbf{u}^\top\mathbf{y}/\mathbf{u}^\top\mathbf{u} = \hat\beta_j$ by
+Theorem~\ref{thm:added-variable}. The proof of that theorem showed
+$\mathbf{H} = \mathbf{H}_1 + \mathbf{u}\mathbf{u}^\top/\mathbf{u}^\top\mathbf{u}$, so the
+residuals of the plot's line are
+\[
+\mathbf{v} - \hat\beta_j\mathbf{u}
+= (\mathbf{I} - \mathbf{H}_1)\mathbf{y} - \frac{\mathbf{u}\mathbf{u}^\top\mathbf{y}}{\mathbf{u}^\top\mathbf{u}}
+= (\mathbf{I} - \mathbf{H})\mathbf{y} = \mathbf{e} . \qedhere
+\]
+\end{proof}
+
+(Both $\mathbf{u}$ and $\mathbf{v}$ are residuals from a fit with an intercept, so both add
+to zero, and the least-squares line with an intercept is the same as the line through the
+origin.) So the partial regression plot is a scatter plot that does for multiple regression
+what the ordinary scatter plot does for simple regression: its slope is the estimated
+effect of $x_j$, its scatter about the line is the residual scatter of the whole model, and
+a curve in it shows that $x_j$ needs a non-linear term. Points that dominate the slope are
+easy to spot.
+
+\begin{exa}\label{exa:crop-avp}
+Construct the partial regression plot for rainfall $x_2$ in the crop data.
+\end{exa}
+
+\begin{solution}
+\emph{Regress $x_2$ on $x_1$.} $\bar x_1 = 3$, $\bar x_2 = 2.5$,
+$\sum(x_{i1} - 3)^2 = 4 + 1 + 1 + 0 + 1 + 9 = 16$ and
+$\sum(x_{i1} - 3)x_{i2} = -4 - 1 - 3 + 0 + 4 + 9 = 5$. The slope is $5/16 = 0.3125$, the
+intercept $2.5 - 0.3125 \times 3 = 1.5625$, and $\mathbf{u}$ is $x_2$ minus the fitted values.
+
+\emph{Regress $y$ on $x_1$.} $\bar y = 11.5$ and
+$\sum(x_{i1} - 3)y_i = -12 - 9 - 11 + 0 + 15 + 54 = 37$. The slope is $37/16 = 2.3125$, the
+intercept $11.5 - 2.3125 \times 3 = 4.5625$, and $\mathbf{v}$ is $y$ minus the fitted values.
+\begin{center}
+\begin{tabular}{c|rrrrrr}
+Plot & 1 & 2 & 3 & 4 & 5 & 6 \\
+\hline
+$u_i$ & $0.125$ & $-1.188$ & $0.813$ & $-0.500$ & $1.188$ & $-0.438$ \\
+$v_i$ & $-0.875$ & $-0.188$ & $1.813$ & $-1.500$ & $1.188$ & $-0.438$ \\
+\end{tabular}
+\end{center}
+(All the entries are exact multiples of $1/16$; they are rounded here.) Then
+$\mathbf{u}^\top\mathbf{v} = \mathbf{u}^\top\mathbf{u} = 3.9375$, so the slope is $1 = \hat\beta_2$,
+and $v_i - u_i = -1, 1, 1, -1, 0, 0$, the residuals of the full fit, as
+Theorem~\ref{thm:added-variable-plot} says. Note also that
+$\mathbf{u}^\top\mathbf{u} = 3.9375 = 1/C_{22}$, as in Theorem~\ref{thm:added-variable}.
+\end{solution}
+
+A related plot uses the full model only.
+
+\begin{defn}
+The \textbf{partial residuals} for $x_j$ are $e_i + \hat\beta_j x_{ij}$, and the
+\textbf{partial residual plot} (or \emph{component-plus-residual plot}) plots them against
+$x_{ij}$.
+\end{defn}
+
+The partial residual adds back to the residual the part of the fit due to $x_j$. Its plot
+against $x_j$ also has least-squares slope $\hat\beta_j$ (Problem~\ref{prob:partial-resid}),
+and, because the horizontal axis is $x_j$ itself rather than a residual, it is the better
+plot for seeing \emph{what shape} the dependence on $x_j$ has, and so for choosing a
+transformation of $x_j$.
+
+\subsection{Outliers}
+An \textbf{outlier} is an observation that is unlike the rest: in a regression, one whose
+response is far from where the model fitted to the other observations would put it. It
+shows up as a large scaled residual, conventionally three or four standard deviations from
+zero.
+
+Outliers have causes, and the cause decides what is done. A \emph{bad value}, a reading
+recorded wrongly, a faulty instrument, a unit that does not belong to the population, should
+be corrected if possible, and otherwise removed. But an outlier may be a perfectly genuine
+observation, telling us that the model is wrong in some region, or that the errors have
+heavier tails than the normal. Such points should never be deleted merely to improve the
+fit; they are often the most informative points in the data. The safe course is to fit the
+model with and without the point, report both, and look for an explanation.
+
+\subhead{A test for an outlier}
+Theorem~\ref{thm:rstudent}(ii) turns R-student into a test. If observation $i$ was singled
+out in advance, compare $|t_i|$ with $t_{\alpha/2, n - p - 1}$. Usually it was not: we look
+at all $n$ residuals and test the largest. The chance that \emph{at least one} of $n$
+statistics exceeds the critical value is then far above $\alpha$. The \emph{Bonferroni}
+correction allows for this. Testing each at level $\alpha/n$, the probability of any false
+alarm is at most $n \times \alpha/n = \alpha$ (the probability of a union of events is at
+most the sum of their probabilities). So
+\[
+\text{declare observation } i \text{ an outlier if } |t_i| > t_{\alpha/(2n),\, n - p - 1} .
+\]
+The test is conservative, but critical values of this size are what a single extreme
+residual among $n$ should be measured against.
+
+\begin{exa}\label{exa:yield-outlier}
+In the chemical-yield data of Example~\ref{exa:yield}, suppose the yield at $40^\circ$C had
+been recorded as $80$ instead of $70$:
+\begin{center}
+\begin{tabular}{l|cccccc}
+Temperature $x$ & 10 & 20 & 30 & 40 & 50 & 60 \\
+\hline
+Yield $y$ & 52 & 58 & 63 & 80 & 74 & 81 \\
+\end{tabular}
+\end{center}
+Fit the line and look for an outlier.
+\end{exa}
+
+\begin{solution}
+As before, $\bar x = 35$ and $S_{xx} = 1750$. Now $\sum y_i = 408$, $\bar y = 68$, and
+\begin{align*}
+S_{xy} = \sum(x_i - 35)y_i &= -1300 - 870 - 315 + 400 + 1110 + 2025 \\
+&= 1050 ,
+\end{align*}
+so $\hat\beta_1 = 1050/1750 = 0.6$, $\hat\beta_0 = 68 - 0.6 \times 35 = 47$ and
+$\hat y = 47 + 0.6x$. By Example~\ref{exa:slr-leverage},
+$h_{ii} = 1/6 + (x_i - 35)^2/1750$.
+\begin{center}
+\begin{tabular}{c|rrrrrr}
+$x_i$ & 10 & 20 & 30 & 40 & 50 & 60 \\
+\hline
+$\hat y_i$ & 53 & 59 & 65 & 71 & 77 & 83 \\
+$e_i$ & $-1$ & $-1$ & $-2$ & $9$ & $-3$ & $-2$ \\
+$h_{ii}$ & 0.524 & 0.295 & 0.181 & 0.181 & 0.295 & 0.524 \\
+\end{tabular}
+\end{center}
+$SS_{\mathrm{Res}} = 1 + 1 + 4 + 81 + 9 + 4 = 100$ and $MS_{\mathrm{Res}} = 100/4 = 25$. For the
+fourth point,
+\begin{align*}
+r_4 &= \frac{9}{\sqrt{25 \times 0.819}} = \frac{9}{4.525} = 1.989, \\
+S^2_{(4)} &= \frac{100 - 81/0.819}{3} = \frac{100 - 98.895}{3} = 0.368, \\
+t_4 &= \frac{9}{\sqrt{0.368 \times 0.819}} = \frac{9}{0.549} = 16.39 .
+\end{align*}
+The other $|t_i|$ are all below $0.7$.
+
+The studentized residual $r_4 = 1.99$ looks entirely unremarkable. But here $n - p = 4$,
+so no $r_i$ can exceed $2$ in size: $r_4$ is as large as a studentized residual can be.
+R-student shows what is happening. With the fourth point removed, the other five lie very
+close to a line ($S^2_{(4)} = 0.37$, against $MS_{\mathrm{Res}} = 25$ with it), and the
+fourth point is $16$ standard errors from that line. The Bonferroni critical value at
+$\alpha = 0.05$ is $t_{0.05/12,\,3} = 6.23$, and $16.39$ is far beyond it: observation~4 is
+an outlier. Checking the laboratory record would reveal the transcription error.
+\end{solution}
+
+\subsection{The PRESS statistic}
+$R^2$ and $MS_{\mathrm{Res}}$ measure how well a model fits the data used to fit it. A model
+always fits its own data better than it will fit new data, because the estimates have
+adapted to the particular errors in the sample. A fairer measure predicts each observation
+from a fit that did not use it.
+
+\begin{defn}
+The \textbf{prediction error sum of squares} is
+\[
+\mathrm{PRESS} = \sum_{i=1}^n \bigl(y_i - \hat y_{(i)}\bigr)^2
+= \sum_{i=1}^n \left(\frac{e_i}{1 - h_{ii}}\right)^2 ,
+\]
+and the \textbf{$R^2$ for prediction} is
+\[
+R^2_{\mathrm{pred}} = 1 - \frac{\mathrm{PRESS}}{SS_T} .
+\]
+\end{defn}
+
+The second form of PRESS is Theorem~\ref{thm:deletion}(iii); it means that PRESS, although
+it is defined by $n$ separate fits, is computed from one. Since $0 < 1 - h_{ii} \le 1$,
+every PRESS residual is at least as large as the ordinary one, so
+$\mathrm{PRESS} \ge SS_{\mathrm{Res}}$ and $R^2_{\mathrm{pred}} \le R^2$. A large gap between
+them warns that the model will predict new observations much less well than its fit
+suggests. PRESS is also useful for comparing models: other things equal, prefer the model
+with the smaller PRESS. Points with high leverage contribute most, because their residuals
+are divided by a small $1 - h_{ii}$.
+
+\begin{exa}\label{exa:crop-press}
+Compute PRESS and $R^2_{\mathrm{pred}}$ for the crop data.
+\end{exa}
+
+\begin{solution}
+The PRESS residuals were found in Example~\ref{exa:crop-scaled}. Exactly, from the
+leverages $53/126$, $37/63$, $25/63$, $29/126$,
+\[
+e_{(1)} = -\frac{126}{73}, \quad e_{(2)} = \frac{63}{26}, \quad
+e_{(3)} = \frac{63}{38}, \quad e_{(4)} = -\frac{126}{97},
+\]
+and $e_{(5)} = e_{(6)} = 0$. So
+\[
+\mathrm{PRESS} = 2.979 + 5.871 + 2.749 + 1.687 = 13.29 .
+\]
+From Example~\ref{exa:crop-anova}, $SS_T = 93.5$, so
+\[
+R^2_{\mathrm{pred}} = 1 - \frac{13.29}{93.5} = 0.858 ,
+\]
+against $R^2 = 0.957$. We may expect the model to explain about $86\%$ of the variability
+in predicting new plots. PRESS is more than three times $SS_{\mathrm{Res}} = 4$, a reminder
+that with six observations and three parameters the fit has adapted a good deal to its
+data. Plot~2 alone contributes $44\%$ of PRESS: its leverage is high, and the other five
+plots predict it badly.
+\end{solution}
+
+\subsection{Lack of fit and pure error}\label{ssec:lof}
+The residual plots of Figure~\ref{fig:catalyst-plots} suggested that a straight line has the
+wrong shape for the catalyst data. When the data contain \textbf{replicates}, repeated
+observations of $y$ at the same value of $x$, the suspicion can be tested formally.
+
+The idea is this. The residual sum of squares measures two things at once: the random
+scatter of $y$ about its true mean, and any systematic failure of the line to pass through
+the true means. Replicates measure the first on its own, because the scatter among
+observations at the \emph{same} $x$ can owe nothing to the shape of the model. If what is
+left over is much larger than replicate scatter would explain, the model has the wrong
+shape.
+
+\subhead{The decomposition}
+Suppose there are $m$ distinct values $x_1, \dots, x_m$ of the regressor, with $n_i$
+observations $y_{i1}, \dots, y_{in_i}$ at $x_i$, and $n = \sum n_i$. Let $\bar y_i$ be the
+mean of the observations at $x_i$, and $\hat y_i$ the fitted value there. The residual of
+$y_{ij}$ splits as
+\[
+y_{ij} - \hat y_i = (y_{ij} - \bar y_i) + (\bar y_i - \hat y_i) .
+\]
+
+\begin{thm}\label{thm:lof-identity}
+$SS_{\mathrm{Res}} = SS_{\mathrm{PE}} + SS_{\mathrm{LOF}}$, where
+\[
+SS_{\mathrm{PE}} = \sum_{i=1}^m \sum_{j=1}^{n_i}(y_{ij} - \bar y_i)^2 ,
+\qquad
+SS_{\mathrm{LOF}} = \sum_{i=1}^m n_i(\bar y_i - \hat y_i)^2 .
+\]
+$SS_{\mathrm{PE}}$ is the \textbf{pure-error} sum of squares, with $n - m$ degrees of
+freedom, and $SS_{\mathrm{LOF}}$ the \textbf{lack-of-fit} sum of squares, with $m - 2$.
+\end{thm}
+
+\begin{proof}
+Square the split residual and add over $i$ and $j$. The cross term is
+\[
+2\sum_{i=1}^m (\bar y_i - \hat y_i)\sum_{j=1}^{n_i}(y_{ij} - \bar y_i) = 0 ,
+\]
+since deviations from a mean add to zero. The degrees of freedom are those of the
+distribution theory below: $\sum_i (n_i - 1) = n - m$ for pure error, and
+$(n - 2) - (n - m) = m - 2$ for lack of fit.
+\end{proof}
+
+$SS_{\mathrm{LOF}}$ is a weighted sum of squared distances between the fitted line and the
+means at each $x$: it is small when the line passes close to the group means. At least one
+$x$ must be replicated for there to be any pure error ($n > m$), and there must be more
+distinct $x$ values than parameters ($m > 2$) for lack of fit to be measurable.
+
+\begin{thm}\label{thm:lof-test}
+Under A1--A4 with $E(y_{ij}) = \mu_i$, where the means $\mu_i$ need not lie on a line,
+\begin{enumerate}[label=(\roman*)]
+\item $SS_{\mathrm{PE}}/\sigma^2 \sim \chi^2_{n - m}$, so $MS_{\mathrm{PE}} = SS_{\mathrm{PE}}/(n - m)$
+is unbiased for $\sigma^2$ whatever the true means;
+\item $SS_{\mathrm{PE}}$ and $SS_{\mathrm{LOF}}$ are independent;
+\item if the straight-line model is correct, $\mu_i = \beta_0 + \beta_1 x_i$, then
+$SS_{\mathrm{LOF}}/\sigma^2 \sim \chi^2_{m - 2}$, and
+\[
+F_0 = \frac{SS_{\mathrm{LOF}}/(m - 2)}{SS_{\mathrm{PE}}/(n - m)} \sim F_{m - 2,\, n - m} .
+\]
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+Let $\mathbf{Z}$ be the $n \times m$ matrix of group indicators, with $z_{(ij),k} = 1$ if
+$k = i$ and $0$ otherwise, and let $\mathbf{P} = \mathbf{Z}(\mathbf{Z}^\top\mathbf{Z})^{-1}\mathbf{Z}^\top$
+be its hat matrix. Regressing $y$ on $\mathbf{Z}$ fits a separate mean to each group, so
+$\mathbf{Py}$ replaces each $y_{ij}$ by $\bar y_i$, and $\mathbf{y}^\top(\mathbf{I} - \mathbf{P})\mathbf{y} = SS_{\mathrm{PE}}$.
+Like any hat matrix, $\mathbf{P}$ is symmetric and idempotent with trace $m$
+(Theorem~\ref{thm:hat}).
+
+Both columns of $\mathbf{X}$, the ones and the $x$ values, are constant within groups, so
+they are combinations of the columns of $\mathbf{Z}$; hence $\mathbf{PX} = \mathbf{X}$ and,
+taking transposes and using symmetry, $\mathbf{X}^\top\mathbf{P} = \mathbf{X}^\top$. Then
+$\mathbf{PH} = \mathbf{H}$ and $\mathbf{HP} = \mathbf{H}$, and so $\mathbf{P} - \mathbf{H}$
+is symmetric, with
+\[
+(\mathbf{P} - \mathbf{H})^2 = \mathbf{P} - \mathbf{H} - \mathbf{H} + \mathbf{H} = \mathbf{P} - \mathbf{H},
+\qquad
+(\mathbf{I} - \mathbf{P})(\mathbf{P} - \mathbf{H}) = \mathbf{0} .
+\]
+Its trace is $m - 2$, and
+$\mathbf{y}^\top(\mathbf{P} - \mathbf{H})\mathbf{y} = \mathbf{y}^\top(\mathbf{I} - \mathbf{H})\mathbf{y} - \mathbf{y}^\top(\mathbf{I} - \mathbf{P})\mathbf{y}
+= SS_{\mathrm{Res}} - SS_{\mathrm{PE}} = SS_{\mathrm{LOF}}$.
+
+Write $\mathbf{y} = \boldsymbol\mu + \boldsymbol\varepsilon$, where $\boldsymbol\mu$ has entry
+$\mu_i$ for each observation in group $i$; it is a combination of the columns of
+$\mathbf{Z}$, so $(\mathbf{I} - \mathbf{P})\boldsymbol\mu = \mathbf{0}$.
+
+(i) $SS_{\mathrm{PE}} = \boldsymbol\varepsilon^\top(\mathbf{I} - \mathbf{P})\boldsymbol\varepsilon$,
+and Lemma~\ref{lem:idempotent-chisq}(ii) applies, with $\operatorname{tr}(\mathbf{I} - \mathbf{P}) = n - m$.
+
+(ii) $SS_{\mathrm{PE}}$ is a function of $(\mathbf{I} - \mathbf{P})\mathbf{y}$ and
+$SS_{\mathrm{LOF}} = \bigl((\mathbf{P} - \mathbf{H})\mathbf{y}\bigr)^\top(\mathbf{P} - \mathbf{H})\mathbf{y}$
+of $(\mathbf{P} - \mathbf{H})\mathbf{y}$. These are jointly normal with covariance
+$\sigma^2(\mathbf{I} - \mathbf{P})(\mathbf{P} - \mathbf{H}) = \mathbf{0}$, so independent by (F1).
+
+(iii) If $\boldsymbol\mu = \mathbf{X}\boldsymbol\beta$ then
+$(\mathbf{P} - \mathbf{H})\boldsymbol\mu = \mathbf{X}\boldsymbol\beta - \mathbf{X}\boldsymbol\beta = \mathbf{0}$,
+so $SS_{\mathrm{LOF}} = \boldsymbol\varepsilon^\top(\mathbf{P} - \mathbf{H})\boldsymbol\varepsilon$
+and Lemma~\ref{lem:idempotent-chisq}(ii) gives $\chi^2_{m - 2}$. The $F$ distribution
+follows from (i), (ii) and (F3).
+\end{proof}
+
+When the line is wrong, $(\mathbf{P} - \mathbf{H})\boldsymbol\mu \neq \mathbf{0}$, and a
+calculation like that of Lemma~\ref{lem:quad-form} gives
+\[
+E(SS_{\mathrm{LOF}}) = (m - 2)\sigma^2 + \boldsymbol\mu^\top(\mathbf{P} - \mathbf{H})\boldsymbol\mu ,
+\]
+where the second term is $\sum_i n_i(\mu_i - \tilde\mu_i)^2 > 0$, $\tilde\mu_i$ being the
+value at $x_i$ of the least-squares line fitted to the true means. So $MS_{\mathrm{LOF}}$
+estimates $\sigma^2$ when the model is right and something larger when it is wrong, while
+$MS_{\mathrm{PE}}$ estimates $\sigma^2$ in either case. A large $F_0$ is evidence of lack of
+fit.
+
+\subhead{The lack-of-fit test}
+To test $H_0$: the straight-line model is adequate, against $H_1$: it is not, compute
+\[
+F_0 = \frac{MS_{\mathrm{LOF}}}{MS_{\mathrm{PE}}}
+\]
+and reject $H_0$ at level $\alpha$ if $F_0 > F_{\alpha, m - 2, n - m}$. The calculations go in an extension of the analysis of
+variance table:
+\begin{center}
+\begin{tabular}{lcccc}
+Source & SS & df & MS & $F_0$ \\
+\hline
+Regression & $SS_R$ & $1$ & $MS_R$ & \\
+Residual & $SS_{\mathrm{Res}}$ & $n - 2$ & & \\
+\quad Lack of fit & $SS_{\mathrm{LOF}}$ & $m - 2$ & $MS_{\mathrm{LOF}}$ & $MS_{\mathrm{LOF}}/MS_{\mathrm{PE}}$ \\
+\quad Pure error & $SS_{\mathrm{PE}}$ & $n - m$ & $MS_{\mathrm{PE}}$ & \\
+\hline
+Total & $SS_T$ & $n - 1$ & & \\
+\end{tabular}
+\end{center}
+If $H_0$ is not rejected, there is no evidence against the model, and $MS_{\mathrm{Res}}$,
+which pools both sources and has more degrees of freedom, is used to estimate $\sigma^2$
+in the tests and intervals that follow. If $H_0$ is rejected, the model should be revised
+before any inference is drawn from it.
+
+Everything extends to multiple regression, where the replicates are repeated observations
+at the same \emph{combination} of regressor values. With $m$ distinct combinations and $p$
+parameters, $SS_{\mathrm{LOF}}$ has $m - p$ degrees of freedom; the proof is unchanged, with
+$\operatorname{tr}(\mathbf{P} - \mathbf{H}) = m - p$.
+
+\begin{remark}
+Replicates must be genuine: separate runs of the process at the same settings, each
+subject to all the sources of variation that affect any other run. Measuring the same
+sample twice, or splitting one batch, captures only measurement error, which is smaller
+than the true run-to-run variation. $MS_{\mathrm{PE}}$ is then too small, and the test finds
+lack of fit that is not there.
+\end{remark}
+
+\begin{exa}\label{exa:catalyst-lof}
+Test the straight-line model for the catalyst data of Example~\ref{exa:catalyst} for lack of
+fit, at $\alpha = 0.05$.
+\end{exa}
+
+\begin{solution}
+There are $m = 5$ distinct concentrations, each with $n_i = 2$ observations, $n = 10$.
+
+\emph{Pure error.} Each pair differs by $1$, so each pair contributes
+$(\tfrac12)^2 + (\tfrac12)^2 = 0.5$, and $SS_{\mathrm{PE}} = 5 \times 0.5 = 2.5$ on
+$n - m = 5$ degrees of freedom.
+
+\emph{Lack of fit.} From Example~\ref{exa:catalyst}, $SS_{\mathrm{Res}} = 15.1$, so
+$SS_{\mathrm{LOF}} = 15.1 - 2.5 = 12.6$ on $m - 2 = 3$ degrees of freedom. As a check, directly,
+with group means $4.5, 7.5, 10.5, 10.5, 10.5$ and fitted values $5.7, 7.2, 8.7, 10.2, 11.7$,
+\[
+SS_{\mathrm{LOF}} = 2\bigl[(-1.2)^2 + 0.3^2 + 1.8^2 + 0.3^2 + (-1.2)^2\bigr] = 2 \times 6.3 = 12.6 .
+\]
+\emph{The table.} $SS_R = \hat\beta_1 S_{xy} = 1.5 \times 30 = 45$.
+\begin{center}
+\begin{tabular}{lcccc}
+Source & SS & df & MS & $F_0$ \\
+\hline
+Regression & 45.0 & 1 & 45.0 & \\
+Residual & 15.1 & 8 & & \\
+\quad Lack of fit & 12.6 & 3 & 4.2 & 8.40 \\
+\quad Pure error & 2.5 & 5 & 0.5 & \\
+\hline
+Total & 60.1 & 9 & & \\
+\end{tabular}
+\end{center}
+$F_{0.05,3,5} = 5.41$, and $F_0 = 8.40 > 5.41$ (the $P$-value is $0.021$). We reject $H_0$: the
+straight line does not adequately describe how yield depends on concentration.
+
+This confirms what the plot of residuals against fitted values suggested. The means rise
+from $4.5$ to $10.5$ over the first three concentrations and then stay level, and a
+straight line cannot follow that. Notice too that the line's $MS_{\mathrm{Res}} = 1.89$ is
+nearly four times the pure-error estimate $0.5$ of $\sigma^2$, because the lack of fit has
+inflated it. A curved model, for instance one with an $x^2$ term, should be tried.
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:yield-resid}
+For the original chemical-yield data of Example~\ref{exa:yield}, with fitted line
+$\hat y = 46.3333 + 0.5714x$:
+\begin{enumerate}[label=(\alph*)]
+\item find the residuals, $MS_{\mathrm{Res}}$ and the leverages;
+\item find the studentized residuals and the R-student residuals, and say whether any
+observation is an outlier at $\alpha = 0.05$;
+\item compute PRESS and $R^2_{\mathrm{pred}}$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) With $\hat\beta_1 = 4/7$ exactly, the fitted values are $46.3333 + 0.5714x_i$, giving
+\begin{center}
+\begin{tabular}{c|rrrrrr}
+$x_i$ & 10 & 20 & 30 & 40 & 50 & 60 \\
+\hline
+$\hat y_i$ & 52.048 & 57.762 & 63.476 & 69.190 & 74.905 & 80.619 \\
+$e_i$ & $-0.048$ & $0.238$ & $-0.476$ & $0.810$ & $-0.905$ & $0.381$ \\
+$h_{ii}$ & 0.524 & 0.295 & 0.181 & 0.181 & 0.295 & 0.524 \\
+\end{tabular}
+\end{center}
+In exact terms the residuals are $-1/21$, $5/21$, $-10/21$, $17/21$, $-19/21$, $8/21$; they
+add to zero, and $\sum(x_i - 35)e_i = 0$. Then $SS_{\mathrm{Res}} = 840/441 = 1.905$ and
+$MS_{\mathrm{Res}} = 1.905/4 = 0.476$. The leverages are
+$h_{ii} = 1/6 + (x_i - 35)^2/1750$, from Example~\ref{exa:slr-leverage}.
+
+(b) With $r_i = e_i/\sqrt{0.476(1 - h_{ii})}$ and $S^2_{(i)} = (1.905 - e_i^2/(1 - h_{ii}))/3$:
+\begin{center}
+\begin{tabular}{c|rrrrrr}
+$x_i$ & 10 & 20 & 30 & 40 & 50 & 60 \\
+\hline
+$r_i$ & $-0.100$ & $0.411$ & $-0.763$ & $1.296$ & $-1.562$ & $0.800$ \\
+$t_i$ & $-0.087$ & $0.364$ & $-0.714$ & $1.474$ & $-2.165$ & $0.756$ \\
+\end{tabular}
+\end{center}
+The largest $|t_i|$ is $2.165$, far below the Bonferroni critical value
+$t_{0.05/12,\,3} = 6.23$. No observation is an outlier.
+
+(c) The PRESS residuals $e_i/(1 - h_{ii})$ are $-0.100$, $0.338$, $-0.581$, $0.988$,
+$-1.284$, $0.800$, so
+\[
+\mathrm{PRESS} = 0.010 + 0.114 + 0.338 + 0.977 + 1.648 + 0.640 = 3.727 .
+\]
+$SS_T = 26974 - 398^2/6 = 573.33$, so $R^2_{\mathrm{pred}} = 1 - 3.727/573.33 = 0.9935$, very
+close to $R^2 = 0.9967$. The line should predict new runs about as well as it fits these.
+\end{solution}
+
+\begin{problem}\label{prob:e-vs-y}
+\begin{enumerate}[label=(\alph*)]
+\item Show that under A1--A3, $\operatorname{Cov}(\mathbf{e}, \mathbf{y}) = \sigma^2(\mathbf{I} - \mathbf{H})$.
+\item For a model with an intercept, show that the sample correlation between the
+residuals and the observed responses is $\sqrt{1 - R^2}$.
+\item Explain why residuals are plotted against $\hat y_i$ and not against $y_i$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\mathbf{e} = (\mathbf{I} - \mathbf{H})\mathbf{y}$ and $\operatorname{Var}(\mathbf{y}) = \sigma^2\mathbf{I}$, so
+$\operatorname{Cov}(\mathbf{e}, \mathbf{y}) = (\mathbf{I} - \mathbf{H})\sigma^2\mathbf{I} = \sigma^2(\mathbf{I} - \mathbf{H})$.
+In particular $\operatorname{Cov}(e_i, y_i) = \sigma^2(1 - h_{ii}) > 0$ whenever $h_{ii} < 1$.
+
+(b) With an intercept, $\sum e_i = 0$, so $\bar e = 0$ and
+\[
+\sum (e_i - \bar e)(y_i - \bar y) = \sum e_i y_i = \mathbf{e}^\top\mathbf{y} .
+\]
+Since $\mathbf{y} = \hat{\mathbf{y}} + \mathbf{e}$ and $\mathbf{e}^\top\hat{\mathbf{y}} = 0$
+(Theorem~\ref{thm:hat}), this is $\mathbf{e}^\top\mathbf{e} = SS_{\mathrm{Res}}$. The sums of
+squares about the means are $\sum e_i^2 = SS_{\mathrm{Res}}$ and $SS_T$. So the correlation is
+\[
+\frac{SS_{\mathrm{Res}}}{\sqrt{SS_{\mathrm{Res}}\, SS_T}} = \sqrt{\frac{SS_{\mathrm{Res}}}{SS_T}} = \sqrt{1 - R^2} .
+\]
+
+(c) The correlation in (b) is positive for every data set, whether the model is right or
+not. A plot of $e_i$ against $y_i$ would always show a rising trend, which would be a
+property of least squares and not of the data. Against $\hat y_i$ the sample correlation is
+exactly zero (since $\mathbf{e}^\top\hat{\mathbf{y}} = 0$ and $\bar e = 0$), so any pattern seen
+there is genuine. For the catalyst data, $\sqrt{1 - 0.749} = 0.50$: a plot of $e$ against
+$y$ would have shown a misleading upward drift.
+\end{solution}
+
+\begin{problem}\label{prob:partial-resid}
+Show that the least-squares line, with intercept, fitted to the partial residual plot for
+$x_j$ has slope $\hat\beta_j$. Verify this for $x_1$ in the crop data.
+\end{problem}
+
+\begin{solution}
+The slope of the least-squares line of $w_i = e_i + \hat\beta_j x_{ij}$ on $x_{ij}$ is
+\[
+\frac{\sum (x_{ij} - \bar x_j) w_i}{\sum (x_{ij} - \bar x_j)^2}
+= \frac{\sum (x_{ij} - \bar x_j) e_i + \hat\beta_j \sum (x_{ij} - \bar x_j) x_{ij}}{\sum (x_{ij} - \bar x_j)^2} .
+\]
+By Theorem~\ref{thm:hat}(iii), $\sum x_{ij}e_i = 0$ and $\sum e_i = 0$, so the first sum in the
+numerator vanishes. The second sum, $\sum(x_{ij} - \bar x_j)x_{ij}$, equals
+$\sum(x_{ij} - \bar x_j)^2$, so the slope is $\hat\beta_j$.
+
+For the crop data, $\hat\beta_1 = 2$ and the residuals are $-1, 1, 1, -1, 0, 0$, so the
+partial residuals $e_i + 2x_{i1}$ are $1, 5, 5, 5, 8, 12$ at $x_{i1} = 1, 2, 2, 3, 4, 6$. With
+$\bar x_1 = 3$ and $\sum(x_{i1} - 3)^2 = 16$,
+\[
+\frac{-2(1) - 1(5) - 1(5) + 0(5) + 1(8) + 3(12)}{16} = \frac{32}{16} = 2 .
+\]
+\end{solution}
+
+\begin{problem}\label{prob:mean-shift}
+(The mean-shift outlier model.) Let $\mathbf{d}_i$ be the vector with $1$ in place $i$ and
+$0$ elsewhere, and suppose $h_{ii} < 1$. Fit the model
+$\mathbf{y} = \mathbf{X}\boldsymbol\beta + \gamma\mathbf{d}_i + \boldsymbol\varepsilon$,
+which allows observation $i$ alone to have its mean shifted by $\gamma$. Show that
+\begin{enumerate}[label=(\alph*)]
+\item $\hat\gamma = e_i/(1 - h_{ii}) = e_{(i)}$, the PRESS residual;
+\item the residual mean square of this model is $S^2_{(i)}$;
+\item the $t$ statistic for $H_0\colon \gamma = 0$ is the R-student residual $t_i$.
+\end{enumerate}
+So the R-student test for an outlier is the $t$-test of whether observation $i$ has a
+mean of its own.
+\end{problem}
+
+\begin{solution}
+Apply Theorem~\ref{thm:added-variable} with $\mathbf{d}_i$ as the added column and
+$\mathbf{X}$ as the others. Then
+$\mathbf{u} = (\mathbf{I} - \mathbf{H})\mathbf{d}_i$, column $i$ of $\mathbf{I} - \mathbf{H}$,
+and since $\mathbf{I} - \mathbf{H}$ is symmetric and idempotent,
+\[
+\mathbf{u}^\top\mathbf{u} = \mathbf{d}_i^\top(\mathbf{I} - \mathbf{H})\mathbf{d}_i = 1 - h_{ii},
+\qquad
+\mathbf{u}^\top\mathbf{y} = \mathbf{d}_i^\top(\mathbf{I} - \mathbf{H})\mathbf{y} = e_i .
+\]
+(a) $\hat\gamma = \mathbf{u}^\top\mathbf{y}/\mathbf{u}^\top\mathbf{u} = e_i/(1 - h_{ii})$.
+
+(b) The extra sum of squares due to $\gamma$ is
+$(\mathbf{u}^\top\mathbf{y})^2/\mathbf{u}^\top\mathbf{u} = e_i^2/(1 - h_{ii})$, so the
+enlarged model has residual sum of squares $SS_{\mathrm{Res}} - e_i^2/(1 - h_{ii})$, on
+$n - p - 1$ degrees of freedom. By Theorem~\ref{thm:deletion}(iv) its mean square is
+$S^2_{(i)}$. (This is no coincidence: with $\gamma$ free, observation $i$ is fitted exactly
+and the other $n - 1$ determine $\boldsymbol\beta$.)
+
+(c) The coefficient $\gamma$ has $C_{\gamma\gamma} = 1/\mathbf{u}^\top\mathbf{u} = 1/(1 - h_{ii})$,
+so
+\[
+t_0 = \frac{\hat\gamma}{\sqrt{S^2_{(i)}/(1 - h_{ii})}}
+= \frac{e_i/(1 - h_{ii})}{\sqrt{S^2_{(i)}/(1 - h_{ii})}}
+= \frac{e_i}{\sqrt{S^2_{(i)}(1 - h_{ii})}} = t_i .
+\]
+By Theorem~\ref{thm:t-mlr} it has the $t_{n - p - 1}$ distribution when $\gamma = 0$, which
+is a second proof of Theorem~\ref{thm:rstudent}(ii).
+\end{solution}
+
+\begin{problem}\label{prob:hii-one}
+Show that if $h_{ii} = 1$ then $e_i = 0$ for every possible response vector $\mathbf{y}$.
+What does this say about the role of observation $i$, and about its PRESS residual? Give a
+simple model in which it happens.
+\end{problem}
+
+\begin{solution}
+From the proof of Theorem~\ref{thm:hat}(v),
+$h_{ii} = h_{ii}^2 + \sum_{j \neq i}h_{ij}^2$. If $h_{ii} = 1$ this gives
+$\sum_{j \neq i}h_{ij}^2 = 0$, so $h_{ij} = 0$ for $j \neq i$, and row $i$ of $\mathbf{H}$
+is $\mathbf{d}_i^\top$. Then $\hat y_i = \sum_j h_{ij}y_j = y_i$, so $e_i = 0$ whatever
+$\mathbf{y}$ is.
+
+The fitted surface is forced through observation $i$: one parameter's worth of the model is
+determined by that observation alone, so the data contain no check of it. Its residual is
+zero not because it fits but because it cannot fail to. The PRESS residual
+$e_i/(1 - h_{ii})$ is $0/0$, undefined, and correspondingly the fit without observation $i$
+cannot be computed. With $\mathbf{v} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{x}_i \neq \mathbf{0}$,
+$\mathbf{Xv}$ is column $i$ of $\mathbf{H}$, which is $\mathbf{d}_i$; so every row of
+$\mathbf{X}_{(i)}$ is orthogonal to $\mathbf{v}$, $\mathbf{X}_{(i)}\mathbf{v} = \mathbf{0}$, and
+$\mathbf{X}_{(i)}$ does not have full column rank. Such a point is maximally influential, and it is studied in the next section.
+
+An example: $y = \beta_0 + \beta_1 x + \varepsilon$ with every observation at $x = 0$ except
+one, at $x = 1$. Then $\beta_0$ is estimated by the mean of the others and the slope is
+determined by the single point at $x = 1$, which the line must pass through. Indeed
+$\bar x = 1/n$, $S_{xx} = 1 - 1/n$, and
+$h = 1/n + (1 - 1/n)^2/(1 - 1/n) = 1/n + 1 - 1/n = 1$.
+\end{solution}
+
+\begin{problem}\label{prob:lof2}
+Nine runs of a process gave
+\begin{center}
+\begin{tabular}{l|ccccccccc}
+$x$ & 1 & 1 & 1 & 2 & 3 & 3 & 4 & 5 & 5 \\
+\hline
+$y$ & 3 & 4 & 5 & 5 & 8 & 9 & 11 & 11 & 12 \\
+\end{tabular}
+\end{center}
+\begin{enumerate}[label=(\alph*)]
+\item Fit a straight line.
+\item Carry out the lack-of-fit test at $\alpha = 0.05$, setting out the analysis of variance
+table.
+\item Estimate $\sigma^2$ in the light of your conclusion.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $n = 9$, $\sum x_i = 25$, $\sum y_i = 68$, $\sum x_i^2 = 91$, $\sum x_i y_i = 232$,
+$\sum y_i^2 = 606$. Then
+\begin{align*}
+S_{xx} &= 91 - \frac{625}{9} = \frac{194}{9}, \\
+S_{xy} &= 232 - \frac{25 \times 68}{9} = \frac{388}{9},
+\end{align*}
+so $\hat\beta_1 = 388/194 = 2$ and $\hat\beta_0 = 68/9 - 2 \times 25/9 = 18/9 = 2$:
+\[
+\hat y = 2 + 2x .
+\]
+(b) The fitted values at $x = 1, \dots, 5$ are $4, 6, 8, 10, 12$, and the residuals are
+$-1$, $0$, $1$, $-1$, $0$, $1$, $1$, $-1$, $0$, so $SS_{\mathrm{Res}} = 6$ on $7$ degrees of freedom.
+There are $m = 5$ distinct values of $x$. Pure error comes from the replicated levels:
+at $x = 1$, mean $4$, $SS = 1 + 0 + 1 = 2$; at $x = 3$, mean $8.5$, $SS = 0.5$; at $x = 5$,
+mean $11.5$, $SS = 0.5$. So $SS_{\mathrm{PE}} = 3$ on $n - m = 4$ degrees of freedom, and
+$SS_{\mathrm{LOF}} = 6 - 3 = 3$ on $m - 2 = 3$. Also
+\[
+SS_T = 606 - \frac{68^2}{9} = 92.22, \qquad SS_R = \hat\beta_1 S_{xy} = \frac{2 \times 388}{9} = 86.22 ,
+\]
+and indeed $86.22 + 6 = 92.22$.
+\begin{center}
+\begin{tabular}{lcccc}
+Source & SS & df & MS & $F_0$ \\
+\hline
+Regression & 86.22 & 1 & 86.22 & \\
+Residual & 6.00 & 7 & & \\
+\quad Lack of fit & 3.00 & 3 & 1.00 & 1.33 \\
+\quad Pure error & 3.00 & 4 & 0.75 & \\
+\hline
+Total & 92.22 & 8 & & \\
+\end{tabular}
+\end{center}
+$F_0 = 1.00/0.75 = 1.33 < F_{0.05,3,4} = 6.59$ ($P = 0.38$). There is no evidence of lack of
+fit.
+
+(c) With no evidence against the line, the pooled estimate is used:
+$\hat\sigma^2 = MS_{\mathrm{Res}} = 6/7 = 0.857$, on $7$ degrees of freedom rather than the $4$ of
+$MS_{\mathrm{PE}}$.
+\end{solution}
+
+\begin{problem}\label{prob:catalyst-rstudent}
+For the catalyst data of Example~\ref{exa:catalyst}, compute the R-student residual of the
+largest residual, $e = 2.3$ at $x = 3$, and test whether it is an outlier at $\alpha = 0.05$.
+Comment, in the light of Example~\ref{exa:catalyst-lof}.
+\end{problem}
+
+\begin{solution}
+Here $h = 0.1$, $SS_{\mathrm{Res}} = 15.1$, $n - p = 8$. By Theorem~\ref{thm:deletion}(iv),
+\[
+S^2_{(6)} = \frac{15.1 - 2.3^2/0.9}{7} = \frac{15.1 - 5.878}{7} = 1.317 ,
+\]
+\[
+t_6 = \frac{2.3}{\sqrt{1.317 \times 0.9}} = \frac{2.3}{1.089} = 2.11 .
+\]
+The Bonferroni critical value is $t_{0.05/20,\,7} = 4.03$, so the observation is not an
+outlier. That is the right conclusion: no single observation is out of line. The two
+largest positive residuals both sit at $x = 3$, and the two runs there agree closely with
+each other. The fault is in the model, not in any observation, and it is the lack-of-fit
+test, not the outlier test, that detects it. A residual analysis should always look at the
+pattern of the residuals as a whole, not only at the largest one.
+\end{solution}
+
 \section{Selecting the Best Regression Model}
 
 \section{Multicollinearity}
-
-\section{Model adequacy checking}
 
 \section{Test for influential observations}
 
