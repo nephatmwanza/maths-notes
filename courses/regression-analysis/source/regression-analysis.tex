@@ -8056,6 +8056,675 @@ kernel's $10.67$.
 \end{solution}
 
 \section{Generalized linear models}
+Every model so far has had a response that is, at least approximately, normal with constant variance.
+Many responses are not. Whether an insect dies, whether a borrower defaults, whether a patient recovers:
+these are \emph{binary} responses, $0$ or $1$. The number of faults on a machine, of accidents at a junction,
+of customers in an hour: these are \emph{counts}. For such responses the mean is restricted (a probability
+lies between $0$ and $1$, a mean count is positive), and the variance depends on the mean. A
+\textbf{generalized linear model} (GLM) keeps the linear predictor $\mathbf{x}^\top\boldsymbol\beta$ of regression but
+connects it to the mean through a \emph{link function}, and replaces the normal distribution by one suited to
+the response. This section treats the two most used cases, logistic regression for binary data and
+Poisson regression for counts, and then the general theory that covers both, and the normal linear model
+as well.
+
+\subsection{Binary responses and the logistic model}
+Let $y_i = 1$ if observation $i$ is a ``success'' and $0$ otherwise, with $P(y_i = 1) = \pi_i$. Then
+$E(y_i) = \pi_i$ and $\operatorname{Var}(y_i) = \pi_i(1 - \pi_i)$. Fitting $y_i = \beta_0 + \beta_1x_i + \varepsilon_i$ by least squares, the
+\emph{linear probability model}, runs into three problems, shown in Figure~\ref{fig:why-logistic}:
+\begin{enumerate}[label=(\arabic*)]
+\item the fitted line leaves $[0, 1]$, giving impossible ``probabilities'';
+\item the variance $\pi_i(1 - \pi_i)$ changes with the mean, so the constant-variance assumption fails;
+\item the errors take only two values for each $x$, so they are far from normal.
+\end{enumerate}
+The \textbf{logistic regression model} avoids the first two problems by modelling a transformation of $\pi$:
+\[
+\pi = \frac{e^{\eta}}{1 + e^{\eta}} = \frac{1}{1 + e^{-\eta}}, \qquad \eta = \beta_0 + \beta_1x_1 + \dots + \beta_kx_k = \mathbf{x}^\top\boldsymbol\beta .
+\]
+Solving for $\eta$,
+\[
+\eta = \log\frac{\pi}{1 - \pi} ,
+\]
+the \textbf{logit} or \emph{log-odds} of $\pi$. Whatever the value of $\eta$, $\pi$ lies strictly between $0$ and $1$, and as $\eta$
+increases, $\pi$ traces an S-shaped curve. The variance is dealt with by fitting by maximum likelihood, which
+uses the binomial distribution directly, instead of least squares.
+
+\subhead{Odds and odds ratios}
+The \emph{odds} of success are $\pi/(1 - \pi)$: odds of $3$ mean success is three times as likely as failure, $\pi = 0.75$.
+The logistic model says that the log-odds are linear in the regressors, so when $x_j$ increases by one unit and
+the others are held fixed, the log-odds increase by $\beta_j$ and the odds are \emph{multiplied} by
+\[
+\frac{\text{odds at } x_j + 1}{\text{odds at } x_j} = \frac{e^{\eta + \beta_j}}{e^{\eta}} = e^{\beta_j} ,
+\]
+the \textbf{odds ratio}. It is the same at every value of $x_j$, which is what makes it the natural summary of a
+logistic regression. An odds ratio above $1$ means $x_j$ raises the probability of success; below $1$, lowers it.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\col/\num/\name/\eqn in {
+ 0/red/1/{Straight line}/{$\hat\pi = -0.1 + 0.2x$},
+ 5.1/orange/2/{Variance}/{$\operatorname{Var}(y) = \pi(1 - \pi)$},
+ 10.2/blue/3/{Logistic}/{$\operatorname{logit}\hat\pi = -3.04 + 1.01x$}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.4,-1.2) rectangle (4.5,3.95);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (-0.05,3.6) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.2,3.6) {\name};
+  \draw[-Stealth,gray] (0,0) -- (4.2,0);
+  \draw[-Stealth,gray] (0,0) -- (0,2.95);
+  \ifnum\num=2
+   \draw[-,thick,orange!70!black] plot[domain=0:1,samples=40] ({3.8*\x},{0.3+9.2*\x*(1-\x)});
+   \draw[-,dashed,gray] (1.9,0) -- (1.9,2.6);
+   \node[font=\scriptsize,anchor=north] at (0,0) {$0$};
+   \node[font=\scriptsize,anchor=north] at (1.9,0) {$0.5$};
+   \node[font=\scriptsize,anchor=north] at (3.8,0) {$1$};
+   \node[font=\scriptsize,anchor=west] at (4.05,0.25) {$\pi$};
+  \else
+   \draw[-,dashed,gray] (0,0.4) -- (4.0,0.4);
+   \draw[-,dashed,gray] (0,2.6) -- (4.0,2.6);
+   \node[font=\scriptsize,anchor=east] at (0,0.4) {$0$};
+   \node[font=\scriptsize,anchor=east] at (0,2.6) {$1$};
+   \foreach \d/\p in {1/0.1,2/0.3,3/0.5,4/0.7,5/0.9}
+    \fill[black] ({0.62*\d},{0.4+2.2*\p}) circle (1.8pt);
+  \fi
+  \ifnum\num=1
+   \draw[-,thick,red!60!black] (0,0.18) -- (3.72,2.82);
+   \fill[red!60!black] (0,0.18) circle (1.5pt);
+   \fill[red!60!black] (3.72,2.82) circle (1.5pt);
+   \node[font=\scriptsize,text=red!50!black,anchor=west] at (3.8,2.82) {$1.1$};
+  \fi
+  \ifnum\num=3
+   \draw[-,thick,blue!60!black] plot[domain=0:6.3,samples=50] ({0.62*\x},{0.4+2.2/(1+exp(3.036-1.012*\x))});
+   \draw[-,dashed,blue!50!black] (1.86,0) -- (1.86,1.5);
+   \node[font=\scriptsize,text=blue!50!black,anchor=north] at (1.86,0) {$\mathrm{ED}_{50} = 3$};
+  \fi
+  \node[font=\scriptsize,text=\col!50!black] at (2.05,-0.85) {\eqn};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Why binary data need a different model. (1) Least squares on the insecticide data of
+Example~\ref{exa:dose} gives a line that predicts $-0.1$ at dose $0$ and $1.1$ at dose $6$. (2) The variance of a binary
+response depends on its mean. (3) The fitted logistic curve stays between $0$ and $1$.}
+\label{fig:why-logistic}
+\end{figure}
+
+\subsection{Maximum likelihood estimation}
+Data are often \emph{grouped}: at the $i$th setting $\mathbf{x}_i$ of the regressors there are $m_i$ trials, of which
+$y_i$ are successes, so $y_i \sim \text{Bin}(m_i, \pi_i)$, $i = 1, \dots, n$, independently. (Ungrouped binary data are the case
+$m_i = 1$.) The log-likelihood is, apart from a constant $\sum\log\binom{m_i}{y_i}$ that does not involve $\boldsymbol\beta$,
+\begin{align*}
+\ell(\boldsymbol\beta) &= \sum_{i=1}^n\bigl[y_i\log\pi_i + (m_i - y_i)\log(1 - \pi_i)\bigr] \\
+&= \sum_{i=1}^n\Bigl[y_i\log\frac{\pi_i}{1 - \pi_i} + m_i\log(1 - \pi_i)\Bigr] .
+\end{align*}
+With $\eta_i = \log\{\pi_i/(1 - \pi_i)\} = \mathbf{x}_i^\top\boldsymbol\beta$ and $1 - \pi_i = 1/(1 + e^{\eta_i})$, this is
+\[
+\ell(\boldsymbol\beta) = \sum_{i=1}^n\bigl[y_i\eta_i - m_i\log(1 + e^{\eta_i})\bigr] .
+\]
+
+\begin{thm}\label{thm:logistic-score}
+Let $\boldsymbol\mu$ have components $\mu_i = m_i\pi_i$, and let $\mathbf{W} = \operatorname{diag}(w_i)$ with $w_i = m_i\pi_i(1 - \pi_i)$. Then
+\begin{enumerate}[label=(\roman*)]
+\item the gradient (the \emph{score}) of $\ell$ is $\mathbf{U}(\boldsymbol\beta) = \mathbf{X}^\top(\mathbf{y} - \boldsymbol\mu)$, so the maximum-likelihood estimate
+satisfies the \emph{likelihood equations} $\mathbf{X}^\top\mathbf{y} = \mathbf{X}^\top\hat{\boldsymbol\mu}$;
+\item the matrix of second derivatives is $-\mathbf{X}^\top\mathbf{WX}$, which does not involve $\mathbf{y}$;
+\item if $\mathbf{X}$ has full column rank, $\ell$ is strictly concave, so it has at most one maximum, and any solution
+of the likelihood equations is the maximum-likelihood estimate.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $\dfrac{d}{d\eta}\log(1 + e^{\eta}) = \dfrac{e^{\eta}}{1 + e^{\eta}} = \pi$, so $\partial\ell/\partial\eta_i = y_i - m_i\pi_i = y_i - \mu_i$, and since
+$\partial\eta_i/\partial\beta_j = x_{ij}$, the chain rule gives $\partial\ell/\partial\beta_j = \sum_i x_{ij}(y_i - \mu_i)$.
+
+(ii) $d\pi/d\eta = e^{\eta}/(1 + e^{\eta})^2 = \pi(1 - \pi)$, so $\partial\mu_i/\partial\beta_l = m_i\pi_i(1 - \pi_i)x_{il} = w_ix_{il}$, and
+$\partial^2\ell/\partial\beta_j\partial\beta_l = -\sum_i x_{ij}w_ix_{il}$, the $(j, l)$ element of $-\mathbf{X}^\top\mathbf{WX}$.
+
+(iii) For $\mathbf{v} \ne \mathbf{0}$, $\mathbf{v}^\top\mathbf{X}^\top\mathbf{WXv} = \sum_i w_i(\mathbf{x}_i^\top\mathbf{v})^2 > 0$, because every $w_i > 0$ and $\mathbf{Xv} \ne \mathbf{0}$. So the
+second-derivative matrix is negative definite everywhere, and $\ell$ is strictly concave: along any line it is
+a function with negative second derivative, so a point with zero gradient is the unique maximum.
+\end{proof}
+
+When the model contains an intercept, the first likelihood equation reads $\sum y_i = \sum\hat\mu_i$: the fitted
+number of successes equals the observed number, as the sum of the residuals is zero in least squares.
+
+The likelihood equations are non-linear in $\boldsymbol\beta$, and in general they must be solved by iteration.
+Newton's method turns out to be a sequence of weighted least squares fits.
+
+\begin{thm}[Iteratively reweighted least squares]\label{thm:irls-logistic}
+Newton's method for maximising $\ell$, started from $\boldsymbol\beta^{(t)}$, gives
+\[
+\boldsymbol\beta^{(t+1)} = (\mathbf{X}^\top\mathbf{WX})^{-1}\mathbf{X}^\top\mathbf{Wz} ,
+\qquad z_i = \eta_i + \frac{y_i - \mu_i}{w_i} ,
+\]
+where $\eta_i$, $\mu_i$, $w_i$ are evaluated at $\boldsymbol\beta^{(t)}$. That is, each step is the weighted least squares
+regression of the \emph{working response} $\mathbf{z}$ on $\mathbf{X}$ with weights $w_i$.
+\end{thm}
+
+\begin{proof}
+Newton's method maximises the second-order Taylor approximation of $\ell$ at
+$\boldsymbol\beta^{(t)}$. By Theorem~\ref{thm:logistic-score} this gives
+\[
+\boldsymbol\beta^{(t+1)} = \boldsymbol\beta^{(t)} + (\mathbf{X}^\top\mathbf{WX})^{-1}\mathbf{U} .
+\]
+Since
+$\mathbf{X}\boldsymbol\beta^{(t)} = \boldsymbol\eta$ and $\mathbf{y} - \boldsymbol\mu = \mathbf{W}(\mathbf{z} - \boldsymbol\eta)$,
+\begin{align*}
+\boldsymbol\beta^{(t+1)} &= (\mathbf{X}^\top\mathbf{WX})^{-1}\bigl[\mathbf{X}^\top\mathbf{WX}\boldsymbol\beta^{(t)} + \mathbf{X}^\top\mathbf{W}(\mathbf{z} - \boldsymbol\eta)\bigr] \\
+&= (\mathbf{X}^\top\mathbf{WX})^{-1}\mathbf{X}^\top\mathbf{Wz} .
+\end{align*}
+This is the weighted least squares estimate of Theorem~\ref{thm:wls} with response $\mathbf{z}$.
+\end{proof}
+
+The working response $z_i$ is a linearised version of the logit of $y_i/m_i$, and $w_i = m_i\pi_i(1 - \pi_i)$ is the
+reciprocal of its approximate variance, so the weighting is exactly the remedy of Section~6 for unequal
+variances, with the weights recomputed as the estimates improve. A common start is $\boldsymbol\beta = \mathbf{0}$, which
+gives $\pi_i = \frac12$. The iteration usually converges in a handful of steps. It fails only when the
+estimate does not exist: if some combination of the regressors separates the successes from the failures
+completely, the likelihood keeps increasing as the coefficients go to infinity.
+
+\begin{exa}\label{exa:dose}
+Batches of $20$ insects were exposed to five doses of an insecticide, and the numbers killed were:
+\begin{center}
+\begin{tabular}{c|ccccc}
+Dose, $x$ & 1 & 2 & 3 & 4 & 5 \\
+\hline
+Killed, $y$ (of 20) & 2 & 6 & 10 & 14 & 18 \\
+\end{tabular}
+\end{center}
+Fit the logistic regression of the probability of death on dose.
+\end{exa}
+
+\begin{solution}
+\emph{First step.} At $\boldsymbol\beta = \mathbf{0}$, every $\pi_i = \frac12$, $\mu_i = 10$ and $w_i = 20 \times \frac14 = 5$, so
+$z_i = 0 + (y_i - 10)/5 = -1.6, -0.8, 0, 0.8, 1.6$. The weights are equal, so the weighted fit is the ordinary straight-line fit
+of $z$ on $x$: with $\bar x = 3$ and $\sum(x_i - 3)^2 = 10$,
+\begin{align*}
+\beta_1^{(1)} &= \frac{\sum(x_i - 3)z_i}{10} = \frac{3.2 + 0.8 + 0 + 0.8 + 3.2}{10} = 0.8 , \\
+\beta_0^{(1)} &= \bar z - 0.8\bar x = -2.4 .
+\end{align*}
+
+\emph{Further steps.} Recomputing $\pi_i$, $w_i$ and $z_i$ at each new estimate gives:
+\begin{center}
+\begin{tabular}{cccc}
+Step $t$ & $\beta_0^{(t)}$ & $\beta_1^{(t)}$ & $\ell(\boldsymbol\beta^{(t)})$ \\
+\hline
+0 & 0 & 0 & $-69.315$ \\
+1 & $-2.4000$ & $0.8000$ & $-52.063$ \\
+2 & $-2.9666$ & $0.9889$ & $-51.475$ \\
+3 & $-3.0351$ & $1.0117$ & $-51.469$ \\
+4 & $-3.0360$ & $1.0120$ & $-51.469$ \\
+\end{tabular}
+\end{center}
+The log-likelihood rises at each step and the estimates settle after four steps:
+\[
+\operatorname{logit}\hat\pi = -3.036 + 1.012x .
+\]
+The fitted probabilities are $0.117, 0.267, 0.500, 0.733, 0.883$, so the fitted numbers killed are
+$2.33, 5.33, 10.00, 14.67, 17.67$. They add to $50$, the observed total, as Theorem~\ref{thm:logistic-score} requires. The
+odds ratio for one unit of dose is $e^{1.012} = 2.75$: each extra unit multiplies the odds of death by $2.75$.
+Figure~\ref{fig:why-logistic}, panel~3, shows the fit.
+\end{solution}
+
+\subhead{A single indicator: the two-by-two table}
+With one indicator regressor, the likelihood equations can be solved exactly.
+
+\begin{thm}\label{thm:logit-indicator}
+Suppose $z = 0$ for group $0$ and $z = 1$ for group $1$, with $y_0$ successes in $m_0$ trials in group $0$ and $y_1$ in $m_1$
+in group $1$, and fit $\operatorname{logit}\pi = \beta_0 + \beta_1z$. Then $\hat\pi_0 = y_0/m_0$, $\hat\pi_1 = y_1/m_1$,
+\[
+\hat\beta_0 = \log\frac{y_0}{m_0 - y_0}, \qquad \hat\beta_1 = \log\frac{y_1(m_0 - y_0)}{y_0(m_1 - y_1)} ,
+\]
+so $e^{\hat\beta_1}$ is the sample odds ratio, and the variance estimate of Theorem~\ref{thm:wald} below is
+\[
+\widehat{\operatorname{Var}}(\hat\beta_1) = \frac{1}{y_0} + \frac{1}{m_0 - y_0} + \frac{1}{y_1} + \frac{1}{m_1 - y_1} .
+\]
+\end{thm}
+
+\begin{proof}
+The columns of $\mathbf{X}$ are $\mathbf{1}$ and $\mathbf{z}$, so the likelihood equations say the fitted successes equal the
+observed ones in total and in group $1$, hence in each group: $m_0\hat\pi_0 = y_0$ and $m_1\hat\pi_1 = y_1$. Taking logits,
+$\hat\beta_0 = \operatorname{logit}\hat\pi_0$ and $\hat\beta_0 + \hat\beta_1 = \operatorname{logit}\hat\pi_1$, which give the formulas. For the variance,
+with $w_g = m_g\hat\pi_g(1 - \hat\pi_g)$,
+\begin{align*}
+\mathbf{X}^\top\mathbf{WX} &= \begin{pmatrix} w_0 + w_1 & w_1 \\ w_1 & w_1 \end{pmatrix} , \\
+\bigl[(\mathbf{X}^\top\mathbf{WX})^{-1}\bigr]_{22} &= \frac{w_0 + w_1}{w_0w_1} = \frac{1}{w_0} + \frac{1}{w_1} ,
+\end{align*}
+and $\dfrac{1}{w_g} = \dfrac{1}{m_g\hat\pi_g(1 - \hat\pi_g)} = \dfrac{1}{m_g\hat\pi_g} + \dfrac{1}{m_g(1 - \hat\pi_g)} = \dfrac{1}{y_g} + \dfrac{1}{m_g - y_g}$.
+\end{proof}
+
+\subsection{Inference in logistic regression}
+The exact distribution of $\hat{\boldsymbol\beta}$ is intractable, and inference rests on large-sample approximations.
+The matrix $\mathcal{I}(\boldsymbol\beta) = \mathbf{X}^\top\mathbf{WX}$, minus the second-derivative matrix, is the \emph{information matrix}.
+
+\begin{thm}[Large-sample distribution]\label{thm:wald}
+For large samples, approximately,
+\[
+\hat{\boldsymbol\beta} \sim N\bigl(\boldsymbol\beta, (\mathbf{X}^\top\mathbf{WX})^{-1}\bigr) ,
+\]
+and the variance is estimated by $(\mathbf{X}^\top\hat{\mathbf{W}}\mathbf{X})^{-1}$, with $\hat{\mathbf{W}}$ evaluated at $\hat{\boldsymbol\beta}$.
+\end{thm}
+
+\begin{proof}[Derivation]
+Expand the score about the true $\boldsymbol\beta$: $\mathbf{0} = \mathbf{U}(\hat{\boldsymbol\beta}) \approx \mathbf{U}(\boldsymbol\beta) - \mathcal{I}(\hat{\boldsymbol\beta} - \boldsymbol\beta)$, so
+$\hat{\boldsymbol\beta} - \boldsymbol\beta \approx \mathcal{I}^{-1}\mathbf{U}(\boldsymbol\beta)$. Now $\mathbf{U}(\boldsymbol\beta) = \mathbf{X}^\top(\mathbf{y} - \boldsymbol\mu)$ has mean $\mathbf{0}$ and, since the $y_i$ are independent
+with variances $w_i$, variance $\mathbf{X}^\top\mathbf{WX} = \mathcal{I}$. It is a sum of many independent terms, so by the central limit
+theorem it is approximately normal. Then $\mathcal{I}^{-1}\mathbf{U}$ is approximately normal with mean $\mathbf{0}$ and variance
+$\mathcal{I}^{-1}\mathcal{I}\mathcal{I}^{-1} = \mathcal{I}^{-1}$.
+\end{proof}
+
+So the \textbf{Wald test} of $H_0\colon \beta_j = 0$ uses $Z_0 = \hat\beta_j/\operatorname{se}(\hat\beta_j)$, compared with the standard normal, and an
+approximate $100(1 - \alpha)\%$ confidence interval for $\beta_j$ is $\hat\beta_j \pm z_{\alpha/2}\operatorname{se}(\hat\beta_j)$. Exponentiating its end
+points gives an interval for the odds ratio $e^{\beta_j}$.
+
+\subhead{Deviance and the likelihood ratio test}
+The largest log-likelihood any model can reach is that of the \textbf{saturated model}, which has a separate
+parameter for every group and so fits $\hat\pi_i = y_i/m_i$ exactly. The \textbf{deviance} of a model measures how far
+it falls short:
+\[
+D = 2\bigl[\ell(\text{saturated}) - \ell(\hat{\boldsymbol\beta})\bigr]
+= 2\sum_{i=1}^n\Bigl[y_i\log\frac{y_i}{\hat\mu_i} + (m_i - y_i)\log\frac{m_i - y_i}{m_i - \hat\mu_i}\Bigr] ,
+\]
+the second form by substituting $\pi_i = y_i/m_i$ and $\pi_i = \hat\mu_i/m_i$ in the first expression for $\ell$; a term with
+$y_i = 0$ or $y_i = m_i$ is taken as $0$. The deviance plays the part of the residual sum of squares: it is never negative,
+and it is zero only for a perfect fit.
+
+\begin{thm}[Likelihood ratio test]\label{thm:lr-test}
+Let model $M_0$ be obtained from model $M_1$ by setting $q$ of its coefficients to zero. If $M_0$ is correct,
+then for large samples, approximately,
+\[
+D(M_0) - D(M_1) = 2\bigl[\ell(\hat{\boldsymbol\beta}_1) - \ell(\hat{\boldsymbol\beta}_0)\bigr] \sim \chi^2_q .
+\]
+\end{thm}
+
+\begin{proof}[Derivation]
+The saturated log-likelihood cancels in the difference, which gives the equality. For the distribution,
+consider first the case where $M_0$ fixes all $p$ coefficients at their true value $\boldsymbol\beta$. Expanding $\ell$ about $\hat{\boldsymbol\beta}$,
+where the gradient is zero,
+\[
+\ell(\boldsymbol\beta) \approx \ell(\hat{\boldsymbol\beta}) - \tfrac12(\hat{\boldsymbol\beta} - \boldsymbol\beta)^\top\mathcal{I}(\hat{\boldsymbol\beta} - \boldsymbol\beta) .
+\]
+So $2[\ell(\hat{\boldsymbol\beta}) - \ell(\boldsymbol\beta)] \approx \mathbf{v}^\top\mathbf{v}$ with $\mathbf{v} = \mathcal{I}^{1/2}(\hat{\boldsymbol\beta} - \boldsymbol\beta)$, which by Theorem~\ref{thm:wald} is
+approximately $N(\mathbf{0}, \mathbf{I}_p)$. A sum of $p$ squared independent standard normals is $\chi^2_p$
+(Lemma~\ref{lem:idempotent-chisq} with $\mathbf{A} = \mathbf{I}_p$). When $M_0$ fixes only $q$ coefficients, the same expansion applies to
+both fits, and the $p - q$ coefficients estimated in both cancel, leaving $q$ squared approximately
+independent standard normals.
+\end{proof}
+
+This is the analogue of the extra-sum-of-squares $F$-test. In particular, comparing a model with the
+intercept-only model tests whether the regressors matter at all. The likelihood ratio test is generally more
+reliable than the Wald test, which can behave badly when a coefficient is large.
+
+\subhead{Goodness of fit}
+When the $m_i$ are reasonably large, the saturated model is a sensible alternative, and the deviance of the
+fitted model is approximately $\chi^2_{n-p}$ if the model is correct. A large deviance relative to $n - p$
+signals lack of fit. A similar statistic is \textbf{Pearson's chi-square},
+\[
+X^2 = \sum_{i=1}^n \frac{(y_i - \hat\mu_i)^2}{m_i\hat\pi_i(1 - \hat\pi_i)} ,
+\]
+the sum of the squared \emph{Pearson residuals} $(y_i - \hat\mu_i)/\sqrt{m_i\hat\pi_i(1 - \hat\pi_i)}$. For ungrouped binary data ($m_i = 1$)
+neither statistic has a $\chi^2$ distribution, and goodness of fit is checked by grouping the observations by their
+fitted probabilities (the Hosmer--Lemeshow test) or by plotting residuals.
+
+\begin{exa}\label{exa:dose-inference}
+For the insecticide data of Example~\ref{exa:dose}:
+\begin{enumerate}[label=(\alph*)]
+\item test whether dose affects mortality, by the Wald and likelihood ratio tests;
+\item find a $95\%$ confidence interval for the odds ratio;
+\item check the fit;
+\item estimate the dose that kills half the insects, the $\mathrm{ED}_{50}$, with its standard error.
+\end{enumerate}
+\end{exa}
+
+\begin{solution}
+It is easiest to work with the centred dose $u = x - 3$, for which $\operatorname{logit}\hat\pi = \hat\alpha_0 + \hat\beta_1u$ with
+$\hat\alpha_0 = -3.036 + 3(1.012) = 0$. The weights $w_i = 20\hat\pi_i(1 - \hat\pi_i)$ are
+\[
+2.062, \quad 3.910, \quad 5.000, \quad 3.910, \quad 2.062 ,
+\]
+symmetric about $u = 0$, so $\sum w_iu_i = 0$ and $\mathbf{X}^\top\hat{\mathbf{W}}\mathbf{X}$ is diagonal, with entries
+$\sum w_i = 16.944$ and $\sum w_iu_i^2 = 2(4 \times 2.062 + 3.910) = 24.314$.
+
+(a) $\operatorname{se}(\hat\beta_1) = 1/\sqrt{24.314} = 0.2028$, and the Wald statistic is $Z_0 = 1.012/0.2028 = 4.99$, far beyond $1.96$.
+For the likelihood ratio test, the intercept-only model fits $\hat\pi = 50/100 = 0.5$ everywhere, so $\hat\mu_i = 10$. Dose $3$ contributes nothing to its deviance, and doses $5$ and $4$ contribute the same as doses $1$ and $2$ (with $y$ and $20 - y$
+exchanged), so
+\begin{align*}
+D(M_0) &= 2 \times 2\Bigl[\bigl(2\log\tfrac{2}{10} + 18\log\tfrac{18}{10}\bigr) + \bigl(6\log\tfrac{6}{10} + 14\log\tfrac{14}{10}\bigr)\Bigr] \\
+&= 4(7.361 + 1.646) = 36.03 .
+\end{align*} The fitted model has
+\[
+D(M_1) = 0.0566 + 0.1114 + 0 + 0.1114 + 0.0566 = 0.336 ,
+\]
+so $D(M_0) - D(M_1) = 35.69$, against $\chi^2_{0.05,1} = 3.84$. Both tests reject $H_0\colon \beta_1 = 0$ decisively.
+
+(b) A $95\%$ interval for $\beta_1$ is $1.012 \pm 1.96(0.2028) = (0.615, 1.410)$, and for the odds ratio
+$(e^{0.615}, e^{1.410}) = (1.85, 4.09)$.
+
+(c) $D(M_1) = 0.336$ on $n - p = 5 - 2 = 3$ degrees of freedom, far below $\chi^2_{0.05,3} = 7.81$, and Pearson's $X^2 = 0.337$
+agrees. The logistic model fits well.
+
+(d) $\pi = \frac12$ where the logit is $0$: $\hat\alpha_0 + \hat\beta_1u = 0$, so $\hat u_{50} = -\hat\alpha_0/\hat\beta_1 = 0$ and $\widehat{\mathrm{ED}}_{50} = 3$. By the
+delta method, as in Theorem~\ref{thm:turning}, with $\operatorname{Cov}(\hat\alpha_0, \hat\beta_1) = 0$ and $\hat\alpha_0 = 0$,
+\[
+\widehat{\operatorname{Var}}(\hat u_{50}) = \frac{\widehat{\operatorname{Var}}(\hat\alpha_0)}{\hat\beta_1^2} + \frac{\hat\alpha_0^2\,\widehat{\operatorname{Var}}(\hat\beta_1)}{\hat\beta_1^4}
+= \frac{1/16.944}{1.012^2} + 0 = 0.0576 ,
+\]
+so $\operatorname{se}(\widehat{\mathrm{ED}}_{50}) = 0.240$, and an approximate $95\%$ interval is $3 \pm 0.47$, from $2.53$ to $3.47$.
+\end{solution}
+
+\begin{exa}\label{exa:vaccine}
+In a study of a vaccine, $10$ of $100$ vaccinated people became infected, and $30$ of $100$ unvaccinated people. Fit
+$\operatorname{logit}\pi = \beta_0 + \beta_1z$, where $z = 1$ for the vaccinated, and estimate the odds ratio.
+\end{exa}
+
+\begin{solution}
+By Theorem~\ref{thm:logit-indicator}, with the unvaccinated as group $0$,
+\[
+\hat\beta_0 = \log\frac{30}{70} = -0.847, \qquad \hat\beta_1 = \log\frac{10 \times 70}{30 \times 90} = \log 0.259 = -1.350 ,
+\]
+and
+\[
+\operatorname{se}(\hat\beta_1) = \sqrt{\tfrac{1}{30} + \tfrac{1}{70} + \tfrac{1}{10} + \tfrac{1}{90}} = \sqrt{0.1587} = 0.398 .
+\]
+The Wald statistic is $-1.350/0.398 = -3.39$. A $95\%$ interval for $\beta_1$ is $-1.350 \pm 0.781$, so the odds ratio is
+$0.26$, with interval $(0.12, 0.57)$. Vaccination cuts the odds of infection to about a quarter. (In terms of
+probabilities, from $0.30$ to $0.10$: the odds ratio and the ratio of probabilities differ when the probabilities are
+not small.)
+\end{solution}
+
+\subsection{The exponential family and generalized linear models}
+Logistic regression is one member of a family. A random variable $y$ belongs to the \textbf{exponential
+family} if its density or probability function has the form
+\[
+f(y; \theta, \phi) = \exp\Bigl\{\frac{y\theta - b(\theta)}{a(\phi)} + c(y, \phi)\Bigr\} ,
+\]
+where $\theta$ is the \emph{natural parameter}, $\phi$ a \emph{dispersion parameter}, and $a$, $b$, $c$ are known functions.
+
+\begin{itemize}
+\item \emph{Normal}, $N(\mu, \sigma^2)$: $\log f = \dfrac{y\mu - \mu^2/2}{\sigma^2} - \dfrac{y^2}{2\sigma^2} - \tfrac12\log(2\pi\sigma^2)$, so $\theta = \mu$,
+$b(\theta) = \theta^2/2$, $a(\phi) = \sigma^2$.
+\item \emph{Poisson}, mean $\mu$: $\log f = y\log\mu - \mu - \log y!$, so $\theta = \log\mu$, $b(\theta) = e^{\theta}$, $a(\phi) = 1$.
+\item \emph{Bernoulli}, $P(y = 1) = \pi$: $\log f = y\log\frac{\pi}{1 - \pi} + \log(1 - \pi)$, so $\theta = \operatorname{logit}\pi$, $b(\theta) = \log(1 + e^{\theta})$,
+$a(\phi) = 1$.
+\end{itemize}
+
+\begin{thm}\label{thm:expfam-moments}
+If $y$ belongs to the exponential family, then
+\[
+E(y) = b'(\theta) , \qquad \operatorname{Var}(y) = a(\phi)\,b''(\theta) .
+\]
+\end{thm}
+
+\begin{proof}
+For every $\theta$, $\int f(y; \theta, \phi)\,dy = 1$ (a sum for a discrete $y$). Differentiating with respect to $\theta$ under the integral,
+\[
+0 = \int \frac{y - b'(\theta)}{a(\phi)}\,f\,dy = \frac{E(y) - b'(\theta)}{a(\phi)} ,
+\]
+so $E(y) = b'(\theta)$. Differentiating $\int (y - b'(\theta))f\,dy = 0$ once more,
+\[
+0 = \int\Bigl[-b''(\theta) + \frac{(y - b'(\theta))^2}{a(\phi)}\Bigr]f\,dy = -b''(\theta) + \frac{\operatorname{Var}(y)}{a(\phi)} ,
+\]
+which gives the variance.
+\end{proof}
+
+So the mean determines $\theta$, and the variance is a function of the mean: $\operatorname{Var}(y) = a(\phi)V(\mu)$ with
+$V(\mu) = b''(\theta)$, the \emph{variance function}. For the normal $V(\mu) = 1$, for the Poisson $b''(\theta) = e^\theta = \mu$, and for the
+Bernoulli $b''(\theta) = e^\theta/(1 + e^\theta)^2 = \pi(1 - \pi)$, as they should be.
+
+A \textbf{generalized linear model} has three components:
+\begin{enumerate}[label=(\arabic*)]
+\item a \emph{random component}: $y_1, \dots, y_n$ independent, from the same exponential family, with means $\mu_i$;
+\item a \emph{linear predictor}: $\eta_i = \mathbf{x}_i^\top\boldsymbol\beta$;
+\item a \emph{link function}: a smooth monotone $g$ with $g(\mu_i) = \eta_i$.
+\end{enumerate}
+The link for which $g(\mu) = \theta$, so that the natural parameter is the linear predictor, is the \textbf{canonical link}:
+the identity for the normal, the log for the Poisson, and the logit for the binomial. The normal linear model of
+Sections 2 to 10 is the GLM with normal errors and identity link. Other links are possible: the probit,
+$g(\pi) = \Phi^{-1}(\pi)$, gives an S-curve very like the logistic.
+
+\begin{thm}[Fitting a GLM]\label{thm:irls}
+Let $\mathbf{W} = \operatorname{diag}(w_i)$ with $w_i = 1/\bigl[V(\mu_i)g'(\mu_i)^2\bigr]$.
+\begin{enumerate}[label=(\roman*)]
+\item The score is $\mathbf{U} = \frac{1}{a(\phi)}\mathbf{X}^\top\mathbf{W}\mathbf{G}(\mathbf{y} - \boldsymbol\mu)$, where $\mathbf{G} = \operatorname{diag}(g'(\mu_i))$, and its variance (the
+information matrix) is $\mathcal{I} = \frac{1}{a(\phi)}\mathbf{X}^\top\mathbf{WX}$.
+\item Fisher scoring, $\boldsymbol\beta^{(t+1)} = \boldsymbol\beta^{(t)} + \mathcal{I}^{-1}\mathbf{U}$, is iteratively reweighted least squares:
+\[
+\boldsymbol\beta^{(t+1)} = (\mathbf{X}^\top\mathbf{WX})^{-1}\mathbf{X}^\top\mathbf{Wz}, \qquad z_i = \eta_i + (y_i - \mu_i)g'(\mu_i) .
+\]
+\item For the canonical link, $\mathbf{U} = \frac{1}{a(\phi)}\mathbf{X}^\top(\mathbf{y} - \boldsymbol\mu)$, and Fisher scoring is Newton's method.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) The log-likelihood of observation $i$ is $\ell_i = [y_i\theta_i - b(\theta_i)]/a(\phi) + c(y_i, \phi)$, so
+$\partial\ell_i/\partial\theta_i = (y_i - \mu_i)/a(\phi)$. By the chain rule through $\theta_i \to \mu_i \to \eta_i \to \boldsymbol\beta$, with
+$d\mu/d\theta = b''(\theta) = V(\mu)$ and $d\eta/d\mu = g'(\mu)$,
+\[
+\frac{\partial\ell_i}{\partial\beta_j} = \frac{y_i - \mu_i}{a(\phi)}\cdot\frac{1}{V(\mu_i)}\cdot\frac{1}{g'(\mu_i)}\cdot x_{ij}
+= \frac{1}{a(\phi)}\,x_{ij}w_ig'(\mu_i)(y_i - \mu_i) .
+\]
+Summing over $i$ gives $\mathbf{U}$. The $y_i$ are independent with $\operatorname{Var}(y_i) = a(\phi)V(\mu_i)$, so
+\[
+\operatorname{Var}(\mathbf{U}) = \frac{1}{a(\phi)^2}\mathbf{X}^\top\mathbf{WG}\bigl[a(\phi)\operatorname{diag}(V(\mu_i))\bigr]\mathbf{GWX} = \frac{1}{a(\phi)}\mathbf{X}^\top\mathbf{WX} ,
+\]
+because $w_ig'(\mu_i)^2V(\mu_i) = 1$.
+
+(ii) With $\boldsymbol\eta = \mathbf{X}\boldsymbol\beta^{(t)}$, $\mathcal{I}\boldsymbol\beta^{(t)} + \mathbf{U} = \frac{1}{a(\phi)}\mathbf{X}^\top\mathbf{W}\bigl[\boldsymbol\eta + \mathbf{G}(\mathbf{y} - \boldsymbol\mu)\bigr] = \frac{1}{a(\phi)}\mathbf{X}^\top\mathbf{Wz}$, and
+multiplying by $\mathcal{I}^{-1} = a(\phi)(\mathbf{X}^\top\mathbf{WX})^{-1}$ gives the formula; $a(\phi)$ cancels.
+
+(iii) For the canonical link $\eta = \theta$, so $g'(\mu) = d\theta/d\mu = 1/V(\mu)$ and $w_ig'(\mu_i) = 1/[V(\mu_i)g'(\mu_i)] = 1$. So $\mathbf{U} = \mathbf{X}^\top(\mathbf{y} - \boldsymbol\mu)/a(\phi)$, and its derivative is
+\[
+-\frac{1}{a(\phi)}\mathbf{X}^\top\operatorname{diag}\Bigl(\frac{d\mu_i}{d\eta_i}\Bigr)\mathbf{X} = -\frac{1}{a(\phi)}\mathbf{X}^\top\operatorname{diag}\bigl(V(\mu_i)\bigr)\mathbf{X} .
+\]
+This does not involve $\mathbf{y}$, and it equals $-\mathcal{I}$, since $w_i = 1/[V(\mu_i)(1/V(\mu_i))^2] = V(\mu_i)$. So the Newton step and the scoring step coincide.
+\end{proof}
+
+For the binomial with the logit link, $w_i = m_i\pi_i(1 - \pi_i)$ and $z_i = \eta_i + (y_i - \mu_i)/w_i$, which is
+Theorem~\ref{thm:irls-logistic}. For the normal with identity link, $\mathbf{W} = \mathbf{I}$ and $\mathbf{z} = \mathbf{y}$, so one step gives the
+least-squares estimate (Problem~\ref{prob:glm-normal}). The results on the approximate normality of $\hat{\boldsymbol\beta}$ and on
+the likelihood ratio test carry over, with $\mathcal{I}$ in place of $\mathbf{X}^\top\mathbf{WX}$. The deviance is defined as before,
+$D = 2a(\phi)[\ell(\text{saturated}) - \ell(\hat{\boldsymbol\beta})]$; for the normal model it is $SS_{\mathrm{Res}}$.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\py/\col/\num/\name/\eqn in {
+ 0/2.4/blue/1/{Linear predictor}/{$\eta_i = \mathbf{x}_i^\top\boldsymbol\beta, \ \mu_i = g^{-1}(\eta_i)$},
+ 7.4/2.4/orange/2/{Working response}/{$z_i = \eta_i + (y_i - \mu_i)g'(\mu_i)$},
+ 7.4/0/green/3/{Weights}/{$w_i = 1/[V(\mu_i)g'(\mu_i)^2]$},
+ 0/0/red/4/{Weighted least squares}/{$\boldsymbol\beta = (\mathbf{X}^\top\mathbf{WX})^{-1}\mathbf{X}^\top\mathbf{Wz}$}} {
+ \begin{scope}[shift={(\px,\py)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (0,0) rectangle (6.0,1.6);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0.35,1.25) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.6,1.25) {\name};
+  \node[font=\small] at (3.0,0.55) {\eqn};
+ \end{scope}
+}
+\draw[-Stealth,very thick,gray] (6.15,3.2) -- (7.25,3.2);
+\draw[-Stealth,very thick,gray] (10.4,2.3) -- (10.4,1.7);
+\draw[-Stealth,very thick,gray] (7.25,0.8) -- (6.15,0.8);
+\draw[-Stealth,very thick,gray] (3.0,1.7) -- (3.0,2.3);
+\node[font=\scriptsize,text=gray!30!black,align=center] at (6.7,2.0) {repeat until\\$\boldsymbol\beta$ settles};
+\end{tikzpicture}
+\caption{Iteratively reweighted least squares (Theorem~\ref{thm:irls}). Each cycle is one weighted least
+squares fit of the working response; the weights are recomputed from the current fitted means.}
+\label{fig:irls}
+\end{figure}
+
+\subsection{Poisson regression}
+For counts, the natural model is $y_i \sim \text{Poisson}(\mu_i)$ with the canonical log link,
+\[
+\log\mu_i = \mathbf{x}_i^\top\boldsymbol\beta , \qquad \mu_i = e^{\mathbf{x}_i^\top\boldsymbol\beta} ,
+\]
+which keeps every mean positive. Increasing $x_j$ by one unit multiplies the mean by $e^{\beta_j}$, the \textbf{rate
+ratio}. By Theorem~\ref{thm:irls}, the likelihood equations are $\mathbf{X}^\top\mathbf{y} = \mathbf{X}^\top\hat{\boldsymbol\mu}$, the weights are $w_i = \mu_i$, and the
+working response is $z_i = \eta_i + (y_i - \mu_i)/\mu_i$. The log-likelihood is $\sum[y_i\log\mu_i - \mu_i - \log y_i!]$, and the saturated model
+has $\hat\mu_i = y_i$, so the deviance is
+\[
+D = 2\sum_{i=1}^n\Bigl[y_i\log\frac{y_i}{\hat\mu_i} - (y_i - \hat\mu_i)\Bigr] ,
+\]
+in which the second term adds to zero when the model has an intercept (Problem~\ref{prob:poisson-dev}).
+
+\subhead{Exposure and offsets}
+Counts are often collected over different amounts of exposure $t_i$: different lengths of time, numbers of
+people or lengths of road. Then the model is for the \emph{rate} $\mu_i/t_i$, $\log(\mu_i/t_i) = \mathbf{x}_i^\top\boldsymbol\beta$, that is,
+\[
+\log\mu_i = \log t_i + \mathbf{x}_i^\top\boldsymbol\beta .
+\]
+The term $\log t_i$ is an \textbf{offset}: a regressor whose coefficient is fixed at $1$, not estimated.
+
+\subhead{Overdispersion}
+The Poisson model forces $\operatorname{Var}(y) = \mu$. Counts are often more variable than that, because of
+differences between units that the regressors do not capture. Then the estimates $\hat{\boldsymbol\beta}$ are still
+reasonable, but the standard errors from $(\mathbf{X}^\top\mathbf{WX})^{-1}$ are too small and the tests too optimistic.
+Overdispersion shows itself as a deviance or Pearson $X^2 = \sum(y_i - \hat\mu_i)^2/\hat\mu_i$ much larger than $n - p$. A simple
+remedy, the \emph{quasi-Poisson} model, assumes $\operatorname{Var}(y) = \phi\mu$, estimates $\hat\phi = X^2/(n - p)$, and multiplies every
+standard error by $\sqrt{\hat\phi}$. The same applies to binomial data with $m_i > 1$.
+
+\begin{exa}\label{exa:faults}
+The numbers of faults recorded in a year on six machines of ages $0$ to $5$ years were:
+\begin{center}
+\begin{tabular}{c|cccccc}
+Age, $x$ & 0 & 1 & 2 & 3 & 4 & 5 \\
+\hline
+Faults, $y$ & 2 & 3 & 6 & 7 & 11 & 15 \\
+\end{tabular}
+\end{center}
+Fit a Poisson regression with log link, test the effect of age, and check the fit.
+\end{exa}
+
+\begin{solution}
+Starting from $\beta_0 = \log\bar y = \log(44/6) = 1.992$ and $\beta_1 = 0$, iteratively reweighted least squares gives
+\[
+(1.116, 0.351), \quad (0.870, 0.376), \quad (0.838, 0.381), \quad (0.837, 0.381) ,
+\]
+and then no further change:
+\[
+\log\hat\mu = 0.837 + 0.381x .
+\]
+The fitted counts are $2.31, 3.38, 4.95, 7.24, 10.60, 15.52$. They add to $44 = \sum y$, and
+$\sum x\hat\mu = 155 = \sum xy$: the two likelihood equations hold.
+
+The rate ratio is $e^{0.381} = 1.46$: each year of age multiplies the expected number of faults by about $1.46$.
+From $(\mathbf{X}^\top\hat{\mathbf{W}}\mathbf{X})^{-1}$, $\operatorname{se}(\hat\beta_1) = 0.100$, so $Z_0 = 3.81$, and a $95\%$ interval for the rate ratio is
+$(e^{0.381 - 0.196}, e^{0.381 + 0.196}) = (1.20, 1.78)$.
+
+The intercept-only model has $\hat\mu_i = 44/6$ and deviance $16.77$. The deviance contributions of the fitted model are
+$0.043, 0.045, 0.209, 0.008, 0.015, 0.018$, so $D = 0.338$, and the likelihood ratio statistic is $16.77 - 0.34 = 16.43$,
+against $\chi^2_{0.05,1} = 3.84$. Age matters. With $D = 0.338$ and $X^2 = 0.348$ on $6 - 2 = 4$ degrees of freedom, there is no
+sign of lack of fit or of overdispersion; in fact the counts vary rather less than a Poisson model would
+lead one to expect. A machine of age $6$ would be predicted to have $e^{0.837 + 6(0.381)} = 22.7$ faults in a year, an
+extrapolation to be treated with caution. Figure~\ref{fig:faults} shows the fit.
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[xscale=1.3,yscale=0.17]
+\draw[-Stealth,gray] (0,0) -- (6.2,0) node[right,black,font=\small] {age $x$};
+\draw[-Stealth,gray] (0,0) -- (0,19) node[above,black,font=\small] {faults $y$};
+\foreach \t in {0,...,5} \draw[gray] (\t,0) -- (\t,-0.5) node[below,black,font=\scriptsize] {\t};
+\foreach \t in {5,10,15} \draw[gray] (0,\t) -- (-0.08,\t) node[left,black,font=\scriptsize] {\t};
+\draw[-,thick,blue!60!black] plot[domain=0:5.5,samples=40] (\x,{exp(0.837+0.381*\x)});
+\foreach \a/\b in {0/2,1/3,2/6,3/7,4/11,5/15}
+ \fill[black] (\a,\b) circle (0.055 and 0.42);
+\node[font=\scriptsize,text=blue!50!black,anchor=west] at (0.3,15) {$\hat\mu = e^{0.837 + 0.381x}$};
+\end{tikzpicture}
+\caption{The fault counts of Example~\ref{exa:faults} with the fitted Poisson regression curve. On the log scale
+the curve is a straight line; each year of age multiplies the mean by $1.46$.}
+\label{fig:faults}
+\end{figure}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:ed90}
+For the insecticide data of Example~\ref{exa:dose}, with $\operatorname{logit}\hat\pi = -3.036 + 1.012x$:
+\begin{enumerate}[label=(\alph*)]
+\item estimate the probability of death at dose $4.5$;
+\item estimate the dose that kills $90\%$ of the insects.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\hat\eta = -3.036 + 1.012(4.5) = 1.518$, so $\hat\pi = 1/(1 + e^{-1.518}) = 0.820$.
+
+(b) $\pi = 0.9$ where $\eta = \log(0.9/0.1) = \log 9 = 2.197$, so $x = (2.197 + 3.036)/1.012 = 5.17$. This is just beyond the largest dose
+used, so it is a mild extrapolation.
+\end{solution}
+
+\begin{problem}\label{prob:poisson-indicator}
+Five junctions of design $A$ had $40$ accidents in a year and five junctions of design $B$ had $20$. Fit the Poisson model
+$\log\mu = \beta_0 + \beta_1z$, with $z = 1$ for design $B$, assuming every junction has the same mean within its design. Show
+that $\hat\beta_1 = \log(\bar y_B/\bar y_A)$ and $\widehat{\operatorname{Var}}(\hat\beta_1) = 1/Y_A + 1/Y_B$, where $Y_A$, $Y_B$ are the group totals, and test
+whether the designs differ.
+\end{problem}
+
+\begin{solution}
+The likelihood equations $\mathbf{X}^\top\mathbf{y} = \mathbf{X}^\top\hat{\boldsymbol\mu}$, with columns $\mathbf{1}$ and $\mathbf{z}$, say that the fitted totals match the
+observed totals overall and in group $B$, hence in each group: $5e^{\hat\beta_0} = Y_A$ and $5e^{\hat\beta_0 + \hat\beta_1} = Y_B$. So
+$e^{\hat\beta_0} = \bar y_A$ and $e^{\hat\beta_1} = \bar y_B/\bar y_A$. The weights are $w_i = \hat\mu_i$, so, as in Theorem~\ref{thm:logit-indicator},
+\[
+\mathbf{X}^\top\hat{\mathbf{W}}\mathbf{X} = \begin{pmatrix} Y_A + Y_B & Y_B \\ Y_B & Y_B \end{pmatrix} ,
+\qquad \widehat{\operatorname{Var}}(\hat\beta_1) = \frac{Y_A + Y_B}{Y_AY_B} = \frac{1}{Y_A} + \frac{1}{Y_B} .
+\]
+Here $\hat\beta_1 = \log(4/8) = -0.693$ and $\operatorname{se} = \sqrt{1/40 + 1/20} = 0.274$, so $Z_0 = -2.53$, beyond $-1.96$. Design $B$ halves the
+accident rate, with a $95\%$ interval for the rate ratio of $(e^{-1.230}, e^{-0.156}) = (0.29, 0.86)$.
+\end{solution}
+
+\begin{problem}\label{prob:gamma}
+The gamma distribution with mean $\mu$ and shape $\nu$ has density
+$f(y) = \dfrac{1}{\Gamma(\nu)}\Bigl(\dfrac{\nu}{\mu}\Bigr)^\nu y^{\nu - 1}e^{-\nu y/\mu}$, $y > 0$. Show that it belongs to the exponential family, and find
+$\theta$, $b(\theta)$, $a(\phi)$, the variance function and the canonical link.
+\end{problem}
+
+\begin{solution}
+\[
+\log f = \nu\Bigl(-\frac{y}{\mu} - \log\mu\Bigr) + \nu\log\nu + (\nu - 1)\log y - \log\Gamma(\nu) .
+\]
+This has the form $[y\theta - b(\theta)]/a(\phi) + c(y, \phi)$ with $\theta = -1/\mu$, $b(\theta) = \log\mu = -\log(-\theta)$ and $a(\phi) = 1/\nu$. Then
+$b'(\theta) = -1/\theta = \mu$, as it must be, and $b''(\theta) = 1/\theta^2 = \mu^2$, so $V(\mu) = \mu^2$ and $\operatorname{Var}(y) = \mu^2/\nu$: the standard deviation
+is proportional to the mean, the situation of Section~6 in which the log transformation stabilises the variance.
+The canonical link is $g(\mu) = -1/\mu$, usually used as $1/\mu$, the reciprocal link.
+\end{solution}
+
+\begin{problem}\label{prob:poisson-dev}
+Show that for a Poisson regression with log link and an intercept, $\sum(y_i - \hat\mu_i) = 0$, so that
+$D = 2\sum y_i\log(y_i/\hat\mu_i)$. Check the deviance of Example~\ref{exa:faults} with this formula.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:irls}(iii), the likelihood equation for the column of ones is $\sum y_i = \sum\hat\mu_i$, so the term
+$\sum(y_i - \hat\mu_i)$ vanishes. For the faults data,
+\begin{align*}
+D &= 2\Bigl[2\log\tfrac{2}{2.309} + 3\log\tfrac{3}{3.380} + 6\log\tfrac{6}{4.948} \\
+&\qquad + 7\log\tfrac{7}{7.243} + 11\log\tfrac{11}{10.602} + 15\log\tfrac{15}{15.518}\Bigr] \\
+&= 2\bigl[-0.2877 - 0.3581 + 1.1565 - 0.2386 + 0.4059 - 0.5092\bigr] = 0.338 ,
+\end{align*}
+as before.
+\end{solution}
+
+\begin{problem}\label{prob:overdispersion}
+A Poisson regression with $p = 3$ coefficients was fitted to counts from $n = 9$ hospitals. A coefficient had
+$\hat\beta_j = 0.42$ with $\operatorname{se} = 0.15$, and Pearson's $X^2 = 18.6$. Is there evidence of overdispersion? Re-assess the
+coefficient using the quasi-Poisson model.
+\end{problem}
+
+\begin{solution}
+$X^2 = 18.6$ on $n - p = 6$ degrees of freedom exceeds $\chi^2_{0.05,6} = 12.59$, and $\hat\phi = 18.6/6 = 3.1$: the counts vary about three
+times as much as a Poisson model allows. The corrected standard error is $0.15\sqrt{3.1} = 0.264$, so $Z_0$ falls from
+$0.42/0.15 = 2.8$ to $0.42/0.264 = 1.59$, no longer significant at the $5\%$ level. The apparent effect was largely
+a consequence of understating the variability.
+\end{solution}
+
+\begin{problem}\label{prob:glm-normal}
+Consider the normal distribution with identity link. Show that one step of
+iteratively reweighted least squares, from any starting value, gives the least-squares estimate. Show also that the
+deviance is $SS_{\mathrm{Res}}$.
+\end{problem}
+
+\begin{solution}
+Here $V(\mu) = 1$ and $g'(\mu) = 1$, so $w_i = 1$ and $z_i = \eta_i + (y_i - \mu_i) = y_i$, since $\eta_i = \mu_i$. The step is
+$(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$, whatever $\boldsymbol\beta^{(t)}$ was. For the deviance, $\ell = -\sum(y_i - \mu_i)^2/(2\sigma^2) + \text{const}$; the
+saturated model has $\mu_i = y_i$ and $\ell = \text{const}$, so
+$D = 2\sigma^2[\ell(\text{saturated}) - \ell(\hat{\boldsymbol\beta})] = \sum(y_i - \hat\mu_i)^2 = SS_{\mathrm{Res}}$. The likelihood ratio test is then
+based on differences of residual sums of squares, as in the extra-sum-of-squares principle.
+\end{solution}
 
 \section{Non linear estimation}
 
