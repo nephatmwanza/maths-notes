@@ -4319,6 +4319,351 @@ With $N = 2^k$ runs and block totals $B_1$, $B_2$ of $N/2$ runs each, $SS_{\math
 confounded effect is $\pm(B_2 - B_1)$, and its sum of squares is $\text{contrast}^2/N$, the same.
 \end{solution}
 
+\section{Two-level fractional factorial designs}
+As the number of factors grows, a full $2^k$ design quickly becomes impractical, and most of its runs are spent estimating high-order
+interactions that the sparsity of effects principle says are negligible. A $2^6$ design has $64$ runs, but only $6$ of its $63$ degrees of freedom are for
+main effects and $15$ for two-factor interactions. A \textbf{fractional factorial design} runs only a carefully chosen fraction of the combinations,
+and gives up information on the high-order interactions in exchange. These designs are the workhorse of screening experiments.
+
+\subsection{The one-half fraction}
+\begin{defn}
+A \textbf{one-half fraction} of the $2^k$ design, written $2^{k-1}$, consists of the $2^{k-1}$ runs on which a chosen effect column, the \textbf{generator}, has the same
+sign. If the chosen effect is $W$ and the sign is $+$, the fraction is described by the \textbf{defining relation} $I = W$; with sign $-$, by $I = -W$.
+\end{defn}
+
+For the $2^3$ design with $I = ABC$, the half fraction consists of the runs with a $+$ in the $ABC$ column: $a$, $b$, $c$ and $abc$. The complementary
+half, $I = -ABC$, is $(1)$, $ab$, $ac$, $bc$. They are the \textbf{principal} and \textbf{alternate} fractions, and together they make up the full design
+(Figure~\ref{fig:half-fraction}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.25]
+\foreach \dx/\title/\col/\on in {0/{$I = +ABC$}/blue/1,4.6/{$I = -ABC$}/orange/0} {
+\begin{scope}[xshift=\dx cm]
+\coordinate (O) at (0,0); \coordinate (A) at (2,0); \coordinate (B) at (0.8,0.6); \coordinate (AB) at (2.8,0.6);
+\coordinate (C) at (0,1.8); \coordinate (AC) at (2,1.8); \coordinate (BC) at (0.8,2.4); \coordinate (ABC) at (2.8,2.4);
+\draw[gray] (O) -- (A) -- (AB); \draw[gray,dashed] (O) -- (B) -- (AB);
+\draw[gray] (C) -- (AC) -- (ABC) -- (BC) -- (C);
+\draw[gray] (O) -- (C); \draw[gray] (A) -- (AC); \draw[gray] (AB) -- (ABC); \draw[gray,dashed] (B) -- (BC);
+\node[font=\bfseries\small,\col!70!black] at (1.4,3.0) {\title};
+\end{scope}}
+% principal fraction a, b, c, abc
+\foreach \p in {(2,0),(0.8,0.6),(0,1.8),(2.8,2.4)} \fill[blue!70!black] \p circle (3pt);
+\foreach \p in {(0,0),(2.8,0.6),(2,1.8),(0.8,2.4)} \draw[gray] \p circle (2pt);
+\node[font=\small,below right] at (2,0) {$a$}; \node[font=\small,above left] at (0.8,0.6) {$b$};
+\node[font=\small,left] at (0,1.8) {$c$}; \node[font=\small,above right] at (2.8,2.4) {$abc$};
+% alternate fraction (1), ab, ac, bc
+\begin{scope}[xshift=4.6cm]
+\foreach \p in {(0,0),(2.8,0.6),(2,1.8),(0.8,2.4)} \fill[orange!85!black] \p circle (3pt);
+\foreach \p in {(2,0),(0.8,0.6),(0,1.8),(2.8,2.4)} \draw[gray] \p circle (2pt);
+\node[font=\small,below left] at (0,0) {$(1)$}; \node[font=\small,right] at (2.8,0.6) {$ab$};
+\node[font=\small,below right] at (2,1.8) {$ac$}; \node[font=\small,above left] at (0.8,2.4) {$bc$};
+\end{scope}
+\end{tikzpicture}
+\caption{The two half fractions of the $2^3$ design. Each uses four corners of the cube, no two joined by an edge, so every factor is at each level
+twice.}
+\label{fig:half-fraction}
+\end{figure}
+
+In the fraction $I = ABC$ the columns of the table of signs are no longer all different. On the four runs $a$, $b$, $c$, $abc$, the $A$ column is $+, -, -, +$, and so is the
+$BC$ column: the contrasts for $A$ and $BC$ are identical. The same holds for $B$ and $AC$, and for $C$ and $AB$. Two effects whose columns coincide on the
+runs of a fraction are \textbf{aliases}: the fraction cannot tell them apart.
+
+\begin{thm}\label{thm:aliases}
+In the fraction defined by $I = W$, the alias of an effect $E$ is the generalised interaction $EW$ (the product with squared letters deleted). The
+contrast for $E$, divided by $2^{k-2}$, estimates $E + EW$; in the fraction $I = -W$ it estimates $E - EW$.
+\end{thm}
+
+\begin{proof}
+On every run of the fraction the column of $W$ is $+1$. The column of $EW$ is the elementwise product of the columns of $E$ and $W$, so on these runs it
+equals the column of $E$. The contrast for $E$ is therefore also the contrast for $EW$. Its expectation is the sum of the contributions of all effects
+whose columns, restricted to the fraction, are $\pm$ the column of $E$; these are $E$ and $EW$ only, because any other effect $F$ has $FE \ne I, W$ and so a
+balanced column on the fraction. In the fraction $I = -W$ the column of $W$ is $-1$ and the column of $EW$ is minus that of $E$.
+\end{proof}
+
+So in the $2^{3-1}$ design with $I = ABC$, the contrasts estimate $A + BC$, $B + AC$ and $C + AB$. If the two-factor interactions are negligible, the main
+effects are estimated cleanly; if not, there is no way to tell from these four runs. If both halves are run, the sum and difference of the two
+estimates separate $A$ from $BC$, and so on: this is the idea of the fold-over below.
+
+\begin{exa}\label{exa:half-fraction}
+Suppose only the eight runs of the $2^4$ experiment of Example~\ref{exa:twofour} with $I = ABCD$ had been made: $(1) = 8$, $ab = 11$, $ac = 16$, $bc = 13$, $ad = 7$, $bd = 5$,
+$cd = 7$, $abcd = 13$. Each main effect is aliased with a three-factor interaction ($A = BCD$, and so on), and the two-factor interactions are aliased in
+pairs ($AB = CD$, $AC = BD$, $AD = BC$). The estimates, contrasts divided by $4$, are
+\begin{center}
+\begin{tabular}{l|c|c|c}
+estimate from the half fraction & value & from the full design & sum \\
+\hline
+$A + BCD$ & $3.5$ & $4.125 - 0.625$ & $3.5$ \\
+$B + ACD$ & $1.0$ & $1.875 - 0.875$ & $1.0$ \\
+$C + ABD$ & $4.5$ & $4.875 - 0.375$ & $4.5$ \\
+$D + ABC$ & $-4.0$ & $-3.125 - 0.875$ & $-4.0$ \\
+$AC + BD$ & $1.0$ & $2.125 - 1.125$ & $1.0$
+\end{tabular}
+\end{center}
+The half fraction reproduces exactly the sums of aliased effects from the full experiment. Because the three-factor interactions are small, it
+identifies the same important factors, $A$, $C$ and $D$, with half the runs.
+\end{exa}
+
+\subsection{Resolution}
+\begin{defn}
+The \textbf{resolution} of a fractional factorial design is the length (number of letters) of the shortest word in its defining relation, written as a
+Roman numeral. In particular:
+\begin{enumerate}[label=(\roman*)]
+\item in a design of \textbf{resolution III}, no main effect is aliased with another main effect, but main effects are aliased with two-factor
+interactions, and two-factor interactions may be aliased with each other;
+\item in a design of \textbf{resolution IV}, no main effect is aliased with another main effect or with a two-factor interaction, but two-factor
+interactions are aliased with each other;
+\item in a design of \textbf{resolution V}, no main effect or two-factor interaction is aliased with another main effect or two-factor interaction.
+\end{enumerate}
+\end{defn}
+
+The connection with word length is immediate from Theorem~\ref{thm:aliases}: an effect with $p$ letters is aliased with an effect of at least $R - p$ letters
+when the shortest word has $R$ letters. The $2^{3-1}$ design with $I = ABC$ is $2^{3-1}_{\mathrm{III}}$, and the $2^{4-1}$ with $I = ABCD$ is $2^{4-1}_{\mathrm{IV}}$.
+
+\begin{prop}\label{prop:best-half}
+The one-half fraction of the $2^k$ design of highest resolution has defining relation $I = ABC\cdots K$, the interaction of all $k$ factors, and is of
+resolution $k$. It is constructed by writing down the full $2^{k-1}$ design in the first $k - 1$ factors, and setting the levels of the $k$th factor equal to the
+product of the columns of the other $k - 1$ (or minus that product, for the alternate fraction).
+\end{prop}
+
+\begin{proof}
+A half fraction has a single word in its defining relation, and the resolution is that word's length, at most $k$, with equality only for the word
+containing every letter. Setting $K = AB\cdots J$ makes $ABC\cdots K = (AB\cdots J)^2 = I$ on every run, so the runs constructed are exactly those with $+$ in the
+$ABC\cdots K$ column, and there are $2^{k-1}$ of them, all distinct.
+\end{proof}
+
+A useful consequence of resolution is the \textbf{projection property}: a design of resolution $R$ contains a full factorial (possibly replicated) in
+any $R - 1$ of its factors. If only a few factors turn out to be active, the data can be analysed as a full factorial in those factors.
+
+\subsection{Smaller fractions: the $2^{k-p}$ design}
+A $2^{k-p}$ design, a $1/2^p$ fraction, is constructed by writing down a full factorial in $k - p$ \textbf{basic factors} and defining each of the remaining $p$
+factors as an interaction of the basic ones, through $p$ \textbf{generators}. The \textbf{defining relation} then contains the $p$ generator words and all
+their generalised interactions: $2^p - 1$ words in all, which, with $I$, form a group under multiplication. Each effect has $2^p - 1$ aliases, obtained by
+multiplying it by each word, and the resolution is again the length of the shortest word.
+
+\begin{exa}\label{exa:quarter}
+Consider the $2^{5-2}$ design with generators $I = ABC$ and $I = BDE$.
+
+\emph{Defining relation.} The generalised interaction is $ABC \cdot BDE = AB^2CDE = ACDE$, so
+\[
+I = ABC = BDE = ACDE .
+\]
+\emph{Resolution.} The shortest words have three letters: the design is $2^{5-2}_{\mathrm{III}}$.
+
+\emph{Alias structure.} Multiplying each effect by the three words, and ignoring repeats,
+\begin{center}
+\begin{tabular}{l}
+$A = BC = ABDE = CDE$ \\
+$B = AC = DE = ABCDE$ \\
+$C = AB = BCDE = ADE$ \\
+$D = ABCD = BE = ACE$ \\
+$E = ABCE = BD = ACD$ \\
+$AD = BCD = ABE = CE$ \\
+$AE = BCE = ABD = CD$
+\end{tabular}
+\end{center}
+These seven alias sets account for the seven degrees of freedom among eight runs. Every main effect is aliased with at least one two-factor
+interaction.
+
+\emph{A quarter fraction.} Take $A$, $B$, $D$ as the basic factors and set $C = AB$, $E = BD$:
+\begin{center}
+\begin{tabular}{ccc|cc|c}
+$A$ & $B$ & $D$ & $C = AB$ & $E = BD$ & run \\
+\hline
+$-$ & $-$ & $-$ & $+$ & $+$ & $ce$ \\
+$+$ & $-$ & $-$ & $-$ & $+$ & $ae$ \\
+$-$ & $+$ & $-$ & $-$ & $-$ & $b$ \\
+$+$ & $+$ & $-$ & $+$ & $-$ & $abc$ \\
+$-$ & $-$ & $+$ & $+$ & $-$ & $cd$ \\
+$+$ & $-$ & $+$ & $-$ & $-$ & $ad$ \\
+$-$ & $+$ & $+$ & $-$ & $+$ & $bde$ \\
+$+$ & $+$ & $+$ & $+$ & $+$ & $abcde$
+\end{tabular}
+\end{center}
+Every run has $ABC = +$ and $BDE = +$; this is the principal fraction. Changing the signs of the generators ($C = -AB$ and/or $E = -BD$) gives the other
+three quarter fractions, and the four together make up the full $2^5$.
+\end{exa}
+
+When several designs of the same resolution are available, the one with the fewest words of minimum length is preferred, since it aliases the
+fewest pairs of low-order effects. This is the criterion of \textbf{minimum aberration}, and tables of recommended generators are constructed with it.
+
+\subsection{Finding the generators of a given design}
+A design may be presented simply as a table of plus and minus signs. Its generators are found by taking a set of $k - p$ columns that form a full
+factorial (the basic factors) and expressing each other column as a product of them.
+
+\begin{exa}\label{exa:find-generators}
+An engineer used the following eight-run design in five factors:
+\begin{center}
+\begin{tabular}{ccccc}
+$A$ & $B$ & $C$ & $D$ & $E$ \\
+\hline
+$-$ & $-$ & $-$ & $+$ & $-$ \\
+$+$ & $-$ & $-$ & $+$ & $+$ \\
+$-$ & $+$ & $-$ & $-$ & $+$ \\
+$+$ & $+$ & $-$ & $-$ & $-$ \\
+$-$ & $-$ & $+$ & $-$ & $+$ \\
+$+$ & $-$ & $+$ & $-$ & $-$ \\
+$-$ & $+$ & $+$ & $+$ & $-$ \\
+$+$ & $+$ & $+$ & $+$ & $+$
+\end{tabular}
+\end{center}
+The columns $A$, $B$, $C$ form a full $2^3$ in standard order, so they are the basic factors. Comparing $D$ with the products of these columns, $D$ agrees
+with $BC$ in every row (row $1$: $(-)(-) = +$; row $3$: $(+)(-) = -$; and so on), and $E$ agrees with $ABC$. So the generators are $D = BC$ and $E = ABC$, that is
+\[
+I = BCD = ABCE , \qquad\text{and their product}\qquad I = ADE .
+\]
+The defining relation is $I = BCD = ABCE = ADE$, and the design is of resolution III. The alias structure is
+\begin{center}
+\begin{tabular}{l}
+$A = ABCD = BCE = DE$ \\
+$B = CD = ACE = ABDE$ \\
+$C = BD = ABE = ACDE$ \\
+$D = BC = ABCDE = AE$ \\
+$E = BCDE = ABC = AD$ \\
+$AB = ACD = CE = BDE$ \\
+$AC = ABD = BE = CDE$
+\end{tabular}
+\end{center}
+No $2^{5-2}$ design has resolution above III: if two generator words both had four or more of the five letters, they would share at least three,
+and their product would have at most two. Every $2^{5-2}_{\mathrm{III}}$ design has at least two words of length three, and this one has exactly two, so in the
+sense of minimum aberration it is as good as any.
+\end{exa}
+
+\subsection{De-aliasing: the fold-over}
+A resolution III design is a cheap screen, but its main effects are aliased with two-factor interactions. If the results are ambiguous, a second
+fraction can be run to separate them.
+
+\begin{thm}\label{thm:foldover}
+Let a second fraction be formed from a resolution III fraction by reversing the signs of every factor in every run (a \textbf{full fold-over}). In the
+combined design, every main effect is free of aliasing with two-factor interactions; the combined design has resolution at least IV.
+\end{thm}
+
+\begin{proof}
+Reversing every factor multiplies the column of an effect with $r$ letters by $(-1)^r$. In the defining relation of the folded fraction, each word of odd
+length therefore changes sign and each word of even length keeps it. Combining the two fractions, a word that appears with opposite signs is
+satisfied by neither sign on all runs, and drops out of the combined defining relation; only words of even length remain. A design whose
+defining words all have even length, and none of length two, has resolution at least IV. (No word of length two can arise, because the original
+design had resolution III, so all its words have length at least three, and the combined relation is a subset of them.)
+\end{proof}
+
+In practice, if the original fraction gives the estimate $l_i$ of $A + BC + \dots$ and the folded fraction gives $l_i'$ of $A - BC - \dots$, then $\frac12(l_i + l_i')$ estimates $A$ (plus
+three-factor interactions) and $\frac12(l_i - l_i')$ estimates the two-factor interactions aliased with it. Reversing the signs of a single factor (a
+\textbf{single-factor fold-over}) instead frees that factor and all its two-factor interactions.
+
+\subsection{Practice problems}
+
+\begin{problem}
+Explain how to generate the one-half fraction of the $2^k$ design of the highest resolution, and give it for $k = 4$.
+\end{problem}
+
+\begin{solution}
+Use the defining relation $I = ABC\cdots K$, with all $k$ letters, which gives resolution $k$. Write down the full $2^{k-1}$ design in the first $k - 1$ factors and set
+the level of the last factor in each run equal to the product of the levels of the others. For $k = 4$, $D = ABC$: the runs are $(1)$, $ad$, $bd$, $ab$, $cd$, $ac$, $bc$,
+$abcd$, the $2^{4-1}_{\mathrm{IV}}$ design with $I = ABCD$.
+\end{solution}
+
+\begin{problem}
+A $2^4$ experiment is to be run as a quarter fraction using $ABC$ and $BCD$ as defining contrasts.
+\begin{enumerate}[label=(\alph*)]
+\item Obtain the principal quarter fraction and its alias structure.
+\item The full $2^4$ was in fact run, with $(1) = 19$, $a = 15$, $b = 15$, $ab = 18$, $c = 15$, $ac = 18$, $bc = 17$, $abc = 19$, $d = 13$, $ad = 18$, $bd = 18$, $abd = 18$, $cd = 18$, $acd = 19$, $bcd = 18$
+and $abcd = 20$. Using only the runs of your quarter fraction, estimate the main effects $A$, $B$ and $D$, and comment.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The runs with an even number of letters from both $\{a, b, c\}$ and $\{b, c, d\}$ are $(1)$, $bc$, $abd$, $acd$, the principal block of the confounding scheme in
+Section~9. On them $ABC = BCD = -$, so the defining relation is $I = -ABC = -BCD = AD$, including the generalised interaction $ABC \cdot BCD = AD$. The aliases are
+\begin{gather*}
+A = D = -BC = -ABCD , \\
+B = ABD = -AC = -CD , \\
+C = ACD = -AB = -BD .
+\end{gather*}
+The word $AD$ has only two letters: the design has resolution II, and the main effects $A$ and $D$ are aliased with each other.
+
+(b) The four responses are $(1) = 19$, $bc = 17$, $abd = 18$, $acd = 19$. Each estimate is a contrast divided by $2$:
+\begin{gather*}
+\hat A = \tfrac12(18 + 19 - 19 - 17) = 0.5 , \\
+\hat B = \tfrac12(17 + 18 - 19 - 19) = -1.5 , \\
+\hat D = \tfrac12(18 + 19 - 19 - 17) = 0.5 .
+\end{gather*}
+The estimates of $A$ and $D$ are identical, because the $A$ and $D$ columns coincide on these runs: the design cannot distinguish the two factors at
+all. Choosing two three-factor interactions whose product is a two-factor interaction is sound for \emph{blocking}, where the confounded effects
+are lost to blocks, but disastrous for \emph{fractionation}, where the generalised interaction becomes a word of the defining relation. For a quarter
+fraction of a $2^4$ the best possible is resolution II in any case, which is why such small fractions are rarely used with four factors.
+\end{solution}
+
+\begin{problem}
+Consider the $2^{5-2}$ design with generators $I = ABCD$ and $I = CDE$.
+\begin{enumerate}[label=(\alph*)]
+\item Write down the complete alias structure, and find the resolution.
+\item Obtain the principal quarter fraction and the remaining three quarter fractions.
+\item The full $2^5$ experiment gave the data below. Using the principal quarter fraction, estimate the effects $A$, $E$ and $BD$.
+\end{enumerate}
+\begin{center}
+\begin{tabular}{llll}
+$(1) = 21$ & $d = 33$ & $e = 30$ & $de = 29$ \\
+$a = 33$ & $ad = 29$ & $ae = 31$ & $ade = 36$ \\
+$b = 28$ & $bd = 30$ & $be = 33$ & $bde = 25$ \\
+$ab = 26$ & $abd = 27$ & $abe = 24$ & $abde = 29$ \\
+$c = 34$ & $cd = 22$ & $ce = 26$ & $cde = 31$ \\
+$ac = 34$ & $acd = 36$ & $ace = 26$ & $acde = 35$ \\
+$bc = 24$ & $bcd = 27$ & $bce = 35$ & $bcde = 27$ \\
+$abc = 25$ & $abcd = 36$ & $abce = 30$ & $abcde = 24$
+\end{tabular}
+\end{center}
+\end{problem}
+
+\begin{solution}
+(a) The generalised interaction is $ABCD \cdot CDE = ABE$, so $I = ABCD = CDE = ABE$, of resolution III. The alias sets are
+\begin{center}
+\begin{tabular}{l}
+$A = BCD = ACDE = BE$ \\
+$B = ACD = BCDE = AE$ \\
+$C = ABD = DE = ABCE$ \\
+$D = ABC = CE = ABDE$ \\
+$E = ABCDE = CD = AB$ \\
+$AC = BD = ADE = BCE$ \\
+$AD = BC = ACE = BDE$
+\end{tabular}
+\end{center}
+
+(b) The four quarter fractions are given by the signs of $ABCD$ and $CDE$:
+\begin{center}
+\begin{tabular}{l|l}
+fraction & runs \\
+\hline
+$ABCD = +$, $CDE = +$ & $ac$, $bc$, $ad$, $bd$, $e$, $abe$, $cde$, $abcde$ \\
+$ABCD = +$, $CDE = -$ & $(1)$, $ab$, $cd$, $abcd$, $ace$, $bce$, $ade$, $bde$ \\
+$ABCD = -$, $CDE = +$ & $c$, $abc$, $d$, $abd$, $ae$, $be$, $acde$, $bcde$ \\
+$ABCD = -$, $CDE = -$ & $a$, $b$, $acd$, $bcd$, $ce$, $abce$, $de$, $abde$
+\end{tabular}
+\end{center}
+The first is the principal fraction. (It does not contain $(1)$, because $CDE$ has an odd number of letters and is $-$ at $(1)$; the fraction containing $(1)$ is
+the second, $I = ABCD = -CDE = -ABE$.)
+
+(c) In the principal fraction the responses are $ac = 34$, $bc = 24$, $ad = 29$, $bd = 30$, $e = 30$, $abe = 24$, $cde = 31$, $abcde = 24$. Each estimate is the contrast divided by $4$:
+\begin{align*}
+\hat A &= \tfrac14\bigl[(34 + 29 + 24 + 24) - (24 + 30 + 30 + 31)\bigr] = -4/4 = -1.0 , \\
+\hat E &= \tfrac14\bigl[(30 + 24 + 31 + 24) - (34 + 24 + 29 + 30)\bigr] = -8/4 = -2.0 , \\
+\widehat{BD} &= \tfrac14\bigl[(34 + 30 + 30 + 31) - (24 + 29 + 24 + 24)\bigr] \\
+&= \tfrac14(125 - 115) = 10/4 = 2.5 .
+\end{align*}
+By the alias structure these estimate $A + BE + BCD + ACDE$, $E + AB + CD + ABCDE$ and $BD + AC + ADE + BCE$; in particular the estimate of $BD$ is equally an
+estimate of $AC$.
+\end{solution}
+
+\begin{problem}
+A $2^{3-1}_{\mathrm{III}}$ design with $I = ABC$ gives estimates $l_A$, $l_B$, $l_C$. The alternate fraction $I = -ABC$ is then run, giving $l_A'$, $l_B'$, $l_C'$. Show how to estimate the
+main effects free of two-factor interactions, and identify the resulting design.
+\end{problem}
+
+\begin{solution}
+The first fraction estimates $A + BC$, the second $A - BC$ (Theorem~\ref{thm:aliases}). So $\frac12(l_A + l_A')$ estimates $A$ and $\frac12(l_A - l_A')$ estimates $BC$, and similarly for
+the others. For three factors the alternate fraction is also the full fold-over (reversing all three signs maps $a$ to $bc$, and so on), and the two
+fractions together form the full $2^3$ design, in which nothing is aliased.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
