@@ -7179,6 +7179,881 @@ $2$ and $n - 6$ degrees of freedom.
 \end{solution}
 
 \section{Polynomial regression}
+Many relationships are curved: yield rises with fertiliser and then falls off, cost per unit falls with
+output and then rises, a growth curve bends. When the curvature is smooth and the theory gives no
+particular non-linear form, a polynomial in the regressors is the natural first model to try. A
+polynomial such as
+\[
+y = \beta_0 + \beta_1x + \beta_2x^2 + \varepsilon
+\]
+is curved in $x$ but \emph{linear in the parameters}: it is the multiple regression model with regressors
+$x_1 = x$ and $x_2 = x^2$. So everything from Sections 3 to 9 applies: least squares, the tests, the
+residual analysis. This section is about what is special to polynomials: how to choose the order, the
+ill-conditioning of the powers of $x$ and how to remove it, orthogonal polynomials, piecewise
+polynomials, models in several regressors, and the stationary points of a fitted surface.
+
+\subsection{Polynomial models in one variable}
+The polynomial model of order $k$ in one variable is
+\[
+y = \beta_0 + \beta_1x + \beta_2x^2 + \dots + \beta_kx^k + \varepsilon ,
+\]
+and the commonest cases are the quadratic ($k = 2$) and the cubic ($k = 3$). In the quadratic, $\beta_1$ is no longer
+``the slope'': the slope of the mean, $\beta_1 + 2\beta_2x$, changes with $x$. The parameter $\beta_2$ measures the
+curvature. The mean function is concave when $\beta_2 < 0$ and convex when $\beta_2 > 0$, and it turns at
+$x = -\beta_1/(2\beta_2)$.
+
+\subhead{Considerations in fitting a polynomial}
+\begin{enumerate}[label=(\arabic*)]
+\item \emph{Keep the order low.} A polynomial of high enough order fits any data, as the next result shows,
+and a perfect fit describes the noise as well as the trend. Transformations (Section~6) may straighten
+the relationship with fewer parameters; orders above $3$ are seldom justified.
+\item \emph{Build the model systematically.} Either raise the order one term at a time until the highest term is
+not significant (forward), or start from a deliberately high order and remove the highest term while it is
+not significant (backward). The two need not stop at the same order.
+\item \emph{Do not extrapolate.} Beyond the range of the data, a polynomial can turn in directions the process
+never takes: a fitted quadratic yield curve, carried far enough, predicts negative yields.
+\item \emph{Expect ill-conditioning.} The powers $x, x^2, x^3, \dots$ are highly correlated when the range of $x$ is
+narrow relative to its distance from zero, and the problem worsens with each power. Centring $x$ removes
+much of it (Theorem~\ref{thm:centred-poly}).
+\item \emph{Keep the hierarchy.} A model containing $x^k$ should contain all the lower powers. A model such as
+$y = \beta_0 + \beta_2x^2 + \varepsilon$ changes its meaning when the origin of $x$ is moved
+(Theorem~\ref{thm:poly-invariance}).
+\end{enumerate}
+Figure~\ref{fig:poly-cautions} illustrates the first, third and fourth points.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\py/\col/\num/\name in {
+ 0/4.75/blue/1/{Order too high},
+ 6.9/4.75/red/2/{Extrapolation},
+ 0/0/orange/3/{$x$ against $x^2$: $r = 0.98$},
+ 6.9/0/green/4/{Centred: $r = 0$}} {
+ \begin{scope}[shift={(\px,\py)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.3,-0.45) rectangle (6.3,3.85);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,3.5) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.25,3.5) {\name};
+  \draw[-Stealth,gray] (0,0) -- (6.0,0);
+  \draw[-Stealth,gray] (0,0) -- (0,3.1);
+  \ifnum\num=1
+   \draw[-,thick,blue!60!black] plot[smooth] coordinates {(0.50,0.60) (0.66,1.47) (0.82,1.81) (0.99,1.83) (1.15,1.69) (1.31,1.50) (1.48,1.32) (1.64,1.20) (1.80,1.16) (1.96,1.20) (2.12,1.31) (2.29,1.46) (2.45,1.64) (2.61,1.82) (2.77,1.98) (2.94,2.09) (3.10,2.16) (3.26,2.18) (3.43,2.15) (3.59,2.08) (3.75,1.98) (3.91,1.89) (4.08,1.83) (4.24,1.81) (4.40,1.86) (4.56,1.99) (4.73,2.20) (4.89,2.48) (5.05,2.77) (5.21,3.00) (5.38,3.08) (5.54,2.83) (5.70,2.07)};
+   \draw[-,thick,dashed,black] plot[domain=0.5:5.7,samples=30] (\x,{0.301+0.784*\x-0.0816*\x*\x});
+   \foreach \a/\b in {0.50/0.60,1.37/1.43,2.23/1.41,3.10/2.16,3.97/1.87,4.83/2.38,5.70/2.07}
+    \fill[black] (\a,\b) circle (1.8pt);
+   \node[font=\scriptsize,text=blue!50!black] at (3.3,0.3) {degree 6: an exact fit};
+  \fi
+  \ifnum\num=2
+   \fill[red!15] (0.4,0) rectangle (3.6,3.0);
+   \node[font=\scriptsize,text=red!50!black] at (2.0,0.25) {range of the data};
+   \draw[-,thick,black] plot[domain=0.4:3.6,samples=30] (\x,{0.6+1.5*\x-0.3*\x*\x});
+   \draw[-,thick,dashed,red!60!black] plot[domain=3.6:5.3,samples=30] (\x,{0.6+1.5*\x-0.3*\x*\x});
+   \foreach \a/\b in {0.6/1.4,1.2/1.9,1.8/2.5,2.4/2.3,3.0/2.6,3.5/2.2}
+    \fill[black] (\a,\b) circle (1.8pt);
+   \node[font=\scriptsize,text=red!50!black,anchor=east] at (5.95,2.3) {fit carried on};
+  \fi
+  \ifnum\num=3
+   \foreach \a/\b in {0.60/0.35,1.40/0.50,2.20/0.75,3.00/1.10,3.80/1.55,4.60/2.10,5.40/2.75}
+    \fill[orange!60!black] (\a,\b) circle (1.8pt);
+   \node[font=\scriptsize,text=orange!50!black,anchor=west] at (0.4,2.4) {$x = 1, \dots, 7$};
+   \node[font=\scriptsize,anchor=north] at (5.8,0) {$x$};
+   \node[font=\scriptsize,anchor=east] at (0,2.9) {$x^2$};
+  \fi
+  \ifnum\num=4
+   \foreach \a/\b in {0.60/2.55,1.40/1.30,2.20/0.55,3.00/0.30,3.80/0.55,4.60/1.30,5.40/2.55}
+    \fill[green!50!black] (\a,\b) circle (1.8pt);
+   \node[font=\scriptsize,text=green!40!black] at (3.0,2.4) {$u = x - 4$};
+   \node[font=\scriptsize,anchor=north] at (5.8,0) {$u$};
+   \node[font=\scriptsize,anchor=east] at (0,2.9) {$u^2$};
+  \fi
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Cautions with polynomials. (1) The sixth-degree polynomial through seven points (solid) against a
+quadratic (dashed). (2) A quadratic carried beyond the data. (3) For $x = 1, \dots, 7$ the columns $x$ and $x^2$
+are almost collinear. (4) After centring, $u$ and $u^2$ are uncorrelated.}
+\label{fig:poly-cautions}
+\end{figure}
+
+\begin{prop}\label{prop:interpolate}
+If the $n$ observations have distinct values $x_1, \dots, x_n$, the polynomial of order $n - 1$ fits them exactly:
+every residual is zero.
+\end{prop}
+
+\begin{proof}
+The model matrix is the $n \times n$ Vandermonde matrix with rows $(1, x_i, x_i^2, \dots, x_i^{n-1})$. If
+$\mathbf{Xc} = \mathbf{0}$, the polynomial $c_0 + c_1x + \dots + c_{n-1}x^{n-1}$, of degree at most $n - 1$, has the $n$ distinct roots
+$x_1, \dots, x_n$, so it is the zero polynomial and $\mathbf{c} = \mathbf{0}$. So $\mathbf{X}$ is non-singular, the equations
+$\mathbf{X}\boldsymbol\beta = \mathbf{y}$ have a solution, and least squares finds it, with $\mathbf{e} = \mathbf{0}$.
+\end{proof}
+
+So $R^2 = 1$ is always within reach, and it means nothing: the fit has no degrees of freedom left with which
+to estimate $\sigma^2$, and the curve between the data points (panel~1 of Figure~\ref{fig:poly-cautions}) is not
+believable.
+
+\subhead{Centring and the hierarchy principle}
+The next result says that moving the origin of $x$ or changing its units leaves a full polynomial fit
+unchanged.
+
+\begin{thm}\label{thm:poly-invariance}
+Let $z = (x - c)/d$ with $d \ne 0$. The polynomial models of order $k$ in $x$ and in $z$,
+\[
+y = \sum_{j=0}^k \beta_jx^j + \varepsilon \quad\text{and}\quad y = \sum_{j=0}^k \gamma_jz^j + \varepsilon ,
+\]
+have the same fitted values, residuals and sums of squares, and the highest coefficients are related by
+$\gamma_k = d^k\beta_k$. A model that leaves out some lower power does not have this property in general.
+\end{thm}
+
+\begin{proof}
+By the binomial theorem,
+\[
+z^j = d^{-j}(x - c)^j = d^{-j}\sum_{i=0}^j \binom{j}{i}(-c)^{j-i}x^i ,
+\]
+so each column $z^j$ is a combination of $1, x, \dots, x^j$, and $\mathbf{X}_z = \mathbf{X}_x\mathbf{T}$ with $\mathbf{T}$ upper triangular. The
+diagonal entries of $\mathbf{T}$ are $d^{-j} \ne 0$, so $\mathbf{T}$ is non-singular. Then the hat matrices agree:
+\begin{align*}
+\mathbf{H}_z &= \mathbf{X}_x\mathbf{T}(\mathbf{T}^\top\mathbf{X}_x^\top\mathbf{X}_x\mathbf{T})^{-1}\mathbf{T}^\top\mathbf{X}_x^\top \\
+&= \mathbf{X}_x\mathbf{T}\mathbf{T}^{-1}(\mathbf{X}_x^\top\mathbf{X}_x)^{-1}(\mathbf{T}^\top)^{-1}\mathbf{T}^\top\mathbf{X}_x^\top = \mathbf{H}_x ,
+\end{align*}
+so $\hat{\mathbf{y}} = \mathbf{Hy}$, $\mathbf{e}$ and every sum of squares are the same for both.
+Matching the coefficients of $x^k$ in $\sum_j\gamma_jz^j = \sum_j\beta_jx^j$, only $z^k$ contains $x^k$, with coefficient
+$d^{-k}$, so $\gamma_kd^{-k} = \beta_k$.
+
+For the last statement, take $y = \beta_0 + \beta_2x^2 + \varepsilon$. In terms of $x$, the variable $z^2 = (x^2 - 2cx + c^2)/d^2$
+contains $x$ when $c \ne 0$, so the column space of $(\mathbf{1}, \mathbf{z}^2)$ contains a vector with a non-zero $x$-component,
+which $(\mathbf{1}, \mathbf{x}^2)$ does not. The two models are different models.
+\end{proof}
+
+So for a full polynomial, the choice of origin and scale is free, and the test of the highest-order term is the
+same whatever the coding, since $\gamma_k$ and $\beta_k$ differ only by the known factor $d^k$. The lower coefficients do change: in the
+quadratic, $\beta_1$ is the slope at $x = 0$ and $\gamma_1$ the slope at $x = c$ (times $d$). Testing $\beta_1 = 0$ in a quadratic
+asks whether the slope is zero at the origin, which depends on where the origin is; that is why
+removing a lower-order term while keeping a higher one is rarely sensible. The freedom to move the origin
+is what makes centring possible.
+
+\begin{thm}\label{thm:centred-poly}
+Suppose the values of $x$ are symmetric about $\bar x$, so that the deviations $u_i = x_i - \bar x$ are the same
+set of numbers as $-u_i$. Then $\sum_i u_i^m = 0$ for every odd $m$. In particular, in the quadratic in $u$
+the column $\mathbf{u}$ is orthogonal to both $\mathbf{1}$ and $\mathbf{u}^2$, and $\operatorname{corr}(\mathbf{u}, \mathbf{u}^2) = 0$.
+\end{thm}
+
+\begin{proof}
+Pairing each $u_i$ with the observation whose deviation is $-u_i$, the odd powers cancel in pairs, and a
+deviation equal to $0$ contributes nothing. Then $\mathbf{1}^\top\mathbf{u} = \sum u_i = 0$, and $\mathbf{u}^\top\mathbf{u}^2 = \sum u_i^3 = 0$. The sample
+covariance of $u$ and $u^2$ is $\frac{1}{n}\sum u_i u_i^2 - \bar u\,\overline{u^2} = 0 - 0$, so the correlation is zero.
+\end{proof}
+
+For $x = 1, \dots, 7$, $\operatorname{corr}(x, x^2) = 0.977$, so in the uncentred quadratic both regressors have
+$\mathrm{VIF} = 1/(1 - 0.977^2) = 22.3$; after centring at $\bar x = 4$, both VIFs are $1$. When the design is not symmetric,
+centring does not make the correlation exactly zero, but it usually reduces it greatly
+(Problem~\ref{prob:centring}).
+
+\begin{exa}\label{exa:irrigation}
+A farmer applied seven levels of irrigation to tomato plots and recorded the yields.
+\begin{center}
+\begin{tabular}{c|ccccccc}
+Irrigation, $x$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\
+\hline
+Yield, $y$ & 8 & 16 & 23 & 26 & 27 & 29 & 26 \\
+\end{tabular}
+\end{center}
+The units of $x$ are 10~mm of water a week, and $y$ is in kilograms per plot. Fit a quadratic, test the
+quadratic term, and find the fitted yield and its turning point.
+\end{exa}
+
+\begin{solution}
+Centre at $\bar x = 4$, so $u = x - 4$ takes the values $-3, \dots, 3$. The needed sums are
+\begin{gather*}
+\textstyle\sum u = 0, \quad \sum u^2 = 28, \quad \sum u^3 = 0, \quad \sum u^4 = 196, \\
+\textstyle\sum y = 155, \quad \sum uy = 84, \quad \sum u^2y = 536 .
+\end{gather*}
+The normal equations for $y = \beta_0 + \beta_1u + \beta_2u^2 + \varepsilon$ are
+\[
+\begin{pmatrix} 7 & 0 & 28 \\ 0 & 28 & 0 \\ 28 & 0 & 196 \end{pmatrix}
+\begin{pmatrix} \hat\beta_0 \\ \hat\beta_1 \\ \hat\beta_2 \end{pmatrix}
+= \begin{pmatrix} 155 \\ 84 \\ 536 \end{pmatrix} .
+\]
+The middle equation, uncoupled from the others by Theorem~\ref{thm:centred-poly}, gives $\hat\beta_1 = 84/28 = 3$. The
+other two have determinant $7(196) - 28^2 = 588$, so
+\begin{align*}
+\hat\beta_0 &= \frac{196(155) - 28(536)}{588} = \frac{15372}{588} = 26.143 , \\
+\hat\beta_2 &= \frac{7(536) - 28(155)}{588} = \frac{-588}{588} = -1 .
+\end{align*}
+The fitted model is
+\[
+\hat y = 26.143 + 3u - u^2 = -1.857 + 11x - x^2 ,
+\]
+the second form by substituting $u = x - 4$ (Theorem~\ref{thm:poly-invariance}: the fits are the same). The fitted
+values are $8.14, 16.14, 22.14, 26.14, 28.14, 28.14, 26.14$, and the residuals are
+\[
+-0.14, \quad -0.14, \quad 0.86, \quad -0.14, \quad -1.14, \quad 0.86, \quad -0.14 ,
+\]
+so $SS_{\mathrm{Res}} = 2.857$ on $7 - 3 = 4$ degrees of freedom and $MS_{\mathrm{Res}} = 0.714$. With $\sum y^2 = 3771$,
+$SS_T = 3771 - 155^2/7 = 338.857$.
+
+The quadratic term. The $(3,3)$ element of $(\mathbf{X}^\top\mathbf{X})^{-1}$ is $7/588 = 1/84$, so
+\[
+\operatorname{se}(\hat\beta_2) = \sqrt{0.714/84} = 0.0922, \qquad t_0 = \frac{-1}{0.0922} = -10.84 ,
+\]
+and $|t_0| > t_{0.025,4} = 2.776$. The curvature is real: a straight line would not do.
+
+The turning point. The fitted yield is greatest where $3 - 2u = 0$, at $u = 1.5$, or $x = 5.5$, where
+$\hat y = 26.143 + 4.5 - 2.25 = 28.39$~kg. Its standard error is found in Example~\ref{exa:irrigation-max}.
+\end{solution}
+
+\begin{thm}[The turning point of a quadratic]\label{thm:turning}
+In the fitted quadratic $\hat y = \hat\beta_0 + \hat\beta_1u + \hat\beta_2u^2$, the turning point $\hat u_0 = -\hat\beta_1/(2\hat\beta_2)$ has
+approximate variance
+\begin{align*}
+\operatorname{Var}(\hat u_0) \approx \frac{1}{4\beta_2^2}\Bigl[&\operatorname{Var}(\hat\beta_1) + 4u_0\operatorname{Cov}(\hat\beta_1, \hat\beta_2) \\
+&+ 4u_0^2\operatorname{Var}(\hat\beta_2)\Bigr] ,
+\end{align*}
+estimated by putting $\hat\beta_2$, $\hat u_0$ and the estimated variances and covariance in place of the unknowns.
+\end{thm}
+
+\begin{proof}
+This is the delta method (Lemma~\ref{lem:delta}) with two variables. Let $g(a, b) = -a/(2b)$. To first order
+around $(\beta_1, \beta_2)$,
+\[
+g(\hat\beta_1, \hat\beta_2) \approx g(\beta_1, \beta_2) + g_a(\hat\beta_1 - \beta_1) + g_b(\hat\beta_2 - \beta_2) ,
+\]
+with $g_a = -1/(2\beta_2)$ and $g_b = \beta_1/(2\beta_2^2) = -u_0/\beta_2$. The variance of the linear function on the right is
+$g_a^2\operatorname{Var}(\hat\beta_1) + 2g_ag_b\operatorname{Cov}(\hat\beta_1, \hat\beta_2) + g_b^2\operatorname{Var}(\hat\beta_2)$. Since
+$g_a^2 = 1/(4\beta_2^2)$, $2g_ag_b = u_0/\beta_2^2$ and $g_b^2 = u_0^2/\beta_2^2$, taking out the factor $1/(4\beta_2^2)$ gives the formula.
+\end{proof}
+
+When the design is symmetric and $u$ is centred, $\operatorname{Cov}(\hat\beta_1, \hat\beta_2) = 0$ by Theorem~\ref{thm:centred-poly}, and the middle
+term disappears.
+
+\begin{exa}\label{exa:irrigation-max}
+Use the irrigation data of Example~\ref{exa:irrigation} to find an approximate $95\%$ confidence
+interval for the level of irrigation that gives the greatest mean yield.
+\end{exa}
+
+\begin{solution}
+From $(\mathbf{X}^\top\mathbf{X})^{-1}$, $\operatorname{Var}(\hat\beta_1) = \sigma^2/28$, $\operatorname{Var}(\hat\beta_2) = \sigma^2/84$ and the covariance is zero. With
+$\hat\beta_2 = -1$, $\hat u_0 = 1.5$ and Theorem~\ref{thm:turning},
+\begin{align*}
+\widehat{\operatorname{Var}}(\hat u_0) &= \frac{MS_{\mathrm{Res}}}{4}\Bigl[\frac{1}{28} + \frac{4(1.5)^2}{84}\Bigr] \\
+&= \frac{0.714}{4}\Bigl[\frac{3}{84} + \frac{9}{84}\Bigr] = \frac{0.714}{28} = 0.0255 ,
+\end{align*}
+so $\operatorname{se}(\hat u_0) = 0.160$. With $t_{0.025,4} = 2.776$ the interval for $u_0$ is $1.5 \pm 0.44$, and adding $4$,
+\[
+5.06 \le x_0 \le 5.94 .
+\]
+The best irrigation level is between about $51$ and $59$~mm a week. Figure~\ref{fig:irrigation} shows the fit.
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[xscale=1.25,yscale=0.14]
+\fill[green!12] (5.06,0) rectangle (5.94,32);
+\draw[-Stealth,gray] (0,0) -- (8,0) node[right,black,font=\small] {$x$};
+\draw[-Stealth,gray] (0,0) -- (0,34) node[above,black,font=\small] {yield $y$};
+\foreach \t in {1,...,7} \draw[gray] (\t,0) -- (\t,-0.6) node[below,black,font=\scriptsize] {\t};
+\foreach \t in {10,20,30} \draw[gray] (0,\t) -- (-0.1,\t) node[left,black,font=\scriptsize] {\t};
+\draw[-,thick,blue!60!black] plot[domain=0.8:7.3,samples=40] (\x,{-1.857+11*\x-\x*\x});
+\draw[-,dashed,green!40!black] (5.5,0) -- (5.5,28.39);
+\fill[green!40!black] (5.5,28.39) circle (0.06 and 0.55);
+\node[font=\scriptsize,text=green!30!black,anchor=south] at (5.5,29.2) {$\hat y = 28.4$};
+\node[font=\scriptsize,text=green!30!black,align=center] at (5.5,-5.6) {$95\%$ interval for $x_0$};
+\foreach \a/\b in {1/8,2/16,3/23,4/26,5/27,6/29,7/26}
+ \fill[black] (\a,\b) circle (0.07 and 0.6);
+\node[font=\scriptsize,text=blue!50!black,anchor=west] at (0.6,31) {$\hat y = -1.857 + 11x - x^2$};
+\end{tikzpicture}
+\caption{The irrigation data with the fitted quadratic. The turning point $x_0 = 5.5$ is marked, and the shaded
+band is its approximate $95\%$ confidence interval $(5.06, 5.94)$.}
+\label{fig:irrigation}
+\end{figure}
+
+\subsection{Orthogonal polynomials}
+The centred quadratic still had $\mathbf{1}$ and $\mathbf{u}^2$ correlated, and adding a cubic term would change every
+lower coefficient. Both problems disappear if the powers are replaced by polynomials that are
+\emph{orthogonal} over the observed $x$ values. Let
+\[
+y_i = \alpha_0P_0(x_i) + \alpha_1P_1(x_i) + \dots + \alpha_kP_k(x_i) + \varepsilon_i ,
+\]
+where $P_j$ is a polynomial of degree exactly $j$, $P_0 = 1$, and
+\[
+\sum_{i=1}^n P_j(x_i)P_l(x_i) = 0 \qquad (j \ne l) .
+\]
+The $P_j$ can be built by the Gram--Schmidt process: $P_j$ is $x^j$ minus its projection on $P_0, \dots, P_{j-1}$. Since
+each $P_j$ has degree exactly $j$, the columns $P_0, \dots, P_k$ span the same space as $1, x, \dots, x^k$, so by the argument of
+Theorem~\ref{thm:poly-invariance} the fitted values are those of the ordinary polynomial.
+
+\begin{thm}\label{thm:orthogonal-columns}
+If the columns $\mathbf{p}_0, \dots, \mathbf{p}_k$ of $\mathbf{X}$ are mutually orthogonal, then
+\begin{enumerate}[label=(\roman*)]
+\item $\hat\alpha_j = \mathbf{p}_j^\top\mathbf{y}/\mathbf{p}_j^\top\mathbf{p}_j$, which does not depend on which other columns are in the model;
+\item $\operatorname{Var}(\hat\alpha_j) = \sigma^2/\mathbf{p}_j^\top\mathbf{p}_j$, and the $\hat\alpha_j$ are uncorrelated;
+\item the regression sum of squares splits as $SS_R = \sum_{j \ge 1}SS(\alpha_j)$ with
+$SS(\alpha_j) = (\mathbf{p}_j^\top\mathbf{y})^2/\mathbf{p}_j^\top\mathbf{p}_j$, and $SS(\alpha_j)$ is also the extra sum of squares for adding
+$\mathbf{p}_j$ to a model containing any of the other columns.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+$\mathbf{X}^\top\mathbf{X} = \operatorname{diag}(\mathbf{p}_0^\top\mathbf{p}_0, \dots, \mathbf{p}_k^\top\mathbf{p}_k)$, so
+$\hat{\boldsymbol\alpha} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$ has the components in (i), each involving only its own column,
+and $\operatorname{Var}(\hat{\boldsymbol\alpha}) = \sigma^2(\mathbf{X}^\top\mathbf{X})^{-1}$ is diagonal, which is (ii). For (iii), with $\mathbf{p}_0 = \mathbf{1}$,
+\[
+SS_R = \hat{\boldsymbol\alpha}^\top\mathbf{X}^\top\mathbf{y} - n\bar y^2 = \sum_{j=0}^k \hat\alpha_j\mathbf{p}_j^\top\mathbf{y} - \frac{(\mathbf{1}^\top\mathbf{y})^2}{n}
+= \sum_{j=1}^k \frac{(\mathbf{p}_j^\top\mathbf{y})^2}{\mathbf{p}_j^\top\mathbf{p}_j} ,
+\]
+because the $j = 0$ term is $(\mathbf{1}^\top\mathbf{y})^2/n$. The same calculation for any subset of the columns gives the sum of the
+same terms over the subset, so adding $\mathbf{p}_j$ always adds exactly $SS(\alpha_j)$.
+\end{proof}
+
+So with orthogonal polynomials, the order can be raised one term at a time without refitting, and the sequence
+of tests in consideration (2) above reads straight off one table.
+
+\subhead{Equally spaced values}
+When $x_i = a + (i - 1)d$, $i = 1, \dots, n$, write $u_i = (x_i - \bar x)/d$, which takes the values $-(n - 1)/2, \dots, (n - 1)/2$ in steps of
+one. The first two orthogonal polynomials are
+\[
+P_1 = u , \qquad P_2 = u^2 - \frac{n^2 - 1}{12} .
+\]
+To check this: the $u_i$ are symmetric about $0$, so $\sum u_i = \sum u_i^3 = 0$ (Theorem~\ref{thm:centred-poly}), which gives
+$\sum P_1 = 0$ and $\sum P_1P_2 = \sum u^3 - \frac{n^2 - 1}{12}\sum u = 0$. For $\sum P_2 = 0$ we need
+$\sum u_i^2 = n(n^2 - 1)/12$. With $u_i = i - (n + 1)/2$,
+\begin{align*}
+\sum u_i^2 &= \sum i^2 - n\Bigl(\frac{n + 1}{2}\Bigr)^2 = \frac{n(n + 1)(2n + 1)}{6} - \frac{n(n + 1)^2}{4} \\
+&= \frac{n(n + 1)\bigl[2(2n + 1) - 3(n + 1)\bigr]}{12} = \frac{n(n + 1)(n - 1)}{12} .
+\end{align*}
+Higher polynomials are found the same way. The polynomials are usually scaled by constants $\lambda_j$ so
+that their values are small integers. For $n = 7$, $u = -3, \dots, 3$, $P_2 = u^2 - 4$ and $P_3 = (u^3 - 7u)/6$:
+\begin{center}
+\begin{tabular}{c|rrrrrrr|r}
+$u$ & $-3$ & $-2$ & $-1$ & $0$ & $1$ & $2$ & $3$ & $\sum P_j^2$ \\
+\hline
+$P_1$ & $-3$ & $-2$ & $-1$ & $0$ & $1$ & $2$ & $3$ & 28 \\
+$P_2$ & $5$ & $0$ & $-3$ & $-4$ & $-3$ & $0$ & $5$ & 84 \\
+$P_3$ & $-1$ & $1$ & $1$ & $0$ & $-1$ & $-1$ & $1$ & 6 \\
+\end{tabular}
+\end{center}
+Each row sums to zero, and the products of any two rows sum to zero, as can be checked directly.
+
+\begin{exa}\label{exa:irrigation-orth}
+Fit polynomials up to the cubic to the irrigation data of Example~\ref{exa:irrigation}, using orthogonal polynomials,
+and decide the order.
+\end{exa}
+
+\begin{solution}
+With $y = 8, 16, 23, 26, 27, 29, 26$ and the table above,
+\begin{align*}
+\textstyle\sum P_1y &= -24 - 32 - 23 + 0 + 27 + 58 + 78 = 84 , \\
+\textstyle\sum P_2y &= 40 + 0 - 69 - 104 - 81 + 0 + 130 = -84 , \\
+\textstyle\sum P_3y &= -8 + 16 + 23 + 0 - 27 - 29 + 26 = 1 .
+\end{align*}
+By Theorem~\ref{thm:orthogonal-columns}, $\hat\alpha_0 = \bar y = 22.143$, $\hat\alpha_1 = 84/28 = 3$,
+$\hat\alpha_2 = -84/84 = -1$ and $\hat\alpha_3 = 1/6 = 0.167$, and these values do not change as terms are added or removed. The
+sums of squares are
+\begin{gather*}
+SS(\alpha_1) = \frac{84^2}{28} = 252, \qquad SS(\alpha_2) = \frac{84^2}{84} = 84, \\
+SS(\alpha_3) = \frac{1^2}{6} = 0.167 .
+\end{gather*}
+From $SS_T = 338.857$, the residual for the cubic model is $338.857 - 252 - 84 - 0.167 = 2.690$ on $3$ degrees of
+freedom.
+\begin{center}
+\begin{tabular}{lrrrr}
+Source & SS & df & MS & $F_0$ \\
+\hline
+Linear & 252.000 & 1 & 252.000 & 281.0 \\
+Quadratic & 84.000 & 1 & 84.000 & 93.7 \\
+Cubic & 0.167 & 1 & 0.167 & 0.19 \\
+Residual & 2.690 & 3 & 0.897 & \\
+\hline
+Total & 338.857 & 6 & & \\
+\end{tabular}
+\end{center}
+The cubic term is far from significant ($F_{0.05,1,3} = 10.13$), so the quadratic is enough. Refitting the quadratic only
+moves the cubic sum of squares into the residual, $2.690 + 0.167 = 2.857$ on $4$ degrees of freedom, and the quadratic
+test becomes $F_0 = 84/0.714 = 117.6$, which is $t_0^2 = 10.84^2$ from Example~\ref{exa:irrigation}. The fitted quadratic is
+\[
+\hat y = 22.143 + 3P_1 - P_2 = 22.143 + 3u - (u^2 - 4) = 26.143 + 3u - u^2 ,
+\]
+the same as before.
+\end{solution}
+
+\subsection{Piecewise polynomials: splines}
+A single low-order polynomial may fit some ranges of $x$ well and others badly, and raising its order brings
+the problems of Figure~\ref{fig:poly-cautions}. An alternative is to divide the range of $x$ at points
+$t_1 < t_2 < \dots < t_h$, called \emph{knots}, and fit a low-order polynomial on each piece, joined smoothly at the knots.
+This was done with straight lines in Section~9 (piecewise linear regression). The usual choice is cubic pieces.
+
+A \textbf{cubic spline} with knots $t_1, \dots, t_h$ is a function that is a cubic polynomial on each interval between
+consecutive knots (and beyond the end knots), and that is continuous with continuous first and second
+derivatives everywhere. Joining the pieces this smoothly makes the joins invisible to the eye.
+
+\begin{thm}[Truncated power basis]\label{thm:spline-basis}
+A function $s$ is a cubic spline with knots $t_1 < \dots < t_h$ if and only if
+\[
+s(x) = \beta_{0} + \beta_{1}x + \beta_{2}x^2 + \beta_{3}x^3 + \sum_{i=1}^h \gamma_i(x - t_i)_+^3
+\]
+for some constants, where $(x - t)_+ = \max(x - t, 0)$. So the cubic splines with $h$ given knots form a
+linear model with $h + 4$ parameters.
+\end{thm}
+
+\begin{proof}
+\emph{If.} $(x - t)_+^3$ is $0$ for $x \le t$ and the cubic $(x - t)^3$ for $x > t$. Its first and second derivatives are
+$3(x - t)_+^2$ and $6(x - t)_+$, which are continuous, with value $0$ at $x = t$ from both sides. So each term is a
+piecewise cubic with two continuous derivatives, and so is the sum.
+
+\emph{Only if.} Let $s$ be a cubic spline, and let $c_0$ be the cubic that equals $s$ on $x \le t_1$, and $c_i$ the cubic that
+equals $s$ on $(t_i, t_{i+1}]$ (with $t_{h+1} = \infty$). At $t_i$, $s$ and its first two derivatives are continuous, so the cubic
+$c_i - c_{i-1}$ and its first two derivatives vanish at $t_i$. Expanded about $t_i$, a cubic is
+$a_0 + a_1(x - t_i) + a_2(x - t_i)^2 + a_3(x - t_i)^3$, and the conditions force $a_0 = a_1 = a_2 = 0$, so
+$c_i - c_{i-1} = \gamma_i(x - t_i)^3$ for some $\gamma_i$. Then for $x$ in the $i$th interval,
+\[
+s(x) = c_0(x) + \sum_{l=1}^i \gamma_l(x - t_l)^3 = c_0(x) + \sum_{l=1}^h \gamma_l(x - t_l)_+^3 ,
+\]
+since the terms with $t_l \ge x$ are zero. This has the stated form, with $c_0$ supplying the $\beta$'s.
+\end{proof}
+
+So once the knots are chosen, a spline is fitted by ordinary least squares on the $h + 4$ columns
+$1, x, x^2, x^3, (x - t_1)_+^3, \dots, (x - t_h)_+^3$, and the extra-sum-of-squares test of $\gamma_1 = \dots = \gamma_h = 0$ asks whether a
+single cubic would do. The coefficient $\gamma_i$ is the jump in $s'''/6$ at $t_i$ (Problem~\ref{prob:spline-jump}). Some
+practical points:
+\begin{itemize}
+\item Use few knots: three to five are usually ample. Put them where the curve is expected to change its
+behaviour, or, lacking that knowledge, at quantiles of the $x$ values so that each piece has about the same
+number of observations.
+\item If the curve may jump at $t_i$, add $(x - t_i)_+^0$ (the indicator of $x > t_i$); for a jump in slope only, add $(x - t_i)_+$; and so
+on. The spline then has fewer continuity conditions.
+\item The truncated power columns are badly conditioned when there are many knots. Software uses an
+equivalent basis, the \emph{B-splines}, which spans the same space (so gives the same fit) with much better
+conditioning.
+\item When the knot positions themselves must be estimated, the model is non-linear in them.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\filldraw[fill=gray!5,draw=gray!50,rounded corners=6pt] (-0.4,-1.15) rectangle (8.6,4.35);
+\fill[blue!8] (0,0) rectangle (2.7,3.6);
+\fill[orange!10] (2.7,0) rectangle (5.4,3.6);
+\fill[green!8] (5.4,0) rectangle (8.1,3.6);
+\draw[-Stealth,gray] (0,0) -- (8.3,0) node[below left,black,font=\small] {$x$};
+\draw[-Stealth,gray] (0,0) -- (0,3.8) node[above,black,font=\small] {$y$};
+\draw[-,dashed,gray] (2.7,0) -- (2.7,3.6);
+\draw[-,dashed,gray] (5.4,0) -- (5.4,3.6);
+\node[font=\small,anchor=north] at (2.7,0) {$t_1$};
+\node[font=\small,anchor=north] at (5.4,0) {$t_2$};
+\draw[-,very thick,blue!60!black] plot[domain=0:3,samples=30] ({0.9*\x},{0.8+1.1*(0.6+1.1*\x-0.25*\x*\x)});
+\draw[-,very thick,orange!70!black] plot[domain=3:6,samples=30] ({0.9*\x},{0.8+1.1*(0.6+1.1*\x-0.25*\x*\x+0.06*(\x-3)^3)});
+\draw[-,very thick,green!50!black] plot[domain=6:9,samples=30] ({0.9*\x},{0.8+1.1*(0.6+1.1*\x-0.25*\x*\x+0.06*(\x-3)^3-0.09*(\x-6)^3)});
+\foreach \a/\b in {0.45/2.33,1.12/2.12,1.80/2.85,2.48/2.61,3.15/2.26,3.83/1.73,4.50/0.83,5.17/0.66,5.85/0.38,6.53/1.20,7.20/1.04,7.88/1.42}
+ \fill[black] (\a,\b) circle (1.8pt);
+\node[font=\scriptsize,text=blue!50!black] at (1.35,3.35) {cubic 1};
+\node[font=\scriptsize,text=orange!60!black] at (4.05,3.35) {cubic 2};
+\node[font=\scriptsize,text=green!40!black] at (6.75,3.35) {cubic 3};
+\node[font=\scriptsize,text=gray!30!black] at (4.05,-0.85) {value, slope and curvature agree at each knot};
+\end{tikzpicture}
+\caption{A cubic spline with two knots: three cubic pieces joined at $t_1$ and $t_2$ with matching values and
+first and second derivatives. It has $2 + 4 = 6$ parameters.}
+\label{fig:spline}
+\end{figure}
+
+\subsection{Polynomial models in two or more variables}
+With two regressors, the \textbf{second-order model} is
+\[
+y = \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_{11}x_1^2 + \beta_{22}x_2^2 + \beta_{12}x_1x_2 + \varepsilon ,
+\]
+and with $k$ regressors it has the $k$ linear terms, the $k$ pure quadratic terms and the $k(k - 1)/2$ cross-products. The
+cross-product $x_1x_2$ is an interaction, as in Section~9: the effect of $x_1$ depends on the level of $x_2$. Such a model
+describes a curved \emph{response surface}, and it is the basis of \emph{response surface methodology}, in which
+an industrial process is moved towards the settings of its variables that give the best response. The
+variables are usually coded, $x_j = (\xi_j - c_j)/d_j$ for natural variable $\xi_j$, so that the design points are at $\pm 1$ and
+$0$.
+
+In matrix form the fitted second-order model is
+\[
+\hat y = \hat\beta_0 + \mathbf{x}^\top\mathbf{b} + \mathbf{x}^\top\mathbf{B}\mathbf{x} ,
+\]
+where $\mathbf{b} = (\hat\beta_1, \dots, \hat\beta_k)^\top$ and $\mathbf{B}$ is the symmetric $k \times k$ matrix with $\hat\beta_{jj}$ on the diagonal and $\frac12\hat\beta_{jl}$
+in positions $(j, l)$ and $(l, j)$. (For $k = 2$, $\mathbf{x}^\top\mathbf{Bx} = \hat\beta_{11}x_1^2 + \hat\beta_{22}x_2^2 + \hat\beta_{12}x_1x_2$.)
+
+\begin{thm}[Stationary point and canonical form]\label{thm:canonical}
+If $\mathbf{B}$ is non-singular, the fitted surface has a single stationary point,
+\[
+\mathbf{x}_s = -\tfrac12\mathbf{B}^{-1}\mathbf{b} , \qquad \hat y_s = \hat\beta_0 + \tfrac12\mathbf{x}_s^\top\mathbf{b} .
+\]
+Let $\mathbf{B} = \mathbf{P}\boldsymbol\Lambda\mathbf{P}^\top$ with $\mathbf{P}$ orthogonal and $\boldsymbol\Lambda = \operatorname{diag}(\lambda_1, \dots, \lambda_k)$, and let
+$\mathbf{w} = \mathbf{P}^\top(\mathbf{x} - \mathbf{x}_s)$. Then
+\[
+\hat y = \hat y_s + \lambda_1w_1^2 + \dots + \lambda_kw_k^2 .
+\]
+The stationary point is a maximum if every $\lambda_i < 0$, a minimum if every $\lambda_i > 0$, and a saddle point if the $\lambda_i$
+have both signs.
+\end{thm}
+
+\begin{proof}
+The gradient of $\hat y$ is $\mathbf{b} + 2\mathbf{Bx}$, which is zero only at $\mathbf{x}_s$. Write $\mathbf{x} = \mathbf{x}_s + \mathbf{z}$. Then
+\[
+\hat y = \hat\beta_0 + \mathbf{x}_s^\top\mathbf{b} + \mathbf{x}_s^\top\mathbf{Bx}_s + \mathbf{z}^\top(\mathbf{b} + 2\mathbf{Bx}_s) + \mathbf{z}^\top\mathbf{Bz} .
+\]
+The middle term is zero, and $\mathbf{Bx}_s = -\frac12\mathbf{b}$ turns the constant into
+$\hat\beta_0 + \mathbf{x}_s^\top\mathbf{b} - \frac12\mathbf{x}_s^\top\mathbf{b} = \hat y_s$. With $\mathbf{w} = \mathbf{P}^\top\mathbf{z}$, so $\mathbf{z} = \mathbf{Pw}$,
+$\mathbf{z}^\top\mathbf{Bz} = \mathbf{w}^\top\mathbf{P}^\top\mathbf{P}\boldsymbol\Lambda\mathbf{P}^\top\mathbf{P}\mathbf{w} = \mathbf{w}^\top\boldsymbol\Lambda\mathbf{w} = \sum\lambda_iw_i^2$. If every $\lambda_i < 0$, then
+$\hat y < \hat y_s$ for every $\mathbf{w} \ne \mathbf{0}$, a maximum; similarly for a minimum. If $\lambda_1 > 0 > \lambda_2$, then $\hat y$ rises from $\hat y_s$
+along the $w_1$ axis and falls along the $w_2$ axis.
+\end{proof}
+
+The $w_i$ are the \emph{canonical variables}: new axes, centred at $\mathbf{x}_s$ and along the eigenvectors of $\mathbf{B}$. The
+eigenvalues say how fast the response changes along each axis. A $\lambda_i$ near zero means the surface is nearly
+flat along $w_i$, a \emph{ridge}: many combinations of the variables give almost the best response, which in
+practice is useful, since the cheapest of them can be chosen. If the stationary point lies far outside the
+region of the data, it is an extrapolation and should not be trusted (consideration~(3)). Figure~\ref{fig:canonical}
+shows the main shapes.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\col/\num/\name/\eqn in {
+ 0/blue/1/{Maximum}/{$\lambda_1, \lambda_2 < 0$},
+ 4.0/red/2/{Saddle}/{$\lambda_1 > 0 > \lambda_2$},
+ 8.0/green/3/{Ridge}/{$\lambda_2 < 0$, $\lambda_1 \approx 0$},
+ 12.0/orange/4/{Rising ridge}/{$\lambda_1 \approx 0$, $\mathbf{x}_s$ remote}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.25,-0.95) rectangle (3.65,3.85);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0.05,3.5) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.3,3.5) {\name};
+  \draw[gray!70] (0,0) rectangle (3.4,3.1);
+  \begin{scope}
+   \clip (0,0) rectangle (3.4,3.1);
+   \ifnum\num=1
+    \foreach \r in {0.35,0.7,1.05,1.4}
+     \draw[blue!60!black,rotate around={45:(1.7,1.55)}] (1.7,1.55) ellipse ({2*\r} and {\r});
+    \fill[blue!60!black] (1.7,1.55) circle (1.8pt);
+   \fi
+   \ifnum\num=2
+    \foreach \a in {0.35,0.75,1.15} {
+     \draw[red!60!black,rotate around={45:(1.7,1.55)}] plot[domain=-1.6:1.6,samples=25] ({1.7+\a*cosh(\x)},{1.55+\a*sinh(\x)});
+     \draw[red!60!black,rotate around={45:(1.7,1.55)}] plot[domain=-1.6:1.6,samples=25] ({1.7-\a*cosh(\x)},{1.55+\a*sinh(\x)});
+     \draw[red!60!black,dashed,rotate around={45:(1.7,1.55)}] plot[domain=-1.6:1.6,samples=25] ({1.7+\a*sinh(\x)},{1.55+\a*cosh(\x)});
+     \draw[red!60!black,dashed,rotate around={45:(1.7,1.55)}] plot[domain=-1.6:1.6,samples=25] ({1.7+\a*sinh(\x)},{1.55-\a*cosh(\x)});
+    }
+    \fill[red!60!black] (1.7,1.55) circle (1.8pt);
+   \fi
+   \ifnum\num=3
+    \foreach \d in {-1.2,-0.8,-0.4,0.4,0.8,1.2}
+     \draw[green!50!black,rotate around={45:(1.7,1.55)}] (-1,{1.55+\d}) -- (4.4,{1.55+\d});
+    \draw[green!50!black,very thick,rotate around={45:(1.7,1.55)}] (-1,1.55) -- (4.4,1.55);
+   \fi
+   \ifnum\num=4
+    \foreach \c in {-1.6,-0.8,0,0.8,1.6}
+     \draw[orange!70!black] plot[domain=-2:2,samples=25] ({1.7+\x},{0.4+0.5*\c+0.55*\x*\x});
+    \draw[-Stealth,thick,orange!70!black] (1.7,0.2) -- (1.7,2.9);
+   \fi
+  \end{scope}
+  \node[font=\scriptsize,text=\col!50!black] at (1.7,-0.5) {\eqn};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Contours of second-order surfaces in two coded variables. (1) A maximum, elongated along the
+axis with the smaller $|\lambda_i|$. (2) A saddle; solid and dashed contours lie above and below $\hat y_s$. (3) A
+stationary ridge: the response is almost constant along the thick line. (4) A rising ridge: the response
+keeps increasing in the direction of the arrow, and the stationary point lies far outside the region.}
+\label{fig:canonical}
+\end{figure}
+
+\begin{exa}\label{exa:process}
+The yield $y$ (\%) of a chemical process was measured at the nine combinations of three temperatures and
+three reaction times, coded as $x_1 = (\text{temperature} - 150)/10$ in $^\circ$C and $x_2 = (\text{time} - 60)/15$ in minutes, so
+that each coded variable takes the values $-1, 0, 1$. The yields were:
+\begin{center}
+\begin{tabular}{c|ccc}
+& $x_2 = -1$ & $x_2 = 0$ & $x_2 = 1$ \\
+\hline
+$x_1 = -1$ & 72 & 74 & 63 \\
+$x_1 = 0$ & 72 & 80 & 78 \\
+$x_1 = 1$ & 65 & 76 & 80 \\
+\end{tabular}
+\end{center}
+Fit the second-order model, test it, and find and describe the stationary point.
+\end{exa}
+
+\begin{solution}
+\emph{Fitting.} On this $3 \times 3$ grid, replace $x_j^2$ by $q_j = 3x_j^2 - 2$, which takes the values $1, -2, 1$ at
+$x_j = -1, 0, 1$ (the quadratic orthogonal polynomial for three levels). Every one of the columns
+$\mathbf{1}, \mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_1\mathbf{x}_2, \mathbf{q}_1, \mathbf{q}_2$ sums to zero except the first, and every product of two of them
+sums to zero over the grid. For example, $\sum q_1q_2 = (1 - 2 + 1)^2 = 0$, and $\sum x_1q_1 = 3(-1 + 0 + 1) = 0$. By
+Theorem~\ref{thm:orthogonal-columns}, each coefficient is a ratio of sums. The row totals are $209, 230, 221$ and the
+column totals are $209, 230, 221$, so
+\begin{gather*}
+\textstyle\sum x_1y = 221 - 209 = 12, \qquad \sum x_2y = 221 - 209 = 12, \\
+\textstyle\sum x_1x_2y = (80 + 72) - (63 + 65) = 24, \\
+\textstyle\sum q_1y = \sum q_2y = 209 + 221 - 2(230) = -30 .
+\end{gather*}
+The sums of squares of the columns are $6, 6, 4, 18, 18$, so
+\[
+\hat\beta_1 = \frac{12}{6} = 2, \quad \hat\beta_2 = 2, \quad \hat\beta_{12} = \frac{24}{4} = 6 ,
+\]
+and the coefficient of each $q_j$ is $-30/18 = -\frac53$.
+Since $q_j = 3x_j^2 - 2$, a coefficient $-\frac53$ on $q_j$ is $\hat\beta_{jj} = 3(-\frac53) = -5$ on $x_j^2$, plus a constant $(-\frac53)(-2) = \frac{10}{3}$. With
+$\bar y = 660/9 = 73.333$, the intercept is $\hat\beta_0 = 73.333 + \frac{10}{3} + \frac{10}{3} = 80$, and
+\[
+\hat y = 80 + 2x_1 + 2x_2 - 5x_1^2 - 5x_2^2 + 6x_1x_2 .
+\]
+
+\emph{Testing.} The fitted values are $72, 73, 64$; $73, 80, 77$; $64, 77, 80$ (row by row), so the residuals are
+$0, 1, -1$; $-1, 0, 1$; $1, -1, 0$, and $SS_{\mathrm{Res}} = 6$ on $9 - 6 = 3$ degrees of freedom: $MS_{\mathrm{Res}} = 2$. By
+Theorem~\ref{thm:orthogonal-columns}(iii),
+\begin{align*}
+SS_R &= \frac{12^2}{6} + \frac{12^2}{6} + \frac{24^2}{4} + \frac{30^2}{18} + \frac{30^2}{18} \\
+&= 24 + 24 + 144 + 50 + 50 = 292
+\end{align*}
+on $5$ degrees of freedom, so $F_0 = (292/5)/2 = 29.2 > F_{0.05,5,3} = 9.01$. The standard errors are $\sqrt{2/6} = 0.577$ for
+$\hat\beta_1, \hat\beta_2$, $\sqrt{2/4} = 0.707$ for $\hat\beta_{12}$, and $3\sqrt{2/18} = 1$ for $\hat\beta_{11}, \hat\beta_{22}$, giving $t$ values $3.46$, $3.46$, $8.49$, $-5$
+and $-5$, all beyond $t_{0.025,3} = 3.182$. Every term is needed.
+
+\emph{The stationary point.} Here $\mathbf{b} = (2, 2)^\top$ and
+\[
+\mathbf{B} = \begin{pmatrix} -5 & 3 \\ 3 & -5 \end{pmatrix}, \qquad
+\mathbf{B}^{-1} = \frac{1}{16}\begin{pmatrix} -5 & -3 \\ -3 & -5 \end{pmatrix} .
+\]
+By Theorem~\ref{thm:canonical},
+\begin{align*}
+\mathbf{x}_s &= -\frac12\cdot\frac{1}{16}\begin{pmatrix} -16 \\ -16 \end{pmatrix} = \begin{pmatrix} 0.5 \\ 0.5 \end{pmatrix} , \\
+\hat y_s &= 80 + \tfrac12(0.5 \times 2 + 0.5 \times 2) = 81 .
+\end{align*}
+As a check, $\hat y$ at $(0.5, 0.5)$ is $80 + 1 + 1 - 1.25 - 1.25 + 1.5 = 81$. The eigenvalues of $\mathbf{B}$ are $-5 + 3 = -2$, with
+eigenvector $(1, 1)/\sqrt2$, and $-5 - 3 = -8$, with eigenvector $(1, -1)/\sqrt2$. So
+\[
+\hat y = 81 - 2w_1^2 - 8w_2^2 ,
+\]
+where
+\[
+w_1 = \frac{(x_1 - 0.5) + (x_2 - 0.5)}{\sqrt2}, \qquad w_2 = \frac{(x_1 - 0.5) - (x_2 - 0.5)}{\sqrt2} .
+\]
+Both eigenvalues are negative, so the stationary point is a maximum, inside the region of the data: a
+temperature of $150 + 0.5(10) = 155\,^\circ$C and a time of $60 + 0.5(15) = 67.5$ minutes, with predicted yield $81\%$. The
+contours are ellipses with their long axis along $w_1$, the direction in which temperature and time rise
+together. The yield falls four times as fast along $w_2$ as along $w_1$, so if the process must be run at a
+different setting, it should be moved along the diagonal, raising or lowering temperature and time
+together, not one without the other.
+\end{solution}
+
+\subsection{Nonparametric regression}
+A polynomial imposes one global form on the whole range of $x$. Nonparametric regression drops the global
+form: it estimates the mean at each point $x_0$ from the observations near $x_0$ only. Let $K$ be a
+\emph{kernel}, a non-negative function that is largest at $0$ and decreases away from it, and let $h > 0$ be the
+\emph{bandwidth}. The weight of observation $i$ at $x_0$ is
+\[
+w_i(x_0) = K\Bigl(\frac{x_i - x_0}{h}\Bigr) ,
+\]
+and the \textbf{kernel estimate} (the Nadaraya--Watson estimate) of the mean at $x_0$ is the weighted average
+\[
+\tilde y(x_0) = \frac{\sum_i w_i(x_0)\,y_i}{\sum_i w_i(x_0)} .
+\]
+A common choice is the triangular kernel $K(t) = \max(1 - |t|, 0)$, which gives weight only to the observations
+within $h$ of $x_0$.
+
+\begin{thm}\label{thm:local-fit}
+\begin{enumerate}[label=(\roman*)]
+\item The kernel estimate $\tilde y(x_0)$ is the weighted least squares estimate of a constant: it minimises
+$\sum_i w_i(x_0)(y_i - a)^2$ over $a$.
+\item The \emph{local linear} estimate, $\tilde y(x_0) = \hat a$ where $(\hat a, \hat b)$ minimises
+$\sum_i w_i(x_0)\bigl(y_i - a - b(x_i - x_0)\bigr)^2$, reproduces any straight line exactly: if $y_i = c + dx_i$ for every $i$,
+then $\tilde y(x_0) = c + dx_0$. The kernel estimate does not, in general.
+\item Both estimates are linear in $\mathbf{y}$: the vector of estimates at the observed $x_i$ is $\tilde{\mathbf{y}} = \mathbf{Sy}$ for a
+matrix $\mathbf{S}$ that depends only on the $x_i$, $K$ and $h$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) The derivative of $\sum w_i(y_i - a)^2$ is $-2\sum w_i(y_i - a)$, zero at $a = \sum w_iy_i/\sum w_i$, and the second derivative
+$2\sum w_i$ is positive.
+
+(ii) The local linear estimate is weighted least squares for the model with columns $\mathbf{1}$ and $\mathbf{x} - x_0\mathbf{1}$
+(Theorem~\ref{thm:wls}), with $\hat{\boldsymbol\beta} = (\mathbf{X}^\top\mathbf{WX})^{-1}\mathbf{X}^\top\mathbf{Wy}$. If $\mathbf{y} = (c + dx_0)\mathbf{1} + d(\mathbf{x} - x_0\mathbf{1})$,
+then $\mathbf{y} = \mathbf{X}\boldsymbol\theta$ with $\boldsymbol\theta = (c + dx_0, d)^\top$, so $\hat{\boldsymbol\beta} = (\mathbf{X}^\top\mathbf{WX})^{-1}\mathbf{X}^\top\mathbf{WX}\boldsymbol\theta = \boldsymbol\theta$, and $\hat a = c + dx_0$.
+For the kernel estimate, take $x_0$ at the smallest $x_i$ and $d > 0$: every observation with positive weight has
+$y_i \ge c + dx_0$, with strict inequality for those to the right of $x_0$, so the weighted average exceeds $c + dx_0$ as soon
+as any of them has positive weight.
+
+(iii) In both cases $\tilde y(x_0)$ is a fixed linear combination of the $y_i$: $\sum_i w_i(x_0)y_i/\sum_i w_i(x_0)$, or the first
+row of $(\mathbf{X}^\top\mathbf{WX})^{-1}\mathbf{X}^\top\mathbf{W}$ applied to $\mathbf{y}$. Stacking these rows for $x_0 = x_1, \dots, x_n$ gives $\mathbf{S}$.
+\end{proof}
+
+The matrix $\mathbf{S}$ plays the part of the hat matrix $\mathbf{H}$. For a linear model, by
+Lemma~\ref{lem:trace},
+\[
+\operatorname{tr}\mathbf{H} = \operatorname{tr}\bigl((\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{X}\bigr) = \operatorname{tr}\mathbf{I}_p = p ,
+\]
+the number of parameters, so $\operatorname{tr}\mathbf{S}$ is called the \emph{effective number of parameters} of the smoother. The
+bandwidth controls the trade-off: a small $h$ follows the data closely (small bias, large variance, large
+$\operatorname{tr}\mathbf{S}$), a large $h$ averages over many points (large bias at peaks and troughs, small variance). Part (ii)
+explains why local linear fitting is preferred near the ends of the data, where the kernel estimate is
+pulled towards the interior. Fitting a local line with tricube weights, and down-weighting
+observations with large residuals, is the \emph{loess} method used by most software. Nonparametric fits are
+useful for exploring the shape of a relationship and for checking a parametric model, but they give no
+formula, and they are unreliable near the ends of the data and wherever the data are sparse.
+
+\begin{exa}\label{exa:irrigation-kernel}
+For the irrigation data of Example~\ref{exa:irrigation}, use the triangular kernel with $h = 2$ to estimate the
+mean yield at $x_0 = 4$ and at $x_0 = 1$, by the kernel and the local linear methods, and find
+$\operatorname{tr}\mathbf{S}$ for the kernel estimate.
+\end{exa}
+
+\begin{solution}
+At $x_0 = 4$ the weights $1 - |x_i - 4|/2$ are $\frac12, 1, \frac12$ at $x = 3, 4, 5$ and zero elsewhere, so
+\[
+\tilde y(4) = \frac{\frac12(23) + 26 + \frac12(27)}{2} = 25.5 .
+\]
+The weights are symmetric about $x_0$, so $\sum w_i(x_i - x_0) = 0$; the local linear normal equations then decouple, and
+the local linear estimate is also $25.5$. The quadratic fit gave $26.14$ here: averaging across the peak of a concave curve
+pulls the smooth estimate down, the bias of a large bandwidth.
+
+At $x_0 = 1$ the weights are $1$ at $x = 1$ and $\frac12$ at $x = 2$. The kernel estimate is
+\[
+\tilde y(1) = \frac{8 + \frac12(16)}{1.5} = 10.67 ,
+\]
+well above the observation $8$ and the quadratic fit $8.14$, because every neighbour lies to the right, uphill. The local
+linear fit uses the same two points; a line through two points fits them exactly, so $\tilde y(1) = 8$, with local
+slope $8$. This is Theorem~\ref{thm:local-fit}(ii) at work.
+
+For $\operatorname{tr}\mathbf{S}$ we need the weight of $y_i$ in its own estimate. At $x_0 = 1$ and $x_0 = 7$ it is $1/1.5 = \frac23$; at each
+interior point the weights are $\frac12, 1, \frac12$ with total $2$, so it is $\frac12$. Then
+\[
+\operatorname{tr}\mathbf{S} = 2\Bigl(\frac23\Bigr) + 5\Bigl(\frac12\Bigr) = 3.83 ,
+\]
+a little more than the three parameters of the quadratic.
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:hierarchy}
+Consider the model $y = \beta_0 + \beta_2x^2 + \varepsilon$, without a linear term.
+\begin{enumerate}[label=(\alph*)]
+\item Rewrite it in terms of $z = x - c$, and show that it becomes a quadratic in $z$ whose coefficients satisfy a
+constraint.
+\item Explain why testing $H_0\colon \beta_1 = 0$ in the full quadratic $y = \beta_0 + \beta_1x + \beta_2x^2 + \varepsilon$ is usually not a sensible
+way to simplify the model.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) With $x = z + c$, $\beta_0 + \beta_2(z + c)^2 = (\beta_0 + \beta_2c^2) + 2\beta_2c\,z + \beta_2z^2$. This is $\gamma_0 + \gamma_1z + \gamma_2z^2$ with the
+constraint $\gamma_1 = 2c\gamma_2$: the turning point is forced to be at $z = -\gamma_1/(2\gamma_2) = -c$, that is, at $x = 0$. Dropping the
+linear term is the statement that the curve turns exactly at the origin of $x$, which is a property of the
+coding, not of the data, unless $x = 0$ has a special meaning.
+
+(b) In the full quadratic, $\beta_1 + 2\beta_2x$ is the slope, so $\beta_1$ is the slope at $x = 0$. Whether that is zero depends on
+where the origin is: by Theorem~\ref{thm:poly-invariance}, changing the origin changes $\beta_1$ but not the fit. A test of
+$\beta_1 = 0$ asks whether the turning point is at $x = 0$, which is seldom a question of interest. The hierarchy
+principle keeps all lower-order terms.
+\end{solution}
+
+\begin{problem}\label{prob:orth5}
+For $x = 1, 2, 3, 4, 5$ and $y = 1, 5, 8, 7, 6$:
+\begin{enumerate}[label=(\alph*)]
+\item find the orthogonal polynomials $P_1$ and $P_2$ (scaled to integer values);
+\item fit the quadratic by orthogonal polynomials, give the analysis of variance, and test the quadratic term;
+\item write the fitted model in terms of $x$ and find the turning point.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Here $n = 5$, $u = x - 3$ takes the values $-2, \dots, 2$, and $(n^2 - 1)/12 = 2$, so $P_1 = u = -2, -1, 0, 1, 2$ and
+$P_2 = u^2 - 2 = 2, -1, -2, -1, 2$, with $\sum P_1^2 = 10$ and $\sum P_2^2 = 14$.
+
+(b) $\sum P_1y = -2 - 5 + 0 + 7 + 12 = 12$ and $\sum P_2y = 2 - 5 - 16 - 7 + 12 = -14$, so $\hat\alpha_1 = 1.2$ and $\hat\alpha_2 = -1$, and
+$\bar y = 27/5 = 5.4$. Then $SS(\alpha_1) = 144/10 = 14.4$ and $SS(\alpha_2) = 196/14 = 14$. With $\sum y^2 = 175$,
+$SS_T = 175 - 27^2/5 = 29.2$, so $SS_{\mathrm{Res}} = 29.2 - 14.4 - 14 = 0.8$ on $2$ degrees of freedom, $MS_{\mathrm{Res}} = 0.4$.
+\begin{center}
+\begin{tabular}{lrrrr}
+Source & SS & df & MS & $F_0$ \\
+\hline
+Linear & 14.4 & 1 & 14.4 & 36 \\
+Quadratic & 14.0 & 1 & 14.0 & 35 \\
+Residual & 0.8 & 2 & 0.4 & \\
+\hline
+Total & 29.2 & 4 & & \\
+\end{tabular}
+\end{center}
+$F_0 = 35 > F_{0.05,1,2} = 18.51$, so the quadratic term is significant.
+
+(c) $\hat y = 5.4 + 1.2u - (u^2 - 2) = 7.4 + 1.2u - u^2$, and with $u = x - 3$,
+$\hat y = 7.4 + 1.2x - 3.6 - (x^2 - 6x + 9) = -5.2 + 7.2x - x^2$. The turning point is at $u = 0.6$, $x = 3.6$, where
+$\hat y = 7.4 + 0.72 - 0.36 = 7.76$.
+\end{solution}
+
+\begin{problem}\label{prob:even-odd}
+Suppose the $x$ values are symmetric about $\bar x$, and fit the cubic $y = \beta_0 + \beta_1u + \beta_2u^2 + \beta_3u^3 + \varepsilon$ with
+$u = x - \bar x$. Show that, after reordering the columns as $(\mathbf{1}, \mathbf{u}^2 \mid \mathbf{u}, \mathbf{u}^3)$, $\mathbf{X}^\top\mathbf{X}$ is block diagonal, and
+deduce that adding $u^3$ to the centred quadratic changes $\hat\beta_1$ but not $\hat\beta_0$ or $\hat\beta_2$.
+\end{problem}
+
+\begin{solution}
+The entries of $\mathbf{X}^\top\mathbf{X}$ are the sums $\sum u_i^{a + b}$ for columns $u^a$ and $u^b$. An even column ($a = 0, 2$) with an odd
+column ($b = 1, 3$) has $a + b$ odd, and the sum is zero by Theorem~\ref{thm:centred-poly}. So
+$\mathbf{X}^\top\mathbf{X} = \operatorname{diag}(\mathbf{A}_{\mathrm{even}}, \mathbf{A}_{\mathrm{odd}})$, and its inverse is block diagonal too. The normal equations
+split into two separate systems: $(\hat\beta_0, \hat\beta_2)$ from the even columns alone and $(\hat\beta_1, \hat\beta_3)$ from the odd columns
+alone. Adding $u^3$ enlarges only the odd system, so $\hat\beta_0$ and $\hat\beta_2$ are unchanged, while $\hat\beta_1$ changes because
+$\sum u^4 \ne 0$ couples $\mathbf{u}$ and $\mathbf{u}^3$. For the irrigation data, adding $\hat\alpha_3P_3 = \frac16(u^3 - 7u)/6$ to the
+quadratic of Example~\ref{exa:irrigation-orth} gives the cubic $\hat y = 26.143 + 2.806u - u^2 + 0.0278u^3$: the even
+coefficients $26.143$ and $-1$ are unchanged, and $\hat\beta_1$ moves from $3$ to $3 - 7/36 = 2.806$.
+\end{solution}
+
+\begin{problem}\label{prob:saddle}
+A fitted second-order model in two coded variables is
+\[
+\hat y = 50 + 2x_1 - 2x_2 + x_1^2 + x_2^2 + 4x_1x_2 .
+\]
+Find the stationary point, write the surface in canonical form, and describe it.
+\end{problem}
+
+\begin{solution}
+Here $\mathbf{b} = (2, -2)^\top$ and $\mathbf{B} = \begin{pmatrix} 1 & 2 \\ 2 & 1 \end{pmatrix}$, with $\det\mathbf{B} = -3$ and
+$\mathbf{B}^{-1} = -\frac13\begin{pmatrix} 1 & -2 \\ -2 & 1 \end{pmatrix}$. Then $\mathbf{B}^{-1}\mathbf{b} = -\frac13(2 + 4, -4 - 2)^\top = (-2, 2)^\top$, so
+$\mathbf{x}_s = -\frac12(-2, 2)^\top = (1, -1)^\top$ and $\hat y_s = 50 + \frac12(2 + 2) = 52$. The eigenvalues of $\mathbf{B}$ are $1 + 2 = 3$, with
+eigenvector $(1, 1)/\sqrt2$, and $1 - 2 = -1$, with eigenvector $(1, -1)/\sqrt2$, so
+\[
+\hat y = 52 + 3w_1^2 - w_2^2 .
+\]
+The eigenvalues have opposite signs: $(1, -1)$ is a saddle point, neither a maximum nor a minimum. The
+response increases fastest away from it along $w_1$, the direction in which $x_1$ and $x_2$ change together, and
+decreases along $w_2$. To increase the response, move along $w_1$, keeping in mind that the model is only
+trustworthy inside the region of the data.
+\end{solution}
+
+\begin{problem}\label{prob:spline-jump}
+\begin{enumerate}[label=(\alph*)]
+\item In the truncated power representation of Theorem~\ref{thm:spline-basis}, show that $s'''$ jumps by $6\gamma_i$ at $t_i$.
+\item Count the parameters of a cubic spline with $h$ knots in another way: start from $h + 1$ unrelated cubics and
+subtract the number of continuity conditions.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The terms $\beta_0 + \dots + \beta_3x^3$ have constant third derivative $6\beta_3$, and $(x - t_l)_+^3$ has third derivative
+$6$ for $x > t_l$ and $0$ for $x < t_l$. So $s'''(x) = 6\beta_3 + 6\sum_{t_l < x}\gamma_l$, a step function that rises by $6\gamma_i$ as $x$ crosses $t_i$.
+
+(b) $h + 1$ separate cubics have $4(h + 1)$ parameters. At each of the $h$ knots, the value and the first and second
+derivatives must match: $3h$ conditions. That leaves $4(h + 1) - 3h = h + 4$, in agreement with the theorem.
+\end{solution}
+
+\begin{problem}\label{prob:moving-average}
+With the \emph{uniform} kernel, $K(t) = 1$ for $|t| \le 1$ and $0$ otherwise, and $h = 1$:
+\begin{enumerate}[label=(\alph*)]
+\item show that for equally spaced $x$ with unit spacing, the kernel estimate at an interior $x_i$ is the moving
+average $(y_{i-1} + y_i + y_{i+1})/3$;
+\item compute the estimates at $x = 1, 4, 7$ for the irrigation data and $\operatorname{tr}\mathbf{S}$;
+\item compare $\operatorname{tr}\mathbf{S}$ with the triangular kernel with $h = 2$ (Example~\ref{exa:irrigation-kernel}).
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The observations with $|x_j - x_i| \le 1$ are $x_{i-1}, x_i, x_{i+1}$, each with weight $1$, so the weighted average is their
+plain average.
+
+(b) $\tilde y(4) = (23 + 26 + 27)/3 = 25.33$. At the ends only two observations are within $1$:
+$\tilde y(1) = (8 + 16)/2 = 12$ and $\tilde y(7) = (29 + 26)/2 = 27.5$. The weight of $y_i$ in its own estimate is $\frac12$ at the two
+ends and $\frac13$ at the five interior points, so $\operatorname{tr}\mathbf{S} = 2(\frac12) + 5(\frac13) = 2.67$.
+
+(c) Both kernels reach the same neighbours, but the uniform kernel gives them full weight, so it smooths more:
+$2.67$ effective parameters against $3.83$. The end estimate $12$ is even further from $y_1 = 8$ than the triangular
+kernel's $10.67$.
+\end{solution}
 
 \section{Generalized linear models}
 
