@@ -608,6 +608,518 @@ replicate of the $2^3 = 8$ combinations. The factorial uses half the runs, in ag
 two-factor interactions as well.
 \end{solution}
 
+\section{Simple comparative experiments}
+The simplest experiment compares two treatments. It is worth treating carefully, because every idea of the later sections appears here in its
+plainest form: a model for the observations, an estimate of experimental error, a test and a confidence interval, a check of the assumptions,
+a choice of sample size, and the gain from blocking.
+
+\begin{exa}\label{exa:catalyst}
+A chemical engineer compares the yield (\%) of a process run with two catalysts. Sixteen batches of raw material are available; eight are
+chosen at random for catalyst $A$ and the other eight are run with catalyst $B$, in random order. The yields are
+\begin{center}
+\begin{tabular}{c|cc}
+batch & catalyst $A$ & catalyst $B$ \\
+\hline
+$1$ & $91.5$ & $89.2$ \\
+$2$ & $94.2$ & $91.0$ \\
+$3$ & $92.2$ & $90.5$ \\
+$4$ & $95.4$ & $93.2$ \\
+$5$ & $91.8$ & $88.9$ \\
+$6$ & $89.1$ & $87.6$ \\
+$7$ & $94.7$ & $90.1$ \\
+$8$ & $89.2$ & $89.9$ \\
+\hline
+$\bar y_i$ & $92.2625$ & $90.0500$ \\
+$s_i^2$ & $5.6741$ & $2.7286$
+\end{tabular}
+\end{center}
+Catalyst $A$ gives the higher mean yield in these data. Is the difference real, or could it have arisen from batch-to-batch variation alone?
+\end{exa}
+
+\subsection{Sampling distributions}
+The analysis rests on three distributions derived from the normal.
+
+\begin{defn}
+Let $Z_1, \dots, Z_k$ be independent $N(0, 1)$ variables.
+\begin{enumerate}[label=(\roman*)]
+\item $\chi^2 = Z_1^2 + \dots + Z_k^2$ has the \textbf{chi-square distribution with $k$ degrees of freedom}, $\chi^2_k$. Its mean is $k$ and its variance $2k$.
+\item If $Z \sim N(0, 1)$ and $V \sim \chi^2_k$ are independent, $T = Z/\sqrt{V/k}$ has the \textbf{$t$ distribution with $k$ degrees of freedom}, $t_k$.
+\item If $V_1 \sim \chi^2_{k_1}$ and $V_2 \sim \chi^2_{k_2}$ are independent, $F = (V_1/k_1)/(V_2/k_2)$ has the \textbf{$F$ distribution with $k_1$ and $k_2$ degrees of
+freedom}, $F_{k_1,k_2}$.
+\end{enumerate}
+\end{defn}
+
+The $t$ statistics below are of the form in (ii) because of the following theorem, which is used again and again.
+
+\begin{thm}\label{thm:normal-sample}
+Let $Y_1, \dots, Y_n$ be independent $N(\mu, \sigma^2)$, with sample mean $\bar Y$ and sample variance $S^2 = \sum(Y_i - \bar Y)^2/(n - 1)$. Then
+\begin{enumerate}[label=(\roman*)]
+\item $\bar Y \sim N(\mu, \sigma^2/n)$;
+\item $(n - 1)S^2/\sigma^2 \sim \chi^2_{n-1}$;
+\item $\bar Y$ and $S^2$ are independent.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+Let $Z_i = (Y_i - \mu)/\sigma$, so $\mathbf Z = (Z_1, \dots, Z_n)^\top \sim N(\mathbf 0, I_n)$. Let $Q$ be an $n \times n$ orthogonal matrix whose first row is
+$(1/\sqrt n, \dots, 1/\sqrt n)$; such a matrix exists, since a unit vector can always be completed to an orthonormal basis. (The Helmert matrix is one
+explicit choice.) Put $\mathbf W = Q\mathbf Z$. Then $\mathbf W \sim N(\mathbf 0, QQ^\top) = N(\mathbf 0, I_n)$, so $W_1, \dots, W_n$ are independent $N(0, 1)$. Now
+$W_1 = \sqrt n\,\bar Z$, and because $Q$ preserves length,
+\[
+\sum_{i=2}^nW_i^2 = \sum_{i=1}^nW_i^2 - W_1^2 = \sum_{i=1}^nZ_i^2 - n\bar Z^2 = \sum_{i=1}^n(Z_i - \bar Z)^2 = \frac{(n - 1)S^2}{\sigma^2} .
+\]
+So $\bar Y = \mu + \sigma W_1/\sqrt n$ is normal with mean $\mu$ and variance $\sigma^2/n$; $(n - 1)S^2/\sigma^2$ is a sum of $n - 1$ squared independent
+standard normals, hence $\chi^2_{n-1}$; and the two depend on disjoint sets of the independent $W_i$, hence are independent.
+\end{proof}
+
+\subsection{The two-sample $t$ test}
+Write $y_{ij}$ for the $j$th observation on treatment $i$, $i = 1, 2$, $j = 1, \dots, n_i$. The model is
+\[
+y_{ij} = \mu_i + \varepsilon_{ij} , \qquad \varepsilon_{ij} \sim N(0, \sigma^2) \text{ independent} ,
+\]
+so the two treatments have possibly different means but a common variance. The randomisation of Section~1 is what entitles us to treat the
+errors as independent. We wish to test
+\[
+H_0 : \mu_1 = \mu_2 \qquad\text{against}\qquad H_1 : \mu_1 \ne \mu_2 .
+\]
+Both sample variances estimate $\sigma^2$, and they are combined into the \textbf{pooled estimate}
+\[
+S_p^2 = \frac{(n_1 - 1)S_1^2 + (n_2 - 1)S_2^2}{n_1 + n_2 - 2} .
+\]
+
+\begin{thm}\label{thm:two-sample-t}
+Under the model,
+\[
+T = \frac{\bar Y_1 - \bar Y_2 - (\mu_1 - \mu_2)}{S_p\sqrt{\frac{1}{n_1} + \frac{1}{n_2}}} \sim t_{n_1+n_2-2} .
+\]
+\end{thm}
+
+\begin{proof}
+By Theorem~\ref{thm:normal-sample} applied to each sample, $\bar Y_1$, $\bar Y_2$, $S_1^2$ and $S_2^2$ are independent, and
+\begin{gather*}
+Z = \frac{\bar Y_1 - \bar Y_2 - (\mu_1 - \mu_2)}{\sigma\sqrt{1/n_1 + 1/n_2}} \sim N(0, 1) , \\
+V = \frac{(n_1 - 1)S_1^2 + (n_2 - 1)S_2^2}{\sigma^2} \sim \chi^2_{n_1+n_2-2} ,
+\end{gather*}
+the second because a sum of independent $\chi^2_{n_1-1}$ and $\chi^2_{n_2-1}$ variables is $\chi^2_{n_1+n_2-2}$. Since $Z$ and $V$ are independent and
+$V/(n_1 + n_2 - 2) = S_p^2/\sigma^2$, the ratio $Z/\sqrt{V/(n_1 + n_2 - 2)} = T$ has the $t_{n_1+n_2-2}$ distribution. The unknown $\sigma$ cancels, which is the
+point of the construction.
+\end{proof}
+
+Under $H_0$ the statistic $t_0 = (\bar y_1 - \bar y_2)/\bigl(s_p\sqrt{1/n_1 + 1/n_2}\bigr)$ is an observation from $t_{n_1+n_2-2}$. We reject $H_0$ at level $\alpha$ if
+$|t_0| > t_{\alpha/2,\,n_1+n_2-2}$, the upper $\alpha/2$ point of the distribution. Inverting the test gives the $100(1 - \alpha)\%$ confidence interval
+\[
+\bar y_1 - \bar y_2 \pm t_{\alpha/2,\,n_1+n_2-2}\,s_p\sqrt{\frac{1}{n_1} + \frac{1}{n_2}} .
+\]
+
+\begin{exa}\label{exa:catalyst-t}
+For the catalyst data of Example~\ref{exa:catalyst}, $n_1 = n_2 = 8$ and
+\[
+s_p^2 = \frac{7(5.6741) + 7(2.7286)}{14} = 4.2013 , \qquad s_p = 2.0497 .
+\]
+The standard error of the difference is $s_p\sqrt{1/8 + 1/8} = 2.0497(0.5) = 1.0249$, and
+\[
+t_0 = \frac{92.2625 - 90.0500}{1.0249} = \frac{2.2125}{1.0249} = 2.159 .
+\]
+With $t_{0.025,14} = 2.145$, we have $|t_0| > 2.145$ and reject $H_0$ at the $5\%$ level; the two-sided $p$-value is $0.049$. The $95\%$ confidence interval
+for $\mu_1 - \mu_2$ is
+\[
+2.2125 \pm 2.145(1.0249) , \qquad\text{that is,}\qquad (0.014,\ 4.411) .
+\]
+The evidence is just significant, and the interval, which nearly reaches $0$, says the same in more useful form: catalyst $A$ is better by
+somewhere between almost nothing and $4.4$ percentage points.
+\end{exa}
+
+\begin{remark}
+The $t$ test can be checked against the randomisation argument of Section~1, which assumes no normal model. Under $H_0$ the treatments do not
+matter, the sixteen yields are fixed, and the only randomness is which eight were labelled $A$. Of the $\binom{16}{8} = 12870$ equally likely labellings,
+$668$ give a difference of means at least as large in absolute value as the observed $2.2125$, so the exact randomisation $p$-value is
+$668/12870 = 0.052$. The agreement with $0.049$ is typical: Fisher showed that the $t$ test is a good approximation to the randomisation test,
+and this is the justification for using it even when normality is only roughly true.
+\end{remark}
+
+\subsection{Unequal variances}
+If the two treatments may have different variances, $\varepsilon_{1j} \sim N(0, \sigma_1^2)$ and $\varepsilon_{2j} \sim N(0, \sigma_2^2)$, there is no exact $t$ test. The natural
+statistic is
+\[
+t_0^* = \frac{\bar y_1 - \bar y_2}{\sqrt{s_1^2/n_1 + s_2^2/n_2}} ,
+\]
+whose numerator has variance $\sigma_1^2/n_1 + \sigma_2^2/n_2$, estimated without pooling. Its null distribution is approximately $t_\nu$, where $\nu$ is found as
+follows.
+
+\begin{prop}[Satterthwaite's approximation]\label{prop:satterthwaite}
+Let $V = a_1S_1^2 + a_2S_2^2$ with $a_i > 0$, where $(n_i - 1)S_i^2/\sigma_i^2 \sim \chi^2_{n_i-1}$ independently. If $V$ is approximated by a multiple of a chi-square
+variable, $\nu V/E(V) \approx \chi^2_\nu$, with mean and variance matched, then
+\[
+\nu = \frac{\bigl(a_1\sigma_1^2 + a_2\sigma_2^2\bigr)^2}{\dfrac{(a_1\sigma_1^2)^2}{n_1 - 1} + \dfrac{(a_2\sigma_2^2)^2}{n_2 - 1}} .
+\]
+\end{prop}
+
+\begin{proof}
+$E(S_i^2) = \sigma_i^2$ and $\Var(S_i^2) = \sigma_i^4\cdot2(n_i - 1)/(n_i - 1)^2 = 2\sigma_i^4/(n_i - 1)$, so
+\[
+E(V) = a_1\sigma_1^2 + a_2\sigma_2^2 , \qquad \Var(V) = \frac{2(a_1\sigma_1^2)^2}{n_1 - 1} + \frac{2(a_2\sigma_2^2)^2}{n_2 - 1} .
+\]
+If $\nu V/E(V) \sim \chi^2_\nu$ exactly, its mean is $\nu$ (automatically) and its variance $\nu^2\Var(V)/E(V)^2$ must equal $2\nu$, that is,
+$\nu = 2E(V)^2/\Var(V)$, which is the formula stated.
+\end{proof}
+
+With $a_i = 1/n_i$ and the unknown $\sigma_i^2$ replaced by $s_i^2$, this gives the \textbf{Welch} degrees of freedom
+\[
+\nu = \frac{\bigl(s_1^2/n_1 + s_2^2/n_2\bigr)^2}{\dfrac{(s_1^2/n_1)^2}{n_1 - 1} + \dfrac{(s_2^2/n_2)^2}{n_2 - 1}} .
+\]
+It always lies between $\min(n_1, n_2) - 1$ and $n_1 + n_2 - 2$.
+
+\begin{exa}
+For the catalyst data, $s_1^2/n_1 = 0.7093$ and $s_2^2/n_2 = 0.3411$. Because $n_1 = n_2$, the Welch statistic is the same as the pooled one, $t_0^* = 2.159$,
+but the degrees of freedom are
+\[
+\nu = \frac{(0.7093 + 0.3411)^2}{0.7093^2/7 + 0.3411^2/7} = 12.47 ,
+\]
+and the $p$-value is $0.051$. The two analyses straddle the $5\%$ line. This should not be read as a contradiction: both say that the evidence is
+borderline. A decision that turns on the third decimal of a $p$-value is not a decision the data support, and the confidence interval is the better
+summary.
+\end{exa}
+
+\begin{note}
+With equal sample sizes the pooled test is robust to unequal variances: its level is close to nominal even when $\sigma_1^2 \ne \sigma_2^2$. With
+unequal sample sizes it is not. If the smaller sample comes from the more variable population, the pooled variance is too small and the test
+rejects too often. This is one reason, beyond simplicity, to design experiments with equal replication.
+\end{note}
+
+\subsection{Checking the assumptions}
+The $t$ test assumes independent errors, normality and, for the pooled form, equal variances. Independence is secured by randomisation, not
+checked after the fact. Normality is checked with a \textbf{normal probability plot}: the ordered residuals $y_{ij} - \bar y_i$ are plotted against the
+expected normal order statistics, approximately $\Phi^{-1}\bigl((k - 0.5)/N\bigr)$ for the $k$th smallest of $N$, and should lie close to a straight line.
+Moderate departures from normality matter little, because the $t$ test is robust to them, as the randomisation argument shows.
+
+Equality of variances can be tested formally.
+
+\begin{thm}\label{thm:F-variances}
+Under the model with variances $\sigma_1^2$ and $\sigma_2^2$,
+\[
+\frac{S_1^2/\sigma_1^2}{S_2^2/\sigma_2^2} \sim F_{n_1-1,\,n_2-1} .
+\]
+\end{thm}
+
+\begin{proof}
+$(n_i - 1)S_i^2/\sigma_i^2 \sim \chi^2_{n_i-1}$ independently by Theorem~\ref{thm:normal-sample}; divide each by its degrees of freedom and take the ratio.
+\end{proof}
+
+To test $H_0 : \sigma_1^2 = \sigma_2^2$, compute $F_0 = s_1^2/s_2^2$ and reject if $F_0 > F_{\alpha/2,\,n_1-1,\,n_2-1}$ or $F_0 < F_{1-\alpha/2,\,n_1-1,\,n_2-1}$. A
+$100(1 - \alpha)\%$ confidence interval for $\sigma_1^2/\sigma_2^2$ is
+\[
+\frac{s_1^2/s_2^2}{F_{\alpha/2,\,n_1-1,\,n_2-1}} \le \frac{\sigma_1^2}{\sigma_2^2} \le \frac{s_1^2/s_2^2}{F_{1-\alpha/2,\,n_1-1,\,n_2-1}} ,
+\]
+and for a single variance, since $(n - 1)S^2/\sigma^2 \sim \chi^2_{n-1}$,
+\[
+\frac{(n - 1)s^2}{\chi^2_{\alpha/2,\,n-1}} \le \sigma^2 \le \frac{(n - 1)s^2}{\chi^2_{1-\alpha/2,\,n-1}} .
+\]
+
+\begin{exa}
+For the catalyst data, $F_0 = 5.6741/2.7286 = 2.080$. With $F_{0.025,7,7} = 4.995$ and $F_{0.975,7,7} = 1/4.995 = 0.200$, $F_0$ lies between the critical values,
+and $H_0$ is not rejected ($p = 0.355$). The $95\%$ interval for $\sigma_1^2/\sigma_2^2$ is $(2.080/4.995,\ 2.080/0.200) = (0.416,\ 10.39)$. The interval for $\sigma_1^2$ alone
+uses $\chi^2_{0.025,7} = 16.013$ and $\chi^2_{0.975,7} = 1.690$:
+\[
+\frac{7(5.6741)}{16.013} \le \sigma_1^2 \le \frac{7(5.6741)}{1.690} , \qquad\text{that is,}\qquad 2.48 \le \sigma_1^2 \le 23.50 .
+\]
+Both intervals are very wide. Eight observations say little about a variance: the data are consistent with equal variances and also with one
+variance ten times the other.
+\end{exa}
+
+\begin{remark}
+Unlike the $t$ test, the $F$ test for variances is \emph{not} robust to non-normality. Its level can be far from nominal for heavy-tailed data, so a
+significant result may reflect the shape of the distribution rather than a difference in spread. Levene's test, which applies a $t$ test or analysis
+of variance to the absolute deviations $|y_{ij} - \tilde y_i|$ from the group medians, is the robust alternative and is discussed with the analysis of
+variance.
+\end{remark}
+
+\subsection{Choice of sample size}
+How many replicates are needed? The answer depends on the difference $\delta = \mu_1 - \mu_2$ that it is important to detect, the error standard
+deviation $\sigma$, the significance level $\alpha$ and the required \textbf{power} $1 - \beta$, the probability of rejecting $H_0$ when the true difference is $\delta$.
+
+With $n$ replicates of each treatment, the statistic $T_0 = (\bar Y_1 - \bar Y_2)/(S_p\sqrt{2/n})$ can be written as
+\[
+T_0 = \frac{Z + \lambda}{\sqrt{V/(2n - 2)}} , \qquad Z = \frac{\bar Y_1 - \bar Y_2 - \delta}{\sigma\sqrt{2/n}} , \qquad \lambda = \frac{\delta}{\sigma\sqrt{2/n}} ,
+\]
+with $Z \sim N(0, 1)$ and $V \sim \chi^2_{2n-2}$ independent. This is the \textbf{non-central $t$ distribution} with $2n - 2$ degrees of freedom and non-centrality
+parameter $\lambda$, and the power is
+\[
+P\bigl(|T_0| > t_{\alpha/2,\,2n-2}\bigr) , \qquad T_0 \sim t_{2n-2}(\lambda) .
+\]
+It increases with $\lambda = \delta\sqrt n/(\sigma\sqrt2)$: with the size of the difference relative to $\sigma$, and with $\sqrt n$.
+
+\begin{prop}\label{prop:sample-size}
+With $\sigma$ known, a two-sided test at level $\alpha$ has power approximately $1 - \beta$ against a
+difference $\delta$ when
+\[
+n = \frac{2(z_{\alpha/2} + z_\beta)^2\sigma^2}{\delta^2} .
+\]
+\end{prop}
+
+\begin{proof}
+With $\sigma$ known the statistic is $Z_0 = (\bar Y_1 - \bar Y_2)/(\sigma\sqrt{2/n}) \sim N(\lambda, 1)$. Ignoring the negligible probability of rejecting in the wrong tail,
+the power is $P(Z_0 > z_{\alpha/2}) = P(Z > z_{\alpha/2} - \lambda)$. This equals $1 - \beta$ when $z_{\alpha/2} - \lambda = -z_\beta$, that is, $\lambda = z_{\alpha/2} + z_\beta$. Squaring
+$\delta\sqrt n/(\sigma\sqrt2) = z_{\alpha/2} + z_\beta$ and solving for $n$ gives the formula.
+\end{proof}
+
+\begin{exa}
+In a repeat of the catalyst experiment, a difference of $\delta = 2$ points is to be detected with power $0.90$ at $\alpha = 0.05$, and $\sigma$ is taken to be
+$2$ from the pooled estimate $s_p = 2.05$. The approximation gives
+\[
+n = \frac{2(1.960 + 1.282)^2(2)^2}{2^2} = 21.01 ,
+\]
+so $22$ batches per catalyst. The exact power from the non-central $t$ distribution is $0.8997$ with $n = 22$ and $0.9125$ with $n = 23$, so $23$ are
+needed. The approximation is slightly optimistic, because it ignores the uncertainty in $s_p$; it is a good starting point, and the exact
+calculation settles the last unit.
+\end{exa}
+
+\subsection{The paired comparison design}
+Section~1 showed that blocking can remove a large source of variation from a comparison. The simplest blocked design has blocks of two units.
+
+\begin{exa}\label{exa:tyre-pairs}
+Ten cars are fitted with a tyre of brand $A$ on one rear wheel and brand $B$ on the other, the side being chosen at random for each car. The tread
+wear (mm) after $20\,000$ km is
+\begin{center}
+\begin{tabular}{c|cc|c}
+car & brand $A$ & brand $B$ & $d_j = y_{Bj} - y_{Aj}$ \\
+\hline
+$1$ & $4.8$ & $5.2$ & $0.4$ \\
+$2$ & $6.1$ & $6.4$ & $0.3$ \\
+$3$ & $3.9$ & $4.5$ & $0.6$ \\
+$4$ & $7.2$ & $7.4$ & $0.2$ \\
+$5$ & $5.5$ & $5.6$ & $0.1$ \\
+$6$ & $4.4$ & $4.9$ & $0.5$ \\
+$7$ & $6.8$ & $7.3$ & $0.5$ \\
+$8$ & $5.0$ & $5.1$ & $0.1$ \\
+$9$ & $3.6$ & $4.2$ & $0.6$ \\
+$10$ & $6.3$ & $6.5$ & $0.2$ \\
+\end{tabular}
+\end{center}
+\end{exa}
+
+The model for a paired design is
+\[
+y_{ij} = \mu_i + \beta_j + \varepsilon_{ij} , \qquad i = 1, 2 , \quad j = 1, \dots, n ,
+\]
+where $\beta_j$ is the effect of the $j$th pair (block) and the $\varepsilon_{ij}$ are independent $N(0, \sigma^2)$. The within-pair differences
+\[
+d_j = y_{1j} - y_{2j} = \mu_1 - \mu_2 + \varepsilon_{1j} - \varepsilon_{2j}
+\]
+do not contain $\beta_j$ at all. They are independent $N(\mu_d, \sigma_d^2)$ with $\mu_d = \mu_1 - \mu_2$ and $\sigma_d^2 = 2\sigma^2$, so the comparison reduces to a one-sample
+problem. By Theorem~\ref{thm:normal-sample},
+\[
+T = \frac{\bar d - \mu_d}{s_d/\sqrt n} \sim t_{n-1} ,
+\]
+and $H_0 : \mu_1 = \mu_2$ is rejected if $|\bar d|/(s_d/\sqrt n) > t_{\alpha/2,\,n-1}$. This is the \textbf{paired $t$ test}.
+
+\begin{exa}
+For the tyre data, $\bar d = 0.35$ and $s_d = 0.1958$, so
+\[
+t_0 = \frac{0.35}{0.1958/\sqrt{10}} = 5.653 ,
+\]
+against $t_{0.025,9} = 2.262$; the $p$-value is $0.0003$. Brand $B$ wears more, and the $95\%$ confidence interval for the difference is
+$0.35 \pm 2.262(0.0619)$, that is $(0.210,\ 0.490)$ mm.
+
+Suppose the pairing had been ignored and the data analysed as two independent samples. The means are $5.36$ and $5.71$, the sample variances
+$1.500$ and $1.281$, so $s_p^2 = 1.391$, the standard error is $\sqrt{1.391(2/10)} = 0.527$, and $t_0 = 0.35/0.527 = 0.664$ with $p = 0.52$. The same difference of
+$0.35$ mm now looks like nothing at all.
+\end{exa}
+
+% Infographic: the same twenty numbers, seen without and with the pairing.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{scope}[xshift=0cm]
+\draw[rounded corners=6pt,very thick,draw=orange!70!black,fill=orange!6] (-1.1,-0.9) rectangle (4.0,6.6);
+\node[font=\bfseries\small,orange!70!black] at (1.45,6.15) {Ignoring the pairs};
+\draw[-Stealth] (0,0) -- (0,5.6);
+\node[rotate=90,font=\scriptsize] at (-0.8,2.8) {wear (mm)};
+\draw (0.06,1.3) -- (-0.06,1.3) node[left,font=\scriptsize] {4};
+\draw (0.06,2.6) -- (-0.06,2.6) node[left,font=\scriptsize] {5};
+\draw (0.06,3.9) -- (-0.06,3.9) node[left,font=\scriptsize] {6};
+\draw (0.06,5.2) -- (-0.06,5.2) node[left,font=\scriptsize] {7};
+\fill[teal] (1.0,2.34) circle (2.6pt);
+\fill[orange!85!black] (2.6,2.86) circle (2.6pt);
+\fill[teal] (1.0,4.03) circle (2.6pt);
+\fill[orange!85!black] (2.6,4.42) circle (2.6pt);
+\fill[teal] (1.0,1.17) circle (2.6pt);
+\fill[orange!85!black] (2.6,1.95) circle (2.6pt);
+\fill[teal] (1.0,5.46) circle (2.6pt);
+\fill[orange!85!black] (2.6,5.72) circle (2.6pt);
+\fill[teal] (1.0,3.25) circle (2.6pt);
+\fill[orange!85!black] (2.6,3.38) circle (2.6pt);
+\fill[teal] (1.0,1.82) circle (2.6pt);
+\fill[orange!85!black] (2.6,2.47) circle (2.6pt);
+\fill[teal] (1.0,4.94) circle (2.6pt);
+\fill[orange!85!black] (2.6,5.59) circle (2.6pt);
+\fill[teal] (1.0,2.6) circle (2.6pt);
+\fill[orange!85!black] (2.6,2.73) circle (2.6pt);
+\fill[teal] (1.0,0.78) circle (2.6pt);
+\fill[orange!85!black] (2.6,1.56) circle (2.6pt);
+\fill[teal] (1.0,4.29) circle (2.6pt);
+\fill[orange!85!black] (2.6,4.55) circle (2.6pt);
+\node[font=\small] at (1.0,-0.45) {$A$}; \node[font=\small] at (2.6,-0.45) {$B$};
+\end{scope}
+\begin{scope}[xshift=5.8cm]
+\draw[rounded corners=6pt,very thick,draw=blue!70!black,fill=blue!6] (-1.1,-0.9) rectangle (4.0,6.6);
+\node[font=\bfseries\small,blue!70!black] at (1.45,6.15) {Within each car};
+\draw[-Stealth] (0,0) -- (0,5.6);
+\node[rotate=90,font=\scriptsize] at (-0.8,2.8) {wear (mm)};
+\draw (0.06,1.3) -- (-0.06,1.3) node[left,font=\scriptsize] {4};
+\draw (0.06,2.6) -- (-0.06,2.6) node[left,font=\scriptsize] {5};
+\draw (0.06,3.9) -- (-0.06,3.9) node[left,font=\scriptsize] {6};
+\draw (0.06,5.2) -- (-0.06,5.2) node[left,font=\scriptsize] {7};
+\draw[gray] (1.0,2.34) -- (2.6,2.86);
+\fill[teal] (1.0,2.34) circle (2.6pt);
+\fill[orange!85!black] (2.6,2.86) circle (2.6pt);
+\draw[gray] (1.0,4.03) -- (2.6,4.42);
+\fill[teal] (1.0,4.03) circle (2.6pt);
+\fill[orange!85!black] (2.6,4.42) circle (2.6pt);
+\draw[gray] (1.0,1.17) -- (2.6,1.95);
+\fill[teal] (1.0,1.17) circle (2.6pt);
+\fill[orange!85!black] (2.6,1.95) circle (2.6pt);
+\draw[gray] (1.0,5.46) -- (2.6,5.72);
+\fill[teal] (1.0,5.46) circle (2.6pt);
+\fill[orange!85!black] (2.6,5.72) circle (2.6pt);
+\draw[gray] (1.0,3.25) -- (2.6,3.38);
+\fill[teal] (1.0,3.25) circle (2.6pt);
+\fill[orange!85!black] (2.6,3.38) circle (2.6pt);
+\draw[gray] (1.0,1.82) -- (2.6,2.47);
+\fill[teal] (1.0,1.82) circle (2.6pt);
+\fill[orange!85!black] (2.6,2.47) circle (2.6pt);
+\draw[gray] (1.0,4.94) -- (2.6,5.59);
+\fill[teal] (1.0,4.94) circle (2.6pt);
+\fill[orange!85!black] (2.6,5.59) circle (2.6pt);
+\draw[gray] (1.0,2.6) -- (2.6,2.73);
+\fill[teal] (1.0,2.6) circle (2.6pt);
+\fill[orange!85!black] (2.6,2.73) circle (2.6pt);
+\draw[gray] (1.0,0.78) -- (2.6,1.56);
+\fill[teal] (1.0,0.78) circle (2.6pt);
+\fill[orange!85!black] (2.6,1.56) circle (2.6pt);
+\draw[gray] (1.0,4.29) -- (2.6,4.55);
+\fill[teal] (1.0,4.29) circle (2.6pt);
+\fill[orange!85!black] (2.6,4.55) circle (2.6pt);
+\node[font=\small] at (1.0,-0.45) {$A$}; \node[font=\small] at (2.6,-0.45) {$B$};
+\end{scope}
+\end{tikzpicture}
+\caption{The tyre data. Between cars the wear ranges over nearly $4$ mm and swamps the brand difference (left). Joining the two tyres of each car
+shows that every line rises: within a car, brand $B$ always wears more (right).}
+\label{fig:pairs}
+\end{figure}
+
+The two analyses differ because the cars differ. The car-to-car variation is part of $s_p^2$ but cancels from every $d_j$, and the correlation between the
+two tyres on a car is $0.989$. In general, if the two observations in a pair have common variance $\sigma_y^2$ and correlation $\rho$, then
+\[
+\Var(\bar d) = \frac{\Var(y_1 - y_2)}{n} = \frac{2\sigma_y^2(1 - \rho)}{n} ,
+\]
+against $2\sigma_y^2/n$ for two independent samples of size $n$. Pairing divides the variance by $1/(1 - \rho)$, here by about $90$.
+
+\begin{remark}
+Pairing is not free. The paired test has $n - 1$ degrees of freedom for error, the unpaired test $2n - 2$, so if the pairs are no more alike than units
+chosen at random ($\rho \approx 0$), pairing wastes $n - 1$ degrees of freedom and gives a slightly less powerful test. The loss is small unless $n$ is very
+small, and the potential gain is large, so when a natural pairing exists, it should be used. What is never acceptable is to choose between the
+paired and unpaired analyses after seeing which gives the smaller $p$-value: the analysis must follow the design that was actually used.
+\end{remark}
+
+\subsection{Practice problems}
+
+\begin{problem}
+Two methods of making concrete blocks were compared, using independent random samples of blocks. Method $1$ gave
+$n_1 = 12$ blocks with $\bar y_1 = 48.2$ and $s_1 = 3.1$; method $2$ gave $n_2 = 10$ blocks with $\bar y_2 = 45.1$ and $s_2 = 2.6$. Test whether the mean compressive strengths
+differ at $\alpha = 0.05$, and give a $95\%$ confidence interval for $\mu_1 - \mu_2$.
+\end{problem}
+
+\begin{solution}
+The pooled variance is
+\[
+s_p^2 = \frac{11(3.1)^2 + 9(2.6)^2}{20} = \frac{105.71 + 60.84}{20} = 8.3275 , \qquad s_p = 2.886 ,
+\]
+and the standard error is $2.886\sqrt{1/12 + 1/10} = 1.2356$. Then $t_0 = (48.2 - 45.1)/1.2356 = 2.509$. Since $t_{0.025,20} = 2.086$, $H_0$ is rejected
+($p = 0.021$). The $95\%$ interval is $3.1 \pm 2.086(1.2356)$, that is $(0.52,\ 5.68)$.
+\end{solution}
+
+\begin{problem}
+Show that $S_p^2$ is an unbiased estimator of $\sigma^2$, and that when $n_1 = n_2$ the Welch statistic $t_0^*$ equals the pooled statistic $t_0$.
+\end{problem}
+
+\begin{solution}
+$E(S_i^2) = \sigma^2$ for each sample, so $E(S_p^2) = [(n_1 - 1)\sigma^2 + (n_2 - 1)\sigma^2]/(n_1 + n_2 - 2) = \sigma^2$. If $n_1 = n_2 = n$, then $S_p^2 = (S_1^2 + S_2^2)/2$, and
+\[
+S_p^2\Bigl(\frac1n + \frac1n\Bigr) = \frac{S_1^2 + S_2^2}{n} = \frac{S_1^2}{n} + \frac{S_2^2}{n} ,
+\]
+so the two denominators are equal and $t_0^* = t_0$. Only the reference distribution differs: $t_{2n-2}$ for the pooled test, $t_\nu$ with $\nu \le 2n - 2$ for
+Welch's.
+\end{solution}
+
+\begin{problem}
+Show that Welch's degrees of freedom satisfy $\min(n_1, n_2) - 1 \le \nu \le n_1 + n_2 - 2$.
+\end{problem}
+
+\begin{solution}
+Write $u_i = s_i^2/n_i > 0$ and $f_i = n_i - 1$, so $\nu = (u_1 + u_2)^2/(u_1^2/f_1 + u_2^2/f_2)$. For the lower bound, with $f = \min(f_1, f_2)$,
+\[
+\frac{u_1^2}{f_1} + \frac{u_2^2}{f_2} \le \frac{u_1^2 + u_2^2}{f} \le \frac{(u_1 + u_2)^2}{f} ,
+\]
+so $\nu \ge f$. For the upper bound, by the Cauchy--Schwarz inequality,
+\[
+(u_1 + u_2)^2 = \Bigl(\frac{u_1}{\sqrt{f_1}}\sqrt{f_1} + \frac{u_2}{\sqrt{f_2}}\sqrt{f_2}\Bigr)^2 \le \Bigl(\frac{u_1^2}{f_1} + \frac{u_2^2}{f_2}\Bigr)(f_1 + f_2) ,
+\]
+so $\nu \le f_1 + f_2 = n_1 + n_2 - 2$, with equality when $u_1/f_1 = u_2/f_2$.
+\end{solution}
+
+\begin{problem}
+An experimenter expects $\sigma \approx 5$ and wants power $0.80$ to detect a difference of $4$ units between two treatment means, using a two-sided test at
+$\alpha = 0.05$. Find the number of replicates per treatment from the normal approximation, and comment on the exact answer.
+\end{problem}
+
+\begin{solution}
+With $z_{0.025} = 1.960$ and $z_{0.20} = 0.842$,
+\[
+n = \frac{2(1.960 + 0.842)^2(25)}{16} = 24.53 ,
+\]
+so $25$ per treatment. The exact power from the non-central $t$ distribution is $0.791$ with $n = 25$ and $0.807$ with $n = 26$, so $26$ are required. As in the
+text, the approximation falls short by about one replicate, because it treats $\sigma$ as known.
+\end{solution}
+
+\begin{problem}
+The systolic blood pressure of six patients was measured before and after a month on a new drug:
+\begin{center}
+\begin{tabular}{l|cccccc}
+patient & 1 & 2 & 3 & 4 & 5 & 6 \\
+\hline
+before & $142$ & $150$ & $138$ & $161$ & $147$ & $155$ \\
+after & $136$ & $144$ & $139$ & $150$ & $141$ & $149$
+\end{tabular}
+\end{center}
+Test whether the drug changes mean blood pressure, and give a $95\%$ confidence interval for the mean reduction. What does this design not control?
+\end{problem}
+
+\begin{solution}
+The reductions are $d = (6, 6, -1, 11, 6, 6)$, with $\bar d = 5.667$ and $s_d = 3.830$. Then
+\[
+t_0 = \frac{5.667}{3.830/\sqrt6} = 3.624 ,
+\]
+against $t_{0.025,5} = 2.571$, so $H_0$ is rejected ($p = 0.015$). The interval is $5.667 \pm 2.571(1.5635)$, that is $(1.65,\ 9.69)$.
+
+Each patient is a block, but the two ``treatments'' (before and after) cannot be randomised in order: after always follows before. Any change
+over the month, such as the season, the attention of being in a study, or regression towards the mean in patients selected for high
+pressure, is confounded with the drug. A control group taking a placebo, with patients allocated at random, would be needed to separate
+them.
+\end{solution}
+
+\begin{problem}
+In a paired design the two observations in a pair have variance $\sigma_y^2$ and correlation $\rho$. For what values of $\rho$ does pairing give a smaller variance
+for the estimated difference than two independent samples of the same size? Explain why the comparison of the two tests also involves the
+degrees of freedom.
+\end{problem}
+
+\begin{solution}
+The variances are $2\sigma_y^2(1 - \rho)/n$ and $2\sigma_y^2/n$, so pairing is better exactly when $\rho > 0$; when units within a pair are negatively correlated it
+is worse. But the tests also differ in their error degrees of freedom, $n - 1$ against $2n - 2$, and so in the critical value $t_{\alpha/2}$. For small $n$ and small
+positive $\rho$ the larger critical value of the paired test can outweigh its smaller variance. In practice pairs are formed because their members
+are alike, $\rho$ is substantial, and the variance reduction dominates.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
