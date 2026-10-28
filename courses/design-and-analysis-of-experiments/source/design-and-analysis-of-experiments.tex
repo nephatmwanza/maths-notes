@@ -2411,6 +2411,426 @@ deviations, which is a contrast chosen by the data; this is why testing it as if
 value $(t - 1)F_\alpha$, rather than $F_\alpha$, is the right yardstick for it.
 \end{solution}
 
+\section{The randomised complete block design}
+Variability from a \textbf{nuisance factor}, a factor that may affect the response but is of no interest in itself, can obscure the treatment
+comparisons. How it is handled depends on what is known about it.
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Unknown and uncontrolled}: randomisation, which spreads its effect evenly over the treatments in the long run (Section~1).
+\item \textbf{Known but uncontrollable}, though its value can be observed on each run: the analysis of covariance, which adjusts the response for
+the measured value.
+\item \textbf{Known and controllable}: blocking, the subject of this section.
+\end{enumerate}
+
+\subsection{The design}
+Suppose $t$ treatments are to be compared and the experimental units fall into $b$ groups, the \textbf{blocks}, of $t$ units each, with units in the same
+block more alike than units in different blocks. The blocks may be fields divided into plots, batches of raw material, days, machines, operators or
+litters of animals. In a \textbf{randomised complete block design (RCBD)} each treatment is applied once in every block, so each block is a complete
+replicate of the experiment, and the treatments are allocated to the units \emph{at random within each block}, with a fresh randomisation in every
+block.
+
+Comparisons between treatments are then made within blocks, where the units are alike, and the differences between blocks are removed
+from the experimental error. The paired comparison design of Section~2 is the RCBD with $t = 2$.
+
+\begin{exa}\label{exa:fertiliser}
+Four fertilisers $A$, $B$, $C$, $D$ were compared on five fields. Each field was divided into four plots of equal size and the fertilisers were
+allocated to the plots of each field at random. The yields (kg per plot) were
+\begin{center}
+\begin{tabular}{c|cccc|c}
+field & $A$ & $B$ & $C$ & $D$ & total $y_{\cdot j}$ \\
+\hline
+$1$ & $45$ & $47$ & $50$ & $45$ & $187$ \\
+$2$ & $41$ & $43$ & $47$ & $45$ & $176$ \\
+$3$ & $46$ & $48$ & $53$ & $48$ & $195$ \\
+$4$ & $41$ & $42$ & $46$ & $43$ & $172$ \\
+$5$ & $43$ & $46$ & $48$ & $44$ & $181$ \\
+\hline
+total $y_{i\cdot}$ & $216$ & $226$ & $244$ & $225$ & $911$ \\
+mean $\bar y_{i\cdot}$ & $43.2$ & $45.2$ & $48.8$ & $45.0$ & $45.55$
+\end{tabular}
+\end{center}
+and $\sum\sum y_{ij}^2 = 41671$. Field $3$ is the best in every column and field $4$ the worst: the fields differ, and a design that ignored them would
+put that variation into the error.
+\end{exa}
+
+\subsection{The model and the analysis of variance}
+The model for the RCBD is
+\[
+y_{ij} = \mu + \tau_i + \beta_j + \varepsilon_{ij} , \qquad i = 1, \dots, t , \quad j = 1, \dots, b ,
+\]
+where $\tau_i$ is the effect of treatment $i$, $\beta_j$ the effect of block $j$, and the $\varepsilon_{ij}$ are independent $N(0, \sigma^2)$. Treatment and block effects are
+taken as fixed deviations from the overall mean, $\sum_i\tau_i = 0$ and $\sum_j\beta_j = 0$. The model is \textbf{additive}: the effect of a treatment is the same in
+every block. With one observation per treatment in each block there are no degrees of freedom left to estimate an interaction, and additivity is
+an assumption to be checked.
+
+\begin{prop}\label{prop:rcbd-estimates}
+The least squares estimates are
+\[
+\hat\mu = \bar y_{\cdot\cdot} , \qquad \hat\tau_i = \bar y_{i\cdot} - \bar y_{\cdot\cdot} , \qquad \hat\beta_j = \bar y_{\cdot j} - \bar y_{\cdot\cdot} ,
+\]
+the fitted values are $\hat y_{ij} = \bar y_{i\cdot} + \bar y_{\cdot j} - \bar y_{\cdot\cdot}$, and the residuals are $e_{ij} = y_{ij} - \bar y_{i\cdot} - \bar y_{\cdot j} + \bar y_{\cdot\cdot}$.
+\end{prop}
+
+\begin{proof}
+The normal equations are those of the parameters $\mu$, each $\tau_i$ and each $\beta_j$:
+\begin{align*}
+tb\hat\mu + b\sum_i\hat\tau_i + t\sum_j\hat\beta_j &= y_{\cdot\cdot} , \\
+b\hat\mu + b\hat\tau_i + \sum_j\hat\beta_j &= y_{i\cdot} , \qquad i = 1, \dots, t , \\
+t\hat\mu + \sum_i\hat\tau_i + t\hat\beta_j &= y_{\cdot j} , \qquad j = 1, \dots, b .
+\end{align*}
+With the side conditions $\sum\hat\tau_i = \sum\hat\beta_j = 0$ they reduce to $tb\hat\mu = y_{\cdot\cdot}$, $b(\hat\mu + \hat\tau_i) = y_{i\cdot}$ and $t(\hat\mu + \hat\beta_j) = y_{\cdot j}$, whose solution is as
+stated, and it satisfies the side conditions.
+\end{proof}
+
+The simplicity of the solution is a consequence of balance: every treatment appears once in every block, so treatment comparisons are
+unaffected by block effects and vice versa. The deviation of each observation from the grand mean splits accordingly,
+\[
+y_{ij} - \bar y_{\cdot\cdot} = (\bar y_{i\cdot} - \bar y_{\cdot\cdot}) + (\bar y_{\cdot j} - \bar y_{\cdot\cdot}) + (y_{ij} - \bar y_{i\cdot} - \bar y_{\cdot j} + \bar y_{\cdot\cdot}) .
+\]
+
+\begin{thm}\label{thm:rcbd-partition}
+\[
+SST = SS_{\mathrm{Treatments}} + SS_{\mathrm{Blocks}} + SSE ,
+\]
+where
+\begin{align*}
+SST &= \sum_i\sum_j(y_{ij} - \bar y_{\cdot\cdot})^2 , \qquad SS_{\mathrm{Treatments}} = b\sum_i(\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2 , \\
+SS_{\mathrm{Blocks}} &= t\sum_j(\bar y_{\cdot j} - \bar y_{\cdot\cdot})^2 , \qquad SSE = \sum_i\sum_j(y_{ij} - \bar y_{i\cdot} - \bar y_{\cdot j} + \bar y_{\cdot\cdot})^2 ,
+\end{align*}
+with $tb - 1 = (t - 1) + (b - 1) + (t - 1)(b - 1)$ degrees of freedom.
+\end{thm}
+
+\begin{proof}
+Square the decomposition and sum. Each of the three cross-product sums vanishes. For example,
+$\sum_i\sum_j(\bar y_{i\cdot} - \bar y_{\cdot\cdot})(\bar y_{\cdot j} - \bar y_{\cdot\cdot}) = \sum_i(\bar y_{i\cdot} - \bar y_{\cdot\cdot})\cdot\sum_j(\bar y_{\cdot j} - \bar y_{\cdot\cdot}) = 0$, and the residual sums to zero over $j$ for each $i$ and over $i$ for
+each $j$, which disposes of its products with the treatment and block terms.
+\end{proof}
+
+\begin{thm}\label{thm:rcbd-ems}
+Under the additive model,
+\begin{gather*}
+E(MS_{\mathrm{Treatments}}) = \sigma^2 + \frac{b\sum_i\tau_i^2}{t - 1} , \qquad E(MS_{\mathrm{Blocks}}) = \sigma^2 + \frac{t\sum_j\beta_j^2}{b - 1} , \\
+E(MSE) = \sigma^2 ,
+\end{gather*}
+where $MSE = SSE/\bigl((t - 1)(b - 1)\bigr)$. With normal errors the three sums of squares are independent, $SSE/\sigma^2 \sim \chi^2_{(t-1)(b-1)}$, and under
+$H_0 : \tau_1 = \dots = \tau_t = 0$,
+\[
+F_0 = \frac{MS_{\mathrm{Treatments}}}{MSE} \sim F_{t-1,\,(t-1)(b-1)} .
+\]
+\end{thm}
+
+\begin{proof}
+Let $H_0$, $H_T$ and $H_B$ be the projections that replace each observation by $\bar y_{\cdot\cdot}$, by its treatment mean and by its block mean. Then
+\begin{gather*}
+SS_{\mathrm{Treatments}} = \mathbf Y^\top(H_T - H_0)\mathbf Y , \qquad SS_{\mathrm{Blocks}} = \mathbf Y^\top(H_B - H_0)\mathbf Y , \\
+SSE = \mathbf Y^\top(I - H_T - H_B + H_0)\mathbf Y .
+\end{gather*}
+Because the design is balanced, $H_TH_B = H_0$: averaging over a block and then over a treatment gives the grand mean. From this and
+$H_TH_0 = H_BH_0 = H_0$ it follows that the three matrices are symmetric and idempotent, with traces $t - 1$, $b - 1$ and $tb - t - b + 1 = (t - 1)(b - 1)$, and that the
+product of any two of them is zero. Theorem~\ref{thm:quad-forms} then gives the independence and the distributions, and
+Lemma~\ref{lem:quad-mean} gives the expectations: with $\boldsymbol\mu$ the vector of means $\mu + \tau_i + \beta_j$, the vector $(H_T - H_0)\boldsymbol\mu$ has entries $\tau_i$, so
+$\boldsymbol\mu^\top(H_T - H_0)\boldsymbol\mu = b\sum\tau_i^2$; similarly for blocks; and $(I - H_T - H_B + H_0)\boldsymbol\mu = \mathbf 0$ for an additive mean.
+\end{proof}
+
+For hand calculation,
+\begin{gather*}
+SST = \sum_i\sum_jy_{ij}^2 - \frac{y_{\cdot\cdot}^2}{tb} , \qquad SS_{\mathrm{Treatments}} = \frac1b\sum_iy_{i\cdot}^2 - \frac{y_{\cdot\cdot}^2}{tb} , \\
+SS_{\mathrm{Blocks}} = \frac1t\sum_jy_{\cdot j}^2 - \frac{y_{\cdot\cdot}^2}{tb} , \qquad SSE = SST - SS_{\mathrm{Treatments}} - SS_{\mathrm{Blocks}} .
+\end{gather*}
+
+\begin{exa}\label{exa:fertiliser-anova}
+For the fertiliser data, the correction factor is $911^2/20 = 41496.05$, and
+\begin{align*}
+SST &= 41671 - 41496.05 = 174.95 , \\
+SS_{\mathrm{Treatments}} &= \frac{216^2 + 226^2 + 244^2 + 225^2}{5} - 41496.05 = 82.55 , \\
+SS_{\mathrm{Blocks}} &= \frac{187^2 + 176^2 + 195^2 + 172^2 + 181^2}{4} - 41496.05 = 82.70 , \\
+SSE &= 174.95 - 82.55 - 82.70 = 9.70 .
+\end{align*}
+\begin{center}
+\begin{tabular}{l|c|c|c|c}
+source & SS & df & MS & $F_0$ \\
+\hline
+fertilisers & $82.55$ & $3$ & $27.517$ & $34.04$ \\
+fields (blocks) & $82.70$ & $4$ & $20.675$ & \\
+error & $9.70$ & $12$ & $0.808$ & \\
+\hline
+total & $174.95$ & $19$ & &
+\end{tabular}
+\end{center}
+Since $F_{0.05,3,12} = 3.49$, the fertilisers differ, with $p = 4 \times 10^{-6}$. Tukey's honestly significant difference is
+\[
+HSD = q_{0.05}(4, 12)\sqrt{0.808/5} = 4.199(0.402) = 1.69 ,
+\]
+so $C$ (mean $48.8$) gives a
+higher yield than every other fertiliser, $B$ ($45.2$) and $D$ ($45.0$) do not differ, and $A$ ($43.2$) is below $B$ and $D$ by more than $1.69$.
+
+Had the fields been ignored and the data analysed as a completely randomised design, the field sum of squares would have joined the error:
+$SSE = 82.70 + 9.70 = 92.40$ on $16$ degrees of freedom, $MSE = 5.775$, and $F_0 = 27.517/5.775 = 4.76$ ($p = 0.015$). The conclusion survives, but the evidence is
+weaker by a factor of seven, and the Tukey difference would be $\sqrt{5.775/0.808} \approx 2.7$ times as wide.
+\end{exa}
+
+\begin{remark}[Testing blocks]
+The ratio $MS_{\mathrm{Blocks}}/MSE = 25.6$ suggests that the fields differ, and it is useful to look at it to see whether blocking was worthwhile. It is not a valid
+$F$ test in the same sense as the test for treatments: the treatments were randomised within blocks, but the blocks themselves were not
+randomised to anything. Block effects may also be regarded as random, if the blocks are a sample from a population of possible blocks. Either
+way, the test for treatments is unchanged: for $H_0$ about treatments the analysis is the same whether blocks are fixed or random.
+\end{remark}
+
+Contrasts and multiple comparisons are as in Section~4, with $r$ replaced by $b$ and $N - t$ by $(t - 1)(b - 1)$: a contrast $\sum c_i\mu_i$ is estimated by
+$\sum c_i\bar y_{i\cdot}$ with variance $\sigma^2\sum c_i^2/b$, free of the block effects.
+
+\subsection{Checking the model}
+The residuals $e_{ij} = y_{ij} - \bar y_{i\cdot} - \bar y_{\cdot j} + \bar y_{\cdot\cdot}$ are plotted as in Section~3: against the fitted values, against treatments and blocks, and on a
+normal probability plot. In an RCBD the assumption that most needs checking is additivity. A treatment that does well in good blocks and badly
+in poor ones produces residuals that are positive in the corners of the table and negative in the middle, or the reverse.
+
+\textbf{Tukey's one-degree-of-freedom test for non-additivity} checks for the commonest form of interaction, one proportional to the product of the
+main effects,
+\[
+y_{ij} = \mu + \tau_i + \beta_j + \gamma\tau_i\beta_j + \varepsilon_{ij} .
+\]
+Writing $a_j = \bar y_{\cdot j} - \bar y_{\cdot\cdot}$ and $c_i = \bar y_{i\cdot} - \bar y_{\cdot\cdot}$, the sum of squares for non-additivity is
+\[
+SS_N = \frac{\bigl(\sum_i\sum_jc_ia_jy_{ij}\bigr)^2}{\sum_ic_i^2\,\sum_ja_j^2} ,
+\]
+on one degree of freedom, and it is tested against the remainder of the error:
+\[
+F_0 = \frac{SS_N}{\bigl(SSE - SS_N\bigr)/\bigl((t - 1)(b - 1) - 1\bigr)} ,
+\]
+which has the $F_{1,\,(t-1)(b-1)-1}$ distribution under additivity.
+$SS_N$ is the regression sum of squares of the residuals on the products $c_ia_j$; if additivity holds, $\gamma = 0$ and the products explain nothing beyond
+chance. When the test is significant, a transformation of the response, often the logarithm (which turns a multiplicative model into an
+additive one), will frequently remove the interaction.
+
+\begin{exa}
+For the fertiliser data, the residuals are
+\begin{center}
+\begin{tabular}{c|rrrr}
+field & $A$ & $B$ & $C$ & $D$ \\
+\hline
+$1$ & $0.60$ & $0.60$ & $0.00$ & $-1.20$ \\
+$2$ & $-0.65$ & $-0.65$ & $-0.25$ & $1.55$ \\
+$3$ & $-0.40$ & $-0.40$ & $1.00$ & $-0.20$ \\
+$4$ & $0.35$ & $-0.65$ & $-0.25$ & $0.55$ \\
+$5$ & $0.10$ & $1.10$ & $-0.50$ & $-0.70$
+\end{tabular}
+\end{center}
+with no pattern and none larger than $1.55/\sqrt{0.808} = 1.7$ standard deviations. For Tukey's test, $\sum\sum c_ia_jy_{ij} = 17.835$, $\sum c_i^2 = 16.51$ and $\sum a_j^2 = 20.675$, so
+\[
+SS_N = \frac{17.835^2}{16.51 \times 20.675} = 0.932 , \qquad F_0 = \frac{0.932}{(9.70 - 0.932)/11} = 1.17 ,
+\]
+with $p = 0.30$. There is no evidence of non-additivity.
+\end{exa}
+
+\subsection{Relative efficiency}
+How much did blocking gain? The question is how large the error variance would have been if the same units had been used in a completely
+randomised design. Section~1 answers it: under complete randomisation, the variance that matters is the variance $S^2$ of the units about their
+overall mean, and that can be estimated from the RCBD mean squares.
+
+\begin{prop}\label{prop:relative-efficiency}
+Under the additive model with fixed block effects,
+\[
+\hat\sigma^2_{\mathrm{CR}} = \frac{(b - 1)MS_{\mathrm{Blocks}} + b(t - 1)MSE}{tb - 1}
+\]
+is unbiased for $\sigma^2 + t\sum_j\beta_j^2/(tb - 1)$, the expected variance of the $tb$ units about their overall mean in the absence of treatment effects. The
+\textbf{relative efficiency} of the RCBD to the completely randomised design is estimated by
+\[
+RE = \frac{\hat\sigma^2_{\mathrm{CR}}}{MSE} .
+\]
+\end{prop}
+
+\begin{proof}
+By Theorem~\ref{thm:rcbd-ems},
+\begin{align*}
+E\bigl[(b - 1)MS_{\mathrm{Blocks}} + b(t - 1)MSE\bigr] &= (b - 1)\sigma^2 + t\sum_j\beta_j^2 + b(t - 1)\sigma^2 \\
+&= (tb - 1)\sigma^2 + t\sum_j\beta_j^2 .
+\end{align*}
+On the other hand, without treatment effects the unit values are $\beta_j + \varepsilon_{ij}$, and the expected value of their sample variance over the $tb$ units is
+$\sigma^2 + \sum_i\sum_j\beta_j^2/(tb - 1) = \sigma^2 + t\sum_j\beta_j^2/(tb - 1)$, since the $\beta_j$ sum to zero.
+\end{proof}
+
+$RE$ is the number of replicates a completely randomised design would need for each replicate of the RCBD to achieve the same precision.
+Because the RCBD has fewer error degrees of freedom, $f_1 = (t - 1)(b - 1)$ against $f_2 = t(b - 1)$, Fisher suggested multiplying $RE$ by
+\[
+\frac{(f_1 + 1)(f_2 + 3)}{(f_2 + 1)(f_1 + 3)} ,
+\]
+a factor slightly below $1$ that accounts for the extra uncertainty in a variance estimated on fewer degrees of freedom.
+
+\begin{exa}
+For the fertiliser data,
+\[
+\hat\sigma^2_{\mathrm{CR}} = \frac{4(20.675) + 15(0.808)}{19} = 4.99 , \qquad RE = \frac{4.99}{0.808} = 6.17 .
+\]
+With $f_1 = 12$ and $f_2 = 16$ the correction factor is $(13)(19)/\bigl((17)(15)\bigr) = 0.969$, giving $5.98$. A completely randomised experiment would have needed about
+six times as many plots, around $120$ instead of $20$, for the same precision.
+\end{exa}
+
+\subsection{A missing observation}
+If one observation is lost, the design is no longer balanced and the simple formulas no longer apply. A classical remedy, due to Yates, is to
+estimate the missing value and analyse the completed table.
+
+\begin{prop}\label{prop:missing}
+Suppose $y_{ij}$ is missing, and let $y_{i\cdot}'$, $y_{\cdot j}'$ and $y_{\cdot\cdot}'$ be the treatment, block and grand totals of the observations that are present. The value $x$
+that minimises the error sum of squares of the completed table is
+\[
+\hat x = \frac{t\,y_{i\cdot}' + b\,y_{\cdot j}' - y_{\cdot\cdot}'}{(t - 1)(b - 1)} .
+\]
+\end{prop}
+
+\begin{proof}
+Write the error sum of squares of the completed table as
+\[
+SSE(x) = \sum\sum y^2 - \frac1b\sum_ky_{k\cdot}^2 - \frac1t\sum_ly_{\cdot l}^2 + \frac{y_{\cdot\cdot}^2}{tb} ,
+\]
+in which $x$ enters $\sum\sum y^2$ as $x^2$, the total of treatment $i$ as $y_{i\cdot}' + x$, the total of block $j$ as $y_{\cdot j}' + x$, and the grand total as $y_{\cdot\cdot}' + x$. Setting the
+derivative to zero,
+\[
+2x - \frac2b(y_{i\cdot}' + x) - \frac2t(y_{\cdot j}' + x) + \frac{2}{tb}(y_{\cdot\cdot}' + x) = 0 .
+\]
+Multiplying by $tb/2$ gives $x(tb - t - b + 1) = t\,y_{i\cdot}' + b\,y_{\cdot j}' - y_{\cdot\cdot}'$, and $tb - t - b + 1 = (t - 1)(b - 1)$. The second derivative is $2(t - 1)(b - 1)/(tb) > 0$.
+\end{proof}
+
+The completed table is then analysed as usual, with one degree of freedom subtracted from the error. The error sum of squares obtained is exact:
+it equals the residual sum of squares from fitting the model by least squares to the observations actually present. The treatment sum of
+squares, however, is biased upwards, by
+\[
+\frac{\bigl(y_{\cdot j}' - (t - 1)\hat x\bigr)^2}{t(t - 1)} ,
+\]
+which should be subtracted. The exact analysis, which today is just as easy, fits the full and reduced models by least squares and takes the
+treatment sum of squares as the difference in their residual sums of squares, as in the remark following Theorem~\ref{thm:anova-F}.
+
+\begin{exa}
+Suppose the yield of fertiliser $C$ on field $3$ (actually $53$) had been lost. Then $y_{C\cdot}' = 191$, $y_{\cdot 3}' = 142$ and $y_{\cdot\cdot}' = 858$, and
+\[
+\hat x = \frac{4(191) + 5(142) - 858}{3 \times 4} = \frac{616}{12} = 51.33 .
+\]
+From the completed table, $SSE = 8.033$ on $11$ degrees of freedom, and the uncorrected treatment sum of squares is $72.13$. The bias is
+$\bigl(142 - 3(51.33)\bigr)^2/12 = 12.00$, so the corrected treatment sum of squares is $60.13$, which is exactly what the least squares fit to the $19$ remaining
+observations gives. Then $F_0 = (60.13/3)/(8.033/11) = 27.45$ on $3$ and $11$ degrees of freedom, and the conclusion is unchanged.
+\end{exa}
+
+\subsection{Practice problems}
+
+\begin{problem}
+Two varieties of wheat are to be compared using two plots at each of three locations. Last year's yields for a standard variety grown on all six
+plots were
+\begin{center}
+\begin{tabular}{c|cc}
+location & left plot & right plot \\
+\hline
+$1$ & $39$ & $37$ \\
+$2$ & $35$ & $38$ \\
+$3$ & $36$ & $39$
+\end{tabular}
+\end{center}
+Three designs are proposed. \emph{Design 1}: use all the left plots for one variety and all the right plots for the other, deciding at random which
+variety goes on the left. \emph{Design 2}: at each location, allocate the two varieties to the two plots at random. \emph{Design 3}: choose three of the six
+plots at random for one variety and use the other three for the other. Name each design, discuss its merits and drawbacks, and recommend one.
+\end{problem}
+
+\begin{solution}
+Treat last year's yields as the unit values $u$ of Section~1, and suppose the varieties do not differ, so that any estimated difference is error.
+
+\emph{Design 3} is a completely randomised design. By Theorem~\ref{thm:randomisation}, with the six unit values having $S^2 = 2.667$, the estimate $\bar y_A - \bar y_B$ is
+unbiased with variance $2S^2/3 = 1.78$; there are $4$ error degrees of freedom.
+
+\emph{Design 2} is a randomised complete block design with locations as blocks. Within each location the difference between the two plots is
+$d = 2$, $-3$, $-3$, and the estimate is the average of $\pm d_j$ with random signs, unbiased with variance $\sum d_j^2/9 = 22/9 = 2.44$; there are $2$ error degrees of
+freedom.
+
+\emph{Design 1} has only two possible allocations, and the variety difference is confounded with the difference between the left and right plots.
+Last year the right plots out-yielded the left ones by $38.00 - 36.67 = 1.33$ on average, a systematic difference that would be reported as a
+variety effect; and since every comparison is between sides, there is no valid estimate of error at all. It should not be used.
+
+These figures show something worth noticing: here the locations differ little (their means are $38.0$, $36.5$ and $37.5$) while the plots within a
+location differ a good deal, so blocking on location does not pay, and the completely randomised design is both more precise and has more
+error degrees of freedom. Blocking helps only when the blocks are more homogeneous than the units as a whole. One year's data on six plots is
+thin evidence, however, and locations usually differ in soil and climate. If the experimenter expects the location differences of last year to be
+typical, Design 3 is preferable; if not, Design 2 is the safe recommendation, since it protects against location differences at the cost of two
+error degrees of freedom. The left--right pattern also suggests that the plots should be examined for a fertility gradient, which, if real, is the
+nuisance factor to block on.
+\end{solution}
+
+\begin{problem}
+Three detergents were tested on four washing machines, each machine washing one load with each detergent in random order. The whiteness
+scores were
+\begin{center}
+\begin{tabular}{c|ccc}
+machine & detergent $1$ & detergent $2$ & detergent $3$ \\
+\hline
+$1$ & $13$ & $18$ & $15$ \\
+$2$ & $21$ & $26$ & $24$ \\
+$3$ & $15$ & $19$ & $18$ \\
+$4$ & $17$ & $23$ & $19$
+\end{tabular}
+\end{center}
+Analyse the experiment, compare the detergents with Tukey's method ($q_{0.05}(3, 6) = 4.339$), and estimate the relative efficiency of blocking on
+machines.
+\end{problem}
+
+\begin{solution}
+The totals are $66$, $86$, $76$ for the detergents and $46$, $71$, $52$, $59$ for the machines, with $y_{\cdot\cdot} = 228$ and $\sum\sum y^2 = 4500$. The correction factor is
+$228^2/12 = 4332$, so $SST = 168$, $SS_{\mathrm{Detergents}} = (66^2 + 86^2 + 76^2)/4 - 4332 = 50$, $SS_{\mathrm{Machines}} = (46^2 + 71^2 + 52^2 + 59^2)/3 - 4332 = 115.33$, and $SSE = 2.67$
+on $6$ degrees of freedom.
+\begin{center}
+\begin{tabular}{l|c|c|c|c}
+source & SS & df & MS & $F_0$ \\
+\hline
+detergents & $50.00$ & $2$ & $25.000$ & $56.25$ \\
+machines & $115.33$ & $3$ & $38.444$ & \\
+error & $2.67$ & $6$ & $0.444$ & \\
+\hline
+total & $168.00$ & $11$ & &
+\end{tabular}
+\end{center}
+$F_0 = 56.25 > F_{0.05,2,6} = 5.14$ ($p = 0.0001$). The means are $16.5$, $21.5$ and $19.0$, and $HSD = 4.339\sqrt{0.444/4} = 1.45$; all three differences ($5.0$, $2.5$, $2.5$)
+exceed it, so detergent $2$ is best and $1$ worst. The relative efficiency is
+\[
+RE = \frac{3(38.444) + 4(2)(0.444)}{11(0.444)} = 24.3 :
+\]
+the machines differ so much that without blocking about $24$ times as many loads would have been needed.
+\end{solution}
+
+\begin{problem}
+Prove that $E(MS_{\mathrm{Blocks}}) = \sigma^2 + t\sum_j\beta_j^2/(b - 1)$ in the RCBD by direct calculation, without projections.
+\end{problem}
+
+\begin{solution}
+$y_{\cdot j} = t\mu + t\beta_j + \sum_i\tau_i + \sum_i\varepsilon_{ij} = t(\mu + \beta_j) + \varepsilon_{\cdot j}$, since $\sum\tau_i = 0$. So $E(y_{\cdot j}^2) = t^2(\mu + \beta_j)^2 + t\sigma^2$, and similarly
+$E(y_{\cdot\cdot}^2) = (tb\mu)^2 + tb\sigma^2$. Then
+\begin{align*}
+E(SS_{\mathrm{Blocks}}) &= \frac1t\sum_jE(y_{\cdot j}^2) - \frac{E(y_{\cdot\cdot}^2)}{tb} = t\sum_j(\mu + \beta_j)^2 + b\sigma^2 - tb\mu^2 - \sigma^2 \\
+&= t\sum_j\beta_j^2 + (b - 1)\sigma^2 ,
+\end{align*}
+using $\sum\beta_j = 0$. Dividing by $b - 1$ gives the result.
+\end{solution}
+
+\begin{problem}
+Show that for $t = 2$ the RCBD $F$ statistic for treatments equals the square of the paired $t$ statistic of Section~2, and check this with the tyre
+data, for which $t_0 = 5.653$.
+\end{problem}
+
+\begin{solution}
+With $t = 2$, $d_j = y_{1j} - y_{2j}$, and $\bar y_{1\cdot} - \bar y_{2\cdot} = \bar d$. Then $SS_{\mathrm{Treatments}} = b\sum_i(\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2 = b\bar d^2/2$. The residuals are
+$e_{1j} = -e_{2j} = (d_j - \bar d)/2$, so $SSE = \sum_j(d_j - \bar d)^2/2 = (b - 1)s_d^2/2$ on $b - 1$ degrees of freedom, and $MSE = s_d^2/2$. Hence
+\[
+F_0 = \frac{b\bar d^2/2}{s_d^2/2} = \Bigl(\frac{\bar d}{s_d/\sqrt b}\Bigr)^2 = t_0^2 .
+\]
+For the tyre data the RCBD analysis gives $F_0 = 31.96 = 5.653^2$.
+\end{solution}
+
+\begin{problem}
+Explain why an RCBD with $b$ blocks has fewer error degrees of freedom than a completely randomised design with the same $tb$ units, and why
+this matters most when $t$ and $b$ are small.
+\end{problem}
+
+\begin{solution}
+The RCBD spends $b - 1$ degrees of freedom on estimating block effects, leaving $(t - 1)(b - 1)$ for error against $t(b - 1)$ in the completely randomised
+design. Fewer error degrees of freedom mean a larger critical value $t_{\alpha/2}$ or $F_\alpha$ and a less precise estimate of $\sigma^2$. With $t = 2$ and $b = 3$, for
+example, the error degrees of freedom fall from $4$ to $2$ and $t_{0.025}$ rises from $2.78$ to $4.30$: blocking must reduce the error variance by more than a
+factor of $(4.30/2.78)^2 \approx 2.4$ just to break even. With $20$ or more error degrees of freedom the loss is negligible, and blocking on any nuisance factor
+that is likely to matter is almost always worthwhile.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
