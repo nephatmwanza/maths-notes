@@ -1519,6 +1519,325 @@ and smallest means, or if many comparisons are made, the confidence level of eac
 that control the error rate over a family of comparisons are the subject of the section on treatment contrasts.
 \end{remark}
 
+\subsection{Model adequacy checking}
+The analysis of variance rests on the assumptions that the errors are independent and normally distributed with mean zero and a common
+variance. These are checked through the \textbf{residuals}
+\[
+e_{ij} = y_{ij} - \hat y_{ij} = y_{ij} - \bar y_{i\cdot} ,
+\]
+which estimate the errors. They are not quite the errors, as the next result shows.
+
+\begin{prop}\label{prop:residual-var}
+In the one-way model, $E(e_{ij}) = 0$ and $\Var(e_{ij}) = \sigma^2(1 - 1/n_i)$, while $\Cov(e_{ij}, e_{ik}) = -\sigma^2/n_i$ for $j \ne k$; residuals from different treatments are
+uncorrelated.
+\end{prop}
+
+\begin{proof}
+$e_{ij} = \varepsilon_{ij} - \bar\varepsilon_{i\cdot}$, since $\mu + \tau_i$ cancels. With $\Cov(\varepsilon_{ij}, \bar\varepsilon_{i\cdot}) = \sigma^2/n_i$ and $\Var(\bar\varepsilon_{i\cdot}) = \sigma^2/n_i$,
+\begin{align*}
+\Var(e_{ij}) &= \sigma^2 - \frac{2\sigma^2}{n_i} + \frac{\sigma^2}{n_i} = \sigma^2\Bigl(1 - \frac{1}{n_i}\Bigr) , \\
+\Cov(e_{ij}, e_{ik}) &= 0 - \frac{\sigma^2}{n_i} - \frac{\sigma^2}{n_i} + \frac{\sigma^2}{n_i} = -\frac{\sigma^2}{n_i} .
+\end{align*}
+Residuals from different treatments involve disjoint sets of independent errors.
+\end{proof}
+
+So the residuals within a treatment are slightly negatively correlated (they sum to zero) and have slightly less variance than the errors. For
+plotting, they are usually scaled: the \textbf{standardised residuals} $d_{ij} = e_{ij}/\sqrt{MSE}$, or the \textbf{studentised residuals}
+$r_{ij} = e_{ij}/\sqrt{MSE(1 - 1/n_i)}$, which have variance close to $1$. If the errors are normal, about $95\%$ of them lie within $\pm2$, and a value beyond $\pm3$
+marks a possible outlier.
+
+\subhead{Residual plots}
+\begin{enumerate}[label=(\roman*)]
+\item A \textbf{normal probability plot} of the residuals checks normality. The ordered residuals $e_{(1)} \le \dots \le e_{(N)}$ are plotted against the normal
+scores $\Phi^{-1}\bigl((k - 0.5)/N\bigr)$; under normality the points lie near a straight line. Curvature suggests skewness, and an S shape suggests
+tails heavier or lighter than normal.
+\item Plotting the residuals against the \textbf{fitted values} $\bar y_{i\cdot}$ checks that the variance is constant. The vertical spread should be the same at
+every fitted value. A spread that grows with the fitted value, a funnel, is the commonest violation, and is treated by transformation below.
+\item A plot of the residuals against \textbf{time order} checks independence. Runs of residuals of the same sign, or a trend, indicate correlation
+between successive runs, which randomisation of the run order is meant to prevent but cannot always.
+\end{enumerate}
+
+\begin{exa}\label{exa:coating-residuals}
+For the coating data the fitted values are the five coating means, and the residuals are
+\begin{center}
+\begin{tabular}{c|cccc}
+coating & \multicolumn{4}{c}{residuals $e_{ij} = y_{ij} - \bar y_{i\cdot}$} \\
+\hline
+$1$ & $-2.75$ & $0.25$ & $0.25$ & $2.25$ \\
+$2$ & $-2.00$ & $-2.00$ & $2.00$ & $2.00$ \\
+$3$ & $-4.75$ & $0.25$ & $2.25$ & $2.25$ \\
+$4$ & $-3.00$ & $-3.00$ & $2.00$ & $4.00$ \\
+$5$ & $-2.75$ & $-1.75$ & $1.25$ & $3.25$
+\end{tabular}
+\end{center}
+The largest standardised residual is $-4.75/\sqrt{8.15} = -1.66$, so there are no outliers. Figure~\ref{fig:coating-diagnostics} shows the two main plots. The
+normal plot is close to a straight line, with a slight gap in the middle that is typical of four observations per group. The spread of the residuals
+does not change systematically with the fitted value. The assumptions look reasonable.
+\end{exa}
+
+% Diagnostics infographic for the coating data: normal plot and residuals
+% against fitted values, side by side in one picture so they do not stack.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\begin{scope}
+\draw[rounded corners=6pt,very thick,draw=teal!70!black,fill=teal!5] (-0.9,-3.4) rectangle (5.0,3.5);
+\node[font=\bfseries\small,teal!70!black] at (2.05,3.1) {Normal probability plot};
+\draw[-Stealth] (0,-2.5) -- (0,2.7);
+\draw[-Stealth] (0,-2.5) -- (4.7,-2.5);
+\foreach \e in {-4,0,4} \draw ({2.2+0.45*\e},-2.44) -- ({2.2+0.45*\e},-2.56) node[below,font=\scriptsize] {\e};
+\node[font=\scriptsize] at (2.35,-3.0) {residual};
+\node[rotate=90,font=\scriptsize] at (-0.55,0) {normal score};
+\foreach \e/\q in {-4.75/-1.96,-3/-1.44,-3/-1.15,-2.75/-0.935,-2.75/-0.755,-2/-0.598,-2/-0.454,-1.75/-0.319,0.25/-0.189,0.25/-0.063,0.25/0.063,1.25/0.189,2/0.319,2/0.454,2/0.598,2.25/0.755,2.25/0.935,2.25/1.15,3.25/1.44,4/1.96}
+  \fill[teal!70!black] ({2.2+0.45*\e},{1.2*\q}) circle (2pt);
+\draw[gray,dashed] ({2.2+0.45*(-5)},{1.2*(-5/2.855)}) -- ({2.2+0.45*(4.6)},{1.2*(4.6/2.855)});
+\end{scope}
+\begin{scope}[xshift=6.4cm]
+\draw[rounded corners=6pt,very thick,draw=orange!70!black,fill=orange!5] (-0.9,-3.4) rectangle (5.0,3.5);
+\node[font=\bfseries\small,orange!70!black] at (2.05,3.1) {Residuals against fitted};
+\draw[-Stealth] (0,-2.5) -- (0,2.7);
+\draw[-Stealth] (0,-2.5) -- (4.7,-2.5);
+\draw[gray,dashed] (0,0) -- (4.5,0);
+\node[font=\scriptsize] at (2.35,-3.0) {fitted value};
+\node[rotate=90,font=\scriptsize] at (-0.55,0) {residual};
+\foreach \f/\e in {82.75/-2.75,82.75/0.25,82.75/0.25,82.75/2.25,77/-2,77/-2,77/2,77/2,71.75/-4.75,71.75/0.25,71.75/2.25,71.75/2.25,65/-3,65/-3,65/2,65/4,62.75/-2.75,62.75/-1.75,62.75/1.25,62.75/3.25}
+  \fill[orange!70!black] ({0.4+0.19*(\f-62)},{0.5*\e}) circle (2pt);
+\foreach \f in {65,75} \draw ({0.4+0.19*(\f-62)},-2.44) -- ({0.4+0.19*(\f-62)},-2.56) node[below,font=\scriptsize] {\f};
+\end{scope}
+\end{tikzpicture}
+\caption{Residual plots for the coating data. Left: the points lie close to a line, consistent with normal errors. Right: the vertical spread is
+about the same for each coating, consistent with a common variance.}
+\label{fig:coating-diagnostics}
+\end{figure}
+
+\subhead{Tests for equality of variances}
+Formal tests of $H_0 : \sigma_1^2 = \dots = \sigma_t^2$ supplement the plot.
+
+\textbf{Bartlett's test.} With $S_i^2$ the sample variance of treatment $i$ and $S_p^2 = MSE$ the pooled variance, compute
+\begin{gather*}
+q = (N - t)\log_{10}S_p^2 - \sum_{i=1}^t(n_i - 1)\log_{10}S_i^2 , \\
+c = 1 + \frac{1}{3(t - 1)}\Bigl(\sum_{i=1}^t\frac{1}{n_i - 1} - \frac{1}{N - t}\Bigr) ,
+\end{gather*}
+and $\chi_0^2 = 2.3026\,q/c$. Under $H_0$ and normality, $\chi_0^2$ is approximately $\chi^2_{t-1}$, and $H_0$ is rejected if $\chi_0^2 > \chi^2_{\alpha,\,t-1}$.
+
+The statistic is a likelihood ratio statistic. Up to the use of $n_i - 1$ in place of $n_i$, $-2\log\Lambda = \sum(n_i - 1)\log(S_p^2/S_i^2)$, which is $2.3026\,q$; it is
+zero when all the $S_i^2$ are equal, because a weighted arithmetic mean exceeds the corresponding geometric mean unless the terms are equal,
+and it grows as they spread. The divisor $c$ is Bartlett's correction, which makes the $\chi^2$ approximation accurate even for small $n_i$.
+
+\textbf{Levene's test.} Bartlett's test is sensitive to non-normality: with heavy-tailed errors it rejects too often. Levene's test, in the modified
+form of Brown and Forsythe, replaces each observation by its absolute deviation from the treatment median,
+\[
+z_{ij} = |y_{ij} - \tilde y_i| ,
+\]
+and applies the one-way analysis of variance $F$ test to the $z_{ij}$. Unequal variances show up as unequal mean absolute deviations. The test is
+robust to departures from normality.
+
+\begin{exa}
+For the coating data, the sample variances are $4.250$, $5.333$, $10.917$, $12.667$ and $7.583$, with $S_p^2 = 8.15$, $N - t = 15$ and $n_i - 1 = 3$. Then
+\begin{align*}
+q &= 15\log_{10}8.15 - 3\bigl(\log_{10}4.250 + \dots + \log_{10}7.583\bigr) = 0.5394 , \\
+c &= 1 + \frac{1}{12}\Bigl(\frac53 - \frac{1}{15}\Bigr) = 1.1333 ,
+\end{align*}
+and $\chi_0^2 = 2.3026(0.5394)/1.1333 = 1.096$, far below $\chi^2_{0.05,4} = 9.49$ ($p = 0.89$). Levene's test gives $F_0 = 0.756$ on $4$ and $15$ degrees of freedom
+($p = 0.57$). Neither test finds any evidence of unequal variances.
+\end{exa}
+
+\begin{remark}
+How much do violations matter? Non-normality matters little for the $F$ test of equal means, which is robust for the same reason as the $t$
+test. Unequal variances matter little when the design is balanced, but can seriously distort the level when the $n_i$ differ, especially if the smaller
+groups have the larger variances. Correlated errors matter most of all, and cannot be repaired by any analysis; that is why randomisation is a
+part of the design.
+\end{remark}
+
+\subsection{Variance-stabilising transformations}
+When the error variance changes with the mean, a transformation of the response can often make it constant. The guide is the delta method.
+
+\begin{prop}\label{prop:vst}
+Suppose $E(Y) = \mu$ and the standard deviation of $Y$ is proportional to a power of the mean, $\sigma_Y = \theta\mu^\alpha$. For a smooth function $g$,
+\[
+\Var\bigl(g(Y)\bigr) \approx g'(\mu)^2\,\theta^2\mu^{2\alpha} ,
+\]
+which is constant in $\mu$ when $g(y) = y^{1-\alpha}$ for $\alpha \ne 1$ and $g(y) = \log y$ for $\alpha = 1$.
+\end{prop}
+
+\begin{proof}
+By Taylor's theorem, $g(Y) \approx g(\mu) + g'(\mu)(Y - \mu)$, so $\Var\bigl(g(Y)\bigr) \approx g'(\mu)^2\Var(Y) = g'(\mu)^2\theta^2\mu^{2\alpha}$. This does not depend on $\mu$ when
+$g'(\mu) \propto \mu^{-\alpha}$. Integrating, $g(\mu) \propto \mu^{1-\alpha}$ if $\alpha \ne 1$ and $g(\mu) = \log\mu$ if $\alpha = 1$.
+\end{proof}
+
+\begin{center}
+\begin{tabular}{l|c|l}
+relationship & $\alpha$ & transformation \\
+\hline
+$\sigma_Y$ constant & $0$ & none \\
+$\sigma_Y^2 \propto \mu$ (Poisson counts) & $\frac12$ & square root, $\sqrt y$ \\
+$\sigma_Y \propto \mu$ (constant coefficient of variation) & $1$ & logarithm, $\log y$ \\
+$\sigma_Y \propto \mu^{3/2}$ & $\frac32$ & reciprocal square root \\
+$\sigma_Y \propto \mu^2$ & $2$ & reciprocal, $1/y$
+\end{tabular}
+\end{center}
+
+For a binomial proportion $\hat p$ based on $m$ trials, $\Var(\hat p) = p(1 - p)/m$, which is not a power of the mean, and the same argument gives the
+\textbf{arcsine transformation} $\arcsin\sqrt{\hat p}$, with variance close to $1/(4m)$ whatever $p$.
+
+The exponent $\alpha$ can be estimated from the data. Taking logarithms of $\sigma_i = \theta\mu_i^\alpha$ gives $\log\sigma_i = \log\theta + \alpha\log\mu_i$, so the slope of a straight line
+fitted to the points $(\log\bar y_{i\cdot},\ \log s_i)$ estimates $\alpha$.
+
+\begin{exa}\label{exa:insects}
+Four insecticides were each applied to five randomly chosen plots, and the number of surviving insects counted on each plot:
+\begin{center}
+\begin{tabular}{c|ccccc|cc}
+insecticide & \multicolumn{5}{c|}{counts} & $\bar y_{i\cdot}$ & $s_i$ \\
+\hline
+$1$ & $4$ & $7$ & $3$ & $6$ & $5$ & $5$ & $1.58$ \\
+$2$ & $12$ & $18$ & $15$ & $11$ & $19$ & $15$ & $3.54$ \\
+$3$ & $34$ & $47$ & $39$ & $31$ & $49$ & $40$ & $7.87$ \\
+$4$ & $78$ & $101$ & $92$ & $70$ & $109$ & $90$ & $16.05$
+\end{tabular}
+\end{center}
+The standard deviation grows with the mean, and Bartlett's test on the raw counts gives $\chi_0^2 = 16.61$ on $3$ degrees of freedom ($p = 0.0008$). The
+fitted slope of $\log s_i$ on $\log\bar y_{i\cdot}$ is $\hat\alpha = 0.80$, which suggests $y^{0.2}$, between the square root ($\alpha = \frac12$, the Poisson value) and the
+logarithm ($\alpha = 1$). Both remove the problem:
+\begin{center}
+\begin{tabular}{l|cccc|c}
+scale & \multicolumn{4}{c|}{group standard deviations} & Bartlett $p$ \\
+\hline
+$y$ & $1.58$ & $3.54$ & $7.87$ & $16.05$ & $0.0008$ \\
+$\sqrt y$ & $0.36$ & $0.46$ & $0.62$ & $0.85$ & $0.40$ \\
+$\log y$ & $0.33$ & $0.24$ & $0.20$ & $0.18$ & $0.64$
+\end{tabular}
+\end{center}
+The logarithm stabilises the spread best, which agrees with $\hat\alpha$ being nearer $1$ than $\frac12$: these counts are more variable than Poisson counts
+would be, as insect counts usually are. On the log scale the analysis of variance gives $F_0 = 131.1$ on $3$ and $16$ degrees of freedom, and conclusions
+are stated about the means of $\log y$, that is, about ratios of typical counts.
+\end{exa}
+
+\begin{remark}
+The choice of $\lambda$ in $y^\lambda$ can be made formally by the method of Box and Cox, which maximises the likelihood of the transformed model over
+$\lambda$. In practice the analyst rounds to a value with an interpretation, $1$, $\frac12$, $0$ (the logarithm) or $-1$, and the plot of $\log s_i$ against
+$\log\bar y_{i\cdot}$ usually suffices. A transformation chosen for constant variance often improves normality as well.
+\end{remark}
+
+\subsection{A quantitative factor: the regression model}
+When the factor is quantitative, such as a temperature, a dose or a concentration, with levels $x_1 < x_2 < \dots < x_t$, the treatment means can be modelled as a
+smooth function of $x$. The analysis of variance treats the levels as unordered labels and ignores this structure; a \textbf{regression model} uses it,
+\[
+y_{ij} = \beta_0 + \beta_1x_i + \beta_2x_i^2 + \dots + \beta_kx_i^k + \varepsilon_{ij} ,
+\]
+which predicts the response between the levels used and summarises the effect of $x$ in a few parameters.
+
+A polynomial of degree $t - 1$ can pass through any $t$ points, so with $k = t - 1$ the fitted values are exactly the treatment means and the regression
+sum of squares equals $SS_{\mathrm{Treatments}}$. A model of lower degree fits the means only approximately, and the question is whether the approximation is
+adequate. The replication provides an answer.
+
+\begin{thm}[Lack of fit]\label{thm:lack-of-fit}
+Fit a regression model with $p < t$ parameters to data with $t$ distinct levels of $x$ and $n_i$ observations at level $x_i$, and let $\hat y_i$ be the fitted
+value at $x_i$. Then the residual sum of squares splits as
+\[
+\underbrace{\sum_i\sum_j(y_{ij} - \hat y_i)^2}_{SS_{\mathrm{Res}}} = \underbrace{\sum_i\sum_j(y_{ij} - \bar y_{i\cdot})^2}_{SS_{\mathrm{PE}}} + \underbrace{\sum_in_i(\bar y_{i\cdot} - \hat y_i)^2}_{SS_{\mathrm{LOF}}} ,
+\]
+with $N - t$ and $t - p$ degrees of freedom. If the regression model is correct and the errors are normal,
+\[
+F_0 = \frac{SS_{\mathrm{LOF}}/(t - p)}{SS_{\mathrm{PE}}/(N - t)} \sim F_{t-p,\,N-t} .
+\]
+\end{thm}
+
+\begin{proof}
+Write $y_{ij} - \hat y_i = (y_{ij} - \bar y_{i\cdot}) + (\bar y_{i\cdot} - \hat y_i)$. The second term does not depend on $j$ and the first sums to zero over $j$, so the cross term
+vanishes. For the distribution, let $H_R$ be the projection onto the regression space (spanned by the columns $1, x, \dots, x^{p-1}$ evaluated at each
+observation) and $H$ the projection onto the treatment space of the one-way model. Every column of the regression model is constant within a
+treatment, so the regression space lies inside the treatment space and $HH_R = H_RH = H_R$. Then $SS_{\mathrm{PE}} = \mathbf Y^\top(I - H)\mathbf Y$ and
+$SS_{\mathrm{LOF}} = \mathbf Y^\top(H - H_R)\mathbf Y$, with symmetric idempotent matrices of ranks $N - t$ and $t - p$ whose product is zero. If the model is correct, $\boldsymbol\mu$ lies in the
+regression space and $(H - H_R)\boldsymbol\mu = \mathbf 0$, so both quadratic forms are central, and Theorem~\ref{thm:quad-forms} gives the result.
+\end{proof}
+
+$SS_{\mathrm{PE}}$ is called the \textbf{pure error} sum of squares: it is the one-way $SSE$, and it estimates $\sigma^2$ whether or not the regression model is
+right. $SS_{\mathrm{LOF}}$ measures how far the treatment means lie from the fitted curve. A large $F_0$ says the model is inadequate.
+
+\begin{exa}\label{exa:temperature}
+The yield of a process was measured three times at each of four temperatures, in random order:
+\begin{center}
+\begin{tabular}{c|ccc|c}
+temperature ($^\circ$C) & \multicolumn{3}{c|}{yield} & $\bar y_{i\cdot}$ \\
+\hline
+$150$ & $62$ & $65$ & $63$ & $63.33$ \\
+$160$ & $71$ & $73$ & $70$ & $71.33$ \\
+$170$ & $75$ & $77$ & $76$ & $76.00$ \\
+$180$ & $76$ & $74$ & $77$ & $75.67$
+\end{tabular}
+\end{center}
+The one-way analysis gives $SST = 328.92$, $SS_{\mathrm{Treatments}} = 312.92$ and $SSE = SS_{\mathrm{PE}} = 16.00$ on $8$ degrees of freedom, so $MS_{\mathrm{PE}} = 2.00$.
+
+A straight line has regression sum of squares $260.42$, leaving $SS_{\mathrm{Res}} = 68.50$, so $SS_{\mathrm{LOF}} = 68.50 - 16.00 = 52.50$ on $4 - 2 = 2$ degrees of freedom and
+\[
+F_0 = \frac{52.50/2}{2.00} = 13.13 > F_{0.05,2,8} = 4.46 \qquad (p = 0.003) .
+\]
+The straight line is inadequate: the means rise and then level off. Adding $x^2$ raises the regression sum of squares to $312.50$, so
+$SS_{\mathrm{LOF}} = 16.42 - 16.00 = 0.42$ on $1$ degree of freedom, and $F_0 = 0.42/2.00 = 0.21$ ($p = 0.66$): the quadratic fits. In the coded variable
+$u = (x - 165)/10$ it is
+\[
+\hat y = 74.19 + 4.17u - 2.08u^2 ,
+\]
+which is greatest at $u = 4.17/(2 \times 2.08) = 1$, that is at $175\,^\circ$C, a temperature that was never run. The analysis of variance could only have said
+that the four means differ; the regression model says how, and where to look next.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.32cm,y=0.22cm]
+\draw[rounded corners=6pt,very thick,draw=blue!70!black,fill=blue!4] (141,47.5) rectangle (190,85);
+\draw[-Stealth] (145,55) -- (186,55);
+\node[font=\scriptsize] at (165,51) {temperature ($^\circ$C)};
+\draw[-Stealth] (145,55) -- (145,82) node[above right,font=\scriptsize] {yield};
+\foreach \x in {150,160,170,180} \draw (\x,55.4) -- (\x,54.6) node[below,font=\scriptsize] {\x};
+\foreach \y in {60,70,80} \draw (145.4,\y) -- (144.6,\y) node[left,font=\scriptsize] {\y};
+\draw[gray,dashed,thick] (147,{2.8333+0.41667*147}) -- (183,{2.8333+0.41667*183});
+\draw[blue!70!black,very thick,domain=147:183,smooth,variable=\x] plot (\x,{74.1875+4.16667*(\x-165)/10-2.08333*((\x-165)/10)^2});
+\foreach \x/\y in {150/62,150/65,150/63,160/71,160/73,160/70,170/75,170/77,170/76,180/76,180/74,180/77} \fill[orange!85!black] (\x,\y) circle (3pt);
+\node[font=\scriptsize,gray,rotate=17] at (153,68.6) {straight line};
+\node[font=\scriptsize,blue!70!black] at (166,80.5) {quadratic};
+\end{tikzpicture}
+\caption{Yield against temperature. The straight line misses the levelling off; the quadratic follows the means and peaks near $175\,^\circ$C.}
+\label{fig:temperature}
+\end{figure}
+
+\subsection{Power and sample size}
+By Theorem~\ref{thm:anova-F}, when $H_0$ is false $F_0$ has the non-central $F_{t-1,\,N-t}(\lambda)$ distribution, and in a balanced design with $r$ replicates and
+$\sum\tau_i = 0$,
+\[
+\lambda = \frac{r\sum_{i=1}^t\tau_i^2}{\sigma^2} .
+\]
+The power $P\bigl(F_{t-1,\,N-t}(\lambda) > F_{\alpha,\,t-1,\,N-t}\bigr)$ increases with $\lambda$, and so with $r$ and with the size of the effects relative to $\sigma$. To choose $r$ the
+experimenter must say what effects matter. A common specification is the smallest difference $D$ between any two treatment means that it is
+important to detect.
+
+\begin{prop}
+If two treatment means differ by $D$, then $\sum_i(\tau_i - \bar\tau)^2 \ge D^2/2$, with equality when those two effects are $\pm D/2$ about the mean and all others
+equal it. Hence $\lambda \ge rD^2/(2\sigma^2)$.
+\end{prop}
+
+\begin{proof}
+Let $\tau_a - \tau_b = D$. Dropping the other terms, $\sum_i(\tau_i - \bar\tau)^2 \ge (\tau_a - \bar\tau)^2 + (\tau_b - \bar\tau)^2$, and for fixed $\tau_a - \tau_b$ the right side is smallest when
+$\bar\tau$ is midway between them, where it equals $2(D/2)^2 = D^2/2$.
+\end{proof}
+
+Using $\lambda = rD^2/(2\sigma^2)$ therefore guarantees at least the stated power for every configuration of means with a difference of $D$; it is the
+least favourable case.
+
+\begin{exa}
+An experiment with $t = 4$ treatments is to detect a difference of $D = 2\sigma$ between any two means with power at least $0.90$ at $\alpha = 0.05$. Then
+$\lambda = r(2\sigma)^2/(2\sigma^2) = 2r$, and the power for successive $r$, from the non-central $F_{3,\,4(r-1)}$ distribution, is
+\begin{center}
+\begin{tabular}{c|cccccc}
+$r$ & $4$ & $5$ & $6$ & $7$ & $8$ & $9$ \\
+\hline
+$\lambda$ & $8$ & $10$ & $12$ & $14$ & $16$ & $18$ \\
+power & $0.504$ & $0.644$ & $0.755$ & $0.836$ & $0.894$ & $0.933$
+\end{tabular}
+\end{center}
+so $r = 9$ replicates per treatment, $36$ runs in all, are needed.
+\end{exa}
+
 \subsection{Practice problems}
 
 \begin{problem}\label{prob:rations}
@@ -1636,6 +1955,79 @@ non-centrality parameter of $F_0$, and explain why the test rejected $H_0$ so de
 $\lambda = \sum n_i\tau_i^2/\sigma^2 = 4(10.90^2 + 5.15^2 + 0.10^2 + 6.85^2 + 9.10^2)/8.15 = 1100.3/8.15 = 135.0$. Under $H_1$, $E(MS_{\mathrm{Treatments}}) = \sigma^2(1 + \lambda/4) \approx 34.8\sigma^2$,
 so $F_0$ is expected to be about $35$, far beyond the critical value $3.06$. The coating means differ by up to $20$ units while the error standard
 deviation is under $3$; with such large effects even four replicates give overwhelming evidence.
+\end{solution}
+
+\begin{problem}
+For the rations data of Problem~\ref{prob:rations}, the sample variances of the four rations are $0.2825$, $0.8700$, $0.5133$ and $0.2867$. Use Bartlett's test to check
+the assumption of equal variances at $\alpha = 0.05$.
+\end{problem}
+
+\begin{solution}
+Here $S_p^2 = MSE = 0.4881$, $N - t = 12$ and $n_i - 1 = 3$. Then
+\begin{align*}
+q &= 12\log_{10}0.4881 \\
+&\quad - 3\bigl(\log_{10}0.2825 + \log_{10}0.8700 + \log_{10}0.5133 + \log_{10}0.2867\bigr) \\
+&= 0.5874 ,
+\end{align*}
+$c = 1 + \frac19\bigl(\frac43 - \frac{1}{12}\bigr) = 1.1389$, and $\chi_0^2 = 2.3026(0.5874)/1.1389 = 1.188 < \chi^2_{0.05,3} = 7.81$ ($p = 0.76$). There is no evidence against
+equal variances, although with four observations per ration the test has little power: variances differing by a factor of three are not unusual in
+samples this small.
+\end{solution}
+
+\begin{problem}
+Let $\hat p$ be the proportion of successes in $m$ independent trials with success probability $p$. Use the delta method to show that
+$\Var\bigl(\arcsin\sqrt{\hat p}\bigr) \approx 1/(4m)$.
+\end{problem}
+
+\begin{solution}
+With $g(p) = \arcsin\sqrt p$,
+\[
+g'(p) = \frac{1}{\sqrt{1 - p}}\cdot\frac{1}{2\sqrt p} = \frac{1}{2\sqrt{p(1 - p)}} .
+\]
+Since $\Var(\hat p) = p(1 - p)/m$, the delta method gives $\Var\bigl(g(\hat p)\bigr) \approx \dfrac{1}{4p(1 - p)}\cdot\dfrac{p(1 - p)}{m} = \dfrac{1}{4m}$, free of $p$.
+\end{solution}
+
+\begin{problem}
+Four treatments gave means $10$, $20$, $40$ and $80$ with standard deviations $2.1$, $3.9$, $8.2$ and $15.8$. Which transformation would you use before the
+analysis of variance?
+\end{problem}
+
+\begin{solution}
+The ratio $s_i/\bar y_{i\cdot}$ is about $0.2$ for every treatment, so $\sigma \propto \mu$ and $\alpha = 1$. (Equivalently, the slope of $\log s_i$ on $\log\bar y_{i\cdot}$ is close to $1$:
+each doubling of the mean doubles the standard deviation.) The logarithm is indicated, and the analysis of $\log y$ compares treatments by the
+ratios of their typical responses.
+\end{solution}
+
+\begin{problem}
+A response was measured twice at each of five equally spaced levels $x = 1, 2, 3, 4, 5$:
+\begin{center}
+\begin{tabular}{c|ccccc}
+$x$ & $1$ & $2$ & $3$ & $4$ & $5$ \\
+\hline
+$y$ & $3.1$, $3.5$ & $4.6$, $4.2$ & $5.4$, $5.8$ & $6.3$, $6.9$ & $7.6$, $7.4$
+\end{tabular}
+\end{center}
+Fit a straight line and test it for lack of fit at $\alpha = 0.05$.
+\end{problem}
+
+\begin{solution}
+The level means are $3.3$, $4.4$, $5.6$, $6.6$ and $7.5$, and $SST = 22.976$, $SS_{\mathrm{Treatments}} = 22.536$, so $SS_{\mathrm{PE}} = 0.440$ on $10 - 5 = 5$ degrees of freedom. The
+least squares line is $\hat y = 2.30 + 1.06x$, with regression sum of squares $22.472$, so $SS_{\mathrm{Res}} = 0.504$ and $SS_{\mathrm{LOF}} = 0.504 - 0.440 = 0.064$ on $5 - 2 = 3$
+degrees of freedom. Then
+\[
+F_0 = \frac{0.064/3}{0.440/5} = 0.24 < F_{0.05,3,5} = 5.41 \qquad (p = 0.86) ,
+\]
+so there is no evidence of lack of fit, and the straight line, whose slope is highly significant ($F_0 = 22.472/(0.504/8) = 357$), describes the data.
+\end{solution}
+
+\begin{problem}
+An experiment with $t = 5$ treatments must detect a difference of $1.5\sigma$ between any two treatment means with power at least $0.80$ at $\alpha = 0.05$. How
+many replicates are needed?
+\end{problem}
+
+\begin{solution}
+The least favourable non-centrality is $\lambda = r(1.5\sigma)^2/(2\sigma^2) = 1.125r$, and the power is computed from the non-central $F_{4,\,5(r-1)}(\lambda)$ distribution. It is
+$0.773$ at $r = 11$ ($\lambda = 12.375$) and $0.817$ at $r = 12$ ($\lambda = 13.5$), so $12$ replicates per treatment, $60$ runs in all, are needed.
 \end{solution}
 
 \section*{References}
