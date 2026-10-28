@@ -8727,6 +8727,467 @@ based on differences of residual sums of squares, as in the extra-sum-of-squares
 \end{solution}
 
 \section{Non linear estimation}
+Every model so far has been linear in its parameters, even when, like a polynomial, it was curved in $x$.
+Many models from science and engineering are not. A drug's concentration in the blood decays as
+$\theta_1e^{-\theta_2x}$; the rate of an enzyme reaction follows $\theta_1x/(\theta_2 + x)$; a population grows towards a ceiling along an
+S-shaped curve. The parameters have physical meanings: a half-life, a maximum rate, a ceiling. This
+section treats the \textbf{non-linear regression model}
+\[
+y_i = f(\mathbf{x}_i, \boldsymbol\theta) + \varepsilon_i , \qquad i = 1, \dots, n ,
+\]
+where $f$ is a known function, non-linear in the $p$ parameters $\boldsymbol\theta = (\theta_1, \dots, \theta_p)^\top$, and the $\varepsilon_i$ are
+independent with mean $0$ and variance $\sigma^2$. Least squares still defines the estimates, but they can no longer
+be written down: they must be found by iteration, and their properties hold only approximately.
+
+\subsection{Non-linear models}
+A model is \textbf{linear} in the parameters if each derivative $\partial f/\partial\theta_j$ is free of $\boldsymbol\theta$. For
+$f = \theta_1 + \theta_2x + \theta_3x^2$ the derivatives are $1$, $x$, $x^2$; for $f = \theta_1e^{-\theta_2x}$ they are $e^{-\theta_2x}$ and $-\theta_1xe^{-\theta_2x}$, which
+involve the parameters, so the model is non-linear. Figure~\ref{fig:nl-models} shows four common models.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\py/\col/\num/\name/\eqn in {
+ 0/5.0/blue/1/{Exponential decay}/{$\theta_1e^{-\theta_2x}$},
+ 7.6/5.0/green/2/{Michaelis--Menten}/{$\theta_1x/(\theta_2 + x)$},
+ 0/0/orange/3/{Asymptotic regression}/{$\theta_1 - \theta_2e^{-\theta_3x}$},
+ 7.6/0/red/4/{Logistic growth}/{$\theta_1/(1 + \theta_2e^{-\theta_3x})$}} {
+ \begin{scope}[shift={(\px,\py)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-1.05,-0.95) rectangle (6.3,3.95);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,3.6) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.25,3.6) {\name};
+  \node[font=\small,text=\col!50!black] at (3.0,-0.6) {\eqn};
+  \draw[-Stealth,gray] (0,0) -- (6.0,0);
+  \draw[-Stealth,gray] (0,0) -- (0,3.2);
+  \ifnum\num=1
+   \draw[-,thick,blue!60!black] plot[domain=0:5.8,samples=40] (\x,{2.8*exp(-0.55*\x)});
+   \node[font=\scriptsize,anchor=east] at (0,2.8) {$\theta_1$};
+   \draw[-,dashed,gray] (1.26,0) -- (1.26,1.4) -- (0,1.4);
+   \node[font=\scriptsize,anchor=north] at (1.26,0) {};
+   \node[font=\scriptsize,text=blue!50!black,anchor=west] at (2.0,1.6) {half-life $\log 2/\theta_2$};
+  \fi
+  \ifnum\num=2
+   \draw[-,dashed,gray] (0,2.6) -- (5.8,2.6);
+   \node[font=\scriptsize,anchor=east] at (0,2.6) {$\theta_1$};
+   \draw[-,thick,green!50!black] plot[domain=0:5.8,samples=40] (\x,{2.6*\x/(0.9+\x)});
+   \draw[-,dashed,gray] (0.9,0) -- (0.9,1.3) -- (0,1.3);
+   \node[font=\scriptsize,anchor=north] at (0.9,0) {$\theta_2$};
+   \node[font=\scriptsize,anchor=east] at (0,1.3) {$\theta_1/2$};
+   \node[font=\scriptsize,text=green!40!black,anchor=west] at (2.3,1.5) {$\theta_2$: half the maximum};
+  \fi
+  \ifnum\num=3
+   \draw[-,dashed,gray] (0,2.7) -- (5.8,2.7);
+   \node[font=\scriptsize,anchor=east] at (0,2.7) {$\theta_1$};
+   \draw[-,thick,orange!70!black] plot[domain=0:5.8,samples=40] (\x,{2.7-2.1*exp(-0.6*\x)});
+   \node[font=\scriptsize,anchor=east] at (0,0.6) {$\theta_1 - \theta_2$};
+   \node[font=\scriptsize,text=orange!50!black,anchor=west] at (2.3,1.4) {rises to the ceiling $\theta_1$};
+  \fi
+  \ifnum\num=4
+   \draw[-,dashed,gray] (0,2.7) -- (5.8,2.7);
+   \node[font=\scriptsize,anchor=east] at (0,2.7) {$\theta_1$};
+   \draw[-,thick,red!60!black] plot[domain=0:5.8,samples=40] (\x,{2.7/(1+20*exp(-1.3*\x))});
+   \node[font=\scriptsize,text=red!50!black,anchor=west] at (3.0,1.3) {S-shaped approach};
+  \fi
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Four non-linear regression models and the meaning of their parameters. In each, the
+parameters enter $f$ non-linearly, and each has a direct interpretation.}
+\label{fig:nl-models}
+\end{figure}
+
+\subhead{Intrinsically linear models}
+Some non-linear models become linear after a transformation. Taking logarithms of $y = \theta_1e^{-\theta_2x}$ gives
+$\log y = \log\theta_1 - \theta_2x$, linear in $\beta_0 = \log\theta_1$ and $\beta_1 = -\theta_2$, and the reciprocal of the Michaelis--Menten model gives
+\[
+\frac1y = \frac{1}{\theta_1} + \frac{\theta_2}{\theta_1}\cdot\frac1x ,
+\]
+the \emph{Lineweaver--Burk} form, linear in $1/x$. Such models are called \textbf{intrinsically linear}. But the
+transformation applies to the errors as well. Fitting $\log y = \beta_0 + \beta_1x + \varepsilon$ by least squares assumes that the
+original model is $y = \theta_1e^{-\theta_2x}e^{\varepsilon}$, with \emph{multiplicative} errors whose spread grows with the mean. If the
+errors are really additive, $y = \theta_1e^{-\theta_2x} + \varepsilon$, the transformed model has non-constant variance, and the
+transformed fit is not the least-squares fit of the original model. Whether to transform therefore depends
+on how the errors behave (Section~6), not only on convenience. Models such as the asymptotic regression
+$\theta_1 - \theta_2e^{-\theta_3x}$ cannot be linearised at all.
+
+\subsection{Least squares and the normal equations}
+The least-squares estimate $\hat{\boldsymbol\theta}$ minimises
+\[
+S(\boldsymbol\theta) = \sum_{i=1}^n\bigl[y_i - f(\mathbf{x}_i, \boldsymbol\theta)\bigr]^2 = \bigl\|\mathbf{y} - \mathbf{f}(\boldsymbol\theta)\bigr\|^2 ,
+\]
+where $\mathbf{f}(\boldsymbol\theta)$ is the vector of the $f(\mathbf{x}_i, \boldsymbol\theta)$. Let $\mathbf{F}(\boldsymbol\theta)$ be the $n \times p$ matrix of derivatives,
+$F_{ij} = \partial f(\mathbf{x}_i, \boldsymbol\theta)/\partial\theta_j$. In a linear model $\mathbf{f} = \mathbf{X}\boldsymbol\theta$ and $\mathbf{F} = \mathbf{X}$; in general $\mathbf{F}$ plays the part of the model
+matrix, but it changes with $\boldsymbol\theta$.
+
+\begin{thm}\label{thm:nl-normal}
+\begin{enumerate}[label=(\roman*)]
+\item The least-squares estimate satisfies the \emph{normal equations}
+\[
+\mathbf{F}(\hat{\boldsymbol\theta})^\top\bigl[\mathbf{y} - \mathbf{f}(\hat{\boldsymbol\theta})\bigr] = \mathbf{0} :
+\]
+the residual vector is orthogonal to the columns of $\mathbf{F}(\hat{\boldsymbol\theta})$.
+\item If the errors are normal, the least-squares estimate is the maximum-likelihood estimate of $\boldsymbol\theta$, and
+the maximum-likelihood estimate of $\sigma^2$ is $S(\hat{\boldsymbol\theta})/n$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $\partial S/\partial\theta_j = -2\sum_i[y_i - f(\mathbf{x}_i, \boldsymbol\theta)]F_{ij}$, so the gradient is $-2\mathbf{F}^\top(\mathbf{y} - \mathbf{f})$, which is zero at a minimum.
+
+(ii) The log-likelihood is $-\frac n2\log(2\pi\sigma^2) - S(\boldsymbol\theta)/(2\sigma^2)$, exactly as in the proof of Theorem~\ref{thm:mle}. For any
+$\sigma^2$ it is largest where $S$ is smallest, and maximising over $\sigma^2$ then gives $S(\hat{\boldsymbol\theta})/n$.
+\end{proof}
+
+Unlike the linear case, the normal equations are non-linear in $\hat{\boldsymbol\theta}$, may have several solutions (local
+minima, maxima and saddle points of $S$), and must be solved numerically.
+
+\subsection{The Gauss--Newton method}
+Gauss--Newton replaces the model by its linear approximation at the current estimate $\boldsymbol\theta^{(t)}$ and solves the
+resulting linear least-squares problem. By Taylor's theorem,
+\[
+\mathbf{f}(\boldsymbol\theta) \approx \mathbf{f}(\boldsymbol\theta^{(t)}) + \mathbf{F}^{(t)}(\boldsymbol\theta - \boldsymbol\theta^{(t)}) ,
+\]
+with $\mathbf{F}^{(t)} = \mathbf{F}(\boldsymbol\theta^{(t)})$. Writing $\mathbf{e}^{(t)} = \mathbf{y} - \mathbf{f}(\boldsymbol\theta^{(t)})$ and $\boldsymbol\delta = \boldsymbol\theta - \boldsymbol\theta^{(t)}$, the model becomes approximately
+$\mathbf{e}^{(t)} = \mathbf{F}^{(t)}\boldsymbol\delta + \boldsymbol\varepsilon$, a linear regression of the current residuals on the columns of $\mathbf{F}^{(t)}$. Its
+least-squares solution (Theorem~\ref{thm:ls-matrix}) gives the step
+\[
+\boldsymbol\delta^{(t)} = \bigl(\mathbf{F}^{(t)\top}\mathbf{F}^{(t)}\bigr)^{-1}\mathbf{F}^{(t)\top}\mathbf{e}^{(t)} , \qquad \boldsymbol\theta^{(t+1)} = \boldsymbol\theta^{(t)} + \boldsymbol\delta^{(t)} .
+\]
+The iteration stops when the step, or the relative change in $S$, is negligible. At a fixed point $\boldsymbol\delta = \mathbf{0}$, so
+$\mathbf{F}^\top\mathbf{e} = \mathbf{0}$: the normal equations hold.
+
+\begin{thm}\label{thm:gn-descent}
+Suppose that $\mathbf{F}^{(t)}$ has full column rank and that $\mathbf{F}^{(t)\top}\mathbf{e}^{(t)} \ne \mathbf{0}$.
+Then the Gauss--Newton step $\boldsymbol\delta^{(t)}$ is a \emph{descent direction}: $S(\boldsymbol\theta^{(t)} + \lambda\boldsymbol\delta^{(t)}) < S(\boldsymbol\theta^{(t)})$ for all small enough $\lambda > 0$.
+\end{thm}
+
+\begin{proof}
+Write $\mathbf{F}$, $\mathbf{e}$, $\boldsymbol\delta$ for the quantities at step $t$. By Theorem~\ref{thm:nl-normal}, the gradient
+of $S$ is $\mathbf{g} = -2\mathbf{F}^\top\mathbf{e}$, so the derivative of $S(\boldsymbol\theta^{(t)} + \lambda\boldsymbol\delta)$ at $\lambda = 0$ is
+\[
+\mathbf{g}^\top\boldsymbol\delta = -2\,\mathbf{e}^\top\mathbf{F}(\mathbf{F}^\top\mathbf{F})^{-1}\mathbf{F}^\top\mathbf{e} = -2\,\mathbf{u}^\top(\mathbf{F}^\top\mathbf{F})^{-1}\mathbf{u} , \qquad \mathbf{u} = \mathbf{F}^\top\mathbf{e} \ne \mathbf{0} .
+\]
+$(\mathbf{F}^\top\mathbf{F})^{-1}$ is positive definite, so this is negative, and $S$ decreases for small $\lambda > 0$.
+\end{proof}
+
+A full step can still overshoot when the linear approximation is poor, far from the solution. Two remedies
+are standard.
+\begin{itemize}
+\item \emph{Step halving}: if $S(\boldsymbol\theta^{(t)} + \boldsymbol\delta) \ge S(\boldsymbol\theta^{(t)})$, try $\lambda = \frac12, \frac14, \dots$ until $S$ decreases. By the theorem,
+this succeeds after finitely many halvings.
+\item The \emph{Levenberg--Marquardt} method takes the step
+$\boldsymbol\delta = (\mathbf{F}^\top\mathbf{F} + k\mathbf{I})^{-1}\mathbf{F}^\top\mathbf{e}$ with $k \ge 0$. This is the ridge estimator of Theorem~\ref{thm:ridge} applied to the
+linearised problem. With $k = 0$ it is the Gauss--Newton step; as $k$ grows, $k\boldsymbol\delta \to \mathbf{F}^\top\mathbf{e} = -\frac12\mathbf{g}$, a short step
+straight downhill (steepest descent). The value of $k$ is reduced after a successful step and increased after an
+unsuccessful one, so the method behaves like steepest descent far from the minimum, where that is safe, and
+like Gauss--Newton near it, where that is fast.
+\end{itemize}
+
+\subhead{Starting values}
+Iterative methods need a starting value, and a poor one can lead to slow convergence, to a local
+minimum, or to divergence. Good sources are:
+\begin{itemize}
+\item the meaning of the parameters: an asymptote, a value at $x = 0$, a half-life, read from a plot of the data;
+\item the fit of a linearised version of the model, when there is one;
+\item a grid of trial values, keeping the one with the smallest $S$.
+\end{itemize}
+It is good practice to rerun the fit from several starting values and check that it reaches the same estimate.
+
+\begin{exa}\label{exa:decay}
+A drug was injected, and its concentration in the blood, in $\mu$g/ml, was then measured every hour:
+\begin{center}
+\begin{tabular}{c|cccccc}
+Hours, $x$ & 1 & 2 & 3 & 4 & 5 & 6 \\
+\hline
+$y$ & 15.0 & 10.8 & 8.3 & 5.8 & 4.6 & 3.2 \\
+\end{tabular}
+\end{center}
+Fit $y = \theta_1e^{-\theta_2x} + \varepsilon$ by Gauss--Newton, first from the deliberately poor starting value $\boldsymbol\theta^{(0)} = (10, 0.1)$, and then
+from the log-linear fit.
+\end{exa}
+
+\begin{solution}
+\emph{The first step.} The columns of $\mathbf{F}$ are $\partial f/\partial\theta_1 = e^{-\theta_2x}$ and $\partial f/\partial\theta_2 = -\theta_1xe^{-\theta_2x}$. At $(10, 0.1)$, together with the residuals $e = y - 10e^{-0.1x}$, they are
+\begin{center}
+\begin{tabular}{c|rrr}
+$x$ & $e^{-0.1x}$ & $-10xe^{-0.1x}$ & $e$ \\
+\hline
+1 & 0.9048 & $-9.048$ & 5.952 \\
+2 & 0.8187 & $-16.375$ & 2.613 \\
+3 & 0.7408 & $-22.225$ & 0.892 \\
+4 & 0.6703 & $-26.813$ & $-0.903$ \\
+5 & 0.6065 & $-30.327$ & $-1.465$ \\
+6 & 0.5488 & $-32.929$ & $-2.288$ \\
+\end{tabular}
+\end{center}
+so that
+\[
+\mathbf{F}^\top\mathbf{F} = \begin{pmatrix} 3.156 & -92.50 \\ -92.50 & 3566.9 \end{pmatrix} , \qquad
+\mathbf{F}^\top\mathbf{e} = \begin{pmatrix} 5.435 \\ 27.545 \end{pmatrix} .
+\]
+The determinant is $3.156(3566.9) - 92.50^2 = 2702$, and
+\begin{align*}
+\delta_1 &= \frac{3566.9(5.435) + 92.50(27.545)}{2702} = 8.117 , \\
+\delta_2 &= \frac{92.50(5.435) + 3.156(27.545)}{2702} = 0.218 ,
+\end{align*}
+so $\boldsymbol\theta^{(1)} = (18.117, 0.318)$, and $S$ falls from $51.24$ to $8.17$.
+
+\emph{The iterations.} Continuing,
+\begin{center}
+\begin{tabular}{cccc}
+Step & $\theta_1$ & $\theta_2$ & $S(\boldsymbol\theta)$ \\
+\hline
+0 & 10.0000 & 0.1000 & 51.242 \\
+1 & 18.1169 & 0.3182 & 8.165 \\
+2 & 20.2301 & 0.3026 & 0.1645 \\
+3 & 20.2380 & 0.3047 & 0.1539 \\
+4 & 20.2386 & 0.3047 & 0.1539 \\
+\end{tabular}
+\end{center}
+so $\hat{\boldsymbol\theta} = (20.239, 0.3047)$ and $S(\hat{\boldsymbol\theta}) = 0.1539$. The fitted values are $14.92$, $11.00$, $8.11$, $5.98$, $4.41$, $3.25$, and the
+residuals $0.08$, $-0.20$, $0.19$, $-0.18$, $0.19$, $-0.05$ show no pattern.
+
+\emph{From the linearised fit.} Regressing $\log y$ on $x$ gives $\log y = 3.006 - 0.3041x$, so
+\[
+\boldsymbol\theta^{(0)} = (e^{3.006}, 0.3041) = (20.210, 0.3041) ,
+\]
+with $S = 0.1542$ already. One Gauss--Newton step gives $(20.2385, 0.3047)$, and the second agrees with the estimate
+above to four figures. The log-linear fit is close here because the data are nearly noise-free; it is a starting
+value, not the answer, since it minimises a different criterion.
+\end{solution}
+
+\subsection{Inference}
+The linear approximation that drives Gauss--Newton also gives approximate inference.
+
+\begin{thm}[Approximate distribution]\label{thm:nl-inference}
+For large samples, or small error variance, approximately
+\[
+\hat{\boldsymbol\theta} \sim N\bigl(\boldsymbol\theta, \sigma^2(\mathbf{F}^\top\mathbf{F})^{-1}\bigr) ,
+\]
+with $\mathbf{F}$ evaluated at the true $\boldsymbol\theta$, and $s^2 = S(\hat{\boldsymbol\theta})/(n - p)$ is approximately unbiased for $\sigma^2$.
+\end{thm}
+
+\begin{proof}[Derivation]
+Near the true $\boldsymbol\theta$, $\mathbf{f}(\boldsymbol\vartheta) \approx \mathbf{f}(\boldsymbol\theta) + \mathbf{F}(\boldsymbol\vartheta - \boldsymbol\theta)$, so
+$\mathbf{y} - \mathbf{f}(\boldsymbol\theta) = \boldsymbol\varepsilon$ is approximately a linear model $\mathbf{F}(\boldsymbol\vartheta - \boldsymbol\theta) + \boldsymbol\varepsilon$ in the unknown $\boldsymbol\vartheta - \boldsymbol\theta$ with true value $\mathbf{0}$.
+Minimising $S$ near $\boldsymbol\theta$ is then, approximately, least squares for this linear model, so
+\[
+\hat{\boldsymbol\theta} - \boldsymbol\theta \approx (\mathbf{F}^\top\mathbf{F})^{-1}\mathbf{F}^\top\boldsymbol\varepsilon .
+\]
+This has mean $\mathbf{0}$ and variance $\sigma^2(\mathbf{F}^\top\mathbf{F})^{-1}$ (Theorem~\ref{thm:beta-props}), and is normal if $\boldsymbol\varepsilon$ is. The residual vector is
+approximately $(\mathbf{I} - \mathbf{H}_F)\boldsymbol\varepsilon$ with $\mathbf{H}_F = \mathbf{F}(\mathbf{F}^\top\mathbf{F})^{-1}\mathbf{F}^\top$, whose expected squared length is $(n - p)\sigma^2$, as in
+Section~3.
+\end{proof}
+
+So, in practice, $\widehat{\operatorname{Var}}(\hat{\boldsymbol\theta}) = s^2(\hat{\mathbf{F}}^\top\hat{\mathbf{F}})^{-1}$ with $\hat{\mathbf{F}} = \mathbf{F}(\hat{\boldsymbol\theta})$, and the $t$-tests and $t$-intervals
+of Section~3 are used with $n - p$ degrees of freedom. The quality of the approximation depends on how
+nearly linear the model is over the region where $\hat{\boldsymbol\theta}$ is likely to fall, which in turn depends on the
+parametrisation: the same curve written with different parameters can give much better or much worse
+approximations. Approximate $F$-tests comparing nested models use the extra sum of squares, as before.
+Functions of the parameters, such as a half-life or a predicted value, are handled by the delta method.
+
+\begin{exa}\label{exa:decay-inference}
+For the drug data of Example~\ref{exa:decay}, find standard errors for $\hat\theta_1$ and $\hat\theta_2$, a $95\%$ confidence interval for the
+elimination rate $\theta_2$, and an interval for the half-life $\log 2/\theta_2$.
+\end{exa}
+
+\begin{solution}
+$s^2 = 0.1539/(6 - 2) = 0.0385$. Evaluating $\mathbf{F}$ at $\hat{\boldsymbol\theta}$ and inverting $\hat{\mathbf{F}}^\top\hat{\mathbf{F}}$ gives
+\[
+\operatorname{se}(\hat\theta_1) = 0.342 , \qquad \operatorname{se}(\hat\theta_2) = 0.00704 ,
+\]
+with correlation $0.85$ between the estimates: a larger initial concentration goes with a faster decay. With
+$t_{0.025,4} = 2.776$,
+\[
+0.3047 - 2.776(0.00704) \le \theta_2 \le 0.3047 + 2.776(0.00704) ,
+\]
+that is, $0.285 \le \theta_2 \le 0.324$.
+The half-life is estimated as $\log 2/0.3047 = 2.275$ hours. Its derivative with respect to $\theta_2$ is $-\log 2/\theta_2^2$, so by the delta
+method (Lemma~\ref{lem:delta})
+\[
+\operatorname{se} = \frac{\log 2}{0.3047^2}(0.00704) = 0.0526 ,
+\]
+and an approximate $95\%$ interval is $2.275 \pm 2.776(0.0526)$, from $2.13$ to $2.42$ hours. Since the half-life is a decreasing
+function of $\theta_2$, transforming the end points of the interval for $\theta_2$ gives a very similar answer, $(2.14, 2.43)$.
+\end{solution}
+
+\subsection{Conditionally linear parameters}
+Many non-linear models are linear in some of their parameters. In $\theta_1e^{-\theta_2x}$ and $\theta_1x/(\theta_2 + x)$, once $\theta_2$ is fixed the
+model is a regression through the origin on a single known regressor. This can be used to reduce the
+search to the non-linear parameters alone.
+
+\begin{thm}[Profile least squares]\label{thm:profile}
+Suppose $\mathbf{f}(\boldsymbol\theta) = \mathbf{G}(\boldsymbol\phi)\boldsymbol\beta$, where $\boldsymbol\theta = (\boldsymbol\beta, \boldsymbol\phi)$ and $\mathbf{G}(\boldsymbol\phi)$ has full column rank for each $\boldsymbol\phi$. For fixed $\boldsymbol\phi$, $S$ is
+minimised over $\boldsymbol\beta$ by $\hat{\boldsymbol\beta}(\boldsymbol\phi) = (\mathbf{G}^\top\mathbf{G})^{-1}\mathbf{G}^\top\mathbf{y}$, with minimum
+\[
+S_p(\boldsymbol\phi) = \mathbf{y}^\top\bigl[\mathbf{I} - \mathbf{G}(\mathbf{G}^\top\mathbf{G})^{-1}\mathbf{G}^\top\bigr]\mathbf{y} .
+\]
+The least-squares estimate is $\hat{\boldsymbol\phi}$, the minimiser of $S_p$, together with $\hat{\boldsymbol\beta}(\hat{\boldsymbol\phi})$. With a single linear parameter,
+$S_p(\phi) = \mathbf{y}^\top\mathbf{y} - (\mathbf{g}^\top\mathbf{y})^2/\mathbf{g}^\top\mathbf{g}$.
+\end{thm}
+
+\begin{proof}
+For fixed $\boldsymbol\phi$ the model is linear with model matrix $\mathbf{G}(\boldsymbol\phi)$, so the minimum over $\boldsymbol\beta$ is the least-squares fit and
+the minimum value is the residual sum of squares $\mathbf{y}^\top(\mathbf{I} - \mathbf{H})\mathbf{y}$ (Theorem~\ref{thm:hat}). Then
+$\min_{\boldsymbol\beta,\boldsymbol\phi}S = \min_{\boldsymbol\phi}\min_{\boldsymbol\beta}S = \min_{\boldsymbol\phi}S_p(\boldsymbol\phi)$. With one column $\mathbf{g}$, $\mathbf{y}^\top\mathbf{Hy} = (\mathbf{g}^\top\mathbf{y})^2/\mathbf{g}^\top\mathbf{g}$.
+\end{proof}
+
+With one non-linear parameter, $S_p$ is a function of one variable that can simply be plotted, which shows at
+once whether there is a single minimum and roughly where it is (Figure~\ref{fig:profile}). This is also the way
+to fit a linear spline with an unknown knot (Section~9): for each trial knot $t$ the model is linear, and $t$ is chosen
+to minimise the residual sum of squares (Problem~\ref{prob:knot}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\filldraw[fill=blue!5,draw=blue!50!black,rounded corners=6pt] (-1.2,-1.3) rectangle (11.3,4.3);
+\draw[-Stealth,gray] (0,0) -- (10.4,0) node[right,black,font=\small] {$\theta_2$};
+\draw[-Stealth,gray] (0,0) -- (0,3.5) node[above,black,font=\small] {$S_p(\theta_2)$};
+\foreach \t/\l in {0/0.1,2.5/0.2,5/0.3,7.5/0.4,10/0.5} \draw[gray] (\t,0) -- (\t,-0.1) node[below,black,font=\scriptsize] {\l};
+\foreach \s in {10,20,30,40} \draw[gray] (0,{0.075*\s}) -- (-0.1,{0.075*\s}) node[left,black,font=\scriptsize] {\s};
+\draw[-,thick,blue!60!black] plot[smooth] coordinates {(0.000,3.141) (0.250,2.822) (0.500,2.520) (0.750,2.236) (1.000,1.970) (1.250,1.723) (1.500,1.493) (1.750,1.281) (2.000,1.087) (2.250,0.911) (2.500,0.752) (2.750,0.609) (3.000,0.483) (3.250,0.374) (3.500,0.279) (3.750,0.200) (4.000,0.136) (4.250,0.085) (4.500,0.048) (4.750,0.024) (5.000,0.013) (5.250,0.013) (5.500,0.025) (5.750,0.047) (6.000,0.080) (6.250,0.122) (6.500,0.173) (6.750,0.233) (7.000,0.301) (7.250,0.376) (7.500,0.458) (7.750,0.547) (8.000,0.642) (8.250,0.743) (8.500,0.849) (8.750,0.960) (9.000,1.075) (9.250,1.195) (9.500,1.318) (9.750,1.445) (10.000,1.575)};
+\fill[red!70!black] (5.1175,0.0115) circle (2pt);
+\node[font=\scriptsize,text=red!50!black,anchor=south] at (5.6,0.35) {$\hat\theta_2 = 0.3047$};
+\foreach \t/\n in {0/0,5.455/1,5.065/2} \fill[orange!70!black] (\t,-0.65) circle (1.8pt);
+\node[font=\scriptsize,text=orange!60!black,anchor=north] at (0,-0.75) {start};
+\node[font=\scriptsize,text=orange!60!black,anchor=north] at (5.6,-0.75) {steps 1, 2, \dots};
+\end{tikzpicture}
+\caption{The profile residual sum of squares $S_p(\theta_2)$ for the drug data, with $\theta_1$ eliminated by
+Theorem~\ref{thm:profile}. It has a single, sharp minimum at $\hat\theta_2 = 0.3047$. The dots below the axis mark the
+values of $\theta_2$ reached by the Gauss--Newton iterations of Example~\ref{exa:decay}.}
+\label{fig:profile}
+\end{figure}
+
+\begin{exa}\label{exa:enzyme}
+The rate $y$ of an enzyme reaction was measured at six concentrations $x$ of its substrate:
+\begin{center}
+\begin{tabular}{c|cccccc}
+$x$ & 0.5 & 1 & 2 & 4 & 8 & 16 \\
+\hline
+$y$ & 2.3 & 3.1 & 5.2 & 6.4 & 8.2 & 8.8 \\
+\end{tabular}
+\end{center}
+Fit the Michaelis--Menten model $y = \theta_1x/(\theta_2 + x) + \varepsilon$, first by the Lineweaver--Burk regression and then by least
+squares, and compare.
+\end{exa}
+
+\begin{solution}
+\emph{Lineweaver--Burk.} Regressing $1/y$ on $1/x$ (with $1/x = 2, 1, 0.5, 0.25, 0.125, 0.0625$ and
+$1/y = 0.4348, 0.3226, 0.1923, 0.1563, 0.1220, 0.1136$) gives $1/y = 0.1115 + 0.1708(1/x)$, so
+\[
+\tilde\theta_1 = \frac{1}{0.1115} = 8.968, \qquad \tilde\theta_2 = \frac{0.1708}{0.1115} = 1.532 .
+\]
+On the original scale these leave $S = 1.057$.
+
+\emph{Least squares.} By Theorem~\ref{thm:profile}, with $g_i = x_i/(\theta_2 + x_i)$,
+$\hat\theta_1(\theta_2) = \sum g_iy_i/\sum g_i^2$. A few trial values give
+\begin{center}
+\begin{tabular}{ccc}
+$\theta_2$ & $\hat\theta_1(\theta_2)$ & $S_p(\theta_2)$ \\
+\hline
+1.5 & 9.299 & 0.754 \\
+2.0 & 9.994 & 0.303 \\
+2.5 & 10.614 & 0.694 \\
+\end{tabular}
+\end{center}
+so the minimum is near $\theta_2 = 2$. Gauss--Newton started from the Lineweaver--Burk values converges in four
+steps to
+\[
+\hat\theta_1 = 9.938, \quad \hat\theta_2 = 1.958, \qquad S(\hat{\boldsymbol\theta}) = 0.300 ,
+\]
+with standard errors $0.328$ and $0.208$ from $s^2 = 0.300/4 = 0.075$. The fitted rates are $2.02$, $3.36$, $5.02$, $6.67$, $7.98$, $8.86$.
+
+\emph{Comparison.} The Lineweaver--Burk estimates leave a residual sum of squares three and a half times as
+large, and they lie two to three standard errors from the least-squares estimates. The reason is the
+transformation: the smallest rates, at the smallest concentrations, become the largest values of $1/y$ and
+$1/x$, and their errors are magnified most, so they dominate the linear fit. The transformation is useful
+for a starting value and for a plot, but not for the final estimates.
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:nl-linear}
+Show that for a linear model, $\mathbf{f}(\boldsymbol\theta) = \mathbf{X}\boldsymbol\theta$, Gauss--Newton reaches the least-squares
+estimate in one step from any starting value.
+\end{problem}
+
+\begin{solution}
+Here $\mathbf{F} = \mathbf{X}$ for every $\boldsymbol\theta$, and $\mathbf{e}^{(0)} = \mathbf{y} - \mathbf{X}\boldsymbol\theta^{(0)}$. The step is
+$\boldsymbol\delta = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\boldsymbol\theta^{(0)}) = \hat{\boldsymbol\beta} - \boldsymbol\theta^{(0)}$, so $\boldsymbol\theta^{(1)} = \hat{\boldsymbol\beta}$. The linear approximation is exact, so the
+first step is the answer.
+\end{solution}
+
+\begin{problem}\label{prob:decay-profile}
+For the model $y = \theta_1e^{-\theta_2x} + \varepsilon$ and the drug data of Example~\ref{exa:decay}:
+\begin{enumerate}[label=(\alph*)]
+\item write down $\hat\theta_1(\theta_2)$ and $S_p(\theta_2)$;
+\item evaluate them at $\theta_2 = 0.3$, given $\sum e^{-0.3x}y = 23.7162$, $\sum e^{-0.6x} = 1.18313$ and $\sum y^2 = 475.57$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) With $g_i = e^{-\theta_2x_i}$,
+\[
+\hat\theta_1(\theta_2) = \frac{\sum e^{-\theta_2x_i}y_i}{\sum e^{-2\theta_2x_i}} , \qquad
+S_p(\theta_2) = \sum y_i^2 - \frac{\bigl(\sum e^{-\theta_2x_i}y_i\bigr)^2}{\sum e^{-2\theta_2x_i}} .
+\]
+
+(b) $\hat\theta_1(0.3) = 23.7162/1.18313 = 20.045$ and
+\[
+S_p(0.3) = 475.57 - \frac{23.7162^2}{1.18313} = 475.57 - 475.399 = 0.171 ,
+\]
+a little above the minimum $0.154$ at $\theta_2 = 0.3047$. Since $S_p$ is the difference of two nearly equal numbers, the sums
+must be carried to many figures.
+\end{solution}
+
+\begin{problem}\label{prob:knot}
+The following data appear to rise steeply and then level off:
+\begin{center}
+\begin{tabular}{c|cccccccc}
+$x$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\hline
+$y$ & 2.1 & 3.9 & 6.2 & 7.8 & 8.6 & 9.1 & 9.4 & 10.0 \\
+\end{tabular}
+\end{center}
+The linear spline $y = \beta_0 + \beta_1x + \beta_2(x - t)_+ + \varepsilon$ was fitted for trial knots $t = 3, 4, 5, 6$, with residual sums of squares
+$0.984$, $0.123$, $0.807$ and $2.288$; a straight line gives $5.769$. Estimate the knot, and describe the fitted
+model if $\hat\beta_0 = 0.096$, $\hat\beta_1 = 1.973$ and $\hat\beta_2 = -1.468$ at that knot.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:profile}, with $t$ as the non-linear parameter, $\hat t = 4$, where the residual sum of squares is smallest
+(a finer search between $3$ and $5$ could refine it). The fitted model rises at $1.973$ per unit of $x$ up to $x = 4$ and at
+$1.973 - 1.468 = 0.505$ per unit afterwards. Note that the usual $t$-tests treat $t$ as known; since it was chosen from the
+data, they are somewhat optimistic.
+\end{solution}
+
+\begin{problem}\label{prob:asymptotic}
+For the asymptotic regression model $f = \theta_1 - \theta_2e^{-\theta_3x}$:
+\begin{enumerate}[label=(\alph*)]
+\item find the columns of $\mathbf{F}$;
+\item identify which parameters are conditionally linear, and describe the profile approach;
+\item suggest starting values from a plot of data that rise from about $3$ at $x = 0$ towards about $10$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\partial f/\partial\theta_1 = 1$, $\partial f/\partial\theta_2 = -e^{-\theta_3x}$, $\partial f/\partial\theta_3 = \theta_2xe^{-\theta_3x}$.
+
+(b) For fixed $\theta_3$ the model is linear in $(\theta_1, \theta_2)$, with columns $\mathbf{1}$ and $-e^{-\theta_3\mathbf{x}}$. So $S_p(\theta_3)$ is the residual sum
+of squares from regressing $y$ on $e^{-\theta_3x}$ with an intercept, a function of one variable to be minimised.
+
+(c) The ceiling is $\theta_1 \approx 10$, and at $x = 0$, $f = \theta_1 - \theta_2 \approx 3$, so $\theta_2 \approx 7$. For $\theta_3$, find the $x$ at which the curve has
+covered half the distance, $y \approx 6.5$; there $e^{-\theta_3x} = \frac12$, so $\theta_3 \approx \log 2/x$.
+\end{solution}
+
+\begin{problem}\label{prob:mm-inference}
+For the enzyme data of Example~\ref{exa:enzyme}, find an approximate $95\%$ confidence interval for the maximum rate $\theta_1$,
+and say whether the Lineweaver--Burk estimate $8.968$ is consistent with the data.
+\end{problem}
+
+\begin{solution}
+With $t_{0.025,4} = 2.776$: $9.938 \pm 2.776(0.328) = 9.938 \pm 0.911$, from $9.03$ to $10.85$. The Lineweaver--Burk value $8.968$ lies outside
+the interval: the linearised fit underestimates the maximum rate, for the reason given in the example.
+\end{solution}
 
 \section{Regression models with autocorrelated errors}
 
