@@ -1171,193 +1171,339 @@ an MA(1), since it is below $\frac12$.)
 
 \pagebreak
 
-\section{Autoregressive Process}
-Let $\{Z_t\}$ be a process with mean zero and variance $\sigma^2_Z$. Then $\{X_t\}$ is said to be an AR of order p or AR(p) if $X_t = \alpha_1 X_{t-1} + \alpha_2 X_{t-2} + \cdots\cdots + \alpha_p X_{t-p} + Z_t$\\
+\section{Autoregressive processes}\label{sec:ar}
+\begin{defn}
+Let $\{Z_t\}$ be a purely random process with mean $0$ and variance $\sigma_Z^2$. The process $\{X_t\}$ is an \textbf{autoregressive
+process of order $p$}, written AR($p$), if
+\[
+X_t = \alpha_1X_{t-1} + \alpha_2X_{t-2} + \dots + \alpha_pX_{t-p} + Z_t .
+\]
+\end{defn}
+The name says what the model is: a multiple regression of $X_t$ on its own past values rather than on
+separate regressors, with $Z_t$ as the error. Each value is a fraction of the recent values plus a new shock, so
+a shock is remembered for ever, though with fading weight.
 
-
-
-The first order process i.e AR(1) or $p = 1$\\
-$X_t = \alpha X_{t-1} + Z_t$, $\hfill( X_{t-1} = \alpha X_{t-2} + Z_{t-1})$\\
-or\\
-$X_t = \alpha (\alpha X_{t-3} + Z_{t-1}) + Z_t$\\
-$X_t = \alpha^2 (\alpha X_{t-3} + Z_{t-2}) + \alpha Z_{t-1} + Z_t$\\
-
-so that $X_t$ is expressed in terms of $Z_t$ or an infinite order MA process provided $|\alpha| < 1$.
-$$X_t = Z_t + \alpha Z_{t-1} + \alpha^2 Z_{t-2} + \alpha^3 Z_{t-3} +\cdots +\cdots$$
-this is the duality between AR and MA process.\\\\
-
-
-
-\begin{note}
-$X_t = \alpha X_{t-1} + Z_t$ can be written as $(1 - \alpha B)X_t = Z_t$ using the backward shift operator. Therefore,
+\subsection{The first-order process}
+For $p = 1$, $X_t = \alpha X_{t-1} + Z_t$. Since also $X_{t-1} = \alpha X_{t-2} + Z_{t-1}$, substituting repeatedly gives
 \begin{align*}
-X_t &= \frac{Z_t}{1 - \alpha B}\\
-    &= (1 + \alpha B + \alpha^2 B^2+ \alpha^3 B^3 + ............ +...)Z_t\\
-    &= Z_t + \alpha Z_{t-1} + \alpha^2 Z_{t-2} + .................. \\
+X_t &= \alpha(\alpha X_{t-2} + Z_{t-1}) + Z_t = \alpha^2X_{t-2} + \alpha Z_{t-1} + Z_t \\
+&= \alpha^2(\alpha X_{t-3} + Z_{t-2}) + \alpha Z_{t-1} + Z_t = \alpha^3X_{t-3} + \alpha^2Z_{t-2} + \alpha Z_{t-1} + Z_t ,
 \end{align*}
-Thus $E(X_t) = 0$ because $X_t$ is a purely random process and
+and so on. So $X_t$ can be expressed in terms of the $Z$'s alone, as an MA process of infinite order,
+\[
+X_t = Z_t + \alpha Z_{t-1} + \alpha^2Z_{t-2} + \alpha^3Z_{t-3} + \dots ,
+\]
+provided $|\alpha| < 1$. This is the \emph{duality} between AR and MA processes: an AR(1) is an MA($\infty$), just as an
+invertible MA(1) is an AR($\infty$) (Section~\ref{sec:invertibility}). With the backward shift operator, $X_t = \alpha X_{t-1} + Z_t$ reads
+$(1 - \alpha B)X_t = Z_t$, and formally
+\[
+X_t = \frac{Z_t}{1 - \alpha B} = (1 + \alpha B + \alpha^2B^2 + \dots)Z_t = Z_t + \alpha Z_{t-1} + \alpha^2Z_{t-2} + \dots ,
+\]
+the same expansion, obtained by treating $(1 - \alpha B)^{-1}$ as a geometric series.
 
+\begin{thm}\label{thm:ar1}
+Suppose $|\alpha| < 1$, and let $X_t = \sum_{j=0}^\infty\alpha^jZ_{t-j}$. Then $\{X_t\}$ satisfies $X_t = \alpha X_{t-1} + Z_t$, it is stationary, and
+\begin{gather*}
+E(X_t) = 0 , \qquad \sigma_X^2 = \Var(X_t) = \frac{\sigma_Z^2}{1 - \alpha^2} , \\
+\gamma(k) = \alpha^{|k|}\sigma_X^2 , \qquad \rho(k) = \alpha^{|k|} .
+\end{gather*}
+\end{thm}
 
+\begin{proof}
+The series converges in mean square: the tail $\sum_{j>n}\alpha^jZ_{t-j}$ has variance $\sigma_Z^2\sum_{j>n}\alpha^{2j} = \sigma_Z^2\alpha^{2(n+1)}/(1 - \alpha^2) \to 0$. Then
+$\alpha X_{t-1} + Z_t = \sum_{j\ge0}\alpha^{j+1}Z_{t-1-j} + Z_t = \sum_{j\ge0}\alpha^jZ_{t-j} = X_t$. The mean is $\sum_j\alpha^jE(Z_{t-j}) = 0$, and since the $Z$'s are
+uncorrelated,
+\[
+\Var(X_t) = \sigma_Z^2(1 + \alpha^2 + \alpha^4 + \dots) = \frac{\sigma_Z^2}{1 - \alpha^2} .
+\]
+For $k \ge 0$, $X_t$ and $X_{t+k} = \sum_i\alpha^iZ_{t+k-i}$ share the shocks $Z_{t-j}$, $j \ge 0$, which appear with weights $\alpha^j$ and $\alpha^{j+k}$, so
+\[
+\gamma(k) = \sigma_Z^2\sum_{j=0}^\infty\alpha^j\alpha^{j+k} = \alpha^k\frac{\sigma_Z^2}{1 - \alpha^2} = \alpha^k\sigma_X^2 .
+\]
+None of this depends on $t$, so the process is stationary; dividing by $\gamma(0)$ gives $\rho(k) = \alpha^k$, and evenness gives $|k|$.
+\end{proof}
 
-\begin{align*}
-var(X_t) &= (1 + \alpha^2 + \alpha^4 + .............)\sigma^2_Z\\
-         &= \frac{\sigma^2_Z}{1 - \alpha^2}
-\end{align*}
-provided $|\alpha| < 1$\\\\
+The same result follows more quickly once stationarity is known. Multiply $X_t = \alpha X_{t-1} + Z_t$ by $X_{t-k}$, for $k > 0$, and take
+expectations:
+\[
+E(X_{t-k}X_t) = \alpha E(X_{t-k}X_{t-1}) + E(X_{t-k}Z_t) .
+\]
+Here $E(X_{t-k}Z_t) = 0$, because $X_{t-k}$ depends only on shocks up to time $t - k$, all independent of $Z_t$. So $\gamma(k) = \alpha\gamma(k - 1)$ for
+$k > 0$, and since $\gamma(0) = \sigma_X^2$, repeated use gives $\gamma(k) = \alpha^k\sigma_X^2$ and
+\[
+\rho(k) = \frac{\gamma(k)}{\gamma(0)} = \frac{\alpha^k\sigma_X^2}{\sigma_X^2} = \alpha^k , \qquad k \ge 0 .
+\]
+Since $|\rho(k)| \le 1$, we must have $|\alpha| \le 1$. If $|\alpha| = 1$, then $|\rho(k)| = 1$ for all $k$, a degenerate case (with $\alpha = 1$ the process is a
+random walk, which is not stationary). Thus $|\alpha| < 1$ for a proper stationary series. The ac.f. of an AR(1) decays
+geometrically: smoothly when $\alpha > 0$, alternating in sign when $\alpha < 0$ (Figure~\ref{fig:ar-acf}). Unlike the MA ac.f., it never
+cuts off.
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\col/\num/\name/\eqn/\vals in {
+ 0/blue/1/{AR(1), $\alpha = 0.8$}/{smooth decay}/{0.8,0.64,0.512,0.41,0.328,0.262,0.21,0.168},
+ 4.4/red/2/{AR(1), $\alpha = -0.8$}/{alternating decay}/{-0.8,0.64,-0.512,0.41,-0.328,0.262,-0.21,0.168},
+ 8.8/green/3/{AR(2), real roots}/{$\alpha_1 = 0.5$, $\alpha_2 = 0.24$}/{0.658,0.569,0.442,0.358,0.285,0.228,0.183,0.146},
+ 13.2/orange/4/{AR(2), complex}/{$\alpha_1 = 1$, $\alpha_2 = -0.5$}/{0.667,0.167,-0.167,-0.25,-0.167,-0.042,0.042,0.062}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.35,-1.75) rectangle (3.95,1.95);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,1.6) {\num};
+  \node[anchor=west,font=\scriptsize\bfseries,text=\col!50!black] at (0.22,1.6) {\name};
+  \draw[-Stealth,gray] (0,0) -- (3.6,0) node[below left,black,font=\scriptsize] {$k$};
+  \draw[-,gray] (0,-1.1) -- (0,1.25);
+  \foreach \v [count=\k] in \vals
+   \draw[-,very thick,\col!60!black] ({0.4*\k},0) -- ({0.4*\k},{1.15*\v});
+  \node[font=\scriptsize,text=\col!50!black] at (1.8,-1.4) {\eqn};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Autocorrelation functions at lags $1$ to $8$. An AR(1) decays geometrically, smoothly for $\alpha > 0$ (1) and in
+alternating signs for $\alpha < 0$ (2). An AR(2) with real roots decays like a mixture of two geometric terms (3); with
+complex roots it oscillates as a damped sine wave (4).}
+\label{fig:ar-acf}
+\end{figure}
 
+\subsection{The general order}
+Write the AR($p$) process as
+\[
+(1 - \alpha_1B - \alpha_2B^2 - \dots - \alpha_pB^p)X_t = Z_t , \qquad\text{or}\qquad \phi(B)X_t = Z_t ,
+\]
+with $\phi(B) = 1 - \alpha_1B - \dots - \alpha_pB^p$. As for the AR(1), the process can be expressed as an MA process,
+\[
+X_t = \frac{Z_t}{\phi(B)} = f(B)Z_t , \qquad f(B) = \phi(B)^{-1} = 1 + \psi_1B + \psi_2B^2 + \dots ,
+\]
+and the weights $\psi_i$ can be found from the $\alpha_i$ by equating coefficients of powers of $B$ in $\phi(B)f(B) = 1$. Since $X_t$ is then written as
+an MA process, $E(X_t) = 0$, and the variance $\sigma_Z^2\sum_i\psi_i^2$ is finite provided $\sum\psi_i^2$ converges. As in Theorem~\ref{thm:ma-acv}, the
+autocovariance is
+\[
+\gamma(k) = \sigma_Z^2\sum_{i=0}^\infty\psi_i\psi_{i+k} , \qquad \psi_0 = 1 ,
+\]
+and a sufficient condition for this to converge is that $\sum|\psi_i|$ converges.
 
+\begin{thm}[Yule--Walker equations]\label{thm:yule-walker}
+For a stationary AR($p$) process,
+\[
+\rho(k) = \alpha_1\rho(k - 1) + \alpha_2\rho(k - 2) + \dots + \alpha_p\rho(k - p) , \qquad k = 1, 2, \dots ,
+\]
+and the variance is
+\[
+\sigma_X^2 = \frac{\sigma_Z^2}{1 - \alpha_1\rho(1) - \alpha_2\rho(2) - \dots - \alpha_p\rho(p)} .
+\]
+\end{thm}
 
-\vspace{4cm}
+\begin{proof}
+Multiply $X_t = \sum_{i=1}^p\alpha_iX_{t-i} + Z_t$ by $X_{t-k}$ and take expectations. For $k > 0$, $E(X_{t-k}Z_t) = 0$, because $X_{t-k}$ is a combination of
+shocks up to time $t - k$ only; so $\gamma(k) = \sum_i\alpha_i\gamma(k - i)$, and dividing by $\gamma(0)$ gives the equations. For $k = 0$, $E(X_tZ_t) = E(Z_t^2) = \sigma_Z^2$,
+since $X_t = Z_t + (\text{terms in earlier shocks})$; so $\gamma(0) = \sum_i\alpha_i\gamma(i) + \sigma_Z^2$, that is $\gamma(0)\bigl(1 - \sum_i\alpha_i\rho(i)\bigr) = \sigma_Z^2$.
+\end{proof}
 
-The acv.f is given by
-\begin{align*}
-\varphi(k) &= E(X_t,X_{t+k})\\
-           &= E\Big[\Big(\sum\alpha^i Z_{t-i}\Big)\Big(\sum\alpha^i Z_{t+k-i}\Big)\Big]\\
-           &= \sigma^2_Z \sum^{\infty}_{i=0} \alpha^i \alpha^{k+i}, \hspace{2cm} for \hspace{0.3cm} k\geq 0      
-\end{align*}
-which converges for $|\alpha| < 1$ to
-\begin{align*}
-\varphi(k) &= \frac{\alpha^k \sigma^2_Z}{1 - \alpha^2}\\
-           &= \alpha^k \sigma^2_x\hspace{0.5cm},   \hspace{1.5cm} var(X_t) = \sigma^2_x = \frac{\sigma^2_Z}{1 - \alpha^k}
-\end{align*}
-for $\hspace{0.2cm} k < 0\hspace{0.3cm}$, $\hspace{0.3cm} \varphi(k) = \varphi(-k)$\\
-$\varphi(k)$ does not depend on $t$, an AR(1) is second order stationary provided $|\alpha| < 1$. The ac.f is given by\\
-$$\rho(k) = \alpha^k, \hspace{1cm} k = 0, \pm1, \pm2, \cdots\cdots$$\\
+The Yule--Walker equations do two jobs. Taken for $k = 1, \dots, p$, with $\rho(-j) = \rho(j)$, they are $p$ linear equations linking
+$\rho(1), \dots, \rho(p)$ to $\alpha_1, \dots, \alpha_p$: given the $\alpha$'s they give the first $p$ autocorrelations, and given estimated autocorrelations
+they give estimates of the $\alpha$'s, one of several routes to fitting an AR model (Section~\ref{sec:estimation}). For $k > p$ they are a
+difference equation that generates all the later autocorrelations.
 
+\begin{thm}\label{thm:ar-acf-solution}
+Let $\pi_1, \dots, \pi_p$ be the roots, assumed distinct, of the \textbf{auxiliary equation}
+\[
+y^p - \alpha_1y^{p-1} - \alpha_2y^{p-2} - \dots - \alpha_p = 0 .
+\]
+Then the general solution of the Yule--Walker difference equation is
+\[
+\rho(k) = A_1\pi_1^{|k|} + A_2\pi_2^{|k|} + \dots + A_p\pi_p^{|k|} ,
+\]
+with constants $A_i$ fixed by the initial conditions, in particular $\rho(0) = 1$, so $\sum A_i = 1$. Moreover, $\pi$ is a root of the auxiliary
+equation exactly when $1/\pi$ is a root of $\phi(B) = 0$.
+\end{thm}
 
+\begin{proof}
+Try $\rho(k) = \pi^k$ in $\rho(k) = \sum_i\alpha_i\rho(k - i)$: dividing by $\pi^{k-p}$ gives $\pi^p = \alpha_1\pi^{p-1} + \dots + \alpha_p$, the auxiliary equation. So each $\pi_i^k$ is a
+solution, and since the equation is linear, so is any combination $\sum A_i\pi_i^k$. With distinct roots, these $p$ solutions are
+independent, and any solution is determined by $p$ starting values, so every solution has this form. For the last
+statement, $\phi(1/\pi) = 1 - \alpha_1\pi^{-1} - \dots - \alpha_p\pi^{-p} = \pi^{-p}(\pi^p - \alpha_1\pi^{p-1} - \dots - \alpha_p)$, which is zero exactly when $\pi$ solves the auxiliary
+equation.
+\end{proof}
 
+The general form of $\rho(k)$ tends to zero as $k$ increases provided every $|\pi_i| < 1$, and this is the necessary and sufficient
+condition for the process to be stationary. By the last part of the theorem, an equivalent way to express it is:
 
+\begin{result}[Stationarity of AR($p$)]
+The AR($p$) process is stationary if and only if all the roots of $\phi(B) = 1 - \alpha_1B - \dots - \alpha_pB^p = 0$ lie outside the unit
+circle.
+\end{result}
 
-For $X_t = \alpha X_{t-1} + Z_t,  \hspace{1cm}(AR(1)) $, we can multiply this by $X_{t-k}$ to obtain\\
-$$X_{t-k}X_t = \alpha X{t-k}\,\cdot \, X_{t-1} + X_{t-k}\,\cdot\, Z_t$$
-taking the expectation, we have
-$\hspace{0.3cm}\boxed{\varphi(-k) = \alpha \varphi(-k+1)}\hspace{0.3cm}$ on the assumption that $E(X_{t-k}\,\cdot\, Z_t) = 0$, for $k>0$.\\
+This is the same root condition as for the invertibility of an MA process (Theorem~\ref{thm:ma-invertible}), with $\phi$ in place of $\theta$:
+the duality again. An AR($p$) process is always invertible, since $Z_t = \phi(B)X_t$ is already a finite sum of observations.
 
-Since $\varphi(-k) = \varphi(k)$ we have $\varphi(k) = \alpha \varphi(k-1)$ for $k > 0$.\\
-Since $\varphi(0) = \sigma^2_X$, thus $\varphi(k) = \alpha^k \sigma^2_X$ for $k\geq0$,
-thus 
-$$\rho(k) = \frac{\varphi(k)}{\varphi(0)} = \frac{\alpha^k \sigma^2_X}{\sigma^2_X} = \alpha^k\hspace{0.2cm},\hspace{0.2cm} \text{for}\hspace{0.2cm} k\geq0.$$
+\subsection{The second-order process}
+For the AR(2) process $X_t = \alpha_1X_{t-1} + \alpha_2X_{t-2} + Z_t$, the roots $\pi_1$, $\pi_2$ of the quadratic $y^2 - \alpha_1y - \alpha_2 = 0$ are
+\[
+\pi = \frac{\alpha_1 \pm \sqrt{\alpha_1^2 + 4\alpha_2}}{2} ,
+\]
+real if $\alpha_1^2 + 4\alpha_2 \ge 0$ and complex if $\alpha_1^2 + 4\alpha_2 < 0$.
 
-Since, $|\rho(k)|<1$ we must have $|\alpha|<1$.\\
-If $|\alpha|=1$, then $|\rho(k)|=1$,for all  k this is a degenerate case. Thus $|\alpha|<1$ for a proper, stationary time series.\\\\\\
+\begin{thm}[The stationarity triangle]\label{thm:ar2-triangle}
+The AR(2) process is stationary, that is $|\pi_1| < 1$ and $|\pi_2| < 1$, if and only if
+\[
+\alpha_1 + \alpha_2 < 1 , \qquad \alpha_2 - \alpha_1 < 1 , \qquad \alpha_2 > -1 .
+\]
+These three inequalities describe the triangle with vertices $(-2, -1)$, $(2, -1)$ and $(0, 1)$ in the $(\alpha_1, \alpha_2)$ plane
+(Figure~\ref{fig:ar2-triangle}).
+\end{thm}
 
+\begin{proof}
+Let $g(y) = y^2 - \alpha_1y - \alpha_2 = (y - \pi_1)(y - \pi_2)$, so $\pi_1\pi_2 = -\alpha_2$, $g(1) = 1 - \alpha_1 - \alpha_2$ and $g(-1) = 1 + \alpha_1 - \alpha_2$.
 
+\emph{Only if.} If both roots have modulus less than $1$, then $|\alpha_2| = |\pi_1\pi_2| < 1$. If the roots are real, they lie in $(-1, 1)$, and $g$ is
+positive outside the interval between them, so $g(1) > 0$ and $g(-1) > 0$. If they are complex, $g$ has no real zero and
+is positive everywhere, so again $g(\pm1) > 0$. These are the three inequalities.
 
+\emph{If.} Suppose the inequalities hold. If the roots are complex they are conjugates, so $|\pi_1|^2 = \pi_1\bar\pi_1 = \pi_1\pi_2 = -\alpha_2 < 1$. If they are
+real, the inequalities give $\alpha_1 < 1 - \alpha_2 < 2$ and $\alpha_1 > \alpha_2 - 1 > -2$, so the vertex $y = \alpha_1/2$ of the parabola lies in $(-1, 1)$. Since
+$g(-1) > 0$, $g(1) > 0$ and $g$ dips to its minimum (which is $\le 0$, as there are real roots) between them, both roots lie
+in $(-1, 1)$.
+\end{proof}
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.25]
+\filldraw[fill=gray!5,draw=gray!50,rounded corners=6pt] (-2.9,-1.65) rectangle (2.9,1.55);
+\fill[green!15] (-2,-1) -- (2,-1) -- (0,1) -- cycle;
+\fill[orange!25] plot[domain=-2:2,samples=40] (\x,{-\x*\x/4}) -- cycle;
+\draw[-,thick,green!50!black] (-2,-1) -- (2,-1) -- (0,1) -- cycle;
+\draw[-,dashed,orange!70!black] plot[domain=-2:2,samples=40] (\x,{-\x*\x/4});
+\draw[-Stealth,gray] (-2.6,0) -- (2.6,0) node[right,black,font=\small] {$\alpha_1$};
+\draw[-Stealth,gray] (0,-1.4) -- (0,1.35) node[above,black,font=\small] {$\alpha_2$};
+\foreach \p/\l in {(-2,-1)/{$(-2,-1)$},(2,-1)/{$(2,-1)$}} \fill \p circle (1pt);
+\node[font=\scriptsize,anchor=north] at (-2,-1.03) {$(-2, -1)$};
+\node[font=\scriptsize,anchor=north] at (2,-1.03) {$(2, -1)$};
+\node[font=\scriptsize,anchor=west] at (0.05,1.0) {$(0, 1)$};
+\node[font=\scriptsize,text=green!40!black] at (-0.5,0.14) {real roots};
+\node[font=\scriptsize,text=orange!60!black] at (-0.75,-0.8) {complex roots};
+\fill[red!70!black] (1,-0.5) circle (1.3pt);
+\node[font=\scriptsize,text=red!50!black,anchor=east] at (0.95,-0.5) {Ex.~\ref{exa:ar2-complex}};
+\fill[blue!70!black] (0.5,0.24) circle (1.3pt);
+\node[font=\scriptsize,text=blue!50!black,anchor=south west] at (0.5,0.24) {Ex.~\ref{exa:ar2-real}};
+\end{tikzpicture}
+\caption{The AR(2) stationarity triangle. Inside the triangle the process is stationary; below the dashed parabola
+$\alpha_1^2 + 4\alpha_2 = 0$ the roots are complex and the ac.f. oscillates. The two worked examples are marked.}
+\label{fig:ar2-triangle}
+\end{figure}
 
+\subhead{The ac.f. of an AR(2)}
+From the first Yule--Walker equation, $\rho(1) = \alpha_1\rho(0) + \alpha_2\rho(-1) = \alpha_1 + \alpha_2\rho(1)$, so
+\[
+\rho(1) = \frac{\alpha_1}{1 - \alpha_2} ,
+\]
+and the later values follow from $\rho(k) = \alpha_1\rho(k - 1) + \alpha_2\rho(k - 2)$. When the roots are real and distinct, $\rho(k) = A_1\pi_1^{|k|} + A_2\pi_2^{|k|}$,
+and the constants follow from $\rho(0) = 1$, that is $A_1 + A_2 = 1$, and $\rho(1) = A_1\pi_1 + A_2\pi_2$. Substituting $A_2 = 1 - A_1$,
+\[
+\frac{\alpha_1}{1 - \alpha_2} = A_1\pi_1 + (1 - A_1)\pi_2 ,
+\]
+so
+\[
+A_1 = \frac{\dfrac{\alpha_1}{1 - \alpha_2} - \pi_2}{\pi_1 - \pi_2} , \qquad A_2 = 1 - A_1 .
+\]
+When the roots are complex, $\pi = re^{\pm i\theta}$ with $r = \sqrt{-\alpha_2}$ and $\cos\theta = \alpha_1/(2\sqrt{-\alpha_2})$, and the two complex terms combine into
+a damped cosine wave, $\rho(k) = r^k(a\cos k\theta + b\sin k\theta)$, with period $2\pi/\theta$.
 
-\vspace{3cm}
-\end{note}
-\subsection{General Order Of an AR Process}
-Let AR be expressed as an MA Process. Consider the equation
-$$X_t = \alpha_1 X_{t-1} + \alpha_2 X_{t-2} + \cdots\cdots + \alpha_p X_{t-p} + Z_t, \hspace{1cm} AR(p)$$
-
-$$\text{or}\hspace{0.5cm}(1 - \alpha_1 B - \alpha_2 B^2 --------- \alpha_p B^p)X_t = Z_t$$
-
-
-
-\begin{align*}
-\text{or}\hspace{0.5cm} X_t & = \frac{Z_t}{1 - \alpha_1 B - \alpha_2 B^2 --------- \alpha_p B^p}\\
-X_t & = f(B)Z_t
-\end{align*}
-
-where
-\begin{align*}
-f(B) &= (1 - \alpha_1 B - \alpha_2 B^2 ----------\alpha_p B^p)^{-1}\\
-     &= 1 + \beta_1 B + \beta_2 B^2 + \cdots\cdots
-\end{align*}
-the $\alpha_i$ and $\beta_i$ can be found.\\
-
-
-
-Since $X_t$ is in terms of an MA, $E(X_t)=0$ and the variance is finite provided $\sum\limits^{\infty}_{i=0} \beta^2_i$ converge.\\
-
-The acv.f is given by
-$$\varphi(k)= \sigma^2_Z \,\sum^{\infty}_{i=0} \beta_i \beta_{i+k}\hspace{0.3cm},\hspace{0.3cm} \text{where}\hspace{0.3cm} \beta_0=1$$ the sufficient condition for this to converge , $\Sigma|\beta_i|$ converge\\
-
-
-
-
-To find the ac.f, we assume as stationality we multiply $$X_t= \alpha_1 X_{t-1} + \alpha_2 X_{t-2} + \cdots\cdots+ \alpha_p X_{t-p}$$ by $X_{t-k}$ and take expectations and divide by $\sigma^2_X$. Assuming $var(X_t)$ is finite. We have
-$$\rho(k)= \alpha_1 \rho(k-1) + \cdots\cdots + \alpha_p \rho(k-p)\hspace{0.3cm},\hspace{0.3cm} \forall k\geq0$$
-This is called Yule Walker equations and this has a general solution
-$$\rho(k)= A_1\pi^{|k|}_1 + A_2\pi^{|k|}_2 + \cdots\cdots+ A_p\pi^{|k|}_p$$
-and the $\{\pi_i\}$ are the roots of the auxiliary equation.
-$$Y^p - \alpha_1 Y^{p-1} - \alpha_2 Y^{p-2} -------- \alpha_p = 0$$
-Then the $A_{i's}$ are chosen to satisfy the initial conditions depending on $\rho(0)=1$, i.e $\sum A_i=1$.\\
-This first Yule Walker equations provide several routes to estimating the parameters of AR(p) model, by replacing the theoretical covariances with estimated values. Further restrictions on the $\{A_{i's}\}$ using $\rho(0)=1$ and $\rho(-k) = \rho(k)$.The general form of $\rho(k)$ tends to zero as $k\rightarrow \infty$ (increases) provided $|\pi_i|<1$, this is a necessary and sufficient condition for the process to be stationary.\\
-
-
-
-
-
-An equivalent way to express stationality of AR(p) is to express the roots as $\phi(B) = 1 -\alpha_1 B -\alpha_2 B^2 --------- \alpha_p B^p=0$ must lie outside the unit circle.\\\\
-
-\begin{exa}
-Consider the AR(2) process $X_t=\alpha_1 X_{t-1}+\alpha_2 X_{t-2}+Z_t$ when $\pi_1$ and $\pi_2$ are the roots of the quadratic equation
-$$Y^2- \alpha_1 Y- \alpha_2=0$$
-We have $|\pi_i|<1$ if $\Bigg|\dfrac{\alpha_1 \pm\sqrt{\alpha^2_1 +4\alpha_2}}{2}\Bigg|<1$
-the stationality region is in the triangular region such that $\alpha_1 +\alpha_2<1,\hspace{0.3cm} \alpha_1- \alpha_2>-1,\hspace{0.3cm} \alpha_2>-1$ the roots are real if $\alpha^2_1 +4\alpha_2>0$ and complex if $\alpha^2_1 + 4\alpha_2 <0$.\\
+\begin{exa}\label{exa:ar2-complex}
+Consider the AR(2) process $X_t = X_{t-1} - \frac12X_{t-2} + Z_t$. Is it stationary? If so, find its ac.f. and variance.
 \end{exa}
-
-When the roots are real $A_1$ and $A_2$ can be found as follows, since $\rho(0)=1$\\
-from $\rho(k)= A_1\pi^{|k|}_1 +A_2\pi^{|k|}_2 +...............+ A_p\pi^{|k|}_p$
-
-
-\begin{align*}
-\rho(0) &= A_1\pi^{|0|}_1 + A_2\pi^{|0|}_2\\
-         &= A_1 + A_2\\
-         1&=A_1 + A_2
-\end{align*}
-from the Yule Walker equation\\
-$\rho(k)=\alpha_1 \rho(k-1) +\alpha_2 \rho(k-2) + ..........+ \alpha_p \rho(k-p), \forall k\geq0$\\
-
-we have\\
-\begin{align*}
-\rho(1) &=\alpha_1 \rho(1-1) + \alpha_2 \rho(1-2)\\
-        &=\alpha_1 \rho(0) +\alpha_2 \rho(-1)\\
-        &=\alpha_1 \rho(0) +\alpha_2 \rho(1)\\\\
- \implies \rho(1)       &=\alpha_1 +\alpha_2 \rho(1)\\\\
- \implies \rho(1) &=\frac{\alpha_1}{1-\alpha_2}\\
-\end{align*}
-
-$\rho(1)= A_1\pi_1 + A_2\pi_2$\\
-But $1= A_1+A_2$ or $1-A_1=A_2$ \hspace{0.2cm},\hspace{0.2cm} Therefore
-\begin{align*}
-\rho(1) &= A_1\pi_1 +A_2\pi_2\\
-        &= A_1\pi_1 +(1-A_1)\pi_2\\\\
-\implies \frac{\alpha_1}{1-\alpha_2} &=A_1\pi_1 +(1-A_1)\pi_2 \\\\
-\implies A_1 &= \frac{\Big[\dfrac{\alpha_1}{1-\alpha_2}-\pi_2\Big]}{\pi_1 -\pi_2}\\\\
-\implies A_2 &= 1-A_1\\
-             &= \frac{\pi_1 -\pi_2 -\Big[\dfrac{\alpha_1}{1-\alpha_2}-\pi_2\Big]}{\pi_1 -\pi_2}\\      
-\end{align*}
-
-
-
-
-
-
-
-
-
-
-\begin{exa}
-Consider an AR(2)\hspace{0.2cm},\hspace{0.3cm} $X_t=X_{t-1}-\dfrac{1}{2}X_{t-2}+Z_t$. Is this process stationary and if so what is its ac.f.\\
-\end{exa}
-
 
 \begin{solution}
-We find the roots of $\phi(B) =1-B+\frac{1}{2}B^2=0$.   The roots are $1\pm2$,the modules of both roots exceed one, therefore there are outside the unit circle. Thus the process is stationary.\\ To find the ac.f, we use the first Yule- Walker equation 
-$$\rho(1)= \rho(0)-\frac{1}{2}\rho(-1)$$ Giving $\hspace{0.2cm}\rho(1)=\dfrac{2}{3}$\\
+The roots of $\phi(B) = 1 - B + \frac12B^2 = 0$ are $B = 1 \pm i$, with modulus $\sqrt2 > 1$, so both lie outside the unit circle and the process is
+stationary. (Equivalently, $\alpha_1 = 1$, $\alpha_2 = -\frac12$ satisfy $\alpha_1 + \alpha_2 = \frac12 < 1$, $\alpha_2 - \alpha_1 = -\frac32 < 1$ and $\alpha_2 > -1$.)
+
+To find the ac.f., use the first Yule--Walker equation, $\rho(1) = \rho(0) - \frac12\rho(-1) = 1 - \frac12\rho(1)$, giving $\rho(1) = \frac23$. For $k \ge 2$,
+$\rho(k) = \rho(k - 1) - \frac12\rho(k - 2)$, and successive substitution gives
+\begin{gather*}
+\rho(2) = \tfrac23 - \tfrac12 = \tfrac16 , \qquad \rho(3) = \tfrac16 - \tfrac13 = -\tfrac16 , \\
+\rho(4) = -\tfrac16 - \tfrac1{12} = -\tfrac14 , \qquad \rho(5) = -\tfrac14 + \tfrac1{12} = -\tfrac16 ,
+\end{gather*}
+then $\rho(6) = -\frac1{24}$, $\rho(7) = \frac1{24}$, $\rho(8) = \frac1{16}$. The roots of the auxiliary equation $y^2 - y + \frac12 = 0$ are $\frac12(1 \pm i)$, the reciprocals of
+$1 \pm i$, with $r = 1/\sqrt2$ and $\theta = \pi/4$. So $\rho(k) = 2^{-k/2}(a\cos\frac{k\pi}4 + b\sin\frac{k\pi}4)$, and $\rho(0) = 1$ gives $a = 1$, while $\rho(1) = \frac23$ gives
+$\frac1{\sqrt2}(\frac1{\sqrt2} + \frac b{\sqrt2}) = \frac23$, so $b = \frac13$:
+\[
+\rho(k) = 2^{-k/2}\Bigl(\cos\frac{k\pi}4 + \frac13\sin\frac{k\pi}4\Bigr) , \qquad k \ge 0 ,
+\]
+a damped cosine with period $8$ (Figure~\ref{fig:ar-acf}, panel~4). By Theorem~\ref{thm:yule-walker}, the variance is
+\[
+\sigma_X^2 = \frac{\sigma_Z^2}{1 - (1)\frac23 - (-\frac12)\frac16} = \frac{\sigma_Z^2}{5/12} = 2.4\sigma_Z^2 .
+\]
 \end{solution}
 
-for $k\geq2$,\\ $\rho(k) =\rho(k-1)-\dfrac{1}{2}\rho(k-2)$ and $\rho(2), \rho(3)$ can be found by successive substitution.\\\\\\
+\begin{exa}\label{exa:ar2-real}
+Find the ac.f. of $X_t = 0.5X_{t-1} + 0.24X_{t-2} + Z_t$.
+\end{exa}
 
+\begin{solution}
+The auxiliary equation $y^2 - 0.5y - 0.24 = 0$ has roots $\pi_1 = 0.8$ and $\pi_2 = -0.3$, both inside the unit circle, so the process is stationary.
+Then $\rho(1) = 0.5/(1 - 0.24) = 0.6579$, and
+\[
+A_1 = \frac{0.6579 - (-0.3)}{0.8 - (-0.3)} = \frac{0.9579}{1.1} = 0.8708 , \qquad A_2 = 0.1292 ,
+\]
+so
+\[
+\rho(k) = 0.8708(0.8)^{|k|} + 0.1292(-0.3)^{|k|} .
+\]
+As a check, the Yule--Walker recursion gives $\rho(2) = 0.5(0.6579) + 0.24 = 0.5689$, and the formula gives $0.8708(0.64) + 0.1292(0.09) = 0.5689$. The
+root $0.8$ dominates, and the ac.f. decays much like that of an AR(1) with $\alpha = 0.8$ (Figure~\ref{fig:ar-acf}, panel~3).
+\end{solution}
 
+\subsection{Practice problems}
+\begin{problem}\label{prob:ar1-moments}
+For the AR(1) process $X_t = 0.6X_{t-1} + Z_t$ with $\sigma_Z^2 = 1.28$, find $\Var(X_t)$, $\rho(3)$ and $\Cov(X_t, X_{t+2})$.
+\end{problem}
 
+\begin{solution}
+$\Var(X_t) = 1.28/(1 - 0.36) = 2$; $\rho(3) = 0.6^3 = 0.216$; $\Cov(X_t, X_{t+2}) = 0.6^2(2) = 0.72$.
+\end{solution}
 
+\begin{problem}\label{prob:ar2-check}
+Which of these AR(2) processes are stationary?
+(a) $X_t = 1.2X_{t-1} - 0.32X_{t-2} + Z_t$; (b) $X_t = 0.5X_{t-1} + 0.6X_{t-2} + Z_t$; (c) $X_t = -0.4X_{t-1} - 0.9X_{t-2} + Z_t$.
+\end{problem}
 
+\begin{solution}
+(a) $\alpha_1 + \alpha_2 = 0.88 < 1$, $\alpha_2 - \alpha_1 = -1.52 < 1$, $\alpha_2 = -0.32 > -1$: stationary. The auxiliary roots are $0.8$ and $0.4$.
+(b) $\alpha_1 + \alpha_2 = 1.1 > 1$: not stationary; one auxiliary root is $1.064$.
+(c) $\alpha_1 + \alpha_2 = -1.3 < 1$, $\alpha_2 - \alpha_1 = -0.5 < 1$, $\alpha_2 = -0.9 > -1$: stationary. Since $\alpha_1^2 + 4\alpha_2 = 0.16 - 3.6 < 0$ the roots are complex, with
+modulus $\sqrt{0.9} = 0.95$, close to $1$: the ac.f. oscillates and dies away slowly.
+\end{solution}
+
+\begin{problem}\label{prob:ar2-variance}
+For the process of Example~\ref{exa:ar2-real} with $\sigma_Z^2 = 1$, find $\Var(X_t)$.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:yule-walker}, $\sigma_X^2 = 1/(1 - 0.5(0.6579) - 0.24(0.5689)) = 1/(1 - 0.3289 - 0.1365) = 1/0.5345 = 1.871$.
+\end{solution}
+
+\begin{problem}\label{prob:yw-reverse}
+A stationary series is believed to be AR(2), with $\rho(1) = 0.6$ and $\rho(2) = 0.5$. Use the Yule--Walker equations to find $\alpha_1$ and $\alpha_2$.
+\end{problem}
+
+\begin{solution}
+The equations for $k = 1, 2$ are $\rho(1) = \alpha_1 + \alpha_2\rho(1)$ and $\rho(2) = \alpha_1\rho(1) + \alpha_2$, that is $0.6 = \alpha_1 + 0.6\alpha_2$ and $0.5 = 0.6\alpha_1 + \alpha_2$.
+Solving,
+\begin{align*}
+\alpha_1 &= \frac{\rho(1)(1 - \rho(2))}{1 - \rho(1)^2} = \frac{0.6(0.5)}{0.64} = 0.469 , \\
+\alpha_2 &= \frac{\rho(2) - \rho(1)^2}{1 - \rho(1)^2} = \frac{0.5 - 0.36}{0.64} = 0.219 .
+\end{align*}
+These satisfy the triangle conditions. Replacing $\rho(1)$, $\rho(2)$ by sample values is how AR models are estimated by the
+Yule--Walker method, and $\alpha_2$ here is the partial autocorrelation at lag $2$ (Section~\ref{sec:pacf}).
+\end{solution}
+
+\begin{problem}\label{prob:ar1-psi}
+Find the $\psi$ weights of the AR(2) process $X_t = 0.5X_{t-1} + 0.24X_{t-2} + Z_t$ up to $\psi_3$, by equating coefficients in $\phi(B)f(B) = 1$.
+\end{problem}
+
+\begin{solution}
+$(1 - 0.5B - 0.24B^2)(1 + \psi_1B + \psi_2B^2 + \psi_3B^3 + \dots) = 1$. The coefficient of $B$: $\psi_1 - 0.5 = 0$, so $\psi_1 = 0.5$. Of $B^2$:
+$\psi_2 - 0.5\psi_1 - 0.24 = 0$, so $\psi_2 = 0.49$. Of $B^3$: $\psi_3 - 0.5\psi_2 - 0.24\psi_1 = 0$, so $\psi_3 = 0.245 + 0.12 = 0.365$. In general
+$\psi_j = 0.5\psi_{j-1} + 0.24\psi_{j-2}$, the same recursion as the ac.f.
+\end{solution}
 
 \section{Mixed Arma Models}
 The MA and AR models can be combined to obtain an ARMA model.  A mixed ARMA with p AR terms and q MA terms is an ARMA process of order $(p,q)$
@@ -1488,7 +1634,7 @@ where $e$ is the prediction error at time n. The values of $\alpha$ depend on th
 
 
 
-\subsection{The Partial Autocorrelation Function}
+\subsection{The Partial Autocorrelation Function}\label{sec:pacf}
 
 The autocorrelation function alone cannot identify an autoregressive model. For
 an AR$(1)$ process the correlation between $X_t$ and $X_{t+2}$ is
@@ -1570,7 +1716,7 @@ error to make.
 \end{remark}
 
 
-\section{Estimation Of Models}
+\section{Estimation Of Models}\label{sec:estimation}
 To effectively use the model for forecasting the parameters of the model ought to be estimated\\
 
 
