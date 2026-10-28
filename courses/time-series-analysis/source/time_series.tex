@@ -2289,72 +2289,7 @@ $z_t = x_t - 0.4z_{t-1}$: $0, 0, -2, -1 + 0.8 = -0.2, -2 + 0.08 = -1.92, 0 + 0.7
 add to $4 + 0.04 + 3.6864 + 0.5898 + 2.8656 + 1.7501 = 12.93$, as in the table.
 \end{solution}
 
-\subsection{Box-Jenkins Seasonal (SARIMA) Model}\label{sec:sarima}
-In practice main time series contain a seasonal periodic component which repeats every 's' observations. e.g with monthly observations $s=12$. $X_t$ depends on terms such that $X_{t-12}$ and perhaps $X_{t-24}$. As well as $X_{t-1},X_{t-2},\cdots\cdots$\\\\
-
-
-Box-Jenkins have generalized the ARIMA model to deal with seasonality and find the general multiplicative ARIMA model (SARIMA)as
-$$\phi_p(B) \Phi_P(B^s) W_t=\theta_q(B) \Theta_Q(B^s)Z_t$$
-where $\hspace{0.3cm} W_t=\nabla^d\, \nabla^D_s X_t$, B denotes the backward shift operator, $\,\phi_p \,,\,\Phi_P ,\,\theta_q \,\text{and} \hspace{0.2cm}\Theta_Q$ are polynomials of order p,P,q,Q respectively. $Z_t$ denotes a purely random process.\\
-If $P=1$ the term $\Phi_p(B^s)$ will be $(1- \text{constant}\, XB^s)$ which means that $W_t$ will depend on $W_{t-s}$ since $B^s\,W_t=W_{t-s}$. The variables $\{W_t\}$ are formed from the original series $\{X_t\}$ not only by simple difference to remove trend but also by seasonal difference to remove seasonality.\\
-
-If $d=D=1$ and $s=12$
-\begin{align*}
-W_t &=\bigtriangledown \bigtriangledown_{12} X_t\\
-    &=\bigtriangledown_{12} X_t-\bigtriangledown_{12} X_{t-1}\\
-    &=(X_t-X_{t-12})-(X_{t-1}-X_{t-13})\\
-\end{align*}
-
-
-The model equation $\,\phi_p(B) \Phi_P(B^s) W_t=\theta_q(B) \Theta_Q(B^s) Z_t\,$ and $\,W_t=\nabla^d \,\nabla^D_s X_t$ is said to be a SARIMA model of order $\,(p,d,q)\times(P,D,Q)_s$.\\\\
-
-
-
-\begin{exa}
-Consider the SARIMA $(1,0,0)\times(0,1,1)_{12}$\\
-\end{exa}
-
-So we note that $s=12$ then the model\\
-$\phi_p(B) \Phi_P(B^s) W_t=\theta_q(B) \Theta_Q(B^s) Z_t$ and $W_t=\nabla^d\, \nabla^D X_t$ can be written as\\\\ $(1-\alpha B)W_t=(1+\theta B^{12})$ where $W_t=\nabla_{12} X_t$\\\\we find $X_t=X_{t-12}+\alpha (X_{t-1}-X_{t-13})+Z_t+\theta Z_{t-12}$ so that $X_t$ depends on $X_{t-1},X_{t-12},X_{t-13}$ as the innovation time.\\
-
-
-
-
-
 \pagebreak
-
-\subsection{Computation of Forecast}
-The rules of Section~\ref{sec:forecasting} apply to seasonal models too.
-
-
-
-
-
-
-\begin{exa}
-Consider the SARIMA $(0,0,1)\times(1,1,0)_{12}$ used where
-$$X_t=X_{t-12}-\alpha(X_{t-1}-X_{t-13})+Z_t+\theta Z_{t-12}$$
-\end{exa}
-
-$$\widehat{x}(n,1)=X_{n-11}-\alpha (X_n-X_{n-12})+\theta Z_{n-11}$$
-
-and
-
-\begin{align*}
-\widehat{x}(n,2) &=X_{n-10}-\alpha (X_{t+1}-X_{n-11})+\theta Z_{n-10}\\
-             &=X_{n-10}+\alpha (\widehat{x}(n,1)-X_{n-11})+\theta Z_{n-10}
-\end{align*} 
-forecasting further in the future can be calculated recursively when $X_{n+1}$ is known.
-
-
-\begin{align*}
-\widehat{x}(n+1,1) &=X_{n-10}+\alpha (X_{n+1}-X_{n-11})+\theta Z_{n-10}\\
-               &=\widehat{x}(n,2)+\alpha (X_{n+1}-\widehat{x}(n,1))+\theta Z_{n-10}\\
-               &=\widehat{x}(n,2)+\alpha Z_{n+1}
-\end{align*}
-
-\pagebreak
-
 
 \section{Diagnostic checking and model selection}\label{sec:diagnostics}
 \subsection{The Box--Jenkins approach}
@@ -2877,6 +2812,216 @@ revise the forecast of $X_{n+2}$, and check it directly.
 \begin{solution}
 The one-step error is $0.50 - (-0.184) = 0.684$, so $\hat x(n + 1, 1) = \hat x(n, 2) + \psi_1(0.684) = -0.222 + 0.554(0.684) = 0.157$. Directly from the model,
 $\hat x(n + 1, 1) = 0.554(0.50) - 0.402(0.30) = 0.277 - 0.121 = 0.157$.
+\end{solution}
+
+\section{Seasonal ARIMA models}\label{sec:sarima}
+\subsection{Seasonal differencing}
+In practice many time series contain a seasonal periodic component which repeats every $s$ observations: with
+monthly observations $s = 12$, with quarterly observations $s = 4$. Then $X_t$ depends on terms such as $X_{t-12}$, and perhaps
+$X_{t-24}$, as well as on $X_{t-1}, X_{t-2}, \dots$. A seasonal pattern can be removed by the \textbf{seasonal difference}
+\[
+\nabla_sX_t = X_t - X_{t-s} = (1 - B^s)X_t ,
+\]
+which compares each value with the value one season earlier (Proposition~\ref{prop:differencing}(ii)). A trend is removed by the
+ordinary difference $\nabla = 1 - B$, and both are often needed. If $d = D = 1$ and $s = 12$,
+\begin{align*}
+W_t &= \nabla\nabla_{12}X_t \\
+&= \nabla_{12}X_t - \nabla_{12}X_{t-1} \\
+&= (X_t - X_{t-12}) - (X_{t-1} - X_{t-13}) ,
+\end{align*}
+the change from last month in the year-on-year change.
+
+\subsection{The multiplicative seasonal model}
+Box and Jenkins generalised the ARIMA model to deal with seasonality, giving the general \textbf{multiplicative
+seasonal ARIMA} model, SARIMA:
+\[
+\phi_p(B)\Phi_P(B^s)W_t = \theta_q(B)\Theta_Q(B^s)Z_t , \qquad W_t = \nabla^d\nabla_s^DX_t ,
+\]
+where $B$ denotes the backward shift operator, $\phi_p$, $\Phi_P$, $\theta_q$ and $\Theta_Q$ are polynomials of orders $p$, $P$, $q$ and $Q$, and $Z_t$ denotes a
+purely random process. This is said to be a SARIMA model of order $(p, d, q) \times (P, D, Q)_s$. The variables $\{W_t\}$ are formed
+from the original series $\{X_t\}$ not only by simple differencing, to remove trend, but also by seasonal differencing, to
+remove seasonality.
+
+The seasonal polynomials act on $B^s$, so they link observations whole seasons apart. If $P = 1$, the term $\Phi_P(B^s)$ is
+$(1 - \Phi B^s)$, and $W_t$ depends on $W_{t-s}$, since $B^sW_t = W_{t-s}$. The non-seasonal polynomials link neighbouring observations. The
+model is called \emph{multiplicative} because the two kinds of dependence are combined by multiplying the
+polynomials, which produces interaction terms, as the next result shows.
+
+\begin{thm}[The airline model]\label{thm:airline}
+For the SARIMA $(0, 1, 1) \times (0, 1, 1)_{12}$ model
+\[
+W_t = \nabla\nabla_{12}X_t = (1 + \theta B)(1 + \Theta B^{12})Z_t ,
+\]
+$W_t$ is an MA(13) process with non-zero autocorrelations only at lags $1$, $11$, $12$ and $13$:
+\begin{gather*}
+\rho(1) = \frac{\theta}{1 + \theta^2} , \qquad \rho(12) = \frac{\Theta}{1 + \Theta^2} , \\
+\rho(11) = \rho(13) = \frac{\theta}{1 + \theta^2}\cdot\frac{\Theta}{1 + \Theta^2} .
+\end{gather*}
+\end{thm}
+
+\begin{proof}
+Multiplying out, $W_t = Z_t + \theta Z_{t-1} + \Theta Z_{t-12} + \theta\Theta Z_{t-13}$: an MA(13) process with $\beta_1 = \theta$, $\beta_{12} = \Theta$, $\beta_{13} = \theta\Theta$ and the other $\beta$'s zero. By
+Theorem~\ref{thm:ma-acv}, $\gamma(0) = \sigma_Z^2(1 + \theta^2 + \Theta^2 + \theta^2\Theta^2) = \sigma_Z^2(1 + \theta^2)(1 + \Theta^2)$, and the non-zero products $\beta_i\beta_{i+k}$ are:
+\begin{itemize}
+\item $k = 1$: $\beta_0\beta_1 + \beta_{12}\beta_{13} = \theta + \theta\Theta^2 = \theta(1 + \Theta^2)$;
+\item $k = 11$: $\beta_1\beta_{12} = \theta\Theta$;
+\item $k = 12$: $\beta_0\beta_{12} + \beta_1\beta_{13} = \Theta + \theta^2\Theta = \Theta(1 + \theta^2)$;
+\item $k = 13$: $\beta_0\beta_{13} = \theta\Theta$.
+\end{itemize}
+Dividing by $\gamma(0)/\sigma_Z^2 = (1 + \theta^2)(1 + \Theta^2)$ gives the stated values; every other lag has no product.
+\end{proof}
+
+So the correlogram of the differenced series shows a spike at lag $1$ from the non-seasonal part, a spike at
+lag $12$ from the seasonal part, and smaller ``satellite'' spikes at lags $11$ and $13$ whose value is the product of the
+two. The model is named after the monthly airline-passenger series for which Box and Jenkins first used it,
+and it fits a remarkable range of seasonal series.
+
+\begin{prop}\label{prop:seasonal-ar}
+The pure seasonal AR process $X_t = \Phi X_{t-s} + Z_t$ with $|\Phi| < 1$ has $\rho(ks) = \Phi^{|k|}$ for every integer $k$, and $\rho(j) = 0$ when $j$ is not a
+multiple of $s$.
+\end{prop}
+
+\begin{proof}
+As for the AR(1) (Theorem~\ref{thm:ar1}), $X_t = \sum_{m\ge0}\Phi^mZ_{t-ms}$. The variables $X_t$ and $X_{t+j}$ share a shock only if $j$ is a multiple of $s$; if $j = ks$
+with $k > 0$, the shared shocks $Z_{t-ms}$ have weights $\Phi^m$ and $\Phi^{m+k}$, so $\gamma(ks) = \sigma_Z^2\Phi^k/(1 - \Phi^2)$ and $\rho(ks) = \Phi^k$.
+\end{proof}
+
+The seasonal patterns are thus the non-seasonal ones stretched by a factor $s$: a seasonal MA ac.f. cuts off after
+lag $Qs$, a seasonal AR ac.f. decays geometrically at lags $s, 2s, 3s, \dots$ (Figure~\ref{fig:seasonal-acf}), and the partial ac.f. behaves
+correspondingly. Identification proceeds as in Section~\ref{sec:pacf}, looking separately at the low lags and at the
+seasonal lags.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\filldraw[fill=blue!8,draw=blue!60!black,rounded corners=6pt] (-0.35,-1.4) rectangle (7.4,1.9);
+\node[circle,fill=blue!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,1.55) {1};
+\node[anchor=west,font=\small\bfseries,text=blue!50!black] at (0.25,1.55) {Airline model, lags 1--15};
+\draw[-Stealth,gray] (0,0) -- (7.0,0) node[below left,black,font=\scriptsize] {$k$};
+\draw[-,gray] (0,-0.9) -- (0,1.2);
+\foreach \k/\v in {1/-0.345,11/0.152,12/-0.441,13/0.152} \draw[-,very thick,blue!60!black] ({0.43*\k},0) -- ({0.43*\k},{1.8*\v});
+\foreach \k in {2,...,10,14,15} \fill[blue!60!black] ({0.43*\k},0) circle (1pt);
+\node[font=\scriptsize,text=blue!50!black,anchor=north] at (0.43,-0.65) {1};
+\node[font=\scriptsize,text=blue!50!black,anchor=north] at (5.16,-0.85) {12};
+\begin{scope}[shift={(8.1,0)}]
+\filldraw[fill=orange!8,draw=orange!60!black,rounded corners=6pt] (-0.35,-1.4) rectangle (7.4,1.9);
+\node[circle,fill=orange!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,1.55) {2};
+\node[anchor=west,font=\small\bfseries,text=orange!50!black] at (0.25,1.55) {Seasonal AR, lags 1--40};
+\draw[-Stealth,gray] (0,0) -- (7.0,0) node[below left,black,font=\scriptsize] {$k$};
+\draw[-,gray] (0,-0.9) -- (0,1.2);
+\foreach \k/\v in {12/0.7,24/0.49,36/0.343} {
+ \draw[-,very thick,orange!70!black] ({0.16*\k},0) -- ({0.16*\k},{1.4*\v});
+ \node[font=\scriptsize,text=orange!60!black,anchor=north] at ({0.16*\k},-0.05) {\k};
+}
+\end{scope}
+\end{tikzpicture}
+\caption{Seasonal autocorrelation patterns. (1) The differenced airline model with $\theta = -0.4$, $\Theta = -0.6$: spikes at
+lags $1$ and $12$, with satellites at $11$ and $13$, zero elsewhere. (2) A seasonal AR with $s = 12$ and $\Phi = 0.7$: correlation only at
+multiples of $12$, decaying geometrically.}
+\label{fig:seasonal-acf}
+\end{figure}
+
+\begin{exa}\label{exa:sarima-expand}
+Write out the SARIMA $(1, 0, 0) \times (0, 1, 1)_{12}$ model as an equation for $X_t$.
+\end{exa}
+
+\begin{solution}
+With $s = 12$, $p = 1$, $d = 0$, $P = 0$, $D = 1$, $q = 0$ and $Q = 1$, the model $\phi_p(B)\Phi_P(B^s)W_t = \theta_q(B)\Theta_Q(B^s)Z_t$ with $W_t = \nabla^d\nabla_s^DX_t$ becomes
+\[
+(1 - \alpha B)W_t = (1 + \theta B^{12})Z_t , \qquad W_t = \nabla_{12}X_t = X_t - X_{t-12} .
+\]
+So $W_t - \alpha W_{t-1} = Z_t + \theta Z_{t-12}$, that is, $(X_t - X_{t-12}) - \alpha(X_{t-1} - X_{t-13}) = Z_t + \theta Z_{t-12}$, and
+\[
+X_t = X_{t-12} + \alpha(X_{t-1} - X_{t-13}) + Z_t + \theta Z_{t-12} ,
+\]
+so that $X_t$ depends on $X_{t-1}$, $X_{t-12}$ and $X_{t-13}$, and on the shocks $Z_t$ and $Z_{t-12}$.
+\end{solution}
+
+\subsection{Forecasting seasonal models}
+The rules of Section~\ref{sec:forecasting} apply unchanged: write the model equation for time $n + k$, replace future $Z$'s by $0$,
+future $X$'s by their forecasts, and past values by the observed values and residuals. For the model of
+Example~\ref{exa:sarima-expand},
+\[
+\hat x(n, 1) = x_{n-11} + \alpha(x_n - x_{n-12}) + \theta z_{n-11} .
+\]
+Two steps ahead, $x_{n+1}$ is not yet known, so it is replaced by its forecast:
+\[
+\hat x(n, 2) = x_{n-10} + \alpha\bigl(\hat x(n, 1) - x_{n-11}\bigr) + \theta z_{n-10} ,
+\]
+and forecasts further ahead are calculated recursively in the same way. When $x_{n+1}$ becomes known, the one-step
+forecast from time $n + 1$ is
+\begin{align*}
+\hat x(n + 1, 1) &= x_{n-10} + \alpha(x_{n+1} - x_{n-11}) + \theta z_{n-10} \\
+&= \hat x(n, 2) + \alpha\bigl(x_{n+1} - \hat x(n, 1)\bigr) = \hat x(n, 2) + \alpha z_{n+1} ,
+\end{align*}
+the updating formula of Theorem~\ref{thm:forecast-error} with $\psi_1 = \alpha$ (the $\psi$ weight of this model at lag $1$).
+
+\begin{exa}\label{exa:sarima-forecast}
+For the quarterly shop sales of Example~\ref{exa:quarterly}, fit the SARIMA $(1, 0, 0) \times (0, 1, 0)_4$ model with a constant,
+\[
+W_t - \mu = \alpha(W_{t-1} - \mu) + Z_t , \qquad W_t = x_t - x_{t-4} ,
+\]
+and forecast the four quarters of year~5.
+\end{exa}
+
+\begin{solution}
+The seasonal differences $W_t = x_t - x_{t-4}$, for $t = 5, \dots, 16$, are
+\[
+3, \ 4, \ 4, \ 3, \ 4, \ 4, \ 5, \ 5, \ 5, \ 6, \ 5, \ 4 ,
+\]
+the year-on-year growth, with the seasonal pattern removed. Their mean is $\hat\mu = 52/12 = 4.333$,
+and the deviations are $-\frac43$, $-\frac13$, $-\frac13$, $-\frac43$, $-\frac13$, $-\frac13$, $\frac23$, $\frac23$, $\frac23$, $\frac53$, $\frac23$, $-\frac13$, with sum of squares $\frac{78}{9}$ and lag-one sum of products $\frac{38}9$. So
+$\hat\alpha = r_1 = 38/78 = 0.49$.
+
+The last difference is $W_{16} = 4$, so $W_{16} - \hat\mu = -\frac13$, and the forecasts of the differences are $\hat W(16, k) = 4.333 + 0.49^k(-0.333)$:
+$4.170$, $4.253$, $4.294$, $4.314$. Adding each to the value a year earlier,
+\begin{align*}
+\hat x(16, 1) &= x_{13} + 4.170 = 31 + 4.170 = 35.17 , \\
+\hat x(16, 2) &= x_{14} + 4.253 = 36 + 4.253 = 40.25 , \\
+\hat x(16, 3) &= x_{15} + 4.294 = 40 + 4.294 = 44.29 , \\
+\hat x(16, 4) &= x_{16} + 4.314 = 35 + 4.314 = 39.31 .
+\end{align*}
+The forecasts keep the seasonal shape (low in Q1, high in Q3) and raise the level by about $4.3$, the average yearly
+growth, with a slight dip for the first quarters because last year's growth, $4$, was below average.
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:airline-eq}
+Write the airline model $\nabla\nabla_{12}X_t = (1 + \theta B)(1 + \Theta B^{12})Z_t$ as an equation for $X_t$.
+\end{problem}
+
+\begin{solution}
+$\nabla\nabla_{12}X_t = X_t - X_{t-1} - X_{t-12} + X_{t-13}$, so
+$X_t = X_{t-1} + X_{t-12} - X_{t-13} + Z_t + \theta Z_{t-1} + \Theta Z_{t-12} + \theta\Theta Z_{t-13}$.
+\end{solution}
+
+\begin{problem}\label{prob:airline-acf}
+For the airline model with $\theta = -0.4$ and $\Theta = -0.6$, compute the non-zero autocorrelations of $W_t$.
+\end{problem}
+
+\begin{solution}
+$\rho(1) = -0.4/1.16 = -0.345$, $\rho(12) = -0.6/1.36 = -0.441$, and $\rho(11) = \rho(13) = (-0.345)(-0.441) = 0.152$ (Figure~\ref{fig:seasonal-acf}, panel~1).
+\end{solution}
+
+\begin{problem}\label{prob:seasonal-identify}
+The sample ac.f. of a seasonally differenced monthly series ($n = 144$) has $r_1 = 0.45$, $r_2 = 0.21$, $r_3 = 0.08$, $r_{12} = -0.38$, and every other value
+up to lag $36$ is within $\pm0.17$. Suggest a model.
+\end{problem}
+
+\begin{solution}
+At the low lags the ac.f. decays ($0.45$, $0.21$, $0.08$), suggesting a non-seasonal AR(1) (check the partial ac.f.). At the
+seasonal lags there is a single spike at $12$ and nothing at $24$ or $36$: a seasonal MA(1). So try SARIMA $(1, 0, 0) \times (0, 1, 1)_{12}$,
+the model of Example~\ref{exa:sarima-expand}, and check its residuals.
+\end{solution}
+
+\begin{problem}\label{prob:sarima-onestep}
+For the model of Example~\ref{exa:sarima-expand} with $\alpha = 0.5$ and $\theta = -0.6$, the data give $x_n = 120$, $x_{n-11} = 105$, $x_{n-12} = 110$ and the residual
+$z_{n-11} = 3$. Find $\hat x(n, 1)$.
+\end{problem}
+
+\begin{solution}
+$\hat x(n, 1) = x_{n-11} + \alpha(x_n - x_{n-12}) + \theta z_{n-11} = 105 + 0.5(10) - 0.6(3) = 105 + 5 - 1.8 = 108.2$. The forecast starts from the value a year
+earlier and adjusts it by half of the latest year-on-year change, less part of last year's surprise.
 \end{solution}
 
 \section{The Frequency Domain}\label{sec:frequency}
