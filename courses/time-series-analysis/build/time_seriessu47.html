@@ -1,6 +1,6 @@
 <!DOCTYPE html> 
 <html lang='en-US' xml:lang='en-US'> 
-<head><title>16.2 The Kalman Filter — Time Series Analysis</title> 
+<head><title>14.4 Box–Jenkins forecasts — Time Series Analysis</title> 
 <meta charset='utf-8' /> 
 <meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
 <meta content='width=device-width,initial-scale=1' name='viewport' /> 
@@ -57,75 +57,134 @@
 <li class="sub"><a class="" href="time_seriessu30.html">The partial autocorrelation function</a></li>
 <li class="sub"><a class="" href="time_seriessu31.html">Identifying a model</a></li>
 <li class="sub"><a class="" href="time_seriessu32.html">Practice problems</a></li>
-<li class="ch"><a class="" href="time_seriesse12.html">Forecasting</a></li>
-<li class="ch"><a class="" href="time_seriesse13.html">Estimation of models</a></li>
+<li class="ch"><a class="" href="time_seriesse12.html">Estimation of models</a></li>
 <li class="sub"><a class="" href="time_seriessu33.html">Estimating the mean</a></li>
 <li class="sub"><a class="" href="time_seriessu34.html">Fitting an autoregressive model</a></li>
 <li class="sub"><a class="" href="time_seriessu35.html">Fitting a moving average process</a></li>
 <li class="sub"><a class="" href="time_seriessu36.html">Practice problems</a></li>
 <li class="sub"><a class="" href="time_seriessu37.html">Box-Jenkins Seasonal (SARIMA) Model</a></li>
 <li class="sub"><a class="" href="time_seriessu38.html">Computation of Forecast</a></li>
-<li class="ch"><a class="" href="time_seriesse14.html">Diagnostic checking and model selection</a></li>
+<li class="ch"><a class="" href="time_seriesse13.html">Diagnostic checking and model selection</a></li>
 <li class="sub"><a class="" href="time_seriessu39.html">The Box–Jenkins approach</a></li>
 <li class="sub"><a class="" href="time_seriessu40.html">Residual analysis</a></li>
 <li class="sub"><a class="" href="time_seriessu41.html">Portmanteau tests</a></li>
 <li class="sub"><a class="" href="time_seriessu42.html">Model selection criteria</a></li>
 <li class="sub"><a class="" href="time_seriessu43.html">Practice problems</a></li>
+<li class="ch"><a class="" href="time_seriesse14.html">Forecasting</a></li>
+<li class="sub"><a class="" href="time_seriessu44.html">Forecasting methods</a></li>
+<li class="sub"><a class="" href="time_seriessu45.html">Exponential smoothing</a></li>
+<li class="sub"><a class="" href="time_seriessu46.html">Holt and Holt–Winters methods</a></li>
+<li class="sub"><a class="current" href="time_seriessu47.html">Box–Jenkins forecasts</a></li>
+<li class="sub"><a class="" href="time_seriessu48.html">Practice problems</a></li>
 <li class="ch"><a class="" href="time_seriesse15.html">The Frequency Domain</a></li>
-<li class="sub"><a class="" href="time_seriessu44.html">The Spectral Density</a></li>
-<li class="sub"><a class="" href="time_seriessu45.html">The Periodogram</a></li>
+<li class="sub"><a class="" href="time_seriessu49.html">The Spectral Density</a></li>
+<li class="sub"><a class="" href="time_seriessu50.html">The Periodogram</a></li>
 <li class="ch"><a class="" href="time_seriesse16.html">State Space Models And The Kalman Filter</a></li>
-<li class="sub"><a class="" href="time_seriessu46.html">The Linear Model</a></li>
-<li class="sub"><a class="current" href="time_seriessu47.html">The Kalman Filter</a></li>
+<li class="sub"><a class="" href="time_seriessu51.html">The Linear Model</a></li>
+<li class="sub"><a class="" href="time_seriessu52.html">The Kalman Filter</a></li>
 <li class="ch"><a class="" href="time_seriesse17.html">Nonlinear Models: ARCH And Volatility</a></li>
 <li class="ch"><a class="" href="time_seriesse18.html">Practice Problems</a></li>
 </ul>
 </aside><main class="content"><div class="inner">
-<!-- l. 2727 --><div class='crosslinks'><p class='noindent'>[<a href='time_seriessu46.html'>prev</a>] [<a href='time_seriessu46.html#tailtime_seriessu46.html'>prev-tail</a>] [<a href='#tailtime_seriessu47.html'>tail</a>] [<a href='time_seriesse16.html#time_seriessu47.html'>up</a>] </p></div>
-<h4 class='subsectionHead'><span class='titlemark'>16.2   </span> <a id='x65-6400016.2'></a>The Kalman Filter</h4>
-<div class='newtheorem'>
-<!-- l. 2729 --><p class='noindent'><span class='head'>
-<a id='x65-64001r1'></a>
-<span class='cmbx-10x-x-109'>Result 16.2.1.</span>  </span>Write \(\widehat {\textbf {x}}_{t\mid s}\) for the expectation of \(\textbf {x}_t\) given observations up to time \(s\), and \(P_{t\mid s}\) for its error
-covariance. The Kalman filter alternates two steps.
-</p><!-- l. 2734 --><p class='noindent'><span class='cmbx-10x-x-109'>Predict</span>
-</p><!-- l. 2735 --><p class='noindent'>
-                                           \[\widehat {\textbf {x}}_{t\mid t-1} = F\,\widehat {\textbf {x}}_{t-1\mid t-1}, \qquad P_{t\mid t-1} = F\,P_{t-1\mid t-1}F^{t} + Q .\]
-</p><!-- l. 2738 --><p class='noindent'><span class='cmbx-10x-x-109'>Update</span>
-</p><!-- l. 2739 --><p class='noindent'>With the <span class='cmti-10x-x-109'>innovation</span> \(e_t = \textbf {y}_t - H\widehat {\textbf {x}}_{t\mid t-1}\) and the Kalman gain
-                                           \[K_t = P_{t\mid t-1}H^{t}\left (H P_{t\mid t-1}H^{t} + R\right )^{-1},\]
-                                                                                      
-                                                                                      
-                                           \[\widehat {\textbf {x}}_{t\mid t} = \widehat {\textbf {x}}_{t\mid t-1} + K_t e_t, \qquad P_{t\mid t} = \left (I - K_tH\right )P_{t\mid t-1} .\]
+<!-- l. 2720 --><div class='crosslinks'><p class='noindent'>[<a href='time_seriessu48.html'>next</a>] [<a href='time_seriessu46.html'>prev</a>] [<a href='time_seriessu46.html#tailtime_seriessu46.html'>prev-tail</a>] [<a href='#tailtime_seriessu47.html'>tail</a>] [<a href='time_seriesse14.html#time_seriessu47.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>14.4   </span> <a id='x63-6200014.4'></a>Box–Jenkins forecasts</h4>
+<!-- l. 2721 --><p class='noindent'>When an ARIMA model has been fitted and checked, it provides forecasts that are optimal in a
+precise sense, together with measures of their uncertainty.
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 2724 --><p class='noindent'><span class='head'>
+<a id='x63-62001r1'></a>
+<span class='cmbx-10x-x-109'>Theorem 14.4.1 </span>(Minimum mean squared error forecast)<span class='cmbx-10x-x-109'>.</span>  </span> Among all forecasts of \(X_{n+k}\) that are
+functions of \(X_n, X_{n-1}, \dots \), the one with the smallest mean squared error is the conditional expectation \[ \hat x(n, k) = E(X_{n+k} \mid X_n, X_{n-1}, \dots ) . \]
 </p>
 </div>
-<!-- l. 2744 --><p class='noindent'>
+<!-- l. 2730 --><p class='noindent'>
 </p>
-<div class='newtheorem nt-remark'>
-<!-- l. 2746 --><p class='noindent'><span class='head'>
-<span class='cmbx-10x-x-109'>Remark.</span>  </span>Read the update as a weighted compromise. The innovation \(e_t\) is the part of the new
-observation the model did not anticipate, and the gain \(K_t\) decides how much of it to believe. If
-the observation noise \(R\) is large the gain is small and the filter trusts its own prediction; if the
-state noise \(Q\) is large the prediction is uncertain, the gain is near one, and the filter follows the
-data. Everything the filter does is that trade, applied recursively.
-</p><!-- l. 2754 --><p class='noindent'>The recursion is what makes it usable. Each step needs only the previous estimate and the
-current observation, not the whole history, so the cost per observation is constant and the filter
-runs in real time. That is why it is used in navigation and tracking as much as in statistics.
+<div class='proof'>
+<!-- l. 2733 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>Write \(\mathcal {F}\) for the information \(X_n, X_{n-1}, \dots \), \(m = E(X_{n+k} \mid \mathcal {F})\), and let \(g\) be any forecast computed from \(\mathcal {F}\). Then \begin {align*}  E(X_{n+k} - g)^2 &amp;= E(X_{n+k} - m)^2 + 2E\bigl [(X_{n+k} - m)(m - g)\bigr ] \\ &amp;\qquad + E(m - g)^2 .  \end {align*}
+</p><!-- l. 2738 --><p class='noindent'>Given \(\mathcal {F}\), the factor \(m - g\) is known and \(X_{n+k} - m\) has conditional mean \(0\), so the middle term is \(0\). Hence \(E(X_{n+k} - g)^2 \ge E(X_{n+k} - m)^2\), with equality
+only when \(g = m\).                                                                                                           □
 </p>
 </div>
-<!-- l. 2758 --><p class='noindent'>
+<!-- l. 2742 --><p class='noindent'>For an ARIMA model, the conditional expectation is computed from the model equation, written out
+for time \(n + k\), by replacing </p>
+     <ul class='itemize1'>
+     <li class='itemize'>future values of \(Z\) by zero (their conditional mean);
+     </li>
+     <li class='itemize'>future values of \(X\) by their conditional expectations, which are forecasts already computed;
+                                                                                      
+                                                                                      
+     </li>
+     <li class='itemize'>past values of \(X\) and \(Z\) by their observed values (the past \(Z\)’s being the residuals of the fitted
+     model).</li></ul>
+<!-- l. 2749 --><p class='noindent'>For an AR(1) with mean \(0\), \(X_{n+1} = \alpha X_n + Z_{n+1}\) gives \(\hat x(n, 1) = \alpha x_n\), then \(\hat x(n, 2) = \alpha \hat x(n, 1) = \alpha ^2x_n\), and in general \(\hat x(n, k) = \alpha ^kx_n\): the forecasts decay geometrically towards the
+mean.
 </p>
-<div class='newtheorem nt-note'>
-<!-- l. 2760 --><p class='noindent'><span class='head'>
-<span class='cmbx-10x-x-109'>Note.</span>  </span>The filter is optimal in two distinct senses that are worth keeping apart. If the noise is
-Gaussian, \(\widehat {\textbf {x}}_{t\mid t}\) is the conditional expectation and therefore the best estimator of any kind. Without
-normality it is still the best <span class='cmti-10x-x-109'>linear </span>estimator — the same distinction as between conditional
-expectation and linear regression.
+<div class='newtheorem nt-theorem'>
+<!-- l. 2752 --><p class='noindent'><span class='head'>
+<a id='x63-62002r2'></a>
+<span class='cmbx-10x-x-109'>Theorem 14.4.2 </span>(Forecast errors)<span class='cmbx-10x-x-109'>.</span>  </span> Write the stationary or invertible-differenced model in its
+\(\psi \)-weight form \(X_t = \sum _{j\ge 0}\psi _jZ_{t-j}\) (for an ARIMA model, the weights of \(\theta (B)/[\phi (B)(1 - B)^d]\)). Then the \(k\)-step forecast error is \[ e_n(k) = X_{n+k} - \hat x(n, k) = Z_{n+k} + \psi _1Z_{n+k-1} + \dots + \psi _{k-1}Z_{n+1} , \] with
+mean \(0\) and variance \[ \Var \bigl (e_n(k)\bigr ) = \sigma _Z^2\bigl (1 + \psi _1^2 + \dots + \psi _{k-1}^2\bigr ) . \] Moreover, the forecasts are updated, when \(x_{n+1}\) is observed, by \[ \hat x(n + 1, k) = \hat x(n, k + 1) + \psi _k\bigl (x_{n+1} - \hat x(n, 1)\bigr ) . \]
 </p>
 </div>
 <!-- l. 2766 --><p class='noindent'>
 </p>
-<!-- l. 2768 --><div class='crosslinks'><p class='noindent'>[<a href='time_seriessu46.html'>prev</a>] [<a href='time_seriessu46.html#tailtime_seriessu46.html'>prev-tail</a>] [<a href='time_seriessu47.html'>front</a>] [<a href='time_seriesse16.html#time_seriessu47.html'>up</a>] </p></div>
-<!-- l. 2768 --><p class='noindent'><a id='tailtime_seriessu47.html'></a> </p> 
-<nav class="pagenav"><a class="prev" href="time_seriessu46.html">&larr; Previous</a><a class="up" href="time_seriesse16.html#time_seriessu47.html">Contents</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="time-series-analysis/16-2-the-kalman-filter" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+<div class='proof'>
+<!-- l. 2769 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>\(X_{n+k} = \sum _{j\ge 0}\psi _jZ_{n+k-j}\). The shocks \(Z_{n+k-j}\) with \(j \ge k\) are at or before time \(n\), so known; those with \(j &lt; k\) are future, with
+conditional mean \(0\) and independent of the past. So \(\hat x(n, k) = \sum _{j\ge k}\psi _jZ_{n+k-j}\) and the error is \(\sum _{j=0}^{k-1}\psi _jZ_{n+k-j}\), a sum of independent
+terms with variance \(\sigma _Z^2\sum _{j&lt;k}\psi _j^2\). For the update, \(\hat x(n + 1, k) = \sum _{j\ge k}\psi _jZ_{n+1+k-j}\) and \(\hat x(n, k + 1) = \sum _{j\ge k+1}\psi _jZ_{n+1+k-j}\) differ by the single term \(\psi _kZ_{n+1}\), and \(Z_{n+1} = x_{n+1} - \hat x(n, 1)\) is the one-step
+error.                                                                                                                   □
+</p>
+</div>
+<!-- l. 2775 --><p class='noindent'>So, with normal shocks, an approximate \(95\%\) <span class='cmbx-10x-x-109'>prediction interval </span>for \(X_{n+k}\) is \[ \hat x(n, k) \pm 1.96\,\hat \sigma _Z\sqrt {1 + \psi _1^2 + \dots + \psi _{k-1}^2} . \] For a stationary model the \(\psi _j\) die
+away, so the interval widens at first and then levels off at \(\pm 1.96\sigma _X\): far ahead, the best forecast is the mean,
+and the uncertainty is the variance of the process itself. For a non-stationary model the \(\psi _j\) do not die
+away (for ARIMA(0,1,1), \(\psi _j = 1 + \beta \) for every \(j \ge 1\)), and the interval keeps widening without limit (Figure <a href='#x63-62003r12'>12<!-- tex4ht:ref: fig:fan  --></a>). The
+intervals ignore the uncertainty in the estimated parameters, so they are somewhat too narrow,
+especially for short series.
+</p>
+<figure class='figure'> 
+
+                                                                                      
+                                                                                      
+<a id='x63-62003r12'></a>
+                                                                                      
+                                                                                      
+<!-- l. 2787 --><p class='noindent'><img alt='1Stni2AtnitnRnateItetrMrivAvoalaln l kaevere(eyls0ps,Aoff1wR,ida1et)n(2 ±in)1g.96σX   ' src='time_series11x.svg' />
+</p>
+<figcaption class='caption'><span class='id'>Figure 12: </span><span class='content'>Forecasts (dashed) with \(95\%\) prediction intervals (shaded). (1) For the stationary AR(2)
+of  Example <a href='#x63-62004r3'>14.4.3<!-- tex4ht:ref: exa:ar2-forecast  --></a>,  the  forecasts  decay  to  the  mean  and  the  interval  levels  off.  (2)  For  a
+non-stationary ARIMA(0,1,1), the forecasts are flat at the smoothed level and the interval
+widens without limit.</span></figcaption><!-- tex4ht:label?: x63-62003r12  -->
+                                                                                      
+                                                                                      
+</figure>
+<div class='newtheorem nt-example'>
+<!-- l. 2818 --><p class='noindent'><span class='head'>
+<a id='x63-62004r3'></a>
+<span class='cmbx-10x-x-109'>Example 14.4.3.</span>  </span> For the AR(2) model fitted in Example <a href='time_seriessu42.html#x57-56002r2'>13.4.2<!-- tex4ht:ref: exa:diagnostics  --></a>, \(X_t = 0.554X_{t-1} - 0.402X_{t-2} + Z_t\) with \(\hat \sigma _Z^2 = 0.930\) (the series measured
+from its mean), the last two values were \(x_{n-1} = 0.87\) and \(x_n = 0.30\). Forecast three steps ahead with \(95\%\) prediction
+intervals.
+</p>
+</div>
+<!-- l. 2821 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2823 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> <span class='cmti-10x-x-109'>Forecasts. </span>Replace future \(Z\)’s by \(0\) and future \(X\)’s by their forecasts: \begin {align*}  \hat x(n, 1) &amp;= 0.554(0.30) - 0.402(0.87) = 0.166 - 0.350 = -0.184 , \\ \hat x(n, 2) &amp;= 0.554(-0.184) - 0.402(0.30) = -0.102 - 0.121 = -0.222 , \\ \hat x(n, 3) &amp;= 0.554(-0.222) - 0.402(-0.184) = -0.123 + 0.074 = -0.049 .  \end {align*}
+</p><!-- l. 2830 --><p class='noindent'><span class='cmti-10x-x-109'>Intervals. </span>The \(\psi \) weights follow the AR recursion (Proposition <a href='time_seriessu25.html#x36-35001r1'>9.2.1<!-- tex4ht:ref: prop:psi-recursion  --></a>): \(\psi _0 = 1\), \(\psi _1 = 0.554\), \(\psi _2 = 0.554^2 - 0.402 = -0.095\). So the error variances are \begin {gather*}  0.930 , \qquad 0.930(1 + 0.307) = 1.215 , \\ 0.930(1 + 0.307 + 0.009) = 1.224 ,  \end {gather*}
+and the \(95\%\) half-widths \(1.96\sqrt {\cdot }\) are \(1.89\), \(2.16\) and \(2.17\). The intervals are \(-0.18 \pm 1.89\), \(-0.22 \pm 2.16\) and \(-0.05 \pm 2.17\). Already at three steps the half-width is
+close to its limit \(1.96\sigma _X = 1.96\sqrt {1.314} = 2.25\), with \(\sigma _X^2\) from Theorem <a href='time_seriessu21.html#x31-30001r1'>8.2.1<!-- tex4ht:ref: thm:yule-walker  --></a>: an AR(2) with these parameters has little memory, so
+beyond a step or two the forecast is essentially the mean. Figure <a href='#x63-62003r12'>12<!-- tex4ht:ref: fig:fan  --></a>, panel 1, shows the
+forecasts.
+</p>
+</div>
+                                                                                      
+                                                                                      
+<!-- l. 2842 --><div class='crosslinks'><p class='noindent'>[<a href='time_seriessu48.html'>next</a>] [<a href='time_seriessu46.html'>prev</a>] [<a href='time_seriessu46.html#tailtime_seriessu46.html'>prev-tail</a>] [<a href='time_seriessu47.html'>front</a>] [<a href='time_seriesse14.html#time_seriessu47.html'>up</a>] </p></div>
+<!-- l. 2842 --><p class='noindent'><a id='tailtime_seriessu47.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="time_seriessu46.html">&larr; Previous</a><a class="up" href="time_seriesse14.html#time_seriessu47.html">Contents</a><a class="next" href="time_seriessu48.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="time-series-analysis/14-4-box-jenkins-forecasts" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
 </html>
