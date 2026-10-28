@@ -2328,7 +2328,7 @@ $z_t = x_t - 0.4z_{t-1}$: $0, 0, -2, -1 + 0.8 = -0.2, -2 + 0.08 = -1.92, 0 + 0.7
 add to $4 + 0.04 + 3.6864 + 0.5898 + 2.8656 + 1.7501 = 12.93$, as in the table.
 \end{solution}
 
-\subsection{Box-Jenkins Seasonal (SARIMA) Model}
+\subsection{Box-Jenkins Seasonal (SARIMA) Model}\label{sec:sarima}
 In practice main time series contain a seasonal periodic component which repeats every 's' observations. e.g with monthly observations $s=12$. $X_t$ depends on terms such that $X_{t-12}$ and perhaps $X_{t-24}$. As well as $X_{t-1},X_{t-2},\cdots\cdots$\\\\
 
 
@@ -2362,20 +2362,6 @@ $\phi_p(B) \Phi_P(B^s) W_t=\theta_q(B) \Theta_Q(B^s) Z_t$ and $W_t=\nabla^d\, \n
 
 \pagebreak
 
-\subsection{Forecasting: (Box-Jenkins Procedure)}
-The main stages of the the Box-Jenkins procedure,
-\begin{enumerate}
-\item Identification: examining the data to identify a model
-\item Estimation: Estimating parameters of the model
-\item Diagnostic checking: examining residuals from the the fitted model to see if the model is adequate
-\item Consideration of an alternative model. This is done when the first model appears to be inadequate.\\
-\end{enumerate}
-
-
-
-
-
-
 \subsection{Computation of Forecast}
 Use of difference equations, if the model equation is known then $\widehat{x}(n,1)$ can be obtained from the model equation by replacing,\\- future values of $Z$ by zero.\\- future values of $X$ by there conditional expectation.\\- past values of $X$ and $Z$ by their observed values.\\
 
@@ -2408,6 +2394,220 @@ forecasting further in the future can be calculated recursively when $X_{n+1}$ i
 
 \pagebreak
 
+
+\section{Diagnostic checking and model selection}\label{sec:diagnostics}
+\subsection{The Box--Jenkins approach}
+The methods of the last three sections fit together into a procedure, due to Box and Jenkins, for building an
+ARIMA model. Its main stages are:
+\begin{enumerate}
+\item \textbf{Identification}: examining the data, its plot and its sample ac.f. and partial ac.f., to identify a model
+(after transforming or differencing if necessary);
+\item \textbf{Estimation}: estimating the parameters of the model;
+\item \textbf{Diagnostic checking}: examining the residuals from the fitted model to see whether the model is
+adequate;
+\item \textbf{Consideration of an alternative model}: done when the first model appears to be inadequate, after
+which the cycle is repeated.
+\end{enumerate}
+Only when a model passes the checks is it used for forecasting (Figure~\ref{fig:box-jenkins}). The emphasis on checking
+is the heart of the approach: identification from correlograms is a judgement, and the residuals are where a
+wrong judgement shows itself.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\col/\num/\name/\eqn in {
+ 0/blue/1/{Identify}/{plot, ac.f., pacf},
+ 4.5/orange/2/{Estimate}/{least squares, ML},
+ 9.0/green/3/{Check}/{residual ac.f., $Q^*$},
+ 13.5/red/4/{Forecast}/{Section~\ref{sec:forecasting}}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (0,0) rectangle (3.5,1.7);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0.35,1.3) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.6,1.3) {\name};
+  \node[font=\scriptsize] at (1.75,0.55) {\eqn};
+ \end{scope}
+}
+\draw[-Stealth,very thick,gray] (3.55,0.85) -- (4.45,0.85);
+\draw[-Stealth,very thick,gray] (8.05,0.85) -- (8.95,0.85);
+\draw[-Stealth,very thick,green!50!black] (12.55,0.85) -- (13.45,0.85);
+\node[font=\scriptsize,text=green!40!black,anchor=south] at (13.0,1.75) {adequate};
+\draw[-Stealth,very thick,red!60!black] (10.75,0) -- (10.75,-0.7) -- (1.75,-0.7) -- (1.75,-0.05);
+\node[font=\scriptsize,text=red!50!black,anchor=north] at (6.25,-0.75) {inadequate: consider an alternative model};
+\end{tikzpicture}
+\caption{The Box--Jenkins cycle. A model is identified, estimated and checked; if the checks fail, a different
+model is identified and the cycle is repeated. Only a model that passes is used for forecasting.}
+\label{fig:box-jenkins}
+\end{figure}
+
+\subsection{Residual analysis}
+If the model is correct and the parameters are estimated well, the residuals $\hat z_t$ (the estimated shocks, computed
+by the recursion of Section~\ref{sec:estimation}) should behave like white noise. The checks are those of regression,
+adapted to time order:
+\begin{itemize}
+\item plot the residuals against time, looking for trends, changes in spread and outliers;
+\item compute the residual ac.f., $r_k(\hat z)$, and see whether any values lie outside $\pm2/\sqrt n$;
+\item look at a histogram or normal plot, since prediction intervals assume normal shocks.
+\end{itemize}
+A large residual autocorrelation at some lag means the model has missed a dependence at that lag. Two
+cautions: with $20$ lags examined, about one value outside the band is expected by chance; and for the first few
+lags the band $\pm2/\sqrt n$ is too wide for residuals, because fitting the model removes some of their
+autocorrelation, so a value near the band at lag $1$ or $2$ deserves attention.
+
+\subsection{Portmanteau tests}
+Rather than look at each $r_k$ separately, a \textbf{portmanteau test} combines the first $K$ of them into one statistic.
+
+\begin{prop}\label{prop:rk-uncorrelated}
+For white noise with finite fourth moment, the sample autocovariances $c_j$ and $c_k$ ($1 \le j < k$) are uncorrelated. Hence
+$r_1, \dots, r_K$ are approximately independent $N(0, 1/n)$ for large $n$, and
+\[
+Q = n\sum_{k=1}^Kr_k^2
+\]
+is approximately $\chi^2_K$.
+\end{prop}
+
+\begin{proof}
+With mean $0$, $c_j = \frac1n\sum_tX_tX_{t+j}$ and $c_k = \frac1n\sum_sX_sX_{s+k}$. A term $E(X_tX_{t+j}X_sX_{s+k})$ is non-zero only if the four indices pair up,
+since a variable appearing once has mean $0$. As $j \ge 1$, $t \ne t + j$, so either $t = s$ and $t + j = s + k$, giving $j = k$, or $t = s + k$
+and $t + j = s$, giving $j = -k < 0$. Neither is possible, so $\Cov(c_j, c_k) = 0$. By Proposition~\ref{prop:rk-white-noise}, each $\sqrt nr_k$ is
+approximately $N(0, 1)$; jointly they are approximately normal and uncorrelated, hence approximately independent,
+and the sum of their squares is approximately $\chi^2_K$.
+\end{proof}
+
+Applied to the residuals of a fitted ARMA($p, q$) model, $Q$ is the \textbf{Box--Pierce statistic}, and it is
+compared with $\chi^2_{K-p-q}$: the degrees of freedom are reduced by the number of estimated parameters, because fitting
+makes the residuals look more random than true shocks would. In small samples $\chi^2$ is a poor approximation to
+the distribution of $Q$. For normal white noise, $\Var(r_k)$ is closer to $(n - k)/(n(n + 2))$ than to $1/n$, and dividing each $r_k^2$ by
+this variance gives the \textbf{Ljung--Box statistic},
+\[
+Q^* = n(n + 2)\sum_{k=1}^K\frac{r_k^2}{n - k} ,
+\]
+also compared with $\chi^2_{K-p-q}$, and now the standard choice. A large value of $Q^*$ means the residuals are
+autocorrelated and the model is inadequate. $K$ is usually taken between about $10$ and $20$.
+
+\subhead{Overfitting}
+Another check is to fit a deliberately larger model, for example AR($p + 1$) when AR($p$) was identified, or
+ARMA($p, q + 1$), and see whether the extra parameter is significantly different from zero (its estimate is more
+than about two standard errors from zero) and whether the original estimates change much. If not, the
+original model is adequate.
+
+\subsection{Model selection criteria}
+Often several models pass the checks, and one must be chosen. The \textbf{information criteria} balance fit
+against complexity:
+\[
+\text{AIC} = -2\log L + 2r , \qquad \text{BIC} = -2\log L + r\log n ,
+\]
+where $L$ is the maximised likelihood, $r$ the number of estimated ARMA parameters and $n$ the length of the series.
+The model with the smallest value is preferred.
+
+\begin{prop}\label{prop:aic-gaussian}
+For Gaussian shocks, using the conditional likelihood,
+\[
+-2\log L = n\log\hat\sigma_Z^2 + n(1 + \log2\pi) ,
+\]
+where $\hat\sigma_Z^2 = S/n$ is the residual mean square. So, up to a constant common to all models,
+\[
+\text{AIC} = n\log\hat\sigma_Z^2 + 2r , \qquad \text{BIC} = n\log\hat\sigma_Z^2 + r\log n .
+\]
+\end{prop}
+
+\begin{proof}
+Given the parameters, the reconstructed shocks $z_t$ are independent $N(0, \sigma_Z^2)$, so
+\[
+\log L = -\frac n2\log(2\pi\sigma_Z^2) - \frac{S}{2\sigma_Z^2} , \qquad S = \sum_tz_t^2 .
+\]
+For fixed parameters this is largest at $\sigma_Z^2 = S/n$, where $S/(2\sigma_Z^2) = n/2$, so $\log L = -\frac n2(\log2\pi + \log\hat\sigma_Z^2 + 1)$. Multiplying by $-2$ gives the
+result.
+\end{proof}
+
+Adding parameters always reduces $\hat\sigma_Z^2$; the penalty asks whether the reduction is worth it. BIC's penalty, $\log n$ per
+parameter, exceeds AIC's $2$ once $n \ge 8$, so BIC tends to choose smaller models. AIC aims at good prediction and
+tends to overfit slightly in large samples; BIC is consistent, choosing the true order with probability tending to
+$1$ when the true model is among the candidates. For forecasting, a slightly smaller model is usually the
+safer error.
+
+\begin{exa}\label{exa:diagnostics}
+For the series of Example~\ref{exa:identify} ($n = 150$), several models were fitted by conditional least squares. The table gives
+the residual mean square, AIC and BIC (as in Proposition~\ref{prop:aic-gaussian}), and the Ljung--Box statistic with $K = 10$:
+\begin{center}
+\begin{tabular}{lcrrrcr}
+Model & $\hat\sigma_Z^2$ & AIC & BIC & $Q^*$ & df & $p$-value \\
+\hline
+AR(1) & 1.1034 & 16.76 & 19.77 & 29.67 & 9 & 0.000 \\
+AR(2) & 0.9299 & $-6.90$ & $-0.88$ & 7.76 & 8 & 0.457 \\
+AR(3) & 0.9205 & $-6.43$ & 2.60 & 4.36 & 7 & 0.737 \\
+MA(2) & 0.9401 & $-5.26$ & 0.76 & 7.79 & 8 & 0.455 \\
+ARMA(1,1) & 0.9449 & $-4.50$ & 1.52 & 7.96 & 8 & 0.438 \\
+ARMA(2,1) & 0.9155 & $-7.25$ & 1.78 & 3.85 & 7 & 0.797 \\
+\end{tabular}
+\end{center}
+The residual autocorrelations of the AR(2) fit, for $k = 1, \dots, 10$, were
+$0.047$, $-0.059$, $0.089$, $-0.004$, $-0.043$, $-0.027$, $-0.101$, $-0.113$, $-0.087$, $-0.047$, and those of the AR(1) fit began $0.159$, $-0.351$, $-0.153$.
+Which model should be used?
+\end{exa}
+
+\begin{solution}
+\emph{AR(1) is inadequate.} Its residual $r_2 = -0.351$ lies far outside $\pm2/\sqrt{150} = \pm0.163$: the model has missed the lag-2
+dependence that the partial ac.f. showed. Its $Q^* = 29.67$ exceeds $\chi^2_{0.05,9} = 16.92$ (the $p$-value is essentially $0$).
+
+\emph{AR(2) passes.} All ten residual autocorrelations lie within $\pm0.163$. For the Ljung--Box statistic,
+\begin{align*}
+Q^* &= 150(152)\Bigl[\frac{0.047^2}{149} + \frac{0.059^2}{148} + \dots + \frac{0.047^2}{140}\Bigr] \\
+&= 22800 \times 0.000341 = 7.77 ,
+\end{align*}
+on $10 - 2 = 8$ degrees of freedom, well below $\chi^2_{0.05,8} = 15.51$ (the table's $7.76$ uses unrounded $r_k$; the $p$-value is $0.46$). The residuals are
+consistent with white noise. Overfitting confirms it: the AR(3) estimate of $\alpha_3$ is $0.11$, with standard error about
+$1/\sqrt{150} = 0.08$, so it is not significant, and $\hat\alpha_1$, $\hat\alpha_2$ change only from $(0.554, -0.402)$ to $(0.601, -0.466)$.
+
+\emph{Choosing among the adequate models.} BIC is smallest for AR(2), by a clear margin of $1.6$ over MA(2). AIC is smallest for
+ARMA(2,1), but only by $0.35$ below AR(2), a negligible difference bought with an extra parameter. Both criteria
+prefer AR(2) to the MA(2) and ARMA(1,1) alternatives. The AR(2) model, $\hat x_t = 0.554x_{t-1} - 0.402x_{t-2}$ with $\hat\sigma_Z^2 = 0.93$, is the sensible
+choice: simplest, adequate, and preferred by BIC. (The data were simulated from an AR(2).)
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:box-pierce}
+The first six residual autocorrelations from an ARMA(1,1) model fitted to $n = 100$ observations are $0.12$, $-0.15$, $0.08$, $0.21$, $-0.05$,
+$0.10$. Compute the Box--Pierce statistic and test the adequacy of the model at the $5\%$ level.
+\end{problem}
+
+\begin{solution}
+$\sum r_k^2 = 0.0144 + 0.0225 + 0.0064 + 0.0441 + 0.0025 + 0.0100 = 0.0999$, so $Q = 100 \times 0.0999 = 9.99$ on $6 - 2 = 4$ degrees of freedom. Since
+$\chi^2_{0.05,4} = 9.49$, the model is (just) rejected. Notice $r_4 = 0.21$, outside $\pm0.2$: with quarterly data this would suggest a seasonal
+term at lag $4$.
+\end{solution}
+
+\begin{problem}\label{prob:aic-choice}
+Two models fitted to $n = 200$ observations gave residual variances $\hat\sigma^2 = 2.40$ for AR(1) and $\hat\sigma^2 = 2.34$ for AR(3). Which does
+each criterion prefer?
+\end{problem}
+
+\begin{solution}
+$n\log\hat\sigma^2$ is $200\log2.40 = 175.09$ and $200\log2.34 = 170.03$. AIC: $175.09 + 2 = 177.09$ against $170.03 + 6 = 176.03$, so AIC prefers AR(3). BIC:
+$175.09 + \log200 = 180.39$ against $170.03 + 3\log200 = 185.93$, so BIC prefers AR(1). The criteria disagree because the gain in fit,
+$5.06$, lies between AIC's extra penalty of $4$ and BIC's of $2\log200 = 10.6$.
+\end{solution}
+
+\begin{problem}\label{prob:ljung-small}
+Explain why the Ljung--Box statistic is always larger than the Box--Pierce statistic computed from the same
+residual autocorrelations, and why this is a correction in the right direction.
+\end{problem}
+
+\begin{solution}
+Each term of $Q^*$ is $r_k^2$ multiplied by $n(n + 2)/(n - k)$, which exceeds $n$ because $n + 2 > n - k$. The true variance of $r_k$ for white noise is
+$(n - k)/(n(n + 2))$, smaller than $1/n$, so $Q = n\sum r_k^2$ understates the standardised sum and the Box--Pierce test rejects too
+rarely in small samples. Dividing by the correct variance makes the $\chi^2$ approximation accurate.
+\end{solution}
+
+\begin{problem}\label{prob:resid-pattern}
+After fitting an MA(1) model to monthly data, the residual ac.f. is small everywhere except $r_{12} = 0.35$, with $n = 120$. What
+does this suggest?
+\end{problem}
+
+\begin{solution}
+The band is $\pm2/\sqrt{120} = \pm0.18$, and $r_{12}$ lies well outside it, at the seasonal lag of monthly data. The model has missed a
+seasonal dependence: values twelve months apart are related. A seasonal term is needed, for example a
+seasonal MA term at lag $12$, giving a SARIMA model (Section~\ref{sec:sarima}).
+\end{solution}
 
 \section{The Frequency Domain}\label{sec:frequency}
 
