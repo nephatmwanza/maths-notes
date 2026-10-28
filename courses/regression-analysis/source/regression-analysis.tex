@@ -6152,6 +6152,604 @@ smaller model and $0.073$ for the larger, a typical symptom of overfitting.
 \end{solution}
 
 \section{Multicollinearity}
+The least-squares estimator needs $\mathbf{X}^\top\mathbf{X}$ to be invertible, which fails exactly when
+one column of $\mathbf{X}$ is a linear combination of the others. In practice an exact dependence is
+rare, but a \emph{near} dependence is common: one regressor is almost a linear combination of some
+of the others. This is \textbf{multicollinearity}. It does not violate any assumption of the model,
+and least squares remains unbiased and best linear unbiased. What it does is make some of the
+estimates so imprecise that they are of little use, and it does so in ways that the usual output can
+disguise.
+
+Multicollinearity has four common sources.
+\begin{enumerate}[label=(\roman*)]
+\item \emph{The way the data were collected.} If the observations happen to lie close to a
+line or plane in $x$-space, the data cannot separate the effects of the regressors, even if in
+the population they vary independently. Observational data are especially prone to this.
+\item \emph{Constraints in the population.} Some regressors genuinely move together: household
+income and house size, or the proportions of the components of a mixture, which must add to
+$1$.
+\item \emph{The choice of model.} Polynomial terms such as $x$ and $x^2$ are strongly correlated when
+the range of $x$ is small compared with its mean.
+\item \emph{Too many regressors.} With more regressors than the data can support, some will
+inevitably be nearly dependent on the rest.
+\end{enumerate}
+
+Figure~\ref{fig:collinear-design} shows why a near dependence matters. To estimate a plane, the
+data must spread out over the plane's base. If the points in the $(x_1, x_2)$ plane lie along a line,
+a whole family of planes, pivoting about that line, fit almost equally well.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\col/\num/\name/\verdict/\pts in {
+ 0/green/1/{Spread out}/{plane well determined}/{(0.6,0.9),(1.0,2.6),(1.4,1.5),(1.9,0.5),(2.2,2.1),(2.7,1.1),(3.0,2.8),(3.3,0.7),(3.6,1.9)},
+ 5.6/red/2/{Nearly collinear}/{plane can pivot}/{(0.6,0.5),(1.0,0.9),(1.4,1.15),(1.9,1.65),(2.2,1.8),(2.7,2.35),(3.0,2.5),(3.3,2.85),(3.6,3.0)}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.4,-1.0) rectangle (4.7,3.9);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (-0.05,3.55) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.2,3.55) {\name};
+  \draw[-Stealth,gray] (0,0) -- (4.2,0) node[above,black,font=\scriptsize] {$x_1$};
+  \draw[-Stealth,gray] (0,0) -- (0,3.1) node[right,black,font=\scriptsize] {$x_2$};
+  \ifnum\num=2 \draw[-,dashed,\col!60!black] (0.3,0.25) -- (3.9,3.3); \fi
+  \foreach \p in \pts \fill[\col!60!black] \p circle (2.2pt);
+  \node[font=\scriptsize,text=\col!50!black] at (2.15,-0.6) {\verdict};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{The design points in the $(x_1, x_2)$ plane. On the left they cover the region, and the
+fitted plane is pinned down in every direction. On the right they lie near a line: the data say
+how $y$ changes \emph{along} the line, but almost nothing about how it changes across it.}
+\label{fig:collinear-design}
+\end{figure}
+
+\subsection{The correlation form of the model}
+Multicollinearity is a property of the regressors alone, and it is best studied on a common scale.
+Centre and scale each regressor to \emph{unit length}:
+\[
+w_{ij} = \frac{x_{ij} - \bar x_j}{\sqrt{S_{jj}}} , \qquad S_{jj} = \sum_{i=1}^n (x_{ij} - \bar x_j)^2 ,
+\]
+and likewise $y_i^* = (y_i - \bar y)/\sqrt{SS_T}$. Let $\mathbf{W}$ be the $n \times k$ matrix of the
+$w_{ij}$. Each column of $\mathbf{W}$ has mean $0$ and length $1$, and the inner product of columns
+$j$ and $l$ is
+\[
+\sum_i w_{ij}w_{il} = \frac{\sum_i (x_{ij} - \bar x_j)(x_{il} - \bar x_l)}{\sqrt{S_{jj}S_{ll}}} = r_{jl} ,
+\]
+the correlation between $x_j$ and $x_l$. So $\mathbf{W}^\top\mathbf{W} = \mathbf{R}$, the
+\textbf{correlation matrix} of the regressors, and similarly $\mathbf{W}^\top\mathbf{y}^*$ is the vector
+$\mathbf{r}_y$ of correlations between each regressor and $y$. As in the proof of
+Theorem~\ref{thm:centred-leverage}, centring separates the intercept from the other coefficients,
+and the least-squares estimates of the coefficients of the $w_j$ in a regression of $y^*$ are
+\[
+\hat{\mathbf{b}} = \mathbf{R}^{-1}\mathbf{r}_y , \qquad \hat\beta_j = \hat b_j\sqrt{SS_T/S_{jj}} .
+\]
+The $\hat b_j$ are the \textbf{standardized regression coefficients}. They are free of units, and
+$\operatorname{Var}(\hat{\mathbf{b}}) = \sigma_*^2\mathbf{R}^{-1}$, where $\sigma_*^2 = \sigma^2/SS_T$ is the error
+variance on the scale of $y^*$.
+
+\subsection{Effects of multicollinearity}
+\begin{thm}[Variance inflation]\label{thm:vif}
+Let $R_j^2$ be the coefficient of determination from regressing $x_j$ on the other $k - 1$
+regressors (with an intercept). Then the $j$th diagonal entry of $\mathbf{R}^{-1}$ is
+\[
+\mathrm{VIF}_j = \frac{1}{1 - R_j^2} ,
+\]
+and the variance of the least-squares estimate of $\beta_j$ in the original model is
+\[
+\operatorname{Var}(\hat\beta_j) = \frac{\sigma^2}{S_{jj}}\cdot\frac{1}{1 - R_j^2} .
+\]
+\end{thm}
+
+\begin{proof}
+Apply Theorem~\ref{thm:added-variable} to the regression on $\mathbf{W}$ (with intercept), taking
+$w_j$ as the added column. Then $(\mathbf{R}^{-1})_{jj} = 1/\mathbf{u}^\top\mathbf{u}$, where $\mathbf{u}$ is the vector of
+residuals from regressing $w_j$ on the other columns and the intercept. $\mathbf{u}^\top\mathbf{u}$ is that
+regression's residual sum of squares, which is $(1 - R_j^2)$ times its total sum of squares; and the
+total sum of squares of $w_j$ is $1$. Scaling a regressor does not change $R_j^2$, so $R_j^2$ is the
+same whether computed from $x_j$ or $w_j$.
+
+For the variance, $\hat\beta_j = \hat b_j\sqrt{SS_T/S_{jj}}$ and
+$\operatorname{Var}(\hat b_j) = (\sigma^2/SS_T)\,\mathrm{VIF}_j$, so
+\[
+\operatorname{Var}(\hat\beta_j) = \frac{SS_T}{S_{jj}}\cdot\frac{\sigma^2}{SS_T}\,\mathrm{VIF}_j = \frac{\sigma^2}{S_{jj}}\,\mathrm{VIF}_j . \qedhere
+\]
+\end{proof}
+
+If $x_j$ were uncorrelated with the other regressors, $R_j^2 = 0$ and its variance would be
+$\sigma^2/S_{jj}$, the same as in a simple regression on $x_j$ alone. The factor $1/(1 - R_j^2)$ is how
+many times larger the variance is because of $x_j$'s relationship with the others: hence the name
+\textbf{variance inflation factor}. With $R_j^2 = 0.9$ it is $10$; with $R_j^2 = 0.99$, $100$, and the
+standard error is ten times what it would be in an orthogonal design. This is
+Theorem~\ref{thm:added-variable} again: only the part of $x_j$ not explained by the others carries
+information about $\beta_j$, and when $R_j^2$ is near $1$ that part is tiny.
+
+The effect on the estimates as a whole is seen through the eigenvalues
+$\lambda_1 \ge \lambda_2 \ge \cdots \ge \lambda_k$ of $\mathbf{R}$. These are positive (since $\mathbf{R} = \mathbf{W}^\top\mathbf{W}$ is
+positive definite) and add to $\operatorname{tr}(\mathbf{R}) = k$.
+
+\begin{thm}\label{thm:length}
+The squared distance between $\hat{\mathbf{b}}$ and $\mathbf{b}$ has expectation
+\[
+E\|\hat{\mathbf{b}} - \mathbf{b}\|^2 = \sigma_*^2\sum_{j=1}^k\frac{1}{\lambda_j} ,
+\qquad\text{and}\qquad
+E\|\hat{\mathbf{b}}\|^2 = \|\mathbf{b}\|^2 + \sigma_*^2\sum_{j=1}^k\frac{1}{\lambda_j} .
+\]
+\end{thm}
+
+\begin{proof}
+$E\|\hat{\mathbf{b}} - \mathbf{b}\|^2 = \sum_j E(\hat b_j - b_j)^2 = \sum_j\operatorname{Var}(\hat b_j) = \sigma_*^2\operatorname{tr}(\mathbf{R}^{-1})$,
+since $\hat{\mathbf{b}}$ is unbiased. By the spectral theorem $\mathbf{R} = \mathbf{P}\boldsymbol\Lambda\mathbf{P}^\top$, so
+$\mathbf{R}^{-1} = \mathbf{P}\boldsymbol\Lambda^{-1}\mathbf{P}^\top$ and by Lemma~\ref{lem:trace}
+$\operatorname{tr}(\mathbf{R}^{-1}) = \operatorname{tr}(\boldsymbol\Lambda^{-1}) = \sum 1/\lambda_j$. For the second, expand
+$\|\hat{\mathbf{b}}\|^2 = \|\mathbf{b} + (\hat{\mathbf{b}} - \mathbf{b})\|^2$; the cross term has expectation $0$.
+\end{proof}
+
+A single small eigenvalue is enough to make $\sum 1/\lambda_j$ large. Then the estimate is, on average,
+far from the truth, and in particular \emph{too long}: the least-squares coefficients tend to be too
+large in absolute value, often with some of them of the wrong sign, offsetting each other.
+
+The symptoms in the computer output are characteristic:
+\begin{itemize}
+\item the overall $F$-test is highly significant, but none or few of the individual $t$-tests are;
+\item coefficients have signs or sizes that contradict subject-matter knowledge, or the simple
+correlations with $y$;
+\item the estimates change greatly when a regressor or a few observations are added or removed;
+\item the standard errors are large.
+\end{itemize}
+These are clues, not proof; the diagnostics of the next subsection measure the problem directly.
+
+\begin{remark}
+Multicollinearity damages estimates of the \emph{individual} coefficients. It need not damage
+prediction: within the region where the data lie, along the line or plane of the near dependence,
+the fitted values are estimated as well as ever. The danger is in predicting at a point that breaks
+the pattern of the data, where the poorly determined combinations of coefficients come into play.
+\end{remark}
+
+\begin{exa}\label{exa:appliances}
+The monthly electricity use $y$ (tens of kWh) of eight households was recorded with the number of
+electrical appliances $x_1$ and the number of those used every day $x_2$:
+\begin{center}
+\begin{tabular}{l|cccccccc}
+Household & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\hline
+$x_1$ & 8 & 1 & 2 & 3 & 2 & 8 & 8 & 6 \\
+$x_2$ & 7 & 0 & 1 & 3 & 2 & 8 & 7 & 5 \\
+$y$ & 16 & 8 & 5 & 7 & 6 & 17 & 15 & 12 \\
+\end{tabular}
+\end{center}
+Fit $y = \beta_0 + \beta_1x_1 + \beta_2x_2 + \varepsilon$ and examine it for multicollinearity.
+\end{exa}
+
+\begin{solution}
+\emph{The fit.} $\bar x_1 = 4.75$, $\bar x_2 = 4.125$, $\bar y = 10.75$, and the corrected sums of
+squares and products are
+\begin{align*}
+S_{11} &= 65.5, & S_{22} &= 64.875, & S_{12} &= 64.25, \\
+S_{1y} &= 98.5, & S_{2y} &= 96.25, & SS_T &= 163.5 .
+\end{align*}
+With two regressors the centred normal equations are
+$S_{11}\hat\beta_1 + S_{12}\hat\beta_2 = S_{1y}$ and $S_{12}\hat\beta_1 + S_{22}\hat\beta_2 = S_{2y}$, with
+determinant $D = S_{11}S_{22} - S_{12}^2 = 4249.3125 - 4128.0625 = 121.25$, so
+\begin{align*}
+\hat\beta_1 &= \frac{S_{22}S_{1y} - S_{12}S_{2y}}{D} = \frac{6390.1875 - 6184.0625}{121.25} = \frac{206.125}{121.25} = 1.7, \\
+\hat\beta_2 &= \frac{S_{11}S_{2y} - S_{12}S_{1y}}{D} = \frac{6304.375 - 6328.625}{121.25} = \frac{-24.25}{121.25} = -0.2 ,
+\end{align*}
+and $\hat\beta_0 = 10.75 - 1.7 \times 4.75 + 0.2 \times 4.125 = 3.5$:
+\[
+\hat y = 3.5 + 1.7x_1 - 0.2x_2 .
+\]
+$SS_R = 1.7 \times 98.5 - 0.2 \times 96.25 = 148.2$, $SS_{\mathrm{Res}} = 15.3$, $MS_{\mathrm{Res}} = 3.06$,
+$R^2 = 0.906$, and
+\[
+F_0 = \frac{148.2/2}{3.06} = 24.2 > F_{0.01,2,5} = 13.27 .
+\]
+The regression is highly significant. But the standard errors are
+\begin{align*}
+\operatorname{se}(\hat\beta_1) &= \sqrt{\frac{3.06 \times 64.875}{121.25}} = 1.280, \\
+\operatorname{se}(\hat\beta_2) &= \sqrt{\frac{3.06 \times 65.5}{121.25}} = 1.286 ,
+\end{align*}
+so $t_1 = 1.33$ and $t_2 = -0.16$, neither significant against $t_{0.025,5} = 2.571$. And
+$\hat\beta_2$ is negative, saying that, with the number of appliances fixed, using more of them
+every day \emph{lowers} electricity use. Separately, $y$ regressed on $x_1$ alone has slope
+$98.5/65.5 = 1.50$ ($t = 7.6$), and on $x_2$ alone $96.25/64.875 = 1.48$. All the classic symptoms
+are present.
+
+\emph{Diagnosis.} The correlation between the regressors is
+\[
+r_{12} = \frac{64.25}{\sqrt{65.5 \times 64.875}} = 0.9856 ,
+\]
+so $R_1^2 = R_2^2 = r_{12}^2 = 0.9715$ and
+\[
+\mathrm{VIF}_1 = \mathrm{VIF}_2 = \frac{1}{1 - 0.9715} = 35.0 .
+\]
+The variances are $35$ times what they would be with uncorrelated regressors; the standard errors
+about six times. The correlation matrix
+$\mathbf{R} = \begin{bmatrix} 1 & r \\ r & 1 \end{bmatrix}$ has eigenvalues $1 \pm r$, that is,
+$\lambda_1 = 1.9856$ and $\lambda_2 = 0.0144$, with eigenvectors $(1, 1)/\sqrt2$ and $(1, -1)/\sqrt2$
+(check: $\mathbf{R}(1, \pm1)^\top = (1 \pm r)(1, \pm1)^\top$). The second eigenvector says that
+$w_1 - w_2 \approx 0$: households with more appliances use more of them every day, so the two
+standardized regressors are almost equal. The data say a great deal about the effect of
+$w_1 + w_2$ and almost nothing about $w_1 - w_2$, which is exactly what the separate coefficients need.
+\end{solution}
+
+\subsection{Diagnostics}
+\subhead{The correlation matrix}
+Large pairwise correlations $|r_{jl}|$ signal a near dependence between two regressors. But a near
+dependence among three or more regressors can exist when every pairwise correlation is modest, so
+the correlation matrix can miss it (Example~\ref{exa:three-way}).
+
+\subhead{Variance inflation factors}
+The VIFs are the diagonal of $\mathbf{R}^{-1}$, and Theorem~\ref{thm:vif} makes them easy to interpret.
+The usual rule is that a VIF above $5$ deserves attention and one above $10$ (that is, $R_j^2 > 0.9$)
+indicates that $\beta_j$ is poorly estimated because of multicollinearity. VIFs detect dependences of
+any number of regressors, but they do not say how many dependences there are or which regressors are
+involved.
+
+\subhead{Eigenvalues and the condition number}
+\begin{thm}\label{thm:eigen-dependence}
+If $\mathbf{R}\mathbf{v} = \lambda\mathbf{v}$ with $\|\mathbf{v}\| = 1$, then
+\[
+\sum_{i=1}^n\Bigl(\sum_{j=1}^k v_jw_{ij}\Bigr)^2 = \lambda .
+\]
+So if $\lambda$ is small, $\sum_j v_jw_{ij} \approx 0$ for every observation $i$: the columns of $\mathbf{W}$
+are nearly dependent, with coefficients given by $\mathbf{v}$.
+\end{thm}
+
+\begin{proof}
+The left side is $\|\mathbf{Wv}\|^2 = \mathbf{v}^\top\mathbf{W}^\top\mathbf{W}\mathbf{v} = \mathbf{v}^\top\mathbf{R}\mathbf{v} = \lambda\mathbf{v}^\top\mathbf{v} = \lambda$.
+\end{proof}
+
+So each small eigenvalue signals one near dependence, and its eigenvector says which regressors are
+involved: those with large entries $v_j$. Because the eigenvalues add to $k$, a small one is small
+relative to the others, and the standard summary is the \textbf{condition number}
+\[
+\kappa = \frac{\lambda_{\max}}{\lambda_{\min}} .
+\]
+As a rough guide, $\kappa < 100$ indicates no serious problem, $100 \le \kappa \le 1000$ moderate to strong
+multicollinearity, and $\kappa > 1000$ severe multicollinearity. The \emph{condition indices}
+$\lambda_{\max}/\lambda_j$ apply the same scale to each eigenvalue, and the number of large indices is the
+number of near dependences. For the appliance data, $\kappa = 1.9856/0.0144 = 138$.
+
+\begin{exa}\label{exa:three-way}
+Ten observations on three regressors:
+\begin{center}
+\begin{tabular}{l|cccccccccc}
+$x_1$ & 7 & 7 & 6 & 6 & 1 & 6 & 7 & 2 & 2 & 1 \\
+$x_2$ & 6 & 7 & 5 & 5 & 6 & 1 & 6 & 7 & 1 & 7 \\
+$x_3$ & 14 & 13 & 11 & 12 & 8 & 6 & 13 & 9 & 3 & 9 \\
+\end{tabular}
+\end{center}
+have correlation matrix, inverse diagonal and eigenvalues
+\[
+\mathbf{R} = \begin{bmatrix} 1 & -0.028 & 0.653 \\ -0.028 & 1 & 0.714 \\ 0.653 & 0.714 & 1 \end{bmatrix} ,
+\]
+VIFs $13.0$, $15.2$ and $26.5$, and eigenvalues $1.954$, $1.028$ and $0.0188$.
+Interpret.
+\end{exa}
+
+\begin{solution}
+No pairwise correlation exceeds $0.72$, and $x_1$ and $x_2$ are uncorrelated; by the correlation matrix
+alone there is no problem. But all three VIFs exceed $10$: each regressor is very well explained by
+the other two ($R_j^2 = 0.923$, $0.934$, $0.962$). There is one small eigenvalue, with condition number
+$\kappa = 1.954/0.0188 = 104$, so there is one near dependence of moderate strength. Its eigenvector is
+$\mathbf{v} = (0.482,\ 0.525,\ -0.702)$, so by Theorem~\ref{thm:eigen-dependence}
+\[
+0.482\,w_1 + 0.525\,w_2 - 0.702\,w_3 \approx 0 .
+\]
+Converting back with $w_j = (x_j - \bar x_j)/\sqrt{S_{jj}}$, where $S_{11} = 62.5$, $S_{22} = 46.9$,
+$S_{33} = 109.6$, the coefficients become $0.482/\sqrt{62.5} = 0.0609$, $0.525/\sqrt{46.9} = 0.0766$ and
+$-0.702/\sqrt{109.6} = -0.0671$, so that
+\[
+x_3 \approx \text{constant} + 0.91x_1 + 1.14x_2 .
+\]
+Indeed in these data $x_3$ differs from $x_1 + x_2$ by at most $1$. The three regressors carry the
+information of two, and a model containing all three cannot estimate their separate coefficients
+well. The correlation matrix missed this because the dependence involves three regressors at once.
+\end{solution}
+
+\subsection{Remedies}
+\subhead{More data, or a different model}
+If it is possible, the best remedy is more data, collected where the existing data are thin: off the
+line of Figure~\ref{fig:collinear-design}, at combinations of the regressors that break the pattern.
+This is often impossible in observational studies, and useless when the dependence is a constraint of
+the population. The model can then be respecified: regressors that measure nearly the same thing can be
+combined into one (in Example~\ref{exa:appliances}, an index such as $x_1 + x_2$), or one of them dropped,
+accepting the bias of Theorem~\ref{thm:under-over} in exchange for precision. For polynomial models,
+centring $x$ before forming $x^2$ often removes most of the problem (Problem~\ref{prob:centring}).
+
+\subhead{Ridge regression}
+A different approach accepts some bias in the estimates in return for a large reduction in variance.
+
+\begin{defn}
+For a constant $k \ge 0$, the \textbf{ridge estimator} of the standardized coefficients is
+\[
+\hat{\mathbf{b}}_R = (\mathbf{R} + k\mathbf{I})^{-1}\mathbf{r}_y .
+\]
+The constant $k$ is the \emph{biasing parameter}; $k = 0$ gives least squares.
+\end{defn}
+
+Adding $k$ to the diagonal raises every eigenvalue from $\lambda_j$ to $\lambda_j + k$, so even a small $k$
+removes the near-singularity. Ridge regression is also least squares with a penalty: $\hat{\mathbf{b}}_R$
+minimises $\|\mathbf{y}^* - \mathbf{Wb}\|^2 + k\|\mathbf{b}\|^2$ (Problem~\ref{prob:ridge-penalty}), so it
+shrinks the coefficients towards zero, counteracting the tendency of least squares to make them too
+long (Theorem~\ref{thm:length}).
+
+The properties of the ridge estimator are clearest in the coordinates of the eigenvectors. Write
+$\mathbf{R} = \mathbf{P}\boldsymbol\Lambda\mathbf{P}^\top$ and $\boldsymbol\alpha = \mathbf{P}^\top\mathbf{b}$, the
+coefficients along the eigenvector directions, with estimates $\hat{\boldsymbol\alpha} = \mathbf{P}^\top\hat{\mathbf{b}}$.
+
+\begin{thm}\label{thm:ridge}
+\begin{enumerate}[label=(\roman*)]
+\item The components of $\hat{\boldsymbol\alpha}$ are uncorrelated, with $E(\hat\alpha_j) = \alpha_j$ and
+$\operatorname{Var}(\hat\alpha_j) = \sigma_*^2/\lambda_j$.
+\item The ridge estimator shrinks each component: $\hat\alpha_{R,j} = \dfrac{\lambda_j}{\lambda_j + k}\hat\alpha_j$.
+\item Its total mean squared error is
+\[
+\mathrm{MSE}(k) = E\|\hat{\mathbf{b}}_R - \mathbf{b}\|^2 = \sum_j\frac{\sigma_*^2\lambda_j + k^2\alpha_j^2}{(\lambda_j + k)^2} .
+\]
+\item (Hoerl and Kennard) $\mathrm{MSE}(k)$ is strictly decreasing for $0 \le k < \sigma_*^2/\max_j\alpha_j^2$.
+Hence there is always a $k > 0$ for which the ridge estimator has smaller total mean squared error than
+least squares.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $\operatorname{Var}(\hat{\boldsymbol\alpha}) = \mathbf{P}^\top(\sigma_*^2\mathbf{R}^{-1})\mathbf{P} = \sigma_*^2\mathbf{P}^\top\mathbf{P}\boldsymbol\Lambda^{-1}\mathbf{P}^\top\mathbf{P} = \sigma_*^2\boldsymbol\Lambda^{-1}$,
+a diagonal matrix; and $E(\hat{\boldsymbol\alpha}) = \mathbf{P}^\top\mathbf{b} = \boldsymbol\alpha$.
+
+(ii) By the normal equations $\mathbf{r}_y = \mathbf{R}\hat{\mathbf{b}}$, so
+$\hat{\mathbf{b}}_R = (\mathbf{R} + k\mathbf{I})^{-1}\mathbf{R}\hat{\mathbf{b}} = \mathbf{P}(\boldsymbol\Lambda + k\mathbf{I})^{-1}\boldsymbol\Lambda\mathbf{P}^\top\hat{\mathbf{b}}$,
+using $\mathbf{R} + k\mathbf{I} = \mathbf{P}(\boldsymbol\Lambda + k\mathbf{I})\mathbf{P}^\top$. Multiply on the left by $\mathbf{P}^\top$.
+
+(iii) $\mathbf{P}$ is orthogonal, so $\|\hat{\mathbf{b}}_R - \mathbf{b}\|^2 = \|\hat{\boldsymbol\alpha}_R - \boldsymbol\alpha\|^2$, and each
+component's mean squared error is its variance plus its squared bias. By (i) and (ii), with
+$c_j = \lambda_j/(\lambda_j + k)$, the variance is $c_j^2\sigma_*^2/\lambda_j = \sigma_*^2\lambda_j/(\lambda_j + k)^2$ and the
+bias is $(c_j - 1)\alpha_j = -k\alpha_j/(\lambda_j + k)$.
+
+(iv) Differentiate one term of (iii) with respect to $k$:
+\begin{align*}
+\frac{d}{dk}\,\frac{\sigma_*^2\lambda_j + k^2\alpha_j^2}{(\lambda_j + k)^2}
+&= \frac{2k\alpha_j^2(\lambda_j + k) - 2(\sigma_*^2\lambda_j + k^2\alpha_j^2)}{(\lambda_j + k)^3} \\
+&= \frac{2\lambda_j(k\alpha_j^2 - \sigma_*^2)}{(\lambda_j + k)^3} .
+\end{align*}
+If $k < \sigma_*^2/\alpha_j^2$ for every $j$, each derivative is negative, so $\mathrm{MSE}(k)$ is strictly decreasing
+on that interval, which starts at $k = 0$.
+\end{proof}
+
+The theorem shows where the gain comes from. Least squares estimates the component along a small
+eigenvalue with variance $\sigma_*^2/\lambda_j$, which is huge. Ridge shrinks that component by the factor
+$\lambda_j/(\lambda_j + k)$, which is far below $1$ when $\lambda_j$ is small compared with $k$, while leaving the
+well-estimated components (large $\lambda_j$) almost untouched. A little bias buys a large cut in variance.
+The catch is that the best $k$ depends on the unknown $\boldsymbol\alpha$ and $\sigma_*^2$.
+
+\subhead{Choosing $k$}
+Two common methods are:
+\begin{itemize}
+\item the \textbf{ridge trace}: plot the coefficients $\hat b_{R,j}$ against $k$, and choose the smallest $k$
+at which they have stabilised, with sensible signs and sizes, and with the residual mean square not much
+larger than at $k = 0$;
+\item the formula of Hoerl, Kennard and Baldwin (1975),
+\[
+\hat k = \frac{q\,\hat\sigma_*^2}{\hat{\mathbf{b}}^\top\hat{\mathbf{b}}} ,
+\]
+where $q$ is the number of regressors. It is the $k$ that minimises the mean squared error of
+Theorem~\ref{thm:ridge}(iii) when all the $\alpha_j$ are equal (Problem~\ref{prob:hkb}).
+\end{itemize}
+Either way $k$ is chosen from the data, so the usual tests and intervals do not apply to the ridge
+estimates; ridge regression is a tool for estimation and prediction, not for testing.
+
+\begin{exa}\label{exa:appliances-ridge}
+Apply ridge regression to the appliance data of Example~\ref{exa:appliances}.
+\end{exa}
+
+\begin{solution}
+In correlation form, $r_{12} = 0.98563$, $r_{1y} = 0.95182$ and $r_{2y} = 0.93455$, and the
+least-squares standardized coefficients are $\hat b_1 = 1.0760$ and $\hat b_2 = -0.1260$. (Check:
+$\hat\beta_1 = 1.0760\sqrt{163.5/65.5} = 1.70$.) For a given $k$,
+\[
+\hat{\mathbf{b}}_R = \frac{1}{(1 + k)^2 - r_{12}^2}\begin{bmatrix} (1 + k)r_{1y} - r_{12}r_{2y} \\ (1 + k)r_{2y} - r_{12}r_{1y} \end{bmatrix} .
+\]
+For instance at $k = 0.05$, $(1.05)^2 - 0.97147 = 0.13103$, and
+\[
+\hat{\mathbf{b}}_R = \frac{1}{0.13103}\begin{bmatrix} 0.99941 - 0.92112 \\ 0.98128 - 0.93815 \end{bmatrix}
+= \begin{bmatrix} 0.5975 \\ 0.3292 \end{bmatrix} .
+\]
+Converting each to the original scale with $\hat\beta_j = \hat b_j\sqrt{SS_T/S_{jj}}$:
+\begin{center}
+\begin{tabular}{c|cc|cc}
+$k$ & $\hat b_{R,1}$ & $\hat b_{R,2}$ & $\hat\beta_{R,1}$ & $\hat\beta_{R,2}$ \\
+\hline
+0 & 1.076 & $-0.126$ & 1.700 & $-0.200$ \\
+0.005 & 0.920 & 0.028 & 1.453 & 0.044 \\
+0.01 & 0.827 & 0.118 & 1.307 & 0.188 \\
+0.02 & 0.722 & 0.219 & 1.140 & 0.348 \\
+0.05 & 0.598 & 0.329 & 0.944 & 0.523 \\
+0.1 & 0.528 & 0.377 & 0.834 & 0.598 \\
+0.2 & 0.472 & 0.391 & 0.746 & 0.621 \\
+\end{tabular}
+\end{center}
+The ridge trace, Figure~\ref{fig:ridge-trace}, shows the two coefficients moving rapidly towards each
+other for small $k$, the sign of $\hat b_2$ turning positive by $k = 0.005$, and both settling down by
+about $k = 0.05$. For the Hoerl--Kennard--Baldwin value, $\hat\sigma_*^2 = MS_{\mathrm{Res}}/SS_T = 3.06/163.5 = 0.01872$
+and $\hat{\mathbf{b}}^\top\hat{\mathbf{b}} = 1.0760^2 + 0.1260^2 = 1.1736$, so
+\[
+\hat k = \frac{2 \times 0.01872}{1.1736} = 0.032 ,
+\]
+giving $\hat{\mathbf{b}}_R = (0.654,\ 0.281)$ and, on the original scale, with
+$\hat\beta_{R,0} = \bar y - \hat\beta_{R,1}\bar x_1 - \hat\beta_{R,2}\bar x_2$,
+\[
+\hat y_R = 4.00 + 1.03x_1 + 0.45x_2 .
+\]
+Both coefficients are now positive and of sensible size: about one unit of use per appliance, and a
+further half unit for each one used daily. The fit has hardly suffered: $R^2$ falls from $0.906$ to
+$0.901$.
+
+The theory explains the result. The eigenvalues are $1.9856$ and $0.0144$, and the least-squares components
+along the eigenvectors are $\hat\alpha_1 = (1.0760 - 0.1260)/\sqrt2 = 0.672$ and
+$\hat\alpha_2 = (1.0760 + 0.1260)/\sqrt2 = 0.850$, the latter with standard error
+$\sqrt{0.01872/0.0144} = 1.14$, larger than the estimate itself. At $k = 0.032$ ridge multiplies $\hat\alpha_1$ by
+$1.9856/2.0176 = 0.98$, leaving it almost unchanged, and $\hat\alpha_2$ by $0.0144/0.0464 = 0.31$, removing most
+of the noise in the poorly determined direction. If the estimates were the true values,
+Theorem~\ref{thm:ridge}(iii) would give $\mathrm{MSE}(0) = 1.31$ and $\mathrm{MSE}(0.032) = 0.48$, a reduction by more than
+half.
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=20cm,y=3.2cm]
+\draw[-Stealth] (0,0) -- (0.32,0) node[right] {\small $k$};
+\draw[-Stealth] (0,-0.25) -- (0,1.25) node[above] {\small $\hat b_{R,j}$};
+\foreach \t in {0.1,0.2,0.3} \draw[-] (\t,0.02) -- (\t,-0.02) node[below] {\scriptsize $\t$};
+\foreach \t in {0.5,1} \draw[-] (0.003,\t) -- (-0.003,\t) node[left] {\scriptsize $\t$};
+\draw[-] (0.003,0) -- (-0.003,0) node[left] {\scriptsize $0$};
+\draw[-,dashed,gray] (0.032,-0.25) -- (0.032,1.2);
+\node[right,font=\scriptsize,gray!70!black] at (0.032,1.12) {$k = 0.032$};
+\draw[-,thick,blue] plot[smooth] coordinates {(0.0000,1.076) (0.0025,0.986) (0.0050,0.920) (0.0075,0.868) (0.0100,0.827) (0.0150,0.765) (0.0200,0.722) (0.0300,0.663) (0.0400,0.624) (0.0500,0.598) (0.0600,0.577) (0.0800,0.548) (0.1000,0.528) (0.1200,0.512) (0.1500,0.494) (0.2000,0.472) (0.2500,0.455) (0.3000,0.440)};
+\draw[-,thick,red!70!black] plot[smooth] coordinates {(0.0000,-0.126) (0.0025,-0.038) (0.0050,0.028) (0.0075,0.078) (0.0100,0.118) (0.0150,0.177) (0.0200,0.219) (0.0300,0.273) (0.0400,0.307) (0.0500,0.329) (0.0600,0.345) (0.0800,0.365) (0.1000,0.377) (0.1200,0.384) (0.1500,0.389) (0.2000,0.391) (0.2500,0.389) (0.3000,0.385)};
+\node[blue,right,font=\small] at (0.3,0.47) {$\hat b_{R,1}$};
+\node[red!70!black,right,font=\small] at (0.3,0.36) {$\hat b_{R,2}$};
+\end{tikzpicture}
+\caption{The ridge trace for the appliance data: the standardized ridge coefficients against $k$.}
+\label{fig:ridge-trace}
+\end{figure}
+
+\begin{remark}[Principal components]
+\emph{Principal-components regression} works directly with the components $\alpha_j$. Since the components along small
+eigenvalues are almost impossible to estimate, set them to zero and keep only the others. In
+Example~\ref{exa:appliances} this would keep only $\hat\alpha_1 = 0.672$, giving
+\[
+\hat{\mathbf{b}} = 0.672 \times \tfrac{1}{\sqrt2}(1, 1) = (0.475,\ 0.475) ,
+\]
+equal standardized coefficients for the two
+regressors, which is the same as regressing on their (standardized) sum. Ridge regression shrinks the
+poorly determined components smoothly; principal-components regression removes them altogether.
+\end{remark}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:two-reg-corr}
+For a model with two regressors, show that
+\[
+\mathbf{R}^{-1} = \frac{1}{1 - r_{12}^2}\begin{bmatrix} 1 & -r_{12} \\ -r_{12} & 1 \end{bmatrix} ,
+\]
+and hence that the correlation between $\hat\beta_1$ and $\hat\beta_2$ is $-r_{12}$. Explain why, in
+Example~\ref{exa:appliances}, an estimate of $\beta_1$ that is too large tends to go with an estimate of
+$\beta_2$ that is too small.
+\end{problem}
+
+\begin{solution}
+The inverse of $\begin{bmatrix} 1 & r \\ r & 1 \end{bmatrix}$ is its adjugate divided by its determinant
+$1 - r^2$. Then $\operatorname{Var}(\hat{\mathbf{b}}) = \sigma_*^2\mathbf{R}^{-1}$ gives
+$\operatorname{Corr}(\hat b_1, \hat b_2) = (-r\sigma_*^2/(1 - r^2))\big/(\sigma_*^2/(1 - r^2)) = -r$, and since
+$\hat\beta_j$ is a positive multiple of $\hat b_j$, the same holds for $\hat\beta_1$, $\hat\beta_2$. In the
+example the correlation is $-0.986$: the data determine $\beta_1 + \beta_2$ (the effect of moving along the
+line $x_1 \approx x_2$) well, so an error upwards in one estimate must be offset by an error downwards in the
+other. That is how $\hat\beta_1 = 1.7$ and $\hat\beta_2 = -0.2$ arise from true values that are probably both
+positive: their sum, $1.5$, is close to the simple-regression slopes $1.50$ and $1.48$.
+\end{solution}
+
+\begin{problem}\label{prob:centring}
+For the quadratic model $y = \beta_0 + \beta_1x + \beta_2x^2 + \varepsilon$ with $x = 1, 2, 3, 4, 5$:
+\begin{enumerate}[label=(\alph*)]
+\item find the correlation between $x$ and $x^2$, and the VIFs;
+\item repeat with $x$ replaced by $x - 3$, and explain why centring helps;
+\item show that the two models give the same fitted values.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $x$: $1, \dots, 5$, $\bar x = 3$, $S_{xx} = 10$. $x^2$: $1, 4, 9, 16, 25$, mean $11$, with deviations
+$-10, -7, -2, 5, 14$, so $S_{x^2x^2} = 100 + 49 + 4 + 25 + 196 = 374$, and
+$S_{x,x^2} = -2(-10) - 1(-7) + 0 + 1(5) + 2(14) = 60$. So
+$r = 60/\sqrt{10 \times 374} = 0.981$, and both VIFs are $1/(1 - 0.9626) = 26.7$.
+
+(b) With $u = x - 3$: $u = -2, -1, 0, 1, 2$ and $u^2 = 4, 1, 0, 1, 4$. Then
+$S_{u,u^2} = \sum u_i \cdot u_i^2 = \sum u_i^3 = -8 - 1 + 0 + 1 + 8 = 0$, so $r = 0$ and both VIFs are $1$.
+Over $1 \le x \le 5$, $x^2$ is an increasing function of $x$ and nearly linear in it, hence the high
+correlation. After centring, $u^2$ is symmetric about $u = 0$ while $u$ is antisymmetric, and for points
+placed symmetrically the two are exactly uncorrelated.
+
+(c) $\beta_0 + \beta_1u + \beta_2u^2 = (\beta_0 - 3\beta_1 + 9\beta_2) + (\beta_1 - 6\beta_2)x + \beta_2x^2$, so the two
+models span the same column space (the functions $1, x, x^2$), and least squares gives the same projection
+$\hat{\mathbf{y}}$. Only the meaning, and the precision, of the individual coefficients change: in the
+centred model $\beta_1$ is the slope at $x = 3$, the middle of the data.
+\end{solution}
+
+\begin{problem}\label{prob:ridge-penalty}
+\begin{enumerate}[label=(\alph*)]
+\item Show that $\hat{\mathbf{b}}_R$ minimises $Q(\mathbf{b}) = \|\mathbf{y}^* - \mathbf{Wb}\|^2 + k\|\mathbf{b}\|^2$.
+\item Show that $\hat{\mathbf{b}}_R$ is the ordinary least-squares estimate for the data $\mathbf{y}^*$, $\mathbf{W}$
+augmented with $k$ extra observations: response $0$ and regressor rows $\sqrt{k}\,\mathbf{I}$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $Q(\mathbf{b}) = \mathbf{y}^{*\top}\mathbf{y}^* - 2\mathbf{b}^\top\mathbf{W}^\top\mathbf{y}^* + \mathbf{b}^\top(\mathbf{W}^\top\mathbf{W} + k\mathbf{I})\mathbf{b}$.
+By Lemma~\ref{lem:diff} the gradient is $-2\mathbf{r}_y + 2(\mathbf{R} + k\mathbf{I})\mathbf{b}$, zero at $\hat{\mathbf{b}}_R$.
+The matrix $\mathbf{R} + k\mathbf{I}$ is positive definite, so, as in the proof of Theorem~\ref{thm:ls-matrix},
+$Q(\mathbf{b}) = Q(\hat{\mathbf{b}}_R) + (\mathbf{b} - \hat{\mathbf{b}}_R)^\top(\mathbf{R} + k\mathbf{I})(\mathbf{b} - \hat{\mathbf{b}}_R)$, which is
+minimised only at $\hat{\mathbf{b}}_R$.
+
+(b) The augmented regressor matrix and response are
+\[
+\begin{bmatrix} \mathbf{W} \\ \sqrt{k}\,\mathbf{I} \end{bmatrix} , \qquad \begin{bmatrix} \mathbf{y}^* \\ \mathbf{0} \end{bmatrix} ,
+\]
+and the least-squares criterion is $\|\mathbf{y}^* - \mathbf{Wb}\|^2 + \|\mathbf{0} - \sqrt{k}\,\mathbf{b}\|^2 = Q(\mathbf{b})$. Equivalently its normal equations are
+$(\mathbf{W}^\top\mathbf{W} + k\mathbf{I})\mathbf{b} = \mathbf{W}^\top\mathbf{y}^*$. The pseudo-observations say ``each coefficient is
+probably near zero'', and they pull the estimates towards zero most strongly in the directions the real
+data leave undetermined.
+\end{solution}
+
+\begin{problem}\label{prob:vif-from-r2}
+In a regression with four regressors, regressing each on the other three gave
+$R_1^2 = 0.30$, $R_2^2 = 0.95$, $R_3^2 = 0.96$ and $R_4^2 = 0.50$.
+\begin{enumerate}[label=(\alph*)]
+\item Compute the VIFs and say which coefficients are affected.
+\item By what factor is the standard error of $\hat\beta_3$ larger than it would be if $x_3$ were
+uncorrelated with the others?
+\item Suggest what to examine next.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\mathrm{VIF}_j = 1/(1 - R_j^2)$: $1.43$, $20$, $25$, $2$. The coefficients of $x_2$ and $x_3$ are badly
+affected; those of $x_1$ and $x_4$ are not.
+
+(b) The standard error is multiplied by $\sqrt{\mathrm{VIF}_3} = 5$.
+
+(c) Since only $x_2$ and $x_3$ have large VIFs, the likeliest explanation is a single near dependence
+between them, possibly involving the others weakly. The correlation $r_{23}$ and the eigenvalues and
+eigenvectors of $\mathbf{R}$ would confirm this: one small eigenvalue, with eigenvector concentrated on $x_2$ and
+$x_3$. Then ask whether the two measure the same thing (combine them), whether one can be dropped, or whether
+the aim is prediction, in which case the collinearity may not matter.
+\end{solution}
+
+\begin{problem}\label{prob:length}
+For the appliance data, $\hat\sigma_*^2 = 0.01872$. Use Theorem~\ref{thm:length} to estimate how much longer, in
+squared length, the least-squares vector $\hat{\mathbf{b}}$ is expected to be than the true $\mathbf{b}$, and compare
+with an orthogonal design with the same $n$ and $\sigma_*^2$.
+\end{problem}
+
+\begin{solution}
+$\sum 1/\lambda_j = 1/1.9856 + 1/0.0144 = 0.504 + 69.6 = 70.1$, so
+$E\|\hat{\mathbf{b}}\|^2 - \|\mathbf{b}\|^2 = 0.01872 \times 70.1 = 1.31$. The observed $\|\hat{\mathbf{b}}\|^2 = 1.174$ is smaller than
+this expected excess alone, so much of its length may well be noise. With uncorrelated regressors $\mathbf{R} = \mathbf{I}$, both
+eigenvalues are $1$, and the excess would be $0.01872 \times 2 = 0.037$: thirty-five times smaller, the
+average of the two VIFs.
+\end{solution}
+
+\begin{problem}\label{prob:hkb}
+Suppose that in Theorem~\ref{thm:ridge}(iii) all the components are equal in size,
+$\alpha_j^2 = a^2$ for each of the $q$ components. Show that $\mathrm{MSE}(k)$ is minimised at $k = \sigma_*^2/a^2$, and deduce the
+Hoerl--Kennard--Baldwin formula.
+\end{problem}
+
+\begin{solution}
+By the derivative in the proof of Theorem~\ref{thm:ridge}(iv), each term has derivative
+$2\lambda_j(ka^2 - \sigma_*^2)/(\lambda_j + k)^3$, which is negative for $k < \sigma_*^2/a^2$ and positive for
+$k > \sigma_*^2/a^2$, whatever $\lambda_j$. So every term, and hence the sum, is minimised at
+$k = \sigma_*^2/a^2$. Since $\|\mathbf{b}\|^2 = \|\boldsymbol\alpha\|^2 = qa^2$, this is
+$k = q\sigma_*^2/\|\mathbf{b}\|^2$. Replacing $\sigma_*^2$ and $\mathbf{b}$ by their least-squares estimates gives
+$\hat k = q\hat\sigma_*^2/\hat{\mathbf{b}}^\top\hat{\mathbf{b}}$.
+\end{solution}
 
 \section{Dummy variables}
 
