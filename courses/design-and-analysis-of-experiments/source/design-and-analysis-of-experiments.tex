@@ -1120,6 +1120,524 @@ positive $\rho$ the larger critical value of the paired test can outweigh its sm
 are alike, $\rho$ is substantial, and the variance reduction dominates.
 \end{solution}
 
+\section{Single-factor experiments}
+We now compare $t \ge 2$ treatments, the levels of a single factor. In a \textbf{completely randomised design} the $N$ available experimental
+units are allocated to the treatments entirely at random, $n_i$ units to treatment $i$, with $N = n_1 + \dots + n_t$. In practice one writes the treatment
+labels, $n_1$ copies of label $1$, $n_2$ of label $2$ and so on, in a list of length $N$, applies a random permutation, and gives the $k$th unit the $k$th label
+of the permuted list. When the runs are made in sequence, the run order is randomised in the same way.
+
+\begin{exa}\label{exa:coating}
+A manufacturer of television sets was interested in the effect of five coating types on the conductivity of colour picture tubes. Four tubes
+were made with each coating, in random order, and the conductivity was measured:
+\begin{center}
+\begin{tabular}{c|cccc|c|c}
+coating type & \multicolumn{4}{c|}{conductivity} & total $y_{i\cdot}$ & mean $\bar y_{i\cdot}$ \\
+\hline
+$1$ & $80$ & $83$ & $83$ & $85$ & $331$ & $82.75$ \\
+$2$ & $75$ & $75$ & $79$ & $79$ & $308$ & $77.00$ \\
+$3$ & $67$ & $72$ & $74$ & $74$ & $287$ & $71.75$ \\
+$4$ & $62$ & $62$ & $67$ & $69$ & $260$ & $65.00$ \\
+$5$ & $60$ & $61$ & $64$ & $66$ & $251$ & $62.75$ \\
+\hline
+ & & & & & $1437$ & $71.85$
+\end{tabular}
+\end{center}
+In addition, $\sum_i\sum_jy_{ij}^2 = 104471$. Does the coating type affect conductivity?
+\end{exa}
+
+The analysis of such data is a special case of the general linear model, which is reviewed first.
+
+\subsection{The general linear model}
+A \textbf{linear model} takes the form
+\[
+\mathbf Y = X\boldsymbol\beta + \boldsymbol\varepsilon ,
+\]
+where $\mathbf Y$ is the $n \times 1$ vector of responses, $X$ is a known $n \times p$ matrix (the \textbf{design matrix}), $\boldsymbol\beta$ is a $p \times 1$ vector of unknown parameters
+and $\boldsymbol\varepsilon$ is the vector of random errors. The model may be a regression model, in which the columns of $X$ are measured variables, or a
+model for a designed experiment, in which they are indicator (dummy) variables for the treatments. The assumptions are
+\begin{enumerate}[label=(\roman*)]
+\item $E(\varepsilon_i) = 0$, so that $E(\mathbf Y) = X\boldsymbol\beta$;
+\item $\Var(\varepsilon_i) = \sigma^2$, a common variance (\textbf{homoscedastic} errors);
+\item $\Cov(\varepsilon_i, \varepsilon_j) = 0$ for $i \ne j$;
+\item for tests and confidence intervals, the $\varepsilon_i$ are normally distributed: $\boldsymbol\varepsilon \sim N(\mathbf 0, \sigma^2I)$.
+\end{enumerate}
+Here $X$ and $\boldsymbol\beta$ are non-random while $\mathbf Y$ and $\boldsymbol\varepsilon$ are random, and $\Var(\mathbf Y) = \Var(\boldsymbol\varepsilon) = \sigma^2I$.
+
+\subhead{Least squares}
+The method of least squares estimates $\boldsymbol\beta$ by minimising
+\[
+S(\boldsymbol\beta) = \|\mathbf Y - X\boldsymbol\beta\|^2 = \sum_{i=1}^n\bigl(Y_i - E(Y_i)\bigr)^2
+\]
+with respect to $\boldsymbol\beta$.
+
+\begin{thm}\label{thm:normal-equations}
+$\hat{\boldsymbol\beta}$ minimises $S(\boldsymbol\beta)$ if and only if it satisfies the \textbf{normal equations}
+\[
+X^\top X\hat{\boldsymbol\beta} = X^\top\mathbf Y .
+\]
+Solutions always exist, and the fitted vector $\hat{\mathbf Y} = X\hat{\boldsymbol\beta}$ is the same for every solution. If $X$ has full column rank $p$, the solution is unique:
+$\hat{\boldsymbol\beta} = (X^\top X)^{-1}X^\top\mathbf Y$.
+\end{thm}
+
+\begin{proof}
+Let $\hat{\boldsymbol\beta}$ satisfy the normal equations, so that $X^\top(\mathbf Y - X\hat{\boldsymbol\beta}) = \mathbf 0$. For any $\boldsymbol\beta$,
+\[
+\|\mathbf Y - X\boldsymbol\beta\|^2 = \|\mathbf Y - X\hat{\boldsymbol\beta}\|^2 + \|X(\hat{\boldsymbol\beta} - \boldsymbol\beta)\|^2 + 2(\hat{\boldsymbol\beta} - \boldsymbol\beta)^\top X^\top(\mathbf Y - X\hat{\boldsymbol\beta}) ,
+\]
+and the last term is zero. So $S(\boldsymbol\beta) \ge S(\hat{\boldsymbol\beta})$, with equality exactly when $X\boldsymbol\beta = X\hat{\boldsymbol\beta}$; this shows that $\hat{\boldsymbol\beta}$ is a minimiser, that every
+minimiser has the same fitted vector, and (taking $\boldsymbol\beta$ to be another minimiser) that every minimiser satisfies the normal equations. Solutions exist
+because $X^\top\mathbf Y$ lies in the column space of $X^\top$, which equals the column space of $X^\top X$. If $X$ has rank $p$, $X^\top X$ is invertible.
+\end{proof}
+
+Geometrically, $\hat{\mathbf Y}$ is the orthogonal projection of $\mathbf Y$ onto the column space $\mathcal C(X)$, and we write $\hat{\mathbf Y} = H\mathbf Y$, where $H$ is the
+\textbf{projection matrix} (or hat matrix) onto $\mathcal C(X)$. When $X$ has full rank, $H = X(X^\top X)^{-1}X^\top$. In every case $H$ is symmetric and idempotent
+($H^2 = H$), and its rank, which equals its trace, is the rank of $X$. The residual vector is $\mathbf e = \mathbf Y - \hat{\mathbf Y} = (I - H)\mathbf Y$, and the
+\textbf{residual (error) sum of squares} is
+\[
+SSE = \mathbf e^\top\mathbf e = \mathbf Y^\top(I - H)\mathbf Y = \sum_{i=1}^n(Y_i - \hat Y_i)^2 .
+\]
+When $X$ has full rank, $E(\hat{\boldsymbol\beta}) = \boldsymbol\beta$ and $\Cov(\hat{\boldsymbol\beta}) = \sigma^2(X^\top X)^{-1}$, and under normality $\hat{\boldsymbol\beta} \sim N\bigl(\boldsymbol\beta, \sigma^2(X^\top X)^{-1}\bigr)$.
+
+\subhead{Quadratic forms}
+Sums of squares are quadratic forms $\mathbf Y^\top A\mathbf Y$ in the observations, and two results about them carry most of the theory.
+
+\begin{lem}\label{lem:quad-mean}
+If $E(\mathbf Y) = \boldsymbol\mu$ and $\Var(\mathbf Y) = \Sigma$, then for any symmetric matrix $A$,
+\[
+E(\mathbf Y^\top A\mathbf Y) = \operatorname{tr}(A\Sigma) + \boldsymbol\mu^\top A\boldsymbol\mu .
+\]
+\end{lem}
+
+\begin{proof}
+$\mathbf Y^\top A\mathbf Y$ is a scalar, so it equals its trace, and $\operatorname{tr}(A\mathbf Y\mathbf Y^\top)$ by the cyclic property. Since $E(\mathbf Y\mathbf Y^\top) = \Sigma + \boldsymbol\mu\boldsymbol\mu^\top$,
+\[
+E(\mathbf Y^\top A\mathbf Y) = \operatorname{tr}\bigl(A(\Sigma + \boldsymbol\mu\boldsymbol\mu^\top)\bigr) = \operatorname{tr}(A\Sigma) + \boldsymbol\mu^\top A\boldsymbol\mu .
+\]
+\end{proof}
+
+Applied to $SSE$ with $\Sigma = \sigma^2I$ and $\boldsymbol\mu = X\boldsymbol\beta$, for which $(I - H)X\boldsymbol\beta = \mathbf 0$, the lemma gives $E(SSE) = \sigma^2\operatorname{tr}(I - H) = \sigma^2(n - r)$, where $r$ is
+the rank of $X$. So $MSE = SSE/(n - r)$ is an unbiased estimator of $\sigma^2$, and no normality is needed for this.
+
+\begin{defn}
+If $Z_1, \dots, Z_k$ are independent with $Z_i \sim N(\delta_i, 1)$, then $\sum Z_i^2$ has the \textbf{non-central chi-square distribution} with $k$ degrees of freedom and
+non-centrality parameter $\lambda = \sum\delta_i^2$, written $\chi^2_k(\lambda)$. Its distribution depends on the $\delta_i$ only through $\lambda$, its mean is $k + \lambda$, and
+$\chi^2_k(0) = \chi^2_k$. If $V_1 \sim \chi^2_{k_1}(\lambda)$ and $V_2 \sim \chi^2_{k_2}$ are independent, $(V_1/k_1)/(V_2/k_2)$ has the \textbf{non-central $F$ distribution} $F_{k_1,k_2}(\lambda)$.
+\end{defn}
+
+\begin{thm}\label{thm:quad-forms}
+Let $\mathbf Y \sim N(\boldsymbol\mu, \sigma^2I_n)$, and let $A$ and $B$ be symmetric idempotent matrices of ranks $a$ and $b$.
+\begin{enumerate}[label=(\roman*)]
+\item $\mathbf Y^\top A\mathbf Y/\sigma^2 \sim \chi^2_a(\lambda)$, with $\lambda = \boldsymbol\mu^\top A\boldsymbol\mu/\sigma^2$.
+\item If $AB = 0$, then $\mathbf Y^\top A\mathbf Y$ and $\mathbf Y^\top B\mathbf Y$ are independent.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) A symmetric idempotent matrix has eigenvalues $0$ and $1$, so by the spectral theorem $A = PP^\top$, where the $n \times a$ matrix $P$ has orthonormal
+columns, $P^\top P = I_a$. Then $\mathbf Y^\top A\mathbf Y = \|P^\top\mathbf Y\|^2$, and $\mathbf Z = P^\top\mathbf Y/\sigma \sim N(P^\top\boldsymbol\mu/\sigma, I_a)$ has independent unit-variance normal
+components. Hence $\mathbf Y^\top A\mathbf Y/\sigma^2 = \|\mathbf Z\|^2 \sim \chi^2_a(\lambda)$ with $\lambda = \|P^\top\boldsymbol\mu\|^2/\sigma^2 = \boldsymbol\mu^\top A\boldsymbol\mu/\sigma^2$.
+
+(ii) Similarly write $B = QQ^\top$. Since $AB = 0$,
+\[
+0 = P^\top(PP^\top QQ^\top)Q = (P^\top P)(P^\top Q)(Q^\top Q) = P^\top Q .
+\]
+So the jointly normal vectors $P^\top\mathbf Y$ and
+$Q^\top\mathbf Y$ have covariance $\sigma^2P^\top Q = 0$ and are independent, and so are their squared lengths $\mathbf Y^\top A\mathbf Y$ and $\mathbf Y^\top B\mathbf Y$.
+\end{proof}
+
+\subsection{Models for a single-factor experiment}
+Let $y_{ij}$ be the $j$th observation on treatment $i$, $i = 1, \dots, t$, $j = 1, \dots, n_i$. Two equivalent models are in use.
+
+\begin{defn}
+\begin{enumerate}[label=(\roman*)]
+\item The \textbf{cell means model} is
+\[
+y_{ij} = \mu_i + \varepsilon_{ij} ,
+\]
+where $\mu_i$ is the mean response to treatment $i$.
+\item The \textbf{effects model} is
+\[
+y_{ij} = \mu + \tau_i + \varepsilon_{ij} ,
+\]
+where $\mu$ is an overall mean and $\tau_i$ is the \textbf{effect} of treatment $i$, its deviation from the overall mean.
+\end{enumerate}
+In both, the errors $\varepsilon_{ij}$ are independent $N(0, \sigma^2)$, and the treatment effects are \textbf{fixed}: the $t$ treatments are the only ones of interest,
+and conclusions are about them alone. (Treatments chosen at random from a larger population lead to the random effects model of a later
+section.)
+\end{defn}
+
+The two models describe the same means, $\mu_i = \mu + \tau_i$, but the effects model has $t + 1$ parameters for $t$ means. In matrix form its design
+matrix has a column of ones followed by the $t$ treatment indicators, and since the indicators sum to the column of ones, $X$ has rank $t$, not $t + 1$:
+it is \textbf{not of full rank}. For example, with $t = 3$ and $n_i = 2$,
+\[
+\begin{pmatrix} y_{11} \\ y_{12} \\ y_{21} \\ y_{22} \\ y_{31} \\ y_{32} \end{pmatrix}
+= \begin{pmatrix} 1 & 1 & 0 & 0 \\ 1 & 1 & 0 & 0 \\ 1 & 0 & 1 & 0 \\ 1 & 0 & 1 & 0 \\ 1 & 0 & 0 & 1 \\ 1 & 0 & 0 & 1 \end{pmatrix}
+\begin{pmatrix} \mu \\ \tau_1 \\ \tau_2 \\ \tau_3 \end{pmatrix} + \boldsymbol\varepsilon .
+\]
+The normal equations $X^\top X\hat{\boldsymbol\beta} = X^\top\mathbf Y$ are, writing $y_{i\cdot} = \sum_jy_{ij}$ and $y_{\cdot\cdot} = \sum_iy_{i\cdot}$,
+\begin{align*}
+N\hat\mu + \sum_{i=1}^tn_i\hat\tau_i &= y_{\cdot\cdot} , \\
+n_i\hat\mu + n_i\hat\tau_i &= y_{i\cdot} , \qquad i = 1, \dots, t .
+\end{align*}
+The first equation is the sum of the others, so there are only $t$ independent equations for $t + 1$ unknowns and infinitely many solutions. Every
+solution has $\hat\mu + \hat\tau_i = \bar y_{i\cdot}$. A unique solution is picked out by imposing one \textbf{side condition}; the usual one is $\sum n_i\hat\tau_i = 0$, which gives
+\[
+\hat\mu = \bar y_{\cdot\cdot} , \qquad \hat\tau_i = \bar y_{i\cdot} - \bar y_{\cdot\cdot} , \qquad i = 1, \dots, t .
+\]
+Statistical software often uses $\hat\tau_t = 0$ instead, giving $\hat\mu = \bar y_{t\cdot}$ and $\hat\tau_i = \bar y_{i\cdot} - \bar y_{t\cdot}$. The two solutions look different, and the next idea
+explains why it does not matter.
+
+\begin{defn}
+A linear function $\psi = \mathbf c^\top\boldsymbol\beta$ of the parameters is \textbf{estimable} if it has a linear unbiased estimator, that is, if there is a vector $\mathbf a$ such
+that $E(\mathbf a^\top\mathbf Y) = \mathbf c^\top\boldsymbol\beta$ for all $\boldsymbol\beta$.
+\end{defn}
+
+Since $E(\mathbf a^\top\mathbf Y) = \mathbf a^\top X\boldsymbol\beta$, the function $\mathbf c^\top\boldsymbol\beta$ is estimable exactly when $\mathbf c^\top = \mathbf a^\top X$ for some $\mathbf a$, that is, when $\mathbf c^\top$ is a linear combination
+of the rows of $X$.
+
+\begin{thm}\label{thm:estimable}
+If $\mathbf c^\top\boldsymbol\beta$ is estimable, then $\mathbf c^\top\hat{\boldsymbol\beta}$ is the same for every solution $\hat{\boldsymbol\beta}$ of the normal equations. It is unbiased for $\mathbf c^\top\boldsymbol\beta$, and (Gauss--Markov) it has
+the smallest variance among all linear unbiased estimators.
+\end{thm}
+
+\begin{proof}
+Write $\mathbf c^\top = \mathbf a^\top X$. Then $\mathbf c^\top\hat{\boldsymbol\beta} = \mathbf a^\top X\hat{\boldsymbol\beta} = \mathbf a^\top\hat{\mathbf Y}$, and $\hat{\mathbf Y}$ is the same for every solution by Theorem~\ref{thm:normal-equations}.
+Since $\hat{\mathbf Y} = H\mathbf Y$ and $HX = X$, $E(\mathbf a^\top H\mathbf Y) = \mathbf a^\top HX\boldsymbol\beta = \mathbf a^\top X\boldsymbol\beta = \mathbf c^\top\boldsymbol\beta$. For minimum variance, let $\mathbf b^\top\mathbf Y$ be any linear unbiased
+estimator, so $\mathbf b^\top X = \mathbf c^\top$. Then $\mathbf b^\top\mathbf Y = \mathbf b^\top H\mathbf Y + \mathbf b^\top(I - H)\mathbf Y$, and $\mathbf b^\top H\mathbf Y = \mathbf c^\top\hat{\boldsymbol\beta}$ because $\mathbf b^\top H\mathbf Y = \mathbf b^\top X\hat{\boldsymbol\beta}$. The two parts are
+uncorrelated, since $\Cov(H\mathbf Y, (I - H)\mathbf Y) = \sigma^2H(I - H) = 0$. Hence
+\[
+\Var(\mathbf b^\top\mathbf Y) = \Var(\mathbf c^\top\hat{\boldsymbol\beta}) + \sigma^2\|(I - H)\mathbf b\|^2 \ge \Var(\mathbf c^\top\hat{\boldsymbol\beta}) .
+\]
+\end{proof}
+
+In the effects model each row of $X$ picks out $\mu + \tau_i$ for some $i$, so the estimable functions are exactly the linear combinations
+$\sum_ia_i(\mu + \tau_i)$. In particular:
+\begin{itemize}
+\item each treatment mean $\mu + \tau_i$ is estimable, with estimate $\bar y_{i\cdot}$;
+\item a \textbf{contrast} $\sum_ic_i\tau_i$ with $\sum_ic_i = 0$ is estimable, since it equals $\sum_ic_i(\mu + \tau_i)$; differences $\tau_i - \tau_k$ are the simplest contrasts;
+\item an individual $\tau_i$, and $\mu$ itself, are \emph{not} estimable. Their values depend on the side condition, which is an arbitrary convention, and
+no experiment can determine them.
+\end{itemize}
+
+\begin{coro}\label{coro:contrast-invariance}
+For any contrast $C = \sum_{i=1}^tc_i\tau_i$, the estimate $\hat C = \sum_{i=1}^tc_i\hat\tau_i$ is the same for the effects model, whatever side condition is used, and for
+the cell means model, and equals $\sum_{i=1}^tc_i\bar y_{i\cdot}$.
+\end{coro}
+
+\begin{proof}
+Every solution of the normal equations of the effects model has $\hat\tau_i = \bar y_{i\cdot} - \hat\mu$, so, because $\sum c_i = 0$,
+\[
+\sum_ic_i\hat\tau_i = \sum_ic_i\bar y_{i\cdot} - \hat\mu\sum_ic_i = \sum_ic_i\bar y_{i\cdot} .
+\]
+In the cell means model, which has full rank, $\hat\mu_i = \bar y_{i\cdot}$, and the same contrast is $\sum c_i\mu_i = \sum c_i(\mu + \tau_i) = \sum c_i\tau_i$, estimated by $\sum c_i\bar y_{i\cdot}$.
+\end{proof}
+
+\subsection{The analysis of variance}
+Write $\bar y_{i\cdot} = y_{i\cdot}/n_i$ and $\bar y_{\cdot\cdot} = y_{\cdot\cdot}/N$. The deviation of each observation from the grand mean splits into a between-treatment and a
+within-treatment part,
+\[
+y_{ij} - \bar y_{\cdot\cdot} = (\bar y_{i\cdot} - \bar y_{\cdot\cdot}) + (y_{ij} - \bar y_{i\cdot}) .
+\]
+
+\begin{thm}[Partition of the total sum of squares]\label{thm:partition}
+\[
+\underbrace{\sum_{i=1}^t\sum_{j=1}^{n_i}(y_{ij} - \bar y_{\cdot\cdot})^2}_{SST} = \underbrace{\sum_{i=1}^tn_i(\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2}_{SS_{\mathrm{Treatments}}} + \underbrace{\sum_{i=1}^t\sum_{j=1}^{n_i}(y_{ij} - \bar y_{i\cdot})^2}_{SSE} .
+\]
+\end{thm}
+
+\begin{proof}
+Square the decomposition above and sum over $i$ and $j$. The cross-product term is
+\[
+2\sum_{i=1}^t(\bar y_{i\cdot} - \bar y_{\cdot\cdot})\sum_{j=1}^{n_i}(y_{ij} - \bar y_{i\cdot}) = 0 ,
+\]
+because the deviations within each treatment sum to zero.
+\end{proof}
+
+The degrees of freedom split in the same way: $N - 1 = (t - 1) + (N - t)$. For calculation by hand,
+\begin{gather*}
+SST = \sum_i\sum_jy_{ij}^2 - \frac{y_{\cdot\cdot}^2}{N} , \qquad SS_{\mathrm{Treatments}} = \sum_i\frac{y_{i\cdot}^2}{n_i} - \frac{y_{\cdot\cdot}^2}{N} , \\
+SSE = SST - SS_{\mathrm{Treatments}} ,
+\end{gather*}
+where $y_{\cdot\cdot}^2/N$ is called the \textbf{correction factor}. The \textbf{mean squares} are the sums of squares divided by their degrees of freedom,
+\[
+MS_{\mathrm{Treatments}} = \frac{SS_{\mathrm{Treatments}}}{t - 1} , \qquad MSE = \frac{SSE}{N - t} .
+\]
+
+\begin{thm}[Expected mean squares]\label{thm:ems-one-way}
+Under the effects model with $E(\varepsilon_{ij}) = 0$, $\Var(\varepsilon_{ij}) = \sigma^2$ and uncorrelated errors (normality is not needed),
+\[
+E(MSE) = \sigma^2 , \qquad E(MS_{\mathrm{Treatments}}) = \sigma^2 + \frac{\sum_{i=1}^tn_i(\tau_i - \bar\tau)^2}{t - 1} ,
+\]
+where $\bar\tau = \sum n_i\tau_i/N$. In a balanced experiment, $n_i = r$ for all $i$, this is
+\[
+E(MS_{\mathrm{Treatments}}) = \sigma^2 + \frac{r}{t - 1}\sum_{i=1}^t(\tau_i - \bar\tau)^2 , \qquad \bar\tau = \frac1t\sum_{i=1}^t\tau_i .
+\]
+\end{thm}
+
+\begin{proof}
+We use $E(W^2) = \Var(W) + \bigl(E(W)\bigr)^2$ repeatedly. Write $\mu_i = \mu + \tau_i$ and $\bar\mu = \sum n_i\mu_i/N = \mu + \bar\tau$. Then
+\begin{align*}
+E(y_{ij}^2) &= \sigma^2 + \mu_i^2 , \\
+E(y_{i\cdot}^2) &= \Var(y_{i\cdot}) + \bigl(E(y_{i\cdot})\bigr)^2 = n_i\sigma^2 + n_i^2\mu_i^2 , \\
+E(y_{\cdot\cdot}^2) &= N\sigma^2 + N^2\bar\mu^2 .
+\end{align*}
+For the error sum of squares,
+\begin{align*}
+E(SSE) &= \sum_i\sum_jE(y_{ij}^2) - \sum_i\frac{E(y_{i\cdot}^2)}{n_i} \\
+&= \sum_in_i(\sigma^2 + \mu_i^2) - \sum_i(\sigma^2 + n_i\mu_i^2) = (N - t)\sigma^2 .
+\end{align*}
+For the treatment sum of squares,
+\begin{align*}
+E(SS_{\mathrm{Treatments}}) &= \sum_i\frac{E(y_{i\cdot}^2)}{n_i} - \frac{E(y_{\cdot\cdot}^2)}{N} \\
+&= \sum_i(\sigma^2 + n_i\mu_i^2) - (\sigma^2 + N\bar\mu^2) \\
+&= (t - 1)\sigma^2 + \sum_in_i\mu_i^2 - N\bar\mu^2 \\
+&= (t - 1)\sigma^2 + \sum_in_i(\mu_i - \bar\mu)^2 ,
+\end{align*}
+and $\mu_i - \bar\mu = \tau_i - \bar\tau$. Dividing by the degrees of freedom gives both results, and with $n_i = r$, $\bar\tau$ is the simple average of the $\tau_i$.
+\end{proof}
+
+With the side condition $\sum n_i\tau_i = 0$ we have $\bar\tau = 0$, and the result is often quoted as
+\[
+E(MS_{\mathrm{Treatments}}) = \sigma^2 + \frac{\sum n_i\tau_i^2}{t - 1} .
+\] Either way, $MSE$
+estimates $\sigma^2$ whatever the treatment effects, while $MS_{\mathrm{Treatments}}$ estimates $\sigma^2$ only when all the $\tau_i$ are equal and something larger
+otherwise. This suggests comparing the two.
+
+\begin{thm}\label{thm:anova-F}
+Under the effects model with normal errors,
+\begin{enumerate}[label=(\roman*)]
+\item $SSE/\sigma^2 \sim \chi^2_{N-t}$;
+\item $SS_{\mathrm{Treatments}}/\sigma^2 \sim \chi^2_{t-1}(\lambda)$ with $\lambda = \sum_in_i(\tau_i - \bar\tau)^2/\sigma^2$;
+\item $SSE$ and $SS_{\mathrm{Treatments}}$ are independent.
+\end{enumerate}
+Hence $F_0 = MS_{\mathrm{Treatments}}/MSE \sim F_{t-1,\,N-t}(\lambda)$, and under $H_0 : \tau_1 = \dots = \tau_t$, where $\lambda = 0$, $F_0 \sim F_{t-1,\,N-t}$.
+\end{thm}
+
+\begin{proof}
+Let $H$ be the projection onto the column space of the design matrix, which is spanned by the $t$ treatment indicators; $H\mathbf Y$ replaces each
+observation by its treatment mean $\bar y_{i\cdot}$. Let $H_0 = \frac1NJ$, the projection onto the column of ones, which replaces each observation by $\bar y_{\cdot\cdot}$.
+Since the column of ones lies in $\mathcal C(X)$, $HH_0 = H_0H = H_0$. Then
+\[
+SSE = \mathbf Y^\top(I - H)\mathbf Y , \qquad SS_{\mathrm{Treatments}} = \mathbf Y^\top(H - H_0)\mathbf Y ,
+\]
+because $(H - H_0)\mathbf Y$ has entries $\bar y_{i\cdot} - \bar y_{\cdot\cdot}$. Both $I - H$ and $H - H_0$ are symmetric and idempotent, for example
+$(H - H_0)^2 = H - H_0 - H_0 + H_0 = H - H_0$, with ranks equal to their traces, $N - t$ and $t - 1$; and $(I - H)(H - H_0) = H - H_0 - H + H_0 = 0$. By
+Theorem~\ref{thm:quad-forms} the two sums of squares are independent with the stated distributions. The non-centrality parameters are found
+by replacing $\mathbf Y$ by its mean: $(I - H)\boldsymbol\mu = \mathbf 0$, while $(H - H_0)\boldsymbol\mu$ has entries $\mu_i - \bar\mu = \tau_i - \bar\tau$, so
+$\boldsymbol\mu^\top(H - H_0)\boldsymbol\mu = \sum n_i(\tau_i - \bar\tau)^2$.
+\end{proof}
+
+We therefore test $H_0 : \tau_1 = \tau_2 = \dots = \tau_t$ against $H_1$: $\tau_i \ne \tau_k$ for at least one pair, by rejecting $H_0$ when
+\[
+F_0 = \frac{MS_{\mathrm{Treatments}}}{MSE} > F_{\alpha,\,t-1,\,N-t} .
+\]
+The test is one-sided because, by Theorem~\ref{thm:ems-one-way}, departures from $H_0$ can only make $F_0$ large. The calculations are set out in an
+\textbf{analysis of variance (ANOVA) table}:
+\begin{center}
+\begin{tabular}{l|c|c|c|c}
+source & sum of squares & df & mean square & $F_0$ \\
+\hline
+treatments & $SS_{\mathrm{Treatments}}$ & $t - 1$ & $MS_{\mathrm{Treatments}}$ & $F_0$ \\
+error & $SSE$ & $N - t$ & $MSE$ & \\
+\hline
+total & $SST$ & $N - 1$ & &
+\end{tabular}
+\end{center}
+
+\begin{remark}
+The $F$ test is a comparison of two models fitted by least squares. The \textbf{full model} $y_{ij} = \mu + \tau_i + \varepsilon_{ij}$ has residual sum of squares $SSE$.
+The \textbf{reduced model} $y_{ij} = \mu + \varepsilon_{ij}$, which is the model under $H_0$, has residual sum of squares $SST$. The treatment sum of squares is the
+\emph{reduction} in residual sum of squares achieved by adding the treatment effects, $SS_{\mathrm{Treatments}} = SST - SSE$, and $F_0$ compares that reduction, per
+parameter added, with the error mean square of the full model. This \textbf{extra sum of squares} principle is how every $F$ test in this course, and
+in regression, is constructed. It is also the likelihood ratio test of $H_0$.
+\end{remark}
+
+\subsection{Estimation}
+Under the side condition $\sum n_i\tau_i = 0$, the least squares estimates are
+\[
+\hat\mu = \bar y_{\cdot\cdot} , \qquad \hat\tau_i = \bar y_{i\cdot} - \bar y_{\cdot\cdot} , \qquad \hat\sigma^2 = MSE ,
+\]
+and the treatment means are estimated by $\hat\mu_i = \hat\mu + \hat\tau_i = \bar y_{i\cdot}$, whatever side condition is used. Because $\bar y_{i\cdot} \sim N(\mu_i, \sigma^2/n_i)$ independently of
+$MSE$, and $(N - t)MSE/\sigma^2 \sim \chi^2_{N-t}$,
+\[
+\frac{\bar y_{i\cdot} - \mu_i}{\sqrt{MSE/n_i}} \sim t_{N-t} ,
+\]
+and a $100(1 - \alpha)\%$ confidence interval for $\mu_i$ is
+\[
+\bar y_{i\cdot} \pm t_{\alpha/2,\,N-t}\sqrt{\frac{MSE}{n_i}} .
+\]
+Similarly, for the difference of two treatment means,
+\[
+\bar y_{i\cdot} - \bar y_{k\cdot} \pm t_{\alpha/2,\,N-t}\sqrt{MSE\Bigl(\frac{1}{n_i} + \frac{1}{n_k}\Bigr)} .
+\]
+These intervals use the pooled estimate $MSE$ from all $t$ treatments, with $N - t$ degrees of freedom, rather than the data on treatments $i$ and $k$
+alone; this is the gain from the common-variance assumption.
+
+\begin{exa}\label{exa:coating-anova}
+For the coating data of Example~\ref{exa:coating}, the model is
+\[
+y_{ij} = \mu + \tau_i + \varepsilon_{ij} , \qquad i = 1, \dots, 5 , \quad j = 1, \dots, 4 ,
+\]
+where $y_{ij}$ is the conductivity of the $j$th tube with coating $i$, $\mu$ is the overall mean conductivity, $\tau_i$ is the effect of coating type $i$, with
+$\sum\tau_i = 0$, and $\varepsilon_{ij}$ is the random error. The errors are assumed independent $N(0, \sigma^2)$, with the same variance for every coating; the
+coating effects are fixed, since these five coatings are the only ones of interest.
+
+With $N = 20$, $t = 5$ and $y_{\cdot\cdot} = 1437$, the correction factor is $1437^2/20 = 103248.45$, and
+\begin{align*}
+SST &= 104471 - 103248.45 = 1222.55 , \\
+SS_{\mathrm{Treatments}} &= \frac{331^2 + 308^2 + 287^2 + 260^2 + 251^2}{4} - 103248.45 \\
+&= 1100.30 , \\
+SSE &= 1222.55 - 1100.30 = 122.25 .
+\end{align*}
+\begin{center}
+\begin{tabular}{l|c|c|c|c}
+source & SS & df & MS & $F_0$ \\
+\hline
+coating types & $1100.30$ & $4$ & $275.075$ & $33.75$ \\
+error & $122.25$ & $15$ & $8.150$ & \\
+\hline
+total & $1222.55$ & $19$ & &
+\end{tabular}
+\end{center}
+Since $F_0 = 33.75 > F_{0.05,4,15} = 3.06$ (the $p$-value is $2.5 \times 10^{-7}$), we reject $H_0$: the coating type affects conductivity.
+
+The estimates are $\hat\mu = 71.85$, $\hat\sigma^2 = 8.15$ and
+\[
+\hat\tau_1 = 10.90 , \quad \hat\tau_2 = 5.15 , \quad \hat\tau_3 = -0.10 , \quad \hat\tau_4 = -6.85 , \quad \hat\tau_5 = -9.10 .
+\]
+With $t_{0.025,15} = 2.131$ and $\sqrt{MSE/4} = 1.427$, the $95\%$ interval for the mean conductivity with coating $1$ is $82.75 \pm 3.04$, that is $(79.71,\ 85.79)$,
+and for the difference between coatings $1$ and $2$ it is
+\[
+5.75 \pm 2.131\sqrt{8.15\Bigl(\frac14 + \frac14\Bigr)} = 5.75 \pm 4.30 ,
+\]
+that is, $(1.45,\ 10.05)$.
+\end{exa}
+
+\begin{remark}
+The intervals above are for comparisons chosen in advance. If the pair to compare is chosen \emph{after} seeing the data, for instance the largest
+and smallest means, or if many comparisons are made, the confidence level of each interval no longer describes the whole collection. Methods
+that control the error rate over a family of comparisons are the subject of the section on treatment contrasts.
+\end{remark}
+
+\subsection{Practice problems}
+
+\begin{problem}\label{prob:rations}
+Sixteen animals were randomised to four food rations, four animals to each. After a period of individual feeding on the diet, the animals were
+sacrificed and organ damage was measured; higher values indicate greater damage.
+\begin{center}
+\begin{tabular}{c|cccc}
+ & \multicolumn{4}{c}{ration} \\
+ & $1$ & $2$ & $3$ & $4$ \\
+\hline
+ & $7.2$ & $4.5$ & $9.7$ & $7.1$ \\
+ & $6.8$ & $6.0$ & $8.4$ & $6.1$ \\
+ & $6.0$ & $4.6$ & $8.8$ & $7.2$ \\
+ & $6.3$ & $6.3$ & $9.9$ & $6.4$ \\
+\hline
+total & $26.3$ & $21.4$ & $36.8$ & $26.8$
+\end{tabular}
+\end{center}
+The grand total is $111.3$ and $\sum\sum y_{ij}^2 = 811.39$. The rations are: $1$, vegetable fat, large proportion; $2$, vegetable fat, small proportion; $3$, animal
+fat, large proportion; $4$, animal fat, small proportion.
+\begin{enumerate}[label=(\alph*)]
+\item Write down a model for the data, explain all the terms and state the assumptions.
+\item Estimate all the parameters in your model.
+\item Construct the ANOVA table and test whether the mean organ damage is the same for the four rations, at $\alpha = 0.05$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $y_{ij} = \mu + \tau_i + \varepsilon_{ij}$, $i = 1, \dots, 4$, $j = 1, \dots, 4$, where $y_{ij}$ is the organ damage of the $j$th animal on ration $i$, $\mu$ the overall mean, $\tau_i$ the
+fixed effect of ration $i$ with $\sum\tau_i = 0$, and $\varepsilon_{ij}$ the random error; the errors are independent $N(0, \sigma^2)$ with a common variance.
+
+(b) The ration means are $6.575$, $5.350$, $9.200$ and $6.700$, and $\bar y_{\cdot\cdot} = 111.3/16 = 6.95625$. So $\hat\mu = 6.956$ and
+\[
+\hat\tau_1 = -0.381 , \quad \hat\tau_2 = -1.606 , \quad \hat\tau_3 = 2.244 , \quad \hat\tau_4 = -0.256 .
+\]
+$\hat\sigma^2 = MSE$ is found in (c).
+
+(c) The correction factor is $111.3^2/16 = 774.2306$, so $SST = 811.39 - 774.2306 = 37.1594$,
+\begin{align*}
+SS_{\mathrm{Rations}} &= \frac{26.3^2 + 21.4^2 + 36.8^2 + 26.8^2}{4} - 774.2306 \\
+&= 805.5325 - 774.2306 = 31.3019 ,
+\end{align*}
+and $SSE = 5.8575$.
+\begin{center}
+\begin{tabular}{l|c|c|c|c}
+source & SS & df & MS & $F_0$ \\
+\hline
+rations & $31.3019$ & $3$ & $10.4340$ & $21.38$ \\
+error & $5.8575$ & $12$ & $0.4881$ & \\
+\hline
+total & $37.1594$ & $15$ & &
+\end{tabular}
+\end{center}
+$F_0 = 21.38 > F_{0.05,3,12} = 3.49$ ($p = 4 \times 10^{-5}$), so the mean organ damage differs among the rations, and $\hat\sigma^2 = 0.488$. Which rations differ, and
+whether it is the type or the proportion of fat that matters, are questions about contrasts, taken up in a later section.
+\end{solution}
+
+\begin{problem}
+In the effects model with $t = 3$ treatments and $n_i = 2$ observations each, find $X^\top X$ and its rank. Find the solution of the normal equations
+under the side condition $\hat\tau_3 = 0$, and verify that it gives the same estimate of $\tau_1 - \tau_2$ as the side condition $\sum\hat\tau_i = 0$. Is $\tau_1 + \tau_2$
+estimable?
+\end{problem}
+
+\begin{solution}
+With $X$ as in the text,
+\[
+X^\top X = \begin{pmatrix} 6 & 2 & 2 & 2 \\ 2 & 2 & 0 & 0 \\ 2 & 0 & 2 & 0 \\ 2 & 0 & 0 & 2 \end{pmatrix} ,
+\]
+whose first column is the sum of the other three, so the rank is $3$. The normal equations give $\hat\mu + \hat\tau_i = \bar y_{i\cdot}$. With $\hat\tau_3 = 0$: $\hat\mu = \bar y_{3\cdot}$,
+$\hat\tau_1 = \bar y_{1\cdot} - \bar y_{3\cdot}$ and $\hat\tau_2 = \bar y_{2\cdot} - \bar y_{3\cdot}$, so $\hat\tau_1 - \hat\tau_2 = \bar y_{1\cdot} - \bar y_{2\cdot}$. With $\sum\hat\tau_i = 0$: $\hat\tau_i = \bar y_{i\cdot} - \bar y_{\cdot\cdot}$, and again
+$\hat\tau_1 - \hat\tau_2 = \bar y_{1\cdot} - \bar y_{2\cdot}$, as Corollary~\ref{coro:contrast-invariance} requires.
+
+$\tau_1 + \tau_2$ is not estimable: its coefficients $(1, 1)$ do not sum to zero, and it is not of the form $\sum a_i(\mu + \tau_i)$, since that would need $\sum a_i = 0$ (no $\mu$) with
+$a_1 = a_2 = 1$ and $a_3 = 0$. Indeed the two side conditions give different values, $\bar y_{1\cdot} + \bar y_{2\cdot} - 2\bar y_{3\cdot}$ and $\bar y_{1\cdot} + \bar y_{2\cdot} - 2\bar y_{\cdot\cdot}$.
+\end{solution}
+
+\begin{problem}
+Show that $SS_{\mathrm{Treatments}} = \sum_iy_{i\cdot}^2/n_i - y_{\cdot\cdot}^2/N$, and deduce the computing formula for $SSE$.
+\end{problem}
+
+\begin{solution}
+Expanding,
+\begin{align*}
+\sum_in_i(\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2 &= \sum_in_i\bar y_{i\cdot}^2 - 2\bar y_{\cdot\cdot}\sum_in_i\bar y_{i\cdot} + N\bar y_{\cdot\cdot}^2 \\
+&= \sum_i\frac{y_{i\cdot}^2}{n_i} - 2\bar y_{\cdot\cdot}y_{\cdot\cdot} + \frac{y_{\cdot\cdot}^2}{N} ,
+\end{align*}
+and $\bar y_{\cdot\cdot}y_{\cdot\cdot} = y_{\cdot\cdot}^2/N$, which gives the formula. The same expansion gives $SST = \sum\sum y_{ij}^2 - y_{\cdot\cdot}^2/N$, and subtracting,
+$SSE = \sum\sum y_{ij}^2 - \sum_iy_{i\cdot}^2/n_i$.
+\end{solution}
+
+\begin{problem}
+Let $A$ be a symmetric idempotent matrix. Show that its eigenvalues are $0$ or $1$ and that $\operatorname{rank}(A) = \operatorname{tr}(A)$. Use this and Lemma~\ref{lem:quad-mean} to
+show that $E(SS_{\mathrm{Treatments}}) = (t - 1)\sigma^2 + \sum n_i(\tau_i - \bar\tau)^2$ without the term-by-term calculation of Theorem~\ref{thm:ems-one-way}.
+\end{problem}
+
+\begin{solution}
+If $A\mathbf v = \lambda\mathbf v$ with $\mathbf v \ne \mathbf 0$, then $\lambda\mathbf v = A\mathbf v = A^2\mathbf v = \lambda^2\mathbf v$, so $\lambda^2 = \lambda$ and $\lambda \in \{0, 1\}$. A symmetric matrix is
+diagonalisable, so its rank is the number of non-zero eigenvalues, which here is the number of eigenvalues equal to $1$, which is their sum, the
+trace.
+
+By Lemma~\ref{lem:quad-mean} with $A = H - H_0$, $\Sigma = \sigma^2I$ and $\boldsymbol\mu$ the vector of means,
+\begin{align*}
+E(SS_{\mathrm{Treatments}}) &= \sigma^2\operatorname{tr}(H - H_0) + \boldsymbol\mu^\top(H - H_0)\boldsymbol\mu \\
+&= (t - 1)\sigma^2 + \sum_in_i(\mu_i - \bar\mu)^2 ,
+\end{align*}
+since $\operatorname{tr}(H) = t$, $\operatorname{tr}(H_0) = 1$, and $(H - H_0)\boldsymbol\mu$ has entries $\mu_i - \bar\mu = \tau_i - \bar\tau$.
+\end{solution}
+
+\begin{problem}
+For the coating data, suppose the true coating effects were equal to the estimates in Example~\ref{exa:coating-anova} and $\sigma^2 = 8.15$. Find the
+non-centrality parameter of $F_0$, and explain why the test rejected $H_0$ so decisively.
+\end{problem}
+
+\begin{solution}
+$\lambda = \sum n_i\tau_i^2/\sigma^2 = 4(10.90^2 + 5.15^2 + 0.10^2 + 6.85^2 + 9.10^2)/8.15 = 1100.3/8.15 = 135.0$. Under $H_1$, $E(MS_{\mathrm{Treatments}}) = \sigma^2(1 + \lambda/4) \approx 34.8\sigma^2$,
+so $F_0$ is expected to be about $35$, far beyond the critical value $3.06$. The coating means differ by up to $20$ units while the error standard
+deviation is under $3$; with such large effects even four replicates give overwhelming evidence.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
