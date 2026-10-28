@@ -3024,93 +3024,276 @@ $\hat x(n, 1) = x_{n-11} + \alpha(x_n - x_{n-12}) + \theta z_{n-11} = 105 + 0.5(
 earlier and adjusts it by half of the latest year-on-year change, less part of last year's surprise.
 \end{solution}
 
-\section{The Frequency Domain}\label{sec:frequency}
+\section{The frequency domain}\label{sec:frequency}
 
-Everything so far has described a series by how each value relates to the ones
-before it. The frequency domain describes the same series by which
-\emph{cycles} it is made of. Neither view adds information the other lacks ---
-they are Fourier transforms of one another --- but each makes different things
-obvious, and periodicity is far easier to see as a peak than as a pattern in the
-autocorrelations.
+Everything so far has described a series by how each value relates to the ones before it. The frequency
+domain describes the same series by which \emph{cycles} it is made of. Neither view adds information the other
+lacks (they are Fourier transforms of one another) but each makes different things obvious, and periodicity is
+far easier to see as a peak than as a pattern in the autocorrelations. A cycle with angular frequency $\omega$
+(radians per time unit) has period $2\pi/\omega$: frequency $\omega = \pi/2$ is a cycle every $4$ observations, and $\omega = \pi$, the highest
+frequency observable in discrete data, is alternation from one observation to the next.
 
-\subsection{The Spectral Density}
+\subsection{The spectral density}
 
 \begin{defn}
-For a stationary process with autocovariance $\gamma(\tau)$ satisfying
-$\sum_{\tau}\left|\gamma(\tau)\right|<\infty$, the \emph{spectral density} is
-$$f(\omega) = \frac{1}{2\pi}\sum_{\tau=-\infty}^{\infty}\gamma(\tau)\,e^{-i\omega\tau},
-\qquad -\pi \leq \omega \leq \pi .$$
+For a stationary process with autocovariance $\gamma(\tau)$ satisfying $\sum_\tau|\gamma(\tau)| < \infty$, the \textbf{spectral density} is
+\[
+f(\omega) = \frac{1}{2\pi}\sum_{\tau=-\infty}^{\infty}\gamma(\tau)\,e^{-i\omega\tau} , \qquad -\pi \le \omega \le \pi .
+\]
 \end{defn}
 
-\begin{result}
-The autocovariance is recovered by inversion,
-$$\gamma(\tau) = \int_{-\pi}^{\pi} f(\omega)\,e^{i\omega\tau}\,d\omega ,$$
+\begin{thm}\label{thm:spectral}
+\begin{enumerate}[label=(\roman*)]
+\item $f(\omega)$ is real and even, and
+\[
+f(\omega) = \frac{1}{2\pi}\Bigl[\gamma(0) + 2\sum_{\tau=1}^\infty\gamma(\tau)\cos(\omega\tau)\Bigr] .
+\]
+\item The autocovariance is recovered by inversion,
+\[
+\gamma(\tau) = \int_{-\pi}^{\pi}f(\omega)\,e^{i\omega\tau}\,d\omega ,
+\]
 and in particular
-$$\gamma(0) = \Var(X_t) = \int_{-\pi}^{\pi} f(\omega)\,d\omega .$$
-\end{result}
+\[
+\gamma(0) = \Var(X_t) = \int_{-\pi}^{\pi}f(\omega)\,d\omega .
+\]
+\end{enumerate}
+\end{thm}
 
-\begin{note}
-The last line is the interpretation. The total variance of the series is
-distributed across frequencies, and $f(\omega)\,d\omega$ is the share
-contributed by cycles near frequency $\omega$. A peak in the spectrum is a
-frequency band doing a disproportionate amount of the work --- which is exactly
-what a seasonal effect looks like, and it is visible at a glance where the
-autocorrelation function would show only a slow ripple.
-\end{note}
+\begin{proof}
+(i) Since $\gamma(-\tau) = \gamma(\tau)$, the terms for $\tau$ and $-\tau$ pair up as $\gamma(\tau)(e^{-i\omega\tau} + e^{i\omega\tau}) = 2\gamma(\tau)\cos(\omega\tau)$, which is real and even in $\omega$.
 
-\begin{exa}
-Find the spectral density of white noise, and of the AR$(1)$ process
-$X_t = \phi X_{t-1} + \varepsilon_t$.
+(ii) For integers $m$, $\int_{-\pi}^{\pi}e^{i\omega m}\,d\omega$ is $2\pi$ if $m = 0$ and $0$ otherwise, since $e^{i\omega m}$ then completes $|m|$ whole turns. So
+\begin{align*}
+\int_{-\pi}^{\pi}f(\omega)e^{i\omega\tau}\,d\omega &= \frac{1}{2\pi}\sum_k\gamma(k)\int_{-\pi}^{\pi}e^{i\omega(\tau-k)}\,d\omega \\
+&= \frac{1}{2\pi}\gamma(\tau)\cdot2\pi = \gamma(\tau) ,
+\end{align*}
+where exchanging sum and integral is justified by the absolute convergence of $\sum|\gamma(k)|$. Put $\tau = 0$ for the variance.
+\end{proof}
+
+The last line is the interpretation: the total variance of the series is spread across the frequencies,
+and $f(\omega)\,d\omega$ is the share contributed by cycles near frequency $\omega$. A peak in the spectrum is a frequency band doing a
+disproportionate amount of the work, which is exactly what a seasonal effect looks like, and it is visible at a
+glance where the autocorrelation function would show only a slow ripple. Since $f$ is even, it is usually plotted
+for $0 \le \omega \le \pi$ only.
+
+\begin{thm}[Spectrum of a linear process]\label{thm:linear-filter}
+If $X_t = \sum_{j\ge0}\psi_jZ_{t-j}$ with $\sum|\psi_j| < \infty$ and $\{Z_t\}$ white noise with variance $\sigma_Z^2$, then
+\[
+f_X(\omega) = \frac{\sigma_Z^2}{2\pi}\bigl|\psi(e^{-i\omega})\bigr|^2 , \qquad \psi(z) = \sum_{j\ge0}\psi_jz^j .
+\]
+In particular, for the ARMA process $\phi(B)X_t = \theta(B)Z_t$,
+\[
+f_X(\omega) = \frac{\sigma_Z^2}{2\pi}\,\frac{|\theta(e^{-i\omega})|^2}{|\phi(e^{-i\omega})|^2} .
+\]
+\end{thm}
+
+\begin{proof}
+As for an MA process, $\gamma(\tau) = \sigma_Z^2\sum_j\psi_j\psi_{j+\tau}$ (with $\psi_j = 0$ for $j < 0$, this holds for all $\tau$). Then
+\begin{align*}
+\sum_\tau\gamma(\tau)e^{-i\omega\tau} &= \sigma_Z^2\sum_j\sum_\tau\psi_j\psi_{j+\tau}e^{-i\omega(j+\tau)}e^{i\omega j} \\
+&= \sigma_Z^2\Bigl(\sum_k\psi_ke^{-i\omega k}\Bigr)\Bigl(\sum_j\psi_je^{i\omega j}\Bigr) ,
+\end{align*}
+with $k = j + \tau$. The second factor is the complex conjugate of the first, so the product is $|\psi(e^{-i\omega})|^2$. For an ARMA process
+$\psi(B) = \theta(B)/\phi(B)$.
+\end{proof}
+
+\begin{exa}\label{exa:spectra}
+Find the spectral densities of white noise, the AR(1) process $X_t = \alpha X_{t-1} + Z_t$, and the MA(1) process $X_t = Z_t + \beta Z_{t-1}$.
 \end{exa}
 
 \begin{solution}
 \subhead{White noise}
-Here $\gamma(0)=\sigma^{2}$ and $\gamma(\tau)=0$ otherwise, so only one term
-survives:
-$$f(\omega) = \frac{\sigma^{2}}{2\pi},$$
-constant in $\omega$. Every frequency contributes equally --- which is what the
-name means, by analogy with white light.
+Here $\gamma(0) = \sigma^2$ and $\gamma(\tau) = 0$ otherwise, so only one term survives:
+\[
+f(\omega) = \frac{\sigma^2}{2\pi} ,
+\]
+constant in $\omega$. Every frequency contributes equally, which is what the name means, by analogy with white
+light.
 
 \subhead{AR(1)}
-For the AR$(1)$, $\gamma(\tau) = \dfrac{\sigma^{2}\phi^{|\tau|}}{1-\phi^{2}}$.
-Summing two geometric series,
-$$f(\omega) = \frac{\sigma^{2}}{2\pi}\cdot\frac{1}{\left|1-\phi e^{-i\omega}\right|^{2}}
-= \frac{\sigma^{2}}{2\pi\left(1 - 2\phi\cos\omega + \phi^{2}\right)} .$$
-For $\phi>0$ this is largest at $\omega=0$: the series is dominated by slow
-movement, which is what positive autocorrelation means. For $\phi<0$ the peak
-moves to $\omega=\pi$, the fastest representable oscillation --- alternation
-from one observation to the next.
+By Theorem~\ref{thm:linear-filter} with $\phi(z) = 1 - \alpha z$, and $|1 - \alpha e^{-i\omega}|^2 = (1 - \alpha e^{-i\omega})(1 - \alpha e^{i\omega}) = 1 - 2\alpha\cos\omega + \alpha^2$,
+\[
+f(\omega) = \frac{\sigma^2}{2\pi}\cdot\frac{1}{|1 - \alpha e^{-i\omega}|^2} = \frac{\sigma^2}{2\pi(1 - 2\alpha\cos\omega + \alpha^2)} .
+\]
+(Summing the two geometric series in the definition, with $\gamma(\tau) = \sigma^2\alpha^{|\tau|}/(1 - \alpha^2)$, gives the same.) For $\alpha > 0$ this is largest at $\omega = 0$: the
+series is dominated by slow movement, which is what positive autocorrelation means. For $\alpha < 0$ the peak moves
+to $\omega = \pi$, the fastest representable oscillation, alternation from one observation to the next.
+
+\subhead{MA(1)}
+With $\theta(z) = 1 + \beta z$, $|1 + \beta e^{-i\omega}|^2 = 1 + 2\beta\cos\omega + \beta^2$, so
+\[
+f(\omega) = \frac{\sigma^2}{2\pi}(1 + 2\beta\cos\omega + \beta^2) ,
+\]
+a single smooth hump, at $\omega = 0$ if $\beta > 0$ and at $\omega = \pi$ if $\beta < 0$. Note that $\beta$ and $1/\beta$ give spectra of the same shape, as they
+give the same ac.f. (Section~\ref{sec:invertibility}).
 \end{solution}
 
-\subsection{The Periodogram}
+\begin{exa}\label{exa:ar2-spectrum}
+Find the frequency at which the spectrum of the AR(2) process $X_t = X_{t-1} - \frac12X_{t-2} + Z_t$ of Example~\ref{exa:ar2-complex} is largest, and
+compare its period with that of the ac.f.
+\end{exa}
+
+\begin{solution}
+Here $\phi(z) = 1 - z + \frac12z^2$, and
+\begin{align*}
+|\phi(e^{-i\omega})|^2 &= \bigl(1 - e^{-i\omega} + \tfrac12e^{-2i\omega}\bigr)\bigl(1 - e^{i\omega} + \tfrac12e^{2i\omega}\bigr) \\
+&= 1 + 1 + \tfrac14 - 2\cos\omega + \cos2\omega - \cos\omega \\
+&= \tfrac94 - 3\cos\omega + \cos2\omega .
+\end{align*}
+The spectrum is largest where this is smallest. With $c = \cos\omega$ and $\cos2\omega = 2c^2 - 1$, it is $2c^2 - 3c + \frac54$, minimised at $c = \frac34$. So the
+peak is at $\omega = \arccos0.75 = 0.723$ radians, a period of $2\pi/0.723 = 8.7$ observations, where $|\phi|^2 = 0.125$ and $f = 8\sigma^2/(2\pi)$, against
+$4\sigma^2/(2\pi)$ at $\omega = 0$ and $0.16\sigma^2/(2\pi)$ at $\omega = \pi$. The ac.f. oscillates with period exactly $8$; the two periods are close but not
+equal, because the damping of the ac.f. shifts the peak of the spectrum (Figure~\ref{fig:spectra}, panel~4).
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\col/\num/\name/\expr in {
+ 0/gray/1/{White noise}/{1},
+ 4.4/blue/2/{AR(1), $\alpha = 0.8$}/{0.04/(1.64-1.6*cos(\x r))},
+ 8.8/red/3/{MA(1), $\beta = -0.5$}/{(1.25-cos(\x r))/2.25},
+ 13.2/green/4/{AR(2), complex}/{0.125/(2.25-3*cos(\x r)+cos(2*\x r))}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.35,-0.75) rectangle (3.85,2.4);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,2.05) {\num};
+  \node[anchor=west,font=\scriptsize\bfseries,text=\col!50!black] at (0.22,2.05) {\name};
+  \draw[-Stealth,gray] (0,0) -- (3.6,0) node[above left,black,font=\scriptsize] {$\omega$};
+  \draw[-,gray] (0,0) -- (0,1.75);
+  \node[font=\scriptsize,anchor=north] at (0,0) {$0$};
+  \node[font=\scriptsize,anchor=north] at (3.14,0) {$\pi$};
+  \draw[-,thick,\col!60!black] plot[domain=0:3.14,samples=60] (\x,{1.5*\expr});
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Spectral densities on $0 \le \omega \le \pi$, each scaled to its maximum. (1) White noise is flat. (2) A positively
+autocorrelated AR(1) concentrates its variance at low frequencies. (3) An MA(1) with $\beta < 0$ peaks at $\omega = \pi$. (4) The AR(2)
+of Example~\ref{exa:ar2-spectrum} has a peak at $\omega = 0.72$, a cycle of about $8.7$ observations.}
+\label{fig:spectra}
+\end{figure}
+
+\subsection{The periodogram}
 
 \begin{defn}
-Given data $x_1,\dots,x_n$, the \emph{periodogram} at the Fourier frequencies
-$\omega_j = 2\pi j/n$ is
-$$I(\omega_j) = \frac{1}{2\pi n}\left|\sum_{t=1}^{n} x_t e^{-i\omega_j t}\right|^{2}.$$
+Given data $x_1, \dots, x_n$, the \textbf{periodogram} at the Fourier frequencies $\omega_j = 2\pi j/n$, $j = 1, \dots, \lfloor n/2\rfloor$, is
+\[
+I(\omega_j) = \frac{1}{2\pi n}\Bigl|\sum_{t=1}^nx_te^{-i\omega_jt}\Bigr|^2 .
+\]
 \end{defn}
 
-\begin{remark}
-The periodogram is the natural estimate of the spectral density and it is a bad
-one. It is asymptotically unbiased, but its variance does \emph{not} fall as $n$
-grows: at each frequency $I(\omega_j)$ is approximately
-$f(\omega_j)\chi^{2}_{2}/2$, whose variance is $f(\omega_j)^{2}$ however long the
-series. Lengthening the record adds more frequencies rather than improving any
-one of them.
+\begin{thm}\label{thm:periodogram}
+\begin{enumerate}[label=(\roman*)]
+\item For $1 \le j < n/2$, $I(\omega_j) = \dfrac{n}{8\pi}(a_j^2 + b_j^2)$, where
+\[
+a_j = \frac2n\sum_{t=1}^nx_t\cos(\omega_jt) , \qquad b_j = \frac2n\sum_{t=1}^nx_t\sin(\omega_jt)
+\]
+are the least-squares coefficients of $\cos(\omega_jt)$ and $\sin(\omega_jt)$ in a regression of $x_t$ on these \emph{harmonics}.
+\item For $j \ne 0$, $I(\omega_j) = \dfrac1{2\pi}\displaystyle\sum_{|k|<n}c_ke^{-i\omega_jk}$, the sample analogue of the spectral density, with $c_k$ the sample
+autocovariances.
+\end{enumerate}
+\end{thm}
 
-The cure is smoothing --- averaging the periodogram over a window of
-neighbouring frequencies. Averaging $m$ approximately independent ordinates cuts
-the variance by a factor $m$ at the cost of blurring detail across the window,
-which is the usual bias-variance trade and is chosen by how sharp the features
-of interest are expected to be.
+\begin{proof}
+(i) $\sum_tx_te^{-i\omega_jt} = \sum_tx_t\cos(\omega_jt) - i\sum_tx_t\sin(\omega_jt) = \frac n2(a_j - ib_j)$, whose squared modulus is $\frac{n^2}4(a_j^2 + b_j^2)$; divide by $2\pi n$. The
+harmonics at the Fourier frequencies are orthogonal over $t = 1, \dots, n$, and for $0 < j < n/2$,
+\[
+\textstyle\sum_t\cos^2(\omega_jt) = \sum_t\sin^2(\omega_jt) = n/2 ,
+\]
+so by the
+orthogonal-regression formula (each coefficient is $\sum x_t\times\text{column}/\sum\text{column}^2$) the least-squares coefficients are $a_j$ and $b_j$.
+
+(ii) For $j \ne 0$, $\sum_te^{-i\omega_jt} = 0$ (a geometric sum over whole turns), so $x_t$ may be replaced by $x_t - \bar x$. Then
+$\bigl|\sum_t(x_t - \bar x)e^{-i\omega_jt}\bigr|^2 = \sum_s\sum_t(x_s - \bar x)(x_t - \bar x)e^{-i\omega_j(t-s)}$, and grouping the pairs by $k = t - s$ gives $\sum_kn\,c_ke^{-i\omega_jk}$.
+\end{proof}
+
+Part (ii) is why the periodogram is the natural estimate of the spectral density. Part (i) gives it a concrete
+meaning: $I(\omega_j)$ measures how much of the series is explained by a sinusoid of frequency $\omega_j$. Indeed the sums of
+squares of the harmonics add up to the total, $\sum_t(x_t - \bar x)^2 = \frac n2\sum_{j<n/2}(a_j^2 + b_j^2)$ (plus a term for $j = n/2$ when $n$ is even), so
+the periodogram is an analysis of variance by frequency.
+
+\begin{exa}\label{exa:periodogram}
+Compute the periodogram of the twelve observations
+\[
+-1, \ -3, \ -1, \ 1, \ -1, \ -3, \ 1, \ 3, \ 1, \ -1, \ 1, \ 3 ,
+\]
+and find which cycle dominates.
+\end{exa}
+
+\begin{solution}
+Here $n = 12$, $\bar x = 0$ and $\sum x_t^2 = 44$. The Fourier frequencies are $\omega_j = 2\pi j/12$, periods $12/j$, for $j = 1, \dots, 6$. At $j = 3$
+(period $4$), $\cos(\pi t/2)$ runs $0, -1, 0, 1, \dots$ and $\sin(\pi t/2)$ runs $1, 0, -1, 0, \dots$, so
+\begin{align*}
+a_3 &= \tfrac2{12}\bigl[(-1)(-3) + (1)(1) + (-1)(-3) + (1)(3) + (-1)(-1) + (1)(3)\bigr] \\
+&= \tfrac{14}6 = 2.333 , \\
+b_3 &= \tfrac2{12}\bigl[(1)(-1) + (-1)(-1) + (1)(-1) + (-1)(1) + (1)(1) + (-1)(1)\bigr] \\
+&= -\tfrac26 = -0.333 ,
+\end{align*}
+and $I(\omega_3) = \frac{12}{8\pi}(5.444 + 0.111) = 2.653$. The same computation at the other frequencies gives:
+\begin{center}
+\begin{tabular}{ccrrrr}
+$j$ & period & $a_j$ & $b_j$ & $I(\omega_j)$ & $\frac n2(a_j^2 + b_j^2)$ \\
+\hline
+1 & 12 & 0.333 & $-1.244$ & 0.792 & 9.95 \\
+2 & 6 & 0 & 0 & 0 & 0 \\
+3 & 4 & 2.333 & $-0.333$ & 2.653 & 33.33 \\
+4 & 3 & 0 & 0 & 0 & 0 \\
+5 & 2.4 & 0.333 & $-0.089$ & 0.057 & 0.71 \\
+6 & 2 & 0 & -- & 0 & 0 \\
+\end{tabular}
+\end{center}
+The sums of squares in the last column add to $9.95 + 33.33 + 0.71 = 44.0 = \sum x_t^2$, as they should. The cycle of period $4$ accounts for $33.33/44 = 76\%$
+of the variation, with most of the rest in a slow movement of period $12$. The data look like quarterly
+observations with a strong seasonal pattern.
+\end{solution}
+
+\begin{remark}
+The periodogram is the natural estimate of the spectral density, and it is a bad one. It is asymptotically
+unbiased, but its variance does \emph{not} fall as $n$ grows: at each frequency $I(\omega_j)$ is approximately $f(\omega_j)\chi^2_2/2$, whose
+variance is $f(\omega_j)^2$ however long the series. Lengthening the record adds more frequencies rather than
+improving any one of them.
+
+The cure is smoothing: averaging the periodogram over a window of neighbouring frequencies. Averaging $m$
+approximately independent ordinates cuts the variance by a factor $m$ at the cost of blurring detail across the
+window, which is the usual bias--variance trade, and is chosen by how sharp the features of interest are
+expected to be.
 \end{remark}
 
 \begin{note}
-This is worth stating plainly because it is counter-intuitive: an estimator can
-be consistent for the whole function in an integrated sense while being
-inconsistent at every single point. The periodogram is the standard example, and
-it is why raw periodograms look so ragged.
+This is worth stating plainly, because it is counter-intuitive: an estimator can be consistent for the
+whole function in an integrated sense while being inconsistent at every single point. The periodogram is the
+standard example, and it is why raw periodograms look so ragged.
 \end{note}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:ma1-spectrum}
+For the MA(1) process $X_t = Z_t + 0.5Z_{t-1}$ with $\sigma_Z^2 = 1$, compute $f(0)$, $f(\pi/2)$ and $f(\pi)$, and check that $\int_{-\pi}^\pi f(\omega)\,d\omega = \Var(X_t)$.
+\end{problem}
+
+\begin{solution}
+$f(\omega) = (1.25 + \cos\omega)/(2\pi)$, so $f(0) = 2.25/(2\pi) = 0.358$, $f(\pi/2) = 1.25/(2\pi) = 0.199$, $f(\pi) = 0.25/(2\pi) = 0.040$. The integral is
+$\frac1{2\pi}\int_{-\pi}^\pi(1.25 + \cos\omega)\,d\omega = \frac1{2\pi}(2.5\pi + 0) = 1.25$, which is $\Var(X_t) = 1 + 0.25$.
+\end{solution}
+
+\begin{problem}\label{prob:ar1-spectrum-ratio}
+For an AR(1) process with $\alpha = 0.6$, find the ratio $f(0)/f(\pi)$, and explain what it says about the series.
+\end{problem}
+
+\begin{solution}
+$f(0)/f(\pi) = (1 + 2\alpha + \alpha^2)/(1 - 2\alpha + \alpha^2) = (1.6/0.4)^2 = 16$. Slow variation carries sixteen times the spectral density of the fastest
+alternation: the series moves in smooth swings rather than jumping about.
+\end{solution}
+
+\begin{problem}\label{prob:cosine-periodogram}
+Let $x_t = 3\cos(\pi t/2)$ for $t = 1, \dots, 8$. Compute the periodogram at $\omega_2 = \pi/2$ and show that it is zero at the other Fourier
+frequencies with $j < 4$.
+\end{problem}
+
+\begin{solution}
+The values are $0, -3, 0, 3, 0, -3, 0, 3$. At $j = 2$, $\sum x_t\cos(\pi t/2) = 3\sum\cos^2(\pi t/2) = 3 \times 4 = 12$, so $a_2 = \frac28 \times 12 = 3$, the
+amplitude of the cosine, and $b_2 = \frac28\sum3\cos(\pi t/2)\sin(\pi t/2) = 0$. So $I(\omega_2) = \frac{8}{8\pi}(9 + 0) = 9/\pi = 2.86$. At $j = 1$ and $j = 3$, $a_j$ and $b_j$ are
+sums of products of different harmonics, which are orthogonal over $t = 1, \dots, 8$, so they are $0$ and the periodogram
+vanishes. All the variance, $\sum x_t^2 = 36 = \frac82 \times 9$, is at the one frequency.
+\end{solution}
 
 \section{State Space Models And The Kalman Filter}
 
