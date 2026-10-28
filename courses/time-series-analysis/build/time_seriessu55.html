@@ -1,6 +1,6 @@
 <!DOCTYPE html> 
 <html lang='en-US' xml:lang='en-US'> 
-<head><title>17.2 The Kalman Filter — Time Series Analysis</title> 
+<head><title>17.2 The Kalman filter — Time Series Analysis</title> 
 <meta charset='utf-8' /> 
 <meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
 <meta content='width=device-width,initial-scale=1' name='viewport' /> 
@@ -83,58 +83,148 @@
 <li class="sub"><a class="" href="time_seriessu51.html">The spectral density</a></li>
 <li class="sub"><a class="" href="time_seriessu52.html">The periodogram</a></li>
 <li class="sub"><a class="" href="time_seriessu53.html">Practice problems</a></li>
-<li class="ch"><a class="" href="time_seriesse17.html">State Space Models And The Kalman Filter</a></li>
-<li class="sub"><a class="" href="time_seriessu54.html">The Linear Model</a></li>
-<li class="sub"><a class="current" href="time_seriessu55.html">The Kalman Filter</a></li>
-<li class="ch"><a class="" href="time_seriesse18.html">Nonlinear Models: ARCH And Volatility</a></li>
-<li class="ch"><a class="" href="time_seriesse19.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="time_seriesse17.html">State space models and the Kalman filter</a></li>
+<li class="sub"><a class="" href="time_seriessu54.html">The linear model</a></li>
+<li class="sub"><a class="current" href="time_seriessu55.html">The Kalman filter</a></li>
+<li class="ch"><a class="" href="time_seriesse18.html">Nonlinear models: ARCH and volatility</a></li>
+<li class="sub"><a class="" href="time_seriessu56.html">The ARCH and GARCH models</a></li>
+<li class="sub"><a class="" href="time_seriessu57.html">Practice problems</a></li>
+<li class="ch"><a class="" href="time_seriesse19.html">Review problems</a></li>
+<li class="sub"><a class="" href="time_seriessu58.html">Problems on the whole course</a></li>
 </ul>
 </aside><main class="content"><div class="inner">
-<!-- l. 3325 --><div class='crosslinks'><p class='noindent'>[<a href='time_seriessu54.html'>prev</a>] [<a href='time_seriessu54.html#tailtime_seriessu54.html'>prev-tail</a>] [<a href='#tailtime_seriessu55.html'>tail</a>] [<a href='time_seriesse17.html#time_seriessu55.html'>up</a>] </p></div>
-<h4 class='subsectionHead'><span class='titlemark'>17.2   </span> <a id='x74-7300017.2'></a>The Kalman Filter</h4>
-<div class='newtheorem'>
-<!-- l. 3327 --><p class='noindent'><span class='head'>
+<!-- l. 3340 --><div class='crosslinks'><p class='noindent'>[<a href='time_seriessu54.html'>prev</a>] [<a href='time_seriessu54.html#tailtime_seriessu54.html'>prev-tail</a>] [<a href='#tailtime_seriessu55.html'>tail</a>] [<a href='time_seriesse17.html#time_seriessu55.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>17.2   </span> <a id='x74-7300017.2'></a>The Kalman filter</h4>
+<!-- l. 3342 --><p class='noindent'>Write \(\hat {\mathbf {x}}_{t\mid s}\) for the conditional expectation of \(\mathbf {x}_t\) given the observations up to time \(s\), and \(P_{t\mid s}\) for its error
+covariance. The Kalman filter computes these recursively as each observation arrives. We derive it for
+the scalar local level model, where the algebra is transparent, and then state the general
+form.
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 3346 --><p class='noindent'><span class='head'>
 <a id='x74-73001r1'></a>
-<span class='cmbx-10x-x-109'>Result 17.2.1.</span>  </span>Write \(\widehat {\textbf {x}}_{t\mid s}\) for the expectation of \(\textbf {x}_t\) given observations up to time \(s\), and \(P_{t\mid s}\) for its error
-covariance. The Kalman filter alternates two steps.
-</p><!-- l. 3332 --><p class='noindent'><span class='cmbx-10x-x-109'>Predict</span>
-</p><!-- l. 3333 --><p class='noindent'>
-                                           \[\widehat {\textbf {x}}_{t\mid t-1} = F\,\widehat {\textbf {x}}_{t-1\mid t-1}, \qquad P_{t\mid t-1} = F\,P_{t-1\mid t-1}F^{t} + Q .\]
-</p><!-- l. 3336 --><p class='noindent'><span class='cmbx-10x-x-109'>Update</span>
-</p><!-- l. 3337 --><p class='noindent'>With the <span class='cmti-10x-x-109'>innovation</span> \(e_t = \textbf {y}_t - H\widehat {\textbf {x}}_{t\mid t-1}\) and the Kalman gain
-                                           \[K_t = P_{t\mid t-1}H^{t}\left (H P_{t\mid t-1}H^{t} + R\right )^{-1},\]
+<span class='cmbx-10x-x-109'>Theorem 17.2.1 </span>(Kalman filter for the local level model)<span class='cmbx-10x-x-109'>.</span>  </span> For \(x_t = x_{t-1} + w_t\), \(y_t = x_t + v_t\), with \(\Var (w_t) = Q\), \(\Var (v_t) = R\) and all variables normal,
+the filter alternates two steps. </p>
+     <ul class='itemize1'>
+     <li class='itemize'><span class='cmti-10x-x-109'>Predict:</span> \(\hat x_{t\mid t-1} = \hat x_{t-1\mid t-1}\) and \(P_{t\mid t-1} = P_{t-1\mid t-1} + Q\).
+     </li>
+     <li class='itemize'><span class='cmti-10x-x-109'>Update: </span>with the innovation \(e_t = y_t - \hat x_{t\mid t-1}\) and the gain \(K_t = P_{t\mid t-1}/(P_{t\mid t-1} + R)\), \[ \hat x_{t\mid t} = \hat x_{t\mid t-1} + K_te_t , \qquad P_{t\mid t} = (1 - K_t)P_{t\mid t-1} . \]</li></ul>
+</div>
+<!-- l. 3356 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 3359 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span><span class='cmti-10x-x-109'>Predict. </span>Given the data to time \(t - 1\), \(x_{t-1}\) has mean \(\hat x_{t-1\mid t-1}\) and variance \(P_{t-1\mid t-1}\), and \(w_t\) is independent of all of
+it with mean \(0\), so \(x_t = x_{t-1} + w_t\) has mean \(\hat x_{t-1\mid t-1}\) and variance \(P_{t-1\mid t-1} + Q\).
+</p><!-- l. 3362 --><p class='noindent'><span class='cmti-10x-x-109'>Update. </span>Given the data to time \(t - 1\), the pair \((x_t, y_t)\) is bivariate normal: \(x_t\) has mean \(\hat x_{t\mid t-1}\) and variance \(P = P_{t\mid t-1}\), and \(y_t = x_t + v_t\) has the
+same mean, variance \(P + R\), and \(\Cov (x_t, y_t) = P\). For a bivariate normal pair, the conditional distribution of one variable
+given the other has \begin {align*}  E(x_t \mid y_t) &amp;= E(x_t) + \frac {\Cov (x_t, y_t)}{\Var (y_t)}\bigl (y_t - E(y_t)\bigr ) , \\ \Var (x_t \mid y_t) &amp;= \Var (x_t) - \frac {\Cov (x_t, y_t)^2}{\Var (y_t)} .  \end {align*}
+</p><!-- l. 3369 --><p class='noindent'>Substituting gives \(\hat x_{t\mid t} = \hat x_{t\mid t-1} + \frac {P}{P+R}e_t\) and \(P_{t\mid t} = P - \frac {P^2}{P+R} = \bigl (1 - \frac {P}{P+R}\bigr )P\).                                                                                          □
                                                                                       
                                                                                       
-                                           \[\widehat {\textbf {x}}_{t\mid t} = \widehat {\textbf {x}}_{t\mid t-1} + K_t e_t, \qquad P_{t\mid t} = \left (I - K_tH\right )P_{t\mid t-1} .\]
 </p>
 </div>
-<!-- l. 3342 --><p class='noindent'>
+<!-- l. 3372 --><p class='noindent'>The same argument with vectors and matrices, using the multivariate normal conditional distribution,
+gives the general filter.
+</p>
+<div class='newtheorem'>
+<!-- l. 3375 --><p class='noindent'><span class='head'>
+<a id='x74-73002r2'></a>
+<span class='cmbx-10x-x-109'>Result 17.2.2 </span>(The Kalman filter)<span class='cmbx-10x-x-109'>.</span>  </span><span class='cmti-10x-x-109'>Predict: </span>\[ \hat {\mathbf {x}}_{t\mid t-1} = F\,\hat {\mathbf {x}}_{t-1\mid t-1} , \qquad P_{t\mid t-1} = F\,P_{t-1\mid t-1}F^\top + Q . \] <span class='cmti-10x-x-109'>Update: </span>with the <span class='cmti-10x-x-109'>innovation</span> \(\mathbf {e}_t = \mathbf {y}_t - H\hat {\mathbf {x}}_{t\mid t-1}\) and the <span class='cmti-10x-x-109'>Kalman
+gain </span>\[ K_t = P_{t\mid t-1}H^\top \bigl (HP_{t\mid t-1}H^\top + R\bigr )^{-1} , \] \[ \hat {\mathbf {x}}_{t\mid t} = \hat {\mathbf {x}}_{t\mid t-1} + K_t\mathbf {e}_t , \qquad P_{t\mid t} = (I - K_tH)P_{t\mid t-1} . \]
+</p>
+</div>
+<!-- l. 3387 --><p class='noindent'>
 </p>
 <div class='newtheorem nt-remark'>
-<!-- l. 3344 --><p class='noindent'><span class='head'>
-<span class='cmbx-10x-x-109'>Remark.</span>  </span>Read the update as a weighted compromise. The innovation \(e_t\) is the part of the new
+<!-- l. 3389 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Remark.</span>  </span>Read the update as a weighted compromise. The innovation \(\mathbf {e}_t\) is the part of the new
 observation the model did not anticipate, and the gain \(K_t\) decides how much of it to believe. If
 the observation noise \(R\) is large the gain is small and the filter trusts its own prediction; if the
 state noise \(Q\) is large the prediction is uncertain, the gain is near one, and the filter follows the
 data. Everything the filter does is that trade, applied recursively.
-</p><!-- l. 3352 --><p class='noindent'>The recursion is what makes it usable. Each step needs only the previous estimate and the
+</p><!-- l. 3395 --><p class='noindent'>The recursion is what makes it usable. Each step needs only the previous estimate and the
 current observation, not the whole history, so the cost per observation is constant and the filter
 runs in real time. That is why it is used in navigation and tracking as much as in statistics.
 </p>
 </div>
-<!-- l. 3356 --><p class='noindent'>
+<!-- l. 3398 --><p class='noindent'>
 </p>
 <div class='newtheorem nt-note'>
-<!-- l. 3358 --><p class='noindent'><span class='head'>
-<span class='cmbx-10x-x-109'>Note.</span>  </span>The filter is optimal in two distinct senses that are worth keeping apart. If the noise is
-Gaussian, \(\widehat {\textbf {x}}_{t\mid t}\) is the conditional expectation and therefore the best estimator of any kind. Without
-normality it is still the best <span class='cmti-10x-x-109'>linear </span>estimator — the same distinction as between conditional
-expectation and linear regression.
+<!-- l. 3400 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>The filter is optimal in two distinct senses that are worth keeping apart. If the noise
+is  Gaussian,  \(\hat {\mathbf {x}}_{t\mid t}\)  is  the  conditional  expectation  and  therefore  the  best  estimator  of  any  kind
+(Theorem <a href='time_seriessu45.html#x61-60001r1'>14.4.1<!-- tex4ht:ref: thm:mmse  --></a>). Without normality it is still the best <span class='cmti-10x-x-109'>linear </span>estimator, the same distinction
+as between conditional expectation and linear regression.
+</p>
+                                                                                      
+                                                                                      
+</div>
+<!-- l. 3404 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 3406 --><p class='noindent'><span class='head'>
+<a id='x74-73003r3'></a>
+<span class='cmbx-10x-x-109'>Example 17.2.3.</span>  </span> For  the  local  level  model  with  \(Q = 1\)  and  \(R = 4\),  starting  from  \(\hat x_{0\mid 0} = 10\)  and  \(P_{0\mid 0} = 4\),  filter  the
+observations \(10, 12, 11, 15, 14, 16\).
 </p>
 </div>
-<!-- l. 3364 --><p class='noindent'>
+<!-- l. 3408 --><p class='noindent'>
 </p>
-<!-- l. 3366 --><div class='crosslinks'><p class='noindent'>[<a href='time_seriessu54.html'>prev</a>] [<a href='time_seriessu54.html#tailtime_seriessu54.html'>prev-tail</a>] [<a href='time_seriessu55.html'>front</a>] [<a href='time_seriesse17.html#time_seriessu55.html'>up</a>] </p></div>
-<!-- l. 3366 --><p class='noindent'><a id='tailtime_seriessu55.html'></a> </p> 
+<div class='proof'>
+<!-- l. 3410 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> At \(t = 1\): predict \(\hat x_{1\mid 0} = 10\), \(P_{1\mid 0} = 4 + 1 = 5\); the gain is \(K_1 = 5/(5 + 4) = 0.556\); the innovation is \(10 - 10 = 0\), so \(\hat x_{1\mid 1} = 10\) and \(P_{1\mid 1} = (1 - 0.556)(5) = 2.222\). At \(t = 2\): \(P_{2\mid 1} = 3.222\), \(K_2 = 3.222/7.222 = 0.446\), \(e_2 = 12 - 10 = 2\), so \(\hat x_{2\mid 2} = 10 + 0.446(2) = 10.89\). Continuing:
+</p>
+<div class='center'>
+<!-- l. 3413 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-13'><colgroup id='TBL-13-1g'><col id='TBL-13-1' /><col id='TBL-13-2' /><col id='TBL-13-3' /><col id='TBL-13-4' /><col id='TBL-13-5' /><col id='TBL-13-6' /><col id='TBL-13-7' /></colgroup><tr id='TBL-13-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-1-1' style='white-space:nowrap; text-align:center;'> \(t\) </td><td class='td11' id='TBL-13-1-2' style='white-space:nowrap; text-align:center;'>  \(y_t\)  </td><td class='td11' id='TBL-13-1-3' style='white-space:nowrap; text-align:right;'>      \(\hat x_{t\mid t-1}\) </td><td class='td11' id='TBL-13-1-4' style='white-space:nowrap; text-align:right;'>     \(P_{t\mid t-1}\) </td><td class='td11' id='TBL-13-1-5' style='white-space:nowrap; text-align:right;'>     \(K_t\) </td><td class='td11' id='TBL-13-1-6' style='white-space:nowrap; text-align:right;'>     \(e_t\) </td><td class='td11' id='TBL-13-1-7' style='white-space:nowrap; text-align:right;'>      \(\hat x_{t\mid t}\) </td></tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-13-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-2-1' style='white-space:nowrap; text-align:center;'> 1 </td><td class='td11' id='TBL-13-2-2' style='white-space:nowrap; text-align:center;'> 10 </td><td class='td11' id='TBL-13-2-3' style='white-space:nowrap; text-align:right;'> 10.000 </td><td class='td11' id='TBL-13-2-4' style='white-space:nowrap; text-align:right;'> 5.000 </td><td class='td11' id='TBL-13-2-5' style='white-space:nowrap; text-align:right;'> 0.556 </td><td class='td11' id='TBL-13-2-6' style='white-space:nowrap; text-align:right;'> 0.000 </td><td class='td11' id='TBL-13-2-7' style='white-space:nowrap; text-align:right;'> 10.000</td>
+</tr><tr id='TBL-13-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-3-1' style='white-space:nowrap; text-align:center;'> 2  </td><td class='td11' id='TBL-13-3-2' style='white-space:nowrap; text-align:center;'> 12  </td><td class='td11' id='TBL-13-3-3' style='white-space:nowrap; text-align:right;'> 10.000  </td><td class='td11' id='TBL-13-3-4' style='white-space:nowrap; text-align:right;'> 3.222  </td><td class='td11' id='TBL-13-3-5' style='white-space:nowrap; text-align:right;'> 0.446  </td><td class='td11' id='TBL-13-3-6' style='white-space:nowrap; text-align:right;'> 2.000  </td><td class='td11' id='TBL-13-3-7' style='white-space:nowrap; text-align:right;'> 10.892  </td></tr><tr id='TBL-13-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-4-1' style='white-space:nowrap; text-align:center;'> 3 </td><td class='td11' id='TBL-13-4-2' style='white-space:nowrap; text-align:center;'> 11 </td><td class='td11' id='TBL-13-4-3' style='white-space:nowrap; text-align:right;'> 10.892 </td><td class='td11' id='TBL-13-4-4' style='white-space:nowrap; text-align:right;'> 2.785 </td><td class='td11' id='TBL-13-4-5' style='white-space:nowrap; text-align:right;'> 0.410 </td><td class='td11' id='TBL-13-4-6' style='white-space:nowrap; text-align:right;'> 0.108 </td><td class='td11' id='TBL-13-4-7' style='white-space:nowrap; text-align:right;'> 10.937</td>
+</tr><tr id='TBL-13-5-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-5-1' style='white-space:nowrap; text-align:center;'> 4  </td><td class='td11' id='TBL-13-5-2' style='white-space:nowrap; text-align:center;'> 15  </td><td class='td11' id='TBL-13-5-3' style='white-space:nowrap; text-align:right;'> 10.937  </td><td class='td11' id='TBL-13-5-4' style='white-space:nowrap; text-align:right;'> 2.642  </td><td class='td11' id='TBL-13-5-5' style='white-space:nowrap; text-align:right;'> 0.398  </td><td class='td11' id='TBL-13-5-6' style='white-space:nowrap; text-align:right;'> 4.063  </td><td class='td11' id='TBL-13-5-7' style='white-space:nowrap; text-align:right;'> 12.553  </td>
+</tr><tr id='TBL-13-6-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-6-1' style='white-space:nowrap; text-align:center;'> 5  </td><td class='td11' id='TBL-13-6-2' style='white-space:nowrap; text-align:center;'> 14  </td><td class='td11' id='TBL-13-6-3' style='white-space:nowrap; text-align:right;'> 12.553  </td><td class='td11' id='TBL-13-6-4' style='white-space:nowrap; text-align:right;'> 2.591  </td><td class='td11' id='TBL-13-6-5' style='white-space:nowrap; text-align:right;'> 0.393  </td><td class='td11' id='TBL-13-6-6' style='white-space:nowrap; text-align:right;'> 1.447  </td><td class='td11' id='TBL-13-6-7' style='white-space:nowrap; text-align:right;'> 13.122  </td>
+</tr><tr id='TBL-13-7-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-7-1' style='white-space:nowrap; text-align:center;'> 6  </td><td class='td11' id='TBL-13-7-2' style='white-space:nowrap; text-align:center;'> 16  </td><td class='td11' id='TBL-13-7-3' style='white-space:nowrap; text-align:right;'> 13.122  </td><td class='td11' id='TBL-13-7-4' style='white-space:nowrap; text-align:right;'> 2.572  </td><td class='td11' id='TBL-13-7-5' style='white-space:nowrap; text-align:right;'> 0.391  </td><td class='td11' id='TBL-13-7-6' style='white-space:nowrap; text-align:right;'> 2.878  </td><td class='td11' id='TBL-13-7-7' style='white-space:nowrap; text-align:right;'> 14.248  </td>
+</tr></table>                                                                                      </div></div>
+<!-- l. 3425 --><p class='noindent'>The filtered level moves only part of the way towards each observation, since the observations are
+noisier (\(R = 4\)) than the level’s steps (\(Q = 1\)). The gain settles quickly near \(0.39\).
+</p>
+</div>
+<figure class='figure'> 
+
+                                                                                      
+                                                                                      
+<a id='x74-73004r15'></a>
+                                                                                      
+                                                                                      
+<!-- l. 3431 --><p class='noindent'><img alt='t1234561111ofi0246bltseerrevdatioˆxtn|ts yt  ' src='time_series14x.svg' />
+</p>
+<figcaption class='caption'><span class='id'>Figure 15: </span><span class='content'>The Kalman filter of Example <a href='#x74-73003r3'>17.2.3<!-- tex4ht:ref: exa:kalman  --></a>. The filtered level (blue) moves about \(40\%\) of the
+way towards each observation (orange), because the observation noise is four times the variance
+of the level’s steps.</span></figcaption><!-- tex4ht:label?: x74-73004r15  -->
+                                                                                      
+                                                                                      
+</figure>
+<div class='newtheorem nt-proposition'>
+<!-- l. 3448 --><p class='noindent'><span class='head'>
+<a id='x74-73005r4'></a>
+<span class='cmbx-10x-x-109'>Proposition 17.2.4.</span>  </span> In the local level model the gain converges to \[ K_\infty = \frac {P_\infty + Q}{P_\infty + Q + R} , \qquad P_\infty = \frac {-Q + \sqrt {Q^2 + 4QR}}{2} , \] and with this constant
+gain the filter is simple exponential smoothing with \(\alpha = K_\infty \).
+</p>
+</div>
+<!-- l. 3454 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 3457 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>A steady state \(P_{t\mid t} = P\) must satisfy \(P = (1 - \frac {P+Q}{P+Q+R})(P + Q) = \frac {(P+Q)R}{P+Q+R}\), that is \(P^2 + QP - QR = 0\), whose positive root is \(P_\infty \). With constant gain \(K\), the
+update reads \(\hat x_{t\mid t} = \hat x_{t-1\mid t-1} + K(y_t - \hat x_{t-1\mid t-1})\), which is the error-correction form of exponential smoothing in Section <a href='time_seriesse14.html#x57-5600014'>14<!-- tex4ht:ref: sec:forecasting  --></a>, with
+\(\hat x_{t\mid t}\) as the forecast of the next value.                                                                               □
+</p>
+</div>
+<!-- l. 3462 --><p class='noindent'>For \(Q = 1\), \(R = 4\): \(P_\infty = (-1 + \sqrt {17})/2 = 1.562\) and \(K_\infty = 2.562/6.562 = 0.390\), the value the table approaches. So exponential smoothing, which appeared as a heuristic,
+then as the optimal forecast for ARIMA(0,1,1), is also the Kalman filter for a random walk observed
+with noise: three views of the same method. The ratio \(Q/R\), the signal-to-noise ratio, fixes the smoothing
+constant.
+</p>
+<!-- l. 3467 --><div class='crosslinks'><p class='noindent'>[<a href='time_seriessu54.html'>prev</a>] [<a href='time_seriessu54.html#tailtime_seriessu54.html'>prev-tail</a>] [<a href='time_seriessu55.html'>front</a>] [<a href='time_seriesse17.html#time_seriessu55.html'>up</a>] </p></div>
+<!-- l. 3467 --><p class='noindent'><a id='tailtime_seriessu55.html'></a> </p> 
 <nav class="pagenav"><a class="prev" href="time_seriessu54.html">&larr; Previous</a><a class="up" href="time_seriesse17.html#time_seriessu55.html">Contents</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="time-series-analysis/17-2-the-kalman-filter" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
 </html>

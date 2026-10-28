@@ -3295,208 +3295,394 @@ sums of products of different harmonics, which are orthogonal over $t = 1, \dots
 vanishes. All the variance, $\sum x_t^2 = 36 = \frac82 \times 9$, is at the one frequency.
 \end{solution}
 
-\section{State Space Models And The Kalman Filter}
+\section{State space models and the Kalman filter}\label{sec:kalman}
 
-An ARMA model describes a series directly. A state space model instead supposes
-an unobserved process driving it, and the observations are a noisy view of that
-process. The framework is more general --- every ARMA model can be written in
-state space form --- and it handles missing data and time-varying parameters,
-which ARMA cannot.
+An ARMA model describes a series directly. A state space model supposes, instead, an unobserved
+process driving it, and the observations are a noisy view of that process. The framework is more general (every ARMA
+model can be written in state space form) and it handles missing data and time-varying parameters, which
+ARMA cannot.
 
-\subsection{The Linear Model}
-
-\begin{defn}
-A \emph{linear state space model} consists of two equations:
-$$\textbf{x}_t = F\,\textbf{x}_{t-1} + \textbf{w}_t \qquad\text{(state equation)},$$
-$$\textbf{y}_t = H\,\textbf{x}_t + \textbf{v}_t \qquad\text{(observation equation)},$$
-where $\textbf{x}_t$ is the unobserved state, $\textbf{y}_t$ the observation, and
-$\textbf{w}_t$, $\textbf{v}_t$ independent white noise with covariance matrices
-$Q$ and $R$.
-\end{defn}
-
-\begin{note}
-The state equation says the system evolves by its own dynamics; the observation
-equation says we see it imperfectly. Separating the two is the whole idea. A
-random walk observed with error --- $x_t = x_{t-1}+w_t$, $y_t = x_t+v_t$ --- is
-the simplest non-trivial case, and it already cannot be written as an ARMA model
-without first working out what its observable autocorrelation structure is.
-\end{note}
-
-\subsection{The Kalman Filter}
-
-\begin{result}
-Write $\widehat{\textbf{x}}_{t\mid s}$ for the expectation of $\textbf{x}_t$
-given observations up to time $s$, and $P_{t\mid s}$ for its error covariance.
-The Kalman filter alternates two steps.
-
-\subhead{Predict}
-$$\widehat{\textbf{x}}_{t\mid t-1} = F\,\widehat{\textbf{x}}_{t-1\mid t-1},
-\qquad P_{t\mid t-1} = F\,P_{t-1\mid t-1}F^{t} + Q .$$
-
-\subhead{Update}
-With the \emph{innovation} $e_t = \textbf{y}_t - H\widehat{\textbf{x}}_{t\mid t-1}$
-and the Kalman gain
-$$K_t = P_{t\mid t-1}H^{t}\left(H P_{t\mid t-1}H^{t} + R\right)^{-1},$$
-$$\widehat{\textbf{x}}_{t\mid t} = \widehat{\textbf{x}}_{t\mid t-1} + K_t e_t,
-\qquad P_{t\mid t} = \left(I - K_tH\right)P_{t\mid t-1} .$$
-\end{result}
-
-\begin{remark}
-Read the update as a weighted compromise. The innovation $e_t$ is the part of
-the new observation the model did not anticipate, and the gain $K_t$ decides how
-much of it to believe. If the observation noise $R$ is large the gain is small
-and the filter trusts its own prediction; if the state noise $Q$ is large the
-prediction is uncertain, the gain is near one, and the filter follows the data.
-Everything the filter does is that trade, applied recursively.
-
-The recursion is what makes it usable. Each step needs only the previous
-estimate and the current observation, not the whole history, so the cost per
-observation is constant and the filter runs in real time. That is why it is used
-in navigation and tracking as much as in statistics.
-\end{remark}
-
-\begin{note}
-The filter is optimal in two distinct senses that are worth keeping apart. If the
-noise is Gaussian, $\widehat{\textbf{x}}_{t\mid t}$ is the conditional
-expectation and therefore the best estimator of any kind. Without normality it
-is still the best \emph{linear} estimator --- the same distinction as between
-conditional expectation and linear regression.
-\end{note}
-
-\section{Nonlinear Models: ARCH And Volatility}
-
-Every model so far has assumed constant variance. Financial series violate this
-plainly: quiet periods and turbulent periods cluster, so the variance is itself
-serially dependent even when the series is uncorrelated. ARCH models that
-directly.
+\subsection{The linear model}
 
 \begin{defn}
-A process follows an \emph{ARCH}$(p)$ model if
-$$X_t = \sigma_t\,\varepsilon_t,\qquad
-\sigma_t^{2} = \alpha_0 + \sum_{i=1}^{p}\alpha_i X_{t-i}^{2},$$
-where $\varepsilon_t$ is independent white noise with unit variance,
-$\alpha_0>0$ and $\alpha_i\geq0$. The \emph{GARCH}$(p,q)$ extension adds lagged
-variances,
-$$\sigma_t^{2} = \alpha_0 + \sum_{i=1}^{p}\alpha_i X_{t-i}^{2}
-+ \sum_{j=1}^{q}\beta_j \sigma_{t-j}^{2}.$$
+A \textbf{linear state space model} consists of two equations:
+\begin{align*}
+\mathbf{x}_t &= F\,\mathbf{x}_{t-1} + \mathbf{w}_t \qquad\text{(state equation)} , \\
+\mathbf{y}_t &= H\,\mathbf{x}_t + \mathbf{v}_t \qquad\text{(observation equation)} ,
+\end{align*}
+where $\mathbf{x}_t$ is the unobserved state, $\mathbf{y}_t$ the observation, $F$ and $H$ known matrices, and $\mathbf{w}_t$, $\mathbf{v}_t$ independent white noise
+with covariance matrices $Q$ and $R$.
 \end{defn}
 
-\begin{result}
-For the ARCH$(1)$ model with $0\leq\alpha_1<1$:
-$$E(X_t) = 0,\qquad \Var(X_t) = \frac{\alpha_0}{1-\alpha_1},
-\qquad \Corr\left(X_t,\,X_{t+\tau}\right) = 0 \ \text{ for } \tau\neq0,$$
-but $X_t^{2}$ is autocorrelated, following an AR$(1)$ in the squares.
-\end{result}
+The state equation says the system evolves by its own dynamics; the observation equation says we see it
+imperfectly. Separating the two is the whole idea. A random walk observed with error,
+\[
+x_t = x_{t-1} + w_t , \qquad y_t = x_t + v_t ,
+\]
+is the simplest non-trivial case, the \textbf{local level model}: the level wanders as a random walk, and each
+observation is the level plus independent noise.
+
+\begin{exa}\label{exa:ar2-statespace}
+Write the AR(2) process $X_t = \alpha_1X_{t-1} + \alpha_2X_{t-2} + Z_t$ in state space form.
+\end{exa}
+
+\begin{solution}
+Take the state to be the vector of the two most recent values, $\mathbf{x}_t = (X_t, X_{t-1})^\top$. Then
+\[
+\begin{pmatrix} X_t \\ X_{t-1} \end{pmatrix} = \begin{pmatrix} \alpha_1 & \alpha_2 \\ 1 & 0 \end{pmatrix}\begin{pmatrix} X_{t-1} \\ X_{t-2} \end{pmatrix} + \begin{pmatrix} Z_t \\ 0 \end{pmatrix} ,
+\qquad y_t = \begin{pmatrix} 1 & 0 \end{pmatrix}\mathbf{x}_t .
+\]
+The first row of the state equation is the AR(2) itself; the second merely shifts $X_{t-1}$ down one place. Here
+$F = \begin{pmatrix} \alpha_1 & \alpha_2 \\ 1 & 0 \end{pmatrix}$, $H = (1, 0)$, $Q = \operatorname{diag}(\sigma_Z^2, 0)$, and $R = 0$: the observation is exact. Any AR($p$) works the same way, with a
+$p$-vector state, and MA terms can be included by adding past shocks to the state.
+\end{solution}
+
+\subsection{The Kalman filter}
+
+Write $\hat{\mathbf{x}}_{t\mid s}$ for the conditional expectation of $\mathbf{x}_t$ given the observations up to time $s$, and $P_{t\mid s}$ for its error covariance.
+The Kalman filter computes these recursively as each observation arrives. We derive it for the scalar
+local level model, where the algebra is transparent, and then state the general form.
+
+\begin{thm}[Kalman filter for the local level model]\label{thm:kalman-scalar}
+For $x_t = x_{t-1} + w_t$, $y_t = x_t + v_t$, with $\Var(w_t) = Q$, $\Var(v_t) = R$ and all variables normal, the filter alternates two
+steps.
+\begin{itemize}
+\item \emph{Predict:} $\hat x_{t\mid t-1} = \hat x_{t-1\mid t-1}$ and $P_{t\mid t-1} = P_{t-1\mid t-1} + Q$.
+\item \emph{Update:} with the innovation $e_t = y_t - \hat x_{t\mid t-1}$ and the gain $K_t = P_{t\mid t-1}/(P_{t\mid t-1} + R)$,
+\[
+\hat x_{t\mid t} = \hat x_{t\mid t-1} + K_te_t , \qquad P_{t\mid t} = (1 - K_t)P_{t\mid t-1} .
+\]
+\end{itemize}
+\end{thm}
 
 \begin{proof}
-Conditioning on the past, $E\left(X_t \mid \mathcal{F}_{t-1}\right)
-= \sigma_t E(\varepsilon_t) = 0$, so $E(X_t)=0$ by the tower property and
-$X_t$ is uncorrelated with anything earlier --- which gives the zero
-autocorrelation.
+\emph{Predict.} Given the data to time $t - 1$, $x_{t-1}$ has mean $\hat x_{t-1\mid t-1}$ and variance $P_{t-1\mid t-1}$, and $w_t$ is independent of all of it with
+mean $0$, so $x_t = x_{t-1} + w_t$ has mean $\hat x_{t-1\mid t-1}$ and variance $P_{t-1\mid t-1} + Q$.
 
-For the variance, $E\left(X_t^{2}\right) = E\left(\sigma_t^{2}\right)
-= \alpha_0 + \alpha_1E\left(X_{t-1}^{2}\right)$. Stationarity makes both
-expectations equal, so $E\left(X_t^{2}\right)(1-\alpha_1) = \alpha_0$, giving the
-stated variance and requiring $\alpha_1<1$ for it to be finite and positive.
-
-Writing $\eta_t = X_t^{2}-\sigma_t^{2}$, which has mean zero, the definition
-rearranges to
-$$X_t^{2} = \alpha_0 + \alpha_1 X_{t-1}^{2} + \eta_t ,$$
-an AR$(1)$ for the squared series.
+\emph{Update.} Given the data to time $t - 1$, the pair $(x_t, y_t)$ is bivariate normal: $x_t$ has mean $\hat x_{t\mid t-1}$ and variance $P = P_{t\mid t-1}$, and
+$y_t = x_t + v_t$ has the same mean, variance $P + R$, and $\Cov(x_t, y_t) = P$. For a bivariate normal pair, the conditional
+distribution of one variable given the other has
+\begin{align*}
+E(x_t \mid y_t) &= E(x_t) + \frac{\Cov(x_t, y_t)}{\Var(y_t)}\bigl(y_t - E(y_t)\bigr) , \\
+\Var(x_t \mid y_t) &= \Var(x_t) - \frac{\Cov(x_t, y_t)^2}{\Var(y_t)} .
+\end{align*}
+Substituting gives $\hat x_{t\mid t} = \hat x_{t\mid t-1} + \frac{P}{P+R}e_t$ and $P_{t\mid t} = P - \frac{P^2}{P+R} = \bigl(1 - \frac{P}{P+R}\bigr)P$.
 \end{proof}
 
-\begin{remark}
-The last line is the whole point. The series itself is uncorrelated --- it passes
-every test built on the autocorrelation function --- while its squares are
-strongly correlated. A series can therefore be unpredictable in level and
-entirely predictable in volatility, which is what makes returns look random
-while their risk does not.
+The same argument with vectors and matrices, using the multivariate normal conditional distribution, gives
+the general filter.
 
-This is also the practical diagnostic: plot the ACF of the squared residuals
-after fitting an ARMA model. If it is flat the constant-variance assumption
-stands; if it decays slowly, an ARCH or GARCH term is needed. Nothing in the
-ordinary residual ACF would have revealed it.
+\begin{result}[The Kalman filter]
+\emph{Predict:}
+\[
+\hat{\mathbf{x}}_{t\mid t-1} = F\,\hat{\mathbf{x}}_{t-1\mid t-1} , \qquad P_{t\mid t-1} = F\,P_{t-1\mid t-1}F^\top + Q .
+\]
+\emph{Update:} with the \emph{innovation} $\mathbf{e}_t = \mathbf{y}_t - H\hat{\mathbf{x}}_{t\mid t-1}$ and the \emph{Kalman gain}
+\[
+K_t = P_{t\mid t-1}H^\top\bigl(HP_{t\mid t-1}H^\top + R\bigr)^{-1} ,
+\]
+\[
+\hat{\mathbf{x}}_{t\mid t} = \hat{\mathbf{x}}_{t\mid t-1} + K_t\mathbf{e}_t , \qquad P_{t\mid t} = (I - K_tH)P_{t\mid t-1} .
+\]
+\end{result}
+
+\begin{remark}
+Read the update as a weighted compromise. The innovation $\mathbf{e}_t$ is the part of the new observation the model did not
+anticipate, and the gain $K_t$ decides how much of it to believe. If the observation noise $R$ is large the gain is small
+and the filter trusts its own prediction; if the state noise $Q$ is large the prediction is uncertain, the gain is near one,
+and the filter follows the data. Everything the filter does is that trade, applied recursively.
+
+The recursion is what makes it usable. Each step needs only the previous estimate and the current
+observation, not the whole history, so the cost per observation is constant and the filter runs in real time.
+That is why it is used in navigation and tracking as much as in statistics.
 \end{remark}
 
-\section{Practice Problems}
+\begin{note}
+The filter is optimal in two distinct senses that are worth keeping apart. If the noise is Gaussian, $\hat{\mathbf{x}}_{t\mid t}$ is the
+conditional expectation and therefore the best estimator of any kind (Theorem~\ref{thm:mmse}). Without normality it is still the
+best \emph{linear} estimator, the same distinction as between conditional expectation and linear regression.
+\end{note}
 
+\begin{exa}\label{exa:kalman}
+For the local level model with $Q = 1$ and $R = 4$, starting from $\hat x_{0\mid0} = 10$ and $P_{0\mid0} = 4$, filter the observations $10, 12, 11, 15, 14, 16$.
+\end{exa}
+
+\begin{solution}
+At $t = 1$: predict $\hat x_{1\mid0} = 10$, $P_{1\mid0} = 4 + 1 = 5$; the gain is $K_1 = 5/(5 + 4) = 0.556$; the innovation is $10 - 10 = 0$, so $\hat x_{1\mid1} = 10$ and
+$P_{1\mid1} = (1 - 0.556)(5) = 2.222$. At $t = 2$: $P_{2\mid1} = 3.222$, $K_2 = 3.222/7.222 = 0.446$, $e_2 = 12 - 10 = 2$, so $\hat x_{2\mid2} = 10 + 0.446(2) = 10.89$. Continuing:
+\begin{center}
+\begin{tabular}{ccrrrrr}
+$t$ & $y_t$ & $\hat x_{t\mid t-1}$ & $P_{t\mid t-1}$ & $K_t$ & $e_t$ & $\hat x_{t\mid t}$ \\
+\hline
+1 & 10 & 10.000 & 5.000 & 0.556 & 0.000 & 10.000 \\
+2 & 12 & 10.000 & 3.222 & 0.446 & 2.000 & 10.892 \\
+3 & 11 & 10.892 & 2.785 & 0.410 & 0.108 & 10.937 \\
+4 & 15 & 10.937 & 2.642 & 0.398 & 4.063 & 12.553 \\
+5 & 14 & 12.553 & 2.591 & 0.393 & 1.447 & 13.122 \\
+6 & 16 & 13.122 & 2.572 & 0.391 & 2.878 & 14.248 \\
+\end{tabular}
+\end{center}
+The filtered level moves only part of the way towards each observation, since the observations are noisier ($R = 4$)
+than the level's steps ($Q = 1$). The gain settles quickly near $0.39$.
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[xscale=1.3,yscale=0.42]
+\filldraw[fill=gray!5,draw=gray!50,rounded corners=4pt] (-0.6,6.6) rectangle (7.6,17.6);
+\draw[-Stealth,gray] (0,8) -- (7,8) node[right,black,font=\small] {$t$};
+\draw[-Stealth,gray] (0,8) -- (0,17.2);
+\foreach \t in {1,...,6} \draw[gray] (\t,8) -- (\t,7.8) node[below,black,font=\scriptsize] {\t};
+\foreach \v in {10,12,14,16} \draw[gray] (0,\v) -- (-0.08,\v) node[left,black,font=\scriptsize] {\v};
+\foreach \a/\b in {1/10,2/12,3/11,4/15,5/14,6/16} \fill[orange!70!black] (\a,\b) circle (0.06 and 0.19);
+\draw[-,thick,blue!60!black] plot coordinates {(0,10) (1,10) (2,10.892) (3,10.937) (4,12.553) (5,13.122) (6,14.248)};
+\foreach \a/\b in {1/10,2/10.892,3/10.937,4/12.553,5/13.122,6/14.248} \fill[blue!60!black] (\a,\b) circle (0.045 and 0.14);
+\node[font=\scriptsize,text=orange!60!black,anchor=west] at (4.15,15.6) {observations $y_t$};
+\node[font=\scriptsize,text=blue!50!black,anchor=west] at (5.2,13.0) {filtered $\hat x_{t\mid t}$};
+\end{tikzpicture}
+\caption{The Kalman filter of Example~\ref{exa:kalman}. The filtered level (blue) moves about $40\%$ of the way towards each
+observation (orange), because the observation noise is four times the variance of the level's steps.}
+\label{fig:kalman}
+\end{figure}
+
+\begin{prop}\label{prop:kalman-ses}
+In the local level model the gain converges to
+\[
+K_\infty = \frac{P_\infty + Q}{P_\infty + Q + R} , \qquad P_\infty = \frac{-Q + \sqrt{Q^2 + 4QR}}{2} ,
+\]
+and with this constant gain the filter is simple exponential smoothing with $\alpha = K_\infty$.
+\end{prop}
+
+\begin{proof}
+A steady state $P_{t\mid t} = P$ must satisfy $P = (1 - \frac{P+Q}{P+Q+R})(P + Q) = \frac{(P+Q)R}{P+Q+R}$, that is $P^2 + QP - QR = 0$, whose positive root is $P_\infty$. With
+constant gain $K$, the update reads $\hat x_{t\mid t} = \hat x_{t-1\mid t-1} + K(y_t - \hat x_{t-1\mid t-1})$, which is the error-correction form of exponential smoothing
+in Section~\ref{sec:forecasting}, with $\hat x_{t\mid t}$ as the forecast of the next value.
+\end{proof}
+
+For $Q = 1$, $R = 4$: $P_\infty = (-1 + \sqrt{17})/2 = 1.562$ and $K_\infty = 2.562/6.562 = 0.390$, the value the table approaches. So exponential smoothing,
+which appeared as a heuristic, then as the optimal forecast for ARIMA(0,1,1), is also the Kalman filter for a
+random walk observed with noise: three views of the same method. The ratio $Q/R$, the signal-to-noise ratio,
+fixes the smoothing constant.
+
+\section{Nonlinear models: ARCH and volatility}\label{sec:arch}
+
+Every model so far has assumed constant variance. Financial series violate this plainly: quiet periods and
+turbulent periods cluster, so the variance is itself serially dependent even when the series is uncorrelated.
+ARCH models that directly.
+
+\subsection{The ARCH and GARCH models}
+
+\begin{defn}
+A process follows an \textbf{ARCH($p$)} model, short for autoregressive conditional
+heteroscedasticity, if
+\[
+X_t = \sigma_t\,\varepsilon_t , \qquad \sigma_t^2 = \alpha_0 + \sum_{i=1}^p\alpha_iX_{t-i}^2 ,
+\]
+where $\varepsilon_t$ is independent white noise with unit variance, $\alpha_0 > 0$ and $\alpha_i \ge 0$. The \textbf{GARCH($p, q$)} extension adds lagged
+variances,
+\[
+\sigma_t^2 = \alpha_0 + \sum_{i=1}^p\alpha_iX_{t-i}^2 + \sum_{j=1}^q\beta_j\sigma_{t-j}^2 .
+\]
+\end{defn}
+
+Here $\sigma_t^2$ is the \emph{conditional} variance of $X_t$ given the past: a large value of $X_{t-1}$, positive or negative, raises the
+variance of $X_t$, so large changes tend to be followed by large changes.
+
+\begin{thm}[Properties of ARCH(1)]\label{thm:arch1}
+For the ARCH(1) model with $0 \le \alpha_1 < 1$:
+\begin{enumerate}[label=(\roman*)]
+\item $E(X_t) = 0$, $\Var(X_t) = \dfrac{\alpha_0}{1 - \alpha_1}$, and $\Corr(X_t, X_{t+\tau}) = 0$ for $\tau \ne 0$;
+\item $X_t^2$ is autocorrelated, following an AR(1) in the squares;
+\item if $\varepsilon_t$ is normal and $3\alpha_1^2 < 1$, the kurtosis of $X_t$ is
+\[
+\frac{E(X_t^4)}{\bigl(E(X_t^2)\bigr)^2} = \frac{3(1 - \alpha_1^2)}{1 - 3\alpha_1^2} > 3 ,
+\]
+so $X_t$ has heavier tails than a normal variable.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) Conditioning on the past, $E(X_t \mid \mathcal{F}_{t-1}) = \sigma_tE(\varepsilon_t) = 0$, so $E(X_t) = 0$ by the tower property, and $X_t$ is uncorrelated with
+anything earlier, which gives the zero autocorrelation. For the variance, $E(X_t^2) = E(\sigma_t^2) = \alpha_0 + \alpha_1E(X_{t-1}^2)$. Stationarity
+makes both expectations equal, so $E(X_t^2)(1 - \alpha_1) = \alpha_0$, giving the stated variance and requiring $\alpha_1 < 1$ for it to be finite and
+positive.
+
+(ii) Writing $\eta_t = X_t^2 - \sigma_t^2$, which has mean zero given the past, the definition rearranges to
+\[
+X_t^2 = \alpha_0 + \alpha_1X_{t-1}^2 + \eta_t ,
+\]
+an AR(1) for the squared series.
+
+(iii) With normal $\varepsilon_t$, $E(\varepsilon_t^4) = 3$, so $m_4 = E(X_t^4) = 3E(\sigma_t^4) = 3E(\alpha_0 + \alpha_1X_{t-1}^2)^2 = 3(\alpha_0^2 + 2\alpha_0\alpha_1m_2 + \alpha_1^2m_4)$, with
+$m_2 = \alpha_0/(1 - \alpha_1)$. Solving, $m_4(1 - 3\alpha_1^2) = 3\alpha_0(\alpha_0 + 2\alpha_1m_2) = 3\alpha_0^2\frac{1 + \alpha_1}{1 - \alpha_1}$, and dividing by $m_2^2 = \alpha_0^2/(1 - \alpha_1)^2$ gives
+$3(1 + \alpha_1)(1 - \alpha_1)/(1 - 3\alpha_1^2)$, which exceeds $3$ when $\alpha_1 > 0$ because $1 - \alpha_1^2 > 1 - 3\alpha_1^2$.
+\end{proof}
+
+Part (ii) is the whole point. The series itself is uncorrelated (it passes every test built on the
+autocorrelation function) while its squares are strongly correlated. A series can therefore be unpredictable in
+level and entirely predictable in volatility, which is what makes returns look random while their risk does
+not. Part (iii) explains another familiar feature of financial data: occasional very large values, more than a
+normal distribution would produce.
+
+This is also the practical diagnostic: plot the ac.f. of the squared residuals after fitting an ARMA model. If it is
+flat the constant-variance assumption stands; if it decays slowly, an ARCH or GARCH term is needed. Nothing in
+the ordinary residual ac.f. would have revealed it (Figure~\ref{fig:arch}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\filldraw[fill=violet!6,draw=violet!60!black,rounded corners=6pt] (-0.35,-1.6) rectangle (6.4,1.9);
+\node[circle,fill=violet!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,1.55) {1};
+\node[anchor=west,font=\small\bfseries,text=violet!50!black] at (0.25,1.55) {ARCH(1) series};
+\draw[-Stealth,gray] (0,0) -- (6.2,0) node[below left,black,font=\scriptsize] {$t$};
+\draw[-,violet!60!black] plot coordinates {(0.00,-0.18) (0.04,0.11) (0.08,0.08) (0.12,-0.02) (0.16,-0.05) (0.20,-0.32) (0.24,-0.16) (0.28,0.33) (0.32,-0.06) (0.36,-0.36) (0.40,0.47) (0.44,0.22) (0.48,0.61) (0.52,0.03) (0.56,-0.11) (0.60,-0.37) (0.64,0.48) (0.68,1.07) (0.72,-0.66) (0.76,-0.34) (0.80,0.20) (0.84,-0.24) (0.88,-0.08) (0.92,-0.09) (0.96,0.05) (1.00,0.27) (1.04,0.01) (1.08,0.23) (1.12,-0.12) (1.16,0.09) (1.20,-0.54) (1.24,-0.66) (1.28,0.42) (1.32,-0.23) (1.36,0.17) (1.40,0.15) (1.44,0.35) (1.48,0.28) (1.52,0.32) (1.56,-0.04) (1.60,-0.17) (1.64,-0.20) (1.68,-0.14) (1.72,-0.30) (1.76,-0.18) (1.80,-0.03) (1.84,0.06) (1.88,-0.08) (1.92,-0.49) (1.96,-0.03) (2.00,0.06) (2.04,0.27) (2.08,0.18) (2.12,-0.18) (2.16,-0.20) (2.20,0.57) (2.24,0.36) (2.28,0.65) (2.32,1.10) (2.36,-0.67) (2.40,0.21) (2.44,0.13) (2.48,0.15) (2.52,0.14) (2.56,0.05) (2.60,0.04) (2.64,-0.37) (2.68,-0.06) (2.72,-0.19) (2.76,0.04) (2.80,-0.12) (2.84,0.16) (2.88,0.22) (2.92,0.09) (2.96,0.08) (3.00,0.02) (3.04,-0.11) (3.08,-0.04) (3.12,-0.12) (3.16,0.10) (3.20,0.00) (3.24,0.14) (3.28,-0.35) (3.32,0.31) (3.36,-0.25) (3.40,-0.22) (3.44,-0.06) (3.48,-0.14) (3.52,0.08) (3.56,-0.14) (3.60,-0.28) (3.64,-0.27) (3.68,0.41) (3.72,0.02) (3.76,-0.29) (3.80,0.00) (3.84,-0.38) (3.88,0.65) (3.92,-0.80) (3.96,0.29) (4.00,0.18) (4.04,-0.40) (4.08,0.11) (4.12,0.26) (4.16,0.14) (4.20,0.07) (4.24,0.24) (4.28,0.05) (4.32,0.08) (4.36,-0.03) (4.40,0.16) (4.44,-0.25) (4.48,0.24) (4.52,-0.15) (4.56,-0.29) (4.60,0.12) (4.64,0.44) (4.68,0.38) (4.72,-0.19) (4.76,0.20) (4.80,-0.13) (4.84,-0.03) (4.88,0.02) (4.92,-0.57) (4.96,0.09) (5.00,-0.26) (5.04,-0.21) (5.08,-0.43) (5.12,-0.59) (5.16,-0.46) (5.20,0.34) (5.24,0.57) (5.28,-0.01) (5.32,0.27) (5.36,-0.08) (5.40,-0.48) (5.44,0.06) (5.48,0.11) (5.52,-0.11) (5.56,0.08) (5.60,0.14) (5.64,-0.23) (5.68,-0.44) (5.72,-0.09) (5.76,-0.05) (5.80,-0.09) (5.84,0.25) (5.88,0.52) (5.92,-0.19) (5.96,0.19)};
+\foreach \px/\col/\num/\name/\vals in {
+ 6.85/blue/2/{ac.f. of $X_t$}/{0.006,-0.033,0.039,-0.082,0.034,-0.031},
+ 11.2/red/3/{ac.f. of $X_t^2$}/{0.405,0.096,0.013,-0.054,0.007,-0.055}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.35,-1.6) rectangle (3.6,1.9);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,1.55) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.25,1.55) {\name};
+  \draw[-Stealth,gray] (0,0) -- (3.3,0) node[below left,black,font=\scriptsize] {$k$};
+  \draw[-,gray] (0,-1.0) -- (0,1.2);
+  \draw[-,dashed,gray] (0,0.4) -- (3.1,0.4);
+  \draw[-,dashed,gray] (0,-0.4) -- (3.1,-0.4);
+  \foreach \v [count=\k] in \vals \draw[-,very thick,\col!60!black] ({0.45*\k},0) -- ({0.45*\k},{2.4*\v});
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{A simulated ARCH(1) series with $\alpha_0 = 0.2$, $\alpha_1 = 0.5$, $n = 150$. (1) Quiet and turbulent spells alternate. (2) The ac.f. of
+the series lies inside $\pm2/\sqrt n$ (dashed): it looks like white noise. (3) The ac.f. of its squares has $r_1 = 0.41$, far outside:
+the volatility is predictable.}
+\label{fig:arch}
+\end{figure}
+
+\begin{prop}\label{prop:garch-var}
+For the GARCH(1,1) model $\sigma_t^2 = \alpha_0 + \alpha_1X_{t-1}^2 + \beta_1\sigma_{t-1}^2$ with $\alpha_1 + \beta_1 < 1$, the unconditional variance is $\alpha_0/(1 - \alpha_1 - \beta_1)$.
+\end{prop}
+
+\begin{proof}
+Take expectations, using $E(X_{t-1}^2) = E(\sigma_{t-1}^2) = v$ by stationarity: $v = \alpha_0 + \alpha_1v + \beta_1v$, so $v = \alpha_0/(1 - \alpha_1 - \beta_1)$.
+\end{proof}
+
+In practice $\alpha_1 + \beta_1$ is often close to $1$ for financial returns, which means shocks to volatility die out slowly. GARCH(1,1)
+with three parameters usually fits as well as an ARCH model with many lags, the same parsimony that ARMA
+offers over pure AR.
+
+\begin{exa}\label{exa:arch-forecast}
+Daily returns follow an ARCH(1) model with $\alpha_0 = 0.2$ and $\alpha_1 = 0.5$ (in squared per cent). Find the unconditional variance and
+kurtosis, and give a $95\%$ interval for tomorrow's return after a day with $X_n = 1.5$ and after a day with $X_n = 0$.
+\end{exa}
+
+\begin{solution}
+$\Var(X_t) = 0.2/(1 - 0.5) = 0.4$, a standard deviation of $0.63$. The kurtosis is $3(1 - 0.25)/(1 - 0.75) = 9$, three times the normal value: extreme returns are
+far more common than a normal model with the same variance would suggest.
+
+Tomorrow's conditional variance is $\sigma_{n+1}^2 = 0.2 + 0.5X_n^2$. After $X_n = 1.5$ it is $0.2 + 0.5(2.25) = 1.325$, a standard deviation of $1.151$, so the interval is
+$\pm1.96(1.151) = \pm2.26$. After $X_n = 0$ it is $0.2$, a standard deviation of $0.447$, and the interval is $\pm0.88$. The forecast of the return is $0$ in both
+cases, but its uncertainty differs by a factor of $2.6$. The unconditional interval, $\pm1.96(0.63) = \pm1.24$, is too wide after a quiet day and much
+too narrow after a turbulent one.
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:kalman-gain}
+In the local level model, find the steady-state gain when $Q = R$, and when $Q = 0.01R$. Interpret.
+\end{problem}
+
+\begin{solution}
+Take $R = 1$. With $Q = 1$: $P_\infty = (-1 + \sqrt5)/2 = 0.618$ and $K_\infty = 1.618/2.618 = 0.618$. With $Q = 0.01$: $P_\infty = (-0.01 + \sqrt{0.0401})/2 = 0.0951$ and
+$K_\infty = 0.1051/1.1051 = 0.095$. When the level moves as much as the noise, the filter follows each new observation closely;
+when the level barely moves, it averages over many observations, like exponential smoothing with a small $\alpha$.
+\end{solution}
+
+\begin{problem}\label{prob:garch-var}
+A GARCH(1,1) model fitted to daily returns has $\alpha_0 = 0.02$, $\alpha_1 = 0.08$ and $\beta_1 = 0.90$. Find the unconditional variance, and comment on
+the persistence of volatility.
+\end{problem}
+
+\begin{solution}
+$\Var(X_t) = 0.02/(1 - 0.98) = 1$. Since $\alpha_1 + \beta_1 = 0.98$ is close to $1$, a shock to volatility decays by only $2\%$ a day: its half-life is
+$\log0.5/\log0.98 \approx 34$ days. Turbulent periods last for weeks.
+\end{solution}
+
+\section{Review problems}\label{sec:review}
+\subsection{Problems on the whole course}
 \begin{problem}
-Show that the MA$(1)$ process $X_t = \varepsilon_t + \theta\varepsilon_{t-1}$ has
-$\rho(1) = \theta/(1+\theta^{2})$ and $\rho(\tau)=0$ for $\tau\geq2$. Deduce the
-largest value $\left|\rho(1)\right|$ can take.
+Show that the MA(1) process $X_t = Z_t + \beta Z_{t-1}$ has $\rho(1) = \beta/(1 + \beta^2)$ and $\rho(\tau) = 0$ for $\tau \ge 2$. Deduce the largest value $|\rho(1)|$ can
+take.
 \end{problem}
 \begin{solution}
-With $\Var(\varepsilon)=\sigma^{2}$,
-$$\gamma(0) = \left(1+\theta^{2}\right)\sigma^{2},\qquad
-\gamma(1) = \theta\sigma^{2},\qquad \gamma(\tau)=0 \ (\tau\geq2),$$
+With $\Var(Z_t) = \sigma^2$,
+\[
+\gamma(0) = (1 + \beta^2)\sigma^2 , \qquad \gamma(1) = \beta\sigma^2 , \qquad \gamma(\tau) = 0 \ (\tau \ge 2) ,
+\]
 the last because $X_t$ and $X_{t+\tau}$ then share no shock. Dividing,
-$$\rho(1) = \frac{\theta}{1+\theta^{2}},\qquad \rho(\tau)=0 \ (\tau\geq2).$$
-Differentiating, $\rho(1)$ is extremised at $\theta=\pm1$, giving
-$$\left|\rho(1)\right| \leq \tfrac12 .$$
-So a sample first autocorrelation beyond $0.5$ in magnitude rules out an MA$(1)$
-outright, whatever $\theta$ is chosen --- a genuine identification constraint,
-not merely a guideline.
+\[
+\rho(1) = \frac{\beta}{1 + \beta^2} , \qquad \rho(\tau) = 0 \ (\tau \ge 2) .
+\]
+Differentiating, $\rho(1)$ is extremised at $\beta = \pm1$, giving
+\[
+|\rho(1)| \le \tfrac12 .
+\]
+So a sample first autocorrelation beyond $0.5$ in magnitude rules out an MA(1) outright, whatever $\beta$ is chosen: a
+genuine identification constraint, not merely a guideline (Theorem~\ref{thm:ma1-bound}).
 
-Note also that $\theta$ and $1/\theta$ give the same $\rho(1)$: the
-autocorrelations do not determine the model, which is why invertibility is
-imposed to pick the root inside the unit circle.
+Note also that $\beta$ and $1/\beta$ give the same $\rho(1)$: the autocorrelations do not determine the model, which is why
+invertibility is imposed, choosing $|\beta| < 1$, so that the root of $\theta(B)$ lies outside the unit circle.
 \end{solution}
 
 \begin{problem}
-An AR$(2)$ process is $X_t = 0.5X_{t-1} + 0.3X_{t-2} + \varepsilon_t$. Determine
-whether it is stationary, and find $\rho(1)$ and $\rho(2)$.
+An AR(2) process is $X_t = 0.5X_{t-1} + 0.3X_{t-2} + Z_t$. Determine whether it is stationary, and find $\rho(1)$ and $\rho(2)$.
 \end{problem}
 \begin{solution}
-Stationarity requires the roots of the characteristic equation
-$1 - 0.5z - 0.3z^{2} = 0$ to lie outside the unit circle. Solving,
-$$z = \frac{0.5 \pm \sqrt{0.25 + 1.2}}{-0.6}
-= \frac{0.5 \pm 1.204}{-0.6},$$
-giving $z \approx -2.84$ and $z \approx 1.17$. Both exceed one in modulus, so the
-process is stationary.
+Stationarity requires the roots of $1 - 0.5z - 0.3z^2 = 0$ to lie outside the unit circle. Solving,
+\[
+z = \frac{0.5 \pm \sqrt{0.25 + 1.2}}{-0.6} = \frac{0.5 \pm 1.204}{-0.6} ,
+\]
+giving $z \approx -2.84$ and $z \approx 1.17$. Both exceed one in modulus, so the process is stationary. (Equivalently, $\alpha_1 + \alpha_2 = 0.8 < 1$,
+$\alpha_2 - \alpha_1 = -0.2 < 1$ and $\alpha_2 > -1$: the point is inside the triangle of Theorem~\ref{thm:ar2-triangle}.)
 
 The Yule--Walker equations give
-$$\rho(1) = \frac{\phi_1}{1-\phi_2} = \frac{0.5}{0.7} \approx 0.714 ,$$
-$$\rho(2) = \phi_1\rho(1) + \phi_2 = 0.5(0.714) + 0.3 \approx 0.657 .$$
-The slow decay is characteristic of an AR process: the ACF tails off rather than
-cutting, and it is the PACF that would cut off after lag two.
+\begin{align*}
+\rho(1) &= \frac{\alpha_1}{1 - \alpha_2} = \frac{0.5}{0.7} = 0.714 , \\
+\rho(2) &= \alpha_1\rho(1) + \alpha_2 = 0.5(0.714) + 0.3 = 0.657 .
+\end{align*}
+The slow decay is characteristic of an AR process: the ac.f. tails off rather than cutting off, and it is the partial
+ac.f. that would cut off after lag two.
 \end{solution}
 
 \begin{problem}
-A series shows a clear upward trend and yearly seasonality in monthly data.
-Describe the differencing needed before an ARMA model is fitted, and say what
-model class results.
+A series shows a clear upward trend and yearly seasonality in monthly data. Describe the differencing needed
+before an ARMA model is fitted, and say what model class results.
 \end{problem}
 \begin{solution}
-A trend is removed by first differencing, $\nabla X_t = X_t - X_{t-1}$. Yearly
-seasonality in monthly data is removed by seasonal differencing at lag twelve,
-$\nabla_{12}X_t = X_t - X_{t-12}$. Applying both,
-$$\nabla\nabla_{12}X_t = \left(X_t - X_{t-1}\right) - \left(X_{t-12}-X_{t-13}\right).$$
-Fitting an ARMA model to the result is a SARIMA$(p,1,q)\times(P,1,Q)_{12}$ model.
+A trend is removed by first differencing, $\nabla X_t = X_t - X_{t-1}$. Yearly seasonality in monthly data is removed by seasonal
+differencing at lag twelve, $\nabla_{12}X_t = X_t - X_{t-12}$. Applying both,
+\[
+\nabla\nabla_{12}X_t = (X_t - X_{t-1}) - (X_{t-12} - X_{t-13}) .
+\]
+Fitting an ARMA model to the result gives a SARIMA $(p, 1, q) \times (P, 1, Q)_{12}$ model (Section~\ref{sec:sarima}).
 
-Two cautions. Differencing more than necessary inflates the variance and
-introduces artificial negative autocorrelation, so one difference of each kind is
-usually enough and the ACF should be inspected before applying a second. And a
-deterministic trend is better removed by regression than by differencing --- the
-two are different models, and differencing a deterministic trend leaves a
-non-invertible moving-average term behind.
+Two cautions. Differencing more than necessary inflates the variance and introduces artificial negative
+autocorrelation (Theorem~\ref{thm:overdifference}), so one difference of each kind is usually enough and the ac.f. should be
+inspected before applying a second. And a deterministic trend is better removed by regression than by
+differencing: the two are different models, and differencing a deterministic trend leaves a non-invertible
+moving-average term behind.
 \end{solution}
 
 \begin{problem}
-After fitting an ARMA model, the residual autocorrelations look like white noise
-but the autocorrelations of the \emph{squared} residuals decay slowly. What does
-this indicate and what should be done?
+After fitting an ARMA model, the residual autocorrelations look like white noise but the autocorrelations of the
+\emph{squared} residuals decay slowly. What does this indicate and what should be done?
 \end{problem}
 \begin{solution}
-Uncorrelated residuals mean the model has captured the conditional \emph{mean}
-correctly, so the ARMA orders need no revision. Correlated squared residuals mean
-the conditional \emph{variance} is not constant --- large errors follow large
-errors --- which violates the homoscedasticity the ARMA model assumed.
+Uncorrelated residuals mean the model has captured the conditional \emph{mean} correctly, so the ARMA orders need
+no revision. Correlated squared residuals mean the conditional \emph{variance} is not constant (large errors follow
+large errors), which violates the constant-variance assumption of the ARMA model.
 
-The remedy is to add a variance model: fit an ARCH or GARCH term to the
-residuals, so the mean follows the ARMA structure and the variance follows the
-volatility structure. Ignoring it does not bias the point forecasts, but every
-interval built from the model will be wrong --- too wide in quiet periods and far
-too narrow in turbulent ones, which is precisely when the interval matters.
+The remedy is to add a variance model: fit an ARCH or GARCH term to the residuals, so the mean follows the
+ARMA structure and the variance follows the volatility structure (Section~\ref{sec:arch}). Ignoring it does not bias the point
+forecasts, but every interval built from the model will be wrong: too wide in quiet periods and far too narrow
+in turbulent ones, which is precisely when the interval matters.
 \end{solution}
 
 
