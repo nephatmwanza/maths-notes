@@ -9190,6 +9190,420 @@ the interval: the linearised fit underestimates the maximum rate, for the reason
 \end{solution}
 
 \section{Regression models with autocorrelated errors}
+The standard assumptions say that the errors are uncorrelated. When the data are collected over time,
+such as monthly sales, yearly rainfall or daily prices, that assumption often fails. A shock that pushes this
+month's response above the regression line tends to persist into next month, so neighbouring errors are
+correlated. The errors are then said to be \textbf{autocorrelated} (or \emph{serially correlated}). This section shows
+what autocorrelation does to least squares, how to detect it, and how to fit and forecast when it is present.
+
+\subsection{Sources and effects of autocorrelation}
+Autocorrelation in the errors of a time-series regression usually has one of two sources:
+\begin{itemize}
+\item a regressor that changes smoothly over time has been \emph{left out} of the model, so its effect, which
+moves slowly, sits in the errors;
+\item the process itself has \emph{inertia}: the effects of a disturbance die away over several periods rather than at
+once.
+\end{itemize}
+The first source calls for a better model, and adding the missing regressor may remove the
+autocorrelation entirely. The second calls for a model of the errors themselves.
+
+\subhead{The first-order autoregressive model}
+The simplest and most used model for autocorrelated errors is the \textbf{first-order autoregressive}
+process, AR(1):
+\[
+y_t = \beta_0 + \beta_1x_t + \varepsilon_t , \qquad \varepsilon_t = \rho\,\varepsilon_{t-1} + a_t , \qquad t = 1, \dots, n ,
+\]
+where $|\rho| < 1$ and the $a_t$ are independent $N(0, \sigma_a^2)$, with $a_t$ independent of $\varepsilon_{t-1}, \varepsilon_{t-2}, \dots$. Each error is a
+fraction $\rho$ of the last one plus a fresh disturbance. The parameter $\rho$ is the \emph{autocorrelation parameter}.
+
+\begin{thm}\label{thm:ar1}
+If the AR(1) process is stationary (its variance does not change with $t$), then
+\begin{gather*}
+\operatorname{Var}(\varepsilon_t) = \sigma^2 = \frac{\sigma_a^2}{1 - \rho^2} , \\
+\operatorname{Cov}(\varepsilon_t, \varepsilon_{t-k}) = \rho^k\sigma^2 , \qquad \operatorname{Corr}(\varepsilon_t, \varepsilon_{t-k}) = \rho^k .
+\end{gather*}
+\end{thm}
+
+\begin{proof}
+Since $a_t$ is independent of $\varepsilon_{t-1}$, $\operatorname{Var}(\varepsilon_t) = \rho^2\operatorname{Var}(\varepsilon_{t-1}) + \sigma_a^2$. With both variances equal to $\sigma^2$,
+$\sigma^2(1 - \rho^2) = \sigma_a^2$. For $k \ge 1$, $a_t$ is independent of $\varepsilon_{t-k}$, so
+$\operatorname{Cov}(\varepsilon_t, \varepsilon_{t-k}) = \rho\operatorname{Cov}(\varepsilon_{t-1}, \varepsilon_{t-k})$. Repeating this $k$ times reaches $\rho^k\operatorname{Var}(\varepsilon_{t-k}) = \rho^k\sigma^2$.
+\end{proof}
+
+So the correlation decays geometrically as the observations get further apart. The errors have
+covariance matrix $\sigma^2\boldsymbol\Sigma$, where $\boldsymbol\Sigma$ has $(s, t)$ element $\rho^{|s-t|}$. When $\rho > 0$, the usual case,
+neighbouring errors have the same sign, and the residuals drift in long runs above and below zero. When $\rho < 0$ they alternate in sign.
+Figure~\ref{fig:ar-patterns} shows the three patterns.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\col/\num/\name/\eqn in {
+ 0/blue/1/{Positive}/{$\rho > 0$: long runs},
+ 5.1/gray/2/{None}/{$\rho = 0$: no pattern},
+ 10.2/red/3/{Negative}/{$\rho < 0$: alternating}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.35,-2.0) rectangle (4.5,1.95);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,1.6) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.25,1.6) {\name};
+  \draw[-Stealth,gray] (0,0) -- (4.3,0) node[below,black,font=\scriptsize] {$t$};
+  \draw[-Stealth,gray] (0,-1.25) -- (0,1.3);
+  \ifnum\num=1
+   \draw[-,\col!60!black,mark=*,mark size=1.4pt,mark options={fill=\col!60!black}] plot coordinates {(0.25,-0.6) (0.5,-0.9) (0.75,-1.0) (1.0,-0.7) (1.25,-0.3) (1.5,0.2) (1.75,0.6) (2.0,0.9) (2.25,1.0) (2.5,0.8) (2.75,0.4) (3.0,0.1) (3.25,-0.3) (3.5,-0.5) (3.75,-0.4) (4.0,-0.1)};
+  \fi
+  \ifnum\num=2
+   \draw[-,\col!60!black,mark=*,mark size=1.4pt,mark options={fill=\col!60!black}] plot coordinates {(0.25,0.3) (0.5,-0.6) (0.75,0.5) (1.0,0.1) (1.25,-0.9) (1.5,0.7) (1.75,-0.2) (2.0,0.4) (2.25,-0.5) (2.5,0.9) (2.75,-0.1) (3.0,-0.7) (3.25,0.6) (3.5,0.2) (3.75,-0.4) (4.0,0.8)};
+  \fi
+  \ifnum\num=3
+   \draw[-,\col!60!black,mark=*,mark size=1.4pt,mark options={fill=\col!60!black}] plot coordinates {(0.25,0.7) (0.5,-0.6) (0.75,0.8) (1.0,-0.9) (1.25,0.5) (1.5,-0.7) (1.75,0.9) (2.0,-0.5) (2.25,0.6) (2.5,-0.8) (2.75,0.7) (3.0,-0.6) (3.25,0.9) (3.5,-0.7) (3.75,0.5) (4.0,-0.6)};
+  \fi
+  \node[font=\scriptsize,text=\col!50!black] at (2.1,-1.65) {\eqn};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Residuals plotted against time under positive, zero and negative autocorrelation.}
+\label{fig:ar-patterns}
+\end{figure}
+
+\subhead{What autocorrelation does to least squares}
+\begin{thm}\label{thm:ols-autocorr}
+Suppose $E(\boldsymbol\varepsilon) = \mathbf{0}$ and $\operatorname{Var}(\boldsymbol\varepsilon) = \sigma^2\boldsymbol\Sigma$. Then the least-squares estimator $\hat{\boldsymbol\beta} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$ is still
+unbiased, but
+\[
+\operatorname{Var}(\hat{\boldsymbol\beta}) = \sigma^2(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\boldsymbol\Sigma\mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1} .
+\]
+For the simple regression with AR(1) errors, with $u_t = x_t - \bar x$,
+\[
+\operatorname{Var}(\hat\beta_1) = \frac{\sigma^2}{S_{xx}}\Bigl[1 + 2\sum_{k=1}^{n-1}\rho^kc_k\Bigr] , \qquad
+c_k = \frac{\sum_{t=k+1}^n u_tu_{t-k}}{S_{xx}} .
+\]
+\end{thm}
+
+\begin{proof}
+Since $\mathbf{y} = \mathbf{X}\boldsymbol\beta + \boldsymbol\varepsilon$,
+\[
+\hat{\boldsymbol\beta} = \boldsymbol\beta + (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\boldsymbol\varepsilon ,
+\]
+which has mean $\boldsymbol\beta$, and by Lemma~\ref{lem:linear-rv} its variance is $(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top(\sigma^2\boldsymbol\Sigma)\mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}$. In simple regression,
+$\hat\beta_1 = \beta_1 + \sum_tu_t\varepsilon_t/S_{xx}$, so
+\begin{align*}
+\operatorname{Var}(\hat\beta_1) &= \frac{1}{S_{xx}^2}\sum_s\sum_tu_su_t\operatorname{Cov}(\varepsilon_s, \varepsilon_t) \\
+&= \frac{\sigma^2}{S_{xx}^2}\sum_s\sum_tu_su_t\rho^{|s-t|}
+\end{align*}
+by Theorem~\ref{thm:ar1}. The terms with $s = t$ add up to $S_{xx}$, and the pairs of terms at distance $k$ add up to
+$2\rho^k\sum_tu_tu_{t-k}$.
+\end{proof}
+
+The usual formula $\sigma^2/S_{xx}$ keeps only the first term. The $c_k$ are the autocorrelations of the regressor. In
+time series the regressor itself usually trends or moves smoothly, so $c_1, c_2, \dots$ are positive, and with $\rho > 0$
+the bracket exceeds $1$: the true variance of $\hat\beta_1$ is larger than the formula says. Worse, the usual estimate $s^2$
+of $\sigma^2$ also tends to be too small, because positively correlated residuals stay closer to the fitted line than
+independent ones would. The consequences are:
+\begin{itemize}
+\item the estimates are unbiased, but no longer have minimum variance;
+\item the reported standard errors are too small, often much too small;
+\item confidence intervals are too narrow and $t$- and $F$-tests reject too often, so regressors appear
+significant when they are not.
+\end{itemize}
+
+\subsection{Detecting autocorrelation}
+The first check is a plot of the residuals against time, looking for the runs of Figure~\ref{fig:ar-patterns}. The
+standard formal test is that of Durbin and Watson, which uses the statistic
+\[
+d = \frac{\sum_{t=2}^n(e_t - e_{t-1})^2}{\sum_{t=1}^ne_t^2} ,
+\]
+computed from the least-squares residuals. If neighbouring residuals are alike, the differences
+$e_t - e_{t-1}$ are small, and so is $d$.
+
+\begin{thm}\label{thm:dw}
+Let $r_1 = \sum_{t=2}^ne_te_{t-1}\big/\sum_{t=1}^ne_t^2$, the lag-one autocorrelation of the residuals. Then
+\[
+d = 2(1 - r_1) - \frac{e_1^2 + e_n^2}{\sum_{t=1}^ne_t^2} ,
+\]
+so $d \approx 2(1 - r_1)$, and $0 \le d \le 4$ approximately: $d$ near $2$ indicates no autocorrelation, near $0$ strong positive,
+and near $4$ strong negative autocorrelation.
+\end{thm}
+
+\begin{proof}
+Expanding the numerator,
+\begin{align*}
+\sum_{t=2}^n(e_t - e_{t-1})^2 &= \sum_{t=2}^ne_t^2 + \sum_{t=2}^ne_{t-1}^2 - 2\sum_{t=2}^ne_te_{t-1} \\
+&= \Bigl(2\sum_{t=1}^ne_t^2 - e_1^2 - e_n^2\Bigr) - 2\sum_{t=2}^ne_te_{t-1} ,
+\end{align*}
+since the first sum omits $e_1^2$ and the second omits $e_n^2$. Dividing by $\sum e_t^2$ gives the identity. The end term is
+small when $n$ is moderate, and since $|r_1| \le 1$ approximately, $d$ lies between $0$ and $4$.
+\end{proof}
+
+To test $H_0\colon \rho = 0$ against $H_1\colon \rho > 0$, small values of $d$ are significant. The exact null distribution of $d$
+depends on $\mathbf{X}$, but Durbin and Watson showed that its critical value always lies between two bounds,
+$d_L$ and $d_U$, which depend only on $n$, the number of regressors $k$ and $\alpha$, and which are tabulated. The rule is:
+\begin{itemize}
+\item if $d < d_L$, reject $H_0$: there is positive autocorrelation;
+\item if $d > d_U$, do not reject $H_0$;
+\item if $d_L \le d \le d_U$, the test is inconclusive.
+\end{itemize}
+For negative autocorrelation, the same rule is applied to $4 - d$. Figure~\ref{fig:dw} summarises the regions. For
+example, at $\alpha = 0.05$ with $k = 1$, the bounds are $d_L = 1.08$, $d_U = 1.36$ for $n = 15$, and $d_L = 1.05$, $d_U = 1.35$ for $n = 14$.
+Software can compute the exact $p$-value, which removes the inconclusive region.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\filldraw[fill=gray!5,draw=gray!50,rounded corners=6pt] (-0.6,-1.5) rectangle (16.6,1.6);
+\foreach \a/\b/\col/\lab in {0/4.32/red/{positive\\autocorrelation},4.32/5.44/orange/{incon-\\clusive},5.44/10.56/green/{no evidence of\\autocorrelation},10.56/11.68/orange/{incon-\\clusive},11.68/16/blue/{negative\\autocorrelation}} {
+ \filldraw[fill=\col!20,draw=\col!60!black] (\a,0) rectangle (\b,0.6);
+ \node[font=\scriptsize,align=center,text=\col!40!black] at ({(\a+\b)/2},1.1) {\lab};
+}
+\foreach \p/\l/\dy in {0/0/0.15,4.32/d_L/0.15,5.44/d_U/0.15,8/2/0.15,10.56/4 - d_U/0.15,11.68/4 - d_L/0.6,16/4/0.15} {
+ \draw[black] (\p,0) -- (\p,-\dy);
+ \node[font=\scriptsize,anchor=north] at (\p,-\dy) {$\l$};
+}
+\draw[-Stealth,thick,red!60!black] (2.0,-1.15) -- (2.0,-0.05);
+\node[font=\scriptsize,text=red!50!black,anchor=west] at (2.15,-0.95) {sales data: $d = 0.50$};
+\end{tikzpicture}
+\caption{Decision regions of the Durbin--Watson test, drawn for $d_L = 1.08$ and $d_U = 1.36$ ($n = 15$, $k = 1$,
+$\alpha = 0.05$), with the value for Example~\ref{exa:sales}.}
+\label{fig:dw}
+\end{figure}
+
+\begin{exa}\label{exa:sales}
+Over $15$ years, a company's annual sales $y$, in millions, and its advertising expenditure $x$, in
+hundreds of thousands, were:
+\begin{center}
+\begin{tabular}{crrr}
+Year $t$ & $x_t$ & $y_t$ & $e_t$ \\
+\hline
+1 & 4 & 18.8 & 0.742 \\
+2 & 5 & 21.9 & 1.878 \\
+3 & 5 & 21.6 & 1.578 \\
+4 & 6 & 21.6 & $-0.387$ \\
+5 & 7 & 23.8 & $-0.151$ \\
+6 & 7 & 24.0 & 0.049 \\
+7 & 8 & 25.4 & $-0.515$ \\
+8 & 9 & 25.9 & $-1.980$ \\
+9 & 9 & 26.5 & $-1.380$ \\
+10 & 10 & 27.0 & $-2.844$ \\
+11 & 11 & 29.8 & $-2.008$ \\
+12 & 12 & 32.4 & $-1.372$ \\
+13 & 12 & 35.3 & 1.528 \\
+14 & 13 & 38.0 & 2.263 \\
+15 & 14 & 40.3 & 2.599 \\
+\end{tabular}
+\end{center}
+The last column holds the residuals from the least-squares line. Fit the line, and test for positive
+autocorrelation at the $5\%$ level.
+\end{exa}
+
+\begin{solution}
+With $\bar x = 8.8$, $\bar y = 27.487$, $S_{xx} = 138.4$ and $S_{xy} = 271.86$,
+\[
+\hat\beta_1 = \frac{271.86}{138.4} = 1.964 , \qquad \hat\beta_0 = 27.487 - 1.964(8.8) = 10.20 ,
+\]
+so $\hat y = 10.20 + 1.964x$, with $SS_{\mathrm{Res}} = 41.04$, $s^2 = 41.04/13 = 3.157$, and the usual standard error
+$\operatorname{se}(\hat\beta_1) = \sqrt{3.157/138.4} = 0.151$.
+
+The residuals are positive for years $1$ to $3$, negative for years $4$ to $12$ (apart from a tiny value in year $6$), and positive
+again for years $13$ to $15$: three long runs, the pattern of panel~1 in Figure~\ref{fig:ar-patterns}. For the test,
+\[
+\sum_{t=2}^{15}(e_t - e_{t-1})^2 = 20.467 , \qquad d = \frac{20.467}{41.041} = 0.499 .
+\]
+As a check on Theorem~\ref{thm:dw}, $\sum e_te_{t-1} = 27.155$, so $r_1 = 0.662$, and with $e_1^2 + e_{15}^2 = 7.305$,
+\[
+2(1 - 0.662) - \frac{7.305}{41.041} = 0.677 - 0.178 = 0.499 .
+\]
+Since $d = 0.499 < d_L = 1.08$, $H_0$ is rejected: the errors are positively autocorrelated. (The exact $5\%$ point for this
+design, found by simulation, is $1.36$, and the exact $p$-value is about $0.00002$.) The standard error $0.151$ cannot be
+trusted. By Theorem~\ref{thm:ols-autocorr}, if $\rho$ were $0.7$, the lag autocorrelations of advertising, $c_1 = 0.78$,
+$c_2 = 0.60$, $c_3 = 0.42, \dots$, make the bracket equal to $2.94$: the true standard error would be $\sqrt{2.94} = 1.7$ times the
+formula's, before even allowing for $s^2$ being too small.
+\end{solution}
+
+\subsection{Estimating the parameters}
+If the autocorrelation comes from a missing regressor, the remedy is to find it and include it, and then to
+check the residuals again. If it is genuine AR(1) behaviour, the model can be transformed into one with
+independent errors.
+
+\begin{thm}[Cochrane--Orcutt transformation]\label{thm:cochrane-orcutt}
+Under the AR(1) model, for $t = 2, \dots, n$, let $y_t' = y_t - \rho y_{t-1}$ and $x_t' = x_t - \rho x_{t-1}$. Then
+\[
+y_t' = \beta_0' + \beta_1x_t' + a_t , \qquad \beta_0' = \beta_0(1 - \rho) ,
+\]
+a regression with the same slope and with independent errors of constant variance $\sigma_a^2$.
+\end{thm}
+
+\begin{proof}
+Subtract $\rho$ times the model at time $t - 1$ from the model at time $t$:
+\[
+y_t - \rho y_{t-1} = \beta_0(1 - \rho) + \beta_1(x_t - \rho x_{t-1}) + (\varepsilon_t - \rho\varepsilon_{t-1}) ,
+\]
+and $\varepsilon_t - \rho\varepsilon_{t-1} = a_t$.
+\end{proof}
+
+So if $\rho$ were known, ordinary least squares on the transformed data would satisfy all the standard
+assumptions, and the usual standard errors and tests would be valid. The transformation loses the first
+observation. The \emph{Prais--Winsten} version keeps it, as $y_1' = \sqrt{1 - \rho^2}\,y_1$ with the same multiplier on its row of $\mathbf{X}$.
+
+\begin{thm}\label{thm:prais-winsten}
+Let $\mathbf{P}$ be the $n \times n$ matrix with $P_{11} = \sqrt{1 - \rho^2}$, $P_{tt} = 1$ and $P_{t,t-1} = -\rho$ for $t \ge 2$, and zeros elsewhere. Then
+$\operatorname{Var}(\mathbf{P}\boldsymbol\varepsilon) = \sigma_a^2\mathbf{I}$, so least squares on $\mathbf{Py}$ and $\mathbf{PX}$ is the generalized least-squares estimator
+\[
+\hat{\boldsymbol\beta}_{\mathrm{GLS}} = (\mathbf{X}^\top\boldsymbol\Sigma^{-1}\mathbf{X})^{-1}\mathbf{X}^\top\boldsymbol\Sigma^{-1}\mathbf{y} ,
+\]
+which has the smallest variance among linear unbiased estimators.
+\end{thm}
+
+\begin{proof}
+For $t \ge 2$, the $t$th element of $\mathbf{P}\boldsymbol\varepsilon$ is $\varepsilon_t - \rho\varepsilon_{t-1} = a_t$. The first is $\sqrt{1 - \rho^2}\,\varepsilon_1$, with variance
+$(1 - \rho^2)\sigma_a^2/(1 - \rho^2) = \sigma_a^2$ by Theorem~\ref{thm:ar1}. The $a_t$ for $t \ge 2$ are independent of each other and of $\varepsilon_1$, so
+$\operatorname{Var}(\mathbf{P}\boldsymbol\varepsilon) = \sigma_a^2\mathbf{I}$. Then $\mathbf{P}\boldsymbol\Sigma\mathbf{P}^\top\sigma^2 = \sigma_a^2\mathbf{I}$, so $\boldsymbol\Sigma^{-1} = (\sigma^2/\sigma_a^2)\mathbf{P}^\top\mathbf{P}$, and least squares
+on the transformed data gives $(\mathbf{X}^\top\mathbf{P}^\top\mathbf{PX})^{-1}\mathbf{X}^\top\mathbf{P}^\top\mathbf{Py}$, the estimator displayed, since the constant cancels.
+This is weighted least squares with $\mathbf{W} = \boldsymbol\Sigma^{-1}$, so the optimality is Theorem~\ref{thm:wls}(iii).
+\end{proof}
+
+In practice $\rho$ is unknown and must be estimated. Three methods are common.
+\begin{itemize}
+\item \emph{Cochrane--Orcutt.} Estimate $\rho$ from the least-squares residuals by regressing $e_t$ on $e_{t-1}$ through the
+origin, $\hat\rho = \sum_{t=2}^ne_te_{t-1}/\sum_{t=2}^ne_{t-1}^2$; transform; fit; and, if desired, recompute the residuals from the new
+estimates and repeat until $\hat\rho$ settles.
+\item \emph{Hildreth--Lu.} For each $\rho$ on a grid, transform and fit, and choose the $\rho$ with the smallest residual
+sum of squares. This is profile least squares (Theorem~\ref{thm:profile}) with $\rho$ as the non-linear parameter.
+\item \emph{First differences.} When $\hat\rho$ is close to $1$, take $\rho = 1$: regress $y_t - y_{t-1}$ on $x_t - x_{t-1}$. The intercept $\beta_0'$
+is then $0$, so the regression is through the origin.
+\end{itemize}
+In all cases the residuals of the transformed regression should be checked again, for example with the
+Durbin--Watson test, to make sure the transformation has removed the autocorrelation.
+
+\begin{exa}\label{exa:sales-co}
+Apply the Cochrane--Orcutt method to the sales data of Example~\ref{exa:sales}.
+\end{exa}
+
+\begin{solution}
+From the least-squares residuals, $\sum_{t=2}^{15}e_te_{t-1} = 27.155$ and $\sum_{t=2}^{15}e_{t-1}^2 = 34.287$, so
+$\hat\rho = 27.155/34.287 = 0.792$. The transformed data $y_t' = y_t - 0.792y_{t-1}$, $x_t' = x_t - 0.792x_{t-1}$ for $t = 2, \dots, 15$ begin
+\[
+y_2' = 21.9 - 0.792(18.8) = 7.010 , \qquad x_2' = 5 - 0.792(4) = 1.832 ,
+\]
+and the least-squares fit to the $14$ transformed pairs is
+\[
+\hat y' = 1.932 + 2.079x' .
+\]
+So $\hat\beta_1 = 2.079$ and $\hat\beta_0 = 1.932/(1 - 0.792) = 9.29$, and the fitted model is $\hat y = 9.29 + 2.079x$, with
+$\operatorname{se}(\hat\beta_1) = 0.445$ from the transformed regression ($s^2 = 1.563$ on $12$ degrees of freedom). The standard error is
+almost three times the $0.151$ reported by ordinary least squares: the original analysis greatly overstated its
+precision. A $95\%$ interval for $\beta_1$ is now $2.079 \pm 2.179(0.445)$, from $1.11$ to $3.05$.
+
+The Durbin--Watson statistic of the transformed residuals is $1.61$, above $d_U = 1.35$ for $n = 14$, so no
+autocorrelation remains. Iterating the method changes $\hat\rho$ to $0.755$ and $\hat\beta_1$ to $2.11$. A Hildreth--Lu grid gives:
+\begin{center}
+\begin{tabular}{cccccc}
+$\rho$ & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+\hline
+Residual SS & 21.34 & 19.69 & 18.83 & 18.78 & 19.00 \\
+\end{tabular}
+\end{center}
+a flat minimum between $0.7$ and $0.8$, consistent with the other estimates.
+\end{solution}
+
+\subsection{Forecasting}
+Autocorrelation is a nuisance for estimation but an asset for forecasting: the last residual carries
+information about the next error.
+
+\begin{thm}\label{thm:ar-forecast}
+Under the AR(1) model with known parameters, the best predictor of $y_{n+h}$ given $y_1, \dots, y_n$ is
+\[
+\hat y_{n+h} = \beta_0 + \beta_1x_{n+h} + \rho^h\varepsilon_n ,
+\]
+and its prediction error has variance $\sigma_a^2(1 + \rho^2 + \dots + \rho^{2(h-1)}) = \sigma_a^2(1 - \rho^{2h})/(1 - \rho^2)$.
+\end{thm}
+
+\begin{proof}
+Applying the AR(1) recursion $h$ times,
+\[
+\varepsilon_{n+h} = \rho^h\varepsilon_n + a_{n+h} + \rho a_{n+h-1} + \dots + \rho^{h-1}a_{n+1} .
+\]
+The $a$'s after time $n$ are independent of everything observed up to time $n$ and have mean zero, so the best
+predictor of $\varepsilon_{n+h}$ is $\rho^h\varepsilon_n$, and the error is the sum of the $a$ terms, with variance
+$\sigma_a^2(1 + \rho^2 + \dots + \rho^{2(h-1)})$. The geometric series sums to the stated form.
+\end{proof}
+
+For one step ahead the error variance is $\sigma_a^2$, smaller than the $\sigma^2 = \sigma_a^2/(1 - \rho^2)$ that would apply if the last
+residual were ignored. As $h$ grows the adjustment $\rho^h\varepsilon_n$ fades and the variance rises to $\sigma^2$. In practice the
+parameters are replaced by estimates and $\varepsilon_n$ by the last residual, $e_n = y_n - \hat\beta_0 - \hat\beta_1x_n$, which makes the
+intervals somewhat too narrow.
+
+\begin{exa}\label{exa:sales-forecast}
+For the sales data, advertising next year will be $x_{16} = 15$. Forecast sales, using the Cochrane--Orcutt fit.
+\end{exa}
+
+\begin{solution}
+The regression part gives $9.29 + 2.079(15) = 40.48$. The last residual from this fit is
+$e_{15} = 40.3 - (9.29 + 2.079 \times 14) = 1.90$, and with $\hat\rho = 0.792$,
+\[
+\hat y_{16} = 40.48 + 0.792(1.90) = 41.98 .
+\]
+Because sales have been running above the line, the forecast is raised by $1.5$. Ordinary least squares, which
+ignores the autocorrelation, would forecast $10.20 + 1.964(15) = 39.67$. With $\hat\sigma_a^2 = 1.563$ and $t_{0.025,12} = 2.179$, an
+approximate $95\%$ prediction interval is $41.98 \pm 2.179\sqrt{1.563} = 41.98 \pm 2.72$, from $39.3$ to $44.7$.
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:ar-two-step}
+For an AR(1) process with $\rho = 0.6$ and $\sigma_a^2 = 4$, find $\operatorname{Var}(\varepsilon_t)$, $\operatorname{Corr}(\varepsilon_t, \varepsilon_{t-3})$, and the variance of the
+error in forecasting $\varepsilon_{n+2}$ from $\varepsilon_n$.
+\end{problem}
+
+\begin{solution}
+$\operatorname{Var}(\varepsilon_t) = 4/(1 - 0.36) = 6.25$; $\operatorname{Corr}(\varepsilon_t, \varepsilon_{t-3}) = 0.6^3 = 0.216$; the two-step forecast error variance is
+$4(1 + 0.36) = 5.44$, between the one-step value $4$ and the unconditional $6.25$.
+\end{solution}
+
+\begin{problem}\label{prob:dw-calc}
+The residuals from a regression on $n = 6$ quarterly observations are $2$, $1$, $-1$, $-2$, $-1$, $1$. Compute the
+Durbin--Watson statistic and $r_1$, and verify the identity of Theorem~\ref{thm:dw}.
+\end{problem}
+
+\begin{solution}
+$\sum e_t^2 = 4 + 1 + 1 + 4 + 1 + 1 = 12$. The differences are $-1$, $-2$, $-1$, $1$, $2$, with squares adding to $11$, so $d = 11/12 = 0.917$.
+The lagged products are $2$, $-1$, $2$, $2$, $-1$, adding to $4$, so $r_1 = 4/12 = 0.333$. Then
+$2(1 - 0.333) - (4 + 1)/12 = 1.333 - 0.417 = 0.917$, as the theorem says. (With so few observations the end term is large,
+and $d$ differs considerably from $2(1 - r_1)$.)
+\end{solution}
+
+\begin{problem}\label{prob:negative-dw}
+A regression with $n = 15$ and one regressor gives $d = 3.1$. What does this indicate, using $d_L = 1.08$ and $d_U = 1.36$?
+\end{problem}
+
+\begin{solution}
+For negative autocorrelation the rule is applied to $4 - d = 0.9$, which is below $d_L = 1.08$. So there is significant
+negative autocorrelation: the residuals tend to alternate in sign. This is less common in practice, and can
+be produced by over-correcting, for example by differencing data that did not need it.
+\end{solution}
+
+\begin{problem}\label{prob:first-diff}
+Show that if the errors follow a random walk, $\varepsilon_t = \varepsilon_{t-1} + a_t$, regressing $y_t - y_{t-1}$ on $x_t - x_{t-1}$ through the origin
+gives an estimator of $\beta_1$ that satisfies the standard assumptions. What happens to $\beta_0$?
+\end{problem}
+
+\begin{solution}
+Differencing the model, $y_t - y_{t-1} = \beta_1(x_t - x_{t-1}) + (\varepsilon_t - \varepsilon_{t-1}) = \beta_1(x_t - x_{t-1}) + a_t$, with independent errors of constant
+variance and no intercept. This is Theorem~\ref{thm:cochrane-orcutt} with $\rho = 1$. The intercept $\beta_0$ cancels and cannot be
+estimated from the differenced data. Under a random walk the errors have no fixed level to return to, so
+$\beta_0$ is not well determined in any case; the differenced model is about how changes in $x$ produce changes in $y$.
+\end{solution}
+
+\begin{problem}\label{prob:omitted}
+Leaving out a regressor that trends over time can produce autocorrelated residuals, even when the
+true errors are independent. Explain why, and say what should be tried before transforming the data.
+\end{problem}
+
+\begin{solution}
+If the true model is $y_t = \beta_0 + \beta_1x_t + \beta_2z_t + \varepsilon_t$ and $z_t$ is omitted, the error of the fitted model is $\beta_2z_t + \varepsilon_t$. A
+regressor that moves smoothly over time has neighbouring values that are alike, so $\beta_2z_t$, and with it the
+residuals, are positively autocorrelated. Before transforming, look for the missing variable (a trend term,
+a price, population, season indicators) and add it; the autocorrelation may disappear, and the model will be
+better for reasons beyond the error structure. Transformations such as Cochrane--Orcutt treat the symptom,
+not the cause.
+\end{solution}
 
 \section{Measurement errors \& calibration problem}
 
