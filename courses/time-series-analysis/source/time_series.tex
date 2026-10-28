@@ -1801,6 +1801,272 @@ Fit a model to the undifferenced series instead.
 \end{solution}
 
 \pagebreak
+\section{Partial autocorrelation and model identification}\label{sec:pacf}
+\subsection{The partial autocorrelation function}
+The autocorrelation function alone cannot identify an autoregressive model. For an AR(1) process the
+correlation between $X_t$ and $X_{t+2}$ is $\rho(2) = \alpha^2$, which is not zero, but none of it is direct: it is entirely inherited through
+$X_{t+1}$. The partial autocorrelation is what removes that inheritance.
+
+\begin{defn}
+The \textbf{partial autocorrelation} at lag $k$, written $\phi_{kk}$, is the correlation between $X_t$ and $X_{t+k}$ after removing the
+linear effect of the intervening values $X_{t+1}, \dots, X_{t+k-1}$:
+\[
+\phi_{kk} = \Corr\left(X_t, \ X_{t+k} \;\middle|\; X_{t+1}, \dots, X_{t+k-1}\right) .
+\]
+Equivalently, $\phi_{kk}$ is the coefficient of $X_{t-k}$ in the best linear predictor of $X_t$ from the previous $k$ values,
+\[
+\hat X_t = \phi_{k1}X_{t-1} + \phi_{k2}X_{t-2} + \dots + \phi_{kk}X_{t-k} .
+\]
+\end{defn}
+
+``Best'' means minimising the mean squared error $E(X_t - \hat X_t)^2$, for a stationary process with mean $0$. The coefficient of $X_{t-k}$
+measures what $X_{t-k}$ adds to the prediction when the values $X_{t-1}, \dots, X_{t-k+1}$ are already used, which is the direct link the
+definition asks for.
+
+\begin{thm}[Yule--Walker form of the partial autocorrelations]\label{thm:pacf-yw}
+The coefficients of the best linear predictor from $k$ past values solve
+\[
+\rho(j) = \sum_{i=1}^{k}\phi_{ki}\,\rho(j - i) , \qquad j = 1, \dots, k ,
+\]
+and $\phi_{kk}$ is the last coefficient of that system. In matrix form, with $\mathbf{R}_k$ the $k \times k$ matrix of $\rho(i - j)$,
+\[
+\mathbf{R}_k\boldsymbol\phi_k = \boldsymbol\rho_k , \qquad \boldsymbol\phi_k = (\phi_{k1}, \dots, \phi_{kk})^\top , \quad \boldsymbol\rho_k = (\rho(1), \dots, \rho(k))^\top .
+\]
+\end{thm}
+
+\begin{proof}
+The mean squared error $Q = E\bigl(X_t - \sum_i\phi_{ki}X_{t-i}\bigr)^2$ is a quadratic in the $\phi_{ki}$. Setting $\partial Q/\partial\phi_{kj} = 0$,
+\[
+-2E\Bigl[\Bigl(X_t - \sum_i\phi_{ki}X_{t-i}\Bigr)X_{t-j}\Bigr] = 0 ,
+\]
+that is,
+\[
+\gamma(j) = \sum_i\phi_{ki}\gamma(j - i) , \qquad j = 1, \dots, k :
+\]
+the prediction error is uncorrelated with each predictor, exactly like the normal equations of least squares.
+Dividing by $\gamma(0)$ gives the system. The matrix $\mathbf{R}_k$ is non-negative definite (Theorem~\ref{thm:acf-properties}), and positive definite for
+any process that is not perfectly predictable, so the solution is unique and minimises $Q$.
+\end{proof}
+
+\begin{exa}\label{exa:pacf12}
+Compute $\phi_{11}$ and $\phi_{22}$ for a general stationary process.
+\end{exa}
+
+\begin{solution}
+At $k = 1$ the system is $\rho(1) = \phi_{11}$, so
+\[
+\phi_{11} = \rho(1) .
+\]
+At $k = 2$,
+\[
+\rho(1) = \phi_{21} + \phi_{22}\rho(1) , \qquad \rho(2) = \phi_{21}\rho(1) + \phi_{22} .
+\]
+Eliminating $\phi_{21}$ (multiply the first by $\rho(1)$ and subtract it from the second),
+\[
+\phi_{22} = \frac{\rho(2) - \rho(1)^2}{1 - \rho(1)^2} .
+\]
+For an AR(1) process $\rho(k) = \alpha^k$, so
+\[
+\phi_{22} = \frac{\alpha^2 - \alpha^2}{1 - \alpha^2} = 0 ,
+\]
+exactly as the definition promises: once $X_{t+1}$ is accounted for, nothing direct connects $X_t$ to $X_{t+2}$.
+\end{solution}
+
+\begin{thm}[AR and MA partial autocorrelations]\label{thm:pacf-ar}
+\begin{enumerate}[label=(\roman*)]
+\item If the process is a stationary AR($p$), then $\phi_{pp} = \alpha_p$, and $\phi_{kk} = 0$ for every $k > p$. That is, the partial
+autocorrelation function \emph{cuts off} after lag $p$.
+\item For the MA(1) process $X_t = Z_t + \beta Z_{t-1}$ with $\beta \ne 0$, $\phi_{22} = -\rho(1)^2/(1 - \rho(1)^2) \ne 0$; the partial autocorrelations do not cut off.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) Let $k \ge p$ and try $\phi_{ki} = \alpha_i$ for $i \le p$ and $\phi_{ki} = 0$ for $p < i \le k$. Then $\sum_i\phi_{ki}\rho(j - i) = \sum_{i=1}^p\alpha_i\rho(j - i)$, which equals $\rho(j)$ for
+every $j \ge 1$ by the Yule--Walker equations (Theorem~\ref{thm:yule-walker}). So this choice solves the system of Theorem~\ref{thm:pacf-yw},
+and since the solution is unique, it is the solution. Its last coefficient is $\alpha_p$ when $k = p$, and $0$ when $k > p$.
+
+(ii) By Example~\ref{exa:pacf12} with $\rho(2) = 0$, $\phi_{22} = -\rho(1)^2/(1 - \rho(1)^2)$, which is non-zero because $\rho(1) = \beta/(1 + \beta^2) \ne 0$.
+\end{proof}
+
+Part (i) is intuitive: an AR($p$) process is a regression on its own last $p$ values with an error uncorrelated with
+the past, so once those $p$ values are known, earlier ones add nothing. For the MA(1), more generally, the partial
+autocorrelations decay geometrically in size and never vanish, because an invertible MA(1) is an AR($\infty$)
+(Section~\ref{sec:invertibility}): every past value has some direct effect. With $\beta = 0.5$, for example, $\rho(1) = 0.4$ and
+\[
+\phi_{11} = 0.4 , \quad \phi_{22} = -0.190 , \quad \phi_{33} = 0.094 , \quad \phi_{44} = -0.047 , \dots ,
+\]
+alternating in sign and halving at each step.
+
+\subsection{Identifying a model}
+The two functions cut off for opposite models, and this is what makes them usable together:
+\begin{center}
+\begin{tabular}{lll}
+Model & ac.f. & partial ac.f. \\
+\hline
+AR($p$) & tails off & cuts off after lag $p$ \\
+MA($q$) & cuts off after lag $q$ & tails off \\
+ARMA($p, q$) & tails off & tails off \\
+\end{tabular}
+\end{center}
+Figure~\ref{fig:identification} shows typical patterns (``pacf'' is the partial ac.f.).
+
+The duality is not a coincidence. An AR($p$) process is a finite regression on its own past, so beyond lag $p$ there is
+no direct effect left to find and the partial ac.f. is zero. An MA($q$) process is a finite sum of $q + 1$ shocks, so beyond
+lag $q$ two values share no shock at all and the ac.f. is zero. Each model is finite in one representation and
+infinite in the other, which is the invertibility discussion of Section~\ref{sec:invertibility} seen from the other side.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\py/\col/\num/\name/\vals in {
+ 0/3.9/blue/1/{AR(2): ac.f.}/{0.429,-0.143,-0.257,-0.097,0.045,0.066,0.022,-0.013},
+ 4.4/3.9/blue/2/{AR(2): pacf}/{0.429,-0.4,0,0,0,0,0,0},
+ 8.8/3.9/red/3/{MA(1): ac.f.}/{0.4,0,0,0,0,0,0,0},
+ 13.2/3.9/red/4/{MA(1): pacf}/{0.4,-0.19,0.094,-0.047,0.023,-0.012,0.006,-0.003},
+ 4.4/0/green/5/{ARMA(1,1): ac.f.}/{0.819,0.573,0.401,0.281,0.197,0.138,0.096,0.067},
+ 8.8/0/green/6/{ARMA(1,1): pacf}/{0.819,-0.294,0.116,-0.046,0.018,-0.007,0.003,-0.001}} {
+ \begin{scope}[shift={(\px,\py)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.35,-1.2) rectangle (3.95,2.35);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,2.0) {\num};
+  \node[anchor=west,font=\scriptsize\bfseries,text=\col!50!black] at (0.22,2.0) {\name};
+  \draw[-Stealth,gray] (0,0) -- (3.6,0) node[below left,black,font=\scriptsize] {$k$};
+  \draw[-,gray] (0,-0.8) -- (0,1.5);
+  \foreach \v [count=\k] in \vals
+   \draw[-,very thick,\col!60!black] ({0.4*\k},0) -- ({0.4*\k},{1.65*\v});
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Theoretical ac.f. and partial ac.f. at lags $1$ to $8$. (1--2) AR(2) with $\alpha_1 = 0.6$, $\alpha_2 = -0.4$: the ac.f. tails off as a damped
+oscillation, the partial ac.f. cuts off after lag $2$. (3--4) MA(1) with $\beta = 0.5$: the reverse. (5--6) ARMA(1,1) with $\alpha = 0.7$,
+$\beta = 0.4$: both tail off.}
+\label{fig:identification}
+\end{figure}
+
+\subhead{Sampling variation}
+In practice both functions are estimated from data, as $r_k$ and $\hat\phi_{kk}$ (the latter by solving the system of
+Theorem~\ref{thm:pacf-yw} with $r_k$ in place of $\rho(k)$), and neither cuts off exactly. The usual rule is to treat a sample value as
+zero when it lies within $\pm2/\sqrt n$. The justification for white noise is as follows.
+
+\begin{prop}\label{prop:rk-white-noise}
+If $X_1, \dots, X_n$ are independent with mean $0$, variance $\sigma^2$ and finite fourth moment, then for each fixed $k \ge 1$, $r_k$ is
+approximately $N(0, 1/n)$ when $n$ is large.
+\end{prop}
+
+\begin{proof}[Derivation]
+For large $n$, $\bar x \approx 0$ and $c_0 \approx \sigma^2$, so $r_k \approx c_k/\sigma^2$ with $c_k \approx \frac1n\sum_{t=1}^{n-k}X_tX_{t+k}$. Each product $X_tX_{t+k}$ has mean $0$ and variance
+$E(X_t^2)E(X_{t+k}^2) = \sigma^4$, and two products $X_tX_{t+k}$ and $X_sX_{s+k}$ with $s \ne t$ are uncorrelated: the expectation of their product
+contains some $X$ appearing exactly once, whose mean is $0$. So $\Var(c_k) \approx (n - k)\sigma^4/n^2 \approx \sigma^4/n$, and $\Var(r_k) \approx 1/n$. The sum is
+of many terms, each dependent only on its neighbours, and a central limit theorem for such sums gives
+approximate normality.
+\end{proof}
+
+For a process that is not white noise the variance is larger. If the process is MA($q$), then for $k > q$ Bartlett's
+approximation gives $\Var(r_k) \approx \frac1n\bigl(1 + 2\sum_{i=1}^q\rho(i)^2\bigr)$, so the band for testing whether the ac.f. has cut off should be widened
+accordingly. For an AR($p$) process, the sample partial autocorrelations beyond lag $p$ are approximately $N(0, 1/n)$, so the
+plain band $\pm2/\sqrt n$ applies to them. With $n = 100$ that band is about $\pm0.2$, which is wide: identification is a
+judgement, not a calculation, and the reason the Box--Jenkins approach insists on checking the fitted model
+afterwards.
+
+\begin{remark}
+When both functions tail off, the process is ARMA and the orders cannot be read off directly. The practical
+route is then to fit several candidate models and compare them by an information criterion, penalising
+parameters:
+\[
+\text{AIC} = -2\log L + 2r , \qquad \text{BIC} = -2\log L + r\log n ,
+\]
+where $r$ is the number of estimated parameters. BIC penalises more heavily and tends to choose the smaller
+model, which for forecasting is usually the safer error to make.
+\end{remark}
+
+\begin{exa}\label{exa:identify}
+A stationary series of $n = 150$ observations, with mean removed, gave these sample autocorrelations and partial
+autocorrelations:
+\begin{center}
+\begin{tabular}{crr}
+$k$ & $r_k$ & $\hat\phi_{kk}$ \\
+\hline
+1 & 0.394 & 0.394 \\
+2 & $-0.183$ & $-0.400$ \\
+3 & $-0.182$ & 0.108 \\
+4 & $-0.026$ & $-0.063$ \\
+5 & 0.040 & 0.026 \\
+6 & $-0.013$ & $-0.066$ \\
+7 & $-0.109$ & $-0.084$ \\
+8 & $-0.106$ & $-0.031$ \\
+\end{tabular}
+\end{center}
+Identify a model and give rough estimates of its parameters.
+\end{exa}
+
+\begin{solution}
+The band is $\pm2/\sqrt{150} = \pm0.163$. The partial autocorrelations at lags $1$ and $2$ ($0.394$ and $-0.400$) lie well outside it, and all
+those from lag $3$ on lie inside: the partial ac.f. cuts off after lag $2$. The ac.f. does not cut off: $r_2$ and $r_3$ are just outside the band,
+and the coefficients change sign and die away, the damped oscillation of an AR(2) with complex roots
+(Figure~\ref{fig:identification}, panel~1). So an AR(2) model is indicated.
+
+Rough estimates follow from the Yule--Walker equations with $r_1$, $r_2$ in place of $\rho(1)$, $\rho(2)$ (Problem~\ref{prob:yw-reverse}):
+\begin{align*}
+\hat\alpha_1 &= \frac{r_1(1 - r_2)}{1 - r_1^2} = \frac{0.394(1.183)}{1 - 0.155} = \frac{0.4661}{0.8448} = 0.552 , \\
+\hat\alpha_2 &= \frac{r_2 - r_1^2}{1 - r_1^2} = \frac{-0.183 - 0.155}{0.8448} = -0.400 .
+\end{align*}
+As Theorem~\ref{thm:pacf-ar} predicts, $\hat\alpha_2$ equals $\hat\phi_{22}$. The point $(0.552, -0.400)$ lies inside the stationarity triangle, below the
+parabola $\alpha_1^2 + 4\alpha_2 = 0$, so the fitted model has complex roots, consistent with the oscillating correlogram. (The series
+was in fact simulated from $\alpha_1 = 0.6$, $\alpha_2 = -0.4$.) The next step is to estimate the parameters properly and check the fit
+(Section~\ref{sec:estimation}).
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:pacf-calc}
+A stationary process has $\rho(1) = 0.5$, $\rho(2) = 0.3$ and $\rho(3) = 0.1$. Find $\phi_{11}$, $\phi_{22}$ and $\phi_{33}$.
+\end{problem}
+
+\begin{solution}
+$\phi_{11} = 0.5$ and $\phi_{22} = (0.3 - 0.25)/(1 - 0.25) = 0.067$. For $\phi_{33}$, solve
+\[
+\begin{pmatrix} 1 & 0.5 & 0.3 \\ 0.5 & 1 & 0.5 \\ 0.3 & 0.5 & 1 \end{pmatrix}\begin{pmatrix} \phi_{31} \\ \phi_{32} \\ \phi_{33} \end{pmatrix} = \begin{pmatrix} 0.5 \\ 0.3 \\ 0.1 \end{pmatrix} ,
+\]
+which gives $\phi_{31} = 0.473$, $\phi_{32} = 0.113$, $\phi_{33} = -0.098$. (Check the first equation: $0.473 + 0.5(0.113) + 0.3(-0.098) = 0.500$.)
+\end{solution}
+
+\begin{problem}\label{prob:pacf-ma1}
+For the MA(1) process $X_t = Z_t - 0.6Z_{t-1}$, find $\phi_{11}$ and $\phi_{22}$.
+\end{problem}
+
+\begin{solution}
+$\rho(1) = -0.6/1.36 = -0.441$, so $\phi_{11} = -0.441$ and, by Theorem~\ref{thm:pacf-ar}(ii), $\phi_{22} = -0.1946/(1 - 0.1946) = -0.242$. Both are negative, and
+the partial ac.f. continues to decay with the same sign, while the ac.f. is zero from lag $2$.
+\end{solution}
+
+\begin{problem}\label{prob:pacf-ar1}
+Show directly from the definition that, for an AR(1) process, $\phi_{33} = 0$.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:pacf-ar}(i) with $p = 1$, the system for $k = 3$ is solved by $(\phi_{31}, \phi_{32}, \phi_{33}) = (\alpha, 0, 0)$. Directly: with $\rho(j) = \alpha^j$,
+$\sum_i\phi_{3i}\rho(j - i) = \alpha\rho(j - 1) = \alpha^j = \rho(j)$ for $j = 1, 2, 3$, so the equations hold and $\phi_{33} = 0$.
+\end{solution}
+
+\begin{problem}\label{prob:identify-tables}
+From $n = 100$ observations, two series gave:
+\begin{center}
+\begin{tabular}{c|rrrr|rrrr}
+& \multicolumn{4}{c|}{Series A} & \multicolumn{4}{c}{Series B} \\
+$k$ & 1 & 2 & 3 & 4 & 1 & 2 & 3 & 4 \\
+\hline
+$r_k$ & 0.62 & 0.05 & $-0.08$ & 0.04 & 0.75 & 0.56 & 0.41 & 0.33 \\
+$\hat\phi_{kk}$ & 0.62 & $-0.55$ & 0.31 & $-0.24$ & 0.75 & 0.01 & $-0.04$ & 0.09 \\
+\end{tabular}
+\end{center}
+Suggest a model for each.
+\end{problem}
+
+\begin{solution}
+The band is $\pm0.2$. Series A: the ac.f. cuts off after lag $1$ and the partial ac.f. tails off, alternating: MA(1). Since
+$r_1 = 0.62$ exceeds $\frac12$, the largest possible for an MA(1) (Theorem~\ref{thm:ma1-bound}), the fit should be checked carefully; sampling
+error can push $r_1$ over the bound. Series B: the partial ac.f. cuts off after lag $1$ and the ac.f. decays roughly geometrically
+($0.75^2 = 0.56$, $0.75^3 = 0.42$): AR(1) with $\hat\alpha \approx 0.75$.
+\end{solution}
+
 \section{Forecasting}\label{sec:forecasting}
  Let $X_1,X_2,..............,X_n$ be an observed time series. The problem is to estimate further values $X_{t+k}$, $\hspace{0.2cm} k $is called lead time. The forecast $X_{n+k}$ at time $n$ at $k$ steps ahead can be denoted by $\widehat{x}(n,k)$. Various methods for forecasting exist. No single method is universally available.\\ Forecasting is of the form of extrapolation condition of a characteristic of a time series.\\
  
@@ -1838,88 +2104,6 @@ where $e$ is the prediction error at time n. The values of $\alpha$ depend on th
 
 
 
-
-
-\subsection{The Partial Autocorrelation Function}\label{sec:pacf}
-
-The autocorrelation function alone cannot identify an autoregressive model. For
-an AR$(1)$ process the correlation between $X_t$ and $X_{t+2}$ is
-$\rho(2)=\phi^{2}$, which is not zero --- but none of it is direct. It is
-entirely inherited through $X_{t+1}$. The partial autocorrelation is what
-removes that inheritance.
-
-\begin{defn}
-The \emph{partial autocorrelation} at lag $k$, written $\phi_{kk}$, is the
-correlation between $X_t$ and $X_{t+k}$ after removing the linear effect of the
-intervening values $X_{t+1},\dots,X_{t+k-1}$:
-$$\phi_{kk} = \Corr\left(X_t,\ X_{t+k} \;\middle|\; X_{t+1},\dots,X_{t+k-1}\right).$$
-Equivalently, $\phi_{kk}$ is the coefficient of $X_{t-k}$ in the best linear
-predictor of $X_t$ from the previous $k$ values.
-\end{defn}
-
-\begin{result}[Yule--Walker]
-The partial autocorrelations solve
-$$\rho(j) = \sum_{i=1}^{k}\phi_{ki}\,\rho(j-i),\qquad j=1,\dots,k,$$
-and $\phi_{kk}$ is the last coefficient of that system. In matrix form, with
-$R_k$ the $k\times k$ matrix of $\rho(i-j)$,
-$$R_k\,\boldsymbol{\phi}_k = \boldsymbol{\rho}_k .$$
-\end{result}
-
-\begin{exa}
-Compute $\phi_{11}$ and $\phi_{22}$ for a general stationary process.
-\end{exa}
-
-\begin{solution}
-At $k=1$ the system is $\rho(1) = \phi_{11}$, so
-$$\phi_{11} = \rho(1).$$
-At $k=2$,
-$$\rho(1) = \phi_{21} + \phi_{22}\rho(1),\qquad
-\rho(2) = \phi_{21}\rho(1) + \phi_{22}.$$
-Eliminating $\phi_{21}$,
-$$\phi_{22} = \frac{\rho(2)-\rho(1)^{2}}{1-\rho(1)^{2}} .$$
-
-For an AR$(1)$ process $\rho(k)=\phi^{k}$, so
-$$\phi_{22} = \frac{\phi^{2}-\phi^{2}}{1-\phi^{2}} = 0 ,$$
-exactly as the definition promises: once $X_{t+1}$ is accounted for, nothing
-direct connects $X_t$ to $X_{t+2}$.
-\end{solution}
-
-\begin{result}[Identification]
-The two functions cut off for opposite models, and this is what makes them
-usable together:
-$$\begin{array}{lll}
-\text{Model} & \text{ACF} & \text{PACF}\\ \hline
-\text{AR}(p) & \text{tails off} & \text{cuts off after lag } p\\
-\text{MA}(q) & \text{cuts off after lag } q & \text{tails off}\\
-\text{ARMA}(p,q) & \text{tails off} & \text{tails off}
-\end{array}$$
-\end{result}
-
-\begin{note}
-The duality is not a coincidence. An AR$(p)$ process is a finite regression on
-its own past, so beyond lag $p$ there is no direct effect left to find and the
-PACF is zero. An MA$(q)$ process is a finite sum of $q+1$ shocks, so beyond lag
-$q$ the two windows share no shock at all and the ACF is zero. Each model is
-finite in one representation and infinite in the other --- which is the
-invertibility discussion of the previous section seen from the other side.
-
-In practice both functions are estimated from data and neither cuts off exactly.
-The usual rule is to treat a sample value as zero when it lies within
-$\pm 1.96/\sqrt{n}$, since under the null that the true value is zero the sample
-autocorrelation is approximately $N(0,1/n)$. With $n=100$ that band is about
-$\pm0.2$, which is wide --- identification is a judgement, not a calculation,
-and the reason Box--Jenkins insists on the verification step.
-\end{note}
-
-\begin{remark}
-When both functions tail off, the process is ARMA and the orders cannot be read
-off directly. The practical route is then to fit several candidate models and
-compare them by an information criterion, penalising parameters:
-$$\text{AIC} = -2\log L + 2r,\qquad \text{BIC} = -2\log L + r\log n ,$$
-where $r$ is the number of estimated parameters. BIC penalises more heavily and
-tends to choose the smaller model, which for forecasting is usually the safer
-error to make.
-\end{remark}
 
 
 \section{Estimation Of Models}\label{sec:estimation}
