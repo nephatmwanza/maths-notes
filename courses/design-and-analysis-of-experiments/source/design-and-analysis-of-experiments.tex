@@ -2030,6 +2030,387 @@ The least favourable non-centrality is $\lambda = r(1.5\sigma)^2/(2\sigma^2) = 1
 $0.773$ at $r = 11$ ($\lambda = 12.375$) and $0.817$ at $r = 12$ ($\lambda = 13.5$), so $12$ replicates per treatment, $60$ runs in all, are needed.
 \end{solution}
 
+\section{Treatment contrasts and multiple comparisons}
+A significant $F$ test says that the treatment means are not all equal. It does not say which differ, or how. Those questions are answered by
+contrasts, and when many of them are asked of the same data, by methods that control the error rate over the whole family. Throughout, the
+one-way model of Section~3 holds with $MSE$ on $N - t$ degrees of freedom.
+
+\subsection{Contrasts}
+\begin{defn}
+A \textbf{contrast} in the treatment means is a linear combination
+\[
+C = \sum_{i=1}^tc_i\mu_i \qquad\text{with}\qquad \sum_{i=1}^tc_i = 0 .
+\]
+\end{defn}
+
+Because $\sum c_i = 0$, $C = \sum c_i(\mu + \tau_i) = \sum c_i\tau_i$: a contrast is free of $\mu$, is estimable, and by Corollary~\ref{coro:contrast-invariance} has the same estimate
+under every parametrisation,
+\[
+\hat C = \sum_{i=1}^tc_i\bar y_{i\cdot} , \qquad \Var(\hat C) = \sigma^2\sum_{i=1}^t\frac{c_i^2}{n_i} .
+\]
+The difference $\mu_1 - \mu_2$ is the contrast with $c = (1, -1, 0, \dots, 0)$; the comparison of the average of treatments $1$ and $2$ with the average of
+treatments $3$, $4$ and $5$ is the contrast with $c = (\frac12, \frac12, -\frac13, -\frac13, -\frac13)$.
+
+Since $\hat C$ is normal and independent of $MSE$,
+\[
+t_0 = \frac{\hat C - C}{\sqrt{MSE\sum c_i^2/n_i}} \sim t_{N-t} ,
+\]
+which gives a test of $H_0 : C = 0$ and the $100(1 - \alpha)\%$ confidence interval
+\[
+\hat C \pm t_{\alpha/2,\,N-t}\sqrt{MSE\sum_{i=1}^t\frac{c_i^2}{n_i}} .
+\]
+The test can equally be put in analysis-of-variance form. The \textbf{contrast sum of squares} is
+\[
+SS_C = \frac{\hat C^2}{\sum_{i=1}^tc_i^2/n_i} ,
+\]
+which in a balanced design is
+\[
+SS_C = \frac{\bigl(\sum_{i=1}^tc_iy_{i\cdot}\bigr)^2}{r\sum_{i=1}^tc_i^2} ,
+\]
+with one degree of freedom, and $F_0 = SS_C/MSE = t_0^2$ under $H_0$. Multiplying all the $c_i$ by a constant changes $\hat C$ but not $SS_C$, so integer
+coefficients may be used for the test.
+
+\begin{thm}\label{thm:contrast-ss}
+$SS_C/\sigma^2 \sim \chi^2_1(\lambda)$ with $\lambda = C^2/(\sigma^2\sum c_i^2/n_i)$, independently of $SSE$; and $SS_C \le SS_{\mathrm{Treatments}}$.
+\end{thm}
+
+\begin{proof}
+Let $\mathbf a$ be the vector with entry $c_i/n_i$ in each position belonging to treatment $i$. Then $\mathbf a^\top\mathbf Y = \sum c_i\bar y_{i\cdot} = \hat C$ and $\|\mathbf a\|^2 = \sum c_i^2/n_i$, so
+$SS_C = (\mathbf a^\top\mathbf Y)^2/\|\mathbf a\|^2 = \mathbf Y^\top P_{\mathbf a}\mathbf Y$, where $P_{\mathbf a} = \mathbf a\mathbf a^\top/\|\mathbf a\|^2$ is the projection onto the line through $\mathbf a$. The vector $\mathbf a$ is constant
+within treatments, so it lies in the treatment space; and $\mathbf 1^\top\mathbf a = \sum c_i = 0$, so it is orthogonal to $\mathbf 1$. Hence $\mathbf a$ lies in the column space of
+$H - H_0$, and $P_{\mathbf a}(H - H_0) = P_{\mathbf a}$, $P_{\mathbf a}(I - H) = 0$. Theorem~\ref{thm:quad-forms} gives the distribution and the independence from $SSE$, and
+$SS_{\mathrm{Treatments}} - SS_C = \mathbf Y^\top(H - H_0 - P_{\mathbf a})\mathbf Y \ge 0$ because $H - H_0 - P_{\mathbf a}$ is again a projection.
+\end{proof}
+
+\begin{exa}\label{exa:coating-contrast}
+For the coating data, compare coating types $1$ and $2$ with the other three. With integer coefficients $c = (3, 3, -2, -2, -2)$ and the totals
+$331$, $308$, $287$, $260$, $251$,
+\begin{gather*}
+\sum c_iy_{i\cdot} = 3(331 + 308) - 2(287 + 260 + 251) = 321 , \\
+SS_C = \frac{321^2}{4(9 + 9 + 4 + 4 + 4)} = 858.68 ,
+\end{gather*}
+and $F_0 = 858.68/8.15 = 105.4 > F_{0.05,1,15} = 4.54$. Coatings $1$ and $2$ differ from the rest; this single contrast accounts for $858.68/1100.30 = 78\%$ of the
+treatment sum of squares. On the scale of means, $c = (\frac12, \frac12, -\frac13, -\frac13, -\frac13)$ gives $\hat C = 79.875 - 66.500 = 13.375$ with standard error
+$\sqrt{8.15(\frac14 + \frac14 + \frac19 + \frac19 + \frac19)/4} = 1.303$, and the $95\%$ interval $13.375 \pm 2.131(1.303) = (10.60,\ 16.15)$.
+\end{exa}
+
+\subsection{Orthogonal contrasts}
+\begin{defn}
+Two contrasts with coefficients $c_i$ and $d_i$ are \textbf{orthogonal} if
+\[
+\sum_{i=1}^t\frac{c_id_i}{n_i} = 0 ,
+\]
+which in a balanced design is $\sum c_id_i = 0$.
+\end{defn}
+
+Orthogonality means that the estimates are uncorrelated: $\Cov(\hat C, \hat D) = \sigma^2\sum c_id_i/n_i$. In the notation of the proof of Theorem~\ref{thm:contrast-ss}, it means
+that the vectors $\mathbf a$ and $\mathbf b$ are orthogonal.
+
+\begin{thm}\label{thm:orthogonal-partition}
+If $C_1, \dots, C_{t-1}$ are mutually orthogonal contrasts, then
+\[
+SS_{\mathrm{Treatments}} = SS_{C_1} + SS_{C_2} + \dots + SS_{C_{t-1}} ,
+\]
+and under normality the $SS_{C_k}$ are independent of each other and of $SSE$.
+\end{thm}
+
+\begin{proof}
+The vectors $\mathbf a_1, \dots, \mathbf a_{t-1}$ are mutually orthogonal and non-zero, and all lie in the column space of $H - H_0$, which has dimension $t - 1$. So they
+form an orthogonal basis of it, and $H - H_0 = \sum_kP_{\mathbf a_k}$. Taking the quadratic form in $\mathbf Y$ gives the partition, and since $P_{\mathbf a_k}P_{\mathbf a_l} = 0$ for $k \ne l$,
+Theorem~\ref{thm:quad-forms} gives the independence.
+\end{proof}
+
+Thus $t - 1$ orthogonal contrasts split the treatment sum of squares into components with one degree of freedom each, each answering its
+own question, with no overlap between the answers. When the treatments have a structure, the right contrasts are usually obvious from it.
+
+\begin{exa}\label{exa:rations-contrasts}
+The four rations of Problem~\ref{prob:rations} are the combinations of two factors: type of fat (vegetable for rations $1$
+and $2$, animal for $3$ and $4$) and proportion of fat (large for $1$ and $3$, small for $2$ and $4$). Three contrasts follow from the structure:
+\begin{center}
+\begin{tabular}{l|cccc|c|c|c}
+contrast & $1$ & $2$ & $3$ & $4$ & $\sum c_iy_{i\cdot}$ & $SS_C$ & $F_0$ \\
+\hline
+fat type & $-1$ & $-1$ & $1$ & $1$ & $15.9$ & $15.801$ & $32.37$ \\
+proportion & $1$ & $-1$ & $1$ & $-1$ & $14.9$ & $13.876$ & $28.43$ \\
+interaction & $1$ & $-1$ & $-1$ & $1$ & $-5.1$ & $1.626$ & $3.33$ \\
+\hline
+total & & & & & & $31.302$ &
+\end{tabular}
+\end{center}
+The fat-type contrast compares animal with vegetable fat, and the proportion contrast large with small. Each pair of coefficient rows has $\sum c_id_i = 0$, so the contrasts are orthogonal and their sums of squares, each $(\sum c_iy_{i\cdot})^2/(4 \times 4)$, add up to
+$SS_{\mathrm{Rations}} = 31.302$. With $F_{0.05,1,12} = 4.75$: the type of fat matters ($p = 0.0001$), animal fat causing on average $15.9/8 = 1.99$ units more damage
+than vegetable fat; the proportion matters ($p = 0.0002$), a large proportion causing $14.9/8 = 1.86$ units more; and there is no significant
+interaction ($p = 0.093$), so the effect of the proportion is about the same for both types of fat. This is a $2 \times 2$ factorial analysis inside a
+one-way experiment, and it anticipates the factorial designs of a later section.
+\end{exa}
+
+\subsection{Multiple comparisons}
+A $95\%$ confidence interval misses its target $5\%$ of the time. Make twenty such intervals and, even if each is valid, about one of them is
+expected to be wrong. The more comparisons an experimenter makes, and especially the more he or she chooses them by looking at the data,
+the more likely it is that some apparent difference is spurious.
+
+\begin{defn}
+For a family of tests, the \textbf{comparisonwise error rate} is the probability of a type I error on any one test, and the \textbf{familywise error rate}
+is the probability of at least one type I error in the family. A procedure \textbf{controls the familywise error rate} at $\alpha$ if this probability is at
+most $\alpha$ whatever the true means. The corresponding property for intervals is \textbf{simultaneous coverage}: the probability that every interval in the
+family contains its parameter is at least $1 - \alpha$.
+\end{defn}
+
+The methods below are for a balanced design with $r$ replicates per treatment, the case of most practical interest; each extends to unequal
+$n_i$.
+
+\subhead{Fisher's least significant difference}
+Two means are declared different if
+\[
+|\bar y_{i\cdot} - \bar y_{k\cdot}| > LSD = t_{\alpha/2,\,N-t}\sqrt{\frac{2\,MSE}{r}} .
+\]
+This controls only the comparisonwise rate. In the \emph{protected} form it is used only after the $F$ test has rejected $H_0$; that controls the familywise
+rate when all the means are equal, but not when some are equal and others are not.
+
+\subhead{Bonferroni's method}
+\begin{prop}\label{prop:bonferroni}
+If each of $m$ tests is carried out at level $\alpha/m$, the familywise error rate is at most $\alpha$. Equivalently, $m$ intervals each with confidence
+$1 - \alpha/m$ have simultaneous coverage at least $1 - \alpha$.
+\end{prop}
+
+\begin{proof}
+Let $E_k$ be the event that the $k$th interval misses. By Boole's inequality, $P(E_1 \cup \dots \cup E_m) \le \sum_kP(E_k) = m(\alpha/m) = \alpha$.
+\end{proof}
+
+The method needs no assumption about the dependence between the tests, and works for any pre-specified family of $m$ contrasts, using
+$t_{\alpha/(2m),\,N-t}$ in place of $t_{\alpha/2,\,N-t}$. It becomes conservative when $m$ is large.
+
+\subhead{Tukey's method}
+For all $\binom t2$ pairwise differences, Tukey's method is exact.
+
+\begin{defn}
+If $Z_1, \dots, Z_t$ are independent $N(0, 1)$ and $V \sim \chi^2_\nu$ is independent of them, the distribution of
+\[
+Q = \frac{\max_iZ_i - \min_iZ_i}{\sqrt{V/\nu}}
+\]
+is the \textbf{studentised range distribution} with parameters $t$ and $\nu$. Its upper $\alpha$ point is written $q_\alpha(t, \nu)$.
+\end{defn}
+
+\begin{thm}[Tukey]\label{thm:tukey}
+In a balanced one-way design, with probability exactly $1 - \alpha$ all the intervals
+\[
+\bar y_{i\cdot} - \bar y_{k\cdot} \pm q_\alpha(t, N - t)\sqrt{\frac{MSE}{r}} , \qquad 1 \le i < k \le t ,
+\]
+contain the corresponding $\mu_i - \mu_k$ simultaneously.
+\end{thm}
+
+\begin{proof}
+Let $Z_i = (\bar y_{i\cdot} - \mu_i)/(\sigma/\sqrt r)$, which are independent $N(0, 1)$, and $V = (N - t)MSE/\sigma^2 \sim \chi^2_{N-t}$, independent of them. Every interval covers if and only
+if $|(\bar y_{i\cdot} - \mu_i) - (\bar y_{k\cdot} - \mu_k)| \le q_\alpha\sqrt{MSE/r}$ for all pairs, that is, if and only if the largest such difference, which is
+$\max_i(\bar y_{i\cdot} - \mu_i) - \min_i(\bar y_{i\cdot} - \mu_i)$, is at most $q_\alpha\sqrt{MSE/r}$. Dividing by $\sqrt{MSE/r}$, this is the event $(\max Z_i - \min Z_i)/\sqrt{V/(N - t)} \le q_\alpha$,
+which has probability $1 - \alpha$ by definition.
+\end{proof}
+
+The quantity $HSD = q_\alpha(t, N - t)\sqrt{MSE/r}$ is Tukey's \textbf{honestly significant difference}. For unequal $n_i$, replacing $\sqrt{MSE/r}$ by
+$\sqrt{MSE(1/n_i + 1/n_k)/2}$ gives the Tukey--Kramer method, which is slightly conservative.
+
+\subhead{Scheff\'e's method}
+Scheff\'e's method covers \emph{every} contrast, including those suggested by the data.
+
+\begin{thm}[Scheff\'e]\label{thm:scheffe}
+Let $S^2 = (t - 1)F_{\alpha,\,t-1,\,N-t}$. With probability exactly $1 - \alpha$, the intervals
+\[
+\hat C \pm S\sqrt{MSE\sum_{i=1}^t\frac{c_i^2}{n_i}}
+\]
+contain $C$ simultaneously for \emph{all} contrasts $C = \sum c_i\mu_i$.
+\end{thm}
+
+\begin{proof}
+Let $u_i = \bar y_{i\cdot} - \mu_i$ and $\bar u = \sum n_iu_i/N$. For any contrast, since $\sum c_i = 0$,
+\[
+\hat C - C = \sum_ic_iu_i = \sum_ic_i(u_i - \bar u) = \sum_i\frac{c_i}{\sqrt{n_i}}\cdot\sqrt{n_i}(u_i - \bar u) .
+\]
+By the Cauchy--Schwarz inequality,
+\[
+(\hat C - C)^2 \le \Bigl(\sum_i\frac{c_i^2}{n_i}\Bigr)\sum_in_i(u_i - \bar u)^2 ,
+\]
+with equality when $c_i \propto n_i(u_i - \bar u)$, which is itself a contrast. Hence
+\[
+\max_{\text{contrasts}}\frac{(\hat C - C)^2}{MSE\sum c_i^2/n_i} = \frac{\sum_in_i(u_i - \bar u)^2}{MSE} .
+\]
+The numerator is the treatment sum of squares computed from the errors $\varepsilon_{ij}$ in place of the $y_{ij}$, so it is $\sigma^2\chi^2_{t-1}$, independent of $MSE$, and the
+right side is distributed as $(t - 1)F_{t-1,\,N-t}$. So every interval covers if and only if this maximum is at most $S^2$, which has probability $1 - \alpha$.
+\end{proof}
+
+The price of covering infinitely many contrasts is wide intervals. Scheff\'e's method is the right one when contrasts are chosen after looking
+at the data; for pairwise comparisons alone, Tukey's is better. The two are linked: the $F$ test rejects $H_0$ if and only if at least one contrast is
+significant by Scheff\'e's criterion.
+
+\begin{exa}\label{exa:coating-mc}
+For the coating data, $r = 4$, $MSE = 8.15$ and $N - t = 15$. For pairwise differences, the minimum significant difference is the multiplier times $\sqrt{2(8.15)/4} = 2.019$, except for Tukey's method, where it is the multiplier times $\sqrt{8.15/4} = 1.427$:
+\begin{center}
+\begin{tabular}{l|c|c}
+method & multiplier & minimum difference \\
+\hline
+Fisher LSD & $t_{0.025,15} = 2.131$ & $4.30$ \\
+Tukey & $q_{0.05}(5, 15) = 4.367$ & $6.23$ \\
+Bonferroni, $m = 10$ & $t_{0.0025,15} = 3.286$ & $6.63$ \\
+Scheff\'e & $\sqrt{4F_{0.05,4,15}} = 3.496$ & $7.06$
+\end{tabular}
+\end{center}
+The means in increasing order are $62.75$ (coating $5$), $65.00$ ($4$), $71.75$ ($3$), $77.00$ ($2$) and $82.75$ ($1$). By Tukey's method, the pairs not
+significantly different are $\{4, 5\}$ (difference $2.25$), $\{2, 3\}$ ($5.25$) and $\{1, 2\}$ ($5.75$); all other pairs differ. A compact way to show this gives each mean one or more letters, so that two means share a letter exactly when they
+are not significantly different:
+\begin{center}
+\begin{tabular}{c|ccccc}
+coating & $5$ & $4$ & $3$ & $2$ & $1$ \\
+\hline
+mean & $62.75$ & $65.00$ & $71.75$ & $77.00$ & $82.75$ \\
+group & a & a & b & bc & c
+\end{tabular}
+\end{center}
+Bonferroni gives the same groups. The LSD separates every pair except $\{4, 5\}$, which overstates the evidence. Scheff\'e's method, the most
+conservative, also fails to separate coatings $3$ and $4$ (difference $6.75 < 7.06$). The different answers for that one pair are a reminder that a
+difference close to the borderline is uncertain, whichever method is used.
+\end{exa}
+
+\begin{remark}
+When one treatment is a control and the only questions are whether each other treatment differs from it, \textbf{Dunnett's method} uses the joint
+distribution of the $t - 1$ comparisons with the control and gives shorter intervals than Tukey's. In every case the family of comparisons should
+be decided when the experiment is designed. Planned contrasts that answer the questions the experiment was built for need no correction, or
+only Bonferroni's; it is the unplanned search through the data that requires Tukey or Scheff\'e.
+\end{remark}
+
+\subsection{Orthogonal polynomials}
+When the factor is quantitative with equally spaced levels and equal replication, the regression analysis of Example~\ref{exa:temperature} can be done with
+contrasts. The coefficients of the \textbf{orthogonal polynomials} are chosen so that the $k$th contrast measures the component of the trend in the
+means that is a polynomial of degree $k$ and is orthogonal to all lower degrees.
+
+\begin{center}
+\begin{tabular}{c|l|rrrrr}
+$t$ & component & \multicolumn{5}{c}{coefficients} \\
+\hline
+$3$ & linear & $-1$ & $0$ & $1$ & & \\
+ & quadratic & $1$ & $-2$ & $1$ & & \\
+\hline
+$4$ & linear & $-3$ & $-1$ & $1$ & $3$ & \\
+ & quadratic & $1$ & $-1$ & $-1$ & $1$ & \\
+ & cubic & $-1$ & $3$ & $-3$ & $1$ & \\
+\hline
+$5$ & linear & $-2$ & $-1$ & $0$ & $1$ & $2$ \\
+ & quadratic & $2$ & $-1$ & $-2$ & $-1$ & $2$ \\
+ & cubic & $-1$ & $2$ & $0$ & $-2$ & $1$ \\
+ & quartic & $1$ & $-4$ & $6$ & $-4$ & $1$
+\end{tabular}
+\end{center}
+
+The coefficients come from applying the Gram--Schmidt process to the vectors $(x_1^k, \dots, x_t^k)$, $k = 0, 1, \dots, t - 1$, for the coded levels
+$x = 1, 2, \dots, t$, and scaling the results to integers. For $t = 4$, for example, the linear vector must be orthogonal to $(1, 1, 1, 1)$, which gives
+$x - \bar x = (-1.5, -0.5, 0.5, 1.5)$, or $(-3, -1, 1, 3)$; the quadratic is $x^2$ minus its projection on the constant and linear vectors, which is proportional to
+$(1, -1, -1, 1)$. Because each successive vector is orthogonal to all lower powers, the $k$th contrast sum of squares is exactly the increase in the
+regression sum of squares when $x^k$ is added to a polynomial of degree $k - 1$.
+
+\begin{exa}
+For the temperature data of Example~\ref{exa:temperature} the totals at $150$, $160$, $170$ and $180\,^\circ$C are $190$, $214$, $228$ and $227$, with $r = 3$ and $MSE = 2.00$. Then
+\begin{center}
+\begin{tabular}{l|c|c|c|c}
+component & $\sum c_iy_{i\cdot}$ & $SS_C = (\sum c_iy_{i\cdot})^2/(3\sum c_i^2)$ & $F_0$ & $p$ \\
+\hline
+linear & $125$ & $125^2/60 = 260.42$ & $130.2$ & $< 0.0001$ \\
+quadratic & $-25$ & $25^2/12 = 52.08$ & $26.04$ & $0.0009$ \\
+cubic & $-5$ & $5^2/60 = 0.42$ & $0.21$ & $0.66$ \\
+\hline
+total & & $312.92 = SS_{\mathrm{Treatments}}$ & &
+\end{tabular}
+\end{center}
+These are exactly the sums of squares found by regression in Example~\ref{exa:temperature}: $260.42$ for the straight line, $312.50 - 260.42 = 52.08$ for adding $x^2$,
+and the lack of fit $0.42$ of the quadratic. The linear and quadratic components are significant and the cubic is not, so a quadratic describes the
+trend, with the curvature negative as the sign of the quadratic contrast shows.
+\end{exa}
+
+\subsection{Practice problems}
+
+\begin{problem}
+Define orthogonal contrasts. In a balanced experiment with five treatments, show that the contrasts with coefficients
+\[
+(1, -1, 0, 0, 0) , \quad (1, 1, -2, 0, 0) , \quad (1, 1, 1, -3, 0) , \quad (1, 1, 1, 1, -4)
+\]
+are mutually orthogonal, and explain what Theorem~\ref{thm:orthogonal-partition} says about them.
+\end{problem}
+
+\begin{solution}
+Two contrasts $\sum c_i\mu_i$ and $\sum d_i\mu_i$ are orthogonal if $\sum c_id_i/n_i = 0$, which for equal $n_i$ is $\sum c_id_i = 0$. Each vector sums to zero, so each is a contrast. For the
+pairs: $1 - 1 = 0$; $1 - 1 = 0$; $1 - 1 = 0$; $1 + 1 - 2 = 0$; $1 + 1 - 2 = 0$; $1 + 1 + 1 - 3 = 0$. They are four mutually orthogonal contrasts among five treatments
+(the Helmert contrasts, each comparing a treatment with the average of those before it), so their four sums of squares add up to $SS_{\mathrm{Treatments}}$ and
+are independent of one another and of $SSE$.
+\end{solution}
+
+\begin{problem}
+For the coating data, find the sum of squares of the contrast comparing coating types $1$, $2$ and $3$ with types $4$ and $5$, test it at $\alpha = 0.05$, and
+construct a $95\%$ confidence interval for the difference between the average of the first three means and the average of the last two.
+\end{problem}
+
+\begin{solution}
+With integer coefficients $(2, 2, 2, -3, -3)$, $\sum c_iy_{i\cdot} = 2(331 + 308 + 287) - 3(260 + 251) = 1852 - 1533 = 319$ and
+\[
+SS_C = \frac{319^2}{4(4 + 4 + 4 + 9 + 9)} = \frac{101761}{120} = 848.01 ,
+\]
+so $F_0 = 848.01/8.15 = 104.05 > 4.54$, and the contrast is significant. With coefficients $(\frac13, \frac13, \frac13, -\frac12, -\frac12)$, $\hat C = 77.167 - 63.875 = 13.29$ and
+\[
+\operatorname{se}(\hat C) = \sqrt{\frac{8.15}{4}\Bigl(\frac39 + \frac24\Bigr)} = 1.303 ,
+\]
+so the interval is $13.29 \pm 2.131(1.303)$, that is $(10.51,\ 16.07)$.
+\end{solution}
+
+\begin{problem}
+For the rations data, use Tukey's method at $\alpha = 0.05$ to find which pairs of rations differ in mean organ damage. ($q_{0.05}(4, 12) = 4.199$.)
+\end{problem}
+
+\begin{solution}
+$HSD = 4.199\sqrt{0.4881/4} = 1.467$. The means are $5.350$ (ration $2$), $6.575$ ($1$), $6.700$ ($4$) and $9.200$ ($3$). Ration $3$ differs from each of the others (by
+$2.500$, $2.625$ and $3.850$, all above $1.467$), while the differences among rations $1$, $2$ and $4$ ($1.225$, $1.350$, $0.125$) are not significant. So ration $3$,
+animal fat in a large proportion, causes more damage than the rest, which form a single group. This is consistent with the factorial
+contrasts of Example~\ref{exa:rations-contrasts}: both main effects push ration $3$ upwards.
+\end{solution}
+
+\begin{problem}
+Five coatings give $10$ pairwise comparisons. For this family, and for a family of $m = 50$ pre-specified contrasts in the same experiment
+($t_{0.0005,15} = 4.073$), compare the multipliers of the Bonferroni and Scheff\'e methods. When should each be used?
+\end{problem}
+
+\begin{solution}
+For $m = 10$ the Bonferroni multiplier is $t_{0.0025,15} = 3.286$, smaller than Scheff\'e's $3.496$, so Bonferroni gives shorter intervals. For $m = 50$ it is $4.073$, larger than
+$3.496$, and Scheff\'e's intervals are shorter even though they cover every contrast. Bonferroni is preferable for a modest number of contrasts fixed in
+advance; Scheff\'e for many contrasts or for contrasts suggested by the data. (For the pairwise comparisons alone, Tukey's $q/\sqrt2 = 3.088$ beats both.)
+\end{solution}
+
+\begin{problem}
+For the lack-of-fit data of Section~3 (two observations at each of $x = 1, \dots, 5$, with totals $6.6$, $8.8$, $11.2$, $13.2$, $15.0$ and $MSE = 0.088$), partition the
+treatment sum of squares into orthogonal polynomial components and confirm the conclusion of the lack-of-fit test.
+\end{problem}
+
+\begin{solution}
+With $r = 2$ and the coefficients for $t = 5$:
+\begin{center}
+\begin{tabular}{l|c|c|c}
+component & $\sum c_iy_{i\cdot}$ & $SS_C$ & $F_0$ \\
+\hline
+linear & $21.2$ & $21.2^2/(2 \times 10) = 22.472$ & $255.4$ \\
+quadratic & $-1.2$ & $1.2^2/(2 \times 14) = 0.051$ & $0.58$ \\
+cubic & $-0.4$ & $0.4^2/(2 \times 10) = 0.008$ & $0.09$ \\
+quartic & $0.8$ & $0.8^2/(2 \times 70) = 0.005$ & $0.05$
+\end{tabular}
+\end{center}
+The total is $22.536 = SS_{\mathrm{Treatments}}$. Only the linear component is significant ($F_{0.05,1,5} = 6.61$), and the three higher components together give
+$0.064$ on $3$ degrees of freedom, which is exactly the lack-of-fit sum of squares of the straight line.
+\end{solution}
+
+\begin{problem}
+In a balanced design, show that the maximum of $SS_C$ over all contrasts is $SS_{\mathrm{Treatments}}$, and find the contrast that attains it.
+\end{problem}
+
+\begin{solution}
+With $n_i = r$, $SS_C = r\bigl(\sum c_i\bar y_{i\cdot}\bigr)^2/\sum c_i^2 = r\bigl(\sum c_i(\bar y_{i\cdot} - \bar y_{\cdot\cdot})\bigr)^2/\sum c_i^2$, since $\sum c_i = 0$. By the Cauchy--Schwarz inequality this is at most
+$r\sum(\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2 = SS_{\mathrm{Treatments}}$, with equality when $c_i \propto \bar y_{i\cdot} - \bar y_{\cdot\cdot}$. The best single contrast compares the treatments in proportion to their observed
+deviations, which is a contrast chosen by the data; this is why testing it as if it had been planned would be wrong, and why Scheff\'e's critical
+value $(t - 1)F_\alpha$, rather than $F_\alpha$, is the right yardstick for it.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
