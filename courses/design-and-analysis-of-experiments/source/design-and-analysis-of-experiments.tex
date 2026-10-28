@@ -3272,6 +3272,337 @@ For the Fano plane, $E = \lambda t/(rk) = 7/9 = 0.78$: about $22\%$ of the infor
 complete block design of the same replication.
 \end{solution}
 
+\section{Factorial experiments}
+In a \textbf{factorial experiment} each complete trial or replicate of the experiment contains all possible combinations of the levels of the
+factors under investigation. With factor $A$ at $a$ levels and factor $B$ at $b$ levels, each replicate has $ab$ treatment combinations. Section~1
+showed why this is the right way to study several factors: it detects interactions, which one-factor-at-a-time experiments cannot, and it uses
+every run to estimate every main effect.
+
+\subsection{Main effects and interaction}
+For two factors, write $\mu_{ij}$ for the mean response at level $i$ of $A$ and level $j$ of $B$, and use dots for averages: $\bar\mu_{i\cdot} = \frac1b\sum_j\mu_{ij}$, $\bar\mu_{\cdot j} = \frac1a\sum_i\mu_{ij}$
+and $\bar\mu_{\cdot\cdot}$ the average of all $ab$ cell means.
+
+\begin{defn}
+\begin{enumerate}[label=(\roman*)]
+\item The \textbf{main effect} of level $i$ of $A$ is $\tau_i = \bar\mu_{i\cdot} - \bar\mu_{\cdot\cdot}$, and that of level $j$ of $B$ is $\beta_j = \bar\mu_{\cdot j} - \bar\mu_{\cdot\cdot}$.
+\item The \textbf{interaction} of levels $i$ and $j$ is
+\[
+(\tau\beta)_{ij} = \mu_{ij} - \bar\mu_{i\cdot} - \bar\mu_{\cdot j} + \bar\mu_{\cdot\cdot} ,
+\]
+the part of the cell mean not explained by the two main effects.
+\end{enumerate}
+\end{defn}
+
+By construction $\mu_{ij} = \mu + \tau_i + \beta_j + (\tau\beta)_{ij}$ with $\mu = \bar\mu_{\cdot\cdot}$, and
+\begin{gather*}
+\sum_i\tau_i = 0 , \qquad \sum_j\beta_j = 0 , \\
+\sum_i(\tau\beta)_{ij} = 0 \text{ for each } j , \qquad \sum_j(\tau\beta)_{ij} = 0 \text{ for each } i .
+\end{gather*}
+The factors do not interact exactly when all $(\tau\beta)_{ij} = 0$, that is, when the difference $\mu_{ij} - \mu_{i'j}$ between two levels of $A$ is the same at every level
+of $B$. On an interaction plot of $\mu_{ij}$ against $j$, one line for each $i$, the lines are then parallel. For two levels of each factor, $(\tau\beta)_{11}$ is one quarter
+of the difference of differences, and the interaction $AB$ of Section~1 is $2(\tau\beta)_{22}$; the definitions agree up to a constant.
+
+\begin{remark}
+When the factors interact, a main effect is an average over the levels of the other factor, and it may describe no level at all. A main effect of
+zero can hide large effects of opposite sign at different levels of the other factor. So the interaction is examined first: if it is important, the
+effects of each factor are reported \emph{separately} at each level of the other.
+\end{remark}
+
+\subsection{The two-factor factorial design}
+Suppose there are $n \ge 2$ replicates of each of the $ab$ treatment combinations, run in random order (a completely randomised design with $ab$
+treatments). Let $y_{ijk}$ be the $k$th observation at level $i$ of $A$ and level $j$ of $B$. The \textbf{two-factor fixed effects model} is
+\[
+y_{ijk} = \mu + \tau_i + \beta_j + (\tau\beta)_{ij} + \varepsilon_{ijk} ,
+\]
+for $i = 1, \dots, a$, $j = 1, \dots, b$ and $k = 1, \dots, n$, with the side conditions above and independent $N(0, \sigma^2)$ errors. The hypotheses of interest are
+\[
+H_0^A : \text{all } \tau_i = 0 , \qquad H_0^B : \text{all } \beta_j = 0 , \qquad H_0^{AB} : \text{all } (\tau\beta)_{ij} = 0 .
+\]
+
+\begin{exa}\label{exa:adhesive}
+The bond strength of a joint (MPa) was studied for three adhesives cured at three temperatures, with three joints for each of the nine
+combinations, all $27$ made in random order:
+\begin{center}
+\begin{tabular}{c|ccc}
+adhesive & $120\,^\circ$C & $140\,^\circ$C & $160\,^\circ$C \\
+\hline
+$1$ & $29$, $28$, $30$ & $35$, $36$, $34$ & $35$, $35$, $37$ \\
+$2$ & $31$, $28$, $26$ & $31$, $36$, $33$ & $35$, $38$, $36$ \\
+$3$ & $25$, $23$, $26$ & $32$, $31$, $30$ & $43$, $43$, $39$
+\end{tabular}
+\end{center}
+The cell totals $y_{ij\cdot}$ are
+\begin{center}
+\begin{tabular}{c|ccc|c}
+adhesive & $120\,^\circ$C & $140\,^\circ$C & $160\,^\circ$C & $y_{i\cdot\cdot}$ \\
+\hline
+$1$ & $87$ & $105$ & $107$ & $299$ \\
+$2$ & $85$ & $100$ & $109$ & $294$ \\
+$3$ & $74$ & $93$ & $125$ & $292$ \\
+\hline
+$y_{\cdot j\cdot}$ & $246$ & $298$ & $341$ & $885$
+\end{tabular}
+\end{center}
+and $\sum\sum\sum y_{ijk}^2 = 29687$.
+\end{exa}
+
+\begin{prop}\label{prop:two-factor-est}
+The least squares estimates are
+\begin{gather*}
+\hat\mu = \bar y_{\cdot\cdot\cdot} , \qquad \hat\tau_i = \bar y_{i\cdot\cdot} - \bar y_{\cdot\cdot\cdot} , \qquad \hat\beta_j = \bar y_{\cdot j\cdot} - \bar y_{\cdot\cdot\cdot} , \\
+\widehat{(\tau\beta)}_{ij} = \bar y_{ij\cdot} - \bar y_{i\cdot\cdot} - \bar y_{\cdot j\cdot} + \bar y_{\cdot\cdot\cdot} ,
+\end{gather*}
+so that the fitted value is the cell mean, $\hat y_{ijk} = \bar y_{ij\cdot}$.
+\end{prop}
+
+\begin{proof}
+The model places no restriction on the $ab$ cell means $\mu_{ij}$, so it is a one-way model with $ab$ treatments, whose least squares fit is $\hat\mu_{ij} = \bar y_{ij\cdot}$ by
+Section~3. The estimates of $\mu$, $\tau_i$, $\beta_j$ and $(\tau\beta)_{ij}$ are the same functions of the $\bar y_{ij\cdot}$ as the parameters are of the $\mu_{ij}$, and they satisfy the side
+conditions.
+\end{proof}
+
+The deviation of an observation from the grand mean splits into four parts,
+\[
+y_{ijk} - \bar y_{\cdot\cdot\cdot} = (\bar y_{i\cdot\cdot} - \bar y_{\cdot\cdot\cdot}) + (\bar y_{\cdot j\cdot} - \bar y_{\cdot\cdot\cdot}) + (\bar y_{ij\cdot} - \bar y_{i\cdot\cdot} - \bar y_{\cdot j\cdot} + \bar y_{\cdot\cdot\cdot}) + (y_{ijk} - \bar y_{ij\cdot}) .
+\]
+
+\begin{thm}\label{thm:two-factor}
+In the balanced two-factor design,
+\[
+SST = SS_A + SS_B + SS_{AB} + SSE ,
+\]
+where
+\begin{align*}
+SS_A &= bn\sum_i(\bar y_{i\cdot\cdot} - \bar y_{\cdot\cdot\cdot})^2 , \\
+SS_B &= an\sum_j(\bar y_{\cdot j\cdot} - \bar y_{\cdot\cdot\cdot})^2 , \\
+SS_{AB} &= n\sum_i\sum_j(\bar y_{ij\cdot} - \bar y_{i\cdot\cdot} - \bar y_{\cdot j\cdot} + \bar y_{\cdot\cdot\cdot})^2 , \\
+SSE &= \sum_i\sum_j\sum_k(y_{ijk} - \bar y_{ij\cdot})^2 ,
+\end{align*}
+with $a - 1$, $b - 1$, $(a - 1)(b - 1)$ and $ab(n - 1)$ degrees of freedom. The four sums of squares are independent under normality, and
+\begin{gather*}
+E(MS_A) = \sigma^2 + \frac{bn\sum\tau_i^2}{a - 1} , \qquad E(MS_B) = \sigma^2 + \frac{an\sum\beta_j^2}{b - 1} , \\
+E(MS_{AB}) = \sigma^2 + \frac{n\sum\sum(\tau\beta)_{ij}^2}{(a - 1)(b - 1)} , \qquad E(MSE) = \sigma^2 .
+\end{gather*}
+Each null hypothesis is tested by the ratio of the corresponding mean square to $MSE$, which has an $F$ distribution under that hypothesis.
+\end{thm}
+
+\begin{proof}
+Let $H_A$, $H_B$, $H_{AB}$ and $H_0$ be the projections replacing each observation by its $A$-level mean, its $B$-level mean, its cell mean and the grand
+mean. Balance gives $H_AH_B = H_0$, and $H_AH_{AB} = H_A$, $H_BH_{AB} = H_B$, since a cell lies within one level of each factor. The four matrices
+\[
+H_A - H_0 , \qquad H_B - H_0 , \qquad H_{AB} - H_A - H_B + H_0 , \qquad I - H_{AB}
+\]
+are then symmetric, idempotent and mutually orthogonal, with traces $a - 1$, $b - 1$, $ab - a - b + 1$ and $abn - ab$, and they sum to $I - H_0$. The quadratic forms
+in $\mathbf Y$ are the four sums of squares, which gives the partition, and Theorem~\ref{thm:quad-forms} gives independence and the distributions. For the
+expectations, apply each matrix to the mean vector with entries $\mu + \tau_i + \beta_j + (\tau\beta)_{ij}$: the results have entries $\tau_i$, $\beta_j$, $(\tau\beta)_{ij}$ and $0$, by the
+side conditions, and Lemma~\ref{lem:quad-mean} completes the proof.
+\end{proof}
+
+For hand calculation, with $abn = N$,
+\begin{gather*}
+SST = \sum\sum\sum y_{ijk}^2 - \frac{y_{\cdot\cdot\cdot}^2}{N} , \qquad SS_A = \frac{1}{bn}\sum_iy_{i\cdot\cdot}^2 - \frac{y_{\cdot\cdot\cdot}^2}{N} , \\
+SS_B = \frac{1}{an}\sum_jy_{\cdot j\cdot}^2 - \frac{y_{\cdot\cdot\cdot}^2}{N} , \qquad SS_{\mathrm{Subtotals}} = \frac1n\sum_i\sum_jy_{ij\cdot}^2 - \frac{y_{\cdot\cdot\cdot}^2}{N} , \\
+SS_{AB} = SS_{\mathrm{Subtotals}} - SS_A - SS_B , \qquad SSE = SST - SS_{\mathrm{Subtotals}} .
+\end{gather*}
+
+\begin{exa}\label{exa:adhesive-anova}
+For the adhesive data, $N = 27$ and the correction factor is $885^2/27 = 29008.33$. Then
+\begin{align*}
+SST &= 29687 - 29008.33 = 678.67 , \\
+SS_{\mathrm{Adhesives}} &= (299^2 + 294^2 + 292^2)/9 - 29008.33 = 2.89 , \\
+SS_{\mathrm{Temperatures}} &= (246^2 + 298^2 + 341^2)/9 - 29008.33 = 502.89 , \\
+SS_{\mathrm{Subtotals}} &= (87^2 + 105^2 + \dots + 125^2)/3 - 29008.33 = 624.67 ,
+\end{align*}
+so $SS_{AB} = 624.67 - 2.89 - 502.89 = 118.89$ and $SSE = 678.67 - 624.67 = 54.00$.
+\begin{center}
+\begin{tabular}{l|c|c|c|c|c}
+source & SS & df & MS & $F_0$ & $p$ \\
+\hline
+adhesives ($A$) & $2.89$ & $2$ & $1.44$ & $0.48$ & $0.63$ \\
+temperatures ($B$) & $502.89$ & $2$ & $251.44$ & $83.81$ & $< 0.0001$ \\
+interaction ($AB$) & $118.89$ & $4$ & $29.72$ & $9.91$ & $0.0002$ \\
+error & $54.00$ & $18$ & $3.00$ & & \\
+\hline
+total & $678.67$ & $26$ & & &
+\end{tabular}
+\end{center}
+The interaction is highly significant ($F_{0.05,4,18} = 2.93$), and so is temperature. The adhesive main effect is not significant, but because of the
+interaction this does not mean that the adhesives are alike. Figure~\ref{fig:adhesive} shows why.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=2.6cm,y=0.33cm]
+\draw[rounded corners=6pt,very thick,draw=blue!70!black,fill=blue!4] (-0.45,19.5) rectangle (3.35,45.5);
+\draw[-Stealth] (0,22) -- (2.6,22);
+\draw[-Stealth] (0,22) -- (0,44) node[above,font=\scriptsize] {mean strength};
+\foreach \x/\l in {0.4/120,1.2/140,2.0/160} \draw (\x,22.3) -- (\x,21.7) node[below,font=\scriptsize] {\l\,$^\circ$C};
+\foreach \y in {25,30,35,40} \draw (0.05,\y) -- (-0.05,\y) node[left,font=\scriptsize] {\y};
+\draw[teal,very thick] (0.4,29) -- (1.2,35) -- (2.0,35.667);
+\draw[orange!85!black,very thick] (0.4,28.333) -- (1.2,33.333) -- (2.0,36.333);
+\draw[blue!70!black,very thick] (0.4,24.667) -- (1.2,31) -- (2.0,41.667);
+\foreach \x/\y in {0.4/29,1.2/35,2.0/35.667} \fill[teal] (\x,\y) circle (2.5pt);
+\foreach \x/\y in {0.4/28.333,1.2/33.333,2.0/36.333} \fill[orange!85!black] (\x,\y) circle (2.5pt);
+\foreach \x/\y in {0.4/24.667,1.2/31,2.0/41.667} \fill[blue!70!black] (\x,\y) circle (2.5pt);
+\node[teal,font=\small,anchor=west] at (2.1,34.6) {adhesive 1};
+\node[orange!85!black,font=\small,anchor=west] at (2.1,37.4) {adhesive 2};
+\node[blue!70!black,font=\small,anchor=west] at (2.1,41.7) {adhesive 3};
+\end{tikzpicture}
+\caption{Cell means for the adhesive experiment. Adhesive $3$ is the weakest at $120\,^\circ$C and the strongest at $160\,^\circ$C. Averaged over
+temperature the three adhesives are nearly equal, which is all the main effect sees.}
+\label{fig:adhesive}
+\end{figure}
+
+\subhead{Comparing means when there is interaction}
+With a significant interaction, the adhesives are compared separately at each temperature. Within one temperature the three cell means are each
+based on $n = 3$ observations, and Tukey's method applies with the pooled $MSE$:
+\[
+HSD = q_{0.05}(3, 18)\sqrt{MSE/n} = 3.61\sqrt{3.00/3} = 3.61 .
+\]
+\begin{itemize}
+\item At $160\,^\circ$C the means are $35.67$, $36.33$, $41.67$: adhesive $3$ is stronger than $1$ (by $6.00$) and $2$ (by $5.33$).
+\item At $140\,^\circ$C the means are $35.00$, $33.33$, $31.00$: adhesive $1$ is stronger than $3$ (by $4.00$); the other differences are not significant.
+\item At $120\,^\circ$C the means are $29.00$, $28.33$, $24.67$: adhesive $3$ is weaker than $1$ (by $4.33$) and $2$ (by $3.67$).
+\end{itemize}
+The practical conclusion is a recommendation about combinations: adhesive $3$ cured at $160\,^\circ$C, which gives the strongest joints, but adhesive $3$ should not
+be used if a lower curing temperature is unavoidable. A one-factor analysis of the adhesives, or an analysis that ignored the interaction, would
+have concluded that the adhesive does not matter.
+
+\subhead{Checking the model}
+The residuals are $e_{ijk} = y_{ijk} - \bar y_{ij\cdot}$. For the adhesive data the largest is $2.67$ in absolute value, $1.54$ standard deviations, and Bartlett's test on the nine cells
+gives $p = 0.83$. As in Section~3, the residuals should also be plotted against the fitted values and on a normal probability plot.
+
+\subsection{One observation per cell}
+If $n = 1$, there is no replication: $SSE$ has $ab(n - 1) = 0$ degrees of freedom, and the interaction and error cannot be separated. The two-factor model
+with interaction then fits the data exactly. To test the main effects one must assume that the interaction is zero, or small, and use $SS_{AB}$ as the
+error sum of squares, with $(a - 1)(b - 1)$ degrees of freedom. The analysis is then that of a randomised complete block design, with one factor
+in the role of blocks, and Tukey's one-degree-of-freedom test of Section~5 can be used to check the assumption.
+
+If the assumption is wrong, $E(MS_{AB}) > \sigma^2$, and the $F$ tests for main effects are conservative: they lose power but do not reject too often. The
+experiment is safe, but may miss real effects. Unreplicated designs are nevertheless widely used when runs are expensive, especially
+two-level designs with many factors, where the high-order interactions are assumed negligible; this is taken up in the next section.
+
+\subsection{More than two factors}
+The analysis extends directly. With three factors $A$, $B$, $C$ at $a$, $b$, $c$ levels and $n$ replicates of each combination, the model is
+\[
+y_{ijkl} = \mu + \tau_i + \beta_j + \gamma_k + (\tau\beta)_{ij} + (\tau\gamma)_{ik} + (\beta\gamma)_{jk} + (\tau\beta\gamma)_{ijk} + \varepsilon_{ijkl} ,
+\]
+and the analysis of variance has a line for each term. Each expected mean square has the form $\sigma^2 + m\,\Phi$, where $\Phi$ is the sum of the squared
+effects divided by the degrees of freedom (for example $\Phi_A = \sum\tau_i^2/(a - 1)$) and $m$ is the multiplier shown:
+\begin{center}
+\begin{tabular}{l|c|c}
+source & df & multiplier $m$ \\
+\hline
+$A$ & $a - 1$ & $bcn$ \\
+$B$ & $b - 1$ & $acn$ \\
+$C$ & $c - 1$ & $abn$ \\
+$AB$ & $(a - 1)(b - 1)$ & $cn$ \\
+$AC$ & $(a - 1)(c - 1)$ & $bn$ \\
+$BC$ & $(b - 1)(c - 1)$ & $an$ \\
+$ABC$ & $(a - 1)(b - 1)(c - 1)$ & $n$ \\
+error & $abc(n - 1)$ & -- \\
+\hline
+total & $abcn - 1$ &
+\end{tabular}
+\end{center}
+The pattern is general. The degrees of freedom of an effect are the product of $(\text{levels} - 1)$ over the factors in it. The multiplier in its expected mean
+square is the number of observations at each combination of its levels, which is $n$ times the product of the numbers of levels of the factors
+\emph{not} in it. And each sum of squares can be computed from the table of totals for the factors in it, minus the sums of squares of all the
+effects contained in it: for example,
+\[
+SS_{AB} = \frac{1}{cn}\sum_i\sum_jy_{ij\cdot\cdot}^2 - \frac{y_{\cdot\cdot\cdot\cdot}^2}{N} - SS_A - SS_B .
+\]
+With fixed factors, every effect is tested against $MSE$.
+
+\subsection{Blocking in a factorial design}
+If the $ab$ treatment combinations cannot all be run under homogeneous conditions, each replicate can be run in a separate block, giving a
+randomised complete block design whose treatments are the factor combinations. The model is
+\[
+y_{ijk} = \mu + \tau_i + \beta_j + (\tau\beta)_{ij} + \delta_k + \varepsilon_{ijk} , \qquad k = 1, \dots, n ,
+\]
+with block effects $\delta_k$. The block sum of squares $\frac{1}{ab}\sum_ky_{\cdot\cdot k}^2 - y_{\cdot\cdot\cdot}^2/N$, on $n - 1$ degrees of freedom, is removed from the error, which keeps $(ab - 1)(n - 1)$
+degrees of freedom; the factorial effects are computed exactly as before. When even one replicate is too large for a block, the blocks must
+contain only part of a replicate, and some effect is necessarily confounded with blocks; that is the subject of a later section.
+
+\subsection{Practice problems}
+
+\begin{problem}
+Define a factorial experiment, and explain why the main effect of a factor can be misleading when the factor interacts with another.
+\end{problem}
+
+\begin{solution}
+In a factorial experiment each complete replicate contains all combinations of the levels of the factors studied, so that the factors
+are varied together. A main effect is the average effect of a factor over the levels of the others. When the factor interacts with another, its
+effect differs from one level of the other factor to the next, and the average may describe none of them; effects of opposite sign may cancel to
+give a main effect of zero, as for the adhesives in Example~\ref{exa:adhesive-anova}.
+\end{solution}
+
+\begin{problem}
+In the two-factor model, prove directly that
+\[
+E(SS_{AB}) = (a - 1)(b - 1)\sigma^2 + n\sum_i\sum_j(\tau\beta)_{ij}^2 ,
+\]
+using $SS_{AB} = SS_{\mathrm{Subtotals}} - SS_A - SS_B$.
+\end{problem}
+
+\begin{solution}
+$SS_{\mathrm{Subtotals}}$ is the treatment sum of squares of a one-way model with $ab$ treatments of $n$ replicates and means $\mu_{ij}$, so by
+Theorem~\ref{thm:ems-one-way} its expectation is $(ab - 1)\sigma^2 + n\sum\sum(\mu_{ij} - \mu)^2$. Similarly $E(SS_A) = (a - 1)\sigma^2 + bn\sum\tau_i^2$ and $E(SS_B) = (b - 1)\sigma^2 + an\sum\beta_j^2$.
+Since $\mu_{ij} - \mu = \tau_i + \beta_j + (\tau\beta)_{ij}$ and the side conditions make the three terms orthogonal when summed over $i$ and $j$,
+\[
+\sum_i\sum_j(\mu_{ij} - \mu)^2 = b\sum\tau_i^2 + a\sum\beta_j^2 + \sum\sum(\tau\beta)_{ij}^2 .
+\]
+Subtracting, $E(SS_{AB}) = (ab - 1 - a + 1 - b + 1)\sigma^2 + n\sum\sum(\tau\beta)_{ij}^2 = (a - 1)(b - 1)\sigma^2 + n\sum\sum(\tau\beta)_{ij}^2$.
+\end{solution}
+
+\begin{problem}
+Three machines and four operators were used in a factorial experiment with one observation per combination:
+\begin{center}
+\begin{tabular}{c|cccc}
+machine & operator $1$ & operator $2$ & operator $3$ & operator $4$ \\
+\hline
+$1$ & $12$ & $15$ & $14$ & $18$ \\
+$2$ & $14$ & $17$ & $17$ & $21$ \\
+$3$ & $11$ & $13$ & $12$ & $16$
+\end{tabular}
+\end{center}
+Assuming no interaction, test the main effects at $\alpha = 0.05$. Then check the assumption with Tukey's one-degree-of-freedom test.
+\end{problem}
+
+\begin{solution}
+The totals are $59$, $69$, $52$ for machines and $37$, $45$, $43$, $55$ for operators; $y_{\cdot\cdot} = 180$ and $\sum y^2 = 2794$. The correction factor is $2700$, so $SST = 94$,
+$SS_{\mathrm{Machines}} = (59^2 + 69^2 + 52^2)/4 - 2700 = 36.5$, $SS_{\mathrm{Operators}} = (37^2 + 45^2 + 43^2 + 55^2)/3 - 2700 = 56.0$, and the residual, used as error, is $1.5$ on $6$
+degrees of freedom ($MSE = 0.25$). Then $F_{\mathrm{Machines}} = 18.25/0.25 = 73.0$ and $F_{\mathrm{Operators}} = 18.67/0.25 = 74.7$, far beyond $F_{0.05,2,6} = 5.14$ and $F_{0.05,3,6} = 4.76$: both
+factors matter.
+
+For Tukey's test, with $c_i$ the machine deviations and $a_j$ the operator deviations, $\sum\sum c_ia_jy_{ij} = 11.333$, $\sum c_i^2 = 9.125$ and $\sum a_j^2 = 18.667$, so
+$SS_N = 11.333^2/(9.125 \times 18.667) = 0.754$, and $F_0 = 0.754/\bigl((1.5 - 0.754)/5\bigr) = 5.05$ on $1$ and $5$ degrees of freedom ($p = 0.074$). There is no significant evidence
+of non-additivity at the $5\%$ level, though the $p$-value is small enough that the assumption deserves a second look in further work.
+\end{solution}
+
+\begin{problem}
+A factorial experiment has four factors with $2$, $3$, $3$ and $4$ levels and $n = 2$ replicates. Give the degrees of freedom for each main effect, for the
+interaction of the last three factors, for the four-factor interaction, and for error.
+\end{problem}
+
+\begin{solution}
+The main effects have $1$, $2$, $2$ and $3$ degrees of freedom. The three-factor interaction $BCD$ has $2 \times 2 \times 3 = 12$, the four-factor interaction $ABCD$ has
+$1 \times 2 \times 2 \times 3 = 12$, and error has $abcd(n - 1) = 72$. In all there are $abcdn - 1 = 143$ degrees of freedom; the $71$ for the treatment combinations split into the
+$15$ main effects and interactions of all orders.
+\end{solution}
+
+\begin{problem}
+For the adhesive experiment, suppose the interaction had been ignored and an additive two-factor model fitted. Compute the resulting $F$
+statistic for adhesives, and explain why the conclusion about adhesives would be wrong even though the arithmetic is right.
+\end{problem}
+
+\begin{solution}
+The interaction sum of squares joins the error: $SSE = 54.00 + 118.89 = 172.89$ on $22$ degrees of freedom, $MSE = 7.86$, and $F_{\mathrm{Adhesives}} = 1.44/7.86 = 0.18$. The test
+says the adhesives do not differ on average over the three temperatures, which is true. But the additive model claims that this average
+describes every temperature, which is false: the adhesives differ by up to $6$ MPa at $160\,^\circ$C and by up to $4.3$ MPa at $120\,^\circ$C, in opposite directions. The
+error mean square is inflated by the omitted interaction, and the model answers a question nobody should be asking.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
