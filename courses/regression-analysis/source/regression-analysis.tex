@@ -5573,6 +5573,583 @@ residuals from $-0.6 + 2.5x$ are $0.1$, $-0.4$, $-0.9$, $1.6$, which add to $0.4
 \end{solution}
 
 \section{Selecting the Best Regression Model}
+So far the regressors in a model have been given. In practice there is usually a list of
+candidates, some of which matter and some of which do not, and part of the analysis is to decide
+which to keep. This is the \textbf{variable selection} problem. Two forces pull against each
+other. Leaving out a regressor that matters biases the estimates of the others and the
+predictions. Putting in regressors that do not matter costs degrees of freedom and inflates the
+variances. A good model is a compromise: as simple as it can be while still describing the data
+adequately.
+
+This section first makes the two costs precise, then describes the criteria used to compare
+candidate models, and finally the two ways of searching among them: examining every possible
+subset, and stepwise methods that add or remove one regressor at a time.
+
+Throughout, the \emph{full model} contains all $K$ candidate regressors, and a \emph{subset model}
+contains $p - 1$ of them with an intercept, so $p$ parameters. Model adequacy checking
+(Section~4) should be done on the full model first; selection among regressors assumes that the
+form of the model is otherwise right.
+
+\subsection{The cost of leaving regressors out, and of putting them in}
+Partition the full model as
+\[
+\mathbf{y} = \mathbf{X}_1\boldsymbol\beta_1 + \mathbf{X}_2\boldsymbol\beta_2 + \boldsymbol\varepsilon ,
+\]
+where $\mathbf{X}_1$ ($n \times p$, including the column of ones) holds the regressors to be kept and
+$\mathbf{X}_2$ ($n \times r$) the regressors to be deleted. Assume the full model is correct and
+satisfies A1--A3. Let $\mathbf{H}_1$ be the hat matrix of $\mathbf{X}_1$, and write
+\begin{itemize}
+\item $\hat{\boldsymbol\beta}_1$, $\hat{\boldsymbol\beta}_2$ for the least-squares estimates in the full model;
+\item $\hat{\boldsymbol\beta}_1^* = (\mathbf{X}_1^\top\mathbf{X}_1)^{-1}\mathbf{X}_1^\top\mathbf{y}$ for the estimate of
+$\boldsymbol\beta_1$ from the subset model, which ignores $\mathbf{X}_2$;
+\item $\mathbf{A} = (\mathbf{X}_1^\top\mathbf{X}_1)^{-1}\mathbf{X}_1^\top\mathbf{X}_2$, the $p \times r$ \textbf{alias matrix},
+whose column $j$ holds the coefficients from regressing column $j$ of $\mathbf{X}_2$ on $\mathbf{X}_1$.
+\end{itemize}
+
+\begin{lem}\label{lem:partitioned}
+\begin{enumerate}[label=(\roman*)]
+\item $\hat{\boldsymbol\beta}_1^* = \hat{\boldsymbol\beta}_1 + \mathbf{A}\hat{\boldsymbol\beta}_2$;
+\item $\hat{\boldsymbol\beta}_2 = \bigl(\mathbf{X}_2^\top(\mathbf{I} - \mathbf{H}_1)\mathbf{X}_2\bigr)^{-1}\mathbf{X}_2^\top(\mathbf{I} - \mathbf{H}_1)\mathbf{y}$;
+\item $\hat{\boldsymbol\beta}_1^*$ and $\hat{\boldsymbol\beta}_2$ are uncorrelated.
+\end{enumerate}
+\end{lem}
+
+\begin{proof}
+The normal equations of the full model, split into the rows belonging to $\mathbf{X}_1$ and to
+$\mathbf{X}_2$, are
+\begin{align*}
+\mathbf{X}_1^\top\mathbf{X}_1\hat{\boldsymbol\beta}_1 + \mathbf{X}_1^\top\mathbf{X}_2\hat{\boldsymbol\beta}_2 &= \mathbf{X}_1^\top\mathbf{y} , \\
+\mathbf{X}_2^\top\mathbf{X}_1\hat{\boldsymbol\beta}_1 + \mathbf{X}_2^\top\mathbf{X}_2\hat{\boldsymbol\beta}_2 &= \mathbf{X}_2^\top\mathbf{y} .
+\end{align*}
+(i) Multiply the first by $(\mathbf{X}_1^\top\mathbf{X}_1)^{-1}$:
+$\hat{\boldsymbol\beta}_1 + \mathbf{A}\hat{\boldsymbol\beta}_2 = \hat{\boldsymbol\beta}_1^*$.
+
+(ii) Substitute $\hat{\boldsymbol\beta}_1 = \hat{\boldsymbol\beta}_1^* - \mathbf{A}\hat{\boldsymbol\beta}_2$ in the second. Since
+$\mathbf{X}_1\hat{\boldsymbol\beta}_1^* = \mathbf{H}_1\mathbf{y}$ and $\mathbf{X}_1\mathbf{A} = \mathbf{H}_1\mathbf{X}_2$,
+\[
+\mathbf{X}_2^\top\mathbf{H}_1\mathbf{y} - \mathbf{X}_2^\top\mathbf{H}_1\mathbf{X}_2\hat{\boldsymbol\beta}_2 + \mathbf{X}_2^\top\mathbf{X}_2\hat{\boldsymbol\beta}_2 = \mathbf{X}_2^\top\mathbf{y} ,
+\]
+that is, $\mathbf{X}_2^\top(\mathbf{I} - \mathbf{H}_1)\mathbf{X}_2\,\hat{\boldsymbol\beta}_2 = \mathbf{X}_2^\top(\mathbf{I} - \mathbf{H}_1)\mathbf{y}$. The matrix on
+the left is invertible because $\mathbf{X}$ has full column rank (the argument is that of
+Theorem~\ref{thm:ls-matrix}, applied to $(\mathbf{I} - \mathbf{H}_1)\mathbf{X}_2$).
+
+(iii) By Lemma~\ref{lem:linear-rv}, the covariance of
+$(\mathbf{X}_1^\top\mathbf{X}_1)^{-1}\mathbf{X}_1^\top\mathbf{y}$ with $\mathbf{M}\mathbf{X}_2^\top(\mathbf{I} - \mathbf{H}_1)\mathbf{y}$, where
+$\mathbf{M}$ is the inverse in (ii), is
+$\sigma^2(\mathbf{X}_1^\top\mathbf{X}_1)^{-1}\mathbf{X}_1^\top(\mathbf{I} - \mathbf{H}_1)\mathbf{X}_2\mathbf{M} = \mathbf{0}$, because
+$\mathbf{X}_1^\top(\mathbf{I} - \mathbf{H}_1) = \bigl((\mathbf{I} - \mathbf{H}_1)\mathbf{X}_1\bigr)^\top = \mathbf{0}$.
+\end{proof}
+
+Part (ii) is the matrix form of the added-variable theorem (Theorem~\ref{thm:added-variable}), which
+was the case $r = 1$.
+
+\begin{thm}[Underfitting and overfitting]\label{thm:under-over}
+Suppose the full model is correct. Then
+\begin{enumerate}[label=(\roman*)]
+\item $E(\hat{\boldsymbol\beta}_1^*) = \boldsymbol\beta_1 + \mathbf{A}\boldsymbol\beta_2$, so the subset estimate is biased unless
+$\boldsymbol\beta_2 = \mathbf{0}$ or $\mathbf{A} = \mathbf{0}$;
+\item $\operatorname{Var}(\hat{\boldsymbol\beta}_1) = \operatorname{Var}(\hat{\boldsymbol\beta}_1^*) + \mathbf{A}\operatorname{Var}(\hat{\boldsymbol\beta}_2)\mathbf{A}^\top$; in
+particular each $\operatorname{Var}(\hat\beta_{1j}) \ge \operatorname{Var}(\hat\beta^*_{1j})$;
+\item the residual mean square of the subset model has
+\[
+E\bigl(MS_{\mathrm{Res}}(p)\bigr) = \sigma^2 + \frac{\boldsymbol\beta_2^\top\mathbf{X}_2^\top(\mathbf{I} - \mathbf{H}_1)\mathbf{X}_2\boldsymbol\beta_2}{n - p} \;\ge\; \sigma^2 ;
+\]
+\item the mean square error matrix of $\hat{\boldsymbol\beta}_1^*$,
+$E\bigl[(\hat{\boldsymbol\beta}_1^* - \boldsymbol\beta_1)(\hat{\boldsymbol\beta}_1^* - \boldsymbol\beta_1)^\top\bigr]$, equals
+$\operatorname{Var}(\hat{\boldsymbol\beta}_1) - \mathbf{A}\bigl[\operatorname{Var}(\hat{\boldsymbol\beta}_2) - \boldsymbol\beta_2\boldsymbol\beta_2^\top\bigr]\mathbf{A}^\top$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $E(\mathbf{y}) = \mathbf{X}_1\boldsymbol\beta_1 + \mathbf{X}_2\boldsymbol\beta_2$, so
+$E(\hat{\boldsymbol\beta}_1^*) = (\mathbf{X}_1^\top\mathbf{X}_1)^{-1}\mathbf{X}_1^\top(\mathbf{X}_1\boldsymbol\beta_1 + \mathbf{X}_2\boldsymbol\beta_2) = \boldsymbol\beta_1 + \mathbf{A}\boldsymbol\beta_2$.
+
+(ii) By Lemma~\ref{lem:partitioned}(i), $\hat{\boldsymbol\beta}_1 = \hat{\boldsymbol\beta}_1^* - \mathbf{A}\hat{\boldsymbol\beta}_2$, a difference of
+uncorrelated vectors by part (iii) of the lemma, so the variances add. The diagonal entries of
+$\mathbf{A}\operatorname{Var}(\hat{\boldsymbol\beta}_2)\mathbf{A}^\top$ are variances of linear combinations of $\hat{\boldsymbol\beta}_2$, and so
+are $\ge 0$.
+
+(iii) Write $\boldsymbol\mu = \mathbf{X}_1\boldsymbol\beta_1 + \mathbf{X}_2\boldsymbol\beta_2$.
+$SS_{\mathrm{Res}}(p) = \mathbf{y}^\top(\mathbf{I} - \mathbf{H}_1)\mathbf{y}$, and by Lemma~\ref{lem:quad-form}
+\begin{align*}
+E\bigl(SS_{\mathrm{Res}}(p)\bigr) &= \sigma^2\operatorname{tr}(\mathbf{I} - \mathbf{H}_1) + \boldsymbol\mu^\top(\mathbf{I} - \mathbf{H}_1)\boldsymbol\mu \\
+&= (n - p)\sigma^2 + \boldsymbol\beta_2^\top\mathbf{X}_2^\top(\mathbf{I} - \mathbf{H}_1)\mathbf{X}_2\boldsymbol\beta_2 ,
+\end{align*}
+since $(\mathbf{I} - \mathbf{H}_1)\mathbf{X}_1 = \mathbf{0}$. The quadratic form is $\|(\mathbf{I} - \mathbf{H}_1)\mathbf{X}_2\boldsymbol\beta_2\|^2 \ge 0$.
+
+(iv) The mean square error matrix is the variance plus the bias times its transpose:
+$\operatorname{Var}(\hat{\boldsymbol\beta}_1^*) + \mathbf{A}\boldsymbol\beta_2\boldsymbol\beta_2^\top\mathbf{A}^\top$. Substitute
+$\operatorname{Var}(\hat{\boldsymbol\beta}_1^*) = \operatorname{Var}(\hat{\boldsymbol\beta}_1) - \mathbf{A}\operatorname{Var}(\hat{\boldsymbol\beta}_2)\mathbf{A}^\top$ from (ii).
+\end{proof}
+
+The theorem says three things.
+\begin{itemize}
+\item \emph{Underfitting biases.} Deleting regressors that matter biases the remaining
+coefficients, through the alias matrix: the kept regressors take credit for the omitted ones in
+proportion to their correlation with them. It also biases $MS_{\mathrm{Res}}$ upwards, so the
+subset model looks noisier than the truth.
+\item \emph{Overfitting inflates variance.} If $\boldsymbol\beta_2 = \mathbf{0}$, the subset model is correct
+and unbiased, and part (ii) shows that carrying the useless regressors along only increases the
+variances of the others.
+\item \emph{The trade-off.} By (iv), deleting $\mathbf{X}_2$ reduces the mean square error of the
+estimates of $\boldsymbol\beta_1$ whenever $\operatorname{Var}(\hat{\boldsymbol\beta}_2) - \boldsymbol\beta_2\boldsymbol\beta_2^\top$ is positive semi-definite.
+For a single deleted regressor this says $\beta_2^2 \le \operatorname{Var}(\hat\beta_2)$: it pays to drop a
+regressor whose true coefficient is smaller than the standard error with which it could be
+estimated. A biased model can be the more accurate one.
+\end{itemize}
+
+\begin{exa}\label{exa:farms}
+A survey of twelve farms recorded the maize yield $y$ (bags per hectare), the fertiliser applied
+$x_1$ (bags per hectare), the labour input $x_2$ (person-days per hectare, in tens) and the
+distance $x_3$ from the farm to the nearest market (km):
+\begin{center}
+\begin{tabular}{c|cccc||c|cccc}
+Farm & $x_1$ & $x_2$ & $x_3$ & $y$ & Farm & $x_1$ & $x_2$ & $x_3$ & $y$ \\
+\hline
+1 & 7 & 6 & 4 & 29 & 7 & 7 & 4 & 7 & 24 \\
+2 & 1 & 2 & 4 & 9 & 8 & 5 & 2 & 8 & 18 \\
+3 & 2 & 2 & 6 & 11 & 9 & 1 & 2 & 7 & 13 \\
+4 & 2 & 1 & 5 & 13 & 10 & 1 & 2 & 3 & 8 \\
+5 & 2 & 5 & 2 & 17 & 11 & 3 & 6 & 3 & 19 \\
+6 & 7 & 8 & 6 & 29 & 12 & 4 & 5 & 6 & 22 \\
+\end{tabular}
+\end{center}
+The correlations are $r_{12} = 0.65$, $r_{13} = 0.37$, $r_{23} = -0.21$, and with $y$: $0.93$,
+$0.83$ and $0.20$. Compare the fits of $y$ on $x_1$ alone, on $x_1$ and $x_2$, and on all three.
+\end{exa}
+
+\begin{solution}
+By the methods of Section~3 (with the matrices given at the end of this solution):
+\begin{center}
+\begin{tabular}{l|ccc}
+Model & $\hat\beta_1$ (se) & $\hat\beta_2$ (se) & $\hat\beta_3$ (se) \\
+\hline
+$x_1$ & 2.754 (0.355) & & \\
+$x_1, x_2$ & 1.982 (0.289) & 1.303 (0.316) & \\
+$x_1, x_2, x_3$ & 1.801 (0.407) & 1.480 (0.424) & 0.268 (0.410) \\
+\end{tabular}
+\end{center}
+\emph{Underfitting.} Leaving out labour raises the fertiliser coefficient from $1.98$ to $2.75$. The
+alias matrix explains it: regressing $x_2$ on $x_1$ gives slope $38.5/65 = 0.592$, and by
+Lemma~\ref{lem:partitioned}(i),
+\[
+\hat\beta_1^* = \hat\beta_1 + 0.592\,\hat\beta_2 = 1.982 + 0.592 \times 1.303 = 2.754 .
+\]
+Farms that use more fertiliser also tend to put in more labour, and with labour omitted, fertiliser
+is credited with part of its effect. The residual mean square rises from $3.15$ to $8.17$.
+
+\emph{Overfitting.} Adding the distance to market, whose coefficient is small and far from
+significant ($t = 0.65$), raises the standard error of $\hat\beta_1$ from $0.289$ to $0.407$ and of
+$\hat\beta_2$ from $0.316$ to $0.424$: distance is mildly correlated with the other two, and carrying
+it along costs precision for nothing.
+
+For the record, for the model in $x_1, x_2$,
+\[
+\mathbf{X}^\top\mathbf{X} = \begin{bmatrix} 12 & 42 & 45 \\ 42 & 212 & 196 \\ 45 & 196 & 223 \end{bmatrix} ,
+\qquad
+\mathbf{X}^\top\mathbf{y} = \begin{bmatrix} 212 \\ 921 \\ 942 \end{bmatrix} ,
+\]
+with $\det(\mathbf{X}^\top\mathbf{X}) = 24528$, and the fit is $\hat y = 5.843 + 1.982x_1 + 1.303x_2$.
+\end{solution}
+
+\subsection{Criteria for comparing models}
+Each candidate model is summarised by a number, and the numbers are compared. Write
+$SS_{\mathrm{Res}}(p)$, $R^2_p$ and $MS_{\mathrm{Res}}(p)$ for the quantities of a subset model with
+$p$ parameters, and $\hat\sigma^2$ for the residual mean square of the full model.
+
+\subhead{$R^2$, adjusted $R^2$ and the residual mean square}
+$R^2_p = 1 - SS_{\mathrm{Res}}(p)/SS_T$ never decreases when a regressor is added
+(Theorem~\ref{thm:r2-increase}), so it cannot choose between models of different sizes; it is
+used to compare models of the \emph{same} size, and to see where adding regressors stops paying,
+the point at which $R^2_p$ levels off as $p$ grows. The adjusted
+\[
+R^2_{\mathrm{adj},p} = 1 - \frac{SS_{\mathrm{Res}}(p)/(n - p)}{SS_T/(n - 1)} = 1 - \frac{MS_{\mathrm{Res}}(p)}{SS_T/(n - 1)}
+\]
+does penalise size, and since $SS_T/(n - 1)$ is the same for every model, maximising
+$R^2_{\mathrm{adj},p}$ is the same as minimising $MS_{\mathrm{Res}}(p)$. As shown in the practice problems of
+Section~3, adding one regressor raises $R^2_{\mathrm{adj}}$ exactly when its partial $F$ statistic exceeds
+$1$, which is a weak requirement; these criteria tend to choose models that are too large.
+
+\subhead{Mallows' $C_p$}
+A model is used to estimate the mean response at the observed points. A natural measure of its
+quality is the total mean squared error of the fitted values, scaled by $\sigma^2$:
+\[
+\Gamma_p = \frac{1}{\sigma^2}\sum_{i=1}^n E\bigl[(\hat y_i - E(y_i))^2\bigr] .
+\]
+It combines variance and bias, and it is small for a good model.
+
+\begin{thm}\label{thm:cp}
+For a subset model with $p$ parameters,
+\[
+\Gamma_p = p + \frac{SS_B}{\sigma^2} = \frac{E\bigl(SS_{\mathrm{Res}}(p)\bigr)}{\sigma^2} - n + 2p ,
+\]
+where $SS_B = \sum_i\bigl(E(\hat y_i) - E(y_i)\bigr)^2 = \boldsymbol\mu^\top(\mathbf{I} - \mathbf{H}_1)\boldsymbol\mu$ is the sum of
+squared biases.
+\end{thm}
+
+\begin{proof}
+Each term splits into variance plus squared bias:
+$E[(\hat y_i - \mu_i)^2] = \operatorname{Var}(\hat y_i) + (E\hat y_i - \mu_i)^2$. The fitted values are
+$\hat{\mathbf{y}} = \mathbf{H}_1\mathbf{y}$, with covariance matrix $\sigma^2\mathbf{H}_1\mathbf{H}_1^\top = \sigma^2\mathbf{H}_1$, so
+$\sum_i\operatorname{Var}(\hat y_i) = \sigma^2\operatorname{tr}(\mathbf{H}_1) = p\sigma^2$. The biases form the vector
+$\mathbf{H}_1\boldsymbol\mu - \boldsymbol\mu = -(\mathbf{I} - \mathbf{H}_1)\boldsymbol\mu$, whose squared length is
+$\boldsymbol\mu^\top(\mathbf{I} - \mathbf{H}_1)\boldsymbol\mu = SS_B$. This gives the first form. By the proof of
+Theorem~\ref{thm:under-over}(iii), $E(SS_{\mathrm{Res}}(p)) = (n - p)\sigma^2 + SS_B$, so
+$SS_B/\sigma^2 = E(SS_{\mathrm{Res}}(p))/\sigma^2 - n + p$; add $p$.
+\end{proof}
+
+\begin{defn}
+\textbf{Mallows' $C_p$} is the estimate of $\Gamma_p$ obtained by replacing $E(SS_{\mathrm{Res}}(p))$ by
+$SS_{\mathrm{Res}}(p)$ and $\sigma^2$ by the full-model estimate $\hat\sigma^2$:
+\[
+C_p = \frac{SS_{\mathrm{Res}}(p)}{\hat\sigma^2} - n + 2p .
+\]
+\end{defn}
+
+If a subset model has no bias, $SS_B = 0$ and $\Gamma_p = p$, so its $C_p$ should be close to $p$. A
+model with substantial bias has $C_p$ well above $p$. The usual practice is to plot $C_p$ against
+$p$ for every candidate, draw the line $C_p = p$, and look for models that are small, have $C_p$
+near or below the line, and have a small $C_p$. For the full model $C_p = p$ exactly
+(Problem~\ref{prob:cp-full}), so the criterion is only as good as the assumption that the full
+model is unbiased and $\hat\sigma^2$ a fair estimate of $\sigma^2$.
+
+\subhead{AIC and BIC}
+Information criteria balance fit against size by penalising the log-likelihood. For the normal
+linear model with $p$ parameters, the argument in the proof of Theorem~\ref{thm:boxcox} shows
+that the maximised log-likelihood is $-\frac{n}{2}\ln\bigl(SS_{\mathrm{Res}}(p)/n\bigr)$ plus a
+constant. The
+\textbf{Akaike information criterion} and the \textbf{Bayesian information criterion} are
+\[
+\mathrm{AIC}_p = n\ln\frac{SS_{\mathrm{Res}}(p)}{n} + 2p ,
+\qquad
+\mathrm{BIC}_p = n\ln\frac{SS_{\mathrm{Res}}(p)}{n} + p\ln n ,
+\]
+and smaller is better. The first term rewards fit; the second penalises size. Akaike derived the
+penalty $2p$ as the bias in the maximised log-likelihood as an estimate of how well the model will
+predict new data; Schwarz derived $p\ln n$ from a large-sample approximation to the posterior
+probability of the model. The derivations are beyond this course, but the consequence is easy to
+see: for $n \ge 8$, $\ln n > 2$, and BIC penalises extra parameters more heavily than AIC, so it
+tends to choose smaller models. As $n \to \infty$, BIC chooses the true model (if it is among the
+candidates) with probability tending to $1$, while AIC aims at good prediction and may keep a few
+superfluous terms.
+
+\subhead{PRESS}
+The prediction error sum of squares of Section~4,
+$\mathrm{PRESS}_p = \sum e_i^2/(1 - h_{ii})^2$, measures how well a model predicts each observation
+from the others. It is a direct estimate of predictive performance, needs no estimate of
+$\sigma^2$, and is computed from a single fit of each candidate. Prefer models with small PRESS, or
+equivalently large $R^2_{\mathrm{pred}}$.
+
+\subsection{All possible regressions}
+With $K$ candidate regressors there are $2^K$ subset models, counting the model with the
+intercept alone. When $K$ is moderate (up to about $20$ with modern computing) all of them can be
+fitted and compared on the criteria above. The usual presentation lists, for each size $p$, the
+few best models of that size.
+
+\begin{exa}\label{exa:farms-all}
+Fit all eight subset models to the farm data of Example~\ref{exa:farms} and choose a model.
+\end{exa}
+
+\begin{solution}
+Here $n = 12$, $SS_T = 574.67$, and the full model gives $\hat\sigma^2 = MS_{\mathrm{Res}} = 26.891/8 = 3.361$.
+\begin{center}
+\begin{tabular}{l|crrrr}
+Regressors & $p$ & $SS_{\mathrm{Res}}$ & $R^2_p$ & $R^2_{\mathrm{adj}}$ & $MS_{\mathrm{Res}}$ \\
+\hline
+none & 1 & 574.67 & 0 & 0 & 52.24 \\
+$x_1$ & 2 & 81.73 & 0.858 & 0.844 & 8.17 \\
+$x_2$ & 2 & 176.34 & 0.693 & 0.663 & 17.63 \\
+$x_3$ & 2 & 552.56 & 0.038 & $-0.058$ & 55.26 \\
+$x_1, x_2$ & 3 & 28.33 & 0.951 & 0.940 & 3.15 \\
+$x_1, x_3$ & 3 & 67.85 & 0.882 & 0.856 & 7.54 \\
+$x_2, x_3$ & 3 & 92.71 & 0.839 & 0.803 & 10.30 \\
+$x_1, x_2, x_3$ & 4 & 26.89 & 0.953 & 0.936 & 3.36 \\
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tabular}{l|rrrr}
+Regressors & $C_p$ & AIC & BIC & PRESS \\
+\hline
+none & 160.96 & 48.43 & 48.91 & 683.90 \\
+$x_1$ & 16.31 & 27.02 & 27.99 & 116.85 \\
+$x_2$ & 44.46 & 36.25 & 37.22 & 240.42 \\
+$x_3$ & 156.39 & 49.96 & 50.93 & 734.91 \\
+$x_1, x_2$ & 2.43 & 16.31 & 17.76 & 46.28 \\
+$x_1, x_3$ & 14.18 & 26.79 & 28.24 & 128.94 \\
+$x_2, x_3$ & 21.58 & 30.53 & 31.99 & 162.92 \\
+$x_1, x_2, x_3$ & 4.00 & 17.68 & 19.62 & 68.74 \\
+\end{tabular}
+\end{center}
+Two of the entries in full, for the model in $x_1, x_2$ ($p = 3$):
+\begin{align*}
+C_3 &= \frac{28.332}{3.361} - 12 + 6 = 8.43 - 6 = 2.43 , \\
+\mathrm{AIC}_3 &= 12\ln\frac{28.332}{12} + 6 = 12 \times 0.8591 + 6 = 16.31 .
+\end{align*}
+Every criterion chooses the model in $x_1$ and $x_2$. It has the largest $R^2_{\mathrm{adj}}$ and the
+smallest $MS_{\mathrm{Res}}$, $C_p$, AIC, BIC and PRESS. Its $C_p = 2.43$ is below $p = 3$, so there is no
+sign of bias, while every other model with fewer than four parameters has $C_p$ far above the line
+(Figure~\ref{fig:cp}). Adding $x_3$ raises $R^2$ only from $0.951$ to $0.953$, and makes every other
+criterion worse; PRESS in particular rises by half, from $46$ to $69$. The chosen model is
+\[
+\hat y = 5.84 + 1.98x_1 + 1.30x_2 .
+\]
+Each extra bag of fertiliser per hectare goes with about two more bags of maize, at a fixed labour
+input; distance to market adds nothing once fertiliser and labour are known.
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1.6cm,y=0.09cm]
+\draw[-Stealth] (0.6,0) -- (4.6,0) node[right] {\small $p$};
+\draw[-Stealth] (0.6,0) -- (0.6,52) node[above] {\small $C_p$};
+\foreach \t in {1,2,3,4} \draw[-] (\t,1) -- (\t,-1) node[below] {\scriptsize $\t$};
+\foreach \t in {10,20,30,40,50} \draw[-] (0.63,\t) -- (0.57,\t) node[left] {\scriptsize $\t$};
+\draw[-,dashed,gray] (0.6,0.6) -- (4.4,4.4) node[above right,font=\scriptsize] {$C_p = p$};
+\foreach \p/\c in {2/16.31,2/44.46,3/2.43,3/14.18,3/21.58,4/4.0}
+  \fill[blue] (\p,\c) circle (2.4pt);
+\node[right,font=\scriptsize] at (2,16.31) {$x_1$};
+\node[right,font=\scriptsize] at (2,44.46) {$x_2$};
+\node[above left,font=\scriptsize] at (3,2.43) {$x_1x_2$};
+\node[right,font=\scriptsize] at (3,14.18) {$x_1x_3$};
+\node[right,font=\scriptsize] at (3,21.58) {$x_2x_3$};
+\node[above left,font=\scriptsize] at (4,4.0) {$x_1x_2x_3$};
+\node[font=\scriptsize,align=center] at (3.6,46) {off the scale:\\ none ($161$), $x_3$ ($156$)};
+\end{tikzpicture}
+\caption{The $C_p$ plot for the farm data. Models near or below the dashed line show no sign of
+bias; the model in $x_1$ and $x_2$ is the smallest such model.}
+\label{fig:cp}
+\end{figure}
+
+\subsection{Stepwise methods}
+When there are too many candidates to fit every subset, or as a quicker first look, models are
+built one regressor at a time. Every step uses the partial $F$ statistic of
+Subsection~\ref{ssec:extra-ss} for a single regressor $x_j$ given the regressors already in the model,
+\[
+F_j = \frac{SS_R(\beta_j \mid \text{others in the model})}{MS_{\mathrm{Res}}(\text{model with } x_j)} ,
+\]
+which equals the square of the $t$ statistic for $\beta_j$ (Theorem~\ref{thm:added-variable}). Two
+thresholds are chosen: $F_{\mathrm{in}}$, which a regressor must exceed to enter, and $F_{\mathrm{out}}$,
+below which a regressor already in the model is removed. Common choices are
+$F_{\mathrm{in}} = F_{\mathrm{out}} = 4$, roughly the $5\%$ point of $F_{1,\nu}$ for moderate $\nu$.
+Figure~\ref{fig:stepwise} summarises the three methods.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85,every node/.style={font=\scriptsize,align=center}]
+\foreach \px/\col/\num/\name/\start/\stepa/\stepb/\stopp in {
+ 0/blue/1/{Forward selection}/{start with no regressors}/{add the candidate with\\ the largest $F_j$}/{a regressor once in\\ is never removed}/{stop when the largest\\ $F_j < F_{\mathrm{in}}$},
+ 5.4/orange/2/{Backward elimination}/{start with all $K$ regressors}/{remove the regressor with\\ the smallest $F_j$}/{a regressor once out\\ never returns}/{stop when the smallest\\ $F_j \ge F_{\mathrm{out}}$},
+ 10.8/green/3/{Stepwise regression}/{start with no regressors}/{add as in forward\\ selection}/{after each addition, remove\\ any with $F_j < F_{\mathrm{out}}$}/{stop when no regressor\\ enters or leaves}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.2,-5.2) rectangle (5.0,0.6);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0.15,0.25) {\num};
+  \node[anchor=west,font=\footnotesize\bfseries,text=\col!50!black] at (0.4,0.25) {\name};
+  \node[draw=\col!60!black,fill=white,rounded corners=3pt,minimum width=3.8cm] (a) at (2.4,-0.55) {\start};
+  \node[draw=\col!60!black,fill=white,rounded corners=3pt,minimum width=3.8cm] (b) at (2.4,-1.75) {\stepa};
+  \node[draw=\col!60!black,fill=white,rounded corners=3pt,minimum width=3.8cm] (c) at (2.4,-3.05) {\stepb};
+  \node[draw=\col!60!black,fill=\col!20,rounded corners=3pt,minimum width=3.8cm] (d) at (2.4,-4.4) {\stopp};
+  \draw[-Stealth,\col!60!black] (a) -- (b);
+  \draw[-Stealth,\col!60!black] (b) -- (c);
+  \draw[-Stealth,\col!60!black] (c) -- (d);
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{The three stepwise methods. Each uses the partial $F$ statistic $F_j$ of a single regressor
+given those currently in the model.}
+\label{fig:stepwise}
+\end{figure}
+
+\begin{exa}\label{exa:farms-stepwise}
+Apply forward selection and backward elimination to the farm data, with
+$F_{\mathrm{in}} = F_{\mathrm{out}} = 4$.
+\end{exa}
+
+\begin{solution}
+All the residual sums of squares are in the table of Example~\ref{exa:farms-all}.
+
+\emph{Forward selection.} Step~1: with no regressors, $SS_{\mathrm{Res}} = 574.67$. Adding $x_1$ gives
+$F = (574.67 - 81.73)/(81.73/10) = 60.3$; adding $x_2$, $(574.67 - 176.34)/17.63 = 22.6$; adding $x_3$,
+$(574.67 - 552.56)/55.26 = 0.40$. The largest is $60.3 > 4$, so $x_1$ enters.
+Step~2: given $x_1$,
+\begin{align*}
+x_2:\quad F &= \frac{81.73 - 28.33}{28.33/9} = \frac{53.40}{3.148} = 16.96, \\
+x_3:\quad F &= \frac{81.73 - 67.85}{67.85/9} = \frac{13.88}{7.539} = 1.84 ,
+\end{align*}
+so $x_2$ enters. Step~3: given $x_1$ and $x_2$, adding $x_3$ gives
+$F = (28.33 - 26.89)/(26.89/8) = 1.44/3.361 = 0.43 < 4$. Stop. The model is $x_1, x_2$.
+(In stepwise regression we would also check, after $x_2$ entered, whether $x_1$ should leave:
+$F = (176.34 - 28.33)/3.148 = 47.0$, so it stays, and the result is the same.)
+
+\emph{Backward elimination.} Start from the full model, $MS_{\mathrm{Res}} = 3.361$. Deleting each
+regressor in turn:
+\begin{align*}
+x_1:\quad F &= (92.71 - 26.89)/3.361 = 19.58, \\
+x_2:\quad F &= (67.85 - 26.89)/3.361 = 12.19, \\
+x_3:\quad F &= (28.33 - 26.89)/3.361 = 0.43 .
+\end{align*}
+The smallest, $0.43 < 4$, so $x_3$ leaves. In the model $x_1, x_2$ ($MS_{\mathrm{Res}} = 3.148$), deleting $x_1$
+gives $F = 47.0$ and deleting $x_2$ gives $F = 16.96$, both above $4$. Stop. The model is again $x_1, x_2$.
+Here all methods agree; Problem~\ref{prob:fwd-bwd} shows that they need not.
+\end{solution}
+
+\subsection{Cautions in model selection}
+\begin{enumerate}[label=(\roman*)]
+\item \emph{There is no single best model.} Different criteria, and different search methods, can
+choose different models, and several models are often nearly equally good. Variable selection
+should produce a short list of candidates, to be judged by residual analysis, by subject-matter
+knowledge, and by how sensible the coefficients are.
+\item \emph{Stepwise methods do not search every model.} Forward selection never removes a
+regressor; backward elimination never brings one back. When regressors are correlated, a variable
+that looks best alone may be useless in combination, and the two methods can end in different
+places, neither of them the best subset (Problem~\ref{prob:fwd-bwd}).
+\item \emph{Inference after selection is optimistic.} The $t$ and $F$ statistics of the chosen model
+are computed as if it had been specified in advance. It was not: it was chosen because its
+statistics looked good. Its $P$-values are too small, its $R^2$ too large and its residual mean
+square too small. Where possible, a model chosen on one set of data should be checked on fresh
+data, or on a part of the data held back for the purpose (\emph{validation}).
+\item \emph{Respect the structure of the model.} If $x^2$ or an interaction $x_1x_2$ is kept, the
+lower-order terms $x$, $x_1$ and $x_2$ are normally kept too, whatever their individual $t$ values, so
+that the model does not depend on the arbitrary origin of the measurement scale.
+\item \emph{Multicollinearity makes selection unstable.} When regressors are strongly correlated, small
+changes in the data can change which of them is chosen. This is the subject of the next section.
+\end{enumerate}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:cp-full}
+\begin{enumerate}[label=(\alph*)]
+\item Show that for the full model, $C_p = p$ exactly.
+\item Show that $C_p$ can be negative, and say what a negative value suggests.
+\item Show that maximising $R^2_{\mathrm{adj}}$ over all models is the same as minimising $MS_{\mathrm{Res}}(p)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) For the full model $SS_{\mathrm{Res}} = (n - p)\hat\sigma^2$, so $C_p = (n - p) - n + 2p = p$.
+
+(b) $C_p < 0$ when $SS_{\mathrm{Res}}(p)/\hat\sigma^2 < n - 2p$, that is,
+$MS_{\mathrm{Res}}(p) < \hat\sigma^2(n - 2p)/(n - p)$, which is possible since $MS_{\mathrm{Res}}(p)$ is a random
+variable that can fall below $\hat\sigma^2$. Since $\Gamma_p \ge p > 0$, a negative $C_p$ is pure sampling
+error, and usually means that the subset model is unbiased and its residual mean square happened to
+be small; it can also mean that $\hat\sigma^2$ is inflated by superfluous terms in the full model.
+
+(c) $R^2_{\mathrm{adj},p} = 1 - MS_{\mathrm{Res}}(p)\big/[SS_T/(n - 1)]$, and $SS_T/(n - 1)$ is the same for
+every model fitted to the same responses. So $R^2_{\mathrm{adj}}$ is a decreasing function of
+$MS_{\mathrm{Res}}(p)$.
+\end{solution}
+
+\begin{problem}\label{prob:omitted}
+Suppose the true model is $y = \beta_0 + \beta_1x_1 + \beta_2x_2 + \varepsilon$ but $y$ is regressed on
+$x_1$ alone.
+\begin{enumerate}[label=(\alph*)]
+\item Show that $E(\hat\beta_1^*) = \beta_1 + \beta_2 S_{12}/S_{11}$, where
+$S_{11} = \sum(x_{i1} - \bar x_1)^2$ and $S_{12} = \sum(x_{i1} - \bar x_1)x_{i2}$.
+\item When is the slope estimate unbiased despite the omission?
+\item A study finds that households with more radios have more children at school, and concludes that
+radios cause school attendance. Explain the likely error in terms of (a).
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) By Theorem~\ref{thm:under-over}(i), $E(\hat{\boldsymbol\beta}_1^*) = \boldsymbol\beta_1 + \mathbf{A}\beta_2$, where
+$\mathbf{A}$ holds the coefficients of the simple regression of $x_2$ on $x_1$. Its slope is $S_{12}/S_{11}$.
+(Directly: $\hat\beta_1^* = \sum(x_{i1} - \bar x_1)y_i/S_{11}$, and substituting
+$E(y_i) = \beta_0 + \beta_1x_{i1} + \beta_2x_{i2}$ gives $\beta_1 + \beta_2S_{12}/S_{11}$, since
+$\sum(x_{i1} - \bar x_1) = 0$.)
+
+(b) When $\beta_2 = 0$, or when $S_{12} = 0$, so that $x_1$ and $x_2$ are uncorrelated in the sample.
+This is one reason for designing experiments with uncorrelated (orthogonal) factors.
+
+(c) An omitted variable, such as household income, raises both the number of radios and school
+attendance. In the regression of attendance on radios alone, the radio coefficient is
+$\beta_1 + \beta_2S_{12}/S_{11}$, where $\beta_2$ is the effect of income and $S_{12}/S_{11}$ the slope of
+income on radios. Even if radios have no effect ($\beta_1 = 0$), the estimate is positive.
+\end{solution}
+
+\begin{problem}\label{prob:aic-bic}
+\begin{enumerate}[label=(\alph*)]
+\item Show that, in comparing a model with $p$ parameters to one with $p + 1$, AIC prefers the larger
+model exactly when $SS_{\mathrm{Res}}(p)/SS_{\mathrm{Res}}(p + 1) > e^{2/n}$, and find the corresponding condition
+for BIC.
+\item For $n = 12$, express each condition as a partial $F$ statistic, and compare with $F_{\mathrm{in}} = 4$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\mathrm{AIC}_{p+1} < \mathrm{AIC}_p$ means $n\ln SS_{\mathrm{Res}}(p + 1) + 2(p + 1) < n\ln SS_{\mathrm{Res}}(p) + 2p$
+(the $-n\ln n$ terms cancel), that is, $\ln[SS_{\mathrm{Res}}(p)/SS_{\mathrm{Res}}(p + 1)] > 2/n$. For BIC the penalty
+difference is $\ln n$ instead of $2$, so the condition is $SS_{\mathrm{Res}}(p)/SS_{\mathrm{Res}}(p + 1) > n^{1/n}$.
+
+(b) The partial $F$ statistic for the added term is
+$F = (n - p - 1)\bigl[SS_{\mathrm{Res}}(p)/SS_{\mathrm{Res}}(p + 1) - 1\bigr]$. With $n = 12$ and, say, $p = 2$ (so
+$n - p - 1 = 9$):
+\begin{align*}
+\text{AIC:}\quad F &> 9\,(e^{2/12} - 1) = 9 \times 0.1814 = 1.63, \\
+\text{BIC:}\quad F &> 9\,(12^{1/12} - 1) = 9 \times 0.2300 = 2.07 .
+\end{align*}
+Both are more lenient than $F_{\mathrm{in}} = 4$, and AIC more than BIC. With small samples, AIC in
+particular tends to admit terms that a significance test would reject.
+\end{solution}
+
+\begin{problem}\label{prob:fwd-bwd}
+Ten observations on three candidate regressors gave the following residual sums of squares:
+\begin{center}
+\begin{tabular}{l|r||l|r}
+Regressors & $SS_{\mathrm{Res}}$ & Regressors & $SS_{\mathrm{Res}}$ \\
+\hline
+none & 474.5 & $x_1, x_2$ & 32.56 \\
+$x_1$ & 39.97 & $x_1, x_3$ & 33.59 \\
+$x_2$ & 82.66 & $x_2, x_3$ & 3.42 \\
+$x_3$ & 178.09 & $x_1, x_2, x_3$ & 3.40 \\
+\end{tabular}
+\end{center}
+In these data $x_1$ is roughly the average of $x_2$ and $x_3$.
+\begin{enumerate}[label=(\alph*)]
+\item Carry out forward selection and backward elimination with $F_{\mathrm{in}} = F_{\mathrm{out}} = 4$.
+\item Which model do $C_p$ and BIC choose?
+\item Explain the difference.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) \emph{Forward.} Step 1: the single-regressor $F$ values are
+$(474.5 - 39.97)/(39.97/8) = 87.0$, $(474.5 - 82.66)/(82.66/8) = 37.9$ and
+$(474.5 - 178.09)/(178.09/8) = 13.3$; $x_1$ enters. Step 2: given $x_1$, adding $x_2$ gives
+$F = (39.97 - 32.56)/(32.56/7) = 1.59$, and adding $x_3$ gives $(39.97 - 33.59)/(33.59/7) = 1.33$. Both
+are below $4$, so forward selection stops with $x_1$ alone, $SS_{\mathrm{Res}} = 39.97$.
+
+\emph{Backward.} In the full model $MS_{\mathrm{Res}} = 3.40/6 = 0.566$. Deleting $x_1$ gives
+$F = (3.42 - 3.40)/0.566 = 0.05$; deleting $x_2$, $(33.59 - 3.40)/0.566 = 53.3$; deleting $x_3$,
+$(32.56 - 3.40)/0.566 = 51.5$. Remove $x_1$. In the model $x_2, x_3$ ($MS_{\mathrm{Res}} = 3.42/7 = 0.489$),
+deleting $x_2$ gives $F = (178.09 - 3.42)/0.489 = 357$ and deleting $x_3$ gives
+$(82.66 - 3.42)/0.489 = 162$. Stop with $x_2, x_3$, $SS_{\mathrm{Res}} = 3.42$.
+
+(b) With $\hat\sigma^2 = 0.566$ and $n = 10$:
+$C_p(x_1) = 39.97/0.566 - 10 + 4 = 64.6$, $C_p(x_2x_3) = 3.42/0.566 - 10 + 6 = 2.04$, and every other
+model with $p < 4$ has $C_p > 50$. BIC is likewise smallest for $x_2, x_3$
+($10\ln 0.342 + 3\ln 10 = -3.81$, against $18.5$ for $x_1$). Both choose $x_2, x_3$.
+
+(c) Because $x_1$ is close to the average of $x_2$ and $x_3$, it is the best single stand-in for both,
+and forward selection, which looks one regressor at a time, takes it first. Once $x_1$ is in, $x_2$
+and $x_3$ each add little separately, since $x_1$ already carries most of what each contributes,
+so neither enters. But $y$ depends on $x_2$ and $x_3$ with \emph{different} coefficients, which $x_1$
+cannot mimic, and the pair together fits ten times better. Backward elimination starts from the
+model that contains the pair and finds that $x_1$ is the redundant one. When regressors are
+correlated, one-at-a-time searches can miss the best subset; this is the strongest argument for
+examining all subsets when it is feasible.
+\end{solution}
+
+\begin{problem}\label{prob:farms-press}
+For the farm data, the model in $x_1, x_2$ has $R^2 = 0.951$ and $\mathrm{PRESS} = 46.28$, and the
+full model has $R^2 = 0.953$ and $\mathrm{PRESS} = 68.74$. Compute $R^2_{\mathrm{pred}}$ for both and comment.
+\end{problem}
+
+\begin{solution}
+$R^2_{\mathrm{pred}} = 1 - \mathrm{PRESS}/SS_T$ with $SS_T = 574.67$: for $x_1, x_2$,
+$1 - 46.28/574.67 = 0.919$; for the full model, $1 - 68.74/574.67 = 0.880$. The full model fits the
+data slightly better but predicts new farms worse. The extra term has adapted to noise in these twelve
+farms, and that noise does not recur. The gap between $R^2$ and $R^2_{\mathrm{pred}}$ is $0.032$ for the
+smaller model and $0.073$ for the larger, a typical symptom of overfitting.
+\end{solution}
 
 \section{Multicollinearity}
 
