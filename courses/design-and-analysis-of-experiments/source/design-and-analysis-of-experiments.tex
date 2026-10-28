@@ -4008,6 +4008,317 @@ each main-effect column does and the levels of different factors are crossed. So
 product column, is zero.
 \end{solution}
 
+\section{Blocking and confounding in the $2^k$ design}
+A $2^k$ design often has to be run in blocks. If whole replicates fit in blocks, the design is a randomised complete block design with the $2^k$
+combinations as treatments (Section~7). Often, however, a single replicate is too large for one block: a batch of raw material is enough for only
+four runs, or only eight runs can be made in a day. Then each block can hold only part of a replicate, and the price is that some effect becomes
+indistinguishable from the difference between blocks. The art is to choose that effect, so that only an unimportant one is lost.
+
+\subsection{Confounding in two blocks}
+\begin{defn}
+An effect is \textbf{confounded} with blocks when its estimate is also an estimate of a difference between blocks, so that the two cannot be
+separated.
+\end{defn}
+
+Consider a $2^3$ design in two blocks of four runs. Place in one block the four runs with a $-$ sign in the $ABC$ column of the table of signs, and in the
+other the four with a $+$:
+\begin{center}
+\begin{tabular}{c|c}
+block $1$ ($ABC = -$) & block $2$ ($ABC = +$) \\
+\hline
+$(1)$, $ab$, $ac$, $bc$ & $a$, $b$, $c$, $abc$
+\end{tabular}
+\end{center}
+The $ABC$ contrast is then (block $2$ total) $-$ (block $1$ total), and any difference between the blocks enters it in full: $ABC$ is confounded with
+blocks. Every other effect is unaffected.
+
+\begin{prop}\label{prop:confound-two}
+If a $2^k$ design is divided into two blocks according to the sign of the column of an effect $E$, and the block effects are additive, then $E$ is
+confounded with blocks and the estimate of every other effect is unchanged by the block effects.
+\end{prop}
+
+\begin{proof}
+Let the block effects be $\delta_1$ and $\delta_2$. They add $\delta_1$ to every run in block $1$ and $\delta_2$ to every run in block $2$. For the confounded effect, the $+$
+runs are exactly block $2$, so its contrast gains $2^{k-1}(\delta_2 - \delta_1)$. For any other effect $F$, the column of $F$ is orthogonal to the column of $E$, so within each
+block (each sign of $E$) the column of $F$ has as many $+$ as $-$ signs: the product $EF$ is a column, with as many $+$ as $-$ signs in each half where
+$E$ is constant. Hence the contrast of $F$ gains $\delta_1(\text{\#}+ - \text{\#}-)_{\text{block }1} + \delta_2(\text{\#}+ - \text{\#}-)_{\text{block }2} = 0$.
+\end{proof}
+
+A convenient way to form the blocks uses the \textbf{defining contrast}
+\[
+L = \alpha_1x_1 + \alpha_2x_2 + \dots + \alpha_kx_k \pmod 2 ,
+\]
+where now $x_i = 1$ if factor $i$ is at its high level and $0$ if low, and $\alpha_i = 1$ if factor $i$ appears in the effect to be confounded and $0$ otherwise. Runs with
+$L = 0$ go in one block and runs with $L = 1$ in the other. For $ABC$ in the $2^3$, $L = x_1 + x_2 + x_3$, which is $0$ for $(1)$, $ab$, $ac$, $bc$ and $1$ for the others,
+reproducing the blocks above. ($L$ is the parity of the number of letters a run shares with the confounded effect, and the sign of the effect column
+is $(-1)^{k_E - L}$ with $k_E$ the number of letters in $E$, so the two descriptions agree.)
+
+The block containing $(1)$ is called the \textbf{principal block}. It has a useful structure.
+
+\begin{prop}\label{prop:principal-block}
+Multiply treatment combinations by writing their letters together and deleting any squared letter (so $ab \cdot bc = ab^2c = ac$). Then the principal block
+is closed under multiplication: it is a group, with identity $(1)$. Every other block is obtained by multiplying each run of the principal block by any
+one run not in it.
+\end{prop}
+
+\begin{proof}
+In the $0/1$ coding, multiplying two runs adds their vectors modulo $2$, and $L$ is linear modulo $2$. If $L(\mathbf x) = L(\mathbf y) = 0$, then $L(\mathbf x + \mathbf y) = 0$, so the principal
+block is closed. If $\mathbf z$ has $L(\mathbf z) = 1$, then $L(\mathbf x + \mathbf z) = 1$ for every $\mathbf x$ in the principal block, and $\mathbf x \mapsto \mathbf x + \mathbf z$ is one-to-one, so it gives the whole of the
+other block.
+\end{proof}
+
+In practice one finds the principal block, then generates the others by multiplication. The run order within each block, and the assignment
+of the blocks to the physical blocks, are randomised.
+
+\subsection{Confounding in four or more blocks}
+To divide a $2^k$ design into four blocks of $2^{k-2}$ runs, choose two effects $E_1$ and $E_2$ to confound, with defining contrasts $L_1$ and $L_2$. The four
+combinations of $(L_1, L_2) = (0,0), (0,1), (1,0), (1,1)$ give the four blocks.
+
+\begin{thm}\label{thm:gen-interaction}
+When $E_1$ and $E_2$ are confounded with blocks, their \textbf{generalised interaction} $E_1E_2$, the product with squared letters deleted, is also confounded.
+In general, a $2^k$ design in $2^p$ blocks confounds $2^p - 1$ effects: $p$ chosen independent effects and all their generalised interactions. The remaining
+effects are estimable and unaffected by the blocks.
+\end{thm}
+
+\begin{proof}
+The defining contrast of $E_1E_2$ is $L_1 + L_2 \pmod 2$, since a letter appearing in both effects contributes $x_i + x_i \equiv 0$. Within each block $L_1$ and $L_2$ are
+constant, so $L_1 + L_2$ is constant too, and the column of $E_1E_2$ has the same sign throughout each block: its contrast is a contrast among block totals.
+For $2^p$ blocks the confounded effects are those whose defining contrasts are constant on blocks, which are the non-zero sums of the $p$ chosen
+contrasts, $2^p - 1$ of them. Any other effect has a column that is balanced in every block, by the argument of Proposition~\ref{prop:confound-two}.
+\end{proof}
+
+The generalised interaction is easy to overlook and can be costly. Confounding $AB$ and $AC$ in a $2^3$, for example, also confounds $AB \cdot AC = BC$: three
+two-factor interactions lost. Confounding $ABC$ and $BCD$ in a $2^4$ also confounds $AD$. The usual choice for a $2^4$ in four blocks is two three-factor
+interactions whose product is a two-factor interaction, which is the best possible: with four letters, any two effects of order $3$ or $4$ have a
+product of order $1$ or $2$.
+
+\begin{exa}\label{exa:four-blocks}
+A single replicate of a $2^4$ design is run in four blocks of four runs, with $ACD$ and $BCD$ confounded.
+
+(i) The generalised interaction is $ACD \cdot BCD = ABC^2D^2 = AB$, which is also confounded.
+
+(ii) The defining contrasts are $L_1 = x_1 + x_3 + x_4$ and $L_2 = x_2 + x_3 + x_4 \pmod 2$. The principal block, $L_1 = L_2 = 0$, contains $(1)$, and checking the other
+runs gives $\{(1), abc, abd, cd\}$; it is closed under multiplication ($abc \cdot abd = cd$). Multiplying it by $a$, $b$ and $d$, which are not in it, gives the other three
+blocks. With the observed responses,
+\begin{center}
+\begin{tabular}{c|c|c|c}
+block $1$ & block $2$ & block $3$ & block $4$ \\
+($L_1 = 0$, $L_2 = 0$) & ($L_1 = 1$, $L_2 = 0$) & ($L_1 = 0$, $L_2 = 1$) & ($L_1 = 1$, $L_2 = 1$) \\
+\hline
+$(1) = 90$ & $a = 74$ & $b = 81$ & $d = 98$ \\
+$abc = 73$ & $bc = 88$ & $ac = 81$ & $ab = 83$ \\
+$abd = 85$ & $bd = 87$ & $ad = 72$ & $c = 77$ \\
+$cd = 99$ & $acd = 79$ & $bcd = 87$ & $abcd = 80$ \\
+\hline
+total $347$ & total $328$ & total $321$ & total $338$
+\end{tabular}
+\end{center}
+
+(iii) With $ABCD$ assumed negligible, the analysis of variance has the following lines:
+\begin{center}
+\begin{tabular}{l|c}
+source & df \\
+\hline
+blocks ($AB$, $ACD$, $BCD$) & $3$ \\
+$A$, $B$, $C$, $D$ & $1$ each \\
+$AC$, $AD$, $BC$, $BD$, $CD$ & $1$ each \\
+$ABC$, $ABD$ & $1$ each \\
+error ($ABCD$) & $1$ \\
+\hline
+total & $15$
+\end{tabular}
+\end{center}
+With one degree of freedom for error the tests would have almost no power; in practice more interactions must be assumed negligible.
+
+(iv) Assume all interactions negligible. Of the $11$ interactions, three are confounded with blocks, and the other eight form the error.
+The total is $1334$ and $\sum y^2 = 112182$, so $SST = 112182 - 1334^2/16 = 959.75$. The block sum of squares is
+\[
+SS_{\mathrm{Blocks}} = \frac{347^2 + 328^2 + 321^2 + 338^2}{4} - \frac{1334^2}{16} = 97.25 ,
+\]
+which equals $SS_{AB} + SS_{ACD} + SS_{BCD} = 81.00 + 0.25 + 16.00$, as it must. The main-effect contrasts are $A$: $-80$, $B$: $-6$, $C$: $-6$, $D$: $40$, with sums of squares
+$\text{contrast}^2/16$:
+\begin{center}
+\begin{tabular}{l|c|c|c|c}
+source & SS & df & $F_0$ & $p$ \\
+\hline
+blocks & $97.25$ & $3$ & & \\
+$A$ & $400.00$ & $1$ & $8.94$ & $0.017$ \\
+$B$ & $2.25$ & $1$ & $0.05$ & $0.83$ \\
+$C$ & $2.25$ & $1$ & $0.05$ & $0.83$ \\
+$D$ & $100.00$ & $1$ & $2.23$ & $0.17$ \\
+error & $358.00$ & $8$ & & \\
+\hline
+total & $959.75$ & $15$ & &
+\end{tabular}
+\end{center}
+with $MSE = 44.75$ and $F_{0.05,1,8} = 5.32$. Only factor $A$ has a significant effect: raising it lowers the response by $10$ on average. The conclusion
+should be qualified, however. The error sum of squares is large, and the pooled interactions include $ABC$ ($SS = 144$) and $ABD$ ($SS = 90.25$), which
+are not small; the assumption that all interactions are negligible is doubtful here, and a normal plot of the effects should be examined before
+it is relied on.
+\end{exa}
+
+\begin{remark}
+When some effect must be sacrificed, the highest-order interactions are the natural choice, by the sparsity of effects principle. For $2^k$ designs in
+$2^p$ blocks, published tables of confounding schemes give the choice that keeps all the main effects, and as many two-factor
+interactions as possible, free of blocks.
+\end{remark}
+
+\subsection{Partial confounding}
+When the design is replicated, the same effect need not be confounded in every replicate. Confounding a different effect in each replicate,
+called \textbf{partial confounding}, keeps some information on every effect. The effect confounded in a replicate is estimated from the other
+replicates only. (When the same effect is confounded in every replicate, the design is \textbf{completely confounded}, and that effect cannot be
+estimated at all.)
+
+\begin{exa}\label{exa:partial}
+An experiment studied three factors $A$, $B$, $C$ at two levels each. Homogeneous blocks of eight runs were not available, so two replicates were
+run, each in two blocks of four:
+\begin{center}
+\begin{tabular}{c|c|c|c}
+\multicolumn{2}{c|}{replicate I} & \multicolumn{2}{c}{replicate II} \\
+block $1$ & block $2$ & block $3$ & block $4$ \\
+\hline
+$(1) = 5$ & $a = 21$ & $(1) = 6$ & $b = 13$ \\
+$ab = 18$ & $b = 13$ & $a = 21$ & $ab = 17$ \\
+$c = 8$ & $ac = 13$ & $bc = 6$ & $c = 8$ \\
+$abc = 18$ & $bc = 7$ & $abc = 18$ & $ac = 17$
+\end{tabular}
+\end{center}
+The total is $209$ and $SST = 482.9375$.
+
+\emph{Which effects are confounded?} In block $1$ every run has an even number of the letters $a$, $b$ (none or both), so the $AB$ column is $+$ throughout,
+and in block $2$ it is $-$ throughout: $AB$ is confounded in replicate I. In replicate II the same holds for $B$ and $C$: block $3$ has $BC = +$ throughout and
+block $4$ has $BC = -$. So $AB$ is confounded in replicate I and $BC$ in replicate II.
+
+\emph{Estimates.} $A$, $B$, $C$, $AC$ and $ABC$ are estimated from all $16$ runs, as contrasts divided by $8$. $AB$ is estimated from replicate II alone and $BC$ from
+replicate I alone, each as a contrast over eight runs divided by $4$:
+\begin{gather*}
+A = 77/8 = 9.625 , \qquad B = 11/8 = 1.375 .
+\end{gather*}
+In replicate II the runs $(1)$, $a$, $bc$, $abc$, $b$, $ab$, $c$, $ac$ have $AB$ signs $+$, $-$, $-$, $+$, $-$, $+$, $+$, $-$. In replicate I the runs
+$(1)$, $ab$, $c$, $abc$, $a$, $b$, $ac$, $bc$ have $BC$ signs $+$, $-$, $-$, $+$, $+$, $-$, $-$, $+$. So
+\begin{align*}
+\widehat{AB} &= \tfrac14(6 - 21 - 6 + 18 - 13 + 17 + 8 - 17) = -8/4 = -2.00 , \\
+\widehat{BC} &= \tfrac14(5 - 18 - 8 + 18 + 21 - 13 - 13 + 7) = -1/4 = -0.25 .
+\end{align*}
+
+\emph{Analysis of variance.} The block sum of squares, from the four block totals $49$, $54$, $51$, $55$, is $5.6875$ on $3$ degrees of freedom; it splits into
+replicates ($0.5625$, $1$ df) and blocks within replicates ($5.125$, $2$ df). Each unconfounded effect has $SS = \text{contrast}^2/16$, and each partially confounded
+effect has $SS = \text{contrast}^2/8$ from the replicate in which it is not confounded:
+\begin{center}
+\begin{tabular}{l|c|c|c|c}
+source & SS & df & $F_0$ & $p$ \\
+\hline
+blocks & $5.6875$ & $3$ & & \\
+\quad replicates & $0.5625$ & $1$ & & \\
+\quad blocks within replicates & $5.1250$ & $2$ & & \\
+$A$ & $370.5625$ & $1$ & $237.2$ & $< 0.0001$ \\
+$B$ & $7.5625$ & $1$ & $4.84$ & $0.079$ \\
+$C$ & $22.5625$ & $1$ & $14.44$ & $0.013$ \\
+$AB$ (replicate II only) & $8.0000$ & $1$ & $5.12$ & $0.073$ \\
+$AC$ & $0.5625$ & $1$ & $0.36$ & $0.57$ \\
+$BC$ (replicate I only) & $0.1250$ & $1$ & $0.08$ & $0.79$ \\
+$ABC$ & $60.0625$ & $1$ & $38.44$ & $0.002$ \\
+error & $7.8125$ & $5$ & & \\
+\hline
+total & $482.9375$ & $15$ & &
+\end{tabular}
+\end{center}
+The error is found by subtraction, with $15 - 3 - 7 = 5$ degrees of freedom, and $MSE = 1.5625$. $A$, $C$ and $ABC$ are significant at $5\%$ ($F_{0.05,1,5} = 6.61$). The
+partially confounded effects $AB$ and $BC$ are each estimated with half the information of the others: their sums of squares are based on eight
+runs, and their estimates have twice the variance, $\sigma^2/2$ against $\sigma^2/4$. The \textbf{relative information} on a partially confounded effect is the fraction of
+replicates in which it is not confounded, here $\frac12$.
+\end{exa}
+
+\subsection{Practice problems}
+
+\begin{problem}
+Define (a) the principal block, and (b) a completely confounded design.
+\end{problem}
+
+\begin{solution}
+(a) In a $2^k$ design confounded in blocks, the principal block is the block containing the treatment combination $(1)$; equivalently, the runs for
+which every defining contrast is $0$. It is closed under multiplication of treatment combinations, and the other blocks are obtained from it by
+multiplication. (b) A replicated design in which the same effect (or effects) is confounded with blocks in every replicate, so that no information
+on it is available.
+\end{solution}
+
+\begin{problem}
+A single replicate of a $2^4$ design is run in four blocks with $ABC$ and $BCD$ confounded. Write down the blocks, and find the other effect confounded
+with blocks.
+\end{problem}
+
+\begin{solution}
+The generalised interaction is $ABC \cdot BCD = AB^2C^2D = AD$, also confounded. With $L_1 = x_1 + x_2 + x_3$ and $L_2 = x_2 + x_3 + x_4 \pmod 2$, the principal block is
+$\{(1), bc, abd, acd\}$ (check: $bc \cdot abd = ab^2cd = acd$). Multiplying by $a$, by $b$ and by $d$:
+\begin{center}
+\begin{tabular}{c|c|c|c}
+block $1$ & block $2$ & block $3$ & block $4$ \\
+\hline
+$(1)$, $bc$, $abd$, $acd$ & $a$, $abc$, $bd$, $cd$ & $b$, $c$, $ad$, $abcd$ & $d$, $bcd$, $ab$, $ac$
+\end{tabular}
+\end{center}
+\end{solution}
+
+\begin{problem}
+In an agricultural experiment on three two-level factors, the eight runs were laid out in two blocks of four:
+\begin{center}
+\begin{tabular}{c|c|ccc|c}
+run & block & $A$ & $B$ & $C$ & response \\
+\hline
+$1$ & $1$ & $+$ & $+$ & $-$ & $y_1$ \\
+$2$ & $1$ & $+$ & $-$ & $+$ & $y_2$ \\
+$3$ & $1$ & $-$ & $-$ & $-$ & $y_3$ \\
+$4$ & $1$ & $-$ & $+$ & $+$ & $y_4$ \\
+$5$ & $2$ & $+$ & $-$ & $-$ & $y_5$ \\
+$6$ & $2$ & $+$ & $+$ & $+$ & $y_6$ \\
+$7$ & $2$ & $-$ & $-$ & $+$ & $y_7$ \\
+$8$ & $2$ & $-$ & $+$ & $-$ & $y_8$
+\end{tabular}
+\end{center}
+(a) Find the effect confounded with blocks. (b) Can the main effect $A$ and the interaction $BC$ be estimated? If so, give their estimates in terms of
+$y_1, \dots, y_8$. (c) A second replicate placed $\{a, bc, (1), abc\}$ in block $3$ and $\{ac, ab, c, b\}$ in block $4$. Which effect is confounded there, and which of $A$ and
+$BC$ can be estimated from blocks $3$ and $4$ alone?
+\end{problem}
+
+\begin{solution}
+(a) Block $1$ is $\{ab, ac, (1), bc\}$, the runs with an even number of letters, so the $ABC$ column is $-$ throughout block $1$ and $+$ throughout block $2$: $ABC$
+is confounded.
+
+(b) Both are estimable, since only $ABC$ is confounded. The $A$ column is $+$ for runs $1$, $2$, $5$, $6$, and the $BC$ column is $+$ for runs $3$, $4$, $5$, $6$, so
+\begin{gather*}
+\hat A = \tfrac14(y_1 + y_2 + y_5 + y_6 - y_3 - y_4 - y_7 - y_8) , \\
+\widehat{BC} = \tfrac14(y_3 + y_4 + y_5 + y_6 - y_1 - y_2 - y_7 - y_8) .
+\end{gather*}
+Each column has two $+$ signs in each block, so the block difference cancels.
+
+(c) In block $3$, the runs $a$, $bc$, $(1)$, $abc$ all have $B$ and $C$ at the same level, so the $BC$ column is $+$ throughout; in block $4$ it is $-$: $BC$ is confounded.
+From blocks $3$ and $4$ alone, $A$ is estimable (its column has two $+$ signs in each block), as $\hat A = \frac14\bigl(a + abc + ac + ab - bc - (1) - c - b\bigr)$, but $BC$ is not.
+Taken together, the two replicates partially confound $ABC$ and $BC$.
+\end{solution}
+
+\begin{problem}
+A $2^5$ design is to be run in four blocks of eight. Choose two effects to confound so that no main effect or two-factor interaction is confounded,
+and find the principal block.
+\end{problem}
+
+\begin{solution}
+Choose $ABC$ and $CDE$: their generalised interaction is $ABC^2DE = ABDE$, of order four, so the confounded effects are $ABC$, $CDE$ and $ABDE$. (Choosing,
+say, $ABCD$ and $BCDE$ would confound $AE$.) The principal block satisfies $x_1 + x_2 + x_3 \equiv 0$ and $x_3 + x_4 + x_5 \equiv 0$:
+\[
+\{(1),\ ab,\ de,\ abde,\ acd,\ ace,\ bcd,\ bce\} .
+\]
+It contains $8$ runs and is closed under multiplication, for example $acd \cdot bce = abde$.
+\end{solution}
+
+\begin{problem}
+Show that in a $2^k$ design in two blocks the sum of squares for blocks equals the sum of squares of the confounded effect.
+\end{problem}
+
+\begin{solution}
+With $N = 2^k$ runs and block totals $B_1$, $B_2$ of $N/2$ runs each, $SS_{\mathrm{Blocks}} = (B_1^2 + B_2^2)/(N/2) - (B_1 + B_2)^2/N = (B_2 - B_1)^2/N$. The contrast of the
+confounded effect is $\pm(B_2 - B_1)$, and its sum of squares is $\text{contrast}^2/N$, the same.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
