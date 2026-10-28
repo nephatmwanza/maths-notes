@@ -755,7 +755,7 @@ processes of the following sections are constructed, usually with $\mu = 0$. Its
 for a series with no structure: the sample autocorrelations are approximately $N(0, 1/n)$, as noted in
 Section~\ref{ssec:sample-acf}.
 
-\section{Random walk}
+\section{Random walk}\label{sec:random-walk}
 \subsection{Definition and properties}
 \begin{defn}
 Let $\{Z_t\}$ be a purely random process with mean $\mu$ and variance $\sigma_Z^2$. The process $\{X_t\}$ is a \textbf{random walk} if
@@ -1505,96 +1505,302 @@ $\psi_2 - 0.5\psi_1 - 0.24 = 0$, so $\psi_2 = 0.49$. Of $B^3$: $\psi_3 - 0.5\psi
 $\psi_j = 0.5\psi_{j-1} + 0.24\psi_{j-2}$, the same recursion as the ac.f.
 \end{solution}
 
-\section{Mixed Arma Models}
-The MA and AR models can be combined to obtain an ARMA model.  A mixed ARMA with p AR terms and q MA terms is an ARMA process of order $(p,q)$
-$$X_t=\alpha_1 X_{t-1}+\alpha_2 X_{t-2}+\cdots\cdots+\alpha_{p} X_{t-p}+Z_t+\beta_1 Z_{t-1}+\cdots\cdots+\beta_q Z_{t-q}$$ or\\
-$\phi(B) X_t=\theta(B) Z_t $ where $\phi(B)$ and $\theta(B)$ are polynomials of order p and q respectively and
-$$\phi(B)= 1-\alpha_1 B-\alpha_2 B^2- ------\alpha_p B^p$$
-$$\theta(B)=1+\beta_1 B+\beta_2B^2 +.........+\beta_q B^q$$
-For AR the values of $\{\alpha_i \}$ which makes the process stationary are such that the roots of $\phi(B) =0$ lie outside the unit circle.\\
-Similarly for the MA process, the values of $\{\beta_i \}$ which make the process stationary are such that the roots of $\theta(B) =0$ lie outside the unit circle.\\
-ARMA process are important in that a stationary time series may be described by an ARMA model involving few parameters than the pure MA or AR by itself.\\It is useful to express ARMA as pure MA process in the form $X_t=\psi(B) Z_t$, where $\psi(B) =\sum\psi_i \beta^i$. $\psi(B)$ is an MA operator and maybe of finite or infinite order.\\
+\section{Mixed ARMA models}\label{sec:arma}
+\subsection{Definition}
+The MA and AR models can be combined. A mixed process with $p$ AR terms and $q$ MA terms is an \textbf{ARMA process of
+order $(p, q)$}, written ARMA($p, q$):
+\[
+X_t = \alpha_1X_{t-1} + \alpha_2X_{t-2} + \dots + \alpha_pX_{t-p} + Z_t + \beta_1Z_{t-1} + \dots + \beta_qZ_{t-q} ,
+\]
+or, with the backward shift operator,
+\[
+\phi(B)X_t = \theta(B)Z_t ,
+\]
+where $\phi(B)$ and $\theta(B)$ are polynomials of order $p$ and $q$:
+\begin{align*}
+\phi(B) &= 1 - \alpha_1B - \alpha_2B^2 - \dots - \alpha_pB^p , \\
+\theta(B) &= 1 + \beta_1B + \beta_2B^2 + \dots + \beta_qB^q .
+\end{align*}
+The conditions on the two parts are those found separately in Sections~\ref{sec:ar} and~\ref{sec:invertibility}:
+\begin{itemize}
+\item the process is \emph{stationary} if the roots of $\phi(B) = 0$ lie outside the unit circle;
+\item it is \emph{invertible} if the roots of $\theta(B) = 0$ lie outside the unit circle.
+\end{itemize}
+ARMA processes are important because a stationary series can often be described by an ARMA model with fewer
+parameters than a pure MA or pure AR model would need: the principle of \textbf{parsimony}.
 
-From $\phi(B) X_t=\theta(B) Z_t$\hspace{0.2cm} we have \hspace{0.2cm}$\psi(B) =\dfrac{\theta(B)}{\phi(B)}$\hspace{0.2cm} and\hspace{0.2cm} $\pi(B) X_t=Z_t$\hspace{0.2cm} where\hspace{0.2cm} $\pi(B) =\dfrac{\phi(B)}{\theta(B)}$\\
+One condition is easily overlooked: $\phi(B)$ and $\theta(B)$ must have \emph{no common factor}. If they share a factor, it cancels
+from both sides of $\phi(B)X_t = \theta(B)Z_t$, and the process is really of lower order. For example,
+$X_t = 0.4X_{t-1} + Z_t - 0.4Z_{t-1}$ is $(1 - 0.4B)X_t = (1 - 0.4B)Z_t$, which is just $X_t = Z_t$, white noise. Fitting such an over-specified
+model gives unstable estimates, since any common factor fits equally well.
 
-That $\pi(B) =1- \sum\pi_i B^i $, since $X_t=\sum\limits^{\infty}_{i=0} \pi_i X_{t-i}+Z_t$\\
+\subsection{The $\psi$ and $\pi$ weights}
+It is useful to express an ARMA process as a pure MA process,
+\[
+X_t = \psi(B)Z_t , \qquad \psi(B) = \sum_{i=0}^\infty\psi_iB^i = \frac{\theta(B)}{\phi(B)} ,
+\]
+an MA operator that may be of finite or infinite order, and as a pure AR process,
+\[
+\pi(B)X_t = Z_t , \qquad \pi(B) = \frac{\phi(B)}{\theta(B)} = 1 - \sum_{i=1}^\infty\pi_iB^i ,
+\]
+so that
+\[
+X_t = \sum_{i=1}^\infty\pi_iX_{t-i} + Z_t .
+\]
+From $X_t = \psi(B)Z_t$ and $\pi(B)X_t = Z_t$, we have $\psi(B)\pi(B) = 1$, as it must be, since
+\[
+\frac{\theta(B)}{\phi(B)}\cdot\frac{\phi(B)}{\theta(B)} = 1 .
+\]
+The $\psi$ weights describe how a shock propagates: a shock $Z_t$ of size $1$ changes $X_{t+j}$ by $\psi_j$, so the sequence $\psi_0, \psi_1, \dots$ is the
+\emph{impulse response} of the process. The $\pi$ weights describe how the current value depends on the past.
 
+\begin{prop}\label{prop:psi-recursion}
+The $\psi$ weights satisfy $\psi_0 = 1$ and
+\[
+\psi_j = \alpha_1\psi_{j-1} + \alpha_2\psi_{j-2} + \dots + \alpha_p\psi_{j-p} + \beta_j , \qquad j \ge 1 ,
+\]
+where $\psi_i = 0$ for $i < 0$ and $\beta_j = 0$ for $j > q$.
+\end{prop}
 
-Thus from $X_t=\psi(B) Z_t$ and $\pi(B) X_t=Z_t$, we have $\psi(B)\,\cdot\,\pi(B) =1$
-$$\implies\hspace{1cm}\frac{\theta(B)}{\phi(B)}\,\cdot\,\frac{\phi(B)}{\theta(B)}=1$$
-the $\psi$ weight and $\pi$ weight maybe computed by equating the process of B in the equation $\psi(B) \phi(B) =\theta(B)$.\\\\
+\begin{proof}
+Equate coefficients of $B^j$ in $\phi(B)\psi(B) = \theta(B)$. The coefficient of $B^j$ on the left is $\psi_j - \alpha_1\psi_{j-1} - \dots - \alpha_p\psi_{j-p}$, and on the
+right it is $\beta_j$ (with $\beta_0 = 1$, giving $\psi_0 = 1$).
+\end{proof}
 
+The $\pi$ weights are found the same way from $\theta(B)\pi(B) = \phi(B)$. For $j > q$ the $\psi$ weights obey the AR recursion
+$\psi_j = \sum_i\alpha_i\psi_{j-i}$, so they die away geometrically, as an AR ac.f. does.
 
-
-
-
-
-
-
-\begin{exa}
-Find the $\psi$ and $\pi$ weights for this ARMA(1,1) given by $$X_t =0.5X_{t-1}+Z_t-0.3Z_{t-1}$$
-Here\\ $\phi(B) =1-0.5B.........(1)$\\
+\begin{exa}\label{exa:arma11-weights}
+Find the $\psi$ and $\pi$ weights for the ARMA(1,1) process $X_t = 0.5X_{t-1} + Z_t - 0.3Z_{t-1}$.
 \end{exa}
 
-$\phi(B)X_t=(1-0.5B)X_t=X_t-0.5X_t$\\
+\begin{solution}
+Here $\phi(B) = 1 - 0.5B$ and $\theta(B) = 1 - 0.3B$. The root of $\phi(B) = 0$ is $B = 1/0.5 = 2$, and that of $\theta(B) = 0$ is $B = 1/0.3 = 3.33$; both lie
+outside the unit circle, so the process is stationary and invertible. Then
+\begin{align*}
+\psi(B) &= \frac{\theta(B)}{\phi(B)} = (1 - 0.3B)(1 - 0.5B)^{-1} \\
+&= (1 - 0.3B)(1 + 0.5B + 0.5^2B^2 + 0.5^3B^3 + \dots) \\
+&= 1 + (0.5 - 0.3)B + (0.25 - 0.15)B^2 + (0.125 - 0.075)B^3 + \dots \\
+&= 1 + 0.2B + 0.1B^2 + 0.05B^3 + \dots ,
+\end{align*}
+so $\psi_i = 0.2 \times 0.5^{i-1}$ for $i = 1, 2, 3, \dots$. Similarly,
+\begin{align*}
+\pi(B) &= \frac{\phi(B)}{\theta(B)} = (1 - 0.5B)(1 + 0.3B + 0.09B^2 + \dots) \\
+&= 1 - 0.2B - 0.06B^2 - 0.018B^3 - \dots ,
+\end{align*}
+so $\pi_i = 0.2 \times 0.3^{i-1}$ for $i = 1, 2, \dots$. (Proposition~\ref{prop:psi-recursion} gives the same $\psi$'s: $\psi_1 = 0.5 - 0.3 = 0.2$, then $\psi_j = 0.5\psi_{j-1}$.)
+\end{solution}
 
-$\theta(B) =1-0.3............(2)$\\ 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\col/\num/\name/\eqn/\vals in {
+ 0/blue/1/{AR(1)}/{$\alpha = 0.5$: $\psi_j = 0.5^j$}/{1,0.5,0.25,0.125,0.0625,0.031,0.016},
+ 5.2/red/2/{MA(1)}/{$\beta = -0.3$: stops after lag 1}/{1,-0.3,0,0,0,0,0},
+ 10.4/green/3/{ARMA(1,1)}/{$\psi_j = 0.2(0.5)^{j-1}$}/{1,0.2,0.1,0.05,0.025,0.0125,0.006}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.35,-1.2) rectangle (4.75,2.3);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,1.95) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.25,1.95) {\name};
+  \draw[-Stealth,gray] (0,0) -- (4.4,0) node[below left,black,font=\scriptsize] {$j$};
+  \draw[-,gray] (0,-0.5) -- (0,1.6);
+  \foreach \v [count=\k] in \vals
+   \draw[-,very thick,\col!60!black] ({0.55*\k-0.3},0) -- ({0.55*\k-0.3},{1.4*\v});
+  \node[font=\scriptsize,text=\col!50!black] at (2.2,-0.85) {\eqn};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Impulse responses ($\psi$ weights, $j = 0, \dots, 6$): the effect of a unit shock on later values. The ARMA(1,1)
+combines a first step set by both parts with a geometric decay set by the AR part.}
+\label{fig:psi-weights}
+\end{figure}
 
-$\phi(B) =0$ and $\theta(B) =0$ have roots outside the unit circle, so the process is stationary and invertible.\\\\
+\subsection{The autocorrelation function}
+\begin{thm}\label{thm:arma11-acf}
+For the stationary ARMA(1,1) process $X_t = \alpha X_{t-1} + Z_t + \beta Z_{t-1}$,
+\begin{gather*}
+\gamma(0) = \sigma_Z^2\frac{1 + 2\alpha\beta + \beta^2}{1 - \alpha^2} , \qquad \gamma(1) = \sigma_Z^2\frac{(1 + \alpha\beta)(\alpha + \beta)}{1 - \alpha^2} , \\
+\gamma(k) = \alpha\gamma(k - 1) \quad (k \ge 2) .
+\end{gather*}
+So
+\[
+\rho(1) = \frac{(1 + \alpha\beta)(\alpha + \beta)}{1 + 2\alpha\beta + \beta^2} , \qquad \rho(k) = \alpha^{k-1}\rho(1) \quad (k \ge 1) .
+\]
+\end{thm}
 
-(1)  $\phi(B) =1-0.5B=0$\\
+\begin{proof}
+By Proposition~\ref{prop:psi-recursion}, $\psi_0 = 1$ and $\psi_j = (\alpha + \beta)\alpha^{j-1}$ for $j \ge 1$. Then, as for an MA process,
+\begin{align*}
+\gamma(0) &= \sigma_Z^2\sum_{j\ge0}\psi_j^2 = \sigma_Z^2\Bigl[1 + (\alpha + \beta)^2\sum_{j\ge1}\alpha^{2(j-1)}\Bigr] \\
+&= \sigma_Z^2\Bigl[1 + \frac{(\alpha + \beta)^2}{1 - \alpha^2}\Bigr] = \sigma_Z^2\frac{1 + 2\alpha\beta + \beta^2}{1 - \alpha^2} , \\
+\gamma(1) &= \sigma_Z^2\sum_{j\ge0}\psi_j\psi_{j+1} = \sigma_Z^2\Bigl[(\alpha + \beta) + (\alpha + \beta)^2\sum_{j\ge1}\alpha^{2j-1}\Bigr] \\
+&= \sigma_Z^2(\alpha + \beta)\Bigl[1 + \frac{\alpha(\alpha + \beta)}{1 - \alpha^2}\Bigr] ,
+\end{align*}
+and $1 - \alpha^2 + \alpha^2 + \alpha\beta = 1 + \alpha\beta$ gives the stated $\gamma(1)$. For $k \ge 2$, multiply the model by $X_{t-k}$ and take expectations: $X_{t-k}$ involves only
+shocks up to time $t - k$, so $E(X_{t-k}Z_t) = E(X_{t-k}Z_{t-1}) = 0$, leaving $\gamma(k) = \alpha\gamma(k - 1)$.
+\end{proof}
 
-$\implies B=\dfrac{1}{0.5}=2$\\
+So the ac.f. of an ARMA(1,1) starts from a value $\rho(1)$ fixed by both parameters and then decays geometrically
+at the AR rate $\alpha$. In general the ac.f. of an ARMA($p, q$) satisfies the AR Yule--Walker recursion for $k > q$, so it tails
+off like that of an AR process, after $q$ irregular starting values. Neither the ac.f. nor (as Section~\ref{sec:pacf}
+shows) the partial ac.f. cuts off, which is what makes mixed models harder to identify.
 
-$\psi(B)=\dfrac{\theta(B)}{\phi(B)}=\dfrac{1-0.3B}{1-0.5B}$\\
+\begin{exa}\label{exa:arma11-acf}
+Find the ac.f. and variance of the process of Example~\ref{exa:arma11-weights}.
+\end{exa}
 
-$\psi(B) =(1-0.3B)(1-0.5B)^{-1}$\\
+\begin{solution}
+With $\alpha = 0.5$ and $\beta = -0.3$, $1 + 2\alpha\beta + \beta^2 = 1 - 0.3 + 0.09 = 0.79$ and $(1 + \alpha\beta)(\alpha + \beta) = 0.85 \times 0.2 = 0.17$. So
+\begin{gather*}
+\gamma(0) = \frac{0.79}{0.75}\sigma_Z^2 = 1.053\sigma_Z^2 , \qquad \rho(1) = \frac{0.17}{0.79} = 0.215 , \\
+\rho(k) = 0.215(0.5)^{k-1} .
+\end{gather*}
+As a check, $\sum\psi_j^2 = 1 + 0.04/0.75 = 1.0533$. The MA term with $\beta = -0.3$ partly cancels the AR term, so $\rho(1)$ is much smaller than
+the $0.5$ of the AR(1) alone.
+\end{solution}
 
-$\psi(B)=(1-0.3B)(1+0.5B+ 0.5^2B^2 +0.5^3B^3+\cdots\cdots)$\\
+\section{Integrated ARIMA models}\label{sec:integrated}
+\subsection{Definition}
+When a process is non-stationary, the non-stationary sources of variation must be removed. A common
+approach, which goes back to Box and Jenkins, is to difference the series. If in the ARMA model
+\[
+X_t = \alpha_1X_{t-1} + \dots + \alpha_pX_{t-p} + Z_t + \beta_1Z_{t-1} + \dots + \beta_qZ_{t-q}
+\]
+$X_t$ is replaced by its $d$th difference $\nabla^dX_t$, the model is capable of describing a certain type of non-stationary
+series. Writing
+\[
+W_t = \nabla^dX_t = (1 - B)^dX_t ,
+\]
+the model is the ARMA process
+\[
+W_t = \alpha_1W_{t-1} + \dots + \alpha_pW_{t-p} + Z_t + \beta_1Z_{t-1} + \dots + \beta_qZ_{t-q} ,
+\]
+or $\phi(B)W_t = \theta(B)Z_t$,
+or, in terms of the original series,
+\[
+\phi(B)(1 - B)^dX_t = \theta(B)Z_t .
+\]
+Thus $W_t$ is a stationary ARMA($p, q$) process, while $X_t$, described through its $d$th difference, is an \textbf{autoregressive
+integrated moving average} process of order $(p, d, q)$, ARIMA($p, d, q$). The name ``integrated'' is explained by the
+case $d = 1$: then $X_t = X_0 + W_1 + W_2 + \dots + W_t$, a sum (the discrete analogue of an integral) of the stationary $W$'s.
 
-$\implies \psi(B)=1+0.2B+0.1B^2+0.005B^3+\cdots\cdots$\\ 
+The model for $X_t$ is non-stationary: its generalised AR operator $\phi(B)(1 - B)^d$ has $d$ roots \emph{on} the unit circle, at
+$B = 1$, rather than outside it. In practice $d$ is usually $1$, occasionally $2$. The second difference is
+\begin{align*}
+\nabla^2X_t &= \nabla(X_t - X_{t-1}) \\
+&= (X_t - X_{t-1}) - (X_{t-1} - X_{t-2}) \\
+&= X_t - 2X_{t-1} + X_{t-2} ,
+\end{align*}
+which is $(1 - B)^2X_t = (1 - 2B + B^2)X_t$, as the binomial expansion says. Special cases are familiar: ARIMA(0,1,0) is the
+random walk of Section~\ref{sec:random-walk}, and ARIMA(0,0,$q$) and ARIMA($p$,0,0) are the MA and AR processes.
 
-Hence $\psi_i = 0.2\times0.5^{i-1}$ for\hspace{0.3cm}$i=1,2,3\cdots\cdots\cdots$\\\\ 
+\begin{exa}\label{exa:arima110}
+Write the ARIMA(1,1,0) model $(1 - 0.6B)(1 - B)X_t = Z_t$ as a difference equation in $X_t$, and find the roots of its
+generalised AR operator. Given $x_{n-1} = 50$ and $x_n = 54$, find the value of $X_{n+1}$ if the next shock is $0$.
+\end{exa}
 
-Similarly show that(2) $\pi_i =0.2\times 0.3^{i-1}$ for $i= 1,2,\cdots\cdots$\\
+\begin{solution}
+$(1 - 0.6B)(1 - B) = 1 - 1.6B + 0.6B^2$, so
+\[
+X_t = 1.6X_{t-1} - 0.6X_{t-2} + Z_t .
+\]
+The roots of $1 - 1.6B + 0.6B^2 = 0$ are $B = 1$ and $B = 1/0.6 = 1.67$: one unit root, from the differencing, and one stationary root. As an
+AR(2) this would fail the triangle condition, since $\alpha_1 + \alpha_2 = 1.6 - 0.6 = 1$, exactly on the boundary. With $Z_{n+1} = 0$,
+$X_{n+1} = 1.6(54) - 0.6(50) = 56.4$. In terms of differences: the last change was $W_n = 4$, the next is $0.6 \times 4 = 2.4$, and $54 + 2.4 = 56.4$. The
+changes die away geometrically, but the level never returns to any fixed mean.
+\end{solution}
 
+\subsection{How much to difference}
+Differencing too little leaves a non-stationary series, recognisable by a sample ac.f. that dies away only
+very slowly. Differencing too much is also a mistake, with its own signature.
 
+\begin{thm}[Over-differencing]\label{thm:overdifference}
+\begin{enumerate}[label=(\roman*)]
+\item If $X_t = a + bt + Y_t$, where $Y_t$ is stationary, then $\nabla X_t = b + \nabla Y_t$ is stationary.
+\item If $Y_t$ is already white noise, then $\nabla Y_t = Y_t - Y_{t-1}$ is a non-invertible MA(1) process with $\beta = -1$, and $\rho(1) = -\frac12$.
+\end{enumerate}
+\end{thm}
 
+\begin{proof}
+(i) $\nabla(a + bt) = b$ (Proposition~\ref{prop:differencing}), and $\nabla Y_t = Y_t - Y_{t-1}$ is a fixed linear combination of a stationary process, so its
+mean is constant and $\Cov(\nabla Y_t, \nabla Y_{t+k}) = 2\gamma_Y(k) - \gamma_Y(k + 1) - \gamma_Y(k - 1)$ depends only on $k$.
 
+(ii) $\nabla Y_t = Y_t - Y_{t-1}$ is MA(1) with $\beta = -1$, so by Section~\ref{sec:ma}, $\rho(1) = -1/(1 + 1) = -\frac12$, the boundary value of
+Theorem~\ref{thm:ma1-bound}, and $\theta(B) = 1 - B$ has its root at $B = 1$, on the unit circle: not invertible.
+\end{proof}
 
+So if a differenced series has a sample $r_1$ close to $-0.5$, it has probably been differenced once too often. The
+practical rule is to difference until the sample ac.f. dies away reasonably quickly, and no further. (Formal
+tests for a unit root, such as the Dickey--Fuller test, are available in software.)
+
+\begin{exa}\label{exa:arima011}
+Show that the ARIMA(0,1,1) model $X_t = X_{t-1} + Z_t - 0.4Z_{t-1}$ can be written as
+\[
+X_t = \sum_{j=1}^\infty 0.6(0.4)^{j-1}X_{t-j} + Z_t ,
+\]
+so that the predictable part of $X_t$ is an exponentially weighted average of the past.
+\end{exa}
+
+\begin{solution}
+The model is $(1 - B)X_t = (1 - 0.4B)Z_t$, invertible since $|0.4| < 1$. So
+\begin{align*}
+\pi(B) &= \frac{1 - B}{1 - 0.4B} = (1 - B)(1 + 0.4B + 0.16B^2 + \dots) \\
+&= 1 - 0.6B - 0.24B^2 - 0.096B^3 - \dots ,
+\end{align*}
+and $\pi_j = 0.6(0.4)^{j-1}$: the coefficient of $B^j$ is $0.4^j - 0.4^{j-1} = -0.6(0.4)^{j-1}$. These weights are positive, decrease geometrically,
+and add to $0.6/(1 - 0.4) = 1$, so $\sum\pi_jX_{t-j}$ is a weighted average of past values, with the most recent weighted most. This is
+exactly the forecast of simple exponential smoothing with smoothing constant $0.6$ (Section~\ref{sec:forecasting}).
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:arma11-08}
+For $X_t = 0.8X_{t-1} + Z_t + 0.4Z_{t-1}$, check stationarity and invertibility, find the $\psi$ weights, and find $\rho(1)$ and $\rho(2)$.
+\end{problem}
+
+\begin{solution}
+The roots are $1/0.8 = 1.25$ for $\phi$ and $-1/0.4 = -2.5$ for $\theta$, both outside the unit circle. $\psi_j = (0.8 + 0.4)0.8^{j-1} = 1.2(0.8)^{j-1}$:
+$1.2, 0.96, 0.768, \dots$. By Theorem~\ref{thm:arma11-acf}, $\rho(1) = (1 + 0.32)(1.2)/(1 + 0.64 + 0.16) = 1.584/1.8 = 0.88$ and $\rho(2) = 0.8(0.88) = 0.704$.
+\end{solution}
+
+\begin{problem}\label{prob:redundant}
+Show that $X_t = 1.3X_{t-1} - 0.4X_{t-2} + Z_t - 0.5Z_{t-1}$ is really an AR(1) process.
+\end{problem}
+
+\begin{solution}
+$\phi(B) = 1 - 1.3B + 0.4B^2 = (1 - 0.5B)(1 - 0.8B)$ and $\theta(B) = 1 - 0.5B$. The common factor $(1 - 0.5B)$ cancels, leaving
+$(1 - 0.8B)X_t = Z_t$, an AR(1) with $\alpha = 0.8$.
+\end{solution}
+
+\begin{problem}\label{prob:arima111}
+Write the ARIMA(1,1,1) model with $\alpha = 0.5$, $\beta = 0.3$ as a difference equation in $X_t$.
+\end{problem}
+
+\begin{solution}
+$(1 - 0.5B)(1 - B)X_t = (1 + 0.3B)Z_t$, and $(1 - 0.5B)(1 - B) = 1 - 1.5B + 0.5B^2$, so $X_t = 1.5X_{t-1} - 0.5X_{t-2} + Z_t + 0.3Z_{t-1}$.
+\end{solution}
+
+\begin{problem}\label{prob:second-diff}
+The series $3, 6, 11, 18, 27$ follows a quadratic trend exactly. Find its first and second differences.
+\end{problem}
+
+\begin{solution}
+First differences: $3$, $5$, $7$, $9$, still trending. Second differences: $2$, $2$, $2$, constant. A quadratic trend needs $d = 2$
+(Proposition~\ref{prop:differencing}).
+\end{solution}
+
+\begin{problem}\label{prob:overdiff}
+After differencing a series once, the $n = 150$ differenced values have sample autocorrelations
+$r_1 = -0.48$, $r_2 = 0.03$ and $r_3 = -0.05$. What does this suggest?
+\end{problem}
+
+\begin{solution}
+The correlogram cuts off after lag $1$, with $r_1$ close to $-0.5$. This is the signature described in
+Theorem~\ref{thm:overdifference}(ii): the original series was
+probably already stationary (perhaps white noise around a constant), and the differencing was unnecessary.
+Fit a model to the undifferenced series instead.
+\end{solution}
 
 \pagebreak
-
-\section{Integrated Arma}\label{sec:integrated}
-When a process is non- stationary it is necessary to remove non-stationary sources of variation. In the process
- $$X_t + \alpha_1 X_{t-1} + \alpha_2 X_{t-2} + \cdots\cdots + \alpha_p X_{t-p} + Z_t + \beta_1 Z_{t-1} + \cdots\cdots + \beta_q Z_{t-q}$$
-$X_t$ is replaced by $\nabla^d X_t$ then the model is capable of describing a certain type of non-stationary series. This model is called an integrated model, written as $W_t= \nabla^d X_t=(1 - B)^d X_t$ then the ARMA process is of the form
- $$W_t= \alpha_1 W_{t-1} +\alpha_2 W_{t-2} +\cdots\cdots+\alpha_p W_{t-p} +Z_t +\beta_1 Z_{t-1} +\cdots\cdots+\beta_q Z_{t-q}$$
- 
-or\\ $\phi(B) W_t =\theta(B) Z_t$\\or \\ $\phi(B) (1-B)^dX_t=\theta(B) Z_t$\\
-
-Thus we have an ARMA of order $(p,q)$ for $W_t$. While the equation $$\phi(B) (1-B)^dX_t =\theta(B) Z_t$$ describes    the $d^{th}$ difference of $X_t$ it is an ARIMA process of order $(p,d,q)$. The $X_t$ model is non-stationary as the AR operator $\phi(B) (1-B)^d$ has d roots outside the unit circle. In particular the value of $d$ is 1.
- \begin{align*}
- \nabla^2 X_t &=\nabla (X_t-X_{t-1})\\
-                        &=(X_t-X_{t-1})-(X_{t-1}-X_{t-2})\\
-                        &=X_t-2X_{t-1}+X_{t-2}\\\\\
- \end{align*}
- 
- 
- 
- 
- 
-
-
-
-
-
-
-
-
-
-
-\pagebreak 
 \section{Forecasting}\label{sec:forecasting}
  Let $X_1,X_2,..............,X_n$ be an observed time series. The problem is to estimate further values $X_{t+k}$, $\hspace{0.2cm} k $is called lead time. The forecast $X_{n+k}$ at time $n$ at $k$ steps ahead can be denoted by $\widehat{x}(n,k)$. Various methods for forecasting exist. No single method is universally available.\\ Forecasting is of the form of extrapolation condition of a characteristic of a time series.\\
  
