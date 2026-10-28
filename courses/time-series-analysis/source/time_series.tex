@@ -103,210 +103,469 @@ $$\rho(\tau) = \frac{\gamma(\tau)}{\gamma(0)},
 \hrulefill
 \end{center}
 
-$Def^n$:\\
-A time series is an ordered sequence of observations.\\
-The ordering is usually in time or other dimensions e.g space.\\
-
-
-
-
-\begin{center}
-APPLICATION OF TIME SERIES
-\end{center}
-\begin{enumerate}
-
-\item \textbf{Agriculture}
-      \begin{enumerate}
-      \item Observation of annual crops production
-      \item Annual livestock
-      \item Prices of crops over time
-      \end{enumerate}
-
-\item \textbf{Business and Economics}
-      \begin{enumerate}
-      \item Annual sales of a product
-      \item Price of commodity
-      \item Price induces (inflation e.t.c)
-      \item Annual earnings at a stock exchange market
-      \item Exchange rate
-      \end{enumerate}
-      
-\item \textbf{Engineering}
-      \begin{enumerate}
-      \item Electrical signals
-      \item Voltage
-      \item Sound monitoring
-      \end{enumerate}
-      
-\item \textbf{Geophysics}
-      \begin{enumerate}
-      \item turbulence of waves (ocean)\\\\
-      \end{enumerate}
-      
-\item \textbf{Meteorology}
-      \begin{enumerate}
-      \item Sea surface temperatures
-      \item Wind speed
-      \end{enumerate}
-      
-\item \textbf{Medical Studies}
-      \begin{enumerate}
-      \item Mortality rate (Annual)
-      \item Failure rate of surgery
-      \end{enumerate}
-      
-\item \textbf{Quality Control}
-      \begin{enumerate}
-      \item Monitor a production process
-      \end{enumerate}
-      
-\item \textbf{Social Sciences}
-      \begin{enumerate}
-      \item Annual birthrate
-      \item Mortality rate
-      \item Accident rates
-      \item Crime rates\\
-      \end{enumerate}
-\end{enumerate}
-
-
-
-
-
 \section{Introduction}
+\begin{defn}
+A \textbf{time series} is an ordered sequence of observations $x_1, x_2, \dots, x_n$. The ordering is usually in
+time, but it may be in another dimension, such as distance along a line.
+\end{defn}
 
-\subsection{Types of Time Series}
+What makes a time series a subject of its own is that its observations are \emph{dependent}: this month's
+value is related to last month's. In most of statistics observations are assumed independent, and their order
+does not matter; in a time series the order is the most important thing about the data. Time series arise in
+every field:
+\begin{itemize}
+\item \textbf{Agriculture}: annual crop production, livestock numbers, crop prices.
+\item \textbf{Business and economics}: annual sales of a product, commodity prices, price indices such as
+inflation, stock-exchange earnings, exchange rates.
+\item \textbf{Engineering}: electrical signals, voltage, sound.
+\item \textbf{Geophysics}: the height of ocean waves, seismic records.
+\item \textbf{Meteorology}: sea-surface temperature, rainfall, wind speed.
+\item \textbf{Medicine}: annual mortality rates, failure rates of a surgical procedure.
+\item \textbf{Quality control}: measurements monitoring a production process.
+\item \textbf{Social sciences}: birth rates, mortality rates, accident and crime rates.
+\end{itemize}
+
+\subsection{Types of time series}
 \begin{enumerate}
-\item A time series which can be reordered continuously in time is said to be continuous e.g electrical signals and voltage.
-\item A time series taken only at specific time intervals is said to be discrete e.g interest rate, yields, value of calls e.t.c\\\\
+\item A time series recorded continuously in time is said to be \textbf{continuous}, for example an electrical
+signal or a voltage trace.
+\item A time series recorded only at specific times, usually equally spaced, is said to be \textbf{discrete}, for
+example a monthly interest rate, an annual crop yield or a daily closing price.
+\end{enumerate}
+A discrete series may arise by \emph{sampling} a continuous one at intervals (the temperature at noon each
+day) or by \emph{aggregating} over intervals (the rainfall in each month). These notes deal with discrete series
+observed at equal intervals, written $x_t$ for $t = 1, \dots, n$.
+
+\subsection{Objectives of time-series analysis}
+A major objective is to understand and describe the mechanism that generates the series. Because the
+observations are dependent, this mechanism can be exploited for:
+\begin{enumerate}
+\item \textbf{Description}: computing descriptive measures, and above all plotting the series, to characterise its
+main features.
+\item \textbf{Explanation}: when observations are taken on two or more variables, using the variation in one
+series to explain the variation in another, for example rainfall and crop yield.
+\item \textbf{Prediction}: forecasting future values from the past of the series.
+\item \textbf{Control}: adjusting a process, especially in quality control in manufacturing, so that it stays on
+target.
 \end{enumerate}
 
+\section{Descriptive techniques}
+Simple descriptive methods are the first step of any analysis. They classify the main properties of a series,
+and often suggest the model to use.
 
-
-
-
-
-
-
-\pagebreak
-\subsection{Objectives of Time Series}
-One of the major objectives of time series is to understand and describe the generating mechanism.\\
-The interesting nature of time series is that the observations are depended and correlated, thus the order of the observations is important.
-
-
-
-
+\subsection{Components of a time series}
+Traditionally a series is analysed by \emph{decomposing} it into components, each a source of variation:
 \begin{enumerate}
-\item \textbf{Description}:
-to compute descriptive majors of a time series, this helps to characterize a time series.
-\item \textbf{Explanation}: when a time series is taken on two or more variable it may be possible to use variation in one time series to explain the variation in the other series.
-\item \textbf{Prediction}: given a time series one may wish to predict the future values.
-\item \textbf{Control}: especially in quality control in a manufacturing process.\\\\
+\item \textbf{Trend}: a long-term change in the mean level.
+\item \textbf{Seasonal effects}: variation that repeats with a fixed period, usually annual, such as sales that
+rise every December.
+\item \textbf{Cyclic effects}: variation with a longer, less regular period, from some other physical or economic
+cause; business cycles, for example, often have a period of five to seven years.
+\item \textbf{Irregular fluctuations}: what is left when the trend, seasonal and cyclic variation have been
+removed. These residuals may or may not be random.
 \end{enumerate}
+The components are usually combined in one of two ways. With trend $m_t$, seasonal effect $s_t$ and irregular term
+$\varepsilon_t$:
+\[
+\text{additive:}\quad x_t = m_t + s_t + \varepsilon_t , \qquad\qquad \text{multiplicative:}\quad x_t = m_t\,s_t\,\varepsilon_t .
+\]
+In the additive model the seasonal swings have the same size whatever the level of the series; in the
+multiplicative model they grow in proportion to the level. Figure~\ref{fig:ts-components} shows how the
+components add up to a series.
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\py/\col/\num/\name in {
+ 0/4.4/blue/1/{Trend $m_t$},
+ 6.9/4.4/orange/2/{Seasonal $s_t$},
+ 0/0/gray/3/{Irregular $\varepsilon_t$},
+ 6.9/0/green/4/{Observed $x_t = m_t + s_t + \varepsilon_t$}} {
+ \begin{scope}[shift={(\px,\py)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.35,-0.45) rectangle (6.3,3.65);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,3.3) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.25,3.3) {\name};
+  \draw[-Stealth,gray] (0,0) -- (6.0,0) node[below left,black,font=\scriptsize] {$t$};
+  \draw[-Stealth,gray] (0,0) -- (0,2.9);
+  \ifnum\num=1
+   \draw[-,thick,blue!60!black] plot[domain=0.2:5.8,samples=30] (\x,{0.6+0.32*\x});
+  \fi
+  \ifnum\num=2
+   \draw[-,dashed,gray] (0.2,1.4) -- (5.8,1.4);
+   \draw[-,thick,orange!70!black] plot[domain=0.2:5.8,samples=80] (\x,{1.4+0.6*sin(\x*360/1.4)});
+  \fi
+  \ifnum\num=3
+   \draw[-,gray!60!black] plot coordinates {(0.2,1.5) (0.55,1.2) (0.9,1.7) (1.25,1.35) (1.6,1.55) (1.95,1.1) (2.3,1.6) (2.65,1.45) (3.0,1.25) (3.35,1.75) (3.7,1.4) (4.05,1.2) (4.4,1.6) (4.75,1.35) (5.1,1.5) (5.45,1.15) (5.8,1.45)};
+  \fi
+  \ifnum\num=4
+   \draw[-,thick,green!50!black] plot[domain=0.2:5.8,samples=120] (\x,{0.25+0.32*\x+0.6*sin(\x*360/1.4)+0.15*sin(\x*977)});
+   \draw[-,dashed,blue!60!black] plot[domain=0.2:5.8,samples=30] (\x,{0.25+0.32*\x});
+  \fi
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{The components of an additive time series. The observed series (panel~4) is the sum of a trend, a
+seasonal pattern and irregular fluctuations; its trend is shown dashed.}
+\label{fig:ts-components}
+\end{figure}
 
+\subsection{Plotting the series and stationarity}
+The first and most important step in any time-series analysis is to plot the observations against time. The
+plot shows the important features of the series, such as trend, seasonality, outliers and sudden changes
+(discontinuities), and it helps in formulating a sensible model.
 
+Loosely, a series is \textbf{stationary} if it has no systematic change in mean (no trend), no systematic change in
+variance, and no strictly periodic variation. Most of the theory of later sections is for stationary series, so a
+common strategy is to remove the trend and seasonal effects first and then model what is left. Stationarity is
+defined precisely in the next section.
 
-
-
-
-
-
-\subsection{Descriptive Techniques}
-These help in classifying the main properties of a time series.\\
-Traditionally time series are analyzed by first decomposition of its components, namely: trends, seasonal effects, cycling effects and irregular (or residues).\\
-These components constitute the sources of variation of a time series.
-
+\subsection{Transformations}
+A plot may suggest transforming the series, for example by taking logarithms or square roots. There are three
+main reasons:
 \begin{enumerate}
-\item \textbf{Seasonal effects}: this exhibits variation which is annual in period.
-\item \textbf{Cyclic effects}: time series may exhibit variation in a fixed period due to some other physical causes.
-may have a period variation in between 5-7 years.
-\item \textbf{Trend}: this is a long term change in mean level.
-\item \textbf{Irregular fluctuations}: after trend seasonal the cyclic variation are removed from a series. We are left with a series of residuals which may or may not be random.\\\\\\
+\item to stabilise the variance;
+\item to make the seasonal effect additive;
+\item to make the data closer to normally distributed.
 \end{enumerate}
+The logarithm does the first two jobs at once when the series is multiplicative, as the next result shows.
 
-
-
-
-
-
-
-\pagebreak
-\subsection{Stationary Time Series}
-A time series is said to be stationary if there is change in mean and no change in the variance and if strictly periodicity variations have been removed.\\
-\begin{note}
-The first and most important step in many time series is to observe what the graph may show.
-\end{note}
-\begin{enumerate}
-\item important features of a time series such as trend seasonality and out lies and discontinuities
-\item describe the data and help in formulating sensible model.\\
-\end{enumerate} 
-
-
-
-
-
-
-
-\subsection{Transformation}
-Once a time series is plotted, it may suggest transforming a series e.g taking logs, squares. There a three many reasons for doing this:
-\begin{enumerate}
-\item to make the variance stable
-\item to make the seasonal effects adjectives 
-\item to make the data normally distributed\\
+\begin{prop}\label{prop:ts-log}
+\begin{enumerate}[label=(\roman*)]
+\item If $x_t = m_t\,s_t\,\varepsilon_t$ with all factors positive, then $\log x_t = \log m_t + \log s_t + \log\varepsilon_t$, an additive model.
+\item If the standard deviation of $x_t$ is proportional to its mean $\mu_t$, say $\operatorname{sd}(x_t) = c\,\mu_t$, then approximately
+$\Var(\log x_t) \approx c^2$, which does not depend on $t$.
 \end{enumerate}
+\end{prop}
 
+\begin{proof}
+(i) is the rule $\log(abc) = \log a + \log b + \log c$. For (ii), by Taylor's theorem $\log x_t \approx \log\mu_t + (x_t - \mu_t)/\mu_t$ when $x_t$ is
+close to $\mu_t$. The right-hand side has variance $\Var(x_t)/\mu_t^2 = c^2\mu_t^2/\mu_t^2 = c^2$.
+\end{proof}
 
+So when the seasonal swings, or the scatter, of a series grow with its level, take logarithms first.
 
+\subsection{Estimating and removing the trend}
+There are two broad approaches: estimate the trend and subtract it, or remove it by differencing.
 
+\subhead{Fitting a curve}
+A simple trend can be fitted by least squares as a function of time, for example a straight line $m_t = a + bt$, a
+quadratic, or an exponential growth curve $m_t = ae^{bt}$ (linear after taking logarithms). This gives a formula,
+but it imposes one shape on the whole series.
 
+\subhead{Moving averages}
+A \textbf{moving average} smooths the series by replacing each value with an average of its neighbours. The
+simple moving average of order $2q + 1$ is
+\[
+\hat m_t = \frac{1}{2q + 1}\sum_{j=-q}^{q} x_{t+j} , \qquad t = q + 1, \dots, n - q .
+\]
 
+\begin{prop}\label{prop:ma-linear}
+A moving average $\sum_{j=-q}^{q} w_jx_{t+j}$ with weights that add to $1$ and are symmetric ($w_{-j} = w_j$) leaves a linear trend
+unchanged: if $x_t = a + bt$, then $\sum_j w_jx_{t+j} = a + bt$.
+\end{prop}
 
-\subsection{Auto correlation}
-A sample auto correlation co-efficiency are an important guide to the properties of a time series.\\
-A sample auto correlation measures the correlation between observations of different time apart.\\\\
-\begin{note}
-Since $n$ pairs of observations on $x$ and $y$ the correlation co efficient is given by
-\end{note}
+\begin{proof}
+$\sum_j w_j(a + b(t + j)) = (a + bt)\sum_j w_j + b\sum_j jw_j = a + bt + 0$, since the terms $jw_j$ and $(-j)w_{-j}$ cancel in pairs.
+\end{proof}
 
-$$r = \frac{\sum(x-\overline{x})(y-\overline{y})}{\sqrt{\sum(x-\overline{x})^2\sum(y-\overline{y})^2}}$$
+So a moving average keeps the trend while averaging out the irregular fluctuations, whose average over
+several periods is close to zero. For seasonal data, the window should cover exactly one full season, so that
+the seasonal effect is also averaged out. With quarterly data a season has $4$ observations, an even number,
+so a simple average of four would be centred between two time points. The standard remedy is the
+\textbf{centred moving average} (or $2\times4$ moving average):
+\[
+\hat m_t = \tfrac18x_{t-2} + \tfrac14x_{t-1} + \tfrac14x_t + \tfrac14x_{t+1} + \tfrac18x_{t+2} ,
+\]
+the average of the two four-term averages that straddle $t$. For monthly data the $2\times12$ average is built the
+same way, with weights $\frac{1}{24}$ at the ends and $\frac{1}{12}$ in between.
 
-Now, given n observations $x_1,x_2,.........,x_n$. We can form $n-1$ pairs of observations, $(x_1-x_2), (x_2-x_3),............., (x_{t-1}-x_t)$ and the correlation coefficient between $x_t$ and $x_{t-1}$
+\begin{prop}\label{prop:centred-ma}
+Suppose $x_t = a + bt + s_t$, where $s_t$ has period $4$ ($s_{t+4} = s_t$) and $s_1 + s_2 + s_3 + s_4 = 0$. Then the centred moving average
+gives $\hat m_t = a + bt$ exactly.
+\end{prop}
 
-$$r_1 = \frac{\sum\limits^{n-1}_{t=1}(x_t-\overline{x_1})(x_{t+1}-\overline{x_2})}{\sqrt{\sum\limits^{n-1}_{t=1}(x_t-\overline{x_1})\sum\limits^{n-1}_{t=1}(x_{t+1}-\overline{x_2})}}$$
+\begin{proof}
+The weights are symmetric and add to $\frac18 + \frac14 + \frac14 + \frac14 + \frac18 = 1$, so by Proposition~\ref{prop:ma-linear} the trend part
+passes through unchanged. The seasonal part gives $\frac18s_{t-2} + \frac14s_{t-1} + \frac14s_t + \frac14s_{t+1} + \frac18s_{t+2}$. Since $s_{t+2} = s_{t-2}$, this is
+$\frac14(s_{t-2} + s_{t-1} + s_t + s_{t+1})$, a quarter of the sum over four consecutive quarters, which is $0$.
+\end{proof}
 
-on the assumption that $\overline{x_1}=\overline{x_2}$
+\subhead{Seasonal indices}
+Once the trend has been estimated, the \emph{detrended} values $x_t - \hat m_t$ (additive model) contain the seasonal
+effect plus noise. Averaging them over all the years for each season gives the raw seasonal indices, which
+are adjusted, if necessary, to add to zero. Subtracting the indices from the data gives the \textbf{seasonally
+adjusted} series. For a multiplicative model the same steps use ratios $x_t/\hat m_t$, and the indices are adjusted to
+average $1$.
 
-$$r_1 = \frac{\sum\limits^{n-1}_{t=1}(x_t-\overline{x})(x_{t+1}-\overline{x})}{(n-1)\frac{\sum\limits^n_{t=1}(x_t-\overline{x})^2}{n}}$$
-
-for large n, we have
-
-$$r_1 = \frac{\sum\limits^{n-1}_{t=1}(x_t-\overline{x})(x_{t+1}-\overline{x})}{\sum\limits^n_{t=1}(x_t-\overline{x})^2}$$
-
-This is the formula used to compute the auto correlation coefficient.\\\\
-In the similar manner we can find the correlation between observation at distance k as
-
-$$r_k = \frac{\sum\limits^{n-k}_{t=1}(x_t-\overline{x})(x_{t+k}-\overline{x})}{\sum\limits^n_{t=1}(x_t-\overline{x})^2}$$
-
-this the auto correlation coefficient at lag k.\\\\\
-The auto correlation coefficients are usually calculated using the auto ca variance and defined as
-
-$$c_k = \frac{1}{n}\sum^{n-k}_{t=1}(x_t-\overline{x})(x_{t+1}-\overline{x})$$
-This is the auto  co variance at lag k.\\\\
-We can the compute the auto-correlation co efficiency as\\
+\begin{exa}\label{exa:quarterly}
+The quarterly sales of a shop (in thousands) over four years were:
 \begin{center}
- $r_k = \frac{c_k}{c_0} $ 
+\begin{tabular}{c|cccc}
+Year & Q1 & Q2 & Q3 & Q4 \\
+\hline
+1 & 19 & 22 & 26 & 23 \\
+2 & 22 & 26 & 30 & 26 \\
+3 & 26 & 30 & 35 & 31 \\
+4 & 31 & 36 & 40 & 35 \\
+\end{tabular}
 \end{center}
-for k = 1,2, ......,n  where k < n.\\
+Estimate the trend by a centred moving average, find the seasonal indices of an additive model, and
+seasonally adjust the series.
+\end{exa}
 
+\begin{solution}
+\emph{The trend.} The centred moving average at $t$ is the sum of the two four-quarter totals that straddle $t$,
+divided by $8$. The four-quarter totals, starting from quarters $1$--$4$, are
+\[
+90, \ 93, \ 97, \ 101, \ 104, \ 108, \ 112, \ 117, \ 122, \ 127, \ 133, \ 138, \ 142 .
+\]
+So the first centred average, at $t = 3$ (year~1, Q3), is $(90 + 93)/8 = 22.875$, the next is $(93 + 97)/8 = 23.75$, and so on:
+\begin{center}
+\begin{tabular}{ccrrr}
+$t$ & Quarter & $x_t$ & $\hat m_t$ & $x_t - \hat m_t$ \\
+\hline
+3 & Y1 Q3 & 26 & 22.875 & 3.125 \\
+4 & Y1 Q4 & 23 & 23.750 & $-0.750$ \\
+5 & Y2 Q1 & 22 & 24.750 & $-2.750$ \\
+6 & Y2 Q2 & 26 & 25.625 & 0.375 \\
+7 & Y2 Q3 & 30 & 26.500 & 3.500 \\
+8 & Y2 Q4 & 26 & 27.500 & $-1.500$ \\
+9 & Y3 Q1 & 26 & 28.625 & $-2.625$ \\
+10 & Y3 Q2 & 30 & 29.875 & 0.125 \\
+11 & Y3 Q3 & 35 & 31.125 & 3.875 \\
+12 & Y3 Q4 & 31 & 32.500 & $-1.500$ \\
+13 & Y4 Q1 & 31 & 33.875 & $-2.875$ \\
+14 & Y4 Q2 & 36 & 35.000 & 1.000 \\
+\end{tabular}
+\end{center}
+No centred average exists for the first two or last two quarters.
 
+\emph{Seasonal indices.} Averaging the detrended values quarter by quarter:
+\begin{align*}
+\text{Q1}: \ & (-2.750 - 2.625 - 2.875)/3 = -2.75 , \\
+\text{Q2}: \ & (0.375 + 0.125 + 1.000)/3 = 0.50 , \\
+\text{Q3}: \ & (3.125 + 3.500 + 3.875)/3 = 3.50 , \\
+\text{Q4}: \ & (-0.750 - 1.500 - 1.500)/3 = -1.25 .
+\end{align*}
+These add to $-2.75 + 0.50 + 3.50 - 1.25 = 0$, so no adjustment is needed. Sales are $3.5$ thousand above trend in the third
+quarter and $2.75$ thousand below it in the first.
 
+\emph{Seasonally adjusted series.} Subtracting the indices,
+\begin{center}
+\begin{tabular}{c|cccc}
+Year & Q1 & Q2 & Q3 & Q4 \\
+\hline
+1 & 21.75 & 21.50 & 22.50 & 24.25 \\
+2 & 24.75 & 25.50 & 26.50 & 27.25 \\
+3 & 28.75 & 29.50 & 31.50 & 32.25 \\
+4 & 33.75 & 35.50 & 36.50 & 36.25 \\
+\end{tabular}
+\end{center}
+The adjusted series rises steadily, by about one thousand a quarter, and shows that the jump from Q4 to Q1
+each year is not a real fall in business but the seasonal pattern. Figure~\ref{fig:quarterly} shows the data and
+the trend.
+\end{solution}
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[xscale=0.72,yscale=0.16]
+\filldraw[fill=gray!5,draw=gray!50,rounded corners=4pt] (-1.6,10.2) rectangle (18.0,46.5);
+\foreach \y in {1,...,4} \fill[blue!6] ({4*\y-3.5},15) rectangle ({4*\y-2.5},43);
+\draw[-Stealth,gray] (0,15) -- (17,15) node[right,black,font=\small] {$t$};
+\draw[-Stealth,gray] (0,15) -- (0,44) node[above,black,font=\small] {sales};
+\foreach \t in {4,8,12,16} \draw[gray] (\t,15) -- (\t,14.3) node[below,black,font=\scriptsize] {\t};
+\foreach \v in {20,30,40} \draw[gray] (0,\v) -- (-0.15,\v) node[left,black,font=\scriptsize] {\v};
+\draw[-,thick,green!50!black] plot coordinates {(1,19) (2,22) (3,26) (4,23) (5,22) (6,26) (7,30) (8,26) (9,26) (10,30) (11,35) (12,31) (13,31) (14,36) (15,40) (16,35)};
+\foreach \a/\b in {1/19,2/22,3/26,4/23,5/22,6/26,7/30,8/26,9/26,10/30,11/35,12/31,13/31,14/36,15/40,16/35}
+ \fill[green!50!black] (\a,\b) circle (0.1 and 0.45);
+\draw[-,thick,dashed,blue!60!black] plot coordinates {(3,22.875) (4,23.75) (5,24.75) (6,25.625) (7,26.5) (8,27.5) (9,28.625) (10,29.875) (11,31.125) (12,32.5) (13,33.875) (14,35)};
+\node[font=\scriptsize,text=blue!50!black,anchor=north west] at (9.5,27.5) {centred moving average};
+\node[font=\scriptsize,text=blue!40!black,anchor=south] at (8,43.2) {shaded: first quarters};
+\end{tikzpicture}
+\caption{The quarterly sales of Example~\ref{exa:quarterly} (solid) with the centred moving-average trend (dashed).
+Every first quarter (shaded) dips below the trend and every third quarter rises above it.}
+\label{fig:quarterly}
+\end{figure}
 
+\subhead{Differencing}
+Instead of estimating the trend, it can be removed by \textbf{differencing}. The difference operator is
+$\nabla x_t = x_t - x_{t-1}$, and the seasonal difference of period $s$ is $\nabla_sx_t = x_t - x_{t-s}$.
 
+\begin{prop}\label{prop:differencing}
+\begin{enumerate}[label=(\roman*)]
+\item If $m_t = a + bt$, then $\nabla m_t = b$, a constant; if $m_t$ is a quadratic in $t$, then $\nabla^2m_t = \nabla(\nabla m_t)$ is a constant.
+\item If $s_t$ has period $s$, then $\nabla_ss_t = 0$.
+\end{enumerate}
+\end{prop}
 
+\begin{proof}
+(i) $\nabla(a + bt) = (a + bt) - (a + b(t - 1)) = b$. For $m_t = a + bt + ct^2$, $\nabla m_t = b + c(2t - 1)$, which is linear in $t$, so a second difference
+gives the constant $2c$. (ii) $\nabla_ss_t = s_t - s_{t-s} = 0$ by periodicity.
+\end{proof}
 
-\pagebreak
+Differencing is the basis of the ARIMA models of later sections. For the quarterly sales, the seasonal
+differences $\nabla_4x_t$ are $3, 4, 4, 3, 4, 4, 5, 5, 5, 6, 5, 4$: the seasonal pattern has gone, and what remains varies around
+the yearly growth of about $4$ (four quarters at one thousand each).
+
+\subsection{The sample autocorrelation function}
+Sample autocorrelation coefficients are an important guide to the properties of a time series. They measure
+the correlation between observations a given time apart.
+
+Recall that for $n$ pairs of observations $(x_i, y_i)$, the correlation coefficient is
+\[
+r = \frac{\sum(x_i - \bar x)(y_i - \bar y)}{\sqrt{\sum(x_i - \bar x)^2\sum(y_i - \bar y)^2}} .
+\]
+Given $n$ observations $x_1, \dots, x_n$ of a time series, we can form the $n - 1$ pairs
+\[
+(x_1, x_2), \ (x_2, x_3), \ \dots, \ (x_{n-1}, x_n) ,
+\]
+and
+treat the first member of each pair as one variable and the second as another. Their correlation is
+\[
+r_1 = \frac{\sum_{t=1}^{n-1}(x_t - \bar x_{(1)})(x_{t+1} - \bar x_{(2)})}{\sqrt{\sum_{t=1}^{n-1}(x_t - \bar x_{(1)})^2\sum_{t=1}^{n-1}(x_{t+1} - \bar x_{(2)})^2}} ,
+\]
+where $\bar x_{(1)}$ is the mean of the first $n - 1$ observations and $\bar x_{(2)}$ the mean of the last $n - 1$. For a long series both means
+are close to the overall mean $\bar x$, and both sums of squares in the denominator are close to $\sum_{t=1}^n(x_t - \bar x)^2$. This
+gives the simpler and standard form
+\[
+r_1 = \frac{\sum_{t=1}^{n-1}(x_t - \bar x)(x_{t+1} - \bar x)}{\sum_{t=1}^{n}(x_t - \bar x)^2} ,
+\]
+the \textbf{autocorrelation coefficient} at lag $1$. Similarly, the correlation between observations a
+distance $k$ apart is the \textbf{autocorrelation coefficient at lag $k$},
+\[
+r_k = \frac{\sum_{t=1}^{n-k}(x_t - \bar x)(x_{t+k} - \bar x)}{\sum_{t=1}^{n}(x_t - \bar x)^2} .
+\]
+In practice the autocorrelations are calculated from the \textbf{sample autocovariance} at lag $k$,
+\[
+c_k = \frac1n\sum_{t=1}^{n-k}(x_t - \bar x)(x_{t+k} - \bar x) ,
+\]
+as $r_k = c_k/c_0$, for $k = 1, 2, \dots$, with $k < n$. (The divisor $n$ rather than $n - k$ is deliberate: it keeps the sequence of
+$c_k$ a valid autocovariance function, a property needed in Section~3.)
+
+\begin{prop}\label{prop:rk-bound}
+$|r_k| \le 1$ for every $k$.
+\end{prop}
+
+\begin{proof}
+Write $u_t = x_t - \bar x$. By the Cauchy--Schwarz inequality,
+\[
+\Bigl|\sum_{t=1}^{n-k}u_tu_{t+k}\Bigr| \le \sqrt{\sum_{t=1}^{n-k}u_t^2}\sqrt{\sum_{t=1}^{n-k}u_{t+k}^2} \le \sqrt{\sum_{t=1}^nu_t^2}\sqrt{\sum_{t=1}^nu_t^2} = \sum_{t=1}^nu_t^2 ,
+\]
+since each partial sum of squares is at most the full one. Dividing by $\sum u_t^2$ gives $|r_k| \le 1$.
+\end{proof}
+
+\subhead{The correlogram}
+A plot of $r_k$ against $k$ is called a \textbf{correlogram}. It is one of the most useful descriptive tools, and
+its shape is a strong clue to the nature of the series (Figure~\ref{fig:correlograms}):
+\begin{enumerate}
+\item \emph{Random series.} If the observations are independent, $r_k$ is approximately $N(0, 1/n)$ for each $k \ne 0$, so about $95\%$
+of the coefficients should lie within $\pm2/\sqrt n$. (This result is justified later, with the partial autocorrelation function.)
+\item \emph{Short-term correlation.} A fairly large $r_1$, followed by a few smaller positive coefficients that die
+away towards zero, indicates that an observation above the mean tends to be followed by a few more.
+\item \emph{Alternating series.} If successive observations tend to lie on opposite sides of the mean, the
+correlogram alternates in sign, starting with a negative $r_1$.
+\item \emph{Non-stationary series.} If the series has a trend, $r_k$ comes down only slowly and stays positive for large
+lags: the trend dominates everything else. The correlogram is then of little use except to show that the
+trend must be removed first.
+\item \emph{Seasonal series.} If the series has a seasonal pattern, the correlogram oscillates with the same period:
+for monthly data, large positive values at lags $12, 24, \dots$ and negative values around lags $6, 18, \dots$.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\col/\num/\name/\vals in {
+ 0/gray/1/{Random}/{0.08,-0.12,0.05,0.1,-0.07,0.03,-0.1,0.06},
+ 4.4/blue/2/{Short-term}/{0.65,0.4,0.22,0.12,0.05,0.02,-0.03,0.02},
+ 8.8/red/3/{Alternating}/{-0.7,0.5,-0.36,0.25,-0.18,0.12,-0.09,0.06},
+ 13.2/orange/4/{Trend}/{0.92,0.85,0.78,0.71,0.64,0.58,0.52,0.46}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.35,-1.6) rectangle (3.75,1.95);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,1.6) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.25,1.6) {\name};
+  \draw[-Stealth,gray] (0,0) -- (3.5,0) node[below left,black,font=\scriptsize] {$k$};
+  \draw[-,gray] (0,-1.25) -- (0,1.3);
+  \draw[-,dashed,gray] (0,0.3) -- (3.3,0.3);
+  \draw[-,dashed,gray] (0,-0.3) -- (3.3,-0.3);
+  \foreach \v [count=\k] in \vals
+   \draw[-,very thick,\col!60!black] ({0.38*\k},0) -- ({0.38*\k},{1.15*\v});
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Typical correlograms at lags $1$ to $8$. Dashed lines: the band $\pm2/\sqrt n$. (1) A random series stays inside
+the band. (2) Short-term correlation dies away quickly. (3) An alternating series alternates in sign. (4) A
+series with a trend gives coefficients that decline only slowly.}
+\label{fig:correlograms}
+\end{figure}
+
+\begin{exa}\label{exa:sample-acf}
+Compute $r_1$, $r_2$ and $r_3$ for the series $4, 6, 9, 7, 5, 3, 4, 6, 8, 8$.
+\end{exa}
+
+\begin{solution}
+Here $n = 10$ and $\bar x = 60/10 = 6$, so the deviations $u_t = x_t - 6$ are
+\[
+-2, \ 0, \ 3, \ 1, \ -1, \ -3, \ -2, \ 0, \ 2, \ 2 ,
+\]
+with $\sum u_t^2 = 4 + 0 + 9 + 1 + 1 + 9 + 4 + 0 + 4 + 4 = 36$. The lagged products are:
+\begin{align*}
+\text{lag } 1: \ & 0 + 0 + 3 - 1 + 3 + 6 + 0 + 0 + 4 = 15 , \\
+\text{lag } 2: \ & -6 + 0 - 3 - 3 + 2 + 0 - 4 + 0 = -14 , \\
+\text{lag } 3: \ & -2 + 0 - 9 - 2 + 0 - 6 - 4 = -23 .
+\end{align*}
+So
+\[
+r_1 = \frac{15}{36} = 0.417 , \qquad r_2 = \frac{-14}{36} = -0.389 , \qquad r_3 = \frac{-23}{36} = -0.639 .
+\]
+Equivalently, $c_0 = 36/10 = 3.6$ and $c_1 = 1.5$, giving $r_1 = 1.5/3.6$. The positive $r_1$ and the negative $r_3$ reflect the slow
+up-and-down swing in the series, with a period of about six observations: values three apart tend to lie on
+opposite sides of the mean. With only $10$ observations the band $\pm2/\sqrt{10} = \pm0.63$ is wide, and only $r_3$ reaches it.
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:ts-ma3}
+Compute the simple moving average of order $3$ for the series $5, 8, 6, 9, 7, 10, 8$, and explain why it cannot be
+computed at the first and last time points.
+\end{problem}
+
+\begin{solution}
+The averages at $t = 2, \dots, 6$ are $(5 + 8 + 6)/3 = 6.33$, $(8 + 6 + 9)/3 = 7.67$, $(6 + 9 + 7)/3 = 7.33$, $(9 + 7 + 10)/3 = 8.67$ and
+$(7 + 10 + 8)/3 = 8.33$. The series zig-zags, and the moving average smooths it into a gently rising trend. At $t = 1$ there is
+no $x_0$, and at $t = 7$ no $x_8$, so the symmetric window does not fit.
+\end{solution}
+
+\begin{problem}\label{prob:ts-multiplicative}
+Quarterly ratios $x_t/\hat m_t$ averaged over several years gave the raw multiplicative seasonal indices $0.90$, $1.05$, $1.20$,
+$0.89$. Adjust them to average $1$, and seasonally adjust a third-quarter value of $48$.
+\end{problem}
+
+\begin{solution}
+The raw indices add to $4.04$, an average of $1.01$, so divide each by $1.01$: $0.891$, $1.040$, $1.188$, $0.881$. The adjusted value
+of the third-quarter observation is $48/1.188 = 40.4$: third quarters run about $19\%$ above trend.
+\end{solution}
+
+\begin{problem}\label{prob:ts-12ma}
+Show that the $2\times12$ centred moving average has weights $\frac{1}{24}$ on $x_{t\pm6}$ and $\frac{1}{12}$ on $x_{t-5}, \dots, x_{t+5}$, and that it removes any
+seasonal pattern of period $12$ whose effects add to zero.
+\end{problem}
+
+\begin{solution}
+The two twelve-term averages straddling $t$ cover $x_{t-6}, \dots, x_{t+5}$ and $x_{t-5}, \dots, x_{t+6}$. Averaging them, $x_{t-5}, \dots, x_{t+5}$ appear in
+both, with weight $\frac12(\frac1{12} + \frac1{12}) = \frac1{12}$, and $x_{t-6}$, $x_{t+6}$ in one only, with weight $\frac1{24}$. For the seasonal part,
+$s_{t+6} = s_{t-6}$, so the weighted sum is $\frac1{12}(s_{t-6} + s_{t-5} + \dots + s_{t+5})$, a twelfth of the sum over a whole year, which is $0$.
+\end{solution}
+
+\begin{problem}\label{prob:ts-trend-acf}
+For the series $x_t = t$, $t = 1, \dots, 10$, compute $r_1$ and $r_5$, and comment.
+\end{problem}
+
+\begin{solution}
+$\bar x = 5.5$, and $u_t = t - 5.5$ runs from $-4.5$ to $4.5$ in steps of $1$, with $\sum u_t^2 = 82.5$. For lag $1$, $\sum_{t=1}^9u_tu_{t+1} = 57.75$, so
+$r_1 = 0.70$. For lag $5$, $\sum_{t=1}^5u_tu_{t+5} = (-4.5)(0.5) + (-3.5)(1.5) + (-2.5)(2.5) + (-1.5)(3.5) + (-0.5)(4.5) = -21.25$, so $r_5 = -0.258$. The
+coefficients of a short trending series fall steadily (here they turn negative because with $n = 10$ the two ends of the
+series are paired); for a long trending series they stay positive and large for many lags. Either way the
+correlogram mainly reflects the trend, which should be removed before the correlogram is interpreted.
+\end{solution}
 
 \section{Stochastic Process}
 Are random process.\\
