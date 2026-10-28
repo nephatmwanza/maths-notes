@@ -9606,14 +9606,428 @@ not the cause.
 \end{solution}
 
 \section{Measurement errors \& calibration problem}
+The regression model treats the regressors as known exactly; all the randomness is in $y$. In practice
+regressors are often measured with error: a person's usual salt intake is recorded from a single day's
+recall, a soil's nitrogen from one sample, a temperature by an imperfect instrument. This section asks
+what such errors do to least squares and how to allow for them. It then turns to a closely related
+question that runs regression backwards: \emph{calibration}, in which a fitted line is used to estimate the
+value of $x$ that produced an observed $y$.
 
+\subsection{Errors in the variables}
+Suppose the true relationship is between $y$ and a quantity $\xi$ that cannot be observed exactly:
+\[
+y_i = \beta_0 + \beta_1\xi_i + \varepsilon_i ,
+\]
+and what is observed instead of $\xi_i$ is
+\[
+x_i = \xi_i + \delta_i ,
+\]
+where the \emph{measurement error} $\delta_i$ has mean $0$ and variance $\sigma_\delta^2$, and the $\xi_i$, $\delta_i$ and $\varepsilon_i$ are all
+independent. This is the \textbf{classical measurement error} model. Errors in $y$ alone cause no new
+difficulty: a measurement error in the response simply adds to $\varepsilon$, increasing $\sigma^2$ but leaving least squares
+unbiased. Errors in $x$ are different. Substituting $\xi_i = x_i - \delta_i$,
+\[
+y_i = \beta_0 + \beta_1x_i + (\varepsilon_i - \beta_1\delta_i) ,
+\]
+so the error term now contains $\delta_i$, which is also part of $x_i$. The regressor and the error are correlated,
+$\operatorname{Cov}(x_i, \varepsilon_i - \beta_1\delta_i) = -\beta_1\sigma_\delta^2$, and one of the basic assumptions of least squares fails.
 
+\begin{thm}[Attenuation]\label{thm:attenuation}
+In the classical measurement error model, let the $\xi_i$ be independent with variance $\sigma_\xi^2$. Then as $n \to \infty$, the
+least-squares slope of $y$ on the observed $x$ converges in probability to
+\[
+\lambda\beta_1 , \qquad \lambda = \frac{\sigma_\xi^2}{\sigma_\xi^2 + \sigma_\delta^2} ,
+\]
+the \textbf{reliability ratio} of the measurement $x$. Since $0 < \lambda < 1$, the slope is biased towards zero.
+\end{thm}
 
+\begin{proof}
+$\hat\beta_1 = (S_{xy}/n)/(S_{xx}/n)$. By the law of large numbers, sample variances and covariances converge to the
+population values. The covariance of $x = \xi + \delta$ and $y = \beta_0 + \beta_1\xi + \varepsilon$ is $\beta_1\operatorname{Var}(\xi) = \beta_1\sigma_\xi^2$, since $\delta$ and $\varepsilon$ are
+independent of everything else; and $\operatorname{Var}(x) = \sigma_\xi^2 + \sigma_\delta^2$. So
+$\hat\beta_1 \to \beta_1\sigma_\xi^2/(\sigma_\xi^2 + \sigma_\delta^2)$.
+\end{proof}
 
+The effect is called \textbf{attenuation}: measurement error in $x$ spreads the points horizontally and
+flattens the fitted line, as in Figure~\ref{fig:me-types}. A reliability of $0.5$, common for single-day dietary
+measurements, halves the apparent effect. More data do not help: the estimate converges to the wrong
+value. The correlation between $x$ and $y$ is attenuated too, by the factor $\sqrt\lambda$. With several regressors the
+picture is more complicated: the coefficient of a badly measured regressor is attenuated, and its lost
+effect can be picked up by the coefficients of other regressors correlated with it, which can then be
+biased in either direction.
 
+\subhead{Correcting for attenuation}
+If $\sigma_\delta^2$ is known, or can be estimated, the moments can be corrected:
+\[
+\tilde\beta_1 = \frac{S_{xy}}{S_{xx} - (n - 1)\sigma_\delta^2} , \qquad \tilde\beta_0 = \bar y - \tilde\beta_1\bar x .
+\]
+The denominator estimates $(n - 1)\sigma_\xi^2$, so by the argument of Theorem~\ref{thm:attenuation} $\tilde\beta_1 \to \beta_1$. The measurement
+error variance usually comes from \emph{replicate measurements}: if each of $r$ units is measured twice, the
+difference $x_{i1} - x_{i2} = \delta_{i1} - \delta_{i2}$ has variance $2\sigma_\delta^2$, so half the sample variance of the differences estimates
+$\sigma_\delta^2$. The correction is unstable when $S_{xx} - (n - 1)\sigma_\delta^2$ is small, that is, when the measurement is very unreliable.
 
+\begin{exa}\label{exa:attenuation}
+In a study of $100$ adults, systolic blood pressure $y$ was regressed on salt intake $x$ (g/day) estimated from a
+single 24-hour recall. The sample variance of $x$ was $9.0$ and the sample covariance of $x$ and $y$ was $3.6$. A
+separate study in which $40$ adults gave two recalls a week apart found that the sample variance of the
+differences between their two recalls was $4.0$. Estimate the reliability of a single recall, and correct the slope.
+\end{exa}
 
+\begin{solution}
+The least-squares slope is $3.6/9.0 = 0.40$ mm Hg per g/day. From the replicates, $\hat\sigma_\delta^2 = 4.0/2 = 2.0$. So
+$\hat\sigma_\xi^2 = 9.0 - 2.0 = 7.0$, and the reliability is
+\[
+\hat\lambda = \frac{7.0}{9.0} = 0.78 .
+\]
+The corrected slope is
+\[
+\tilde\beta_1 = \frac{3.6}{9.0 - 2.0} = 0.514 = \frac{0.40}{0.78} .
+\]
+The naive analysis understates the effect of salt by more than a fifth. (Dividing the sample sums by $n - 1$
+throughout gives the same result as the formula with $S_{xx}$, $S_{xy}$ and $(n - 1)\sigma_\delta^2$.)
+\end{solution}
 
+\subhead{The Berkson model}
+Not every error in $x$ causes bias. In a controlled experiment the experimenter often sets a \emph{nominal}
+value $x_i$, a dial setting or a target dose, and the true value achieved varies around it: $\xi_i = x_i + \delta_i$, with $\delta_i$
+independent of the set value $x_i$. This is the \textbf{Berkson} model. The error is now in the true value, not in
+the recorded one.
+
+\begin{thm}\label{thm:berkson}
+In the Berkson model, with $\delta_i$ independent of $x_i$ and of $\varepsilon_i$, least squares of $y$ on the nominal $x$ is unbiased for $\beta_0$
+and $\beta_1$, and the error variance becomes $\sigma^2 + \beta_1^2\sigma_\delta^2$.
+\end{thm}
+
+\begin{proof}
+$y_i = \beta_0 + \beta_1(x_i + \delta_i) + \varepsilon_i = \beta_0 + \beta_1x_i + (\beta_1\delta_i + \varepsilon_i)$. The new error $\beta_1\delta_i + \varepsilon_i$ has mean $0$, variance
+$\beta_1^2\sigma_\delta^2 + \sigma^2$, and is independent of $x_i$, so this is an ordinary regression model with fixed $x$, and
+Theorem~\ref{thm:beta-props} applies.
+\end{proof}
+
+The difference from the classical model is which quantity varies around which. In the classical model the
+recorded $x$ is the truth plus noise, so $x$ varies more than $\xi$. In the Berkson model the truth is the recorded $x$ plus
+noise, so $\xi$ varies more than $x$, and $x$ is uncorrelated with the error.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \px/\col/\num/\name/\eqn in {
+ 0/green/1/{Error in $y$}/{unbiased; $\sigma^2$ larger},
+ 5.1/red/2/{Classical error in $x$}/{slope attenuated},
+ 10.2/blue/3/{Berkson error}/{unbiased; $\sigma^2$ larger}} {
+ \begin{scope}[shift={(\px,0)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.35,-1.0) rectangle (4.5,3.85);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,3.5) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.25,3.5) {\name};
+  \draw[-Stealth,gray] (0,0) -- (4.3,0) node[below left,black,font=\scriptsize] {$x$};
+  \draw[-Stealth,gray] (0,0) -- (0,3.1);
+  \draw[-,thick,black] (0.2,0.35) -- (4.0,2.85);
+  \ifnum\num=1
+   \foreach \a/\b in {0.6/0.9,1.1/0.75,1.6/1.4,2.1/1.3,2.6/2.05,3.1/1.9,3.6/2.75}
+    \fill[green!50!black] (\a,\b) circle (1.8pt);
+  \fi
+  \ifnum\num=2
+   \foreach \a/\b/\c in {0.6/0.61/1.2,1.1/0.94/0.5,1.6/1.27/2.3,2.1/1.60/1.5,2.6/1.93/3.3,3.1/2.26/2.4,3.6/2.59/3.2} {
+    \draw[-Stealth,red!40] (\a,\b) -- (\c,\b);
+    \fill[red!60!black] (\c,\b) circle (1.8pt);
+   }
+   \draw[-,thick,dashed,red!60!black] (0.2,0.75) -- (4.0,2.45);
+  \fi
+  \ifnum\num=3
+   \foreach \a in {1.0,2.0,3.0} {
+    \foreach \d in {-0.25,0,0.25}
+     \fill[blue!60!black] (\a,{0.35 + 0.658*(\a + \d - 0.2) + 0.08*\d}) circle (1.8pt);
+   }
+   \foreach \a in {1.0,2.0,3.0} \draw[-,gray,dashed] (\a,0) -- (\a,0.2);
+  \fi
+  \node[font=\scriptsize,text=\col!50!black] at (2.05,-0.6) {\eqn};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Three kinds of measurement error. Solid line: the true relationship. (1) Errors in $y$ scatter the
+points vertically. (2) Classical errors in $x$ move each point sideways from its true position (arrows); the
+least-squares line (dashed) is flatter. (3) Berkson errors: $x$ is set at three nominal values, and the true values
+vary around them; the points scatter about the true line.}
+\label{fig:me-types}
+\end{figure}
+
+\subhead{When both variables have error: Deming regression}
+In comparing two measurement methods, or two instruments, neither variable is the ``true'' value: both are
+measured with error. Suppose
+\[
+x_i = \xi_i + \delta_i , \qquad y_i = \beta_0 + \beta_1\xi_i + \varepsilon_i ,
+\]
+with $\operatorname{Var}(\delta_i) = \sigma_\delta^2$ and $\operatorname{Var}(\varepsilon_i) = \sigma_\varepsilon^2$, and suppose the ratio $\kappa = \sigma_\varepsilon^2/\sigma_\delta^2$ is known (for example from replicate
+measurements by each method). Treating the $\xi_i$ as unknown constants, the natural criterion weights the
+horizontal and vertical errors by their variances and minimises
+\[
+Q = \sum_{i=1}^n\Bigl[(x_i - \xi_i)^2 + \frac{(y_i - \beta_0 - \beta_1\xi_i)^2}{\kappa}\Bigr]
+\]
+over $\beta_0$, $\beta_1$ and all the $\xi_i$. Under normality this is maximum likelihood.
+
+\begin{thm}[Deming regression]\label{thm:deming}
+The minimum of $Q$ is attained at $\hat\beta_0 = \bar y - \hat\beta_1\bar x$ and
+\[
+\hat\beta_1 = \frac{S_{yy} - \kappa S_{xx} + \sqrt{(S_{yy} - \kappa S_{xx})^2 + 4\kappa S_{xy}^2}}{2S_{xy}} .
+\]
+With $\kappa = 1$ this is \textbf{orthogonal regression}, which minimises the sum of squared perpendicular distances
+from the points to the line.
+\end{thm}
+
+\begin{proof}
+For fixed $\beta_0$, $\beta_1$, each $\xi_i$ appears in one term only. Write $r_i = y_i - \beta_0 - \beta_1x_i$; with $\xi_i = x_i - h$ the term is
+$h^2 + (r_i + \beta_1h)^2/\kappa$, which is minimised at $h = -\beta_1r_i/(\kappa + \beta_1^2)$, where it equals $r_i^2/(\kappa + \beta_1^2)$ (substitute and
+simplify). So
+\[
+\min_{\xi}Q = \frac{1}{\kappa + \beta_1^2}\sum_{i=1}^n(y_i - \beta_0 - \beta_1x_i)^2 .
+\]
+For fixed $\beta_1$ this is minimised by $\beta_0 = \bar y - \beta_1\bar x$, leaving
+\[
+q(\beta_1) = \frac{S_{yy} - 2\beta_1S_{xy} + \beta_1^2S_{xx}}{\kappa + \beta_1^2} .
+\]
+Setting $q'(\beta_1) = 0$, the numerator of the derivative is
+$(-2S_{xy} + 2\beta_1S_{xx})(\kappa + \beta_1^2) - 2\beta_1(S_{yy} - 2\beta_1S_{xy} + \beta_1^2S_{xx})$, which simplifies to
+\[
+2\bigl[S_{xy}\beta_1^2 + (\kappa S_{xx} - S_{yy})\beta_1 - \kappa S_{xy}\bigr] .
+\]
+The quadratic $S_{xy}\beta_1^2 + (\kappa S_{xx} - S_{yy})\beta_1 - \kappa S_{xy} = 0$ has roots of opposite signs (their product is $-\kappa < 0$), and the root with
+the sign of $S_{xy}$, given by the formula, is the minimum; the other is a maximum of $q$. With $\kappa = 1$, the
+perpendicular distance from $(x_i, y_i)$ to the line is $|r_i|/\sqrt{1 + \beta_1^2}$, so $\min_{\xi}Q$ is the sum of squared perpendicular
+distances.
+\end{proof}
+
+As $\kappa \to \infty$ (no error in $x$), $\hat\beta_1 \to S_{xy}/S_{xx}$, the ordinary least-squares slope; as $\kappa \to 0$ (no error in $y$), it tends
+to $S_{yy}/S_{xy}$, the reciprocal of the slope of $x$ on $y$ (Problem~\ref{prob:deming-limits}). For $S_{xy} > 0$ the Deming slope lies
+between these two.
+
+\begin{exa}\label{exa:methods-compare}
+Eight blood samples were measured for glucose (mmol/l) by a laboratory analyser, $x$, and a bedside meter, $y$:
+\begin{center}
+\begin{tabular}{c|cccccccc}
+$x$ & 3.0 & 5.6 & 5.2 & 8.1 & 7.4 & 10.9 & 10.2 & 13.0 \\
+\hline
+$y$ & 4.1 & 4.0 & 6.9 & 6.5 & 9.6 & 8.8 & 12.4 & 11.9 \\
+\end{tabular}
+\end{center}
+Replicate measurements suggest that the two methods are about equally precise. Is there evidence that the
+meter reads differently from the analyser?
+\end{exa}
+
+\begin{solution}
+Here $\bar x = 7.925$, $\bar y = 8.025$, $S_{xx} = 77.175$, $S_{yy} = 72.435$ and $S_{xy} = 62.585$. The methods agree if $\beta_0 = 0$ and $\beta_1 = 1$.
+
+\emph{Ordinary least squares} of $y$ on $x$ gives slope $62.585/77.175 = 0.811$ and intercept $1.60$, suggesting that the meter
+reads high for low values and low for high ones. But the analyser's readings have errors too, so this slope is
+attenuated.
+
+\emph{Orthogonal regression} ($\kappa = 1$): $S_{yy} - S_{xx} = -4.740$, and
+\[
+\hat\beta_1 = \frac{-4.740 + \sqrt{4.740^2 + 4(62.585)^2}}{2(62.585)} = \frac{-4.740 + 125.26}{125.17} = 0.963 ,
+\]
+with $\hat\beta_0 = 8.025 - 0.963(7.925) = 0.39$. The fitted line is close to $y = x$. The slope of $x$ on $y$, inverted, gives
+$S_{yy}/S_{xy} = 1.157$, and the Deming slope lies between the two least-squares slopes, as it must. The apparent
+disagreement suggested by ordinary least squares was an artefact of treating the analyser as exact.
+\end{solution}
+
+\subsection{The calibration problem}
+In \textbf{calibration} the roles are reversed. A set of $n$ standards with accurately known values $x_1, \dots, x_n$ is
+measured by an instrument, giving readings $y_1, \dots, y_n$, and the line $\hat y = \hat\beta_0 + \hat\beta_1x$ is fitted. Then a sample with
+\emph{unknown} value $x_0$ gives a reading $y_0$ (or the mean $\bar y_0$ of $m$ readings), and the task is to estimate $x_0$. Typical
+examples: converting an absorbance into a concentration with a standard curve, or estimating age from a bone
+measurement. The \emph{classical estimator} solves the fitted equation for $x$:
+\[
+\hat x_0 = \frac{y_0 - \hat\beta_0}{\hat\beta_1} .
+\]
+It is a ratio of random quantities, and has no finite mean in general, so its standard error is approximate. An
+exact confidence interval comes from inverting a prediction interval.
+
+\begin{thm}[Calibration interval]\label{thm:calibration}
+Let $y_0$ be the mean of $m$ new readings at the unknown $x_0$, independent of the calibration data, with the
+normal-theory assumptions. Then
+\[
+T(x_0) = \frac{y_0 - \hat\beta_0 - \hat\beta_1x_0}{s\sqrt{\dfrac1m + \dfrac1n + \dfrac{(x_0 - \bar x)^2}{S_{xx}}}} \sim t_{n-2} ,
+\]
+so the set of $x_0$ with $|T(x_0)| \le t_{\alpha/2,n-2}$ is a $100(1 - \alpha)\%$ confidence set for $x_0$. If
+$g = t_{\alpha/2,n-2}^2s^2/(\hat\beta_1^2S_{xx}) < 1$, the set is the interval
+\[
+\bar x + \frac{\hat x_0 - \bar x}{1 - g} \pm \frac{t_{\alpha/2,n-2}\,s}{|\hat\beta_1|(1 - g)}\sqrt{(1 - g)\Bigl(\frac1m + \frac1n\Bigr) + \frac{(\hat x_0 - \bar x)^2}{S_{xx}}} .
+\]
+\end{thm}
+
+\begin{proof}
+At the true $x_0$, the numerator $y_0 - (\hat\beta_0 + \hat\beta_1x_0)$ is the difference between a new mean reading and the fitted line,
+which, as in Theorem~\ref{thm:prediction}, is normal with mean $0$ and variance $\sigma^2(1/m + 1/n + (x_0 - \bar x)^2/S_{xx})$, and is independent
+of $s^2$. So $T(x_0) \sim t_{n-2}$, and $P(|T(x_0)| \le t_{\alpha/2,n-2}) = 1 - \alpha$: the set of values $x_0$ for which this holds contains the true
+value with probability $1 - \alpha$.
+
+To find the set, write $u = x_0 - \bar x$, $w = \hat x_0 - \bar x$ and $c = 1/m + 1/n$, and note $y_0 - \hat\beta_0 - \hat\beta_1x_0 = \hat\beta_1(\hat x_0 - x_0) = \hat\beta_1(w - u)$.
+Squaring the condition and dividing by $\hat\beta_1^2$, with $t = t_{\alpha/2,n-2}$,
+\[
+(w - u)^2 \le \frac{t^2s^2}{\hat\beta_1^2}\Bigl(c + \frac{u^2}{S_{xx}}\Bigr) = gS_{xx}c + gu^2 ,
+\]
+that is, $(1 - g)u^2 - 2wu + w^2 - gS_{xx}c \le 0$. When $g < 1$ this quadratic in $u$ opens upwards, and the set is the interval
+between its roots,
+\[
+u = \frac{w \pm \sqrt{w^2 - (1 - g)(w^2 - gS_{xx}c)}}{1 - g} = \frac{w \pm \sqrt{g}\sqrt{w^2 + (1 - g)S_{xx}c}}{1 - g} .
+\]
+Since $\sqrt g = ts/(|\hat\beta_1|\sqrt{S_{xx}})$, the $\pm$ term is $\dfrac{ts}{|\hat\beta_1|}\sqrt{w^2/S_{xx} + (1 - g)c}$, and adding $\bar x$ gives the interval.
+\end{proof}
+
+The quantity $g$ has a simple meaning: $g = t_{\alpha/2,n-2}^2/t_0^2$, where $t_0 = \hat\beta_1/(s/\sqrt{S_{xx}})$ is the statistic for testing $\beta_1 = 0$. So
+$g < 1$ exactly when the slope is significantly different from zero. If it is not, the instrument cannot
+discriminate between values of $x$, and the confidence set is the whole line or two half-lines. A good
+calibration has $g$ very small, and then the interval is close to
+\[
+\hat x_0 \pm t_{\alpha/2,n-2}\,\frac{s}{|\hat\beta_1|}\sqrt{\frac1m + \frac1n + \frac{(\hat x_0 - \bar x)^2}{S_{xx}}} ,
+\]
+the interval from the delta method. The interval is narrowest when $\hat x_0$ is near $\bar x$, and replicating the
+reading (larger $m$) narrows it most when $1/m$ is the dominant term. Figure~\ref{fig:calibration} shows the
+construction: the interval is where the horizontal line at $y_0$ meets the prediction band.
+
+\subhead{The inverse estimator}
+An alternative is to regress $x$ on $y$ directly and predict $x_0$ from $y_0$. This \emph{inverse estimator} pulls estimates
+towards $\bar x$. It can have smaller mean squared error when $x_0$ is near the centre of the standards, but it is
+biased near the ends, and the classical estimator with the interval of Theorem~\ref{thm:calibration} is the usual
+choice. When the calibration is precise, the two agree closely.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[xscale=0.62,yscale=0.27]
+\filldraw[fill=gray!5,draw=gray!50,rounded corners=4pt] (-1.6,-4.6) rectangle (16.0,18.0);
+\draw[-Stealth,gray] (0,0) -- (15.2,0) node[below left,black,font=\small] {$x$};
+\draw[-Stealth,gray] (0,0) -- (0,15.5) node[above,black,font=\small] {$y$};
+\foreach \t in {0,5,10} \draw[gray] (\t,0) -- (\t,-0.3) node[below,black,font=\scriptsize] {\t};
+\fill[orange!15] plot[domain=0:14.5,samples=40] (\x,{1+0.8*\x+1.468*sqrt(1.125+(\x-5)^2/42)}) -- plot[domain=14.5:0,samples=40] (\x,{1+0.8*\x-1.468*sqrt(1.125+(\x-5)^2/42)}) -- cycle;
+\draw[-,orange!70!black] plot[domain=0:14.5,samples=40] (\x,{1+0.8*\x+1.468*sqrt(1.125+(\x-5)^2/42)});
+\draw[-,orange!70!black] plot[domain=0:14.5,samples=40] (\x,{1+0.8*\x-1.468*sqrt(1.125+(\x-5)^2/42)});
+\draw[-,thick,blue!60!black] (0,1) -- (14.5,12.6);
+\draw[-,dashed,red!60!black] (0,9) -- (14.5,9);
+\node[font=\scriptsize,text=red!50!black,anchor=south west] at (0.1,9) {reading $y_0 = 9$};
+\draw[-,dashed,blue!60!black] (10,9) -- (10,0);
+\fill[blue!60!black] (10,9) circle (0.12 and 0.28);
+\draw[-,dotted,red!60!black] (7.889,9) -- (7.889,0);
+\draw[-,dotted,red!60!black] (12.983,9) -- (12.983,0);
+\draw[|-|,very thick,red!60!black] (7.889,-2.2) -- (12.983,-2.2);
+\node[font=\scriptsize,text=red!50!black,anchor=north] at (10.44,-2.6) {$95\%$ interval for $x_0$};
+\node[font=\scriptsize,text=blue!50!black,anchor=south west] at (10.1,0.2) {$\hat x_0$};
+\node[font=\scriptsize,text=orange!60!black,anchor=west] at (0.4,12.2) {$95\%$ prediction band};
+\node[font=\scriptsize,text=blue!50!black,anchor=west] at (5.5,14.6) {$\hat y = 1 + 0.8x$};
+\end{tikzpicture}
+\caption{Inverting the prediction band. The horizontal line at the reading $y_0$ meets the band at the ends of the
+confidence interval for $x_0$. The interval is not symmetric about $\hat x_0$: it is longer on the side away from $\bar x$. Drawn
+for the calibration of Problem~\ref{prob:calibration-g}.}
+\label{fig:calibration}
+\end{figure}
+
+\begin{exa}\label{exa:calibration}
+To calibrate an instrument, six standard solutions of known concentration $x$, in mg/l, were measured,
+giving the scaled absorbances $y$:
+\begin{center}
+\begin{tabular}{c|cccccc}
+$x$ & 0 & 2 & 4 & 6 & 8 & 10 \\
+\hline
+$y$ & 0.6 & 2.9 & 5.3 & 7.8 & 10.0 & 12.6 \\
+\end{tabular}
+\end{center}
+A water sample gave the reading $y_0 = 7.0$. Estimate its concentration with a $95\%$ confidence interval, and
+repeat for the case in which $7.0$ is the mean of three readings.
+\end{exa}
+
+\begin{solution}
+\emph{The calibration line.} $\bar x = 5$, $S_{xx} = 70$, $\bar y = 6.533$ and $S_{xy} = 83.8$, so
+\[
+\hat\beta_1 = \frac{83.8}{70} = 1.19714 , \qquad \hat\beta_0 = 6.533 - 1.19714(5) = 0.5476 .
+\]
+The residuals are $0.052$, $-0.042$, $-0.036$, $0.070$, $-0.125$, $0.081$, so $SS_{\mathrm{Res}} = 0.03276$, $s^2 = 0.00819$ and $s = 0.0905$, on $4$
+degrees of freedom.
+
+\emph{The estimate.} $\hat x_0 = (7.0 - 0.5476)/1.19714 = 5.390$ mg/l.
+
+\emph{The interval.} With $t_{0.025,4} = 2.776$,
+\[
+g = \frac{2.776^2(0.00819)}{1.19714^2(70)} = 0.00063 ,
+\]
+tiny, as it should be for a good calibration. With $m = 1$,
+\[
+\frac{t\,s}{\hat\beta_1}\sqrt{1 + \frac16 + \frac{0.390^2}{70}} = \frac{2.776(0.0905)}{1.19714}(1.0812) = 0.227 ,
+\]
+and the interval is $5.390 \pm 0.227$, from $5.163$ to $5.617$ mg/l. The exact interval of Theorem~\ref{thm:calibration} agrees with this to three
+decimals, since $g$ is so small. With the mean of three readings, $1/m = \frac13$ replaces $1$ and the half-width falls
+to $0.149$: the interval is $(5.241, 5.539)$. Most of the uncertainty comes from the new reading, not from the
+calibration line, so replicating the reading is the effective way to improve precision. The inverse
+estimator, from regressing $x$ on $y$, gives $5.390$ as well.
+\end{solution}
+
+\subsection{Practice problems}
+\begin{problem}\label{prob:reliability}
+A regressor is measured with reliability $\lambda = 0.6$, and the least-squares slope of $y$ on the measured
+regressor is $1.5$. Estimate the slope on the true regressor. What sample size would be needed to remove the
+bias?
+\end{problem}
+
+\begin{solution}
+Dividing by the reliability, the corrected slope is $1.5/0.6 = 2.5$.
+
+No sample size removes the bias. By Theorem~\ref{thm:attenuation}, the naive slope converges to $0.6\beta_1$, not
+to $\beta_1$, so larger samples only make the wrong answer more precise. The remedy is a better
+measurement or a correction based on an estimate of $\sigma_\delta^2$.
+\end{solution}
+
+\begin{problem}\label{prob:berkson-vs-classical}
+In each case, say whether the error is classical or Berkson, and whether the least-squares slope is biased.
+\begin{enumerate}[label=(\alph*)]
+\item An oven is set to $150$, $175$ and $200\,^\circ$C, and the actual temperature fluctuates around each setting.
+\item Household income is recorded from a questionnaire, and respondents misremember their income.
+\item All workers in a room are assigned the exposure measured by a single monitor in the room's centre.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Berkson: the recorded setting is fixed, and the truth varies around it. Unbiased.
+(b) Classical: the recorded value is the truth plus error. The slope is attenuated.
+(c) Berkson: everyone in the room receives the same recorded value, and each worker's true exposure varies around
+it. Unbiased, though less precise.
+\end{solution}
+
+\begin{problem}\label{prob:deming-limits}
+Show that the Deming slope of Theorem~\ref{thm:deming} tends to $S_{xy}/S_{xx}$ as $\kappa \to \infty$, and to $S_{yy}/S_{xy}$ as $\kappa \to 0$, for $S_{xy} > 0$.
+\end{problem}
+
+\begin{solution}
+The slope is the positive root of $S_{xy}\beta^2 + (\kappa S_{xx} - S_{yy})\beta - \kappa S_{xy} = 0$. Dividing by $\kappa$ and letting $\kappa \to \infty$ leaves
+$S_{xx}\beta - S_{xy} = 0$, so $\beta \to S_{xy}/S_{xx}$. Setting $\kappa = 0$ leaves $S_{xy}\beta^2 - S_{yy}\beta = 0$, whose positive root is $S_{yy}/S_{xy}$; by
+continuity of the roots in $\kappa$, the positive root tends to it.
+\end{solution}
+
+\begin{problem}\label{prob:calibration-g}
+A calibration with $n = 8$ standards gave $\hat y = 1 + 0.8x$, with $\bar x = 5$, $S_{xx} = 42$ and $s = 0.6$. A new sample reads $y_0 = 9$.
+Find $\hat x_0$, the approximate interval, and the exact $95\%$ interval of Theorem~\ref{thm:calibration} ($t_{0.025,6} = 2.447$). Comment.
+\end{problem}
+
+\begin{solution}
+$\hat x_0 = (9 - 1)/0.8 = 10$. Then $g = 2.447^2(0.36)/(0.64 \times 42) = 0.080$, not negligible. The approximate standard error is
+\[
+\frac{0.6}{0.8}\sqrt{1 + \frac18 + \frac{25}{42}} = 0.75(1.312) = 0.984 ,
+\]
+giving $10 \pm 2.447(0.984)$, from $7.59$ to $12.41$. The exact interval has centre $5 + 5/0.920 = 10.436$ and half-width
+\[
+\frac{2.447(0.6)}{0.8(0.920)}\sqrt{0.920(1.125) + \frac{25}{42}} = 1.996(1.276) = 2.547 ,
+\]
+so it runs from $7.89$ to $12.98$. It is shifted away from $\bar x$ and is not symmetric about $\hat x_0$, because the band
+widens as $x$ moves away from $\bar x$ (Figure~\ref{fig:calibration}). The symmetric approximation is poor here because $\hat x_0$ is far
+from the centre of the standards and the line is not very precise.
+\end{solution}
+
+\begin{problem}\label{prob:replicates}
+Two measurements of a regressor were taken on each of five units: $(10, 12)$, $(15, 14)$, $(8, 9)$, $(20, 17)$, $(12, 12)$.
+Estimate the measurement error variance $\sigma_\delta^2$.
+\end{problem}
+
+\begin{solution}
+The differences are $-2$, $1$, $-1$, $3$, $0$, with mean $0.2$ and sample variance
+$[(-2.2)^2 + 0.8^2 + (-1.2)^2 + 2.8^2 + (-0.2)^2]/4 = 14.8/4 = 3.7$. Since a difference has variance $2\sigma_\delta^2$,
+$\hat\sigma_\delta^2 = 3.7/2 = 1.85$.
+\end{solution}
 
 \section*{References}
 \addcontentsline{toc}{section}{References}
