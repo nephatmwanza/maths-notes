@@ -894,113 +894,282 @@ function is not an ac.f., even though the $3 \times 3$ and $4 \times 4$ checks p
 general; for this shape of function, the exact condition is $|\rho(1)| \le \frac12$, and $0.6$ exceeds it.
 \end{solution}
 
-\section{Moving Average (Ma)}\label{sec:ma}
-Let $\{Z_t\}$ be a purely random process with mean $\mu = 0$ and variance $\sigma^2$. Then $\{X_t\}$ is a moving average process of order q written as
-$$X_t = \beta_0Z_t + \beta_1Z_{t-1} + \beta_2Z_{t-2} + ............... + \beta_qZ_{t-q}$$
-where $\{\beta_{j's}\}$ are constants. We normally assume $\beta_0 = 1$\\\\
+\section{Moving average processes}\label{sec:ma}
+\subsection{Definition and moments}
+\begin{defn}
+Let $\{Z_t\}$ be a purely random process with mean $0$ and variance $\sigma_Z^2$. The process $\{X_t\}$ is a \textbf{moving average
+process of order $q$}, written MA($q$), if
+\[
+X_t = \beta_0Z_t + \beta_1Z_{t-1} + \beta_2Z_{t-2} + \dots + \beta_qZ_{t-q} ,
+\]
+where the $\beta_j$ are constants. We normally take $\beta_0 = 1$ (this fixes the scale of $Z_t$).
+\end{defn}
 
-We write MA(q) to denote Moving Average of order q.\\
-$E(X_t) = 0$\hspace{0.2cm}   since \hspace{0.2cm}$E(\beta_0Z_t) + E(\beta_1Z_{t-2}) + ......+ E(\beta_qZ_{t-q}) = 0 + 0 + \cdots+ 0$\\
-$var(X_t) = \sum\limits^2_Z\sum\limits^q_{j=0}\beta^2_j$\\
+Each $X_t$ is a weighted sum of the current shock and the $q$ previous ones, so a shock affects the series for
+$q + 1$ periods and then is forgotten. If the series has mean $\mu$, the model is $X_t = \mu + \beta_0Z_t + \dots + \beta_qZ_{t-q}$, which has the
+same autocovariances.
 
-Since $Z_{t's}$ are independent
+\begin{thm}\label{thm:ma-acv}
+The MA($q$) process has mean $0$ and autocovariance function
+\[
+\gamma(k) = \begin{cases} \sigma_Z^2\displaystyle\sum_{i=0}^{q-k}\beta_i\beta_{i+k} , & k = 0, 1, \dots, q , \\[2ex] 0 , & k > q , \end{cases}
+\qquad \gamma(-k) = \gamma(k) .
+\]
+In particular $\Var(X_t) = \sigma_Z^2\sum_{i=0}^q\beta_i^2$. So the process is second-order stationary for every choice of the $\beta_i$, and its
+ac.f. is
+\[
+\rho(k) = \frac{\sum_{i=0}^{q-k}\beta_i\beta_{i+k}}{\sum_{i=0}^q\beta_i^2} \quad (k = 1, \dots, q) , \qquad \rho(k) = 0 \quad (k > q) .
+\]
+\end{thm}
+
+\begin{proof}
+$E(X_t) = \sum_i\beta_iE(Z_{t-i}) = 0$. For $k \ge 0$, since $X_t = \sum_i\beta_iZ_{t-i}$ and $X_{t+k} = \sum_j\beta_jZ_{t+k-j}$, covariance is
+bilinear and
+\[
+\Cov(X_t, X_{t+k}) = \sum_{i=0}^q\sum_{j=0}^q\beta_i\beta_j\Cov(Z_{t-i}, Z_{t+k-j}) .
+\]
+Since $\Cov(Z_s, Z_u) = \sigma_Z^2$ if $s = u$ and $0$ otherwise, only the terms with $t - i = t + k - j$, that is $j = i + k$, survive. Such a $j$ lies in
+$0, \dots, q$ only when $i \le q - k$, which gives the sum; if $k > q$ there are no such terms. Neither the mean nor $\gamma(k)$ depends on
+$t$, so the process is stationary, and evenness is Theorem~\ref{thm:acf-properties}(ii).
+\end{proof}
+
+The key feature is that the ac.f. of an MA($q$) process \emph{cuts off} after lag $q$: it is exactly zero beyond. Two
+observations more than $q$ apart share no shock. A sample correlogram that is clearly non-zero up to some lag
+and negligible afterwards therefore suggests a moving average model of that order.
+
+\begin{exa}\label{exa:ma2}
+Find the ac.f. of the MA(2) process $X_t = Z_t + 0.5Z_{t-1} - 0.3Z_{t-2}$.
+\end{exa}
+
+\begin{solution}
+Here $\beta_0 = 1$, $\beta_1 = 0.5$, $\beta_2 = -0.3$. By Theorem~\ref{thm:ma-acv},
 \begin{align*}
-\varphi(k) &= Cov(X_t,X_{t+k})\\
-           &= Cov(\beta_0Z_t + \beta_1Z_{t-1} +\cdots\cdots+ \beta_qZ_{t-q},\beta_0Z_{t+k} + \beta_1Z_{t+k-1} +\cdots\cdots+ \beta_qZ_{t+k-q})\\
-\end{align*}           
-\[\implies\hspace{0.6cm}\varphi(k) =
-\begin{cases}
-0, &k>q\\\\
-\sigma^2_Z\sum\limits^{q-k}_{i=0}\beta_i\beta_{i+k}, &k = 0, 1, 2,\cdots\cdots, q\\\\
-\varphi(-k),& k<0.\\
-\end{cases} 
-\]\\ 
+\gamma(0) &= \sigma_Z^2(1 + 0.25 + 0.09) = 1.34\sigma_Z^2 , \\
+\gamma(1) &= \sigma_Z^2(\beta_0\beta_1 + \beta_1\beta_2) = \sigma_Z^2(0.5 - 0.15) = 0.35\sigma_Z^2 , \\
+\gamma(2) &= \sigma_Z^2\beta_0\beta_2 = -0.3\sigma_Z^2 ,
+\end{align*}
+and $\gamma(k) = 0$ for $k \ge 3$. So $\rho(1) = 0.35/1.34 = 0.261$, $\rho(2) = -0.3/1.34 = -0.224$, and $\rho(k) = 0$ for $k \ge 3$.
+\end{solution}
 
- 
-\[\text{Since}\hspace{1cm} Cov(Z_s,Z_t) =
-\begin{cases}
-\sigma^2_Z, &s=t\\
-0, &s\neq t\\
-\end{cases}
-\]\\
+\subsection{The first-order moving average}
+The simplest case is the MA(1) process $X_t = Z_t + \beta Z_{t-1}$, for which Theorem~\ref{thm:ma-acv} gives $\gamma(0) = (1 + \beta^2)\sigma_Z^2$,
+$\gamma(1) = \beta\sigma_Z^2$, and
+\[
+\rho(k) = \begin{cases} 1 , & k = 0 , \\ \dfrac{\beta}{1 + \beta^2} , & k = \pm1 , \\ 0 , & |k| \ge 2 . \end{cases}
+\]
+With $\beta > 0$ neighbouring values tend to be alike; with $\beta < 0$ they tend to alternate (Figure~\ref{fig:ma1}).
 
-As $\varphi(k)$ does not depend on t and the mean is constant, the process is second order stationary for all values $\{\beta_i\}$.\\\\
-ac.f of MA(q) is
-\[ \rho(\mu) =
-\begin{cases}
-1, &k = 0\\\\
-\dfrac{\sum\limits^{q-k}_{i=0}\beta_i\beta_{i+k}}{\sum\limits^q_{i=0}\beta^2_i}, &k = 1, \cdots\cdots, q\\\\
-\rho(-k), &k<0
-\end{cases}
-\]\\
+\begin{thm}\label{thm:ma1-bound}
+\begin{enumerate}[label=(\roman*)]
+\item For the MA(1) process, $|\rho(1)| \le \frac12$, with equality only when $\beta = \pm1$.
+\item Conversely, a function with $\rho(0) = 1$, $\rho(\pm1) = r$ and $\rho(k) = 0$ for $|k| \ge 2$ is the ac.f. of a stationary process if and only if
+$|r| \le \frac12$.
+\end{enumerate}
+\end{thm}
 
-In particular the MA(1) with $\beta_0 = 1$ is $X_t = Z_t + \beta_1Z_{t-1}$. We have that
-\[ \rho(k) = 
-\begin{cases}
-1, &k = 0\\
-\dfrac{\beta_1}{1 + \beta^2_1}, &k = 1, 2,\cdots\cdots, q\\
-0, & \text{otherwise}
-\end{cases}
-\]\\\\\\
+\begin{proof}
+(i) $1 + \beta^2 - 2|\beta| = (1 - |\beta|)^2 \ge 0$, so $|\beta| \le \frac12(1 + \beta^2)$ and $|\rho(1)| = |\beta|/(1 + \beta^2) \le \frac12$, with equality exactly when $|\beta| = 1$.
 
+(ii) If $|r| \le \frac12$ and $r \ne 0$, the equation $\beta/(1 + \beta^2) = r$, that is $r\beta^2 - \beta + r = 0$, has the real root
+$\beta = (1 - \sqrt{1 - 4r^2})/(2r)$, since $1 - 4r^2 \ge 0$; the MA(1) process with this $\beta$ has the required ac.f. (For $r = 0$, take white
+noise.) Conversely, suppose the function is an ac.f. By Theorem~\ref{thm:acf-properties}(iv), for any $n$ and weights $a_1, \dots, a_n$,
+\[
+0 \le \sum_i\sum_ja_ia_j\rho(i - j) = \sum_ia_i^2 + 2r\sum_{i=1}^{n-1}a_ia_{i+1} .
+\]
+Taking $a_i = (-1)^i$ gives $0 \le n - 2r(n - 1)$, so $r \le \frac{n}{2(n - 1)}$ for every $n$, and letting $n \to \infty$, $r \le \frac12$. Taking all $a_i = 1$ gives
+$0 \le n + 2r(n - 1)$, and in the same way $r \ge -\frac12$.
+\end{proof}
 
+So no MA(1) process, and indeed no process whose correlations stop after lag~1, can have a lag-one
+autocorrelation above $\frac12$ in size. This explains Example~\ref{exa:not-acf} and Problem~\ref{prob:ts-not-acf}: there $\rho(1) = 0.8$ and
+$0.6$, both too large.
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\foreach \py/\col/\num/\bb/\sgn/\pts in {
+ 3.8/blue/1/{0.8}/{1}/{(0.17,-0.37) (0.34,-0.65) (0.51,-0.09) (0.68,-0.36) (0.85,-0.23) (1.02,-0.88) (1.19,-0.74) (1.36,-0.42) (1.53,1.05) (1.70,1.15) (1.87,-0.07) (2.04,-0.23) (2.21,-0.36) (2.38,-0.64) (2.55,-0.49) (2.72,0.07) (2.89,0.06) (3.06,0.31) (3.23,0.23) (3.40,-0.05) (3.57,0.63) (3.74,0.71) (3.91,-0.03) (4.08,-0.23) (4.25,0.16) (4.42,0.95) (4.59,0.51) (4.76,-0.18) (4.93,0.32) (5.10,-0.03)},
+ 0/red/2/{-0.8}/{-1}/{(0.17,-1.68) (0.34,0.99) (0.51,-0.36) (0.68,0.00) (0.85,0.06) (1.02,-0.74) (1.19,0.55) (1.36,-0.27) (1.53,1.61) (1.70,-0.97) (1.87,-0.21) (2.04,0.00) (2.21,-0.18) (2.38,-0.21) (2.55,0.18) (2.72,0.32) (2.89,-0.25) (3.06,0.46) (3.23,-0.39) (3.40,0.07) (3.57,0.61) (3.74,-0.28) (3.91,-0.38) (4.08,0.09) (4.25,0.27) (4.42,0.60) (4.59,-0.73) (4.76,-0.01) (4.93,0.48) (5.10,-0.68)}} {
+ \begin{scope}[shift={(0,\py)}]
+  \filldraw[fill=\col!8,draw=\col!60!black,rounded corners=6pt] (-0.35,-1.6) rectangle (10.1,1.9);
+  \node[circle,fill=\col!60!black,text=white,inner sep=1.5pt,font=\footnotesize\bfseries] at (0,1.55) {\num};
+  \node[anchor=west,font=\small\bfseries,text=\col!50!black] at (0.25,1.55) {MA(1) with $\beta = \bb$};
+  \draw[-Stealth,gray] (0,0) -- (5.5,0) node[below left,black,font=\scriptsize] {$t$};
+  \begin{scope}[yscale=0.62]\draw[-,\col!60!black] plot coordinates {\pts};\end{scope}
+  \draw[-Stealth,gray] (6.4,0) -- (9.8,0) node[below left,black,font=\scriptsize] {$k$};
+  \draw[-,gray] (6.4,-1.2) -- (6.4,1.2);
+  \node[font=\scriptsize,anchor=east] at (6.4,1.0) {$1$};
+  \draw[-,very thick,\col!60!black] (6.4,0) -- (6.4,1.0);
+  \draw[-,very thick,\col!60!black] (6.9,0) -- (6.9,{\sgn*0.488});
+  \foreach \k in {2,...,6} \fill[\col!60!black] ({6.4+0.5*\k},0) circle (1.2pt);
+  \node[font=\scriptsize,text=\col!50!black,anchor=west] at (7.1,{\sgn*0.75}) {$\rho(1) = \bb/1.64$};
+ \end{scope}
+}
+\end{tikzpicture}
+\caption{Realisations of two MA(1) processes driven by the same white noise, with their ac.f.s. (1) $\beta = 0.8$:
+neighbours alike, $\rho(1) = 0.49$. (2) $\beta = -0.8$: neighbours tend to alternate, $\rho(1) = -0.49$. In both, $\rho(k) = 0$ for $k \ge 2$.}
+\label{fig:ma1}
+\end{figure}
 
+\begin{exa}\label{exa:ma1-moments}
+A stationary series appears to follow an MA(1) model, and its sample lag-one autocorrelation is $r_1 = 0.4$. Estimate
+$\beta$ by equating $\rho(1)$ to $r_1$.
+\end{exa}
 
+\begin{solution}
+Solve $\beta/(1 + \beta^2) = 0.4$, that is $0.4\beta^2 - \beta + 0.4 = 0$:
+\[
+\beta = \frac{1 \pm \sqrt{1 - 4(0.16)}}{0.8} = \frac{1 \pm 0.6}{0.8} , \qquad \beta = 0.5 \ \text{ or } \ \beta = 2 .
+\]
+Both values give $\rho(1) = 0.4$: $0.5/1.25 = 0.4$ and $2/5 = 0.4$. The data cannot distinguish them, because the two
+models have exactly the same ac.f. The next section explains which one to choose: $\hat\beta = 0.5$.
+\end{solution}
 
-
-
-
-\pagebreak
 \section{Invertibility}\label{sec:invertibility}
-This imposes restrictions on the $\{\beta_i\}$ to ensure that the process satisfies the invertibility conditions.\\
+\subsection{The identification problem}
+Example~\ref{exa:ma1-moments} is an instance of a general fact. Consider the two MA(1) processes
+\[
+\text{A}: \ X_t = Z_t + \beta Z_{t-1} , \qquad\qquad \text{B}: \ X_t = Z_t + \frac1\beta Z_{t-1} .
+\]
+They have the same ac.f., since
+\[
+\frac{1/\beta}{1 + 1/\beta^2} = \frac{\beta}{\beta^2 + 1} .
+\]
+Thus a moving average process cannot be identified uniquely from its ac.f. To choose between A and B,
+express each shock in terms of the observations. From A, $Z_t = X_t - \beta Z_{t-1}$, and substituting repeatedly for the
+earlier $Z$'s,
+\[
+\text{A}: \ Z_t = X_t - \beta X_{t-1} + \beta^2X_{t-2} - \beta^3X_{t-3} + \dots ,
+\]
+and similarly
+\[
+\text{B}: \ Z_t = X_t - \frac1\beta X_{t-1} + \frac1{\beta^2}X_{t-2} - \frac1{\beta^3}X_{t-3} + \dots .
+\]
+If $|\beta| < 1$ the series for A converges, while that for B diverges, since its weights grow. So if $|\beta| < 1$, model A is
+\emph{invertible} and model B is not. Imposing invertibility ensures that there is a unique MA process for a
+given ac.f.
 
-Consider the first order MA(1)
-$$\text{A}: X_t = Z_t + \theta Z_{t-1}$$
-$$\text{B}: X_t = Z_t + \frac{1}{\theta} Z_{t-1}$$
-these functions have the same auto correlation function. Thus we can't classify many MA uniquely from a given auto correlation function.\\
+\begin{defn}
+A process $\{X_t\}$ is \textbf{invertible} if each shock $Z_t$ can be written as a convergent weighted
+sum of the present and past observations, $Z_t = \sum_{j=0}^\infty\pi_jX_{t-j}$ with $\sum_j|\pi_j| < \infty$.
+\end{defn}
 
+\begin{prop}\label{prop:ma1-invert}
+If $|\beta| < 1$, the MA(1) process $X_t = Z_t + \beta Z_{t-1}$ is invertible: with $S_n = \sum_{j=0}^n(-\beta)^jX_{t-j}$,
+\[
+E\bigl[(Z_t - S_n)^2\bigr] = \beta^{2(n+1)}\sigma_Z^2 \to 0 \quad\text{as } n \to \infty .
+\]
+\end{prop}
 
-We express A and B in terms of $X_t$ and $X_{t-1}$
-$$\text{A}: Z_t = X_t - \theta X_{t-1} + \theta^2 X_{t-2}$$
-$$\text{B}: Z_t = X_t - \frac{1}{\theta} X_{t-1} + \frac{1}{\theta^2} X_{t-2}$$
-If $|\theta| < 1$ the process A converges while the series B diverges.\\
-Thus, if $|\theta| < 1$ the model A is convertible while B is not.\\
-The impression of the invertibility condition ensures that there is a unique process for a given auto correlation.\\
-To compute the invertibility condition for MA. We express it by the use of the backward shift given by\\
+\begin{proof}
+Substituting $X_{t-j} = Z_{t-j} + \beta Z_{t-j-1}$, the sum telescopes:
+\[
+S_n = \sum_{j=0}^n(-\beta)^jZ_{t-j} + \sum_{j=0}^n(-\beta)^j\beta Z_{t-j-1} = Z_t - (-\beta)^{n+1}Z_{t-n-1} ,
+\]
+because the second sum is minus the first sum without its $j = 0$ term, plus the extra term $-(-\beta)^{n+1}Z_{t-n-1}$. So $Z_t - S_n = (-\beta)^{n+1}Z_{t-n-1}$, whose
+mean square is $\beta^{2(n+1)}\sigma_Z^2$, which tends to $0$ when $|\beta| < 1$. The weights $\pi_j = (-\beta)^j$ have $\sum|\beta|^j = 1/(1 - |\beta|) < \infty$.
+\end{proof}
 
-$\beta^j X_t = X_{t-j},    \hspace{1cm}\forall j$\\
+\subsection{The backward shift operator}
+The invertibility condition for a general MA($q$) is stated with the \textbf{backward shift operator} $B$, defined by
+\[
+BX_t = X_{t-1} , \qquad B^jX_t = X_{t-j} \quad\text{for all } j .
+\]
+So $B^2X_t = X_{t-2}$, and the MA($q$) process can be written
+\[
+X_t = (\beta_0 + \beta_1B + \beta_2B^2 + \dots + \beta_qB^q)Z_t = \theta(B)Z_t ,
+\]
+where $\theta(B) = \beta_0 + \beta_1B + \dots + \beta_qB^q$ is a polynomial of order $q$ in $B$. Operators like this can be added, multiplied and
+factorised like ordinary polynomials.
 
-$\beta^2 X_t = X_{t-2}$, $\hspace{1cm}\beta X_t = X_{t-1}$\\
+\begin{thm}\label{thm:ma-invertible}
+The MA($q$) process $X_t = \theta(B)Z_t$ is invertible if all the roots of the equation
+\[
+\theta(B) = \beta_0 + \beta_1B + \beta_2B^2 + \dots + \beta_qB^q = 0
+\]
+lie outside the unit circle, that is, have modulus greater than $1$.
+\end{thm}
 
-Thus $\hspace{0.2cm} X_t = \beta_0Z_t + \beta_1Z_{t-1} + \cdots\cdots+ \beta_qZ_{t-q}\hspace{0.2cm}$ can be written as
-\begin{align*}
-X_t &= (\beta_0 + \beta_1B + \beta_2B^2 + \cdots\cdots + \beta_qB^q)Z_t\\        
-    &= \theta(B)Z_t\\
-\end{align*}   
+\begin{proof}
+Let $r_1, \dots, r_q$ be the roots, possibly complex. With $\beta_0 = 1$, $\theta(B) = (1 - B/r_1)(1 - B/r_2)\cdots(1 - B/r_q)$, since both sides are
+polynomials of degree $q$ with the same roots and the same constant term $1$. For each factor, $|1/r_j| < 1$, so as in
+Proposition~\ref{prop:ma1-invert} (with $\beta = -1/r_j$), $(1 - B/r_j)^{-1} = \sum_{m=0}^\infty(B/r_j)^m$ is an operator with absolutely summable weights.
+Applying the $q$ inverses in turn to $X_t = \theta(B)Z_t$ gives $Z_t = \pi(B)X_t$, where $\pi(B)$, a product of $q$ series with absolutely
+summable weights, again has absolutely summable weights.
+\end{proof}
 
- 
-Where $\theta(B)$ is a polynomial of order q in B.\\
-An MA(q) is invertible if the roots of the equation $\theta(B) = 0$\\
-i.e $\hspace{0.2cm}\beta_0 + \beta_1B + \beta_2B^2 + .......... + \beta_qB_q = 0$ \hspace{0.2cm},\hspace{0.2cm} lie outside a unit circle.\\\\
+For the MA(1), $\theta(B) = 1 + \beta B$, with the root $B = -1/\beta$, which lies outside the unit circle exactly when $|\beta| < 1$, in
+agreement with Proposition~\ref{prop:ma1-invert}. Invertibility matters for two reasons: it makes the model unique for
+a given ac.f., and it allows the past shocks to be recovered from the data, which is how forecasts are
+computed (Section~\ref{sec:forecasting}).
 
+\begin{exa}\label{exa:ma2-invert}
+Determine whether each MA(2) process is invertible:
+\begin{enumerate}[label=(\alph*)]
+\item $X_t = Z_t - 1.3Z_{t-1} + 0.4Z_{t-2}$;
+\item $X_t = Z_t + 2.5Z_{t-1} + Z_{t-2}$.
+\end{enumerate}
+For any that is not, find an invertible MA(2) process with the same autocovariance function.
+\end{exa}
 
+\begin{solution}
+(a) $\theta(B) = 1 - 1.3B + 0.4B^2 = (1 - 0.5B)(1 - 0.8B)$, with roots $B = 2$ and $B = 1.25$. Both exceed $1$ in modulus, so the process is
+invertible.
 
+(b) $\theta(B) = 1 + 2.5B + B^2 = (1 + 0.5B)(1 + 2B)$, with roots $B = -2$ and $B = -0.5$. The second lies inside the unit circle, so
+the process is not invertible.
 
-\vspace{3cm}
+To find an equivalent invertible process, replace the offending factor $(1 + 2B)$ by $(1 + 0.5B)$, its root reflected
+from $-0.5$ to $-2$, and multiply the noise variance by $2^2 = 4$, as in the MA(1) case. The candidate is
+\[
+X_t = (1 + 0.5B)^2Z_t^* = Z_t^* + Z_{t-1}^* + 0.25Z_{t-2}^* , \qquad \Var(Z_t^*) = 4\sigma_Z^2 .
+\]
+Check with Theorem~\ref{thm:ma-acv}. The original has $\gamma(0) = (1 + 6.25 + 1)\sigma_Z^2 = 8.25\sigma_Z^2$, $\gamma(1) = (2.5 + 2.5)\sigma_Z^2 = 5\sigma_Z^2$,
+$\gamma(2) = \sigma_Z^2$. The new one has $\gamma(0) = 4\sigma_Z^2(1 + 1 + 0.0625) = 8.25\sigma_Z^2$, $\gamma(1) = 4\sigma_Z^2(1 + 0.25) = 5\sigma_Z^2$, $\gamma(2) = 4\sigma_Z^2(0.25) = \sigma_Z^2$. The
+autocovariances agree, and both roots of $(1 + 0.5B)^2$ equal $-2$, outside the unit circle.
+\end{solution}
 
-EXAMPLE:\\
-MA(1) , $\hspace{0.2cm} X_t = Z_t + \theta Z_{t-1}= (1 + \theta B)Z_t$ or $\theta(B) = 1 + \theta B$\\ 
-The roots of $\theta (B) = 0$ are $B = \dfrac{-1}{\theta}$\hspace{0.2cm},\hspace{0.2cm}
-the root is outside the unit circle provided $|\theta| < 1$.\\
+\subsection{Practice problems}
+\begin{problem}\label{prob:ma2-acf}
+For $X_t = Z_t + 0.6Z_{t-1} + 0.2Z_{t-2}$, find the ac.f. and decide whether the process is invertible.
+\end{problem}
 
+\begin{solution}
+$\gamma(0) = (1 + 0.36 + 0.04)\sigma_Z^2 = 1.40\sigma_Z^2$, $\gamma(1) = (0.6 + 0.6 \times 0.2)\sigma_Z^2 = 0.72\sigma_Z^2$, $\gamma(2) = 0.2\sigma_Z^2$. So $\rho(1) = 0.514$, $\rho(2) = 0.143$,
+and $\rho(k) = 0$ for $k \ge 3$. The equation $1 + 0.6B + 0.2B^2 = 0$ has discriminant $0.36 - 0.8 < 0$, so its roots are complex conjugates;
+their product is $1/0.2 = 5$, so each has modulus $\sqrt5 > 1$. The process is invertible.
+\end{solution}
 
+\begin{problem}\label{prob:ma1-negative}
+A series believed to be MA(1) has $r_1 = -0.3$. Find the two values of $\beta$ that match it, and say which should be used.
+\end{problem}
 
+\begin{solution}
+$-0.3\beta^2 - \beta - 0.3 = 0$ gives $\beta = (1 \pm \sqrt{1 - 0.36})/(-0.6) = (1 \pm 0.8)/(-0.6)$, so $\beta = -\frac13$ or $\beta = -3$. They are
+reciprocals, as they must be. Use the invertible value $\hat\beta = -0.333$.
+\end{solution}
 
+\begin{problem}\label{prob:ma1-flip}
+Find the invertible MA(1) process with the same autocovariance function as $X_t = Z_t + 4Z_{t-1}$, $\Var(Z_t) = 1$.
+\end{problem}
 
+\begin{solution}
+The original has $\gamma(0) = 1 + 16 = 17$ and $\gamma(1) = 4$. The candidate $X_t = Z_t^* + 0.25Z_{t-1}^*$ with $\Var(Z_t^*) = 16$ has
+$\gamma(0) = 16(1 + 0.0625) = 17$ and $\gamma(1) = 16(0.25) = 4$. They agree, and $|0.25| < 1$.
+\end{solution}
+
+\begin{problem}\label{prob:ma-cutoff}
+A sample correlogram from $n = 200$ observations has $r_1 = 0.45$, $r_2 = 0.31$, and $|r_k| < 0.1$ for $3 \le k \le 20$. Which MA order does this
+suggest, and why could the model not be MA(1)?
+\end{problem}
+
+\begin{solution}
+The band $\pm2/\sqrt{200} = \pm0.14$ contains every $r_k$ from lag $3$ on, while $r_1$ and $r_2$ lie well outside it: the correlogram cuts off after
+lag~$2$, suggesting MA(2). An MA(1) would need $\rho(2) = 0$, but $r_2 = 0.31$ is more than twice the band. (By itself, $r_1 = 0.45$ would be possible for
+an MA(1), since it is below $\frac12$.)
+\end{solution}
 
 \pagebreak
-
 
 \section{Autoregressive Process}
 Let $\{Z_t\}$ be a process with mean zero and variance $\sigma^2_Z$. Then $\{X_t\}$ is said to be an AR of order p or AR(p) if $X_t = \alpha_1 X_{t-1} + \alpha_2 X_{t-2} + \cdots\cdots + \alpha_p X_{t-p} + Z_t$\\
@@ -1280,7 +1449,7 @@ Thus we have an ARMA of order $(p,q)$ for $W_t$. While the equation $$\phi(B) (1
 
 
 \pagebreak 
-\section{Forecasting}
+\section{Forecasting}\label{sec:forecasting}
  Let $X_1,X_2,..............,X_n$ be an observed time series. The problem is to estimate further values $X_{t+k}$, $\hspace{0.2cm} k $is called lead time. The forecast $X_{n+k}$ at time $n$ at $k$ steps ahead can be denoted by $\widehat{x}(n,k)$. Various methods for forecasting exist. No single method is universally available.\\ Forecasting is of the form of extrapolation condition of a characteristic of a time series.\\
  
  
