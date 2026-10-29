@@ -1262,8 +1262,8 @@ y_{ij} = \mu + \tau_i + \varepsilon_{ij} ,
 where $\mu$ is an overall mean and $\tau_i$ is the \textbf{effect} of treatment $i$, its deviation from the overall mean.
 \end{enumerate}
 In both, the errors $\varepsilon_{ij}$ are independent $N(0, \sigma^2)$, and the treatment effects are \textbf{fixed}: the $t$ treatments are the only ones of interest,
-and conclusions are about them alone. (Treatments chosen at random from a larger population lead to the random effects model of a later
-section.)
+and conclusions are about them alone. (Treatments chosen at random from a larger population lead to the random effects model of
+Section~\ref{sec:random}.)
 \end{defn}
 
 The two models describe the same means, $\mu_i = \mu + \tau_i$, but the effects model has $t + 1$ parameters for $t$ means. In matrix form its design
@@ -4662,6 +4662,719 @@ main effects free of two-factor interactions, and identify the resulting design.
 The first fraction estimates $A + BC$, the second $A - BC$ (Theorem~\ref{thm:aliases}). So $\frac12(l_A + l_A')$ estimates $A$ and $\frac12(l_A - l_A')$ estimates $BC$, and similarly for
 the others. For three factors the alternate fraction is also the full fold-over (reversing all three signs maps $a$ to $bc$, and so on), and the two
 fractions together form the full $2^3$ design, in which nothing is aliased.
+\end{solution}
+
+\section{Fixed, random and mixed effects}\label{sec:random}
+Every model so far has treated the levels of each factor as \emph{fixed}: chosen deliberately, the only ones of interest, and the subject of all
+conclusions. Often the levels are instead a sample from a larger population: batches of raw material, operators, machines, days, locations. Nobody
+wants to know whether batch $3$ was better than batch $5$, since neither will be used again; the question is how much batches vary. Such a factor is
+\textbf{random}, its effects are random variables, and the parameters of interest are variances. This section develops the analysis of random and
+mixed models for balanced data.
+
+\subsection{Fixed and random factors}
+\begin{defn}
+A factor is \textbf{fixed} if its levels are chosen deliberately and inference concerns those levels only. It is \textbf{random} if its levels are a random
+sample from a population of possible levels and inference concerns the population. A model whose factors are all fixed is a \textbf{fixed effects
+model}, one whose factors are all random is a \textbf{random effects model} (or variance components model), and one with both kinds is a \textbf{mixed
+model}.
+\end{defn}
+
+The difference is in the question asked, not the arithmetic. In a fixed effects model the effects $\tau_1, \dots, \tau_t$ are unknown constants with
+$\sum\tau_i = 0$, the hypothesis is $\tau_1 = \dots = \tau_t = 0$, and the conclusions apply only to the $t$ levels studied; a repeat of the experiment would use the
+same levels. In a random effects model the effects are independent draws from a distribution, usually $N(0, \sigma^2_\tau)$, the hypothesis is $\sigma^2_\tau = 0$, and
+the conclusions apply to every level in the population, including the ones not in the experiment; a repeat would draw new levels
+(Figure~\ref{fig:fixed-random}). Two practical tests help to decide: \emph{would a repeat of the experiment use the same levels?} and \emph{does anyone care
+about the effect of a particular level?} If the answers are no, the factor is random.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.95]
+% fixed panel
+\fill[blue!6,rounded corners] (0,0) rectangle (5.6,4.6); \draw[blue!50,rounded corners] (0,0) rectangle (5.6,4.6);
+\node[font=\bfseries,blue!70!black] at (2.8,4.15) {Fixed factor};
+\node[font=\small] at (2.8,3.45) {every level of interest};
+\node[font=\small] at (2.8,3.0) {is in the experiment};
+\foreach \i in {1,2,3,4} {
+\fill[blue!25,rounded corners=2pt] ({0.2+1.32*(\i-1)},1.75) rectangle ({1.2+1.32*(\i-1)},2.35);
+\node[font=\small] at ({0.7+1.32*(\i-1)},2.05) {Op \i};}
+\draw[blue!50] (0.4,1.35) -- (5.2,1.35);
+\node[font=\small] at (2.8,0.95) {parameters $\tau_1, \dots, \tau_a$, $\sum\tau_i = 0$};
+\node[font=\small] at (2.8,0.45) {conclusions about \emph{these} levels};
+% random panel
+\begin{scope}[xshift=6.2cm]
+\fill[orange!6,rounded corners] (0,0) rectangle (5.6,4.6); \draw[orange!60,rounded corners] (0,0) rectangle (5.6,4.6);
+\node[font=\bfseries,orange!80!black] at (2.8,4.15) {Random factor};
+\draw[gray] (0.5,2.75) -- (5.1,2.75);
+\fill[orange!25] plot[domain=-2.4:2.4,samples=50] ({2.8+0.95*\x},{2.75+0.95*exp(-\x*\x/2)}) -- cycle;
+\draw[orange!80!black,thick] plot[domain=-2.4:2.4,samples=50] ({2.8+0.95*\x},{2.75+0.95*exp(-\x*\x/2)});
+\node[font=\small,anchor=west] at (3.75,3.5) {$N(0, \sigma^2_\beta)$};
+\foreach \u/\bx/\k in {-1.1/1.0/1,0.3/2.8/2,0.95/4.6/3} {
+\fill[orange!80!black] ({2.8+0.95*\u},2.75) circle (2pt);
+\draw[->,orange!80!black] ({2.8+0.95*\u},2.68) -- (\bx,2.38);
+\fill[orange!25,rounded corners=2pt] ({\bx-0.6},1.75) rectangle ({\bx+0.6},2.35);
+\node[font=\small] at (\bx,2.05) {Filter \k};}
+\draw[orange!60] (0.4,1.35) -- (5.2,1.35);
+\node[font=\small] at (2.8,0.95) {levels sampled; parameter $\sigma^2_\beta$};
+\node[font=\small] at (2.8,0.45) {conclusions about the \emph{population}};
+\end{scope}
+\end{tikzpicture}
+\caption{A fixed factor and a random factor. The four operators are all the operators there are; the three filters are a sample from many types, and
+what the experiment estimates is the spread $\sigma^2_\beta$ of the population they came from.}
+\label{fig:fixed-random}
+\end{figure}
+
+\subsection{The one-way random effects model}
+\begin{defn}
+In the \textbf{one-way random effects model}
+\[
+y_{ij} = \mu + \tau_i + \varepsilon_{ij} , \qquad i = 1, \dots, t , \quad j = 1, \dots, r ,
+\]
+$\mu$ is a constant, the $\tau_i$ are independent $N(0, \sigma^2_\tau)$, the $\varepsilon_{ij}$ are independent $N(0, \sigma^2)$, and the $\tau_i$ are independent of the $\varepsilon_{ij}$. The
+parameters $\sigma^2_\tau$ and $\sigma^2$ are the \textbf{variance components}.
+\end{defn}
+
+The model has a consequence that the fixed effects model does not: observations on the same level are correlated. Indeed
+\begin{gather*}
+\Var(y_{ij}) = \sigma^2_\tau + \sigma^2 , \qquad \Cov(y_{ij}, y_{ij'}) = \Var(\tau_i) = \sigma^2_\tau \quad (j \ne j') , \\
+\Cov(y_{ij}, y_{i'j'}) = 0 \quad (i \ne i') ,
+\end{gather*}
+so two observations on the same level have correlation
+\[
+\rho = \frac{\sigma^2_\tau}{\sigma^2_\tau + \sigma^2} ,
+\]
+the \textbf{intraclass correlation}. It is also the fraction of the variance of a single observation that is due to the factor.
+
+The sums of squares are computed exactly as in the fixed effects case: $SST = SS_{\mathrm{Treatments}} + SSE$, with $N = tr$ observations. What changes is their
+expectations.
+
+\begin{thm}\label{thm:oneway-random}
+In the one-way random effects model,
+\[
+E(MS_{\mathrm{Treatments}}) = \sigma^2 + r\sigma^2_\tau , \qquad E(MSE) = \sigma^2 .
+\]
+Moreover $SSE/\sigma^2 \sim \chi^2_{N-t}$ and $SS_{\mathrm{Treatments}}/(\sigma^2 + r\sigma^2_\tau) \sim \chi^2_{t-1}$, and the two are independent.
+\end{thm}
+
+\begin{proof}
+The expectations follow from the computing formulas. Since $y_{i\cdot} = r\mu + r\tau_i + \varepsilon_{i\cdot}$ and $y_{\cdot\cdot} = N\mu + r\sum_i\tau_i + \varepsilon_{\cdot\cdot}$, with all terms independent and the random
+ones of mean zero,
+\begin{align*}
+E(y_{ij}^2) &= \mu^2 + \sigma^2_\tau + \sigma^2 , \\
+E(y_{i\cdot}^2) &= r^2\mu^2 + r^2\sigma^2_\tau + r\sigma^2 , \\
+E(y_{\cdot\cdot}^2) &= N^2\mu^2 + r^2t\sigma^2_\tau + N\sigma^2 .
+\end{align*}
+Hence
+\begin{align*}
+E(SS_{\mathrm{Treatments}}) &= \sum_{i=1}^t\frac{E(y_{i\cdot}^2)}r - \frac{E(y_{\cdot\cdot}^2)}N \\
+&= (N\mu^2 + N\sigma^2_\tau + t\sigma^2) - (N\mu^2 + r\sigma^2_\tau + \sigma^2) \\
+&= (t - 1)(\sigma^2 + r\sigma^2_\tau) ,
+\end{align*}
+using $N = tr$, and
+\begin{align*}
+E(SSE) &= \sum_i\sum_jE(y_{ij}^2) - \sum_i\frac{E(y_{i\cdot}^2)}r \\
+&= (N\mu^2 + N\sigma^2_\tau + N\sigma^2) - (N\mu^2 + N\sigma^2_\tau + t\sigma^2) = (N - t)\sigma^2 .
+\end{align*}
+Dividing by the degrees of freedom gives the expected mean squares.
+
+For the distributions, note first that $y_{ij} - \bar y_{i\cdot} = \varepsilon_{ij} - \bar\varepsilon_{i\cdot}$ does not involve $\tau_i$. For each $i$, $\sum_j(\varepsilon_{ij} - \bar\varepsilon_{i\cdot})^2/\sigma^2 \sim \chi^2_{r-1}$ and is
+independent of $\bar\varepsilon_{i\cdot}$, the sample variance and mean of a normal sample being independent. Summing over the independent levels,
+$SSE/\sigma^2 \sim \chi^2_{t(r-1)}$, and $SSE$ is independent of $(\tau_1, \bar\varepsilon_{1\cdot}, \dots, \tau_t, \bar\varepsilon_{t\cdot})$. Next, the level means
+\[
+\bar y_{i\cdot} = \mu + \tau_i + \bar\varepsilon_{i\cdot}
+\]
+are independent $N(\mu, \sigma^2_\tau + \sigma^2/r)$, so their sample variance satisfies $\sum_i(\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2/(\sigma^2_\tau + \sigma^2/r) \sim \chi^2_{t-1}$. Multiplying numerator and
+denominator by $r$ gives the distribution of $SS_{\mathrm{Treatments}}$, which is a function of the $\tau_i$ and $\bar\varepsilon_{i\cdot}$ and so independent of $SSE$.
+\end{proof}
+
+\subhead{The test}
+The hypothesis that the factor contributes no variability is $H_0 : \sigma^2_\tau = 0$, against $H_1 : \sigma^2_\tau > 0$. By the theorem, with $\theta = \sigma^2_\tau/\sigma^2$,
+\[
+\frac{F_0}{1 + r\theta} \sim F_{t-1, N-t} , \qquad F_0 = \frac{MS_{\mathrm{Treatments}}}{MSE} .
+\]
+Under $H_0$ this is the usual $F$ statistic, so the test is computed exactly as for fixed effects: reject when $F_0 > F_{\alpha, t-1, N-t}$. The power is different,
+and simpler: under the alternative the statistic is a multiple of a \emph{central} $F$, so
+\[
+\text{power} = P\bigl(F_{t-1, N-t} > F_{\alpha, t-1, N-t}/(1 + r\theta)\bigr) ,
+\]
+with no noncentrality parameter needed.
+
+\subhead{Estimating the variance components}
+Equating the mean squares to their expectations gives the \textbf{analysis of variance estimators}
+\[
+\hat\sigma^2 = MSE , \qquad \hat\sigma^2_\tau = \frac{MS_{\mathrm{Treatments}} - MSE}r .
+\]
+Both are unbiased, and for balanced data under normality they have minimum variance among all unbiased estimators. But $\hat\sigma^2_\tau$ is negative
+whenever $F_0 < 1$, which by the pivot above has probability
+\[
+P\bigl(F_{t-1, N-t} < 1/(1 + r\theta)\bigr) ,
+\]
+more than one half when $\sigma^2_\tau = 0$. A negative estimate is not an arithmetic error. It is evidence that $\sigma^2_\tau$ is small, and the usual practice is to report
+$\hat\sigma^2_\tau = 0$ (which makes the estimator biased) and to check that the model is right. The restricted maximum likelihood (REML) estimator, which
+is the standard method for unbalanced data, agrees with the analysis of variance estimator for balanced data whenever the latter is non-negative, and
+otherwise sets $\hat\sigma^2_\tau = 0$.
+
+\subhead{Confidence intervals}
+Three intervals are exact. Since $SSE/\sigma^2 \sim \chi^2_{N-t}$,
+\[
+\frac{SSE}{\chi^2_{\alpha/2, N-t}} \le \sigma^2 \le \frac{SSE}{\chi^2_{1-\alpha/2, N-t}} ,
+\]
+where $\chi^2_{\alpha, \nu}$ is the upper $\alpha$ point. The pivot $F_0/(1 + r\theta)$ gives an interval $[L, U]$ for the ratio $\theta$:
+\[
+L = \frac1r\Bigl(\frac{F_0}{F_{\alpha/2, t-1, N-t}} - 1\Bigr) , \qquad U = \frac1r\Bigl(\frac{F_0}{F_{1-\alpha/2, t-1, N-t}} - 1\Bigr) ,
+\]
+and since $\rho = \theta/(1 + \theta)$ is increasing in $\theta$, $[L/(1 + L), U/(1 + U)]$ is an exact interval for the intraclass correlation. There is no exact interval for $\sigma^2_\tau$
+itself, because its estimator is a \emph{difference} of mean squares with different expectations. The standard approximation is the following.
+
+\begin{prop}[Satterthwaite]\label{prop:satterthwaite}
+Let $MS_1$, $MS_2$, \dots, $MS_m$ be independent mean squares such that $\nu_iMS_i/E(MS_i)$ is $\chi^2_{\nu_i}$ for each $i$, and let $\hat\psi = \sum_ic_iMS_i$ for constants $c_i$. Then $\nu\hat\psi/\psi$, with $\psi = E(\hat\psi)$, has
+the mean $\nu$ and the variance $2\nu$ of a $\chi^2_\nu$ variable when
+\[
+\nu = \frac{\bigl(\sum_ic_iE(MS_i)\bigr)^2}{\sum_ic_i^2E(MS_i)^2/\nu_i} , \qquad \text{estimated by} \qquad \hat\nu = \frac{\bigl(\sum_ic_iMS_i\bigr)^2}{\sum_ic_i^2MS_i^2/\nu_i} .
+\]
+\end{prop}
+
+\begin{proof}
+The mean is clearly $\nu$. A $\chi^2_{\nu_i}$ variable has variance $2\nu_i$, so $\Var(MS_i) = 2E(MS_i)^2/\nu_i$, and by independence
+\[
+\Var(\nu\hat\psi/\psi) = \frac{\nu^2}{\psi^2}\sum_ic_i^2\,\frac{2E(MS_i)^2}{\nu_i} .
+\]
+Setting this equal to $2\nu$ and solving gives the stated $\nu$.
+\end{proof}
+
+Treating $\hat\nu\hat\psi/\psi$ as $\chi^2_{\hat\nu}$ gives the approximate interval $\hat\nu\hat\psi/\chi^2_{\alpha/2, \hat\nu} \le \psi \le \hat\nu\hat\psi/\chi^2_{1-\alpha/2, \hat\nu}$. The approximation is good when all $c_i > 0$; with
+negative coefficients, as here, it is rougher, but it remains the usual choice.
+
+\begin{exa}\label{exa:lots}
+A tablet manufacturer receives its active ingredient in lots, and wants to know how much of the variation in tablet strength comes from differences
+between lots. Six lots were chosen at random from the supplier's stock, and four tablets from each were assayed (mg of active ingredient):
+\begin{center}
+\begin{tabular}{c|cccc|c}
+lot & \multicolumn{4}{c|}{assay} & total \\
+\hline
+$1$ & $96.3$ & $98.7$ & $97.1$ & $99.8$ & $391.9$ \\
+$2$ & $99.2$ & $98.0$ & $98.7$ & $98.7$ & $394.6$ \\
+$3$ & $101.0$ & $102.0$ & $101.2$ & $102.3$ & $406.5$ \\
+$4$ & $99.8$ & $99.0$ & $97.6$ & $97.6$ & $394.0$ \\
+$5$ & $101.0$ & $101.5$ & $102.3$ & $100.2$ & $405.0$ \\
+$6$ & $101.4$ & $100.5$ & $100.9$ & $99.0$ & $401.8$
+\end{tabular}
+\end{center}
+Here $t = 6$, $r = 4$, $N = 24$, $y_{\cdot\cdot} = 2393.8$ and $\sum y_{ij}^2 = 238828.74$, so with $C = 2393.8^2/24 = 238761.6017$,
+\begin{gather*}
+SST = 238828.74 - C = 67.1383 , \\
+SS_{\mathrm{Lots}} = \frac{391.9^2 + \dots + 401.8^2}4 - C = 48.7133 , \\
+SSE = 67.1383 - 48.7133 = 18.4250 .
+\end{gather*}
+\begin{center}
+\begin{tabular}{l|cccc}
+source & SS & df & MS & $F_0$ \\
+\hline
+lots & $48.713$ & $5$ & $9.743$ & $9.52$ \\
+error & $18.425$ & $18$ & $1.024$ & \\
+\hline
+total & $67.138$ & $23$ & &
+\end{tabular}
+\end{center}
+Since $F_{0.05, 5, 18} = 2.77$ ($P = 0.0001$), $H_0 : \sigma^2_\tau = 0$ is rejected: lots differ. The estimates are
+\begin{gather*}
+\hat\sigma^2 = 1.024 , \qquad \hat\sigma^2_\tau = \frac{9.743 - 1.024}4 = 2.180 , \\
+\hat\rho = \frac{2.180}{2.180 + 1.024} = 0.68 .
+\end{gather*}
+So about two thirds of the variance of a single tablet, $\hat\sigma^2_\tau + \hat\sigma^2 = 3.20$, is due to lots (Figure~\ref{fig:lots}).
+
+The $95\%$ interval for $\sigma^2$ uses $\chi^2_{0.025, 18} = 31.53$ and $\chi^2_{0.975, 18} = 8.23$: $18.425/31.53 \le \sigma^2 \le 18.425/8.23$, that is $(0.58, 2.24)$. For the ratio, $F_{0.025, 5, 18} = 3.382$ and
+$F_{0.975, 5, 18} = 0.1572$, so
+\begin{align*}
+L &= \tfrac14(9.518/3.382 - 1) = 0.454 , \\
+U &= \tfrac14(9.518/0.1572 - 1) = 14.89 ,
+\end{align*}
+and the intraclass correlation lies in $(0.31, 0.94)$. For $\sigma^2_\tau$, with $c_1 = \frac14$ and $c_2 = -\frac14$,
+\[
+\hat\nu = \frac{(4\times2.180)^2}{9.743^2/5 + 1.024^2/18} = 3.99 \approx 4 ,
+\]
+and with $\chi^2_{0.025, 4} = 11.14$ and $\chi^2_{0.975, 4} = 0.484$ the approximate interval is $(4\times2.180/11.14,\ 4\times2.180/0.484) = (0.78, 18.0)$.
+
+The interval for $\sigma^2_\tau$ is very wide, because it rests on only five degrees of freedom: six lots give little information about a population of
+lots, however many tablets are assayed from each. To estimate $\sigma^2_\tau$ better, the manufacturer must sample more lots.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\fill[blue!5] (0.4,0) rectangle (8.0,4.0);
+\draw[gray!60,dashed] (0.4,2.333) -- (8.0,2.333) node[right,font=\small,black] {$\bar y_{\cdot\cdot}$};
+\foreach \v/\yy in {96/0.275,98/1.375,100/2.475,102/3.575} {
+\draw (0.4,\yy) -- (0.3,\yy) node[left,font=\small] {$\v$};}
+\draw (0.4,0) -- (0.4,4.0);
+\foreach \i in {1,...,6} \node[font=\small] at ({1.2*\i},-0.3) {lot \i};
+\fill[orange!85!black] (1.20,0.440) circle (2.2pt);
+\fill[orange!85!black] (1.20,1.760) circle (2.2pt);
+\fill[orange!85!black] (1.20,0.880) circle (2.2pt);
+\fill[orange!85!black] (1.20,2.365) circle (2.2pt);
+\draw[blue!70!black,very thick] (0.90,1.361) -- (1.50,1.361);
+\fill[orange!85!black] (2.40,2.035) circle (2.2pt);
+\fill[orange!85!black] (2.40,1.375) circle (2.2pt);
+\fill[orange!85!black] (2.31,1.760) circle (2.2pt);
+\fill[orange!85!black] (2.49,1.760) circle (2.2pt);
+\draw[blue!70!black,very thick] (2.10,1.732) -- (2.70,1.732);
+\fill[orange!85!black] (3.60,3.025) circle (2.2pt);
+\fill[orange!85!black] (3.60,3.575) circle (2.2pt);
+\fill[orange!85!black] (3.60,3.135) circle (2.2pt);
+\fill[orange!85!black] (3.60,3.740) circle (2.2pt);
+\draw[blue!70!black,very thick] (3.30,3.369) -- (3.90,3.369);
+\fill[orange!85!black] (4.80,2.365) circle (2.2pt);
+\fill[orange!85!black] (4.80,1.925) circle (2.2pt);
+\fill[orange!85!black] (4.71,1.155) circle (2.2pt);
+\fill[orange!85!black] (4.89,1.155) circle (2.2pt);
+\draw[blue!70!black,very thick] (4.50,1.650) -- (5.10,1.650);
+\fill[orange!85!black] (6.00,3.025) circle (2.2pt);
+\fill[orange!85!black] (6.00,3.300) circle (2.2pt);
+\fill[orange!85!black] (6.00,3.740) circle (2.2pt);
+\fill[orange!85!black] (6.00,2.585) circle (2.2pt);
+\draw[blue!70!black,very thick] (5.70,3.163) -- (6.30,3.163);
+\fill[orange!85!black] (7.20,3.245) circle (2.2pt);
+\fill[orange!85!black] (7.20,2.750) circle (2.2pt);
+\fill[orange!85!black] (7.20,2.970) circle (2.2pt);
+\fill[orange!85!black] (7.20,1.925) circle (2.2pt);
+\draw[blue!70!black,very thick] (6.90,2.723) -- (7.50,2.723);
+\node[font=\small,rotate=90] at (-0.55,2.0) {assay (mg)};
+\end{tikzpicture}
+\caption{Tablet assays for six lots (dots) and the lot means (bars). The spread of the lot means about the grand mean is much larger than the
+spread within a lot would explain: $\hat\sigma^2_\tau = 2.18$ against $\hat\sigma^2 = 1.02$.}
+\label{fig:lots}
+\end{figure}
+
+\begin{remark}
+For unequal numbers $n_i$ per level, $E(MSE) = \sigma^2$ still, but $E(MS_{\mathrm{Treatments}}) = \sigma^2 + n_0\sigma^2_\tau$ with
+\[
+n_0 = \frac1{t - 1}\Bigl(N - \frac{\sum_in_i^2}N\Bigr) ,
+\]
+and $SS_{\mathrm{Treatments}}$ is no longer a multiple of a $\chi^2$ variable (Problem~\ref{prob:unbalanced}). For unbalanced data REML is the method of choice.
+\end{remark}
+
+\subsection{The two-factor random effects model}
+Suppose both factors of a two-factor experiment are random: $a$ levels of $A$ and $b$ levels of $B$, each sampled from a population, with $n$ replicates of every
+combination. The model is
+\[
+y_{ijk} = \mu + \tau_i + \beta_j + (\tau\beta)_{ij} + \varepsilon_{ijk} ,
+\]
+where $\tau_i \sim N(0, \sigma^2_\tau)$, $\beta_j \sim N(0, \sigma^2_\beta)$, $(\tau\beta)_{ij} \sim N(0, \sigma^2_{\tau\beta})$ and $\varepsilon_{ijk} \sim N(0, \sigma^2)$, all independent. Then $\Var(y_{ijk}) = \sigma^2_\tau + \sigma^2_\beta + \sigma^2_{\tau\beta} + \sigma^2$, and the
+hypotheses are $\sigma^2_\tau = 0$, $\sigma^2_\beta = 0$ and $\sigma^2_{\tau\beta} = 0$. The sums of squares are those of the fixed effects analysis. One lemma does most of the work.
+
+\begin{lem}\label{lem:projection}
+If the random vector $w \in \mathbb R^m$ has $E(w) = 0$ and $\Var(w) = vI$, and $P$ is an orthogonal projection, then $E\|Pw\|^2 = v\operatorname{rank}(P)$.
+\end{lem}
+
+\begin{proof}
+$E\|Pw\|^2 = E(w^\top Pw) = \operatorname{tr}(P\Var(w)) = v\operatorname{tr}(P)$, and the trace of a projection is its rank.
+\end{proof}
+
+Two cases are used repeatedly. If $w_1, \dots, w_m$ are independent with variance $v$, centring is a projection of rank $m - 1$, so $E\sum_i(w_i - \bar w)^2 = (m - 1)v$. For an $a \times b$
+array of independent $w_{ij}$ of variance $v$, the double centring $w_{ij} - \bar w_{i\cdot} - \bar w_{\cdot j} + \bar w_{\cdot\cdot}$ is a projection of rank $(a - 1)(b - 1)$, and the map from $w$ to the
+array of row-mean deviations $\bar w_{i\cdot} - \bar w_{\cdot\cdot}$ (each repeated $b$ times) is a projection of rank $a - 1$, so
+\begin{gather*}
+E\sum_i\sum_j(w_{ij} - \bar w_{i\cdot} - \bar w_{\cdot j} + \bar w_{\cdot\cdot})^2 = (a - 1)(b - 1)v , \\
+E\sum_i(\bar w_{i\cdot} - \bar w_{\cdot\cdot})^2 = \frac{(a - 1)v}b .
+\end{gather*}
+
+\begin{thm}\label{thm:twoway-random}
+In the two-factor random effects model,
+\begin{align*}
+E(MS_A) &= \sigma^2 + n\sigma^2_{\tau\beta} + bn\sigma^2_\tau , & E(MS_B) &= \sigma^2 + n\sigma^2_{\tau\beta} + an\sigma^2_\beta , \\
+E(MS_{AB}) &= \sigma^2 + n\sigma^2_{\tau\beta} , & E(MSE) &= \sigma^2 .
+\end{align*}
+Each $SS/E(MS)$ is a $\chi^2$ variable on its degrees of freedom, and the four sums of squares are independent.
+\end{thm}
+
+\begin{proof}
+Averaging the model,
+\[
+\bar y_{i\cdot\cdot} - \bar y_{\cdot\cdot\cdot} = (\tau_i - \bar\tau) + \bigl(\overline{(\tau\beta)}_{i\cdot} - \overline{(\tau\beta)}_{\cdot\cdot}\bigr) + (\bar\varepsilon_{i\cdot\cdot} - \bar\varepsilon_{\cdot\cdot\cdot}) ,
+\]
+the $\beta_j$ cancelling. The three terms are independent with mean zero, so the expected sum of squares over $i$ is the sum of three expectations, which the
+lemma gives as $(a - 1)\sigma^2_\tau$, $(a - 1)\sigma^2_{\tau\beta}/b$ and $(a - 1)\sigma^2/(bn)$ (the $\bar\varepsilon_{i\cdot\cdot}$ are independent with variance $\sigma^2/(bn)$). As $SS_A = bn\sum_i(\bar y_{i\cdot\cdot} - \bar y_{\cdot\cdot\cdot})^2$,
+\[
+E(SS_A) = (a - 1)(bn\sigma^2_\tau + n\sigma^2_{\tau\beta} + \sigma^2) .
+\]
+$B$ is the same with the roles of the factors exchanged. For the interaction, all main effects cancel from the double centring of the cell means
+$\bar y_{ij\cdot}$, leaving the double centrings of $(\tau\beta)_{ij}$ and of $\bar\varepsilon_{ij\cdot}$, so
+\[
+E(SS_{AB}) = n\bigl[(a - 1)(b - 1)\sigma^2_{\tau\beta} + (a - 1)(b - 1)\sigma^2/n\bigr] ,
+\]
+and $E(SSE) = ab(n - 1)\sigma^2$ as before.
+
+For the distributions, write $\bar J_m = \frac1m\mathbf 1\mathbf 1^\top$ and order $y$ by $i$, then $j$, then $k$. The covariance matrix of $y$ is
+\[
+\Var(y) = \sigma^2_\tau\,I_a \otimes J_b \otimes J_n + \sigma^2_\beta\,J_a \otimes I_b \otimes J_n + \sigma^2_{\tau\beta}\,I_a \otimes I_b \otimes J_n + \sigma^2 I ,
+\]
+with $J_m = m\bar J_m$. Writing each $I_m = \bar J_m + (I_m - \bar J_m)$ and expanding expresses $\Var(y)$ as $\sum_X\lambda_XP_X$, where $P_A = (I_a - \bar J_a) \otimes \bar J_b \otimes \bar J_n$ and the
+other $P_X$ are the mutually orthogonal projections whose squared lengths $\|P_Xy\|^2$ are the sums of squares, and the coefficient $\lambda_X$ is exactly the
+expected mean square above. Then $P_Xy$ is normal with covariance $\lambda_XP_X$, the vectors $P_Xy$ are uncorrelated and hence independent, and
+$\|P_Xy\|^2/\lambda_X \sim \chi^2_{\operatorname{rank}P_X}$.
+\end{proof}
+
+The expected mean squares determine the tests. The interaction is tested against error, but the main effects are tested against the \emph{interaction}:
+\begin{gather*}
+H_0 : \sigma^2_{\tau\beta} = 0 : \quad F_0 = \frac{MS_{AB}}{MSE} , \\
+H_0 : \sigma^2_\tau = 0 : \quad F_0 = \frac{MS_A}{MS_{AB}} , \qquad H_0 : \sigma^2_\beta = 0 : \quad F_0 = \frac{MS_B}{MS_{AB}} .
+\end{gather*}
+In each case the two mean squares have equal expectations under $H_0$ and are independent scaled $\chi^2$ variables, so $F_0$ has an $F$ distribution. Using
+$MSE$ as the denominator for the main effects, as in the fixed effects analysis, would be wrong whenever $\sigma^2_{\tau\beta} > 0$: the test would reject too
+often. The reason is visible in the model: with new levels of $B$, the apparent effect of a level of $A$ changes by an amount of variance $\sigma^2_{\tau\beta}/b$, and that
+is the noise against which a main effect of $A$ must be judged. The variance components are estimated by
+\begin{gather*}
+\hat\sigma^2 = MSE , \qquad \hat\sigma^2_{\tau\beta} = \frac{MS_{AB} - MSE}n , \\
+\hat\sigma^2_\tau = \frac{MS_A - MS_{AB}}{bn} , \qquad \hat\sigma^2_\beta = \frac{MS_B - MS_{AB}}{an} .
+\end{gather*}
+
+\begin{exa}\label{exa:filter-random}
+To estimate the sources of variability in a filtration process, concentration (\%) was measured for each combination of four operators ($A$)
+and three filters ($B$), both chosen at random, with two runs on each combination. The data, with cell totals in brackets, are
+\begin{center}
+\begin{tabular}{c|cccc|c}
+filter & operator $1$ & operator $2$ & operator $3$ & operator $4$ & total \\
+\hline
+$1$ & $62$, $68$ $(130)$ & $59$, $51$ $(110)$ & $56$, $59$ $(115)$ & $49$, $52$ $(101)$ & $456$ \\
+$2$ & $66$, $69$ $(135)$ & $60$, $63$ $(123)$ & $61$, $60$ $(121)$ & $54$, $46$ $(100)$ & $479$ \\
+$3$ & $67$, $69$ $(136)$ & $65$, $69$ $(134)$ & $64$, $74$ $(138)$ & $61$, $54$ $(115)$ & $523$ \\
+\hline
+total & $401$ & $367$ & $374$ & $316$ & $1458$
+\end{tabular}
+\end{center}
+With $a = 4$, $b = 3$, $n = 2$ and $C = 1458^2/24 = 88573.5$,
+\begin{gather*}
+SS_A = \frac{401^2 + 367^2 + 374^2 + 316^2}6 - C = 630.1667 , \\
+SS_B = \frac{456^2 + 479^2 + 523^2}8 - C = 289.75 ,
+\end{gather*}
+and from the cell totals $SS_{AB} = 77.5833$; the total is $SST = 1182.5$, so $SSE = 185$.
+\begin{center}
+\begin{tabular}{l|ccccc}
+source & SS & df & MS & $E(MS)$ & $F_0$ \\
+\hline
+operators $A$ & $630.17$ & $3$ & $210.06$ & $\sigma^2 + 2\sigma^2_{\tau\beta} + 6\sigma^2_\tau$ & $16.24$ \\
+filters $B$ & $289.75$ & $2$ & $144.88$ & $\sigma^2 + 2\sigma^2_{\tau\beta} + 8\sigma^2_\beta$ & $11.20$ \\
+$AB$ & $77.58$ & $6$ & $12.93$ & $\sigma^2 + 2\sigma^2_{\tau\beta}$ & $0.84$ \\
+error & $185.00$ & $12$ & $15.42$ & $\sigma^2$ & \\
+\hline
+total & $1182.50$ & $23$ & & &
+\end{tabular}
+\end{center}
+The interaction is not significant ($F_0 = 12.93/15.42 = 0.84$, $F_{0.05, 6, 12} = 3.00$). Both main effects are, tested against $MS_{AB}$: $F_0 = 210.06/12.93 = 16.24$ for
+operators ($F_{0.05, 3, 6} = 4.76$, $P = 0.003$) and $F_0 = 144.88/12.93 = 11.20$ for filters ($F_{0.05, 2, 6} = 5.14$, $P = 0.009$). Operators and filters both add to the variability
+of the process. The variance components are
+\begin{gather*}
+\hat\sigma^2_\tau = \frac{210.06 - 12.93}6 = 32.85 , \qquad \hat\sigma^2_\beta = \frac{144.88 - 12.93}8 = 16.49 , \\
+\hat\sigma^2 = 15.42 ,
+\end{gather*}
+and $\hat\sigma^2_{\tau\beta} = (12.93 - 15.42)/2 = -1.24$.
+
+The negative interaction estimate says that the interaction component is negligible, and it suggests a reduced model without it. Since the $F$
+statistic for the interaction is below $1$ ($P = 0.56$), a common rule is to \textbf{pool} $SS_{AB}$ with $SSE$: the pooled mean square is
+$(77.58 + 185)/(6 + 12) = 14.59$ on $18$ degrees of freedom, and in the reduced model $E(MS_A) = \sigma^2 + bn\sigma^2_\tau$, so
+\begin{align*}
+\text{operators: } F_0 &= 210.06/14.59 = 14.40 , & \hat\sigma^2_\tau &= 195.47/6 = 32.58 , \\
+\text{filters: } F_0 &= 144.88/14.59 = 9.93 , & \hat\sigma^2_\beta &= 130.29/8 = 16.29 .
+\end{align*}
+The conclusions are unchanged, but the denominators now have $18$ degrees of freedom instead of $6$. Pooling is a decision made after looking at the data,
+and it is safe only when the evidence for dropping the term is strong: a large $P$-value (above about $0.25$) and a good reason to expect no
+interaction. Operators contribute the largest component, about twice the run-to-run error.
+\end{exa}
+
+\subsection{The two-factor mixed model}
+Now let $A$ be fixed and $B$ random. The main effects $\tau_i$ are constants with $\sum_i\tau_i = 0$; the $\beta_j$ are $N(0, \sigma^2_\beta)$. The interaction of a fixed level with a random level is
+random, and there are two conventions for it.
+
+\begin{defn}
+The \textbf{restricted mixed model} is
+\begin{gather*}
+y_{ijk} = \mu + \tau_i + \beta_j + (\tau\beta)_{ij} + \varepsilon_{ijk} , \\
+i = 1, \dots, a , \quad j = 1, \dots, b , \quad k = 1, \dots, n ,
+\end{gather*}
+where
+\begin{enumerate}[label=(\roman*)]
+\item $\mu$ and the $\tau_i$ are constants with $\sum_i\tau_i = 0$;
+\item the $\beta_j$ are independent $N(0, \sigma^2_\beta)$;
+\item the interaction effects are normal with mean zero and $\Var\bigl((\tau\beta)_{ij}\bigr) = \frac{a - 1}a\sigma^2_{\tau\beta}$, they sum to zero over the fixed factor,
+$\sum_i(\tau\beta)_{ij} = 0$ for each $j$, and those in different columns $j$ are independent;
+\item the $\varepsilon_{ijk}$ are independent $N(0, \sigma^2)$;
+\item the $\beta_j$, the interaction effects and the errors are mutually independent.
+\end{enumerate}
+In the \textbf{unrestricted mixed model}, (iii) is replaced by: the $(\tau\beta)_{ij}$ are independent $N(0, \sigma^2_{\tau\beta})$, with no constraint.
+\end{defn}
+
+A convenient way to build the restricted interaction is to take independent $w_{ij} \sim N(0, \sigma^2_{\tau\beta})$ and set $(\tau\beta)_{ij} = w_{ij} - \bar w_{\cdot j}$. This sums to zero over $i$, has variance
+$\frac{a - 1}a\sigma^2_{\tau\beta}$, and for $i \ne i'$ has covariance $\Cov\bigl((\tau\beta)_{ij}, (\tau\beta)_{i'j}\bigr) = -\sigma^2_{\tau\beta}/a$ (Problem~\ref{prob:restricted-cov}). The factor $(a - 1)/a$ is a
+convention, chosen so that the expected mean squares come out in the same form as in the other models.
+
+\begin{thm}\label{thm:mixed}
+In the restricted mixed model with $A$ fixed and $B$ random,
+\begin{align*}
+E(MS_A) &= \sigma^2 + n\sigma^2_{\tau\beta} + \frac{bn\sum_i\tau_i^2}{a - 1} , & E(MS_B) &= \sigma^2 + an\sigma^2_\beta , \\
+E(MS_{AB}) &= \sigma^2 + n\sigma^2_{\tau\beta} , & E(MSE) &= \sigma^2 .
+\end{align*}
+In the unrestricted model the only change is $E(MS_B) = \sigma^2 + n\sigma^2_{\tau\beta} + an\sigma^2_\beta$.
+\end{thm}
+
+\begin{proof}
+Use $(\tau\beta)_{ij} = w_{ij} - \bar w_{\cdot j}$. For $B$: $\bar y_{\cdot j\cdot} - \bar y_{\cdot\cdot\cdot} = (\beta_j - \bar\beta) + (\bar\varepsilon_{\cdot j\cdot} - \bar\varepsilon_{\cdot\cdot\cdot})$, because the interaction averages to zero over $i$ in every
+column. So $E(SS_B) = an\bigl[(b - 1)\sigma^2_\beta + (b - 1)\sigma^2/(an)\bigr]$, with no interaction term.
+
+For $A$: $\bar y_{i\cdot\cdot} - \bar y_{\cdot\cdot\cdot} = \tau_i + \overline{(\tau\beta)}_{i\cdot} + (\bar\varepsilon_{i\cdot\cdot} - \bar\varepsilon_{\cdot\cdot\cdot})$, since $\sum_i\tau_i = 0$ and the interaction has zero grand mean. Here $\overline{(\tau\beta)}_{i\cdot} = \bar w_{i\cdot} - \bar w_{\cdot\cdot}$,
+so by the lemma $E\sum_i\overline{(\tau\beta)}_{i\cdot}^2 = (a - 1)\sigma^2_{\tau\beta}/b$. The cross terms with the constants $\tau_i$ have mean zero, and
+\[
+E(SS_A) = bn\Bigl[\sum_i\tau_i^2 + \frac{(a - 1)\sigma^2_{\tau\beta}}b + \frac{(a - 1)\sigma^2}{bn}\Bigr] .
+\]
+For $AB$, the double centring of $(\tau\beta)_{ij}$ equals that of $w_{ij}$, with expected sum of squares $(a - 1)(b - 1)\sigma^2_{\tau\beta}$, which gives $E(MS_{AB})$.
+
+In the unrestricted model the computations for $A$ and $AB$ are those of Theorem~\ref{thm:twoway-random}, giving the same results; but the interaction no
+longer averages to zero over $i$, and $\overline{(\tau\beta)}_{\cdot j}$ contributes $n\sigma^2_{\tau\beta}$ to $E(MS_B)$.
+\end{proof}
+
+So in both models the fixed factor is tested against the interaction, $F_0 = MS_A/MS_{AB}$, and the interaction against error. The random factor is tested
+against $MSE$ in the restricted model and against $MS_{AB}$ in the unrestricted one. The two models are different models of the same data, not different
+analyses: in the restricted model the column effect $\beta_j$ is the average response of column $j$ over the fixed levels, so $\sigma^2_\beta$ measures variation of that
+average; in the unrestricted model the interaction carries part of it. The restricted model is the classical choice; general mixed-model software
+(REML) fits the unrestricted one. Either is acceptable if it is stated.
+
+The estimates in the restricted model are
+\begin{gather*}
+\hat\tau_i = \bar y_{i\cdot\cdot} - \bar y_{\cdot\cdot\cdot} , \qquad \hat\sigma^2 = MSE , \\
+\hat\sigma^2_{\tau\beta} = \frac{MS_{AB} - MSE}n , \qquad \hat\sigma^2_\beta = \frac{MS_B - MSE}{an} ;
+\end{gather*}
+in the unrestricted model $\hat\sigma^2_\beta = (MS_B - MS_{AB})/(an)$. Comparisons among the fixed levels use $MS_{AB}$ in place of $MSE$: in both models
+\[
+\Var(\bar y_{i\cdot\cdot} - \bar y_{i'\cdot\cdot}) = \frac{2(\sigma^2 + n\sigma^2_{\tau\beta})}{bn} = \frac{2E(MS_{AB})}{bn} ,
+\]
+so Tukey's method uses $q_\alpha(a, (a - 1)(b - 1))\sqrt{MS_{AB}/(bn)}$.
+
+\begin{exa}\label{exa:filter-mixed}
+To study the effect of operators and filters in a filtration process, a company measures the percentage of material lost in coffee for each
+combination of its four operators and three types of filter, with three runs on each. The company has only these four operators, but many types of
+filter, and the three were selected at random. So operators ($A$, $a = 4$) are fixed and filters ($B$, $b = 3$) random, with $n = 3$:
+\begin{center}
+\begin{tabular}{c|ccc|c}
+operator & filter $1$ & filter $2$ & filter $3$ & total \\
+\hline
+$1$ & $16.2$, $16.8$, $17.1$ & $16.6$, $16.9$, $16.8$ & $16.7$, $16.9$, $17.1$ & $151.1$ \\
+$2$ & $15.9$, $15.1$, $14.5$ & $16.0$, $16.3$, $16.5$ & $16.5$, $16.9$, $16.8$ & $144.5$ \\
+$3$ & $15.6$, $15.9$, $16.1$ & $16.1$, $16.0$, $17.2$ & $16.4$, $17.4$, $16.9$ & $147.6$ \\
+$4$ & $14.9$, $15.2$, $14.9$ & $15.4$, $14.6$, $15.9$ & $16.1$, $15.4$, $15.6$ & $138.0$ \\
+\hline
+total & $188.2$ & $194.3$ & $198.7$ & $581.2$
+\end{tabular}
+\end{center}
+A model is the restricted mixed model above: $y_{ijk}$ is the loss on the $k$th run by operator $i$ with filter $j$, $\mu$ the overall mean, $\tau_i$ the fixed effect of operator $i$,
+$\beta_j$ the random effect of filter $j$, $(\tau\beta)_{ij}$ the random operator--filter interaction and $\varepsilon_{ijk}$ the run-to-run error, with the assumptions (i)--(v). With
+$C = 581.2^2/36 = 9383.1511$,
+\begin{gather*}
+SS_A = \frac{151.1^2 + 144.5^2 + 147.6^2 + 138.0^2}9 - C = 10.318 , \\
+SS_B = \frac{188.2^2 + 194.3^2 + 198.7^2}{12} - C = 4.634 ,
+\end{gather*}
+and with $SS_{AB} = 1.657$, $SSE = 4.440$ and $SST = 21.049$, the analysis is
+\begin{center}
+\begin{tabular}{l|ccccc}
+source & SS & df & MS & $E(MS)$ & $F_0$ \\
+\hline
+operators $A$ & $10.318$ & $3$ & $3.4393$ & $\sigma^2 + 3\sigma^2_{\tau\beta} + 3\sum\tau_i^2$ & $12.45$ \\
+filters $B$ & $4.634$ & $2$ & $2.3169$ & $\sigma^2 + 12\sigma^2_\beta$ & $12.52$ \\
+$AB$ & $1.657$ & $6$ & $0.2762$ & $\sigma^2 + 3\sigma^2_{\tau\beta}$ & $1.49$ \\
+error & $4.440$ & $24$ & $0.1850$ & $\sigma^2$ & \\
+\hline
+total & $21.049$ & $35$ & & &
+\end{tabular}
+\end{center}
+(the coefficient of $\sum\tau_i^2$ is $bn/(a - 1) = 9/3$). The three tests are:
+\begin{itemize}
+\item interaction, $H_0 : \sigma^2_{\tau\beta} = 0$: $F_0 = 0.2762/0.1850 = 1.49 < F_{0.05, 6, 24} = 2.51$ ($P = 0.22$), not significant;
+\item operators, $H_0 : \tau_1 = \dots = \tau_4 = 0$: $F_0 = 3.4393/0.2762 = 12.45 > F_{0.05, 3, 6} = 4.76$ ($P = 0.005$), significant;
+\item filters, $H_0 : \sigma^2_\beta = 0$: $F_0 = 2.3169/0.1850 = 12.52 > F_{0.05, 2, 24} = 3.40$ ($P = 0.0002$), significant.
+\end{itemize}
+The variance components are
+\begin{gather*}
+\hat\sigma^2_\beta = \frac{2.3169 - 0.1850}{12} = 0.178 , \qquad \hat\sigma^2_{\tau\beta} = \frac{0.2762 - 0.1850}3 = 0.030 , \\
+\hat\sigma^2 = 0.185 ,
+\end{gather*}
+so filter-to-filter variation is about as large as run-to-run variation, and the interaction is small.
+
+The operator means are $16.79$, $16.06$, $16.40$ and $15.33$. With $q_{0.05}(4, 6) = 4.90$, Tukey's critical difference is $4.90\sqrt{0.2762/9} = 0.86$, so operator $4$ loses
+significantly less material than operators $1$ and $3$, and no other pair differs.
+
+In the unrestricted model the filter test would be $F_0 = 2.3169/0.2762 = 8.39$ against $F_{0.05, 2, 6} = 5.14$ ($P = 0.018$), still significant, and $\hat\sigma^2_\beta = (2.3169 - 0.2762)/12 = 0.170$.
+\end{exa}
+
+\subsection{Expected mean squares in general}
+For balanced designs with any number of crossed factors, the expected mean squares follow a rule that reproduces the theorems above. Give each term
+of the model its subscripts ($A$ has $i$, $AB$ has $ij$, error has all subscripts including the replicate index). A term is \textbf{random} if it involves at
+least one random factor.
+
+\begin{result}[Rule for expected mean squares]\label{res:ems-rule}
+For a term $E$ of the model, $E(MS_E)$ is $\sigma^2$ plus a contribution $c_T\phi_T$ from each term $T$ whose subscripts include all those of $E$ and which satisfies the
+inclusion condition below. Here
+\begin{itemize}
+\item $c_T$ is the product of the numbers of levels of the subscripts \emph{not} in $T$ (including $n$ for the replicate);
+\item $\phi_T = \sigma^2_T$ if $T$ is random, and for $T = E$ fixed, $\phi_E$ is the sum of squares of the fixed effects divided by the degrees of freedom of $E$.
+\end{itemize}
+\textbf{Restricted model:} $T$ contributes if $T = E$, or if every subscript of $T$ that is not in $E$ belongs to a random factor. \textbf{Unrestricted
+model:} $T$ contributes if $T = E$, or if $T$ is random.
+\end{result}
+
+For example, with $A$ fixed and $B$ random, $AB$ contributes to $E(MS_A)$ (its extra subscript $j$ is random) but not, in the restricted model, to $E(MS_B)$ (its
+extra subscript $i$ is fixed). With both factors fixed nothing but $E$ itself contributes, which is the fixed effects analysis.
+
+Applied to three factors with $A$ fixed and $B$, $C$ random, the restricted rule gives, with $Q_A = \sum_i\tau_i^2/(a - 1)$,
+\begin{align*}
+E(MS_A) &= \sigma^2 + n\sigma^2_{\tau\beta\gamma} + cn\sigma^2_{\tau\beta} + bn\sigma^2_{\tau\gamma} + bcnQ_A , \\
+E(MS_B) &= \sigma^2 + an\sigma^2_{\beta\gamma} + acn\sigma^2_\beta , \qquad E(MS_C) = \sigma^2 + an\sigma^2_{\beta\gamma} + abn\sigma^2_\gamma , \\
+E(MS_{AB}) &= \sigma^2 + n\sigma^2_{\tau\beta\gamma} + cn\sigma^2_{\tau\beta} , \qquad E(MS_{AC}) = \sigma^2 + n\sigma^2_{\tau\beta\gamma} + bn\sigma^2_{\tau\gamma} , \\
+E(MS_{BC}) &= \sigma^2 + an\sigma^2_{\beta\gamma} , \qquad E(MS_{ABC}) = \sigma^2 + n\sigma^2_{\tau\beta\gamma} .
+\end{align*}
+(A simulation with $a = 3$, $b = 4$, $c = n = 2$ and $80\,000$ replications reproduces every line to within simulation error.) Every term except $A$ now has an exact
+test: $B$ and $C$ against $BC$, $AB$ and $AC$ against $ABC$, $BC$ and $ABC$ against error. But no single mean square has expectation
+$\sigma^2 + n\sigma^2_{\tau\beta\gamma} + cn\sigma^2_{\tau\beta} + bn\sigma^2_{\tau\gamma}$, which is what $E(MS_A)$ becomes under $H_0$. A combination does:
+\[
+E(MS_{AB} + MS_{AC} - MS_{ABC}) = \sigma^2 + n\sigma^2_{\tau\beta\gamma} + cn\sigma^2_{\tau\beta} + bn\sigma^2_{\tau\gamma} .
+\]
+
+\begin{defn}
+An \textbf{approximate} or \textbf{quasi} $F$ test compares a mean square $MS_E$ with a linear combination of mean squares having the same expectation under $H_0$,
+\[
+F_0 = \frac{MS_A}{MS_{AB} + MS_{AC} - MS_{ABC}} ,
+\]
+referred to $F_{a-1, \hat\nu}$ with $\hat\nu$ from Proposition~\ref{prop:satterthwaite}. To avoid a negative denominator one may instead use
+\[
+F_0' = \frac{MS_A + MS_{ABC}}{MS_{AB} + MS_{AC}} ,
+\]
+with Satterthwaite degrees of freedom for both numerator and denominator.
+\end{defn}
+
+\begin{remark}
+For unbalanced data the sums of squares are no longer independent scaled $\chi^2$ variables and the rule fails. Variance components are then
+estimated by REML and fixed effects tested with approximate degrees of freedom (Satterthwaite or Kenward--Roger), as mixed-model software does.
+\end{remark}
+
+\subsection{Practice problems}
+
+\begin{problem}
+For each experiment, say whether each factor is fixed or random, and give the hypotheses tested.
+\begin{enumerate}[label=(\alph*)]
+\item Five varieties of maize, the only ones the seed company sells, are compared on plots at four farms chosen at random from a district.
+\item A laboratory checks its measurement process: three technicians, chosen from the twenty it employs, each measure ten parts chosen from a
+day's production, twice.
+\item The effect of three temperatures ($150$, $175$ and $200\,^\circ$C) on yield is studied, using two batches of raw material from each of three suppliers
+selected from a list of approved suppliers.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Varieties are fixed (all of interest, the same in any repeat); farms are random (a sample from the district, and inference is meant to apply to
+the district). Mixed model: $H_0 : \tau_1 = \dots = \tau_5 = 0$ for varieties, $H_0 : \sigma^2_\beta = 0$ for farms, $H_0 : \sigma^2_{\tau\beta} = 0$ for the interaction.
+
+(b) Technicians and parts are both random: nobody cares about technician $2$ in particular; the question is how much of the measurement variation is
+due to technicians (reproducibility) and to repeat measurements (repeatability). All hypotheses concern variance components. This is the usual
+gauge study.
+
+(c) Temperature is fixed. Suppliers are random. Batches are random too, but each batch belongs to one supplier, so batches are \emph{nested} in
+suppliers rather than crossed with them; nested factors are treated in the next section.
+\end{solution}
+
+\begin{problem}\label{prob:unbalanced}
+In the one-way random effects model with $n_i$ observations on level $i$ and $N = \sum n_i$, show that $E(MSE) = \sigma^2$ and
+$E(MS_{\mathrm{Treatments}}) = \sigma^2 + n_0\sigma^2_\tau$, where $n_0 = \bigl(N - \sum_in_i^2/N\bigr)/(t - 1)$. Show that $n_0 \le \bar n = N/t$, with equality only for equal $n_i$.
+\end{problem}
+
+\begin{solution}
+Now $y_{i\cdot} = n_i\mu + n_i\tau_i + \varepsilon_{i\cdot}$ and $y_{\cdot\cdot} = N\mu + \sum_in_i\tau_i + \varepsilon_{\cdot\cdot}$, so
+\begin{align*}
+E(y_{i\cdot}^2) &= n_i^2\mu^2 + n_i^2\sigma^2_\tau + n_i\sigma^2 , \\
+E(y_{\cdot\cdot}^2) &= N^2\mu^2 + \textstyle\sum_in_i^2\sigma^2_\tau + N\sigma^2 .
+\end{align*}
+Then
+\begin{align*}
+E(SS_{\mathrm{Treatments}}) &= \sum_i\frac{E(y_{i\cdot}^2)}{n_i} - \frac{E(y_{\cdot\cdot}^2)}N \\
+&= (N\mu^2 + N\sigma^2_\tau + t\sigma^2) - \Bigl(N\mu^2 + \frac{\sum_in_i^2}N\sigma^2_\tau + \sigma^2\Bigr) \\
+&= (t - 1)\sigma^2 + \Bigl(N - \frac{\sum_in_i^2}N\Bigr)\sigma^2_\tau ,
+\end{align*}
+and dividing by $t - 1$ gives the result. $E(SSE) = \sum_{i,j}E(y_{ij}^2) - \sum_iE(y_{i\cdot}^2)/n_i = N\sigma^2 - t\sigma^2$, so $E(MSE) = \sigma^2$. By the Cauchy--Schwarz inequality
+$\sum n_i^2 \ge N^2/t$, so
+\[
+(t - 1)n_0 \le N - N/t = (t - 1)N/t ,
+\]
+with equality only when all $n_i$ are equal. Imbalance reduces the effective number of observations per level.
+\end{solution}
+
+\begin{problem}\label{prob:restricted-cov}
+Let the $w_{ij}$ be independent $N(0, \sigma^2_{\tau\beta})$ and $(\tau\beta)_{ij} = w_{ij} - \bar w_{\cdot j}$. Show that $\Var\bigl((\tau\beta)_{ij}\bigr) = \frac{a - 1}a\sigma^2_{\tau\beta}$ and, for $i \ne i'$,
+$\Cov\bigl((\tau\beta)_{ij}, (\tau\beta)_{i'j}\bigr) = -\sigma^2_{\tau\beta}/a$. Interpret the negative covariance.
+\end{problem}
+
+\begin{solution}
+$\Cov(w_{ij}, \bar w_{\cdot j}) = \sigma^2_{\tau\beta}/a$ and $\Var(\bar w_{\cdot j}) = \sigma^2_{\tau\beta}/a$, so
+\begin{align*}
+\Var\bigl((\tau\beta)_{ij}\bigr) &= \sigma^2_{\tau\beta} - 2\sigma^2_{\tau\beta}/a + \sigma^2_{\tau\beta}/a = \tfrac{a - 1}a\sigma^2_{\tau\beta} , \\
+\Cov\bigl((\tau\beta)_{ij}, (\tau\beta)_{i'j}\bigr) &= 0 - \sigma^2_{\tau\beta}/a - \sigma^2_{\tau\beta}/a + \sigma^2_{\tau\beta}/a = -\sigma^2_{\tau\beta}/a .
+\end{align*}
+The interactions in one column must sum to zero, so if one fixed level does unusually well with a given random level, the others must do worse on
+average: they are negatively correlated. Interactions in different columns are independent.
+\end{solution}
+
+\begin{problem}
+Reanalyse the data of Example~\ref{exa:filter-mixed} supposing that the four operators had also been chosen at random from a large workforce. Which
+conclusions change, and why?
+\end{problem}
+
+\begin{solution}
+Both factors are now random, and Theorem~\ref{thm:twoway-random} applies. The sums of squares and mean squares are unchanged. The interaction is
+still tested against error ($F_0 = 1.49$, not significant). Both main effects are now tested against $MS_{AB} = 0.2762$ on $6$ degrees of freedom:
+\begin{align*}
+\text{operators: } F_0 &= 3.4393/0.2762 = 12.45 > F_{0.05, 3, 6} = 4.76 , \\
+\text{filters: } F_0 &= 2.3169/0.2762 = 8.39 > F_{0.05, 2, 6} = 5.14 \quad (P = 0.018) .
+\end{align*}
+Both are still significant, but the evidence on filters is weaker than in the restricted mixed model ($P = 0.0002$), because the denominator has
+larger expectation and fewer degrees of freedom. The estimates are now variance components for both factors:
+\[
+\hat\sigma^2_\tau = \frac{3.4393 - 0.2762}9 = 0.351 , \qquad \hat\sigma^2_\beta = \frac{2.3169 - 0.2762}{12} = 0.170 ,
+\]
+with $\hat\sigma^2_{\tau\beta} = 0.030$ and $\hat\sigma^2 = 0.185$. What changes is the question: instead of asking which of these four operators differ, the analysis
+now says that operators in general are the largest source of variability, so training or standardising the procedure is where to start.
+\end{solution}
+
+\begin{problem}
+A one-way random effects experiment is planned with $r = 4$ observations per level, to detect a variance component as large as half the error
+variance ($\theta = \sigma^2_\tau/\sigma^2 = 0.5$) with power at least $0.8$ at $\alpha = 0.05$. How many levels are needed? For a fixed total of $N = 24$ observations, compare
+the designs $(t, r) = (4, 6)$, $(6, 4)$, $(8, 3)$ and $(12, 2)$ for detecting $\theta = 1$.
+\end{problem}
+
+\begin{solution}
+The power is $P\bigl(F_{t-1, 3t} > F_{0.05, t-1, 3t}/(1 + 4\times0.5)\bigr) = P\bigl(F_{t-1, 3t} > F_{0.05, t-1, 3t}/3\bigr)$. Evaluating it,
+\begin{center}
+\begin{tabular}{c|ccccc}
+$t$ & $6$ & $10$ & $13$ & $14$ & $15$ \\
+\hline
+power & $0.49$ & $0.67$ & $0.77$ & $0.79$ & $0.82$
+\end{tabular}
+\end{center}
+so $t = 15$ levels (60 observations) are needed. For $N = 24$ and $\theta = 1$ the powers are $0.73$, $0.73$, $0.70$ and $0.56$. Few levels with many replicates loses error degrees
+of freedom little but leaves $t - 1$ small; many levels with $r = 2$ makes $1 + r\theta$ small. Here $t = 4$ to $6$ is best for testing, but for \emph{estimating} $\sigma^2_\tau$ the number
+of levels matters most, as Example~\ref{exa:lots} showed.
+\end{solution}
+
+\begin{problem}
+In a balanced three-factor experiment with $A$ fixed ($a = 3$), $B$ and $C$ random ($b = 4$, $c = 2$) and $n = 2$, the mean squares included $MS_A = 95.0$, $MS_{AB} = 12.4$,
+$MS_{AC} = 15.8$ and $MS_{ABC} = 4.6$. Test $H_0 : \tau_1 = \tau_2 = \tau_3 = 0$ at the $5\%$ level using the restricted model. What would the (incorrect) test against $MS_{AB}$ alone
+conclude?
+\end{problem}
+
+\begin{solution}
+The denominator is $MS_{AB} + MS_{AC} - MS_{ABC} = 12.4 + 15.8 - 4.6 = 23.6$, with degrees of freedom $6$, $2$ and $6$ for the three mean squares. So
+\[
+F_0 = \frac{95.0}{23.6} = 4.03 , \qquad \hat\nu = \frac{23.6^2}{12.4^2/6 + 15.8^2/2 + 4.6^2/6} = 3.6 .
+\]
+Since $F_{0.05, 2, 3.6} = 7.67$ ($P = 0.12$), $H_0$ is not rejected. The alternative statistic gives the same conclusion:
+\[
+F_0' = \frac{95.0 + 4.6}{12.4 + 15.8} = 3.53 ,
+\]
+on $2.2$ and $5.3$ degrees of freedom, with $P = 0.10$. Testing against $MS_{AB}$ alone would give $F_0 = 95.0/12.4 = 7.66 > F_{0.05, 2, 6} = 5.14$, a spurious rejection: it ignores the
+contribution $bn\sigma^2_{\tau\gamma}$ of the $AC$ interaction to $E(MS_A)$.
 \end{solution}
 
 \section*{References}
