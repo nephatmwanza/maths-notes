@@ -5931,6 +5931,322 @@ F_0 = \frac{MS_\gamma}{MS_{S\gamma} + MS_{T\gamma} - MSE} ,
 since no single mean square has expectation $\sigma^2 + 2\sigma^2_{S\gamma} + 4\sigma^2_{T\gamma}$.
 \end{solution}
 
+\section{Review problems}\label{sec:review}
+The earlier sections each studied one design. In practice the first question is which design to use, and the most common mistakes in analysis come
+from answering it wrongly: testing a treatment against the wrong error, counting the wrong thing as a replicate, or forgetting what a fraction has
+aliased. This section collects the designs in one place and then works through problems that draw on several sections at once.
+
+\subsection{Choosing a design}
+Every design in the course answers three questions. How is the randomisation restricted? What is the experimental unit for each factor? And so,
+which mean square is the error for each test? Figure~\ref{fig:designs} summarises the answers.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.95,every node/.style={font=\scriptsize}]
+% one tile: #1 x, #2 y, #3 colour, #4 title, #5 when, #6 error
+\foreach \x/\y/\c/\t/\w/\e in {
+0/8/blue/Completely randomised/units homogeneous/treatments vs $MSE$,
+4/8/teal/Randomised block/one nuisance factor/$MSE$ after blocks,
+8/8/green!60!black/Latin square/two nuisance factors/{rows, columns removed},
+0/4/orange/Incomplete block/blocks hold $k < t$ units/adjusted totals $Q_i$,
+4/4/red!70!black/Factorial/several factors together/interactions estimable,
+8/4/violet/Confounded $2^k$/blocks smaller than $2^k$/a high-order effect lost,
+0/0/brown/Fractional $2^{k-p}$/full factorial too large/aliases; resolution,
+4/0/cyan!60!black/Nested/levels of $B$ unique to $A$/$A$ against $B(A)$,
+8/0/magenta!70!black/Split-plot/one factor hard to change/two error terms} {
+\fill[\c!7,rounded corners] ({\x-0.07},\y) rectangle ({\x+3.87},{\y+3.7});
+\draw[\c!55,rounded corners] ({\x-0.07},\y) rectangle ({\x+3.87},{\y+3.7});
+\node[font=\scriptsize\bfseries,text=\c!80!black] at ({\x+1.9},{\y+3.35}) {\t};
+\node at ({\x+1.9},{\y+0.75}) {\w};
+\node at ({\x+1.9},{\y+0.3}) {\e};}
+% completely randomised: shuffled 3 x 4
+\foreach \i/\j/\k in {0/0/1,1/0/3,2/0/2,3/0/1,0/1/2,1/1/1,2/1/3,3/1/3,0/2/3,1/2/2,2/2/1,3/2/2} {
+\fill[blue!\the\numexpr 15+25*\k\relax] ({0.9+0.5*\i},{9.25+0.45*\j}) rectangle ({1.3+0.5*\i},{9.6+0.45*\j});}
+% randomised block: 3 blocks of 3
+\foreach \j/\a/\b/\cc in {0/2/1/3,1/1/3/2,2/3/2/1} {
+\draw[teal!60] (4.9,{9.2+0.5*\j}) rectangle (6.9,{9.62+0.5*\j});
+\foreach \i/\k in {0/\a,1/\b,2/\cc} {
+\fill[teal!\the\numexpr 15+25*\k\relax] ({5.0+0.62*\i},{9.25+0.5*\j}) rectangle ({5.5+0.62*\i},{9.57+0.5*\j});}}
+% Latin square
+\foreach \i/\j/\l in {0/0/A,1/0/B,2/0/C,0/1/C,1/1/A,2/1/B,0/2/B,1/2/C,2/2/A} {
+\draw[green!50!black,fill=green!12] ({9.15+0.5*\i},{9.2+0.48*\j}) rectangle ({9.6+0.5*\i},{9.62+0.48*\j});
+\node at ({9.375+0.5*\i},{9.41+0.48*\j}) {\l};}
+% BIBD: 4 blocks of 3 out of 4
+\foreach \j/\a/\b/\cc in {0/1/2/3,1/1/2/4,2/1/3/4,3/2/3/4} {
+\draw[orange!60] (0.8,{5.05+0.42*\j}) rectangle (3.0,{5.4+0.42*\j});
+\foreach \i/\k in {0/\a,1/\b,2/\cc} {
+\node[font=\tiny] at ({1.2+0.7*\i},{5.225+0.42*\j}) {\k};}}
+% factorial cube
+\begin{scope}[shift={(5.3,5.05)}]
+\draw[red!60] (0,0) rectangle (1.1,1.1); \draw[red!60] (0.45,0.35) rectangle (1.55,1.45);
+\draw[red!60] (0,0) -- (0.45,0.35) (1.1,0) -- (1.55,0.35) (0,1.1) -- (0.45,1.45) (1.1,1.1) -- (1.55,1.45);
+\foreach \p in {(0,0),(1.1,0),(0,1.1),(1.1,1.1),(0.45,0.35),(1.55,0.35),(0.45,1.45),(1.55,1.45)} \fill[red!70!black] \p circle (2pt);
+\end{scope}
+% confounded cube: two blocks by sign of ABC
+\begin{scope}[shift={(9.3,5.05)}]
+\draw[violet!60] (0,0) rectangle (1.1,1.1); \draw[violet!60] (0.45,0.35) rectangle (1.55,1.45);
+\draw[violet!60] (0,0) -- (0.45,0.35) (1.1,0) -- (1.55,0.35) (0,1.1) -- (0.45,1.45) (1.1,1.1) -- (1.55,1.45);
+\foreach \p in {(0,0),(1.1,1.1),(1.55,0.35),(0.45,1.45)} \fill[violet] \p circle (2.2pt);
+\foreach \p in {(1.1,0),(0,1.1),(0.45,0.35),(1.55,1.45)} \draw[violet,fill=white] \p circle (2.2pt);
+\end{scope}
+% fractional cube: half the corners
+\begin{scope}[shift={(1.3,1.05)}]
+\draw[brown!60] (0,0) rectangle (1.1,1.1); \draw[brown!60] (0.45,0.35) rectangle (1.55,1.45);
+\draw[brown!60] (0,0) -- (0.45,0.35) (1.1,0) -- (1.55,0.35) (0,1.1) -- (0.45,1.45) (1.1,1.1) -- (1.55,1.45);
+\foreach \p in {(1.1,0),(0,1.1),(0.45,0.35),(1.55,1.45)} \fill[brown] \p circle (2.2pt);
+\end{scope}
+% nested tree
+\begin{scope}[shift={(5.9,2.55)}]
+\foreach \a in {-1,1} {
+\draw[cyan!50!black] (0,0) -- ({0.95*\a},-0.6);
+\fill[cyan!60!black] ({0.95*\a},-0.6) circle (2pt);
+\foreach \b in {-1,0,1} {\draw[cyan!50!black] ({0.95*\a},-0.6) -- ({0.95*\a+0.38*\b},-1.25); \fill[cyan!40] ({0.95*\a+0.38*\b},-1.25) circle (1.8pt);}}
+\fill[cyan!60!black] (0,0) circle (2pt);
+\end{scope}
+% split-plot: two whole plots each split in three
+\foreach \w/\s in {0/25,1/50} {
+\fill[magenta!\s] ({8.75+1.2*\w},1.2) rectangle ({9.85+1.2*\w},2.85);
+\foreach \k in {1,2} \draw[white,thick] ({8.75+1.2*\w},{1.2+0.55*\k}) -- ({9.85+1.2*\w},{1.2+0.55*\k});
+\draw[magenta!70!black] ({8.75+1.2*\w},1.2) rectangle ({9.85+1.2*\w},2.85);}
+\end{tikzpicture}
+\caption{The designs of the course. Each panel shows the layout, when the design is used (upper line) and what governs the analysis (lower line). In
+the confounded design the filled and open corners of the cube form the two blocks; in the fractional design only the filled corners are run.}
+\label{fig:designs}
+\end{figure}
+
+The choice is made in a fixed order.
+\begin{enumerate}[label=(\arabic*)]
+\item \emph{Identify the experimental unit for each factor}: the smallest piece of material to which a level of that factor is independently applied.
+Measurements taken on parts of one unit are subsamples, not replicates (Problem~\ref{prob:subsampling}). If different factors have different units, the design
+is split-plot (Section~\ref{sec:nested}).
+\item \emph{Identify the nuisance factors}, and block on them. One gives a randomised block design; two crossed ones give a Latin square; blocks too small
+for every treatment give an incomplete block design, or for a $2^k$ treatment structure a confounded design.
+\item \emph{Decide which factors are fixed and which random} (Section~\ref{sec:random}), and whether any are nested. This fixes the expected mean squares,
+and so the error for each test.
+\item \emph{Decide the size}: the number of replicates from a power calculation, or, when there are many factors, a fraction of the resolution needed.
+\end{enumerate}
+
+\subsection{Problems}
+
+\begin{problem}
+Five catalysts are to be compared, but each batch of raw material suffices for only three runs. Show that the smallest balanced incomplete block design
+uses ten batches. Compare the precision of a treatment comparison with that of a randomised block design using the same number of runs per
+catalyst, if such blocks were available.
+\end{problem}
+
+\begin{solution}
+With $t = 5$ and $k = 3$, Proposition~\ref{prop:bibd} requires $3b = 5r$ and $4\lambda = 2r$. So $r = 2\lambda$ is even and $r$ is a multiple of $3$, which makes $r$ a multiple
+of $6$. The smallest choice is $r = 6$, $\lambda = 3$, $b = 10$, and all $\binom53 = 10$ triples of catalysts achieve it. By Theorem~\ref{thm:bibd},
+\[
+\Var(\hat\tau_i - \hat\tau_l) = \frac{2k\sigma^2}{\lambda t} = \frac{6\sigma^2}{15} = 0.4\sigma^2 .
+\]
+In a randomised block design with $r = 6$ the variance would be $2\sigma^2/6 = 0.333\sigma^2$, so the incomplete design keeps a fraction
+$\lambda t/(rk) = 15/18 = 0.83$ of the information. This assumes the same $\sigma^2$; in practice blocks of five runs would be less homogeneous than blocks of
+three, so the true loss is smaller, and may be a gain.
+\end{solution}
+
+\begin{problem}\label{prob:subsampling}
+Three diets are compared on pigs housed in pens. Twelve pens are assigned at random, four to each diet; the diet is put in the pen's feeder, and two pigs
+in each pen are weighed. The weight gains (kg) are
+\begin{center}
+\begin{tabular}{c|cccc}
+diet & pen 1 & pen 2 & pen 3 & pen 4 \\
+\hline
+$1$ & $24.1$, $25.3$ & $22.8$, $23.4$ & $26.0$, $25.2$ & $23.5$, $24.9$ \\
+$2$ & $26.9$, $27.5$ & $25.1$, $26.3$ & $28.4$, $27.6$ & $24.8$, $26.0$ \\
+$3$ & $25.0$, $26.2$ & $27.3$, $26.1$ & $23.9$, $24.7$ & $26.6$, $25.8$
+\end{tabular}
+\end{center}
+with diet totals $195.2$, $212.6$ and $205.6$, grand total $613.4$ and $\sum y^2 = 15724.96$.
+\begin{enumerate}[label=(\alph*)]
+\item What is the experimental unit? Write down a model.
+\item Analyse the data, and test for a difference between diets.
+\item A colleague analyses the $24$ weights as a completely randomised design with eight replicates per diet. What do they conclude, and why is it wrong?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The diet is applied to a pen, not to a pig: the pigs in a pen share a feeder, and nothing assigns the diet to one pig independently of the
+other. The pen is the experimental unit, and the pig is a subsample (an observational unit). The model is a two-stage nested design with pens
+random within fixed diets,
+\[
+y_{ijk} = \mu + \tau_i + \beta_{j(i)} + \varepsilon_{ijk} , \quad i = 1, 2, 3 , \quad j = 1, \dots, 4 , \quad k = 1, 2 ,
+\]
+with $\sum\tau_i = 0$, $\beta_{j(i)} \sim N(0, \sigma^2_\beta)$ the pen effects, $\varepsilon_{ijk} \sim N(0, \sigma^2)$ the pig-to-pig variation, and all random terms independent.
+
+(b) By Theorem~\ref{thm:nested-ems},
+\[
+E(MS_{\mathrm{Diets}}) = \sigma^2 + 2\sigma^2_\beta + 4\sum\tau_i^2 , \quad E(MS_{\mathrm{Pens(Diets)}}) = \sigma^2 + 2\sigma^2_\beta ,
+\]
+so diets are tested against pens within diets. The sums of squares are $SS_{\mathrm{Diets}} = 19.163$, $SS_{\mathrm{Pens(Diets)}} = 22.095$ and $SSE = 6.220$, adding
+to $SST = 47.478$:
+\begin{center}
+\begin{tabular}{l|cccc}
+source & SS & df & MS & $F_0$ \\
+\hline
+diets & $19.163$ & $2$ & $9.582$ & $3.90$ \\
+pens (diets) & $22.095$ & $9$ & $2.455$ & $4.74$ \\
+pigs (pens) & $6.220$ & $12$ & $0.518$ & \\
+\hline
+total & $47.478$ & $23$ & &
+\end{tabular}
+\end{center}
+For diets, $F_0 = 9.582/2.455 = 3.90 < F_{0.05, 2, 9} = 4.26$ ($P = 0.060$): the difference between diets is not significant at the $5\%$ level. Pens differ
+($F_0 = 4.74$, $P = 0.007$), with $\hat\sigma^2_\beta = (2.455 - 0.518)/2 = 0.968$, larger than the pig-to-pig variance $\hat\sigma^2 = 0.518$. The same $F$ test results from a one-way
+analysis of the twelve pen means, which is the simplest correct analysis.
+
+(c) Pooling pens and pigs gives an error mean square $(22.095 + 6.220)/21 = 1.348$ on $21$ degrees of freedom, so $F_0 = 9.582/1.348 = 7.11$ with $P = 0.004$, a
+highly significant difference. The pooled mean square estimates $\sigma^2 + \frac{18}{21}\sigma^2_\beta$ instead of $\sigma^2 + 2\sigma^2_\beta$: it leaves out most of the pen-to-pen
+variation that the diet means actually contain, and it claims $21$ degrees of freedom when there are only $12$ independent units. This error is called
+\textbf{pseudo-replication}. Weighing more pigs per pen reduces $\sigma^2/2$, but not $\sigma^2_\beta$; only more pens make the diet comparison more precise.
+\end{solution}
+
+\begin{problem}
+A $2^{4-1}$ design with $I = ABCD$ was run to study the yield of a process, giving
+\begin{center}
+\begin{tabular}{c|cccccccc}
+run & $(1)$ & $ad$ & $bd$ & $ab$ & $cd$ & $ac$ & $bc$ & $abcd$ \\
+\hline
+$y$ & $49$ & $67$ & $50$ & $65$ & $65$ & $66$ & $64$ & $69$
+\end{tabular}
+\end{center}
+\begin{enumerate}[label=(\alph*)]
+\item Give the alias structure and estimate the seven effects.
+\item Which effects appear important, and how should the aliasing be resolved?
+\item Fit a model in the important factors, analyse it, and recommend settings to maximise yield.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The design has resolution IV, with aliases $A = BCD$, $B = ACD$, $C = ABD$, $D = ABC$, $AB = CD$, $AC = BD$, $AD = BC$. The runs are the full $2^3$ in $A$, $B$, $C$
+with $D = ABC$, so each effect is the contrast in the signs of the $2^3$ table divided by $4$. With $\bar y = 61.875$,
+\begin{gather*}
+A = 9.75 , \quad B = 0.25 , \quad C = 8.25 , \quad D = 1.75 , \\
+AB + CD = 0.25 , \quad AC + BD = -6.75 , \quad AD + BC = 0.75 .
+\end{gather*}
+
+(b) Three effects stand apart: $A$, $C$ and the string $AC + BD$; the other four are below $2$ in absolute value. Since neither $B$ nor $D$ has an effect, the
+heredity principle attributes the string to $AC$. If that were in doubt, the alternate fraction $I = -ABCD$ (eight more runs) would separate $AC$ from $BD$.
+
+(c) Dropping $B$ and $D$ projects the design into a $2^2$ in $A$ and $C$ with two replicates, and the four negligible effects give an error sum of squares
+$SSE = 8(0.25^2 + 1.75^2 + 0.25^2 + 0.75^2)/4 = 7.5$ on $4$ degrees of freedom (an effect estimate $E$ has $SS = 2E^2$ here):
+\begin{center}
+\begin{tabular}{l|cccc}
+source & SS & df & MS & $F_0$ \\
+\hline
+$A$ & $190.125$ & $1$ & $190.125$ & $101.4$ \\
+$C$ & $136.125$ & $1$ & $136.125$ & $72.6$ \\
+$AC$ & $91.125$ & $1$ & $91.125$ & $48.6$ \\
+error & $7.500$ & $4$ & $1.875$ & \\
+\hline
+total & $424.875$ & $7$ & &
+\end{tabular}
+\end{center}
+With $F_{0.05, 1, 4} = 7.71$, all three are significant ($P \le 0.002$). In coded units
+\[
+\hat y = 61.875 + 4.875x_1 + 4.125x_3 - 3.375x_1x_3 ,
+\]
+which predicts $49.5$, $66.0$, $64.5$ and $67.5$ at $(x_1, x_3) = (-1, -1)$, $(1, -1)$, $(-1, 1)$ and $(1, 1)$; these equal the cell means, as they must for a saturated
+model in a $2^2$. Yield is highest with both $A$ and $C$ high. The interaction says that either factor at its high level gives most of the gain: raising
+$A$ adds $16.5$ when $C$ is low but only $3$ when $C$ is high. A further experiment beyond the high levels might be worthwhile.
+\end{solution}
+
+\begin{problem}
+Five factors are to be studied in sixteen runs, but only eight runs can be made in a day, so the runs must be in two blocks. Show that a $2^{5-1}$
+design with $I = ABCDE$ in two blocks necessarily confounds a main effect or a two-factor interaction with blocks. Construct the blocks when $DE$ is
+believed the least likely interaction.
+\end{problem}
+
+\begin{solution}
+The blocks are distinguished by the sign of some effect $W$, which is confounded with blocks, and with $W$ goes its alias $W \cdot ABCDE$. The letters of $W$
+and of its alias are complementary subsets of $\{A, B, C, D, E\}$, so their lengths add to $5$ and one of them has length at most $2$. Hence blocks are
+confounded with either a main effect (when $W$ has length $1$ or $4$) or a two-factor interaction (length $2$ or $3$). The better choice is a
+two-factor interaction believed negligible. To confound $DE = ABC$, take the sixteen runs of the half fraction (the full $2^4$ in $A$, $B$, $C$, $D$ with
+$E = ABCD$) and divide them by the sign of $ABC$:
+\begin{center}
+\begin{tabular}{c|cccccccc}
+$ABC = -$ & $e$ & $abe$ & $ace$ & $bce$ & $d$ & $abd$ & $acd$ & $bcd$ \\
+$ABC = +$ & $a$ & $b$ & $c$ & $abc$ & $ade$ & $bde$ & $cde$ & $abcde$
+\end{tabular}
+\end{center}
+The other main effects and the other nine two-factor interactions remain estimable, each aliased only with a three- or four-factor interaction.
+\end{solution}
+
+\begin{problem}
+A study has three machines (fixed) and four operators chosen at random, each operator making two parts on each machine. A report gives
+\begin{center}
+\begin{tabular}{l|cccc}
+source & df & MS & $F_0$ & $P$ \\
+\hline
+machines & $2$ & $40$ & $20.0$ & $0.0002$ \\
+operators & $3$ & $12$ & $6.0$ & $0.010$ \\
+interaction & $6$ & $10$ & $5.0$ & $0.009$ \\
+error & $12$ & $2$ & &
+\end{tabular}
+\end{center}
+and concludes that the machines differ. Correct the analysis.
+\end{problem}
+
+\begin{solution}
+Every effect has been tested against the error mean square, which is correct only for a fixed effects model. In the restricted mixed model of
+Theorem~\ref{thm:mixed}, with $a = 3$, $b = 4$, $n = 2$,
+\[
+E(MS_A) = \sigma^2 + 2\sigma^2_{\tau\beta} + 4\sum\tau_i^2 , \qquad E(MS_{AB}) = \sigma^2 + 2\sigma^2_{\tau\beta} ,
+\]
+so machines must be tested against the interaction: $F_0 = 40/10 = 4.0$ on $2$ and $6$ degrees of freedom, below $F_{0.05, 2, 6} = 5.14$ ($P = 0.079$). The machines
+are \emph{not} shown to differ. The reason is the significant interaction ($F_0 = 5.0$, correctly against error): machine differences change from operator to
+operator, and with only four operators the average difference over the population of operators is poorly determined. The test against error
+answers a different question, about these four operators only.
+
+Operators are tested against error in the restricted model ($F_0 = 6.0$, $P = 0.010$), and against the interaction in the unrestricted one ($F_0 = 1.2$,
+$P = 0.39$); the report should say which model it uses. The restricted estimates are $\hat\sigma^2_{\tau\beta} = (10 - 2)/2 = 4$ and $\hat\sigma^2_\beta = (12 - 2)/6 = 1.67$. Comparisons of
+machine means use the interaction mean square too: their standard error is $\sqrt{2 \cdot 10/8} = 1.58$, not $\sqrt{2 \cdot 2/8} = 0.71$.
+\end{solution}
+
+\begin{problem}
+In the balanced one-way random effects model with $t$ levels and $r$ replicates, show that the analysis of variance estimator
+$\hat\sigma^2_\tau = (MS_{\mathrm{Treatments}} - MSE)/r$ has variance
+\[
+\Var(\hat\sigma^2_\tau) = \frac2{r^2}\biggl(\frac{(\sigma^2 + r\sigma^2_\tau)^2}{t - 1} + \frac{\sigma^4}{N - t}\biggr) ,
+\]
+and find an unbiased estimator of this variance. Apply it to Example~\ref{exa:lots}.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:oneway-random}, $MS_{\mathrm{Treatments}} = (\sigma^2 + r\sigma^2_\tau)U/(t - 1)$ and $MSE = \sigma^2V/(N - t)$, where $U \sim \chi^2_{t-1}$ and $V \sim \chi^2_{N-t}$ are independent. A
+$\chi^2_\nu$ variable has variance $2\nu$, so a mean square $M = \mathcal E\chi^2_\nu/\nu$ with expectation $\mathcal E$ has $\Var(M) = 2\mathcal E^2/\nu$. By independence,
+\[
+\Var(\hat\sigma^2_\tau) = \frac1{r^2}\bigl(\Var(MS_{\mathrm{Treatments}}) + \Var(MSE)\bigr) ,
+\]
+which is the stated formula. For the estimator, $E(M^2) = \Var(M) + \mathcal E^2 = \mathcal E^2(\nu + 2)/\nu$, so $M^2/(\nu + 2)$ is unbiased for $\mathcal E^2/\nu$, and
+\[
+\widehat{\Var}(\hat\sigma^2_\tau) = \frac2{r^2}\biggl(\frac{MS_{\mathrm{Treatments}}^2}{t + 1} + \frac{MSE^2}{N - t + 2}\biggr)
+\]
+is unbiased. In Example~\ref{exa:lots}, $t = 6$, $r = 4$, $N = 24$, $MS_{\mathrm{Treatments}} = 9.743$ and $MSE = 1.024$:
+\[
+\widehat{\Var}(\hat\sigma^2_\tau) = \frac2{16}\biggl(\frac{9.743^2}7 + \frac{1.024^2}{20}\biggr) = 1.70 ,
+\]
+a standard error of $1.30$ for the estimate $2.18$. Almost all of it comes from the first term: a variance component between lots is estimated from
+only six lots, and its precision is governed by $t - 1 = 5$ degrees of freedom however many tablets are measured. (A simulation of $200000$
+experiments with $\sigma^2 = 1$, $\sigma^2_\tau = 2$ gives a variance of $2.030$ against the formula's $2.032$.)
+\end{solution}
+
+\begin{problem}
+A new tablet-lot study is planned to detect lot-to-lot variation as large as the within-lot variation ($\sigma^2_\tau = \sigma^2$) with power $0.90$ at $\alpha = 0.05$.
+How many lots are needed with four tablets per lot? If only $40$ tablets can be assayed, how should they be divided between lots?
+\end{problem}
+
+\begin{solution}
+By the pivot of Section~\ref{sec:random}, $F_0/(1 + r\theta) \sim F_{t-1, N-t}$ with $\theta = \sigma^2_\tau/\sigma^2$, so the power is
+\[
+P\bigl(F_{t-1, N-t} > F_{\alpha, t-1, N-t}/(1 + r\theta)\bigr) ,
+\]
+computed from a central $F$ distribution. With $r = 4$ and $\theta = 1$ the power for $t = 6, 7, 8, 9, 10$ lots is $0.733$, $0.791$, $0.836$, $0.872$ and $0.901$, so ten lots
+($40$ tablets) are needed. With $40$ tablets in all, the divisions $5 \times 8$, $10 \times 4$ and $20 \times 2$ (lots $\times$ tablets) give power $0.880$, $0.901$ and $0.768$. Few lots leave few
+numerator degrees of freedom; many lots with few tablets make $1 + r\theta$ small. Ten lots of four is the best of the three, and in general sampling more
+lots matters more than measuring more within each, once $r\theta$ is moderately large.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
