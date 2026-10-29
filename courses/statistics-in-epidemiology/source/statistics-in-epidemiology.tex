@@ -622,6 +622,413 @@ With $p_1 = 0.02$, $p_0 = 0.01$: $\RR = 2$ and $\OR = 2 \times 0.99/0.98 = 2.02$
 The approximation is good only for a rare disease.
 \end{solution}
 
+\section{The primacy of data collection}
+\label{sec:data}
+
+\subsection{Why data collection comes first}
+
+Every later section of the course takes a table of counts and extracts from it a measure of frequency or association, with a confidence
+interval and perhaps an adjustment for confounding. All of that machinery assumes that the counts mean what they say: that a person
+recorded as a case had the disease, that a person recorded as exposed was exposed, and that the people counted are the people the study
+meant to count. No analysis can repair data that fail these assumptions. A confidence interval measures the random error of a
+well-collected sample; it says nothing about systematic error, and a large study with biased measurement gives a narrow interval around
+the wrong value.
+
+This is the sense in which data collection has \emph{primacy}. The decisions that most affect the validity of an epidemiological study are
+made before any analysis: who is eligible, how cases are defined and found, how exposure is measured, how many people are lost or refuse.
+The statistician's part in them is to say, in numbers, what each choice will cost.
+
+\subhead{The protocol}
+
+A study begins with a written protocol, fixed before data collection, which states:
+\begin{enumerate}
+\item the \textbf{question}, as a comparison of specified measures in a specified population (for instance, the rate ratio of hip fracture
+for current users of a drug against non-users, among women aged 65 and over);
+\item the \textbf{design} and the source population;
+\item the \textbf{case definition} and how cases will be ascertained;
+\item the \textbf{exposure} definition, its time window and how it will be measured;
+\item the variables to be recorded as possible confounders;
+\item the \textbf{sample size}, with the calculation behind it;
+\item the planned analysis, including what will be done about missing data.
+\end{enumerate}
+Writing the analysis down in advance matters. With many possible definitions of exposure, cut-points and adjustment sets, an analysis
+chosen after looking at the data can find an association that is an artefact of the choice.
+
+\subhead{Sources of data}
+
+Epidemiological data come either from \textbf{routine sources}, collected for other purposes (death certificates and vital registration, disease
+registries such as cancer registries, notifications of infectious disease, hospital discharge records, insurance and prescription
+databases, censuses) or from \textbf{data collected for the study} (interviews, self-completed questionnaires, physical examination,
+laboratory measurement of biological samples). Routine data are cheap and cover whole populations, but their definitions were set by
+someone else and their quality varies with place and time: a rise in the recorded rate of a disease may reflect a new diagnostic test or a
+change in coding rules. Study data can be made to fit the question, at a cost that limits the number of people measured.
+
+A \textbf{pilot study} on a small sample tests the questionnaire, the field procedures and the timing before the main study starts, and
+gives the first estimates of the quantities (prevalence of exposure, response rate, variance) that the sample size calculation needs.
+
+\subsection{Measuring disease: sensitivity and specificity}
+\label{sec:sensspec}
+
+A case definition is applied through some procedure (a questionnaire, a clinical examination, a laboratory test) that will classify some
+people wrongly. Let $D$ denote true disease status and $T^+$, $T^-$ a positive or negative result of the procedure.
+
+\begin{defn}
+The \textbf{sensitivity} of a classification procedure is $\text{Se} = P(T^+ \mid D)$, the probability that a true case is classified as a case. Its
+\textbf{specificity} is $\text{Sp} = P(T^- \mid \bar D)$, the probability that a non-case is classified as a non-case. The \textbf{positive predictive value}
+is $\text{PPV} = P(D \mid T^+)$ and the \textbf{negative predictive value} is $\text{NPV} = P(\bar D \mid T^-)$.
+\end{defn}
+
+Sensitivity and specificity describe the procedure and, to a first approximation, do not depend on the population it is applied to. The
+predictive values describe what a result means for a person, and depend heavily on how common the disease is.
+
+\begin{prop}
+\label{prop:ppv}
+If the prevalence of disease is $p$, then
+\[
+\text{PPV} = \frac{\text{Se}\,p}{\text{Se}\,p + (1 - \text{Sp})(1 - p)}, \qquad \text{NPV} = \frac{\text{Sp}\,(1 - p)}{\text{Sp}\,(1 - p) + (1 - \text{Se})\,p} .
+\]
+PPV increases and NPV decreases with $p$; as $p \to 0$, $\text{PPV} \to 0$ whenever $\text{Sp} < 1$.
+\end{prop}
+
+\begin{proof}
+The formulas are Bayes' theorem. Dividing numerator and denominator of PPV by $\text{Se}\,p$ gives
+$\text{PPV} = \{1 + (1 - \text{Sp})(1 - p)/(\text{Se}\,p)\}^{-1}$, and $(1 - p)/p$ decreases in $p$, so PPV increases; it tends to $0$ as $p \to 0$ because
+$(1 - p)/p \to \infty$. The argument for NPV is the same with $(1 - p)$ and $p$ exchanged.
+\end{proof}
+
+\begin{exa}
+A test has sensitivity $0.90$ and specificity $0.95$. Where the prevalence is $1\%$,
+\[
+\text{PPV} = \frac{0.90 \times 0.01}{0.90 \times 0.01 + 0.05 \times 0.99} = \frac{0.009}{0.0585} = 0.154 ,
+\]
+so only about one positive in six is a true case; the false positives from the $99\%$ who are healthy outnumber the true positives from the
+$1\%$ who are ill. Where the prevalence is $20\%$, as in a clinic of people with symptoms, the same test has $\text{PPV} = 0.818$. The NPV
+is $0.999$ and $0.974$ in the two settings.
+\end{exa}
+
+\subhead{Estimating prevalence from an imperfect test}
+
+If a survey classifies $n$ people with a test of known sensitivity and specificity, the proportion testing positive estimates the
+\textbf{apparent prevalence}
+\begin{equation}
+\label{eq:apparent}
+p^* = P(T^+) = \text{Se}\,p + (1 - \text{Sp})(1 - p) ,
+\end{equation}
+not the true prevalence $p$. Whenever $\text{Se} + \text{Sp} > 1$ (that is, whenever the test is better than tossing a coin) the relation can be inverted.
+
+\begin{thm}[Rogan--Gladen estimator]
+\label{thm:rogan}
+Let $\hat p^*$ be the proportion testing positive in a random sample of size $n$, and $J = \text{Se} + \text{Sp} - 1 > 0$. Then
+\[
+\hat p = \frac{\hat p^* + \text{Sp} - 1}{J}
+\]
+is unbiased for $p$, with variance $p^*(1 - p^*)/(nJ^2)$.
+\end{thm}
+
+\begin{proof}
+From \eqref{eq:apparent}, $p^* = (1 - \text{Sp}) + Jp$, so $p = (p^* + \text{Sp} - 1)/J$. The number testing positive is $\text{Bin}(n, p^*)$, so
+$E(\hat p^*) = p^*$ and $\Var(\hat p^*) = p^*(1 - p^*)/n$. The estimator is a linear function of $\hat p^*$ with slope $1/J$, which gives both results.
+\end{proof}
+
+The quantity $J$ is \textbf{Youden's index}. The variance is inflated by $1/J^2$ compared with a perfect test, the price of the
+misclassification. The estimate can fall outside $[0, 1]$ when $\hat p^*$ is below $1 - \text{Sp}$ or above Se; it is then truncated to the nearer
+end.
+
+\begin{exa}
+In a survey of $1000$ people, $130$ test positive on the test of the last example. The apparent prevalence is $0.130$ and
+\begin{gather*}
+\hat p = \frac{0.130 + 0.95 - 1}{0.85} = 0.094, \\
+\text{SE}(\hat p) = \frac{\sqrt{0.130 \times 0.870/1000}}{0.85} = 0.0125 ,
+\end{gather*}
+with approximate $95\%$ interval $0.094 \pm 1.96 \times 0.0125 = (0.070, 0.119)$. Taking $13\%$ at face value would overstate the
+prevalence by a third.
+\end{exa}
+
+\subsection{Measuring exposure: validity and reliability}
+
+A measurement is \textbf{valid} if it measures what it is meant to, on average, and \textbf{reliable} (repeatable) if it gives the same answer
+when repeated. Validity is judged against a better reference (a \emph{gold standard}): self-reported smoking against cotinine in saliva,
+recalled diet against weighed food records. Reliability can be judged without one, by repeating the measurement or having two observers
+make it independently. A measurement can be reliable and invalid (a scale that always reads two kilograms light); it cannot be valid
+for individuals unless it is reasonably reliable.
+
+\subhead{Agreement between two classifications: kappa}
+
+When two observers classify the same $n$ subjects into two categories, the proportion of subjects on whom they agree, $p_o$, is a poor
+measure of reliability by itself, because two observers who classify at random agree on many subjects by chance. If the observers'
+marginal proportions of ``positive'' are $r_1$ and $c_1$, independent random classification would agree with probability
+$p_e = r_1 c_1 + (1 - r_1)(1 - c_1)$.
+
+\begin{defn}
+\textbf{Cohen's kappa} is
+\[
+\kappa = \frac{p_o - p_e}{1 - p_e} ,
+\]
+the agreement beyond chance as a fraction of the largest possible agreement beyond chance.
+\end{defn}
+
+So $\kappa = 1$ for perfect agreement, $\kappa = 0$ for agreement no better than chance, and $\kappa < 0$ for less. Values above about $0.8$ are
+usually read as very good and below $0.4$ as poor, although the scale is a convention.
+
+\begin{exa}
+\label{exa:kappa}
+Two radiologists read the same $200$ chest X-rays for a lesion.
+\begin{center}
+\begin{tabular}{l|cc|c}
+ & B positive & B negative & Total \\
+\hline
+A positive & $46$ & $10$ & $56$ \\
+A negative & $14$ & $130$ & $144$ \\
+\hline
+Total & $60$ & $140$ & $200$ \\
+\end{tabular}
+\end{center}
+They agree on $p_o = (46 + 130)/200 = 0.880$ of the films. Chance agreement is
+\[
+p_e = \frac{56}{200} \cdot \frac{60}{200} + \frac{144}{200} \cdot \frac{140}{200} = 0.084 + 0.504 = 0.588 ,
+\]
+so $\kappa = (0.880 - 0.588)/(1 - 0.588) = 0.709$. Most of the $88\%$ raw agreement comes from the many films both read as clear.
+\end{exa}
+
+\subhead{Continuous exposures measured with error}
+
+If a continuous exposure $X$ is measured as $W = X + U$, with $U$ independent of $X$, of mean zero and variance $\sigma^2_U$, then a regression of
+an outcome on $W$ instead of $X$ estimates the true slope multiplied by the \textbf{reliability ratio}
+\[
+\lambda = \frac{\sigma^2_X}{\sigma^2_X + \sigma^2_U} ,
+\]
+the proportion of the variance of $W$ that is true variation between people. For if $Y = \alpha + \beta X + \varepsilon$ with $\varepsilon$ independent of
+$X$ and $U$, the slope of $Y$ on $W$ is $\Cov(Y, W)/\Var(W) = \beta\sigma^2_X/(\sigma^2_X + \sigma^2_U) = \lambda\beta$. This attenuation is called
+\textbf{regression dilution}. Its epidemiological reading is that an exposure measured on a single occasion, such as one
+reading of blood pressure, understates the strength of its relation with disease. If repeated measurements on a sample of subjects give
+$\lambda = 0.8$, the observed slope is $80\%$ of the true one, and dividing by $\lambda$ corrects it.
+
+\subsection{Misclassification and its effects}
+\label{sec:misclass}
+
+When a binary exposure or disease is measured with error, the $2 \times 2$ table is \textbf{misclassified}, and the measures of association
+computed from it are biased. Whether the error depends on the other variable is the key distinction.
+
+\begin{defn}
+Misclassification of exposure is \textbf{nondifferential} if its sensitivity and its specificity are the same for cases and
+non-cases;
+misclassification of disease is nondifferential if they are the same for exposed and unexposed. Otherwise it is \textbf{differential}.
+\end{defn}
+
+Exposure taken from records made before the disease appeared, such as employment files or prescriptions, is usually
+nondifferentially misclassified. Exposure recalled at interview after diagnosis may not be: a mother whose child has a birth defect searches her memory of
+the pregnancy more thoroughly than the mother of a healthy child. This is \textbf{recall bias}, the commonest form of differential
+misclassification.
+
+\begin{thm}[Nondifferential misclassification of disease]
+\label{thm:ndd}
+In a cohort study, let disease be classified with sensitivity Se and specificity Sp in both exposure groups, with $J = \text{Se} + \text{Sp} - 1 > 0$. The
+observed risks are $p_i^* = (1 - \text{Sp}) + J p_i$ for $i = 0, 1$, and
+\begin{enumerate}
+\item the observed risk difference is $J$ times the true one;
+\item the observed risk ratio lies between $1$ and the true risk ratio, and equals it if $\text{Sp} = 1$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+The expression for $p_i^*$ is \eqref{eq:apparent} applied within exposure group $i$. Then $p_1^* - p_0^* = J(p_1 - p_0)$, which is (1). For (2), write
+$s = 1 - \text{Sp} \geq 0$ and suppose $p_1 > p_0$. Then $p_1^*/p_0^* = (s + Jp_1)/(s + Jp_0) > 1$, and
+\[
+\frac{s + Jp_1}{s + Jp_0} \leq \frac{p_1}{p_0} \iff p_0 (s + Jp_1) \leq p_1 (s + Jp_0) \iff s\,p_0 \leq s\,p_1 ,
+\]
+which holds, with equality if and only if $s = 0$. The case $p_1 < p_0$ is the same with the inequalities reversed.
+\end{proof}
+
+The second part has a practical consequence. When the effect is measured as a ratio, \emph{specificity} matters far more than sensitivity:
+a case definition that misses some cases but admits no false ones leaves the risk ratio unbiased. Studies therefore often use strict case
+definitions, accepting that some true cases are lost.
+
+\begin{thm}[Nondifferential misclassification of exposure]
+\label{thm:nde}
+In a case-control study, let exposure be classified with sensitivity Se and specificity Sp among both cases and controls, with
+$J = \text{Se} + \text{Sp} - 1 > 0$, and let $q_1, q_0 \in (0, 1)$ be the true probabilities of exposure among cases and controls. Then the observed odds ratio lies
+between $1$ and the true odds ratio.
+\end{thm}
+
+\begin{proof}
+The observed exposure probabilities are $q_i^* = f(q_i)$, where $f(q) = a + Jq$ with $a = 1 - \text{Sp}$; note $1 - f(q) = b + J(1 - q)$ with $b = 1 - \text{Se}$, and
+$a + b = 1 - J$. Let $g(\theta) = \operatorname{logit} f(q)$ where $\theta = \operatorname{logit} q$. The log odds ratios are $\theta_1 - \theta_0$ (true) and $g(\theta_1) - g(\theta_0)$ (observed), so it is
+enough to show $0 < g'(\theta) \leq 1$; the mean value theorem then gives $g(\theta_1) - g(\theta_0) = g'(\xi)(\theta_1 - \theta_0)$, of the same sign and no larger in size.
+
+Since $d\theta/dq = 1/\{q(1 - q)\}$ and $d \operatorname{logit} f/dq = J/\{f(1 - f)\}$,
+\[
+g'(\theta) = \frac{J\,q(1 - q)}{f(q)\{1 - f(q)\}} .
+\]
+This is positive. Expanding the denominator,
+\[
+f(1 - f) = (a + Jq)\{b + J(1 - q)\} = ab + aJ(1 - q) + bJq + J^2 q(1 - q) .
+\]
+Now $aJ(1 - q) \geq aJ\,q(1 - q)$ and $bJq \geq bJ\,q(1 - q)$, so
+\begin{align*}
+f(1 - f) &\geq (a + b)J\,q(1 - q) + J^2 q(1 - q) \\
+&= (1 - J + J)\,J\,q(1 - q) = J\,q(1 - q) ,
+\end{align*}
+and $g'(\theta) \leq 1$.
+\end{proof}
+
+So nondifferential misclassification of a binary exposure biases the odds ratio towards the null, and a study that finds an association
+in spite of it has, if anything, understated it. Three cautions keep this result in its place. It is a statement about the expected
+value; in a particular small study random error can carry the estimate past the true value. It concerns a binary exposure; with three or
+more categories misclassification between adjacent levels can bias the middle category away from the null. And it assumes the errors in
+exposure are independent of any errors in disease.
+
+\begin{exa}
+\label{exa:misclass}
+In a cohort study the true risks are $p_1 = 0.10$ and $p_0 = 0.05$ ($\RR = 2$, $\RD = 0.05$). Disease is ascertained with $\text{Se} = 0.80$ and
+$\text{Sp} = 0.95$, so $J = 0.75$. The observed risks are
+\begin{gather*}
+p_1^* = 0.05 + 0.75 \times 0.10 = 0.125, \\
+p_0^* = 0.05 + 0.75 \times 0.05 = 0.0875 ,
+\end{gather*}
+giving an observed risk ratio of $1.43$ and a risk difference of $0.0375 = 0.75 \times 0.05$.
+
+In a case-control study with true $q_1 = 0.4$ and $q_0 = 0.2$ ($\OR = 2.67$), exposure is classified with $\text{Se} = 0.8$ and $\text{Sp} = 0.9$ in both
+groups. Then $q_1^* = 0.1 + 0.7 \times 0.4 = 0.38$, $q_0^* = 0.1 + 0.7 \times 0.2 = 0.24$, and the observed odds ratio is
+$(0.38/0.62)/(0.24/0.76) = 1.94$.
+
+If instead the misclassification is differential (cases recall exposure with sensitivity $0.95$, controls with $0.75$, specificity $0.9$ in both)
+and the exposure has no effect, $q_1 = q_0 = 0.3$, then $q_1^* = 0.355$ and $q_0^* = 0.295$, and the observed odds ratio is $1.32$: an association
+created entirely by the way exposure was measured.
+\end{exa}
+
+\subhead{Correcting for misclassification}
+
+When Se and Sp are known, from a validation study in which a subsample is measured both ways, the expected observed counts can be
+inverted. Among $m$ subjects of whom $x^*$ are classified exposed, the expected number truly exposed is
+\[
+x = \frac{x^* - (1 - \text{Sp})\,m}{J} ,
+\]
+which is Theorem~\ref{thm:rogan} written in counts. Applying it separately to cases and controls (with their own Se and Sp if the
+misclassification is differential) gives a corrected table.
+
+\begin{exa}
+A case-control study with $200$ cases and $200$ controls observes $76$ exposed cases and $48$ exposed controls, an odds ratio of
+$(76 \times 152)/(124 \times 48) = 1.94$. If exposure is known to be classified with $\text{Se} = 0.8$, $\text{Sp} = 0.9$, the corrected numbers exposed are
+\[
+\frac{76 - 0.1 \times 200}{0.7} = 80 \quad\text{(cases)}, \qquad \frac{48 - 0.1 \times 200}{0.7} = 40 \quad\text{(controls)},
+\]
+and the corrected odds ratio is $(80 \times 160)/(120 \times 40) = 2.67$, recovering the second part of Example~\ref{exa:misclass}. The correction
+is only as good as the values of Se and Sp; small errors in them, especially in Sp when exposure is rare, can produce impossible
+(negative) corrected counts.
+\end{exa}
+
+\subsection{Completeness of the data}
+
+Measurement error concerns the people who are measured; the other threat at the collection stage is the people who are not.
+\textbf{Non-response} in a survey, \textbf{refusal} in a case-control study and \textbf{loss to follow-up} in a cohort remove people from the
+data, and if the reasons are related to exposure or disease, the people left are no longer a random sample.
+
+\begin{prop}
+\label{prop:nonresp}
+In a population in which a fraction $r$ responds, let $\mu_R$ and $\mu_N$ be the means (or prevalences) of a variable among responders and
+non-responders. The population mean is $\mu = r\mu_R + (1 - r)\mu_N$, and the responders' mean has bias
+\[
+\mu_R - \mu = (1 - r)(\mu_R - \mu_N) .
+\]
+\end{prop}
+
+\begin{proof}
+$\mu_R - \mu = \mu_R - r\mu_R - (1 - r)\mu_N = (1 - r)(\mu_R - \mu_N)$.
+\end{proof}
+
+The bias is the product of the non-response rate and the difference between responders and non-responders. A high response rate limits
+it, but cannot remove it if the two groups are very different, and the second factor cannot be estimated from the responders alone.
+
+\begin{exa}
+In a survey with $70\%$ response, the prevalence of a condition among responders is $0.12$. If a follow-up of a sample of
+non-responders finds a prevalence of $0.25$ among them, the population prevalence is $0.7 \times 0.12 + 0.3 \times 0.25 = 0.159$, and the
+responders understated it by $0.3 \times (0.12 - 0.25) = -0.039$, about a quarter of the true value. People who are ill are often less likely
+to take part in a health survey, which makes this direction of bias common.
+\end{exa}
+
+Missing values within the records of those who do take part raise the same issue. Data are \textbf{missing completely at random} (MCAR)
+if whether a value is missing is unrelated to any variable, observed or not; \textbf{missing at random} (MAR) if it depends only on observed
+variables; and \textbf{missing not at random} otherwise. An analysis of complete records only is unbiased under MCAR. Under MAR the
+missingness can be corrected for by using the observed variables it depends on (weighting, or multiple imputation); when values are
+missing not at random no analysis of the data alone can correct for it, which is why the protocol should aim to prevent missing data
+rather than plan to analyse it.
+
+\subsection{Problems}
+
+\begin{problem}
+A screening test for a disease has sensitivity $0.95$ and specificity $0.98$. Find the positive predictive value when the prevalence
+is $0.001$, $0.01$ and $0.1$. Explain why mass screening of a general population for a rare disease generates mostly false
+positives, and what can be done about it.
+\end{problem}
+
+\begin{solution}
+$\text{PPV} = 0.95p/\{0.95p + 0.02(1 - p)\}$, which is $0.045$ at $p = 0.001$, $0.324$ at $p = 0.01$ and $0.841$ at $p = 0.1$. At low prevalence the $2\%$
+false positive rate applies to almost the whole population, while the $95\%$ true positive rate applies to very few, so false positives
+dominate (Proposition~\ref{prop:ppv}). Remedies are to screen only a higher-prevalence group (by age or risk factors), or to follow a positive
+result with a second, more specific test; testing in series raises the effective specificity to about $1 - (1 - \text{Sp}_1)(1 - \text{Sp}_2)$ if
+the two tests err independently.
+\end{solution}
+
+\begin{problem}
+In a serological survey $84$ of $600$ people test positive on an assay with sensitivity $0.92$ and specificity $0.97$. Estimate the true
+prevalence with a $95\%$ confidence interval. What would the estimate be if only $15$ had tested positive?
+\end{problem}
+
+\begin{solution}
+$\hat p^* = 84/600 = 0.140$ and $J = 0.89$, so $\hat p = (0.140 - 0.03)/0.89 = 0.124$ and $\text{SE} = \sqrt{0.14 \times 0.86/600}/0.89 = 0.0159$. The interval is
+$0.124 \pm 0.031 = (0.093, 0.155)$. With $15$ positives, $\hat p^* = 0.025 < 1 - \text{Sp} = 0.03$, so $\hat p = (0.025 - 0.03)/0.89 < 0$: fewer people tested positive than
+the false positive rate alone would produce. The estimate is truncated to $0$; the data are consistent with no infection at all.
+\end{solution}
+
+\begin{problem}
+Show that $\kappa$ can be low even when the observed agreement is high. Two observers classify $100$ subjects; they agree that $90$ are
+negative, both call $2$ positive, and they disagree on the remaining $8$, split equally. Compute $p_o$ and $\kappa$, and explain.
+\end{problem}
+
+\begin{solution}
+Each observer calls $2 + 4 = 6$ positive, so $p_e = 0.06^2 + 0.94^2 = 0.8872$ and $p_o = 0.92$. Then $\kappa = (0.92 - 0.8872)/(1 - 0.8872) = 0.29$. When one category
+is rare, two observers agree on most subjects by chance, so $p_e$ is close to $1$ and the agreement beyond chance is small: the observers
+agree on only $2$ of the $10$ subjects that either of them called positive. Kappa depends on the prevalence of the trait, and should be
+reported with the marginal proportions.
+\end{solution}
+
+\begin{problem}
+In a cohort study the true risks are $p_1 = 0.02$ and $p_0 = 0.01$. Find the observed risk ratio if disease is ascertained (a) with
+sensitivity $0.7$ and specificity $1$, (b) with sensitivity $1$ and specificity $0.99$, in both groups. Comment.
+\end{problem}
+
+\begin{solution}
+(a) $p_i^* = 0.7p_i$, so $\RR^* = 0.014/0.007 = 2$, unbiased (Theorem~\ref{thm:ndd}, $\text{Sp} = 1$). (b) $p_i^* = 0.01 + 0.99p_i$, so
+$\RR^* = (0.01 + 0.0198)/(0.01 + 0.0099) = 0.0298/0.0199 = 1.50$. Losing $30\%$ of the cases costs only precision; a $1\%$ false positive rate, applied to a
+population in which the disease itself has a risk of $1$--$2\%$, adds as many false cases as there are true ones in the unexposed and
+pulls the ratio a long way towards $1$. For a rare disease, specificity is what matters.
+\end{solution}
+
+\begin{problem}
+Give an example, with numbers, in which differential misclassification of exposure biases the odds ratio \emph{away} from the null
+when there is a true association, and one in which it reverses the direction of the association.
+\end{problem}
+
+\begin{solution}
+Take $q_1 = 0.4$, $q_0 = 0.2$ (true $\OR = 2.67$) and $\text{Sp} = 1$ in both groups. If cases report exposure with $\text{Se} = 1$ and controls with
+$\text{Se} = 0.5$, then $q_1^* = 0.4$, $q_0^* = 0.1$ and $\OR^* = (0.4/0.6)/(0.1/0.9) = 6.0$, biased away from the null. If instead cases under-report with
+$\text{Se} = 0.4$ and controls report fully, $q_1^* = 0.16$, $q_0^* = 0.2$ and $\OR^* = (0.16/0.84)/(0.2/0.8) = 0.76$: a harmful exposure appears protective. Differential
+error has no predictable direction, which is why it is worse than nondifferential error of the same size.
+\end{solution}
+
+\begin{problem}
+In a cohort of $5000$ people, $20\%$ are lost to follow-up. Among those followed, the five-year risk is $0.08$. Using
+Proposition~\ref{prop:nonresp}, find the range of the true five-year risk if the risk among those lost could be anything from $0$ to $0.30$.
+What assumption makes the complete-case risk unbiased?
+\end{problem}
+
+\begin{solution}
+The true risk is $0.8 \times 0.08 + 0.2\,\mu_N = 0.064 + 0.2\,\mu_N$, which ranges from $0.064$ (if no one lost became ill) to $0.124$ (if $30\%$ did). The
+complete-case estimate $0.08$ is unbiased only if the risk among those lost equals the risk among those followed: loss to follow-up
+unrelated to outcome. A range like this, computed from extreme but plausible assumptions about the missing, is a simple and honest
+\emph{sensitivity analysis}.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -635,11 +1042,19 @@ Van Nostrand Reinhold (reprinted by Wiley).
 \end{enumerate}
 
 \subhead{Further reading}
+% Long journal names leave no good break point without hyphenation.
+\sloppy
 \begin{enumerate}
 \item Breslow, N. E., and Day, N. E. (1980), \emph{Statistical Methods in Cancer Research, Vol.~I: The Analysis of Case-Control Studies}, Lyon,
 International Agency for Research on Cancer.
+\item Cohen, J. (1960), A coefficient of agreement for nominal scales, \emph{Educational and Psychological
+Measurement}, 20, 37--46.
+\item Copeland, K. T., Checkoway, H., McMichael, A. J., and Holbrook, R. H. (1977), Bias due to misclassification in the estimation of relative risk,
+\emph{American Journal of Epidemiology}, 105, 488--495.
 \item Hill, A. B. (1965), The environment and disease: association or causation? \emph{Proceedings of the Royal Society of Medicine}, 58,
 295--300.
+\item Rogan, W. J., and Gladen, B. (1978), Estimating prevalence from the results of a screening test, \emph{American Journal of
+Epidemiology}, 107, 71--76.
 \item Snow, J. (1855), \emph{On the Mode of Communication of Cholera} (2nd ed.), London, John Churchill.
 \end{enumerate}
 
