@@ -160,7 +160,7 @@ when they are not.
 
 \subhead{Three measures of occurrence}
 
-There are three basic ways of saying how often a disease occurs, studied fully in a later section. Here they are introduced
+There are three basic ways of saying how often a disease occurs, studied fully in Section~\ref{sec:frequency}. Here they are introduced
 informally, because the study designs differ in which of them they can estimate.
 
 \begin{enumerate}
@@ -1027,6 +1027,400 @@ The true risk is $0.8 \times 0.08 + 0.2\,\mu_N = 0.064 + 0.2\,\mu_N$, which rang
 complete-case estimate $0.08$ is unbiased only if the risk among those lost equals the risk among those followed: loss to follow-up
 unrelated to outcome. A range like this, computed from extreme but plausible assumptions about the missing, is a simple and honest
 \emph{sensitivity analysis}.
+\end{solution}
+
+\section{Measures of disease frequency}
+\label{sec:frequency}
+
+Section~\ref{sec:occurrence} introduced prevalence, risk and rate informally. This section defines them precisely, gives the
+probability models under which they are estimated, derives confidence intervals, and proves the relations between them. The measures
+of association in the next sections are ratios and differences of these quantities, so everything there rests on what is done here.
+
+\subsection{Prevalence}
+\label{sec:prevalence}
+
+\begin{defn}
+The \textbf{point prevalence} of a disease at time $t$ is the proportion of a population that has the disease at $t$. The \textbf{period
+prevalence} over an interval is the proportion that has the disease at any time during the interval.
+\end{defn}
+
+Prevalence is a proportion, without units. It counts every existing case, however long ago it began, so it measures the burden of a
+disease on a population, the quantity needed for planning services, rather than how often the disease begins.
+
+In a cross-sectional survey of $n$ people drawn at random, of whom $X$ have the disease, $X \sim \text{Bin}(n, p)$, and the prevalence $p$ is
+estimated by $\hat p = X/n$, unbiased with variance $p(1 - p)/n$. Three confidence intervals are in use.
+
+\subhead{The Wald interval}
+
+The normal approximation $\hat p \approx N(p, p(1 - p)/n)$ with the variance estimated by $\hat p(1 - \hat p)/n$ gives
+\[
+\hat p \pm z \sqrt{\hat p(1 - \hat p)/n} ,
+\]
+where $z = 1.96$ for $95\%$. It is simple, but its coverage is poor when $np$ is small: it can include negative values, and when $X = 0$ it
+collapses to the single point $0$.
+
+\subhead{The Wilson (score) interval}
+
+Instead of estimating the variance, keep $p$ in it and find all $p$ for which $|\hat p - p| \leq z\sqrt{p(1 - p)/n}$. Squaring gives a quadratic
+inequality in $p$,
+\[
+(1 + z^2/n)\,p^2 - (2\hat p + z^2/n)\,p + \hat p^2 \leq 0 ,
+\]
+whose roots are the limits
+\begin{equation}
+\label{eq:wilson}
+\frac{\hat p + \dfrac{z^2}{2n} \pm z\sqrt{\dfrac{\hat p(1 - \hat p)}{n} + \dfrac{z^2}{4n^2}}}{1 + z^2/n} .
+\end{equation}
+The interval always lies inside $[0, 1]$ and is centred not at $\hat p$ but at a point pulled towards $\tfrac12$. Its coverage is close to
+the nominal level even for small $n$, and it is the interval to use by default.
+
+\subhead{The exact (Clopper--Pearson) interval}
+
+The exact interval inverts two one-sided binomial tests: its lower limit $p_L$ is the value of $p$ for which $P(X \geq x) = 0.025$, and its
+upper limit $p_U$ the value for which $P(X \leq x) = 0.025$, where $x$ is the observed count. These are found from the beta distribution.
+
+\begin{lem}
+\label{lem:binbeta}
+If $X \sim \text{Bin}(n, p)$ and $1 \leq x \leq n$, then $P(X \geq x) = P(B \leq p)$ where $B \sim \text{Beta}(x, n - x + 1)$.
+\end{lem}
+
+\begin{proof}
+Let $U_1, \dots, U_n$ be independent uniform on $(0, 1)$ and $X$ the number of them that are at most $p$; then $X \sim \text{Bin}(n, p)$. The event $X \geq x$
+is the event that the $x$-th smallest of the $U_i$, $U_{(x)}$, is at most $p$. The $x$-th order statistic of $n$ uniforms has the
+$\text{Beta}(x, n - x + 1)$ distribution.
+\end{proof}
+
+Hence $p_L$ is the $0.025$ quantile of $\text{Beta}(x, n - x + 1)$ and, applying the lemma to $n - X$, $p_U$ is the $0.975$ quantile of
+$\text{Beta}(x + 1, n - x)$; by convention $p_L = 0$ when $x = 0$ and $p_U = 1$ when $x = n$. The coverage of this interval is never below $95\%$,
+so it is conservative: usually somewhat wider than it need be.
+
+\begin{exa}
+\label{exa:prevci}
+In a survey $46$ of $400$ adults have hypertension, so $\hat p = 0.115$. The $95\%$ intervals are:
+\begin{center}
+\begin{tabular}{lc}
+\hline
+Method & Interval \\
+\hline
+Wald & $(0.084,\ 0.146)$ \\
+Wilson & $(0.087,\ 0.150)$ \\
+Clopper--Pearson & $(0.085,\ 0.150)$ \\
+\hline
+\end{tabular}
+\end{center}
+With this many cases the three agree closely. With $2$ cases in $40$ ($\hat p = 0.05$) they do not: Wald gives $(-0.018,\ 0.118)$, an
+impossible lower limit, while Wilson gives $(0.014,\ 0.165)$ and Clopper--Pearson $(0.006,\ 0.169)$.
+\end{exa}
+
+\subsection{Risk}
+\label{sec:risk}
+
+\begin{defn}
+The \textbf{risk} or \textbf{cumulative incidence} of a disease over an interval $(0, t]$ is the probability that a person free of the disease
+at time $0$ develops it during the interval.
+\end{defn}
+
+In a closed cohort of $N$ people at risk at time $0$, followed completely for the whole period, the number $X$ who develop the disease is
+$\text{Bin}(N, R)$, where $R$ is the risk. The estimate $X/N$ and the intervals of the last subsection apply unchanged. An \textbf{attack rate} is
+the same quantity for an outbreak, where the period is the short duration of the outbreak (the proportion of those who ate at a
+wedding who became ill), and the \textbf{case-fatality} is the risk of death over a stated period among those with the disease.
+
+Despite the word ``rate'' in these names, all are proportions. Two complications prevent them from being as simple in practice as in
+the definition:
+\begin{enumerate}
+\item \textbf{Losses.} People leave the study before the end of the period, by migration or refusal, without having had the event. Their
+outcome over the full period is unknown, so neither the numerator nor the denominator is known exactly. The section on follow-up studies
+handles this with life tables; meanwhile, the rate defined next uses the time each person was actually observed.
+\item \textbf{Competing risks.} People die of other causes before they could develop the disease. The risk of the disease then depends on
+the death rate from other causes as well as on the disease itself (Problem~\ref{prob:compete}).
+\end{enumerate}
+
+\subsection{Incidence rate and person-time}
+\label{sec:rate}
+
+\begin{defn}
+The \textbf{incidence rate} of a disease in a population over a period is
+\[
+I = \frac{\text{number of new cases in the period}}{\text{total person-time at risk in the period}} .
+\]
+\end{defn}
+
+Each person contributes the time from entering observation (or the start of the period) until the earliest of: developing the disease,
+leaving observation, or the end of the period. The units are $\text{time}^{-1}$, conventionally written as cases per $1000$ person-years.
+A rate of $5$ per $1000$ person-years is the same whether it comes from $1000$ people followed for one year or $100$ people for ten.
+
+\begin{exa}
+\label{exa:persontime}
+Eight workers are followed during a five-year study. Times are years from the start of the study.
+\begin{center}
+\begin{tabular}{cccl}
+\hline
+Worker & Enters & Leaves & Reason for leaving \\
+\hline
+1 & 0 & 5 & End of study \\
+2 & 0 & 2.5 & Disease \\
+3 & 1 & 5 & End of study \\
+4 & 0 & 3 & Moved away \\
+5 & 2 & 4.5 & Disease \\
+6 & 0 & 5 & End of study \\
+7 & 0.5 & 1.5 & Died of another cause \\
+8 & 3 & 5 & End of study \\
+\hline
+\end{tabular}
+\end{center}
+The person-years at risk are $5 + 2.5 + 4 + 3 + 2.5 + 5 + 1 + 2 = 25$ and there are $2$ cases, so $I = 2/25 = 0.08$ per person-year, or $80$ per
+$1000$ person-years. No risk can be computed from these data without further assumptions: only $4$ workers were observed for all five
+years, and the others were not observed long enough to say whether they would have become ill.
+\end{exa}
+
+In an open population whose size $N(t)$ changes slowly, the person-time over a period of length $\Delta$ is approximately $N_{\text{mid}}\Delta$,
+where $N_{\text{mid}}$ is the population at the middle of the period. National annual death rates are computed in this way, as the deaths in the year divided by the mid-year population.
+
+\subhead{The rate as a hazard}
+
+The incidence rate estimates a population parameter: the \textbf{hazard} $\lambda(t)$, the instantaneous rate at which disease occurs among
+those still at risk,
+\[
+\lambda(t) = \lim_{h \downarrow 0} \frac{P(t < T \leq t + h \mid T > t)}{h} ,
+\]
+where $T$ is the time to disease. The hazard determines the risk.
+
+\begin{thm}[Risk and rate]
+\label{thm:riskrate}
+In the absence of competing risks, the risk over $(0, t]$ is
+\[
+R(t) = 1 - \exp\Bigl(-\int_0^t \lambda(u)\,du\Bigr) .
+\]
+If the hazard is constant, $R(t) = 1 - e^{-\lambda t}$, and $R(t) \approx \lambda t$ when $\lambda t$ is small.
+\end{thm}
+
+\begin{proof}
+Let $S(t) = P(T > t) = 1 - R(t)$. Then $P(t < T \leq t + h \mid T > t) = \{S(t) - S(t + h)\}/S(t)$, so dividing by $h$ and letting $h \to 0$ gives
+$\lambda(t) = -S'(t)/S(t) = -\frac{d}{dt}\log S(t)$. Integrating from $0$ with $S(0) = 1$, $\log S(t) = -\int_0^t \lambda(u)\,du$. For constant $\lambda$ the
+integral is $\lambda t$, and $1 - e^{-x} = x - x^2/2 + \cdots \approx x$ for small $x$.
+\end{proof}
+
+\begin{exa}
+A rate of $6.23$ per $1000$ person-years, if constant, gives a ten-year risk of $1 - e^{-0.0623} = 0.0604$; the approximation
+$\lambda t = 0.0623$ is $3\%$ too high. For a rate of $50$ per $1000$ the ten-year risk is $1 - e^{-0.5} = 0.39$, against the approximation $0.5$,
+which is useless.
+\end{exa}
+
+\subhead{The Poisson likelihood}
+
+The statistical model for a rate is justified by the following result, which is why counts of cases over person-time are analysed as
+Poisson variables even though nobody's follow-up was fixed in advance.
+
+\begin{thm}
+\label{thm:poissonlik}
+Suppose $n$ people have a constant hazard $\lambda$, and person $i$ is observed for time $t_i$ with event indicator $\delta_i$ ($1$ if the disease
+occurred at $t_i$, $0$ if observation ended without it), where the end of observation without disease is independent of the time to
+disease. Let $D = \sum \delta_i$ and $T = \sum t_i$. Then the likelihood is
+\[
+L(\lambda) = \lambda^D e^{-\lambda T} ,
+\]
+which is proportional to the likelihood of a Poisson observation $D$ with mean $\lambda T$. The maximum likelihood estimate is $\hat\lambda = D/T$,
+and the observed information gives $\text{SE}(\log \hat\lambda) = 1/\sqrt{D}$.
+\end{thm}
+
+\begin{proof}
+With constant hazard, $T_i$ is exponential with density $\lambda e^{-\lambda t}$ and survivor function $e^{-\lambda t}$. A person whose disease is observed at $t_i$
+contributes the density $\lambda e^{-\lambda t_i}$; a person observed disease-free until $t_i$ contributes $P(T_i > t_i) = e^{-\lambda t_i}$. (Independence of the
+end of observation is what makes these the right contributions.) Both are $\lambda^{\delta_i} e^{-\lambda t_i}$, and the product over people is $\lambda^D e^{-\lambda T}$.
+A Poisson variable with mean $\lambda T$ has probability $(\lambda T)^D e^{-\lambda T}/D!$, which as a function of $\lambda$ is a constant times the same expression.
+
+The log-likelihood $D\log\lambda - \lambda T$ has derivative $D/\lambda - T$, zero at $\hat\lambda = D/T$, and second derivative $-D/\lambda^2$. In terms of
+$\theta = \log\lambda$ the log-likelihood is $D\theta - Te^\theta$, with second derivative $-Te^\theta = -D$ at the maximum, so the observed information
+for $\theta$ is $D$ and $\text{SE}(\hat\theta) = 1/\sqrt D$.
+\end{proof}
+
+The approximate interval for the rate is therefore $\hat\lambda\, e^{\pm z/\sqrt D}$. Its precision depends on the number of \emph{cases}, not on the
+number of people or the amount of person-time: a study with $25$ cases estimates a rate to within a factor of about $e^{1.96/5} = 1.48$,
+however large the cohort.
+
+\subhead{The exact interval for a rate}
+
+Treating $D$ as Poisson with mean $\mu = \lambda T$, exact limits for $\mu$ come from the gamma distribution, as the binomial ones came from the beta.
+
+\begin{lem}
+\label{lem:poisgamma}
+If $X \sim \text{Poisson}(\mu)$ and $d \geq 1$, then $P(X \geq d) = P(G \leq \mu)$ where $G \sim \text{Gamma}(d, 1)$; equivalently $2G \sim \chi^2_{2d}$.
+\end{lem}
+
+\begin{proof}
+Let events occur in a Poisson process of unit rate on $(0, \infty)$. The number in $(0, \mu]$ is $\text{Poisson}(\mu)$, and at least $d$ events occur in
+$(0, \mu]$ exactly when the $d$-th event time is at most $\mu$. The $d$-th event time is the sum of $d$ independent unit exponentials, which is
+$\text{Gamma}(d, 1)$, and twice a $\text{Gamma}(d, 1)$ variable is $\chi^2_{2d}$.
+\end{proof}
+
+Solving $P(X \geq d) = 0.025$ and $P(X \leq d) = 0.025$ for $\mu$ gives the exact $95\%$ limits for the rate,
+\begin{equation}
+\label{eq:exactrate}
+\lambda_L = \frac{\chi^2_{2D,\,0.025}}{2T}, \qquad \lambda_U = \frac{\chi^2_{2D + 2,\,0.975}}{2T} ,
+\end{equation}
+where $\chi^2_{k,\alpha}$ is the $\alpha$ quantile of $\chi^2_k$ and $\lambda_L = 0$ when $D = 0$.
+
+\begin{exa}
+\label{exa:rateci}
+A cohort accumulates $3850$ person-years and $24$ cases. The rate is $24/3850 = 6.23$ per $1000$ person-years. The log-scale interval is
+\[
+6.23\, e^{\pm 1.96/\sqrt{24}} = (4.18,\ 9.30) \text{ per } 1000 ,
+\]
+and the exact interval, from $\chi^2_{48,\,0.025} = 30.75$ and $\chi^2_{50,\,0.975} = 71.42$, is $(3.99,\ 9.28)$ per $1000$.
+\end{exa}
+
+\subsection{Prevalence, incidence and duration}
+\label{sec:prevdur}
+
+Prevalence depends on how often a disease begins and how long it lasts. The relation is exact in a population in a steady state.
+
+\begin{thm}
+\label{thm:steady}
+In a population of constant size $N$ in which the incidence rate $I$, the prevalence $P$ and the mean duration $\bar D$ of the disease do not
+change over time,
+\[
+\frac{P}{1 - P} = I\,\bar D .
+\]
+When the prevalence is small, $P \approx I\bar D$.
+\end{thm}
+
+\begin{proof}
+At any time there are $NP$ cases and $N(1 - P)$ people at risk. New cases arise at rate $I\,N(1 - P)$ per unit time. Cases leave the prevalent
+pool, by recovery or death, at rate $NP/\bar D$ per unit time: in a steady state the pool of $NP$ cases turns over once in the mean duration
+$\bar D$. A steady state requires inflow to equal outflow, $I\,N(1 - P) = NP/\bar D$, which rearranges to the result. When $P$ is small, $1 - P \approx 1$.
+\end{proof}
+
+Two consequences matter for design. A treatment that keeps patients alive without curing them \emph{raises} prevalence, by increasing
+$\bar D$. And any factor associated with longer survival with a disease is over-represented among prevalent cases, so a cross-sectional
+comparison of cases with non-cases mixes the causes of the disease with the determinants of its duration (Problem~\ref{prob:prevbias}).
+
+\begin{exa}
+A chronic disease has incidence $4$ per $1000$ person-years and lasts on average $5$ years. In a steady state the prevalence odds are
+$0.004 \times 5 = 0.02$, so $P = 0.02/1.02 = 0.0196$, about $2\%$. If a new treatment doubles survival with the disease, the prevalence rises to
+$0.04/1.04 = 3.8\%$ with no change at all in how often the disease begins.
+\end{exa}
+
+\subsection{Specific and crude rates}
+\label{sec:crude}
+
+Rates are usually computed separately within categories of age and sex, because these affect almost every disease. A rate for a whole
+population, ignoring such categories, is a \textbf{crude} rate; a rate within a category is a \textbf{specific} rate (age-specific,
+sex-specific).
+
+\begin{prop}
+\label{prop:crude}
+If a population is divided into strata $j = 1, \dots, J$ with person-time $T_j$ and specific rates $I_j$, its crude rate is
+\[
+I_{\text{crude}} = \sum_j w_j I_j, \qquad w_j = \frac{T_j}{\sum_k T_k} ,
+\]
+a weighted average of the specific rates with weights equal to the population's own distribution of person-time across the strata.
+\end{prop}
+
+\begin{proof}
+The crude rate is $\sum_j D_j/\sum_k T_k$, where $D_j = I_j T_j$ is the number of cases in stratum $j$. Substituting gives $\sum_j I_j T_j/\sum_k T_k$.
+\end{proof}
+
+So two populations with identical specific rates can have very different crude rates if their age structures differ, and comparing
+crude rates compares age structures as much as risk.
+
+\begin{exa}
+\label{exa:towns}
+Two towns have the same death rates: $2$ per $1000$ per year under age $50$ and $20$ per $1000$ at $50$ and over. Town A has $80{,}000$ people under
+$50$ and $20{,}000$ over; town B, a retirement town, has $40{,}000$ under and $60{,}000$ over. The deaths in a year are
+\[
+\text{A}: 160 + 400 = 560, \qquad \text{B}: 80 + 1200 = 1280 ,
+\]
+crude rates of $5.6$ and $12.8$ per $1000$. Town B's crude rate is more than twice town A's although no person in it is at greater risk than
+the same person in A. Removing the effect of age structure from such comparisons is the subject of the section on standardisation.
+\end{exa}
+
+\subsection{Problems}
+
+\begin{problem}
+Of $250$ children examined in a school, $3$ have a skin infection. Compute the Wald, Wilson and exact $95\%$ intervals for the
+prevalence and comment. What is the exact upper limit if no child had been infected?
+\end{problem}
+
+\begin{solution}
+$\hat p = 0.012$. The Wald interval is
+\[
+0.012 \pm 1.96\sqrt{0.012 \times 0.988/250} = 0.012 \pm 0.0135 ,
+\]
+that is $(-0.0015,\ 0.0255)$, which includes impossible negative values. The Wilson interval, from \eqref{eq:wilson},
+is $(0.0041,\ 0.0347)$, and the Clopper--Pearson interval is $(0.0025,\ 0.0347)$. The two good intervals are asymmetric about
+$\hat p$, as they should be near a boundary.
+
+With $x = 0$ the exact upper limit solves $(1 - p)^{250} = 0.025$, giving $p_U = 1 - 0.025^{1/250} = 0.0146$, close to
+$-\ln(0.025)/250 = 3.69/250$. The same argument for a one-sided $95\%$ limit gives $-\ln(0.05)/n \approx 3/n$, the ``rule of three''.
+\end{solution}
+
+\begin{problem}
+In a cohort followed for a total of $12{,}400$ person-years, no cases of a rare cancer occur. Give a $95\%$ upper confidence limit for
+the incidence rate. How many person-years would be needed for the upper limit to fall below $1$ per $10{,}000$ person-years if again no
+cases were seen?
+\end{problem}
+
+\begin{solution}
+With $D = 0$, \eqref{eq:exactrate} gives $\lambda_U = \chi^2_{2,\,0.975}/(2T) = 7.378/(2 \times 12400) = 2.97$ per $10{,}000$ person-years; equivalently $P(D = 0) = e^{-\mu} = 0.025$
+gives $\mu = 3.689$ and $\lambda_U = 3.689/T$. For $3.689/T < 10^{-4}$ needs $T > 36{,}890$ person-years.
+\end{solution}
+
+\begin{problem}
+\label{prob:compete}
+People are subject to a constant hazard $\lambda$ of a disease and a constant hazard $\mu$ of death from other causes, independently. Show that
+the probability of developing the disease by time $t$ is
+\[
+\frac{\lambda}{\lambda + \mu}\bigl(1 - e^{-(\lambda + \mu)t}\bigr) .
+\]
+Evaluate it for $\lambda = 0.01$, $\mu = 0.04$ per year and $t = 20$, and compare with $1 - e^{-\lambda t}$.
+\end{problem}
+
+\begin{solution}
+A person is alive and disease-free at time $u$ with probability $e^{-(\lambda + \mu)u}$, since the two hazards add. The probability of developing the
+disease in $(u, u + du]$ is that times $\lambda\,du$. Integrating,
+\[
+\int_0^t \lambda e^{-(\lambda + \mu)u}\,du = \frac{\lambda}{\lambda + \mu}\bigl(1 - e^{-(\lambda + \mu)t}\bigr) .
+\]
+With the given values: $0.2(1 - e^{-1}) = 0.2 \times 0.632 = 0.126$, against $1 - e^{-0.2} = 0.181$ without competing deaths. The second figure is the risk in a
+hypothetical population where nobody dies of anything else; the first is the proportion who actually develop the disease. Both are
+legitimate, but they answer different questions, and a risk reported in an elderly population must say which is meant.
+\end{solution}
+
+\begin{problem}
+Using Example~\ref{exa:persontime}, suppose instead that a researcher computed the risk as $2/8 = 0.25$ over five years. Explain what is
+wrong. If the rate is constant, what five-year risk does the rate $0.08$ per year imply?
+\end{problem}
+
+\begin{solution}
+The denominator $8$ treats all eight workers as observed for five years, but they contributed only $25$ of the possible $40$ person-years.
+Workers 3, 5 and 8 entered late, worker 4 moved away and worker 7 died, so their disease status at five years is unknown; treating them
+as disease-free underestimates the risk. Under a constant hazard the five-year risk is $1 - e^{-0.08 \times 5} = 1 - e^{-0.4} = 0.33$.
+\end{solution}
+
+\begin{problem}
+\label{prob:prevbias}
+A chronic disease has incidence $2$ per $1000$ person-years in non-smokers and $4$ per $1000$ in smokers, so the incidence rate ratio is $2$.
+Among smokers the disease lasts (until death) $4$ years on average, among non-smokers $8$ years. In a steady state, find the prevalence in each
+group and the prevalence ratio. What would a cross-sectional study conclude?
+\end{problem}
+
+\begin{solution}
+Prevalence odds are $0.004 \times 4 = 0.016$ in smokers and $0.002 \times 8 = 0.016$ in non-smokers, so both prevalences are $0.016/1.016 = 1.57\%$ and
+the prevalence ratio is $1$. Smoking doubles the incidence but halves the duration, and a cross-sectional study, which sees prevalence,
+would find no association. By Theorem~\ref{thm:steady} the prevalence odds ratio equals the incidence rate ratio times the ratio of mean
+durations, here $2 \times \tfrac12$.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{exa:towns}, suppose town B has lower death rates than town A in both age groups: $1.5$ per $1000$ under $50$ and $18$ per $1000$ at
+$50$ and over. Find town B's crude rate and compare it with town A's. Explain the result using Proposition~\ref{prop:crude}.
+\end{problem}
+
+\begin{solution}
+Deaths in B are $40 \times 1.5 + 60 \times 18 = 60 + 1080 = 1140$, a crude rate of $11.4$ per $1000$, still twice town A's $5.6$. The crude rate weights the
+specific rates by the town's own age distribution: $0.4 \times 1.5 + 0.6 \times 18$ for B against $0.8 \times 2 + 0.2 \times 20$ for A. Town B puts $60\%$ of its
+weight on the high old-age rate, town A only $20\%$, and that difference outweighs B's lower rates in both groups. The crude comparison
+reverses the direction of the age-specific comparisons.
 \end{solution}
 
 \section*{References}
