@@ -1444,8 +1444,8 @@ The measures answer different questions. The ratios measure the \emph{strength} 
 disease is among the exposed. Strength is what bears on causation, since a large ratio is hard to produce by confounding alone. The
 difference measures the \emph{impact}: how many cases per person are added by the exposure, which is what matters for deciding
 whether to remove it. Smoking raises the risk of lung cancer about tenfold and of heart disease about twofold, yet because heart
-disease is so much more common it causes more extra deaths from heart disease than from lung cancer. The section on attributable
-risk develops this into the attributable fractions.
+disease is so much more common it causes more extra deaths from heart disease than from lung cancer. Section~\ref{sec:attributable}
+develops this into the attributable fractions.
 
 The odds ratio has two properties the risk ratio lacks. It is the only one of the three that a case-control study can estimate
 (Theorem~\ref{thm:orinv}). And it is symmetric in the outcome: the odds ratio for \emph{not} getting the disease is exactly $1/\OR$, while the
@@ -1814,6 +1814,280 @@ comparison is between the cases and the people at risk at baseline, which is exa
 involved.
 \end{solution}
 
+\section{Attributable risk}
+\label{sec:attributable}
+
+A risk ratio says how strongly an exposure is associated with a disease; it does not say how much disease the exposure is responsible
+for. A tenfold risk from an exposure that almost nobody has accounts for few cases, while a doubling of risk from an exposure that half
+the population has may account for a third of them. The \emph{attributable} measures answer the question a health authority asks: how
+much of the disease would be avoided if the exposure were removed? They have a causal reading only to the extent that the association
+is causal and unconfounded, and the formulas below assume this.
+
+\subsection{Attributable risk among the exposed}
+
+\begin{defn}
+The \textbf{attributable risk} among the exposed is the risk difference $p_1 - p_0$: the excess risk in the exposed over what they would have
+had without exposure. The \textbf{attributable fraction among the exposed} is the proportion of the exposed group's cases that is due to
+exposure,
+\[
+\text{AF}_E = \frac{p_1 - p_0}{p_1} = \frac{\RR - 1}{\RR} .
+\]
+\end{defn}
+
+The second form follows by dividing numerator and denominator by $p_0$; it can be estimated from a case-control study by putting the
+odds ratio in place of $\RR$. With $\RR = 2.5$ (Example~\ref{exa:cohort}) the attributable risk among the exposed is $0.05 - 0.02 = 0.03$ over five
+years and $\text{AF}_E = 1.5/2.5 = 0.6$: three in five cases among exposed workers would not have occurred without the exposure.
+
+When an exposure \emph{lowers} risk, as a vaccine does, the corresponding quantity is the \textbf{preventable fraction among the exposed},
+\[
+\text{PF}_E = \frac{p_0 - p_1}{p_0} = 1 - \RR ,
+\]
+the proportion of the cases the exposed would have had that the exposure prevented. In vaccine trials it is called the \textbf{vaccine
+efficacy}.
+
+The risk difference also has a clinical form. In a trial with a treatment that lowers the risk by $\RD = p_0 - p_1$, the \textbf{number
+needed to treat}, $\text{NNT} = 1/\RD$, is the number of patients who must be treated to prevent one event; for a harmful exposure $1/(p_1 - p_0)$ is
+the \emph{number needed to harm}. In Example~\ref{exa:cohort}, one extra case occurs for every $1/0.03 = 33$ workers exposed for five years.
+
+\subsection{The population attributable fraction}
+
+\begin{defn}
+Let $p$ be the risk in the whole population and $p_0$ the risk among the unexposed. The \textbf{population attributable risk} is $p - p_0$, and
+the \textbf{population attributable fraction} is
+\[
+\text{PAF} = \frac{p - p_0}{p} ,
+\]
+the proportion of all cases in the population that would not have occurred had nobody been exposed.
+\end{defn}
+
+The definition uses $p_0$ as the risk the whole population would have without exposure, which is the assumption that the unexposed are
+exchangeable with the exposed (Section~\ref{sec:causation}). Two formulas compute the PAF from quantities that the usual designs estimate.
+
+\begin{thm}[Levin's formula]
+\label{thm:levin}
+If a proportion $P_e$ of the population is exposed, then
+\[
+\text{PAF} = \frac{P_e(\RR - 1)}{1 + P_e(\RR - 1)} .
+\]
+\end{thm}
+
+\begin{proof}
+The population risk is the average of the group risks, $p = P_e p_1 + (1 - P_e)p_0 = p_0\{1 + P_e(\RR - 1)\}$. Hence $p - p_0 = p_0 P_e(\RR - 1)$, and dividing by $p$
+gives the result.
+\end{proof}
+
+\begin{thm}[Miettinen's formula]
+\label{thm:miettinen}
+If a proportion $P_c$ of the \emph{cases} is exposed, then
+\[
+\text{PAF} = P_c\,\frac{\RR - 1}{\RR} = P_c\,\text{AF}_E .
+\]
+\end{thm}
+
+\begin{proof}
+All cases due to exposure are among the exposed cases, and among those a fraction $\text{AF}_E$ is due to exposure. Formally, the number of
+excess cases per head of population is $P_e(p_1 - p_0)$, and the total number of cases per head is $p$, so
+\[
+\text{PAF} = \frac{P_e(p_1 - p_0)}{p} = \frac{P_e p_1}{p} \cdot \frac{p_1 - p_0}{p_1} .
+\]
+The first factor is the proportion of cases that are exposed, $P_c$, and the second is $\text{AF}_E$.
+\end{proof}
+
+The PAF depends on both the strength of the association and how common the exposure is. Levin's formula needs the prevalence of
+exposure in the population and suits cohort or cross-sectional data. Miettinen's formula needs the prevalence of exposure among cases, which a case-control study measures directly, with the odds ratio in place of $\RR$. Miettinen's form has a further advantage that matters
+in later sections: when the risk ratio has to be adjusted for confounding, substituting the adjusted ratio into Miettinen's formula gives a
+valid PAF, while substituting it into Levin's does not.
+
+\begin{exa}
+In Example~\ref{exa:cohort} a third of the cohort is exposed and the overall risk is $108/3600 = 0.03$. Directly,
+$\text{PAF} = (0.03 - 0.02)/0.03 = 1/3$. By Levin, $P_e = 1/3$ and
+\[
+\text{PAF} = \frac{(1/3)(1.5)}{1 + (1/3)(1.5)} = \frac{0.5}{1.5} = \frac13 .
+\]
+By Miettinen, $P_c = 60/108 = 0.556$ and $\text{PAF} = 0.556 \times 0.6 = 1/3$. If the cohort is representative, a third of the cases in the
+population would be avoided by removing the exposure.
+\end{exa}
+
+\subsection{Estimating the PAF from a case-control study}
+
+\begin{thm}
+\label{thm:pafcc}
+In a case-control study with cells $a, b$ (exposed and unexposed cases) and $c, d$ (exposed and unexposed controls), the estimate of the
+PAF obtained from Miettinen's formula with $\widehat{\OR}$ satisfies
+\[
+1 - \widehat{\text{PAF}} = \frac{b/m_1}{d/m_0} ,
+\]
+the proportion of cases unexposed divided by the proportion of controls unexposed, and
+\[
+\Var\{\log(1 - \widehat{\text{PAF}})\} \approx \frac{a}{m_1 b} + \frac{c}{m_0 d} .
+\]
+\end{thm}
+
+\begin{proof}
+With $\hat P_c = a/m_1$ and $\widehat{\OR} = ad/(bc)$,
+\[
+\widehat{\text{PAF}} = \hat P_c - \frac{\hat P_c}{\widehat{\OR}} = \frac{a}{m_1} - \frac{a}{m_1} \cdot \frac{bc}{ad} = \frac{a}{m_1} - \frac{bc}{m_1 d} .
+\]
+So $1 - \widehat{\text{PAF}} = (m_1 - a)/m_1 + bc/(m_1 d) = b/m_1 + bc/(m_1 d) = (b/m_1)(d + c)/d$, and $(d + c)/d = m_0/d$.
+
+For the variance, $\log(1 - \widehat{\text{PAF}}) = \log(b/m_1) - \log(d/m_0)$, a difference of the logs of two independent binomial proportions. By
+Lemma~\ref{lem:delta}, as in Proposition~\ref{prop:logrr}, the log of a proportion $\hat\pi$ from $m$ trials has variance about $(1 - \pi)/(m\pi)$. For $b/m_1$
+this is estimated by $(a/m_1)/b = a/(m_1 b)$, and for $d/m_0$ by $c/(m_0 d)$.
+\end{proof}
+
+The interval is computed for $1 - \text{PAF}$ on the log scale and transformed back, which keeps the upper limit of the PAF below $1$.
+
+\begin{exa}
+\label{exa:pafcc}
+In Example~\ref{exa:casecontrol}, $a = 60$, $b = 90$, $c = 66$, $d = 234$, $m_1 = 150$, $m_0 = 300$. Then
+\[
+1 - \widehat{\text{PAF}} = \frac{90/150}{234/300} = \frac{0.600}{0.780} = 0.769 ,
+\]
+so $\widehat{\text{PAF}} = 0.231$, which agrees with $\hat P_c(\widehat{\OR} - 1)/\widehat{\OR} = 0.4 \times 1.364/2.364$. The standard error is
+\[
+\text{SE} = \sqrt{\frac{60}{150 \times 90} + \frac{66}{300 \times 234}} = 0.0734 ,
+\]
+so $1 - \text{PAF}$ lies in $0.769\,e^{\pm 0.144} = (0.666,\ 0.888)$ and the PAF in $(0.112,\ 0.334)$. Removing the exposure would prevent between about
+a ninth and a third of the cases. The estimate assumes the controls represent the source population and that the odds ratio is
+unconfounded and close to the risk ratio.
+\end{exa}
+
+\subsection{Several exposure levels and several factors}
+
+\subhead{An exposure with several levels}
+
+If an exposure has levels $j = 0, 1, \dots, J$ with risk ratios $\RR_j$ relative to the reference level $0$, and a proportion $P_{cj}$ of cases is at
+level $j$, Miettinen's argument applied level by level gives
+\[
+\text{PAF} = \sum_{j \geq 1} P_{cj}\,\frac{\RR_j - 1}{\RR_j} .
+\]
+Collapsing the levels into ``exposed'' and ``unexposed'' and using a single average risk ratio gives a different, wrong answer
+(Problem~\ref{prob:levels}).
+
+\subhead{Attributable fractions for several factors do not add}
+
+When two exposures both affect a disease, the fraction attributable to each can be computed, but the fractions are not shares of a
+fixed total. A case caused by the joint action of two exposures would be prevented by removing either, so it is counted in both
+fractions.
+
+\begin{exa}
+\label{exa:twofactors}
+Suppose the risk of a disease is $p_0 = 0.001$ in people with neither of two exposures, smoking multiplies it by $10$ and an occupational
+exposure by $5$, and the two act multiplicatively, so people with both have risk $0.05$. Half the population smokes and a tenth has the
+occupational exposure, independently. The population risk is
+\[
+p = 0.001(0.5 + 0.5 \times 10)(0.9 + 0.1 \times 5) = 0.001 \times 5.5 \times 1.4 = 0.0077 .
+\]
+Removing smoking leaves $0.001 \times 1.4 = 0.0014$, so $\text{PAF}_{\text{smoking}} = (0.0077 - 0.0014)/0.0077 = 0.818$. Removing the occupational
+exposure leaves $0.001 \times 5.5 = 0.0055$, so $\text{PAF}_{\text{occ}} = 0.286$. The two sum to $1.10$, more than all the cases. Removing both leaves
+$0.001$, so the joint PAF is $0.870$. Each separate figure is correct for its own question; what is wrong is to add them, or to read them
+as ``$82\%$ of cases are caused by smoking and the rest by something else''.
+\end{exa}
+
+\subsection{Preventable fractions in a population}
+
+For a protective exposure, the counterpart of the PAF is the proportion of the cases that would occur without the exposure which it
+prevents in the population as a whole.
+
+\begin{prop}
+\label{prop:pfpop}
+If a proportion $P_e$ of the population has a protective exposure with risk ratio $\RR < 1$, the \textbf{population preventable fraction} is
+\[
+\text{PF} = \frac{p_0 - p}{p_0} = P_e(1 - \RR) .
+\]
+\end{prop}
+
+\begin{proof}
+$p = P_e p_1 + (1 - P_e)p_0$, so $p_0 - p = P_e(p_0 - p_1)$, and dividing by $p_0$ gives $P_e(1 - p_1/p_0)$.
+\end{proof}
+
+\begin{exa}
+In an outbreak, the attack rate is $2\%$ among vaccinated children and $10\%$ among unvaccinated children. The vaccine efficacy is
+$1 - 0.02/0.10 = 0.80$. With $70\%$ coverage, the vaccination programme has prevented $\text{PF} = 0.7 \times 0.8 = 56\%$ of the cases that would have
+occurred without it. Raising coverage to $90\%$ would raise this to $72\%$, if the efficacy and the risk among the unvaccinated stayed the
+same. In practice they do not, because vaccinated children do not pass infection to unvaccinated ones (herd immunity). The formulas
+here ignore this, and so understate the benefit of high coverage.
+\end{exa}
+
+\subsection{Problems}
+
+\begin{problem}
+Show that Levin's and Miettinen's formulas agree, by expressing $P_c$ in terms of $P_e$ and $\RR$.
+\end{problem}
+
+\begin{solution}
+$P_c = P_e p_1/p = P_e\RR\,p_0/[p_0\{1 + P_e(\RR - 1)\}] = P_e\RR/\{1 + P_e(\RR - 1)\}$. Then
+\[
+P_c\,\frac{\RR - 1}{\RR} = \frac{P_e\RR}{1 + P_e(\RR - 1)} \cdot \frac{\RR - 1}{\RR} = \frac{P_e(\RR - 1)}{1 + P_e(\RR - 1)} ,
+\]
+which is Levin's formula.
+\end{solution}
+
+\begin{problem}
+A case-control study gives $a = 40$ exposed and $b = 60$ unexposed cases, and $c = 30$ exposed and $d = 170$ unexposed controls. Estimate the
+odds ratio, the attributable fraction among the exposed and the PAF with a $95\%$ confidence interval.
+\end{problem}
+
+\begin{solution}
+$\widehat{\OR} = (40 \times 170)/(60 \times 30) = 3.78$ and $\widehat{\text{AF}}_E = 2.78/3.78 = 0.735$. From Theorem~\ref{thm:pafcc},
+$1 - \widehat{\text{PAF}} = (60/100)/(170/200) = 0.706$, so $\widehat{\text{PAF}} = 0.294$ $(= 0.4 \times 0.735)$. The standard error of $\log(1 - \widehat{\text{PAF}})$ is
+$\sqrt{40/(100 \times 60) + 30/(200 \times 170)} = 0.0869$, so $1 - \text{PAF}$ lies in $0.706\,e^{\pm 0.170} = (0.595,\ 0.837)$ and the PAF in $(0.163,\ 0.405)$.
+\end{solution}
+
+\begin{problem}
+\label{prob:levels}
+An exposure has three levels, called none, light and heavy, with population prevalences $0.5$, $0.3$, $0.2$ and risk ratios $1$, $2$, $4$.
+\begin{enumerate}[label=(\alph*)]
+\item Find the PAF directly and by the formula for several levels.
+\item Collapse light and heavy into ``exposed''. Find the risk ratio for exposed against unexposed and the PAF by Levin's formula. Comment.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Relative to the risk $p_0$ at level none, the population risk is $p_0(0.5 + 0.3 \times 2 + 0.2 \times 4) = 1.9p_0$, so $\text{PAF} = 0.9/1.9 = 0.474$. The
+proportions of cases at the three levels are $0.5/1.9$, $0.6/1.9$, $0.8/1.9$, that is $0.263$, $0.316$, $0.421$. Then
+$0.316 \times \tfrac12 + 0.421 \times \tfrac34 = 0.158 + 0.316 = 0.474$.
+
+(b) The exposed have risk $p_0(0.3 \times 2 + 0.2 \times 4)/0.5 = 2.8p_0$, so $\RR = 2.8$, and with $P_e = 0.5$ Levin gives $0.5 \times 1.8/(1 + 0.5 \times 1.8) = 0.9/1.9 = 0.474$.
+Collapsing does no harm \emph{here}, because the reference group is unchanged and the collapsed risk ratio is the correct average.
+It goes wrong if the collapsed ratio is taken from elsewhere (another population with a different mix of light and heavy exposure), or
+if the question is the effect of reducing heavy exposure to light, which only the separate ratios can answer.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{exa:twofactors}, find the fraction of cases among people with both exposures that is attributable to the combination,
+and explain why the separate PAFs sum to more than $1$.
+\end{problem}
+
+\begin{solution}
+People with both exposures have risk $0.05$ against $0.001$ with neither, so $(0.05 - 0.001)/0.05 = 98\%$ of their cases are attributable to the
+combination. They make up $5\%$ of the population and contribute $0.05 \times 0.05 = 0.0025$ of the population risk of $0.0077$, a third of all
+cases. Each of these cases is prevented by removing smoking \emph{or} by removing the occupational exposure, so it is counted in both
+PAFs. The sum exceeds $1$ by the share of cases that either removal would prevent.
+\end{solution}
+
+\begin{problem}
+In a five-year trial with $1000$ patients per arm, the risk of a stroke is $0.12$ on placebo and $0.08$ on treatment. Find the number needed
+to treat and a $95\%$ interval for it.
+\end{problem}
+
+\begin{solution}
+$\RD = 0.04$, $\text{NNT} = 25$. $\text{SE}(\RD) = \sqrt{0.08 \times 0.92/1000 + 0.12 \times 0.88/1000} = 0.0134$, so $\RD \in (0.0138,\ 0.0662)$. Inverting, the NNT
+lies between $1/0.0662 = 15$ and $1/0.0138 = 73$. The inversion is valid only because the interval for $\RD$ excludes $0$; if it did not, the
+interval for the NNT would run from a number needed to treat, through infinity, to a number needed to harm.
+\end{solution}
+
+\begin{problem}
+Show that $\text{PAF} \leq \text{AF}_E$ and $\text{PAF} \leq P_c$, with equality in the first if and only if everyone with the disease is exposed. When is the PAF close
+to $\text{AF}_E$?
+\end{problem}
+
+\begin{solution}
+By Miettinen's formula $\text{PAF} = P_c\,\text{AF}_E$ with $0 \leq P_c \leq 1$ and $0 \leq \text{AF}_E \leq 1$ (for $\RR \geq 1$), so $\text{PAF}$ is at most each factor. Equality
+$\text{PAF} = \text{AF}_E$ (with $\text{AF}_E > 0$) requires $P_c = 1$. The PAF is close to $\text{AF}_E$ when almost all cases are exposed, as for lung cancer and smoking, where
+$\text{AF}_E$ is about $0.9$ and the PAF is about $0.8$ to $0.9$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -1838,9 +2112,13 @@ Measurement}, 20, 37--46.
 \emph{American Journal of Epidemiology}, 105, 488--495.
 \item Hill, A. B. (1965), The environment and disease: association or causation? \emph{Proceedings of the Royal Society of Medicine}, 58,
 295--300.
+\item Levin, M. L. (1953), The occurrence of lung cancer in man, \emph{Acta Unio Internationalis contra Cancrum}, 9, 531--541.
+\item Miettinen, O. S. (1974), Proportion of disease caused or prevented by a given exposure, trait or intervention, \emph{American
+Journal of Epidemiology}, 99, 325--332.
 \item Rogan, W. J., and Gladen, B. (1978), Estimating prevalence from the results of a screening test, \emph{American Journal of
 Epidemiology}, 107, 71--76.
 \item Snow, J. (1855), \emph{On the Mode of Communication of Cholera} (2nd ed.), London, John Churchill.
+\item Walter, S. D. (1976), The estimation and interpretation of attributable risk in health research, \emph{Biometrics}, 32, 829--849.
 \end{enumerate}
 
 \end{document}
