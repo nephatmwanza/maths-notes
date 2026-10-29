@@ -2088,6 +2088,334 @@ $\text{PAF} = \text{AF}_E$ (with $\text{AF}_E > 0$) requires $P_c = 1$. The PAF 
 $\text{AF}_E$ is about $0.9$ and the PAF is about $0.8$ to $0.9$.
 \end{solution}
 
+\section{Study design in practice}
+\label{sec:design}
+
+Section~\ref{sec:designs} described the basic designs and Section~\ref{sec:ccsampling} what a case-control odds ratio estimates. This
+section turns to the decisions that make a cohort or case-control study valid and efficient: where the subjects come from, how
+controls are chosen and how many, when to match, and how large the study must be.
+
+\subsection{Cohort studies}
+
+\subhead{Choosing the cohort}
+
+A cohort is chosen for the exposure it offers and for the ease of following it. Rare exposures, typically occupational or medical, are
+studied in \textbf{special-exposure cohorts}: workers in one industry, patients given a drug. Common exposures such as smoking or diet
+are studied in \textbf{general-population cohorts}, which are chosen for completeness of follow-up rather than for being representative: nurses,
+doctors, civil servants, residents of one town. A cohort need not be representative of any population to give valid comparisons between
+its exposed and unexposed members; it needs the two to be comparable.
+
+The comparison group may be \textbf{internal} (members of the same cohort with less or no exposure) or \textbf{external} (the general
+population, through national rates). External comparison is cheap but suffers from the \textbf{healthy worker effect}: people in
+employment are healthier than the general population, which includes those too ill to work, so an occupational cohort usually shows
+lower mortality than national rates even when the work is harmful. Internal comparisons avoid this.
+
+\subhead{Follow-up}
+
+Losses to follow-up threaten validity in the way Proposition~\ref{prop:nonresp} described: if the reasons for loss are related to both
+exposure and outcome, the risks in those followed are biased. Small losses that are unrelated to outcome cost only precision. The
+practical aim is near-complete follow-up, through record linkage to death and cancer registers where possible, and a check that the
+people lost resemble those followed in the characteristics recorded at entry.
+
+\subsection{Case-control studies}
+
+\subhead{The study base}
+
+A case-control study is best thought of as an efficient way of sampling from a cohort that is not enumerated. The \textbf{study base} is
+the population, and its person-time, from which the cases arose. If it can be defined first (the residents of a district over a period,
+the members of an insurance scheme), it is a \textbf{primary base}: all cases arising in it are sought, and controls are sampled from
+it. If the cases are defined first (all patients with the disease admitted to one hospital), the base is \textbf{secondary}: the
+population of people who would have been admitted to that hospital had they developed the disease. It is real but hard to sample,
+which is why hospital-based studies are prone to bias.
+
+The guiding principle is that controls must be sampled from the study base independently of their exposure. They
+should represent the exposure distribution of the person-time that gave rise to the cases. Whether the controls resemble the cases in other respects,
+or are ``healthy'', is beside the point.
+
+\subhead{Sources of controls}
+
+\begin{itemize}
+\item \textbf{Population controls}, sampled from a register of the primary base, satisfy the principle most directly. Their
+participation is often lower than that of cases, which can bias the study if participation depends on exposure.
+\item \textbf{Hospital controls}, patients admitted for other diseases, share the referral pattern of the cases and cooperate readily.
+They are valid only if their diseases are unrelated to the exposure: patients with chronic bronchitis are useless controls in a study
+of smoking.
+\item \textbf{Neighbourhood} or \textbf{friend controls} are chosen by the case or by proximity. They tend to share the case's exposures (friends
+smoke together), which biases the odds ratio towards $1$.
+\end{itemize}
+
+\subhead{Incident and prevalent cases}
+
+Cases should be \textbf{incident}, that is newly diagnosed during the study period. Prevalent cases over-represent those who survive long with
+the disease, and their exposure may be a determinant of survival rather than of occurrence (Problem~\ref{prob:prevbias}). Newly
+diagnosed cases also recall past exposure before the illness has changed their habits.
+
+\subhead{How many controls per case}
+
+When cases are scarce, precision can be bought by taking several controls per case. The return diminishes quickly.
+
+\begin{prop}
+\label{prop:kcontrols}
+With $m_1$ cases and $k m_1$ controls, and exposure probabilities $q_1$ among cases and $q_0$ among controls,
+\[
+\Var(\log\widehat{\OR}) \approx \frac{1}{m_1}\Bigl\{\frac{1}{q_1(1 - q_1)} + \frac{1}{k\,q_0(1 - q_0)}\Bigr\} .
+\]
+When $q_1$ and $q_0$ are close, the efficiency relative to an unlimited number of controls is $k/(k + 1)$.
+\end{prop}
+
+\begin{proof}
+From the proof of Theorem~\ref{thm:woolf}, the cases contribute $1/\{m_1 q_1(1 - q_1)\}$ and the controls $1/\{k m_1 q_0(1 - q_0)\}$. As $k \to \infty$ only the first term
+remains, and with $q_1 = q_0$ the ratio of the limit to the variance is $1/(1 + 1/k) = k/(k + 1)$.
+\end{proof}
+
+\begin{center}
+\begin{tabular}{lcccccc}
+\hline
+Controls per case $k$ & 1 & 2 & 3 & 4 & 5 & 10 \\
+Relative efficiency & 0.50 & 0.67 & 0.75 & 0.80 & 0.83 & 0.91 \\
+\hline
+\end{tabular}
+\end{center}
+Going from one control to four gains as much as doubling the number of cases would from one-to-one; beyond four or five the gain
+rarely justifies the cost.
+
+\subsection{Matching}
+\label{sec:matching}
+
+\textbf{Matching} chooses the controls so that their distribution of some variable, usually a strong confounder such as age or sex, is the
+same as the cases'. In \textbf{frequency matching} the controls are sampled within strata in proportion to the cases; in
+\textbf{individual matching} each case is given one or more controls with the same value (same sex, age within two years).
+
+Matching in a case-control study does \emph{not} by itself remove confounding by the matching variable. It makes the cases and controls
+alike on that variable, but the controls are then no longer a random sample of the base, and their exposure distribution is distorted
+towards that of the cases. The matched variable must be allowed for in the analysis, by stratification on the matched sets. What
+matching achieves is \emph{efficiency}: each stratum of the analysis contains both cases and controls, so none is wasted.
+
+\textbf{Overmatching} means matching on a variable that is associated with exposure but is not a confounder, typically a consequence of
+exposure or a close correlate of it. It brings the exposure distributions of cases and controls together for no gain, losing
+efficiency and, if the variable lies on the causal path, biasing the odds ratio towards $1$.
+
+\subhead{Matched pairs}
+
+With one control per case, each pair falls into one of four types according to the exposure of the case and of the control.
+\begin{center}
+\begin{tabular}{l|cc}
+ & Control exposed & Control unexposed \\
+\hline
+Case exposed & $n_{11}$ & $n_{10}$ \\
+Case unexposed & $n_{01}$ & $n_{00}$ \\
+\end{tabular}
+\end{center}
+Concordant pairs ($n_{11}$, $n_{00}$) carry no information about the association; the analysis rests on the discordant pairs.
+
+\begin{thm}
+\label{thm:pairs}
+Suppose that within each matched pair the odds of exposure among cases are $\psi$ times those among controls, with the baseline odds free to
+vary between pairs. Given that a pair is discordant, the probability that it is the case who is exposed is $\psi/(1 + \psi)$, whatever the pair's
+baseline odds. Hence, conditionally on $n_{10} + n_{01}$, $n_{10}$ is binomial with this probability, the conditional maximum likelihood estimate of
+the odds ratio is
+\[
+\hat\psi = \frac{n_{10}}{n_{01}} ,
+\]
+and the test of $\psi = 1$ is \textbf{McNemar's test}, $X^2 = (n_{10} - n_{01})^2/(n_{10} + n_{01})$ on one degree of freedom.
+\end{thm}
+
+\begin{proof}
+In pair $i$ let the control's probability of exposure be $\pi_i$, with odds $\omega_i = \pi_i/(1 - \pi_i)$, and the case's odds $\psi\omega_i$, so the case's
+probability is $\psi\omega_i/(1 + \psi\omega_i)$. The exposures are independent, so
+\begin{align*}
+P(\text{case exposed, control not}) &= \frac{\psi\omega_i}{1 + \psi\omega_i} \cdot \frac{1}{1 + \omega_i} , \\
+P(\text{control exposed, case not}) &= \frac{1}{1 + \psi\omega_i} \cdot \frac{\omega_i}{1 + \omega_i} .
+\end{align*}
+Given discordance, the first has probability $\psi\omega_i/(\psi\omega_i + \omega_i) = \psi/(1 + \psi)$; $\omega_i$ cancels. The discordant pairs are therefore independent
+Bernoulli trials with success probability $\psi/(1 + \psi)$, and the binomial maximum likelihood estimate $n_{10}/(n_{10} + n_{01})$ of this probability
+gives $\hat\psi = n_{10}/n_{01}$. Under $\psi = 1$ the probability is $\tfrac12$, and the score test of a binomial proportion equal to $\tfrac12$ is McNemar's statistic.
+\end{proof}
+
+Conditioning eliminates the pair-specific odds $\omega_i$, which could not be estimated, since each pair has only two people. Ignoring the
+matching and computing the crude odds ratio from the four margins does not estimate $\psi$ in general, and is biased towards $1$ when the
+matching variable is related to exposure.
+
+\begin{exa}
+\label{exa:pairs}
+In $100$ matched pairs, the case alone is exposed in $30$ pairs and the control alone in $12$. Then $\hat\psi = 30/12 = 2.5$, and McNemar's
+statistic is $(30 - 12)^2/42 = 7.71$, $P = 0.005$. The approximate interval uses $\text{SE}(\log\hat\psi) = \sqrt{1/30 + 1/12} = 0.342$, giving
+$(1.28,\ 4.88)$. An exact interval comes from the Clopper--Pearson interval for $\pi = \psi/(1 + \psi)$ with $30$ successes in $42$, which is
+$(0.554,\ 0.843)$, transformed by $\psi = \pi/(1 - \pi)$ to $(1.24,\ 5.36)$.
+\end{exa}
+
+\subsection{Sample size for comparing two groups}
+\label{sec:samplesize}
+
+A study is too small if it is unlikely to detect an effect of the size that matters, and too large if it spends resources and exposes
+people to measurement beyond what the question needs. The calculation needs four inputs: the significance level $\alpha$, the power
+$1 - \beta$, the frequency of outcome (or exposure) in the reference group, and the smallest effect worth detecting.
+
+\begin{thm}
+\label{thm:ss}
+To compare proportions $\pi_1$ and $\pi_0$ with a two-sided level-$\alpha$ test of $\pi_1 = \pi_0$ and power $1 - \beta$, with $n$ subjects in group $1$ and $kn$ in
+group $0$, the required $n$ is approximately
+\[
+n = \frac{\Bigl\{z_{\alpha/2}\sqrt{(1 + 1/k)\,\bar\pi(1 - \bar\pi)} + z_\beta\sqrt{\pi_1(1 - \pi_1) + \pi_0(1 - \pi_0)/k}\Bigr\}^2}{(\pi_1 - \pi_0)^2} ,
+\]
+where $\bar\pi = (\pi_1 + k\pi_0)/(1 + k)$ and $z_\gamma$ is the upper $\gamma$ point of the standard normal.
+\end{thm}
+
+\begin{proof}
+The test rejects when $|\hat\pi_1 - \hat\pi_0| > z_{\alpha/2}\,\sigma_0/\sqrt n$, where $\sigma_0^2 = (1 + 1/k)\bar\pi(1 - \bar\pi)$ is $n$ times the variance of $\hat\pi_1 - \hat\pi_0$ under the null
+hypothesis. Under the alternative, $\hat\pi_1 - \hat\pi_0$ is approximately normal with mean $\delta = \pi_1 - \pi_0$ and variance $\sigma_1^2/n$, where
+$\sigma_1^2 = \pi_1(1 - \pi_1) + \pi_0(1 - \pi_0)/k$. Ignoring the negligible probability of rejecting in the wrong direction, the power is
+\[
+P\Bigl(\hat\pi_1 - \hat\pi_0 > \frac{z_{\alpha/2}\sigma_0}{\sqrt n}\Bigr) = \Phi\Bigl(\frac{\delta\sqrt n - z_{\alpha/2}\sigma_0}{\sigma_1}\Bigr) .
+\]
+Setting this equal to $1 - \beta$ requires $(\delta\sqrt n - z_{\alpha/2}\sigma_0)/\sigma_1 = z_\beta$, so $\sqrt n = (z_{\alpha/2}\sigma_0 + z_\beta\sigma_1)/\delta$.
+\end{proof}
+
+In a cohort study $\pi_1, \pi_0$ are the risks $p_1, p_0$, and $n$ is the number of exposed subjects. In a case-control study they are the exposure
+probabilities $q_1, q_0$ among cases and controls, and $n$ is the number of cases. There the effect is specified as an odds ratio and the
+control exposure prevalence $q_0$, from which
+\begin{equation}
+\label{eq:q1}
+q_1 = \frac{\OR\,q_0}{1 + q_0(\OR - 1)} ,
+\end{equation}
+obtained by solving $q_1/(1 - q_1) = \OR\,q_0/(1 - q_0)$.
+
+\begin{exa}
+\label{exa:sscohort}
+A cohort study is to detect a risk ratio of $1.5$ when the risk among the unexposed is $0.10$, with equal groups, $\alpha = 0.05$ and power
+$0.80$ ($z_{\alpha/2} = 1.960$, $z_\beta = 0.842$). With $\pi_1 = 0.15$, $\pi_0 = 0.10$, $\bar\pi = 0.125$,
+\begin{gather*}
+\sigma_0 = \sqrt{2 \times 0.125 \times 0.875} = 0.4677, \\
+\sigma_1 = \sqrt{0.15 \times 0.85 + 0.10 \times 0.90} = 0.4664, \\
+n = \frac{(1.960 \times 0.4677 + 0.842 \times 0.4664)^2}{0.05^2} = 685.8
+\end{gather*}
+so $686$ in each group after rounding up. A simulation of $40{,}000$ such studies gave power $0.804$.
+\end{exa}
+
+\begin{exa}
+\label{exa:sscc}
+A case-control study is to detect an odds ratio of $2$ for an exposure carried by $20\%$ of controls. By \eqref{eq:q1},
+$q_1 = 0.4/1.2 = 0.333$. With one control per case, Theorem~\ref{thm:ss} gives $172$ cases and $172$ controls. With four controls per case it gives
+$103$ cases and $412$ controls: fewer cases, many more subjects. Which is cheaper depends on whether cases or controls are the scarce
+resource.
+\end{exa}
+
+\subsection{Sample size for comparing rates}
+
+\begin{prop}
+\label{prop:ssrates}
+To detect an incidence rate ratio $\theta$ with two-sided level $\alpha$ and power $1 - \beta$, when the exposed share of person-time is $T_1/(T_1 + T_0)$, the
+total number of cases needed is approximately
+\[
+D = \frac{(z_{\alpha/2} + z_\beta)^2}{\pi(1 - \pi)(\log\theta)^2}, \qquad \pi = \frac{\theta T_1}{\theta T_1 + T_0} .
+\]
+\end{prop}
+
+\begin{proof}
+By Theorem~\ref{thm:ratecond}, given $D$ cases, $D_1 \sim \text{Bin}(D, \pi)$, and $\log\widehat{\text{IRR}} = \operatorname{logit}\hat\pi - \log(T_1/T_0)$. By the delta method
+$\Var(\operatorname{logit}\hat\pi) \approx 1/\{D\pi(1 - \pi)\}$. A level-$\alpha$ test with power $1 - \beta$ against $\log\theta$ needs the standard error to equal
+$\log\theta/(z_{\alpha/2} + z_\beta)$; solving for $D$ gives the formula.
+\end{proof}
+
+The design question is then turned into person-time, since the number of cases expected per person-year of follow-up determines how long, or
+how large, the cohort must be.
+
+\begin{exa}
+To detect a rate ratio of $2$ with equal person-time in the two groups ($\pi = 2/3$), at $\alpha = 0.05$ and power $0.80$,
+\[
+D = \frac{(1.960 + 0.842)^2}{(2/9)(\log 2)^2} = 73.5 ,
+\]
+so about $74$ cases are needed. If the unexposed rate is $5$ per $1000$ person-years, every $1000$ person-years in each group yield
+$10 + 5 = 15$ cases, so $74$ cases need about $4900$ person-years in each group. The formula uses the variance at
+the alternative; a simulation of the conditional test gave power $0.83$, so the formula errs slightly on the safe side here.
+\end{exa}
+
+\subsection{Power, precision and the size of the effect}
+
+The sample-size formula can be read in three directions. Fixing $n$ and the effect gives the power; fixing $n$ and the power gives the
+\textbf{minimum detectable effect}; fixing the effect and the power gives $n$. In epidemiology the number of available cases is often
+fixed (all cases of a rare cancer in a region over five years), and the useful calculation is the second: what is the smallest risk
+ratio this study could reliably detect?
+
+Two features of the formula govern design. The required size grows as the inverse square of the effect on the log scale, so halving
+$\log\RR$ quadruples the study. And for a rare outcome or a rare exposure, the number of \emph{events} in the rarer cell drives
+precision, which is why cohort studies of rare diseases and case-control studies of rare exposures are both inefficient.
+
+An alternative to power is to design for \textbf{precision}: choose $n$ so that the confidence interval for the measure of association has
+a given width. This is often more honest for an estimation study, whose aim is to measure an association rather than to test whether it
+is zero.
+
+\subsection{Problems}
+
+\begin{problem}
+How many subjects are needed in each of two equal groups of a cohort study to detect a doubling of a five-year risk of $0.05$, at $\alpha = 0.05$
+with power $0.90$?
+\end{problem}
+
+\begin{solution}
+$\pi_1 = 0.10$, $\pi_0 = 0.05$, $\bar\pi = 0.075$, $z_\beta = 1.282$. Then
+\begin{gather*}
+\sigma_0 = \sqrt{2 \times 0.075 \times 0.925} = 0.3725, \\
+\sigma_1 = \sqrt{0.10 \times 0.90 + 0.05 \times 0.95} = 0.3708, \\
+n = \frac{(1.960 \times 0.3725 + 1.282 \times 0.3708)^2}{0.05^2} = 581.3
+\end{gather*}
+so $582$ in each group after rounding up, $1164$ in all.
+\end{solution}
+
+\begin{problem}
+A cohort study has $500$ exposed and $500$ unexposed subjects. What is its power to detect risks of $0.15$ against $0.10$ at $\alpha = 0.05$?
+\end{problem}
+
+\begin{solution}
+$\delta = 0.05$, $\sigma_0 = \sqrt{2 \times 0.125 \times 0.875} = 0.468$, $\sigma_1 = \sqrt{0.1275 + 0.09} = 0.466$. The power is
+$\Phi\{(0.05\sqrt{500} - 1.96 \times 0.468)/0.466\} = \Phi(0.431) = 0.67$. The study has only a two-in-three chance of detecting a risk ratio of $1.5$.
+\end{solution}
+
+\begin{problem}
+Only $100$ cases are available for a case-control study of an exposure with prevalence $0.2$ among controls. Find the power to detect
+an odds ratio of $2$ with $1$, $3$ and $10$ controls per case.
+\end{problem}
+
+\begin{solution}
+With $q_1 = 0.333$ and $q_0 = 0.2$, the power formula of Theorem~\ref{thm:ss} with $n = 100$ gives $0.57$ for $k = 1$, $0.76$ for $k = 3$ and $0.84$ for $k = 10$.
+Tripling the controls raises the power substantially; going from $3$ to $10$ adds much less, as Proposition~\ref{prop:kcontrols} predicts.
+Even with unlimited controls the power would stay below $0.9$, because the $100$ cases fix the first term of the variance.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{exa:pairs} there are also $18$ pairs in which both are exposed and $40$ in which neither is. Compute the crude odds ratio from
+the $100$ cases and $100$ controls, ignoring the matching, and compare it with $\hat\psi = 2.5$.
+\end{problem}
+
+\begin{solution}
+Exposed cases: $n_{11} + n_{10} = 18 + 30 = 48$; exposed controls: $n_{11} + n_{01} = 18 + 12 = 30$. The crude odds ratio is
+$(48 \times 70)/(52 \times 30) = 3360/1560 = 2.15$. It is closer to $1$ than the matched estimate. Pairs are alike in the matching variable, which here is
+associated with exposure, and ignoring the matching treats the controls as if they were a random sample of the base when they have
+been drawn towards the cases' exposure distribution.
+\end{solution}
+
+\begin{problem}
+A cohort study is planned to detect a rate ratio of $1.5$ with power $0.90$ at $\alpha = 0.05$. The rate among the unexposed is $4$ per $1000$
+person-years, and exposed and unexposed will contribute equal person-time. How many cases and how many person-years are needed?
+\end{problem}
+
+\begin{solution}
+$\pi = 1.5/2.5 = 0.6$, so $D = (1.960 + 1.282)^2/\{0.24\,(\log 1.5)^2\} = 10.51/(0.24 \times 0.1644) = 266$ cases. Each pair of exposed and unexposed person-years
+yields $0.004 + 0.006 = 0.010$ cases, so about $26{,}600$ person-years are needed in each group. A modest effect on a rare outcome needs a large
+cohort.
+\end{solution}
+
+\begin{problem}
+Show that in Proposition~\ref{prop:kcontrols} the variance with $k$ controls per case and $m_1$ cases equals the variance with $k = 1$ and
+$m_1' = 2m_1 k/(k + 1)$ cases when $q_1 = q_0$. Interpret.
+\end{problem}
+
+\begin{solution}
+With $q_1 = q_0 = q$ the variance is $(1 + 1/k)/\{m_1 q(1 - q)\}$, and with $k = 1$ and $m_1'$ cases it is $2/\{m_1' q(1 - q)\}$. These are equal when
+$m_1' = 2m_1/(1 + 1/k) = 2m_1 k/(k + 1)$. With four controls per case, $100$ cases are worth $160$ cases with one control each: extra controls substitute
+for cases, but at most $100$ cases with unlimited controls are worth $200$ matched one-to-one.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -2106,18 +2434,25 @@ Van Nostrand Reinhold (reprinted by Wiley).
 \begin{enumerate}
 \item Breslow, N. E., and Day, N. E. (1980), \emph{Statistical Methods in Cancer Research, Vol.~I: The Analysis of Case-Control Studies}, Lyon,
 International Agency for Research on Cancer.
+\item Breslow, N. E., and Day, N. E. (1987), \emph{Statistical Methods in Cancer Research, Vol.~II: The Design and Analysis of Cohort
+Studies}, Lyon, International Agency for Research on Cancer.
 \item Cohen, J. (1960), A coefficient of agreement for nominal scales, \emph{Educational and Psychological
 Measurement}, 20, 37--46.
 \item Copeland, K. T., Checkoway, H., McMichael, A. J., and Holbrook, R. H. (1977), Bias due to misclassification in the estimation of relative risk,
 \emph{American Journal of Epidemiology}, 105, 488--495.
+\item Fleiss, J. L., Levin, B., and Paik, M. C. (2003), \emph{Statistical Methods for Rates and Proportions} (3rd ed.), Hoboken, NJ, Wiley.
 \item Hill, A. B. (1965), The environment and disease: association or causation? \emph{Proceedings of the Royal Society of Medicine}, 58,
 295--300.
 \item Levin, M. L. (1953), The occurrence of lung cancer in man, \emph{Acta Unio Internationalis contra Cancrum}, 9, 531--541.
+\item McNemar, Q. (1947), Note on the sampling error of the difference between correlated proportions or percentages,
+\emph{Psychometrika}, 12, 153--157.
 \item Miettinen, O. S. (1974), Proportion of disease caused or prevented by a given exposure, trait or intervention, \emph{American
 Journal of Epidemiology}, 99, 325--332.
 \item Rogan, W. J., and Gladen, B. (1978), Estimating prevalence from the results of a screening test, \emph{American Journal of
 Epidemiology}, 107, 71--76.
 \item Snow, J. (1855), \emph{On the Mode of Communication of Cholera} (2nd ed.), London, John Churchill.
+\item Wacholder, S., McLaughlin, J. K., Silverman, D. T., and Mandel, J. S. (1992), Selection of controls in case-control studies. I.
+Principles, \emph{American Journal of Epidemiology}, 135, 1019--1028.
 \item Walter, S. D. (1976), The estimation and interpretation of attributable risk in health research, \emph{Biometrics}, 32, 829--849.
 \end{enumerate}
 
