@@ -3031,7 +3031,7 @@ for direct standardisation, a population whose structure is in the range of thos
 Standardisation adjusts rates by reweighting. The more general approach, for any measure and any design, is \textbf{stratification}: divide
 the data into strata within which the confounder is constant (or nearly so), estimate the association within each stratum, and then
 decide whether the stratum estimates can be summarised by one number. This section develops the second step and the decision; the
-Mantel--Haenszel procedure of the next section gives the summary estimator in most common use.
+Mantel--Haenszel procedure of Section~\ref{sec:mh} gives the summary estimator in most common use.
 
 \subsection{Stratification}
 
@@ -3133,7 +3133,7 @@ $\sum_k w_k^2 v_k/(\sum_l w_l)^2 = 1/\sum_l w_l$.
 Applied to log odds ratios with Woolf's variances, this is the \textbf{Woolf pooled estimator}. Its weakness is that the weights and the
 stratum estimates come from the same small tables: a stratum with a zero cell has an infinite log odds ratio and must be corrected or
 dropped, and with many sparse strata (as in matched studies, where each set is a stratum) the estimator is badly biased. The
-Mantel--Haenszel estimator of the next section avoids both problems.
+Mantel--Haenszel estimator of Section~\ref{sec:mh} avoids both problems.
 
 \subsection{Testing homogeneity}
 
@@ -3246,6 +3246,278 @@ excesses ($0.02 + 0.03 = 0.05$). There is strong additive interaction; preventin
 than the separate effects suggest.
 \end{solution}
 
+\section{The Mantel--Haenszel procedure}
+\label{sec:mh}
+
+Mantel and Haenszel (1959) proposed, for case-control studies of cancer stratified by age and other factors, a summary odds ratio and a
+test of association that need no iteration, tolerate empty cells and remain valid when the strata are many and small. Their methods,
+extended since to risk ratios, risk differences and rate ratios, are the standard tools of stratified analysis. Throughout, stratum $k$ has
+the table of Section~\ref{sec:association} with cells $a_k, b_k, c_k, d_k$, margins $n_{1k}, n_{0k}, m_{1k}, m_{0k}$ and total $n_k$.
+
+\subsection{The Mantel--Haenszel odds ratio}
+
+\begin{defn}
+The \textbf{Mantel--Haenszel estimator} of a common odds ratio is
+\[
+\widehat{\OR}_{\text{MH}} = \frac{\sum_k a_k d_k/n_k}{\sum_k b_k c_k/n_k} .
+\]
+\end{defn}
+
+\begin{prop}
+\label{prop:mhweights}
+$\widehat{\OR}_{\text{MH}}$ is a weighted average of the stratum odds ratios $\widehat{\OR}_k = a_k d_k/(b_k c_k)$, with weights proportional to $b_k c_k/n_k$.
+\end{prop}
+
+\begin{proof}
+$\sum_k a_k d_k/n_k = \sum_k (b_k c_k/n_k)\,\widehat{\OR}_k$; divide by $\sum_k b_k c_k/n_k$.
+\end{proof}
+
+The weights $b_k c_k/n_k$ are approximately inverse variances of $\widehat{\OR}_k$ when the odds ratio is near $1$, so the estimator is nearly efficient
+there, and it loses little elsewhere. Unlike the Woolf estimator, it needs no correction for zero cells: a stratum with $b_k c_k = 0$ adds to
+the numerator only, and one with $a_k d_k = 0$ to the denominator only.
+
+\begin{thm}
+\label{thm:mhconsistent}
+Under a common odds ratio $\psi$, $\widehat{\OR}_{\text{MH}}$ is consistent for $\psi$ both as the strata become large with their number fixed, and as the
+number of strata grows with their sizes bounded.
+\end{thm}
+
+\begin{proof}
+Write $R_k = a_k d_k/n_k$ and $S_k = b_k c_k/n_k$. The key fact is that $E(R_k - \psi S_k) = 0$ in every stratum, whatever its size: under the
+product-binomial model of a case-control stratum, with exposure probabilities $q_{1k}$ among $m_{1k}$ cases and $q_{0k}$ among $m_{0k}$ controls, $a_k$ and $d_k$ are
+independent, so $E(a_k d_k) = m_{1k}q_{1k}\,m_{0k}(1 - q_{0k})$ and $E(b_k c_k) = m_{1k}(1 - q_{1k})\,m_{0k}q_{0k}$. Their ratio is the stratum odds ratio $\psi$. (In this
+model $n_k = m_{1k} + m_{0k}$ is fixed, so dividing by it changes nothing.)
+
+With $K$ fixed and the strata growing, $R_k/n_k$ and $S_k/n_k$ converge in probability to their means, and $\sum_k R_k/\sum_k S_k$ converges to
+$\sum_k E(R_k)/\sum_k E(S_k) = \psi$. With the sizes bounded and $K \to \infty$, $\sum_k R_k/K$ and $\sum_k S_k/K$ are averages of independent bounded variables, so by
+the law of large numbers their difference $\frac1K\sum_k (R_k - \psi S_k)$ tends to $0$, while $\frac1K\sum_k S_k$ stays bounded away from $0$ under mild conditions.
+Hence the ratio tends to $\psi$.
+\end{proof}
+
+The second kind of consistency is what the Woolf estimator, and the unconditional maximum likelihood estimator, lack: with matched pairs
+(each pair a stratum of size $2$) both converge to $\psi^2$ rather than $\psi$.
+
+\subsection{Variance and confidence interval}
+
+The variance estimator in general use is due to Robins, Breslow and Greenland (1986). With
+\[
+P_k = \frac{a_k + d_k}{n_k}, \quad Q_k = \frac{b_k + c_k}{n_k}, \quad R_k = \frac{a_k d_k}{n_k}, \quad S_k = \frac{b_k c_k}{n_k} ,
+\]
+and $R_+ = \sum_k R_k$, $S_+ = \sum_k S_k$,
+\[
+\widehat{\Var}(\log\widehat{\OR}_{\text{MH}}) = \frac{\sum_k P_k R_k}{2R_+^2} + \frac{\sum_k (P_k S_k + Q_k R_k)}{2R_+ S_+} + \frac{\sum_k Q_k S_k}{2S_+^2} .
+\]
+It is consistent under both kinds of asymptotics of Theorem~\ref{thm:mhconsistent}, and the $95\%$ interval is
+\[
+\widehat{\OR}_{\text{MH}}\exp(\pm 1.96\,\text{SE}) .
+\]
+
+\begin{exa}
+\label{exa:mhor}
+For the age-stratified data of Example~\ref{exa:strata}:
+\begin{center}
+\begin{tabular}{lccccc}
+\hline
+Age & $n_k$ & $R_k$ & $S_k$ & $P_k$ & $Q_k$ \\
+\hline
+Under 45 & 410 & 7.024 & 4.000 & 0.802 & 0.198 \\
+45--59 & 315 & 17.143 & 8.571 & 0.667 & 0.333 \\
+60+ & 190 & 16.842 & 6.842 & 0.600 & 0.400 \\
+\hline
+Total & & 41.009 & 19.414 & & \\
+\hline
+\end{tabular}
+\end{center}
+So $\widehat{\OR}_{\text{MH}} = 41.009/19.414 = 2.11$, close to the Woolf estimate $2.10$ and far from the crude $3.37$. The weights of
+Proposition~\ref{prop:mhweights} are $0.21$, $0.44$ and $0.35$. The Robins--Breslow--Greenland variance is $0.0334$, so $\text{SE} = 0.183$ and the interval is
+$2.11\,e^{\pm 0.358} = (1.48,\ 3.02)$.
+\end{exa}
+
+\subsection{The Mantel--Haenszel test}
+
+\begin{thm}
+\label{thm:cmh}
+Under the hypothesis of no association in any stratum, conditionally on all the margins,
+\[
+E\Bigl(\sum_k a_k\Bigr) = \sum_k \frac{n_{1k}m_{1k}}{n_k}, \qquad \Var\Bigl(\sum_k a_k\Bigr) = \sum_k \frac{n_{1k}n_{0k}m_{1k}m_{0k}}{n_k^2(n_k - 1)} ,
+\]
+and the \textbf{Mantel--Haenszel statistic}
+\[
+X^2_{\text{MH}} = \frac{\bigl\{\sum_k a_k - \sum_k E(a_k)\bigr\}^2}{\sum_k \Var(a_k)}
+\]
+is approximately $\chi^2_1$ when $\sum_k \Var(a_k)$ is large.
+\end{thm}
+
+\begin{proof}
+By Theorem~\ref{thm:hyper} each $a_k$, given its margins, is hypergeometric with the stated mean and variance, and the strata are independent.
+Sums of independent variables have summed means and variances. A sum of many independent bounded variables with large total variance is
+approximately normal by the Lindeberg central limit theorem, which applies whether the strata are few and large or many and small; the
+square of the standardised sum is then approximately $\chi^2_1$.
+\end{proof}
+
+The statistic compares the total number of exposed cases with its expectation under no association, summed across strata before
+squaring. Associations in the same direction in different strata reinforce each other, and the test is most powerful against a common
+odds ratio. A continuity correction, subtracting $\tfrac12$ from $|\sum a_k - \sum E(a_k)|$ before squaring, is often used.
+
+\begin{exa}
+In Example~\ref{exa:strata}, $\sum_k a_k = 103$. The expected values are $5.98$, $21.43$ and $54.00$, totalling $81.40$, and the variances $4.63$, $11.70$ and $11.43$,
+totalling $27.76$. Then $X^2_{\text{MH}} = (103 - 81.40)^2/27.76 = 16.8$ ($16.0$ with the continuity correction), $P < 0.0001$. The age-adjusted association is
+highly significant.
+\end{exa}
+
+\subsection{Matched pairs}
+
+\begin{prop}
+\label{prop:mhpairs}
+If each matched pair is treated as a stratum, $\widehat{\OR}_{\text{MH}} = n_{10}/n_{01}$ and $X^2_{\text{MH}}$ without continuity correction is McNemar's statistic.
+\end{prop}
+
+\begin{proof}
+Each stratum has $n_k = 2$, with one case and one control. A concordant pair has $a_k d_k = b_k c_k = 0$. A pair in which only the case is exposed has
+$a_k = d_k = 1$, $b_k = c_k = 0$, contributing $\tfrac12$ to $R_+$; one in which only the control is exposed contributes $\tfrac12$ to $S_+$. So $\widehat{\OR}_{\text{MH}} = (n_{10}/2)/(n_{01}/2)$.
+
+For the test, a concordant pair has $n_{1k} = 0$ or $n_{0k} = 0$, so $\Var(a_k) = 0$ and $a_k = E(a_k)$; it contributes nothing. A discordant pair has all margins $1$ and $n_k = 2$,
+so $E(a_k) = \tfrac12$ and $\Var(a_k) = 1/(4 \times 1) = \tfrac14$. Summing over discordant pairs, $\sum a_k - \sum E(a_k) = n_{10} - (n_{10} + n_{01})/2 = (n_{10} - n_{01})/2$ and
+$\sum \Var(a_k) = (n_{10} + n_{01})/4$, giving $(n_{10} - n_{01})^2/(n_{10} + n_{01})$.
+\end{proof}
+
+So the conditional analysis of Theorem~\ref{thm:pairs} is the Mantel--Haenszel analysis with pairs as strata, and the same holds for matched
+sets with several controls (Problem~\ref{prob:onetwo}). This is the sparse-data case of Theorem~\ref{thm:mhconsistent} in its purest form.
+
+\subsection{Risk ratios and risk differences}
+
+For cohort data with risks, the same idea gives
+\[
+\widehat{\RR}_{\text{MH}} = \frac{\sum_k a_k n_{0k}/n_k}{\sum_k b_k n_{1k}/n_k}, \qquad \widehat{\RD}_{\text{MH}} = \frac{\sum_k (a_k n_{0k} - b_k n_{1k})/n_k}{\sum_k n_{1k}n_{0k}/n_k} .
+\]
+The first is a weighted average of the stratum risk ratios with weights $b_k n_{1k}/n_k$, the second of the stratum risk differences with weights
+$n_{1k}n_{0k}/n_k$. Greenland and Robins (1985) gave the variance estimator, consistent in large and sparse strata alike,
+\[
+\widehat{\Var}(\log\widehat{\RR}_{\text{MH}}) = \frac{\sum_k (m_{1k}n_{1k}n_{0k}/n_k^2 - a_k b_k/n_k)}{\bigl(\sum_k a_k n_{0k}/n_k\bigr)\bigl(\sum_k b_k n_{1k}/n_k\bigr)} .
+\]
+The test of no association is the same $X^2_{\text{MH}}$ as before, since conditionally on the margins it does not matter whether the table arose from
+a cohort or a case-control design.
+
+\subsection{Rate ratios}
+\label{sec:mhrate}
+
+With $D_{1k}$ cases in $T_{1k}$ person-years among the exposed and $D_{0k}$ in $T_{0k}$ among the unexposed in stratum $k$, $D_k = D_{1k} + D_{0k}$ and $T_k = T_{1k} + T_{0k}$,
+\[
+\widehat{\text{IRR}}_{\text{MH}} = \frac{\sum_k D_{1k}T_{0k}/T_k}{\sum_k D_{0k}T_{1k}/T_k} ,
+\]
+with
+\[
+\widehat{\Var}(\log\widehat{\text{IRR}}_{\text{MH}}) = \frac{\sum_k D_k T_{1k}T_{0k}/T_k^2}{\bigl(\sum_k D_{1k}T_{0k}/T_k\bigr)\bigl(\sum_k D_{0k}T_{1k}/T_k\bigr)} .
+\]
+The test of no association uses Theorem~\ref{thm:ratecond}: given $D_k$, $D_{1k}$ is binomial with probability $T_{1k}/T_k$ under the null hypothesis, so
+\[
+X^2 = \frac{\bigl(\sum_k D_{1k} - \sum_k D_k T_{1k}/T_k\bigr)^2}{\sum_k D_k T_{1k}T_{0k}/T_k^2} .
+\]
+
+\begin{exa}
+\label{exa:doctors}
+In the British doctors' study (Doll and Hill, 1966; data as in Breslow and Day, 1987) deaths from coronary heart disease among smokers
+and non-smokers were:
+\begin{center}
+\begin{tabular}{lrrrrc}
+\hline
+ & \multicolumn{2}{c}{Smokers} & \multicolumn{2}{c}{Non-smokers} & \\
+Age & Deaths & Person-yrs & Deaths & Person-yrs & IRR \\
+\hline
+35--44 & 32 & 52{,}407 & 2 & 18{,}790 & 5.74 \\
+45--54 & 104 & 43{,}248 & 12 & 10{,}673 & 2.14 \\
+55--64 & 206 & 28{,}612 & 28 & 5710 & 1.47 \\
+65--74 & 186 & 12{,}663 & 28 & 2585 & 1.36 \\
+75--84 & 102 & 5317 & 31 & 1462 & 0.90 \\
+\hline
+\end{tabular}
+\end{center}
+The crude rate ratio is $1.72$ and the Mantel--Haenszel rate ratio $1.42$, with $\text{SE}(\log) = 0.107$ and interval $(1.15,\ 1.76)$. The test gives
+$630$ observed deaths among smokers against $595.2$ expected, variance $110.1$, $X^2 = 11.0$. The crude and adjusted ratios differ, but the more striking feature is that the stratum
+ratios fall steeply with age, from $5.7$ to $0.9$. This is effect modification
+on the ratio scale, and here the summary $1.42$ is a poor description: the relative effect of smoking on heart disease is large in middle age
+and vanishes in old age, while the rate \emph{difference} (Problem~\ref{prob:doctors}) behaves quite differently.
+\end{exa}
+
+\subsection{Testing homogeneity: the Breslow--Day test}
+
+Woolf's test of Section~\ref{sec:stratified} breaks down in sparse strata. Breslow and Day (1980) proposed a test that uses the
+Mantel--Haenszel estimate: in each stratum find the cell count $\tilde a_k$ which, with the observed margins, has odds ratio $\widehat{\OR}_{\text{MH}}$ (the root
+in the admissible range of a quadratic equation), and its variance $\tilde v_k = (1/\tilde a_k + 1/\tilde b_k + 1/\tilde c_k + 1/\tilde d_k)^{-1}$. Then
+\[
+X^2_{\text{BD}} = \sum_k \frac{(a_k - \tilde a_k)^2}{\tilde v_k}
+\]
+is approximately $\chi^2_{K - 1}$ under homogeneity. For Example~\ref{exa:strata} the fitted counts are $10.17$, $30.70$ and $62.36$, and $X^2_{\text{BD}} = 0.50$ on $2$ degrees
+of freedom, $P = 0.78$, in agreement with Woolf's test.
+
+\subsection{Problems}
+
+\begin{problem}
+For the sex-stratified data of Section~\ref{sec:stratified} (men: $20, 80, 40, 200$; women: $40, 20, 30, 150$), compute $\widehat{\OR}_{\text{MH}}$ and the weights of
+Proposition~\ref{prop:mhweights}. Why is the summary inappropriate here?
+\end{problem}
+
+\begin{solution}
+Men: $n = 340$, $R = 4000/340 = 11.76$, $S = 3200/340 = 9.41$. Women: $n = 240$, $R = 6000/240 = 25.0$, $S = 600/240 = 2.5$. So $\widehat{\OR}_{\text{MH}} = 36.76/11.91 = 3.09$, with weights
+$9.41/11.91 = 0.79$ on men's $1.25$ and $0.21$ on women's $10.0$. The stratum odds ratios are strongly heterogeneous ($Q = 20.8$), and the average $3.09$
+describes neither sex. The Mantel--Haenszel estimator assumes a common odds ratio; when that fails, it estimates a weighted average whose
+weights depend on the design, not a population parameter of interest.
+\end{solution}
+
+\begin{problem}
+A cohort study is stratified by sex. Men: $20$ cases among $200$ exposed, $10$ among $400$ unexposed. Women: $40$ among $400$ exposed, $15$ among $300$
+unexposed. Compute $\widehat{\RR}_{\text{MH}}$ with a $95\%$ interval, and $\widehat{\RD}_{\text{MH}}$. Compare with the crude risk ratio.
+\end{problem}
+
+\begin{solution}
+Men: $n = 600$, $a n_0/n = 20 \times 400/600 = 13.33$, $b n_1/n = 10 \times 200/600 = 3.33$. Women: $n = 700$, $40 \times 300/700 = 17.14$, $15 \times 400/700 = 8.57$. So
+$\widehat{\RR}_{\text{MH}} = 30.48/11.90 = 2.56$. The variance numerator is $\sum (m_1 n_1 n_0/n^2 - ab/n)$: men $30 \times 200 \times 400/600^2 - 200/600 = 6.667 - 0.333 = 6.333$, women
+$55 \times 400 \times 300/700^2 - 600/700 = 13.469 - 0.857 = 12.612$; total $18.945$. Then $\Var(\log\widehat{\RR}_{\text{MH}}) = 18.945/(30.48 \times 11.90) = 0.0522$, $\text{SE} = 0.229$,
+interval $(1.64,\ 4.01)$. For the risk difference, $\sum(an_0 - bn_1)/n = (13.33 - 3.33) + (17.14 - 8.57) = 18.57$ and $\sum n_1 n_0/n = 133.3 + 171.4 = 304.8$, so $\widehat{\RD}_{\text{MH}} = 0.061$.
+The crude risk ratio is $(60/600)/(25/700) = 2.80$; sex confounds the crude association slightly, since women are more often exposed and
+at higher baseline risk.
+\end{solution}
+
+\begin{problem}
+\label{prob:onetwo}
+In a case-control study with two controls matched to each case, a matched set is described by whether the case is exposed and by the
+number $j$ of exposed controls. Show that
+\[
+\widehat{\OR}_{\text{MH}} = \frac{\sum_j n_{1j}(2 - j)}{\sum_j n_{0j}\,j} ,
+\]
+where $n_{1j}$ ($n_{0j}$) is the number of sets with an exposed (unexposed) case and $j$ exposed controls. Evaluate it when $n_{10} = 15$, $n_{11} = 10$, $n_{12} = 5$,
+$n_{01} = 8$, $n_{02} = 2$.
+\end{problem}
+
+\begin{solution}
+Each set is a stratum with $n_k = 3$. If the case is exposed, $a = 1$, $b = 0$, $c = j$, $d = 2 - j$, so $R = (2 - j)/3$ and $S = 0$. If the case is unexposed, $a = 0$,
+$b = 1$, $c = j$, $d = 2 - j$, so $R = 0$ and $S = j/3$. Summing, the factors $\tfrac13$ cancel. With the data, the numerator is $15 \times 2 + 10 \times 1 + 5 \times 0 = 40$ and the
+denominator $8 \times 1 + 2 \times 2 = 12$, so $\widehat{\OR}_{\text{MH}} = 3.33$. Sets in which the case and both controls share an exposure status contribute nothing.
+\end{solution}
+
+\begin{problem}
+\label{prob:doctors}
+In Example~\ref{exa:doctors}, compute the rate difference per $100{,}000$ person-years in each age group. Does the effect of smoking on
+coronary mortality look heterogeneous on the additive scale?
+\end{problem}
+
+\begin{solution}
+The rates per $100{,}000$ (smokers, non-smokers) are $61$ and $11$; $240$ and $112$; $720$ and $490$; $1469$ and $1083$; $1918$ and $2120$. The differences are $50$, $128$,
+$230$, $386$ and $-202$. The excess rises with age up to $74$ and reverses in the oldest group, which is small and contains survivors (smokers
+susceptible to heart disease have died earlier). The additive and multiplicative pictures differ: the relative effect falls steadily
+with age, while the number of extra deaths per smoker grows through middle and early old age. Which matters depends on the question.
+\end{solution}
+
+\begin{problem}
+Show that under a common odds ratio, $E(a_k d_k - \psi b_k c_k) = 0$ in a cohort stratum as well, where $a_k \sim \text{Bin}(n_{1k}, p_{1k})$ and $b_k \sim \text{Bin}(n_{0k}, p_{0k})$.
+\end{problem}
+
+\begin{solution}
+$d_k = n_{0k} - b_k$ and $c_k = n_{1k} - a_k$, with $a_k$, $b_k$ independent. So $E(a_k d_k) = n_{1k}p_{1k}\,n_{0k}(1 - p_{0k})$ and $E(b_k c_k) = n_{0k}p_{0k}\,n_{1k}(1 - p_{1k})$. Their
+ratio is $p_{1k}(1 - p_{0k})/\{p_{0k}(1 - p_{1k})\} = \psi$, so $E(a_k d_k) - \psi E(b_k c_k) = 0$. Dividing by the fixed $n_k$ gives $E(R_k - \psi S_k) = 0$, and the consistency argument
+of Theorem~\ref{thm:mhconsistent} goes through.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -3276,19 +3548,27 @@ Measurement}, 20, 37--46.
 \emph{American Journal of Epidemiology}, 105, 488--495.
 \item Cornfield, J., Haenszel, W., Hammond, E. C., Lilienfeld, A. M., Shimkin, M. B., and Wynder, E. L. (1959), Smoking and lung cancer:
 recent evidence and a discussion of some questions, \emph{Journal of the National Cancer Institute}, 22, 173--203.
+\item Doll, R., and Hill, A. B. (1966), Mortality of British doctors in relation to smoking: observations on coronary thrombosis,
+\emph{National Cancer Institute Monograph}, 19, 205--268.
 \item Fay, M. P., and Feuer, E. J. (1997), Confidence intervals for directly standardized rates: a method based on the gamma
 distribution, \emph{Statistics in Medicine}, 16, 791--801.
 \item Fleiss, J. L., Levin, B., and Paik, M. C. (2003), \emph{Statistical Methods for Rates and Proportions} (3rd ed.), Hoboken, NJ, Wiley.
+\item Greenland, S., and Robins, J. M. (1985), Estimation of a common effect parameter from sparse follow-up data, \emph{Biometrics}, 41,
+55--68.
 \item Greenland, S., Pearl, J., and Robins, J. M. (1999), Causal diagrams for epidemiologic research, \emph{Epidemiology}, 10, 37--48.
 \item Greenland, S., Robins, J. M., and Pearl, J. (1999), Confounding and collapsibility in causal inference, \emph{Statistical Science},
 14, 29--46.
 \item Hill, A. B. (1965), The environment and disease: association or causation? \emph{Proceedings of the Royal Society of Medicine}, 58,
 295--300.
 \item Levin, M. L. (1953), The occurrence of lung cancer in man, \emph{Acta Unio Internationalis contra Cancrum}, 9, 531--541.
+\item Mantel, N., and Haenszel, W. (1959), Statistical aspects of the analysis of data from retrospective studies of disease,
+\emph{Journal of the National Cancer Institute}, 22, 719--748.
 \item McNemar, Q. (1947), Note on the sampling error of the difference between correlated proportions or percentages,
 \emph{Psychometrika}, 12, 153--157.
 \item Miettinen, O. S. (1974), Proportion of disease caused or prevented by a given exposure, trait or intervention, \emph{American
 Journal of Epidemiology}, 99, 325--332.
+\item Robins, J., Breslow, N., and Greenland, S. (1986), Estimators of the Mantel--Haenszel variance consistent in both sparse data and
+large-strata limiting models, \emph{Biometrics}, 42, 311--323.
 \item Rogan, W. J., and Gladen, B. (1978), Estimating prevalence from the results of a screening test, \emph{American Journal of
 Epidemiology}, 107, 71--76.
 \item Simpson, E. H. (1951), The interpretation of interaction in contingency tables, \emph{Journal of the Royal Statistical Society,
