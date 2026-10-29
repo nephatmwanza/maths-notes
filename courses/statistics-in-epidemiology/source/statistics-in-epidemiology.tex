@@ -20,6 +20,9 @@
 \setlength{\abovedisplayshortskip}{0.25\baselineskip}
 \setlength{\belowdisplayshortskip}{0.25\baselineskip}
 \numberwithin{equation}{section}
+% Hyphenation is off, so give TeX a little extra stretch before it settles for an
+% overfull line.
+\setlength{\emergencystretch}{1.5em}
 
 \pagestyle{fancy}
 \fancyfoot[C]{\thepage}
@@ -2416,6 +2419,364 @@ $m_1' = 2m_1/(1 + 1/k) = 2m_1 k/(k + 1)$. With four controls per case, $100$ cas
 for cases, but at most $100$ cases with unlimited controls are worth $200$ matched one-to-one.
 \end{solution}
 
+\section{Threats to validity}
+\label{sec:validity}
+
+\subsection{Random error and bias}
+
+An estimate of a measure of association can be wrong for two kinds of reason. \textbf{Random error} comes from sampling variation; it
+shrinks as the study grows and is described by a confidence interval. \textbf{Systematic error}, or \textbf{bias}, is a difference between
+what the study estimates on average and the true value in the source population; it does not shrink with size, and no confidence
+interval reflects it. A study is \textbf{internally valid} if it is free of bias for the population it sampled. Whether its result
+applies to other populations, its \textbf{external validity} or generalisability, is a separate and usually more judgemental question.
+
+Biases are traditionally grouped into three kinds:
+\begin{enumerate}
+\item \textbf{selection bias}, from the way subjects come to be in the study or in the analysis;
+\item \textbf{information bias}, from errors in measuring exposure, disease or other variables;
+\item \textbf{confounding}, from the mixing of the effect of exposure with the effects of other factors.
+\end{enumerate}
+The first two are flaws in how the data were obtained. The third is a property of the source population, present even in perfectly
+collected data, and it is the one the methods of the following sections are designed to remove.
+
+\subsection{Selection bias}
+\label{sec:selection}
+
+Selection bias arises when the probability of being included in the study, or in the analysis, depends on both exposure and disease.
+A simple model shows exactly when it biases the odds ratio.
+
+\begin{thm}
+\label{thm:selection}
+Suppose that people in the source population with disease status $i$ and exposure status $j$ enter the study with probability $s_{ij}$
+($i = 1$ for cases, $0$ for non-cases; $j = 1$ for exposed, $0$ for unexposed). Then the odds ratio in the study population is
+\[
+\OR_{\text{obs}} = \OR \times \frac{s_{11}\,s_{00}}{s_{10}\,s_{01}} ,
+\]
+where $\OR$ is the odds ratio in the source population.
+\end{thm}
+
+\begin{proof}
+If $N_{ij}$ is the number of people in cell $(i, j)$ of the source population, the expected number in the study is $s_{ij}N_{ij}$. The odds ratio of
+the expected study table is
+\[
+\frac{(s_{11}N_{11})(s_{00}N_{00})}{(s_{10}N_{10})(s_{01}N_{01})} = \frac{N_{11}N_{00}}{N_{10}N_{01}} \cdot \frac{s_{11}s_{00}}{s_{10}s_{01}} .
+\]
+\end{proof}
+
+The \textbf{selection bias factor} $s_{11}s_{00}/(s_{10}s_{01})$ equals $1$ whenever selection depends on disease only ($s_{1j} = s_1$, $s_{0j} = s_0$), which is
+exactly what case-control sampling does, and whenever it depends on exposure only, which is what cohort sampling does. Bias arises only
+when the selection probabilities depend on exposure and disease \emph{jointly}, in the sense that the ratio of the case's selection
+probabilities for exposed and unexposed differs from the non-case's.
+
+\begin{exa}
+In a case-control study $90\%$ of eligible cases agree to take part whatever their exposure. Among population controls, people with
+the exposure (say, heavy drinkers) are less willing: $50\%$ of exposed and $70\%$ of unexposed controls take part. The bias factor is
+$(0.9 \times 0.7)/(0.9 \times 0.5) = 1.4$, so a true odds ratio of $1$ would appear as $1.4$. Response rates of $90\%$ and $60\%$ are not by themselves
+a problem; their dependence on exposure among the controls is.
+\end{exa}
+
+\subhead{Common forms of selection bias}
+
+\begin{itemize}
+\item \textbf{Non-response} and \textbf{loss to follow-up} related to both exposure and outcome.
+\item \textbf{Hospital controls}, when the conditions for which they were admitted are associated with the exposure
+(Problem~\ref{prob:hospital}).
+\item \textbf{Berkson's bias}: when admission to hospital depends on having either of two conditions, the conditions become associated
+among hospital patients even if they are independent in the population (Problem~\ref{prob:berkson}).
+\item The \textbf{healthy worker effect}: employment selects healthier people, so comparing workers with the general population is
+biased against finding harm.
+\item \textbf{Survival bias}: prevalent cases are survivors (Section~\ref{sec:prevdur}).
+\end{itemize}
+
+\subsection{Information bias}
+
+Errors in measuring a binary exposure or disease were studied in Section~\ref{sec:misclass}. Nondifferential misclassification of a binary exposure biases the odds ratio towards $1$, while differential misclassification can bias it in either direction. Its common sources
+are:
+\begin{itemize}
+\item \textbf{recall bias}, when cases remember or report past exposure differently from controls;
+\item \textbf{interviewer bias}, when an interviewer who knows the subject's disease status probes harder for exposure in cases;
+\item \textbf{detection bias}, when exposure leads to closer medical surveillance and so to earlier or more complete diagnosis of the
+disease (women taking hormones see doctors more often, so more of their slow-growing cancers are found).
+\end{itemize}
+The defences are in the data collection: exposure measured from records made before the disease, interviewers kept unaware of case
+status and of the hypothesis, the same procedures for every subject, and objective measures where they exist.
+
+\subsection{Confounding}
+\label{sec:confounding}
+
+Section~\ref{sec:causation} defined confounding as the failure of exchangeability: the exposed and unexposed would have had different
+risks even without the exposure. In practice confounding is attributed to particular variables.
+
+\begin{defn}
+A variable $C$ is a \textbf{confounder} of the association between exposure $E$ and disease $D$ if
+\begin{enumerate}
+\item $C$ is a risk factor for $D$ among the unexposed (a cause of $D$, or a proxy for one);
+\item $C$ is associated with $E$ in the source population;
+\item $C$ is not affected by $E$: it is not on the causal path from $E$ to $D$.
+\end{enumerate}
+\end{defn}
+
+Age is the classic confounder: it raises the risk of most diseases and is associated with most exposures. The third condition matters.
+A variable through which the exposure acts, a \textbf{mediator}, satisfies the first two conditions, but adjusting for it removes part of
+the effect being studied.
+
+\subhead{How large can confounding be?}
+
+\begin{thm}[Bias from an unmeasured binary confounder]
+\label{thm:confbias}
+Let $C$ be a binary confounder with risk ratio $R_C$ for disease (the same among exposed and unexposed), present in a proportion $\pi_1$ of the
+exposed and $\pi_0$ of the unexposed, and let the risk ratio for exposure be $\theta$ within each level of $C$. Then the crude risk ratio is
+\[
+\RR_{\text{crude}} = \theta \times \frac{1 + \pi_1(R_C - 1)}{1 + \pi_0(R_C - 1)} .
+\]
+\end{thm}
+
+\begin{proof}
+Let $r$ be the risk among the unexposed with $C$ absent. The unexposed have risk $r$ or $rR_C$, so their average risk is
+$r\{(1 - \pi_0) + \pi_0 R_C\} = r\{1 + \pi_0(R_C - 1)\}$. The exposed have risks $\theta r$ and $\theta r R_C$, averaging $\theta r\{1 + \pi_1(R_C - 1)\}$. The ratio of the
+averages is the stated expression.
+\end{proof}
+
+The second factor is the \textbf{confounding bias factor}. It equals $1$ if $\pi_1 = \pi_0$ (no association of $C$ with exposure) or $R_C = 1$ (no
+effect of $C$ on disease), which are conditions 2 and 1 of the definition.
+
+\begin{exa}
+\label{exa:coffee}
+A study finds that coffee drinkers have a higher risk of a cancer. Suppose coffee has no effect ($\theta = 1$), but smoking multiplies the
+risk by $10$, and $60\%$ of coffee drinkers smoke against $30\%$ of others. The crude risk ratio is
+\[
+\frac{1 + 0.6 \times 9}{1 + 0.3 \times 9} = \frac{6.4}{3.7} = 1.73 ,
+\]
+an association produced entirely by smoking.
+\end{exa}
+
+\begin{thm}[Cornfield's inequalities]
+\label{thm:cornfield}
+If an observed risk ratio $\RR_{\text{obs}} > 1$ is entirely due to a binary confounder $C$ (so $\theta = 1$), then both
+\[
+R_C \geq \RR_{\text{obs}} \qquad\text{and}\qquad \frac{\pi_1}{\pi_0} \geq \RR_{\text{obs}} .
+\]
+\end{thm}
+
+\begin{proof}
+With $\theta = 1$ and $x = R_C - 1 > 0$, $\RR_{\text{obs}} = (1 + \pi_1 x)/(1 + \pi_0 x)$, which exceeds $1$ only if $\pi_1 > \pi_0$. As a function of $x$ it is increasing
+(its derivative has the sign of $\pi_1 - \pi_0$) and tends to $\pi_1/\pi_0$ as $x \to \infty$, so $\RR_{\text{obs}} \leq \pi_1/\pi_0$. For the other inequality,
+\begin{align*}
+\frac{1 + \pi_1 x}{1 + \pi_0 x} \leq 1 + x &\iff 1 + \pi_1 x \leq (1 + x)(1 + \pi_0 x) \\
+&\iff \pi_1 \leq 1 + \pi_0(1 + x) ,
+\end{align*}
+which holds because $\pi_1 \leq 1$.
+\end{proof}
+
+Cornfield and colleagues used this argument in 1959 against the claim that the association between smoking and lung cancer, a risk
+ratio of about $9$, was due to a genetic factor that predisposed people both to smoke and to develop the cancer. Such a factor would
+have to multiply the risk of lung cancer at least ninefold and be at least nine times as common among smokers as among non-smokers.
+No such factor was known, and one so strong would hardly have gone unnoticed. The argument is the ancestor of modern
+\emph{sensitivity analysis} for unmeasured confounding.
+
+\subhead{Confounding is not non-collapsibility}
+
+When there is no confounding, one might expect the crude measure to equal the common stratum-specific measure. This holds for the
+risk difference and the risk ratio, but not for the odds ratio.
+
+\begin{prop}
+\label{prop:collapse}
+If $C$ is independent of $E$ and the risk ratio (or risk difference) is the same in every stratum of $C$, the crude risk ratio (risk difference)
+equals it.
+\end{prop}
+
+\begin{proof}
+Let $w_k = P(C = k)$, the same among exposed and unexposed by independence, and let the stratum risks be $p_{0k}$ and $p_{1k} = \theta p_{0k}$. The crude
+risks are $\sum_k w_k p_{1k} = \theta\sum_k w_k p_{0k}$ and $\sum_k w_k p_{0k}$, with ratio $\theta$. For the difference, $p_{1k} = p_{0k} + \delta$ gives crude risks differing by
+$\delta\sum_k w_k = \delta$.
+\end{proof}
+
+\begin{exa}
+\label{exa:noncollapse}
+Two equal strata of $C$ each have half their members exposed, so $C$ is independent of $E$ and there is no
+confounding. In stratum 1 the risks are $0.8$ among the exposed and $0.5$ among the unexposed; in stratum 2 they are $0.5$ and $0.2$.
+The odds ratios in the two strata are
+\[
+\frac{0.8/0.2}{0.5/0.5} = 4 \qquad\text{and}\qquad \frac{0.5/0.5}{0.2/0.8} = 4 .
+\]
+The crude risks are $0.65$ and $0.35$, and the crude odds ratio is
+\[
+\frac{0.65/0.35}{0.35/0.65} = 3.45 ,
+\]
+not $4$. The risk difference is $0.3$ in both strata and $0.3$ crude, as Proposition~\ref{prop:collapse} requires. The odds ratio is
+\textbf{non-collapsible}: averaging over a risk factor that is unrelated to exposure still moves it towards $1$. The difference between
+$3.45$ and $4$ is not confounding, and a change in the odds ratio on adjustment is therefore not by itself evidence of confounding. For a
+rare disease the effect is negligible.
+\end{exa}
+
+\subsection{Causal diagrams}
+\label{sec:dags}
+
+The definition of a confounder in terms of associations can mislead, and a picture of the causal structure is often clearer. In a
+\textbf{causal diagram} (directed acyclic graph) each variable is a node and an arrow $A \to B$ means that $A$ directly affects $B$.
+Figure~\ref{fig:dags} shows the three basic structures in which a third variable is related to both exposure and disease.
+
+% Three panels in the infographic style used for the study designs: the
+% structure, what adjusting for the third variable does, and an example.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1,
+  nd/.style={circle,draw,thick,fill=white,minimum size=0.8cm,font=\small},
+  ar/.style={-Stealth,very thick},
+  ttl/.style={font=\bfseries},
+  txt/.style={font=\footnotesize,align=center,text width=4.6cm}]
+\begin{scope}[shift={(0,0)}]
+\fill[orange!8,rounded corners=6pt] (0,0) rectangle (5,5.2);
+\draw[orange!80!black,thick,rounded corners=6pt] (0,0) rectangle (5,5.2);
+\node[ttl,orange!80!black] at (2.5,4.8) {1\;\; Confounder};
+\node[nd,fill=orange!25] (c) at (2.5,3.7) {$C$};
+\node[nd] (e) at (1.0,2.2) {$E$};
+\node[nd] (d) at (4.0,2.2) {$D$};
+\draw[ar] (c) -- (e); \draw[ar] (c) -- (d); \draw[ar,gray] (e) -- (d);
+\node[txt] at (2.5,1.25) {Common cause of $E$ and $D$.};
+\node[txt,font=\footnotesize\bfseries,green!45!black] at (2.5,0.55) {Adjust for $C$};
+\end{scope}
+\begin{scope}[shift={(5.3,0)}]
+\fill[teal!7,rounded corners=6pt] (0,0) rectangle (5,5.2);
+\draw[teal!70!black,thick,rounded corners=6pt] (0,0) rectangle (5,5.2);
+\node[ttl,teal!70!black] at (2.5,4.8) {2\;\; Mediator};
+\node[nd,fill=teal!20] (m) at (2.5,3.7) {$M$};
+\node[nd] (e) at (1.0,2.2) {$E$};
+\node[nd] (d) at (4.0,2.2) {$D$};
+\draw[ar] (e) -- (m); \draw[ar] (m) -- (d); \draw[ar,gray] (e) -- (d);
+\node[txt] at (2.5,1.25) {On the path from $E$ to $D$.};
+\node[txt,font=\footnotesize\bfseries,red!70!black] at (2.5,0.55) {Do not adjust for $M$};
+\end{scope}
+\begin{scope}[shift={(10.6,0)}]
+\fill[violet!6,rounded corners=6pt] (0,0) rectangle (5,5.2);
+\draw[violet!70!black,thick,rounded corners=6pt] (0,0) rectangle (5,5.2);
+\node[ttl,violet!70!black] at (2.5,4.8) {3\;\; Collider};
+\node[nd,fill=violet!18] (s) at (2.5,3.7) {$S$};
+\node[nd] (e) at (1.0,2.2) {$E$};
+\node[nd] (d) at (4.0,2.2) {$D$};
+\draw[ar] (e) -- (s); \draw[ar] (d) -- (s);
+\node[txt] at (2.5,1.25) {Common effect of $E$ and $D$.};
+\node[txt,font=\footnotesize\bfseries,red!70!black] at (2.5,0.55) {Do not adjust for $S$};
+\end{scope}
+\end{tikzpicture}
+\caption{Three ways a third variable can be related to both exposure $E$ and disease $D$. Grey arrows are the effect under study.
+Adjusting for a confounder removes bias; adjusting for a mediator removes part of the effect; conditioning on a collider, for
+instance by selecting only people with $S$, creates an association where there was none.}
+\label{fig:dags}
+\end{figure}
+
+A \textbf{path} between $E$ and $D$ is a sequence of arrows, in any direction, connecting them. A path that begins with an arrow into $E$, such as
+$E \leftarrow C \to D$, is a \textbf{back-door path}; it carries association that is not causal. A path is \textbf{blocked} if it passes through a variable
+that has been adjusted for, unless that variable is a \textbf{collider} (two arrowheads meeting, as at $S$ in panel 3), in which case the path is
+blocked when the collider is \emph{not} adjusted for and opened when it is. The working rule, the \textbf{back-door criterion}, is that
+adjusting for a set of variables removes confounding if the set contains no descendants of $E$ and blocks every back-door path from $E$ to $D$.
+
+The collider structure explains selection bias in a unified way. Restricting a study to hospital patients conditions on admission $S$.
+If admission is affected by both the exposure and the disease, conditioning on it opens the path $E \to S \leftarrow D$, and exposure and
+disease become associated among the patients whether or not they are associated in the population. Berkson's bias is this, and so is
+the bias from differential participation of Theorem~\ref{thm:selection}.
+
+\subsection{Controlling confounding}
+
+Confounding can be prevented in the design or removed in the analysis.
+\begin{itemize}
+\item In the design: \textbf{randomisation}, which makes exposure independent of every pre-existing variable; \textbf{restriction} to one
+level of the confounder (only non-smokers), which removes it at the cost of generalisability; and \textbf{matching}
+(Section~\ref{sec:matching}), which must be followed by a matched analysis.
+\item In the analysis: \textbf{standardisation}, \textbf{stratification} with pooled estimates such as the
+Mantel--Haenszel estimators, and \textbf{regression} models, which do the same with many variables at once.
+\end{itemize}
+Each analytic method removes confounding only by the variables that were measured, and only as well as they were measured: adjusting
+for a confounder measured with error leaves \textbf{residual confounding}. No analysis removes confounding by variables that were not
+recorded, which is why Cornfield's argument and its modern relatives remain necessary.
+
+\subsection{Problems}
+
+\begin{problem}
+\label{prob:hospital}
+In a case-control study of a cancer and coffee drinking, the controls are patients admitted with other conditions. Among people who
+are not cases, coffee drinkers are admitted to hospital with those conditions at $1.5$ times the rate of non-drinkers (some of the
+conditions are caused by coffee), while among cases admission does not depend on coffee. If coffee has no effect on the cancer, what odds
+ratio will the study find on average?
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:selection} with $s_{11} = s_{10}$ and $s_{01} = 1.5\,s_{00}$, the bias factor is $(s_{11}s_{00})/(s_{10} \times 1.5\,s_{00}) = 1/1.5 = 0.67$. The study will tend to
+find an odds ratio of $0.67$, suggesting that coffee protects. The controls over-represent coffee drinkers, so the cases look less
+exposed than the base they came from.
+\end{solution}
+
+\begin{problem}
+\label{prob:berkson}
+In a population, $10\%$ have disease A and $20\%$ have condition B, independently. People with A alone are admitted to hospital with
+probability $0.5$, with B alone with probability $0.3$, with both with probability $0.65$ (the two reasons acting independently) and with
+neither with probability $0.05$. Find the odds ratio between A and B among hospital patients.
+\end{problem}
+
+\begin{solution}
+The proportions of the population who are in hospital in each category are: both, $0.1 \times 0.2 \times 0.65 = 0.013$; A only, $0.1 \times 0.8 \times 0.5 = 0.040$; B only,
+$0.9 \times 0.2 \times 0.3 = 0.054$; neither, $0.9 \times 0.8 \times 0.05 = 0.036$. The odds ratio among patients is $(0.013 \times 0.036)/(0.040 \times 0.054) = 0.22$. Two independent
+conditions appear strongly negatively associated in hospital, because a patient admitted without one of them must usually have the
+other. Admission is a collider.
+\end{solution}
+
+\begin{problem}
+A study reports a crude risk ratio of $2.0$ for an exposure. An unmeasured binary confounder triples the risk of disease and is present
+in $50\%$ of the exposed and $20\%$ of the unexposed. What is the risk ratio adjusted for it?
+\end{problem}
+
+\begin{solution}
+The bias factor is $(1 + 0.5 \times 2)/(1 + 0.2 \times 2) = 2/1.4 = 1.43$, so by Theorem~\ref{thm:confbias} the adjusted risk ratio is $2.0/1.43 = 1.40$. The confounder
+explains part of the association but not all of it. Cornfield's conditions, $R_C \geq 2$ and $\pi_1/\pi_0 \geq 2$, both hold here ($3$ and $2.5$), yet
+the confounder does not explain the association away: the conditions are necessary for a confounder to explain an association
+fully, not sufficient.
+\end{solution}
+
+\begin{problem}
+Show that if $C$ is independent of $E$ there is no confounding by $C$ on the risk ratio scale even when the stratum risk ratios differ: the crude
+risk ratio is then a weighted average of the stratum risk ratios.
+\end{problem}
+
+\begin{solution}
+With weights $w_k = P(C = k)$ common to exposed and unexposed, the crude risk ratio is
+\[
+\frac{\sum_k w_k p_{1k}}{\sum_k w_k p_{0k}} = \sum_k \frac{w_k p_{0k}}{\sum_l w_l p_{0l}} \cdot \frac{p_{1k}}{p_{0k}} ,
+\]
+a weighted average of the stratum ratios $p_{1k}/p_{0k}$ with weights proportional to the expected cases among the unexposed in each stratum. When
+the stratum ratios differ there is \emph{effect modification}, a separate matter taken up with stratified analysis; the crude
+ratio is a meaningful summary of them, not a confounded one.
+\end{solution}
+
+\begin{problem}
+For each situation say whether the third variable is a confounder, a mediator or a collider, and whether to adjust for it.
+\begin{enumerate}[label=(\alph*)]
+\item Exposure: obesity; disease: heart attack; third variable: blood pressure.
+\item Exposure: smoking; disease: lung cancer; third variable: age.
+\item Exposure: a drug; disease: birth defect; third variable: whether the pregnancy ended in a live birth (only live births are studied),
+where both the drug and the defect raise the risk of miscarriage.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Obesity raises blood pressure, which raises the risk of heart attack: a mediator. Adjusting for it estimates only the effect of
+obesity not acting through blood pressure, which is a different question; for the total effect, do not adjust.
+(b) Age affects both smoking habits and cancer risk and is not affected by smoking: a confounder; adjust.
+(c) Live birth is affected by both the drug and the defect: a collider. Restricting to live births conditions on it and can bias the
+association, typically towards a protective-looking effect, since exposed pregnancies with defects are especially likely to be lost.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{exa:noncollapse}, find the crude and stratum-specific risk ratios, and explain why the crude risk ratio does not equal
+either stratum value even though there is no confounding.
+\end{problem}
+
+\begin{solution}
+The stratum risk ratios are $0.8/0.5 = 1.6$ and $0.5/0.2 = 2.5$, and the crude is $0.65/0.35 = 1.86$. The risk ratio is not constant across strata
+(the odds ratio is), so there is effect modification on the ratio scale. The crude $1.86$ is the weighted average of the problem before,
+with weights proportional to $0.5$ and $0.2$, the unexposed risks: $(0.5 \times 1.6 + 0.2 \times 2.5)/0.7 = 1.86$. With no confounding the crude risk ratio is a
+fair summary of the stratum ratios; the crude odds ratio $3.45$, by contrast, is smaller than both stratum odds ratios.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -2432,6 +2793,8 @@ Van Nostrand Reinhold (reprinted by Wiley).
 % Long journal names leave no good break point without hyphenation.
 \sloppy
 \begin{enumerate}
+\item Berkson, J. (1946), Limitations of the application of fourfold table analysis to hospital data, \emph{Biometrics Bulletin}, 2,
+47--53.
 \item Breslow, N. E., and Day, N. E. (1980), \emph{Statistical Methods in Cancer Research, Vol.~I: The Analysis of Case-Control Studies}, Lyon,
 International Agency for Research on Cancer.
 \item Breslow, N. E., and Day, N. E. (1987), \emph{Statistical Methods in Cancer Research, Vol.~II: The Design and Analysis of Cohort
@@ -2440,7 +2803,12 @@ Studies}, Lyon, International Agency for Research on Cancer.
 Measurement}, 20, 37--46.
 \item Copeland, K. T., Checkoway, H., McMichael, A. J., and Holbrook, R. H. (1977), Bias due to misclassification in the estimation of relative risk,
 \emph{American Journal of Epidemiology}, 105, 488--495.
+\item Cornfield, J., Haenszel, W., Hammond, E. C., Lilienfeld, A. M., Shimkin, M. B., and Wynder, E. L. (1959), Smoking and lung cancer:
+recent evidence and a discussion of some questions, \emph{Journal of the National Cancer Institute}, 22, 173--203.
 \item Fleiss, J. L., Levin, B., and Paik, M. C. (2003), \emph{Statistical Methods for Rates and Proportions} (3rd ed.), Hoboken, NJ, Wiley.
+\item Greenland, S., Pearl, J., and Robins, J. M. (1999), Causal diagrams for epidemiologic research, \emph{Epidemiology}, 10, 37--48.
+\item Greenland, S., Robins, J. M., and Pearl, J. (1999), Confounding and collapsibility in causal inference, \emph{Statistical Science},
+14, 29--46.
 \item Hill, A. B. (1965), The environment and disease: association or causation? \emph{Proceedings of the Royal Society of Medicine}, 58,
 295--300.
 \item Levin, M. L. (1953), The occurrence of lung cancer in man, \emph{Acta Unio Internationalis contra Cancrum}, 9, 531--541.
