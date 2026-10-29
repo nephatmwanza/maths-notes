@@ -1133,7 +1133,7 @@ Despite the word ``rate'' in these names, all are proportions. Two complications
 the definition:
 \begin{enumerate}
 \item \textbf{Losses.} People leave the study before the end of the period, by migration or refusal, without having had the event. Their
-outcome over the full period is unknown, so neither the numerator nor the denominator is known exactly. The section on follow-up studies
+outcome over the full period is unknown, so neither the numerator nor the denominator is known exactly. Section~\ref{sec:followup}
 handles this with life tables; meanwhile, the rate defined next uses the time each person was actually observed.
 \item \textbf{Competing risks.} People die of other causes before they could develop the disease. The risk of the disease then depends on
 the death rate from other causes as well as on the disease itself (Problem~\ref{prob:compete}).
@@ -3518,6 +3518,278 @@ ratio is $p_{1k}(1 - p_{0k})/\{p_{0k}(1 - p_{1k})\} = \psi$, so $E(a_k d_k) - \p
 of Theorem~\ref{thm:mhconsistent} goes through.
 \end{solution}
 
+\section{Follow-up studies: life tables and person-years}
+\label{sec:followup}
+
+In a follow-up study people enter observation at different times, are followed for different lengths of time, and leave for different
+reasons: the event of interest, death from another cause, migration, or the end of the study. Section~\ref{sec:rate} handled this by
+counting person-time and assuming a constant rate. This section relaxes that assumption in two ways. Life tables and the Kaplan--Meier
+estimator describe how risk accumulates with time without assuming any form for the hazard. Person-years analysis lets the rate vary
+with age and calendar time by splitting each person's follow-up across bands of both.
+
+\subsection{Time scales and the Lexis diagram}
+
+Every person in a follow-up study moves along three time scales at once: \textbf{calendar time}, \textbf{age}, and \textbf{time since entry}
+(since exposure began, diagnosis, or randomisation). Rates of most diseases depend strongly on age and often on calendar period, so
+person-time must be classified by both. The \textbf{Lexis diagram} (Figure~\ref{fig:lexis}) shows this: calendar time on one axis, age on
+the other, and each person as a line at $45^\circ$, since age and calendar time advance together.
+
+% Lexis diagram: equal scales on both axes so life lines run at 45 degrees.
+% One age-period cell is shaded; person-time is split along its edges.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85,
+  lab/.style={font=\small}]
+\fill[orange!18] (4,2) rectangle (6,4);
+\foreach \x in {0,2,4,6,8} \draw[gray!40] (\x,0) -- (\x,8);
+\foreach \y in {0,2,4,6,8} \draw[gray!40] (0,\y) -- (8,\y);
+\draw[-Stealth,thick] (0,0) -- (8.6,0) node[right,lab] {Calendar year};
+\draw[-Stealth,thick] (0,0) -- (0,8.6) node[above,lab] {Age};
+\foreach \x/\l in {0/1990,2/1995,4/2000,6/2005,8/2010} \node[below,lab] at (\x,0) {\l};
+\foreach \y/\l in {0/40,2/45,4/50,6/55,8/60} \node[left,lab] at (0,\y) {\l};
+\draw[very thick,blue!70!black] (0.8,0.8) -- (7.2,7.2);
+\draw[very thick,blue!70!black] (2,0) -- (5.2,3.2);
+\fill[red!80!black] (5.2,3.2) circle (0.13);
+\draw[very thick,blue!70!black] (0,2) -- (3.2,5.2);
+\draw[thick,fill=white] (3.2,5.2) circle (0.13);
+\draw[very thick,blue!70!black] (4.4,1.2) -- (8,4.8);
+\node[lab,blue!70!black] at (7.45,7.55) {1};
+\node[lab,blue!70!black] at (1.75,0.35) {2};
+\node[lab,blue!70!black] at (0.5,1.7) {3};
+\node[lab,blue!70!black] at (4.55,0.85) {4};
+\fill[red!80!black] (9.4,6.5) circle (0.13); \node[right,lab] at (9.6,6.5) {event};
+\draw[thick,fill=white] (9.4,5.8) circle (0.13); \node[right,lab] at (9.6,5.8) {lost to follow-up};
+\draw[very thick,blue!70!black] (9.2,5.1) -- (9.6,5.1); \node[right,lab] at (9.6,5.1) {follow-up};
+\fill[orange!18] (9.2,4.0) rectangle (9.6,4.4); \node[right,lab,align=left] at (9.6,4.0) {cell: 2000--04,\\age 45--49};
+\end{tikzpicture}
+\caption{A Lexis diagram. Each person is a line at $45^\circ$ from entry to exit. Person 2 has the event in 2003 at age 48; person 3 is lost
+in 1998; persons 1 and 4 are followed to the end. The shaded cell collects the person-time and events in one age band and one
+calendar period.}
+\label{fig:lexis}
+\end{figure}
+
+\subhead{Splitting person-time}
+
+To compute rates by age band, each person's follow-up is cut at the band boundaries. A woman born on 1 July 1950 who enters a study on
+1 January 1990 (aged $39.5$) and is followed until 1 July 2003 (aged $53$) contributes $0.5$ person-years at ages $35$--$39$, $5$ at $40$--$44$, $5$ at $45$--$49$
+and $3$ at $50$--$54$. An event is assigned to the band in which it occurs. Summing over people gives the person-years $T_j$ and events $D_j$ in each
+band, from which age-specific rates, standardised rates and SMRs (Section~\ref{sec:standard}) follow. Splitting by calendar period as
+well, the cells of the Lexis diagram, is done the same way.
+
+\subsection{The actuarial life table}
+
+A \textbf{cohort life table} summarises survival in a group followed from a common starting point, such as diagnosis, with time since
+entry divided into intervals. For interval $i$ let $l_i$ be the number alive and under observation at its start, $d_i$ the number who have the
+event in it, and $w_i$ the number withdrawn alive (censored) in it.
+
+\begin{defn}
+The \textbf{actuarial} estimate of the conditional probability of the event in interval $i$, among those who reach it, is
+\[
+\hat q_i = \frac{d_i}{l_i - w_i/2} ,
+\]
+and the estimated probability of surviving to the end of interval $i$ is $\hat S_i = \prod_{h \leq i}(1 - \hat q_h)$.
+\end{defn}
+
+The denominator $l_i - w_i/2$, the \textbf{effective number at risk}, counts each withdrawal as at risk for half the interval, which is right on
+average if withdrawals are spread evenly through it. The survival estimate multiplies conditional probabilities: to survive three
+intervals one must survive the first, then the second given the first, and so on.
+
+\begin{thm}[Greenwood's formula]
+\label{thm:greenwood}
+Treating the $d_i$ as binomial given the effective numbers at risk $n_i'$, with the intervals conditionally independent,
+\[
+\widehat{\Var}(\hat S_i) = \hat S_i^2 \sum_{h \leq i} \frac{d_h}{n_h'(n_h' - d_h)} .
+\]
+\end{thm}
+
+\begin{proof}
+$\log\hat S_i = \sum_{h \leq i}\log(1 - \hat q_h)$. Each $\hat q_h$ is a binomial proportion with variance $q_h(1 - q_h)/n_h'$, and by the delta method
+$\Var\{\log(1 - \hat q_h)\} \approx q_h/\{n_h'(1 - q_h)\}$. Conditionally independent terms have summed variances. Substituting $\hat q_h = d_h/n_h'$ gives
+$q_h/\{n_h'(1 - q_h)\} = d_h/\{n_h'(n_h' - d_h)\}$. A second application of the delta method, $\Var(\hat S) \approx S^2\Var(\log\hat S)$, gives the result.
+\end{proof}
+
+\begin{exa}
+\label{exa:lifetable}
+$500$ patients are followed for five years after treatment. The life table is:
+\begin{center}
+\begin{tabular}{crrrrccc}
+\hline
+Year & $l_i$ & $d_i$ & $w_i$ & $n_i'$ & $\hat q_i$ & $\hat S_i$ & $\text{SE}(\hat S_i)$ \\
+\hline
+0--1 & 500 & 40 & 20 & 490.0 & 0.0816 & 0.918 & 0.012 \\
+1--2 & 440 & 35 & 25 & 427.5 & 0.0819 & 0.843 & 0.017 \\
+2--3 & 380 & 30 & 30 & 365.0 & 0.0822 & 0.774 & 0.020 \\
+3--4 & 320 & 20 & 40 & 300.0 & 0.0667 & 0.722 & 0.021 \\
+4--5 & 260 & 15 & 45 & 237.5 & 0.0632 & 0.677 & 0.023 \\
+\hline
+\end{tabular}
+\end{center}
+The five-year survival is $0.677$, with interval $0.677 \pm 1.96 \times 0.023 = (0.632,\ 0.722)$. Simply dividing the $140$ events by $500$ would give a five-year
+risk of $0.28$, too low, because the $160$ people withdrawn before five years were not observed long enough to have all their events counted.
+\end{exa}
+
+The life table assumes that withdrawals are \textbf{non-informative}: those withdrawn had the same future risk as those who stayed. A
+patient who leaves the study because they feel too ill to attend breaks this assumption, and the life table then overestimates
+survival.
+
+\subsection{The Kaplan--Meier estimator}
+
+When exact times are known, the intervals can be made so fine that each contains at most one distinct event time. Then
+intervals without events contribute factors of $1$, and withdrawals never share an interval with an event except by a tie, which is
+resolved by counting those censored at $t$ as at risk at $t$.
+
+\begin{defn}
+Let $t_1 < t_2 < \cdots$ be the distinct event times, $d_j$ the number of events at $t_j$ and $n_j$ the number at risk just before $t_j$ (those with
+follow-up time $\geq t_j$). The \textbf{Kaplan--Meier} (product-limit) estimator is
+\[
+\hat S(t) = \prod_{j: t_j \leq t}\Bigl(1 - \frac{d_j}{n_j}\Bigr) ,
+\]
+a step function that drops only at event times.
+\end{defn}
+
+Greenwood's formula applies with $n_h'$ replaced by $n_j$. Kaplan and Meier (1958) showed that $\hat S$ is the nonparametric maximum likelihood
+estimate of the survivor function under non-informative censoring.
+
+\begin{exa}
+\label{exa:km}
+Ten patients on a new treatment (A) have follow-up times in months $3$, $5$, $7^+$, $9$, $12$, $15^+$, $18$, $22^+$, $24^+$, $24^+$, where $^+$ marks a censored time. The
+Kaplan--Meier estimate is:
+\begin{center}
+\begin{tabular}{ccccc}
+\hline
+$t_j$ & $n_j$ & $d_j$ & $\hat S(t_j)$ & SE \\
+\hline
+3 & 10 & 1 & 0.900 & 0.095 \\
+5 & 9 & 1 & 0.800 & 0.126 \\
+9 & 7 & 1 & 0.686 & 0.152 \\
+12 & 6 & 1 & 0.571 & 0.164 \\
+18 & 4 & 1 & 0.429 & 0.174 \\
+\hline
+\end{tabular}
+\end{center}
+At $9$ months only $7$ are at risk, because the patient censored at $7$ months has left the risk set without an event. The estimate stays at $0.429$
+from $18$ to $24$ months. The standard errors are large: ten patients cannot estimate a survival curve precisely.
+\end{exa}
+
+\subsection{Comparing survival: the log-rank test}
+
+To compare survival between two groups, form at each distinct event time $t_j$ the $2 \times 2$ table of group by event (yes or no) among those
+at risk. With $n_{Aj}$ and $n_{Bj}$ at risk, $d_j$ events in total and $d_{Aj}$ in group A, under the null hypothesis of equal hazards the conditional
+distribution of $d_{Aj}$ given the margins is hypergeometric (Theorem~\ref{thm:hyper}), with
+\[
+E_j = d_j\,\frac{n_{Aj}}{n_j}, \qquad V_j = \frac{n_{Aj}n_{Bj}d_j(n_j - d_j)}{n_j^2(n_j - 1)} .
+\]
+
+\begin{defn}
+The \textbf{log-rank statistic} is
+\[
+X^2_{\text{LR}} = \frac{\bigl(\sum_j d_{Aj} - \sum_j E_j\bigr)^2}{\sum_j V_j} ,
+\]
+approximately $\chi^2_1$ under the null hypothesis.
+\end{defn}
+
+The log-rank test is the Mantel--Haenszel test (Theorem~\ref{thm:cmh}) with the risk sets at the event times as strata. The tables are
+not independent, since the same people appear in many risk sets, but the successive differences $d_{Aj} - E_j$ are uncorrelated given the past
+(they form a martingale), which is enough for the same normal approximation. The test is most powerful when the hazard ratio is
+constant over time, the proportional hazards situation.
+
+\begin{exa}
+\label{exa:logrank}
+Ten patients on the standard treatment (B) have times $2$, $3$, $4$, $5^+$, $6$, $8$, $10$, $11^+$, $14$, $16$. Combining with Example~\ref{exa:km}, there are $12$ distinct event times
+from $2$ to $18$ months. Group A had $O_A = 5$ deaths against $E_A = 8.30$ expected, with $\sum V_j = 2.73$, so $X^2_{\text{LR}} = (5 - 8.30)^2/2.73 = 3.99$, $P = 0.046$. Group B had $8$
+deaths against $13 - 8.30 = 4.70$ expected. The ratio $(O_A/E_A)/(O_B/E_B) = 0.602/1.702 = 0.35$ is a rough estimate of the hazard ratio. With so few
+patients the evidence that A is better is modest.
+\end{exa}
+
+\subsection{The current life table and life expectancy}
+
+A \textbf{current} (period) life table applies the age-specific death rates $m_x$ of one calendar period to a hypothetical cohort, and
+summarises them as \textbf{life expectancy}: the average length of life of a cohort that experienced those rates throughout. For an age
+interval of length $n$, the death rate $m_x$ (deaths per person-year) must be converted to a probability of dying in the interval.
+
+\begin{prop}
+\label{prop:mtoq}
+If deaths in the interval occur on average half-way through it, the probability of dying in the interval for a person alive at its
+start is
+\[
+q_x = \frac{n\,m_x}{1 + n\,m_x/2} .
+\]
+If instead the hazard is constant over the interval, $q_x = 1 - e^{-n m_x}$.
+\end{prop}
+
+\begin{proof}
+Of $l$ people alive at the start, $d = l q_x$ die in the interval. Survivors contribute $n$ person-years each and those who die $n/2$ on average,
+so the person-years are $n(l - d) + nd/2 = n(l - d/2)$. Then $m_x = d/\{n(l - d/2)\}$, so $nm_x(l - d/2) = d$, and dividing by $l$, $nm_x(1 - q_x/2) = q_x$, which
+rearranges to the result. The constant-hazard form is Theorem~\ref{thm:riskrate}.
+\end{proof}
+
+With $q_x$ for each interval, the survivors $l_x$ of a hypothetical cohort follow by multiplication, the person-years lived in each interval are
+$L_x = n(l_x + l_{x+n})/2$, and the life expectancy at age $x$ is $e_x = \sum_{y \geq x} L_y/l_x$. Life expectancy at birth is a summary of a period's age-specific
+death rates that is free of the age structure of the population, a form of standardisation (Problem~\ref{prob:lifeexp}).
+
+\subsection{Problems}
+
+\begin{problem}
+In Example~\ref{exa:km}, verify the estimate and its standard error at $12$ months.
+\end{problem}
+
+\begin{solution}
+$\hat S(12) = (1 - \tfrac1{10})(1 - \tfrac19)(1 - \tfrac17)(1 - \tfrac16) = 0.9 \times 0.8889 \times 0.8571 \times 0.8333 = 0.5714$. The Greenwood sum is
+\begin{align*}
+&\frac{1}{10 \times 9} + \frac{1}{9 \times 8} + \frac{1}{7 \times 6} + \frac{1}{6 \times 5} \\
+&\qquad = 0.0111 + 0.0139 + 0.0238 + 0.0333 = 0.0821 ,
+\end{align*}
+so $\text{SE} = 0.5714\sqrt{0.0821} = 0.164$.
+\end{solution}
+
+\begin{problem}
+Find the Kaplan--Meier estimate for group B of Example~\ref{exa:logrank} at $6$, $10$ and $16$ months. What is the median survival in each
+group?
+\end{problem}
+
+\begin{solution}
+Group B: at risk $10, 9, 8$ at $2, 3, 4$ months (one event each), then the patient censored at $5$ leaves, so $6$ at risk at $6$ months. $\hat S(6) = 0.9 \times \tfrac89 \times \tfrac78 \times \tfrac56 = 0.583$.
+Then $\tfrac45$ at $8$ and $\tfrac34$ at $10$: $\hat S(10) = 0.583 \times 0.8 \times 0.75 = 0.350$. After the censoring at $11$, two remain; events at $14$ and $16$ give
+$\hat S(16) = 0.350 \times \tfrac12 \times 0 = 0$. The median is the first time $\hat S \leq 0.5$: $8$ months for B ($\hat S = 0.467$) and $18$ months for A ($\hat S = 0.429$).
+\end{solution}
+
+\begin{problem}
+In Example~\ref{exa:lifetable}, compute the five-year survival if withdrawals are ignored in the denominators ($n_i' = l_i$), and if they are
+removed at the start of each interval ($n_i' = l_i - w_i$). Which assumption does each correspond to?
+\end{problem}
+
+\begin{solution}
+With $n_i' = l_i$: $q = 0.0800, 0.0795, 0.0789, 0.0625, 0.0577$, giving $\hat S_5 = 0.689$. This treats the withdrawn as at risk for the whole interval, so it
+overestimates survival. With $n_i' = l_i - w_i$: $q = 0.0833, 0.0843, 0.0857, 0.0714, 0.0698$, giving $\hat S_5 = 0.663$, which treats them as at risk for none of it and
+underestimates survival. The actuarial value $0.677$ lies between, assuming withdrawal half-way through on average.
+\end{solution}
+
+\begin{problem}
+A cohort member born on 15 March 1940 enters a study on 15 September 1985 and dies on 15 March 1997. Allocate the person-time to five-year
+age bands and say in which band the death is counted.
+\end{problem}
+
+\begin{solution}
+Entry is at age $45.5$ and death at exactly $57$. Person-time: $4.5$ years at $45$--$49$ (to age $50$, on 15 March 1990), $5$ years at $50$--$54$, and $2$
+years at $55$--$59$; total $11.5$. The death, at the start of the person's $58$th year, is counted in the $55$--$59$ band.
+\end{solution}
+
+\begin{problem}
+\label{prob:lifeexp}
+A population has constant death rates $m = 0.002$ per year below age $60$, $0.02$ from $60$ to $80$, and $0.15$ above $80$. Using $q = 1 - e^{-nm}$ for each
+of the three intervals, find the proportions surviving to $60$ and to $80$, and the life expectancy at birth.
+\end{problem}
+
+\begin{solution}
+$l_{60} = e^{-0.12} = 0.887$ and $l_{80} = 0.887\,e^{-0.4} = 0.594$. Under a constant hazard $m$, the expected time lived in an interval of length $n$ by a person alive at its
+start is $(1 - e^{-nm})/m$, and above $80$ it is $1/m$. So
+\begin{align*}
+e_0 &= \frac{1 - e^{-0.12}}{0.002} + 0.887 \times \frac{1 - e^{-0.4}}{0.02} + 0.594 \times \frac{1}{0.15} \\
+&= 56.5 + 14.6 + 4.0 = 75.1
+\end{align*}
+years. The answer depends only on the death rates, not on how many people of each age the population contains.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -3548,6 +3820,8 @@ Measurement}, 20, 37--46.
 \emph{American Journal of Epidemiology}, 105, 488--495.
 \item Cornfield, J., Haenszel, W., Hammond, E. C., Lilienfeld, A. M., Shimkin, M. B., and Wynder, E. L. (1959), Smoking and lung cancer:
 recent evidence and a discussion of some questions, \emph{Journal of the National Cancer Institute}, 22, 173--203.
+\item Cutler, S. J., and Ederer, F. (1958), Maximum utilization of the life table method in analyzing survival, \emph{Journal of Chronic
+Diseases}, 8, 699--712.
 \item Doll, R., and Hill, A. B. (1966), Mortality of British doctors in relation to smoking: observations on coronary thrombosis,
 \emph{National Cancer Institute Monograph}, 19, 205--268.
 \item Fay, M. P., and Feuer, E. J. (1997), Confidence intervals for directly standardized rates: a method based on the gamma
@@ -3558,9 +3832,15 @@ distribution, \emph{Statistics in Medicine}, 16, 791--801.
 \item Greenland, S., Pearl, J., and Robins, J. M. (1999), Causal diagrams for epidemiologic research, \emph{Epidemiology}, 10, 37--48.
 \item Greenland, S., Robins, J. M., and Pearl, J. (1999), Confounding and collapsibility in causal inference, \emph{Statistical Science},
 14, 29--46.
+\item Greenwood, M. (1926), \emph{The Natural Duration of Cancer}, Reports on Public Health and Medical Subjects 33, London, His Majesty's
+Stationery Office.
 \item Hill, A. B. (1965), The environment and disease: association or causation? \emph{Proceedings of the Royal Society of Medicine}, 58,
 295--300.
+\item Kaplan, E. L., and Meier, P. (1958), Nonparametric estimation from incomplete observations, \emph{Journal of the American Statistical
+Association}, 53, 457--481.
 \item Levin, M. L. (1953), The occurrence of lung cancer in man, \emph{Acta Unio Internationalis contra Cancrum}, 9, 531--541.
+\item Mantel, N. (1966), Evaluation of survival data and two new rank order statistics arising in its consideration, \emph{Cancer
+Chemotherapy Reports}, 50, 163--170.
 \item Mantel, N., and Haenszel, W. (1959), Statistical aspects of the analysis of data from retrospective studies of disease,
 \emph{Journal of the National Cancer Institute}, 22, 719--748.
 \item McNemar, Q. (1947), Note on the sampling error of the difference between correlated proportions or percentages,
