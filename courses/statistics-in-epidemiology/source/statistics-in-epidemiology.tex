@@ -1335,7 +1335,7 @@ $50$ and $20{,}000$ over; town B, a retirement town, has $40{,}000$ under and $6
 \text{A}: 160 + 400 = 560, \qquad \text{B}: 80 + 1200 = 1280 ,
 \]
 crude rates of $5.6$ and $12.8$ per $1000$. Town B's crude rate is more than twice town A's although no person in it is at greater risk than
-the same person in A. Removing the effect of age structure from such comparisons is the subject of the section on standardisation.
+the same person in A. Removing the effect of age structure from such comparisons is the subject of Section~\ref{sec:standard}.
 \end{exa}
 
 \subsection{Problems}
@@ -2683,7 +2683,7 @@ Confounding can be prevented in the design or removed in the analysis.
 \item In the design: \textbf{randomisation}, which makes exposure independent of every pre-existing variable; \textbf{restriction} to one
 level of the confounder (only non-smokers), which removes it at the cost of generalisability; and \textbf{matching}
 (Section~\ref{sec:matching}), which must be followed by a matched analysis.
-\item In the analysis: \textbf{standardisation}, \textbf{stratification} with pooled estimates such as the
+\item In the analysis: \textbf{standardisation} (Section~\ref{sec:standard}), \textbf{stratification} with pooled estimates such as the
 Mantel--Haenszel estimators, and \textbf{regression} models, which do the same with many variables at once.
 \end{itemize}
 Each analytic method removes confounding only by the variables that were measured, and only as well as they were measured: adjusting
@@ -2777,6 +2777,254 @@ with weights proportional to $0.5$ and $0.2$, the unexposed risks: $(0.5 \times 
 fair summary of the stratum ratios; the crude odds ratio $3.45$, by contrast, is smaller than both stratum odds ratios.
 \end{solution}
 
+\section{Standardisation of rates}
+\label{sec:standard}
+
+Proposition~\ref{prop:crude} showed that a crude rate is a weighted average of stratum-specific rates, weighted by the population's own
+distribution across the strata. Two populations with different age structures therefore have crude rates that differ for two reasons:
+because their age-specific rates differ, and because their weights differ. In the language of Section~\ref{sec:confounding}, age
+confounds the comparison of crude rates. \textbf{Standardisation} removes this by computing, for each population, a summary rate that
+uses the \emph{same} weights for both. It is the oldest method of adjusting for confounding and still the standard way of comparing
+mortality between countries, regions and periods.
+
+Throughout, population $k$ has person-time $T_{kj}$, deaths (or cases) $D_{kj}$ and rate $I_{kj} = D_{kj}/T_{kj}$ in stratum $j = 1, \dots, J$.
+
+\begin{exa}
+\label{exa:regions}
+Two regions have the following deaths, person-years and death rates per $1000$ person-years in three age groups.
+\begin{center}
+\begin{tabular}{l|rrr|rrr}
+\hline
+ & \multicolumn{3}{c|}{Region A} & \multicolumn{3}{c}{Region B} \\
+Age & Deaths & Person-yrs & Rate & Deaths & Person-yrs & Rate \\
+\hline
+0--39 & 30 & 60{,}000 & 0.5 & 12 & 30{,}000 & 0.4 \\
+40--64 & 90 & 30{,}000 & 3.0 & 75 & 30{,}000 & 2.5 \\
+65+ & 200 & 10{,}000 & 20.0 & 640 & 40{,}000 & 16.0 \\
+\hline
+Total & 320 & 100{,}000 & 3.2 & 727 & 100{,}000 & 7.27 \\
+\hline
+\end{tabular}
+\end{center}
+Region B's crude death rate is more than twice region A's, yet in every age group its rate is $20\%$ or so \emph{lower}. Region B is old:
+$40\%$ of its person-time is over $65$, against $10\%$ in A. The crude comparison is reversed by confounding by age.
+\end{exa}
+
+\subsection{Direct standardisation}
+
+\begin{defn}
+Given a \textbf{standard population} with weights $w_j \geq 0$, $\sum_j w_j = 1$ (its proportions of person-time in the strata), the \textbf{directly standardised
+rate} of population $k$ is
+\[
+\text{DSR}_k = \sum_j w_j I_{kj} ,
+\]
+which is the crude rate the standard population would have if it experienced the stratum-specific rates of
+population $k$. The ratio of two directly
+standardised rates is the \textbf{comparative mortality figure} (CMF), $\text{DSR}_1/\text{DSR}_0$.
+\end{defn}
+
+\begin{prop}
+\label{prop:dsr}
+\begin{enumerate}
+\item If the stratum rate ratio $I_{1j}/I_{0j} = \theta$ is the same in every stratum, then $\text{CMF} = \theta$ whatever the standard.
+\item In general the CMF is a weighted average of the stratum rate ratios, with weights $w_j I_{0j}/\sum_l w_l I_{0l}$.
+\item If the counts $D_{kj}$ are Poisson, $\Var(\text{DSR}_k) = \sum_j w_j^2 I_{kj}/T_{kj}$, estimated by $\sum_j w_j^2 D_{kj}/T_{kj}^2$.
+\end{enumerate}
+\end{prop}
+
+\begin{proof}
+(1) $\text{DSR}_1 = \sum_j w_j\theta I_{0j} = \theta\,\text{DSR}_0$. (2) $\text{DSR}_1/\text{DSR}_0 = \sum_j w_j I_{0j}(I_{1j}/I_{0j})/\sum_l w_l I_{0l}$. (3) $I_{kj} = D_{kj}/T_{kj}$ with $D_{kj}$ Poisson
+with mean $\lambda_{kj}T_{kj}$ has variance $\lambda_{kj}/T_{kj}$, and the strata are independent.
+\end{proof}
+
+The choice of standard matters little when the rate ratios are nearly constant across strata, and matters a great deal when they are
+not; then the CMF is an average of quite different numbers and the stratum-specific ratios should be reported instead of, or as well
+as, the summary. Common standards are the combined population of the groups compared, a national population, or a conventional
+``world'' or ``European'' standard population that allows comparison across published studies.
+
+An approximate interval for $\text{DSR}_k$ is $\text{DSR}_k \pm 1.96\,\text{SE}$; when the deaths are few, intervals based on the gamma distribution are
+better. For the CMF, the delta method gives $\Var(\log\text{CMF}) \approx \Var(\text{DSR}_1)/\text{DSR}_1^2 + \Var(\text{DSR}_0)/\text{DSR}_0^2$.
+
+\begin{exa}
+\label{exa:dsr}
+Take as standard the two regions combined: $90{,}000$, $60{,}000$ and $50{,}000$ person-years, so $w = (0.45,\ 0.30,\ 0.25)$. Per $1000$ person-years,
+\begin{align*}
+\text{DSR}_A &= 0.45 \times 0.5 + 0.30 \times 3.0 + 0.25 \times 20 = 6.125 , \\
+\text{DSR}_B &= 0.45 \times 0.4 + 0.30 \times 2.5 + 0.25 \times 16 = 4.93 .
+\end{align*}
+The CMF of B relative to A is $4.93/6.125 = 0.805$: after allowing for age, region B's mortality is about $20\%$ lower, in line with the
+stratum ratios $0.80$, $0.83$, $0.80$. The standard errors are
+\[
+\text{SE}(\text{DSR}_A) = \sqrt{0.45^2\frac{30}{60^2} + 0.30^2\frac{90}{30^2} + 0.25^2\frac{200}{10^2}} = 0.368
+\]
+per $1000$ (with person-time in thousands), and similarly $\text{SE}(\text{DSR}_B) = 0.188$. The intervals are $(5.40,\ 6.85)$ and $(4.56,\ 5.30)$. Most of the
+variance of $\text{DSR}_A$ comes from its oldest stratum, which carries a quarter of the weight but only a tenth of A's person-time.
+\end{exa}
+
+\subsection{Indirect standardisation and the SMR}
+
+Direct standardisation needs stratum-specific rates for each population compared. When a population is small, as an occupational
+cohort usually is, those rates are unstable or, with few deaths, cannot be computed at all. Indirect standardisation reverses the roles:
+it applies \emph{standard rates} to the study population's own structure.
+
+\begin{defn}
+Let $\lambda_j^{\text{s}}$ be standard stratum-specific rates. The \textbf{expected} number of deaths in the study population is $E = \sum_j T_j \lambda^{\text{s}}_j$, and with
+$O = \sum_j D_j$ observed deaths the \textbf{standardised mortality ratio} is
+\[
+\text{SMR} = \frac{O}{E} .
+\]
+\end{defn}
+
+The SMR compares the deaths that occurred with those that would have occurred had the study population experienced the standard rates.
+Only the total number of deaths in the study population is needed, not their distribution across strata.
+
+\begin{thm}
+\label{thm:smr}
+Suppose $D_j \sim \text{Poisson}(\theta\lambda^{\text{s}}_j T_j)$ independently, so that the study rates are a constant multiple $\theta$ of the standard rates, which are
+treated as known. Then $O \sim \text{Poisson}(\theta E)$, the maximum likelihood estimate of $\theta$ is the SMR, and exact confidence limits are
+\[
+\frac{\chi^2_{2O,\,0.025}}{2E} \qquad\text{and}\qquad \frac{\chi^2_{2O + 2,\,0.975}}{2E} .
+\]
+\end{thm}
+
+\begin{proof}
+A sum of independent Poisson variables is Poisson with the sum of the means, $\theta\sum_j\lambda^{\text{s}}_j T_j = \theta E$. The likelihood is
+$\prod_j(\theta E_j)^{D_j}e^{-\theta E_j}/D_j! \propto \theta^O e^{-\theta E}$, with $E_j = \lambda^{\text{s}}_j T_j$, maximised at $\theta = O/E$. The limits are those of \eqref{eq:exactrate} with
+person-time replaced by $E$, by Lemma~\ref{lem:poisgamma}.
+\end{proof}
+
+Treating the standard rates as known is reasonable when they come from a national population, whose rates are estimated from vastly
+more deaths than the study's. The test of $\theta = 1$ uses the Poisson distribution with mean $E$ directly; for large $E$, $(O - E)/\sqrt{E}$ is
+approximately standard normal.
+
+\begin{exa}
+\label{exa:smr}
+Take as standard the national rates $0.45$, $2.8$ and $18$ per $1000$ person-years in the three age groups. For region A,
+\[
+E_A = 60 \times 0.45 + 30 \times 2.8 + 10 \times 18 = 27 + 84 + 180 = 291 ,
+\]
+against $O_A = 320$, so $\text{SMR}_A = 1.10$, with exact interval $(0.98,\ 1.23)$ and two-sided exact $P = 0.098$. For region B,
+$E_B = 13.5 + 84 + 720 = 817.5$ and $O_B = 727$, so $\text{SMR}_B = 0.89$, with interval $(0.83,\ 0.96)$. Region A's mortality is about $10\%$ above
+the national level, region B's about $11\%$ below. The ratio of SMRs, $0.89/1.10 = 0.81$, happens to agree with the CMF here, because the
+regions' rates are nearly proportional to the national ones; in general it need not (Section~\ref{sec:smrcompare}).
+\end{exa}
+
+\subsection{Comparing SMRs}
+\label{sec:smrcompare}
+
+\begin{prop}
+\label{prop:smrweights}
+The SMR is a weighted average of the stratum-specific ratios $I_j/\lambda^{\text{s}}_j$, with weights $E_j/E$ proportional to the study population's own expected
+deaths in each stratum.
+\end{prop}
+
+\begin{proof}
+$O/E = \sum_j D_j/E = \sum_j (E_j/E)(D_j/E_j)$, and $D_j/E_j = I_j T_j/(\lambda^{\text{s}}_j T_j) = I_j/\lambda^{\text{s}}_j$.
+\end{proof}
+
+So each SMR uses its own population's weights. Two SMRs computed against the same standard are \emph{not} standardised to a common
+structure, and their ratio can mislead when the stratum ratios vary. This is the price of indirect standardisation: an SMR compares one
+population with the standard, not two populations with each other.
+
+\begin{exa}
+\label{exa:smrparadox}
+With standard rates $1$ and $10$ per $1000$ in two age groups, population A has rates $2$ and $10$ and person-time $9000$ and $1000$ years;
+population B has rates $2.2$ and $11$ ($10\%$ higher than A's in both groups) and person-time $1000$ and $9000$. Then
+\begin{align*}
+\text{A}: \quad O &= 18 + 10 = 28, & E &= 9 + 10 = 19, & \text{SMR} &= 1.47 ; \\
+\text{B}: \quad O &= 2.2 + 99 = 101.2, & E &= 1 + 90 = 91, & \text{SMR} &= 1.11 .
+\end{align*}
+Population B has the higher rate in every age group, but the lower SMR. A's SMR is dominated by the young stratum, where its rate is
+twice the standard; B's by the old stratum, where its rate is only $10\%$ above it. Direct standardisation with any standard gives a CMF of
+$1.1$ for B against A.
+\end{exa}
+
+\subsection{Choosing between the methods}
+
+\begin{center}
+\begin{tabular}{p{3.4cm}p{5.5cm}p{5.5cm}}
+\hline
+ & Direct & Indirect \\
+\hline
+Needs & stratum rates of each study population; a standard population & total deaths in each study population; standard rates \\
+Weights & the standard's structure & each study population's own structure \\
+Comparable between study populations & yes & only if rate ratios are constant across strata \\
+Stability with small numbers & poor & good \\
+\hline
+\end{tabular}
+\end{center}
+Both summaries are adequate when the stratum ratios are roughly constant, and both hide something important when they are not. In
+that case the proper report is the stratum-specific comparison, with a summary only as a supplement. The Mantel--Haenszel methods of
+the next sections give pooled estimates with better statistical properties under the assumption of a common ratio, and a later section
+sets them side by side with standardisation on one set of data.
+
+\subsection{Problems}
+
+\begin{problem}
+Recompute the directly standardised rates of Example~\ref{exa:regions} using (a) region B's person-time as the standard, (b) the young
+standard $w = (0.6,\ 0.3,\ 0.1)$. Compare the CMFs with the value $0.805$ from the combined standard.
+\end{problem}
+
+\begin{solution}
+(a) $w = (0.3,\ 0.3,\ 0.4)$: $\text{DSR}_A = 0.15 + 0.9 + 8.0 = 9.05$ and $\text{DSR}_B = 0.12 + 0.75 + 6.4 = 7.27$, region B's crude rate, as it must be when B's own
+structure is the standard. $\text{CMF} = 0.803$. (b) $\text{DSR}_A = 0.3 + 0.9 + 2.0 = 3.2$, $\text{DSR}_B = 0.24 + 0.75 + 1.6 = 2.59$, $\text{CMF} = 0.809$. The standardised
+rates themselves change greatly with the standard (from $3.2$ to $9.05$ for A), so they have no meaning except relative to one another;
+the CMF hardly changes, because the stratum ratios are nearly constant.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{exa:dsr}, find a $95\%$ confidence interval for the CMF.
+\end{problem}
+
+\begin{solution}
+$\Var(\log\text{CMF}) \approx (0.368/6.125)^2 + (0.188/4.93)^2 = 0.00362 + 0.00145 = 0.00507$, so $\text{SE} = 0.0712$ and the interval is
+$0.805\,e^{\pm 0.140} = (0.700,\ 0.925)$. Region B's age-adjusted mortality is between $7\%$ and $30\%$ below A's.
+\end{solution}
+
+\begin{problem}
+A cohort of chemical workers experiences $18$ deaths from a cancer, against $9.6$ expected from national rates. Compute the SMR, its exact
+$95\%$ confidence interval and the exact $P$-value for $\theta = 1$. Why might the SMR understate the effect of the work?
+\end{problem}
+
+\begin{solution}
+$\text{SMR} = 18/9.6 = 1.88$. The limits are $\chi^2_{36,\,0.025}/19.2 = 1.11$ and $\chi^2_{38,\,0.975}/19.2 = 2.96$. Under $\theta = 1$, $O \sim \text{Poisson}(9.6)$, and $P(O \geq 18) = 0.0098$,
+so the two-sided $P$ is about $0.020$. The comparison is with the general population, which includes people too ill to work; the
+healthy worker effect makes the expected count too high for an employed group and biases the SMR downwards. The effect is weaker for
+cancers than for all-cause mortality, but present.
+\end{solution}
+
+\begin{problem}
+Show that if every stratum of a population has rate $\theta\lambda^{\text{s}}_j$, the SMR is unbiased for $\theta$ and $\Var(\text{SMR}) = \theta/E$. Deduce that the precision of an
+SMR is governed by the expected number of deaths.
+\end{problem}
+
+\begin{solution}
+$O \sim \text{Poisson}(\theta E)$ by Theorem~\ref{thm:smr}, so $E(\text{SMR}) = \theta E/E = \theta$ and $\Var(\text{SMR}) = \theta E/E^2 = \theta/E$. The coefficient of variation is $1/\sqrt{\theta E}$,
+which depends on the expected deaths only. Doubling the size of a cohort, or its follow-up, doubles $E$ and reduces the coefficient of
+variation by a factor of $\sqrt 2$.
+\end{solution}
+
+\begin{problem}
+Verify the figures of Example~\ref{exa:smrparadox} and compute the CMF of B relative to A with the combined population as standard.
+\end{problem}
+
+\begin{solution}
+The combined person-time is $10{,}000$ in each stratum, so $w = (0.5,\ 0.5)$. Then $\text{DSR}_A = 0.5 \times 2 + 0.5 \times 10 = 6$ and $\text{DSR}_B = 0.5 \times 2.2 + 0.5 \times 11 = 6.6$,
+giving $\text{CMF} = 1.1$. Indeed, since $I_{Bj} = 1.1\,I_{Aj}$ in both strata, Proposition~\ref{prop:dsr} gives $\text{CMF} = 1.1$ for any standard, while the ratio of
+SMRs is $1.11/1.47 = 0.75$.
+\end{solution}
+
+\begin{problem}
+Show that when the study population itself is used as the standard for indirect standardisation (that is, $\lambda^{\text{s}}_j = I_j$), the SMR is $1$,
+and when it is used as the standard for direct standardisation, the DSR is its crude rate. What does this say about choosing a standard?
+\end{problem}
+
+\begin{solution}
+With $\lambda^{\text{s}}_j = I_j$, $E = \sum_j T_j I_j = \sum_j D_j = O$. With $w_j = T_j/\sum_l T_l$, $\text{DSR} = \sum_j (T_j/\sum_l T_l)(D_j/T_j)$ is the crude rate. A standard
+is a reference, and comparing a population with itself gives the trivial answer. The standard should be external to the comparison or,
+for direct standardisation, a population whose structure is in the range of those compared.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -2805,6 +3053,8 @@ Measurement}, 20, 37--46.
 \emph{American Journal of Epidemiology}, 105, 488--495.
 \item Cornfield, J., Haenszel, W., Hammond, E. C., Lilienfeld, A. M., Shimkin, M. B., and Wynder, E. L. (1959), Smoking and lung cancer:
 recent evidence and a discussion of some questions, \emph{Journal of the National Cancer Institute}, 22, 173--203.
+\item Fay, M. P., and Feuer, E. J. (1997), Confidence intervals for directly standardized rates: a method based on the gamma
+distribution, \emph{Statistics in Medicine}, 16, 791--801.
 \item Fleiss, J. L., Levin, B., and Paik, M. C. (2003), \emph{Statistical Methods for Rates and Proportions} (3rd ed.), Hoboken, NJ, Wiley.
 \item Greenland, S., Pearl, J., and Robins, J. M. (1999), Causal diagrams for epidemiologic research, \emph{Epidemiology}, 10, 37--48.
 \item Greenland, S., Robins, J. M., and Pearl, J. (1999), Confounding and collapsibility in causal inference, \emph{Statistical Science},
