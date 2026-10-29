@@ -384,7 +384,7 @@ When the disease is rare in both exposure groups the odds ratio is close to the 
 \OR = \RR \cdot \frac{1 - p_0}{1 - p_1}
 \]
 and the second factor is near $1$ when $p_0$ and $p_1$ are both small. This \textbf{rare disease assumption} is what lets a case-control
-study of cancer be read as estimating a relative risk. A later section shows that with a suitable choice of controls
+study of cancer be read as estimating a relative risk. Section~\ref{sec:ccsampling} shows that with a suitable choice of controls
 (\emph{density sampling}) the odds ratio estimates the \emph{rate} ratio exactly, without the assumption.
 
 \begin{exa}[Same exposure probabilities, different risk ratios]
@@ -558,6 +558,7 @@ the analysis must take into account.
 \end{solution}
 
 \begin{problem}
+\label{prob:orrr}
 Show that $\OR \geq \RR \geq 1$ when $p_1 \geq p_0$, and $\OR \leq \RR \leq 1$ when $p_1 \leq p_0$. So the odds ratio always lies further from $1$ than the
 risk ratio.
 \end{problem}
@@ -1421,6 +1422,396 @@ Deaths in B are $40 \times 1.5 + 60 \times 18 = 60 + 1080 = 1140$, a crude rate 
 specific rates by the town's own age distribution: $0.4 \times 1.5 + 0.6 \times 18$ for B against $0.8 \times 2 + 0.2 \times 20$ for A. Town B puts $60\%$ of its
 weight on the high old-age rate, town A only $20\%$, and that difference outweighs B's lower rates in both groups. The crude comparison
 reverses the direction of the age-specific comparisons.
+\end{solution}
+
+\section{Measures of association}
+\label{sec:association}
+
+A measure of association compares the frequency of disease between exposed and unexposed people. This section defines the measures,
+derives their sampling distributions and confidence intervals, gives the tests of no association, and shows which measure each kind of
+case-control study estimates. Throughout, the $2 \times 2$ table is laid out as in Section~\ref{sec:occurrence}: $a$ and $b$ are the exposed and
+unexposed cases, $c$ and $d$ the exposed and unexposed non-cases, $n_1 = a + c$, $n_0 = b + d$, $m_1 = a + b$, $m_0 = c + d$.
+
+\subsection{Comparing two risks}
+
+With risks $p_1$ among the exposed and $p_0$ among the unexposed, the three measures of Section~\ref{sec:occurrence} are
+\[
+\RR = \frac{p_1}{p_0}, \qquad \RD = p_1 - p_0, \qquad \OR = \frac{p_1/(1 - p_1)}{p_0/(1 - p_0)} .
+\]
+No association means $\RR = \OR = 1$ and $\RD = 0$. The ratios lie in $(0, \infty)$, the difference in $(-1, 1)$.
+
+The measures answer different questions. The ratios measure the \emph{strength} of an association: how many times more frequent the
+disease is among the exposed. Strength is what bears on causation, since a large ratio is hard to produce by confounding alone. The
+difference measures the \emph{impact}: how many cases per person are added by the exposure, which is what matters for deciding
+whether to remove it. Smoking raises the risk of lung cancer about tenfold and of heart disease about twofold, yet because heart
+disease is so much more common it causes more extra deaths from heart disease than from lung cancer. The section on attributable
+risk develops this into the attributable fractions.
+
+The odds ratio has two properties the risk ratio lacks. It is the only one of the three that a case-control study can estimate
+(Theorem~\ref{thm:orinv}). And it is symmetric in the outcome: the odds ratio for \emph{not} getting the disease is exactly $1/\OR$, while the
+risk ratio for not getting it, $(1 - p_1)/(1 - p_0)$, is not $1/\RR$ (Problem~\ref{prob:symmetry}). Its drawback is that it is not what most people
+mean by ``how many times more likely''; reported for a common outcome as if it were a risk ratio, it exaggerates
+(Section~\ref{sec:estimable}).
+
+\subsection{Inference for the risk ratio and risk difference}
+\label{sec:rrci}
+
+In a cohort study $a \sim \text{Bin}(n_1, p_1)$ and $b \sim \text{Bin}(n_0, p_0)$ independently, and the estimates are $\hat p_1 = a/n_1$ and $\hat p_0 = b/n_0$. The
+sampling distributions of the ratio measures are much closer to normal on the log scale, and their variances are found by the delta
+method.
+
+\begin{lem}[Delta method]
+\label{lem:delta}
+If $\sqrt n(\hat\theta - \theta) \to N(0, \sigma^2)$ in distribution and $g$ is differentiable at $\theta$ with $g'(\theta) \neq 0$, then
+$\sqrt n\{g(\hat\theta) - g(\theta)\} \to N(0, g'(\theta)^2\sigma^2)$. So $\Var g(\hat\theta) \approx g'(\theta)^2 \Var(\hat\theta)$.
+\end{lem}
+
+\begin{proof}
+By Taylor's theorem $g(\hat\theta) - g(\theta) = g'(\theta)(\hat\theta - \theta) + r(\hat\theta)(\hat\theta - \theta)$, where $r(\hat\theta) \to 0$ as $\hat\theta \to \theta$. Since $\hat\theta \to \theta$ in
+probability, $r(\hat\theta) \to 0$ in probability, and $\sqrt n(\hat\theta - \theta)$ is bounded in probability, so the remainder times $\sqrt n$ tends to $0$. The
+result follows from Slutsky's theorem.
+\end{proof}
+
+\begin{prop}
+\label{prop:logrr}
+In a cohort study,
+\[
+\Var(\log \widehat{\RR}) \approx \frac{1 - p_1}{n_1 p_1} + \frac{1 - p_0}{n_0 p_0} ,
+\]
+estimated by
+\[
+\frac{1}{a} - \frac{1}{n_1} + \frac{1}{b} - \frac{1}{n_0} ,
+\]
+and $\Var(\widehat{\RD}) = p_1(1 - p_1)/n_1 + p_0(1 - p_0)/n_0$ exactly.
+\end{prop}
+
+\begin{proof}
+$\log\widehat{\RR} = \log\hat p_1 - \log\hat p_0$, the difference of two independent terms. With $g = \log$, $g'(p) = 1/p$, so
+$\Var(\log\hat p_1) \approx p_1(1 - p_1)/(n_1 p_1^2) = (1 - p_1)/(n_1 p_1)$; substituting $\hat p_1 = a/n_1$ gives $(1 - a/n_1)/a = 1/a - 1/n_1$. The
+same holds for $\hat p_0$, and the variances add. The risk difference is a difference of independent binomial proportions.
+\end{proof}
+
+The $95\%$ interval for the risk ratio is $\widehat{\RR}\,\exp(\pm 1.96\,\text{SE})$, with SE the square root of the estimated variance (often called
+the Katz interval), and for the risk difference $\widehat{\RD} \pm 1.96\,\text{SE}$. The interval for the ratio is asymmetric about the estimate, as it
+should be for a quantity bounded below by $0$.
+
+\begin{exa}
+\label{exa:cohort}
+In a cohort study $1200$ exposed workers and $2400$ unexposed workers are followed for five years.
+\begin{center}
+\begin{tabular}{l|cc|c}
+ & Exposed & Unexposed & Total \\
+\hline
+Cases & $60$ & $48$ & $108$ \\
+Non-cases & $1140$ & $2352$ & $3492$ \\
+\hline
+Total & $1200$ & $2400$ & $3600$ \\
+\end{tabular}
+\end{center}
+The risks are $0.05$ and $0.02$, so $\widehat{\RR} = 2.5$. Then
+\[
+\text{SE}(\log\widehat{\RR}) = \sqrt{\tfrac{1}{60} - \tfrac{1}{1200} + \tfrac{1}{48} - \tfrac{1}{2400}} = 0.190 ,
+\]
+and the interval is $2.5\,e^{\pm 1.96 \times 0.190} = (1.72,\ 3.63)$. The risk difference is $0.030$ with
+$\text{SE} = \sqrt{0.05 \times 0.95/1200 + 0.02 \times 0.98/2400} = 0.0069$, giving $(0.016,\ 0.044)$: between $16$ and $44$ extra cases per $1000$ workers over
+five years.
+\end{exa}
+
+\subsection{Inference for the odds ratio}
+\label{sec:orci}
+
+\begin{thm}[Woolf]
+\label{thm:woolf}
+In either a cohort study or a case-control study,
+\[
+\Var(\log\widehat{\OR}) \approx \frac{1}{a} + \frac{1}{b} + \frac{1}{c} + \frac{1}{d} ,
+\]
+where $\widehat{\OR} = ad/(bc)$ and the cell counts on the right are the observed ones.
+\end{thm}
+
+\begin{proof}
+In a cohort study $\log\widehat{\OR} = \operatorname{logit}\hat p_1 - \operatorname{logit}\hat p_0$. The derivative of $\operatorname{logit} p = \log\{p/(1 - p)\}$ is $1/\{p(1 - p)\}$, so by
+Lemma~\ref{lem:delta}
+\[
+\Var(\operatorname{logit}\hat p_1) \approx \frac{1}{p_1^2(1 - p_1)^2} \cdot \frac{p_1(1 - p_1)}{n_1} = \frac{1}{n_1 p_1(1 - p_1)} .
+\]
+Substituting $\hat p_1 = a/n_1$, $1 - \hat p_1 = c/n_1$ gives $n_1/(ac) = (a + c)/(ac) = 1/a + 1/c$. Likewise the unexposed contribute $1/b + 1/d$.
+
+In a case-control study the binomial samples are the cases, of whom $a$ of $m_1$ are exposed, and the controls, $c$ of $m_0$. The
+estimate $ad/(bc)$ is the ratio of the exposure odds $a/b$ and $c/d$, and the same argument applied to $\operatorname{logit}(a/m_1)$ and
+$\operatorname{logit}(c/m_0)$ gives $1/a + 1/b$ and $1/c + 1/d$. The sum is the same.
+\end{proof}
+
+The symmetry of the variance in the four cells reflects the symmetry of the odds ratio between exposure and disease. If any cell is
+zero, $\widehat{\OR}$ is $0$ or infinite and the variance is infinite; the usual remedy is to add $\tfrac12$ to every cell
+(\emph{Haldane's correction}) before computing both. Exact methods, which avoid the problem, come with the conditional distribution of
+Section~\ref{sec:tests}.
+
+\begin{exa}
+\label{exa:casecontrol}
+A case-control study of $150$ cases and $300$ controls finds:
+\begin{center}
+\begin{tabular}{l|cc|c}
+ & Exposed & Unexposed & Total \\
+\hline
+Cases & $60$ & $90$ & $150$ \\
+Controls & $66$ & $234$ & $300$ \\
+\hline
+\end{tabular}
+\end{center}
+Then $\widehat{\OR} = (60 \times 234)/(90 \times 66) = 2.36$, and
+\[
+\text{SE}(\log\widehat{\OR}) = \sqrt{\tfrac{1}{60} + \tfrac{1}{90} + \tfrac{1}{66} + \tfrac{1}{234}} = 0.217 ,
+\]
+so the $95\%$ interval is $2.36\,e^{\pm 1.96 \times 0.217} = (1.54,\ 3.62)$. In the cohort of Example~\ref{exa:cohort} the odds ratio is
+$(60 \times 2352)/(48 \times 1140) = 2.58$, with interval $(1.75,\ 3.79)$, a little further from $1$ than the risk ratio $2.5$, as it must be
+(Problem~\ref{prob:orrr}).
+\end{exa}
+
+\subsection{Testing for no association}
+\label{sec:tests}
+
+\subhead{The chi-squared test}
+
+\begin{prop}
+\label{prop:chisq}
+For a $2 \times 2$ table, Pearson's statistic $X^2 = \sum (O - E)^2/E$, with expected counts $E$ computed from the margins, is
+\[
+X^2 = \frac{n(ad - bc)^2}{n_1 n_0 m_1 m_0} ,
+\]
+and it equals $z^2$, where $z = (\hat p_1 - \hat p_0)/\sqrt{\hat p(1 - \hat p)(1/n_1 + 1/n_0)}$ is the two-sample test statistic for proportions with pooled
+$\hat p = m_1/n$.
+\end{prop}
+
+\begin{proof}
+The expected count in the exposed-case cell is $n_1 m_1/n$, and
+\[
+a - \frac{n_1 m_1}{n} = \frac{a(a + b + c + d) - (a + c)(a + b)}{n} = \frac{ad - bc}{n} .
+\]
+Since the margins of $O$ and $E$ agree, the other three deviations are $\pm(ad - bc)/n$ too. Hence $X^2 = \{(ad - bc)/n\}^2 \sum 1/E$, and
+\begin{align*}
+\sum \frac{1}{E} &= n\Bigl(\frac{1}{n_1 m_1} + \frac{1}{n_1 m_0} + \frac{1}{n_0 m_1} + \frac{1}{n_0 m_0}\Bigr) \\
+&= \frac{n(n_0 + n_1)(m_0 + m_1)}{n_1 n_0 m_1 m_0} = \frac{n^3}{n_1 n_0 m_1 m_0} .
+\end{align*}
+For the second claim, $\hat p_1 - \hat p_0 = a/n_1 - b/n_0 = (an_0 - bn_1)/(n_1 n_0) = (ad - bc)/(n_1 n_0)$, and
+$\hat p(1 - \hat p)(1/n_1 + 1/n_0) = m_1 m_0 n/(n^2 n_1 n_0)$. Squaring and dividing gives $n(ad - bc)^2/(n_1 n_0 m_1 m_0)$.
+\end{proof}
+
+Under no association $X^2$ is approximately $\chi^2_1$. In Example~\ref{exa:cohort}, $X^2 = 24.7$ ($P < 0.0001$), and in
+Example~\ref{exa:casecontrol}, $X^2 = 16.1$ ($P = 0.00006$). The approximation needs expected counts that are not too small; a common rule
+is all four at least $5$.
+
+\subhead{The conditional distribution and Fisher's exact test}
+
+\begin{thm}
+\label{thm:hyper}
+In a cohort study with $p_1 = p_0$, the conditional distribution of $a$ given the total number of cases $m_1$ is hypergeometric:
+\[
+P(a = k \mid m_1) = \frac{\binom{n_1}{k}\binom{n_0}{m_1 - k}}{\binom{n}{m_1}} ,
+\]
+with mean $n_1 m_1/n$ and variance $n_1 n_0 m_1 m_0/\{n^2(n - 1)\}$. The same distribution holds in a case-control study under $q_1 = q_0$,
+conditioning on $n_1$.
+\end{thm}
+
+\begin{proof}
+With common risk $p$, $P(a = k,\ b = m_1 - k) = \binom{n_1}{k}\binom{n_0}{m_1 - k} p^{m_1}(1 - p)^{n - m_1}$, and $m_1 \sim \text{Bin}(n, p)$ has probability
+$\binom{n}{m_1}p^{m_1}(1 - p)^{n - m_1}$. The ratio is the stated probability, free of $p$. It is the distribution of the number of exposed people among
+$m_1$ drawn without replacement from $n$ of whom $n_1$ are exposed, whose mean and variance are the standard hypergeometric moments.
+The case-control statement is the same argument with the roles of exposure and disease exchanged.
+\end{proof}
+
+Conditioning removes the unknown common risk, so the distribution can be used exactly. \textbf{Fisher's exact test} computes the
+$P$-value as the conditional probability of a table at least as extreme as the one observed. The hypergeometric mean and variance are
+the building blocks of the Mantel--Haenszel test, later in the course.
+
+\begin{exa}
+\label{exa:fisher}
+In a small outbreak investigation, $6$ of $10$ people who ate a dish became ill, against $2$ of $12$ who did not. Here $n = 22$, $n_1 = 10$,
+$m_1 = 8$, and $\widehat{\OR} = (6 \times 10)/(2 \times 4) = 7.5$. Given $8$ cases, the number among the $10$ who ate the dish is hypergeometric with
+probabilities
+\begin{center}
+\begin{tabular}{lccccccccc}
+\hline
+$k$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\hline
+$P$ & .0016 & .0248 & .1300 & .2972 & .3251 & .1734 & .0433 & .0045 & .0001 \\
+\hline
+\end{tabular}
+\end{center}
+The one-sided $P$-value is $P(a \geq 6) = 0.0433 + 0.0045 + 0.0001 = 0.048$. The two-sided value, adding the probabilities of all tables no
+more probable than the observed one ($k = 0, 1, 6, 7, 8$), is $0.074$. The chi-squared test gives $X^2 = 4.43$, $P = 0.035$, too small, because
+three expected counts are under $5$.
+\end{exa}
+
+\subsection{Comparing rates}
+\label{sec:rateratio}
+
+With $D_1$ cases in $T_1$ person-years among the exposed and $D_0$ in $T_0$ among the unexposed, the \textbf{incidence rate ratio} and
+\textbf{rate difference} are estimated by
+\[
+\widehat{\text{IRR}} = \frac{D_1/T_1}{D_0/T_0}, \qquad \widehat{\text{IRD}} = \frac{D_1}{T_1} - \frac{D_0}{T_0} .
+\]
+By Theorem~\ref{thm:poissonlik} the counts behave as independent Poisson variables with means $\lambda_1 T_1$ and $\lambda_0 T_0$, so
+$\text{SE}(\log\widehat{\text{IRR}}) = \sqrt{1/D_1 + 1/D_0}$ and $\text{SE}(\widehat{\text{IRD}}) = \sqrt{D_1/T_1^2 + D_0/T_0^2}$.
+
+\begin{thm}
+\label{thm:ratecond}
+If $D_1 \sim \text{Poisson}(\lambda_1 T_1)$ and $D_0 \sim \text{Poisson}(\lambda_0 T_0)$ independently, then given $D = D_1 + D_0$,
+\[
+D_1 \sim \text{Bin}(D, \pi), \qquad \pi = \frac{\text{IRR}\;T_1}{\text{IRR}\;T_1 + T_0} ,
+\]
+which depends on the rates only through $\text{IRR} = \lambda_1/\lambda_0$.
+\end{thm}
+
+\begin{proof}
+$D \sim \text{Poisson}(\mu_1 + \mu_0)$ with $\mu_i = \lambda_i T_i$, so
+\begin{align*}
+P(D_1 = k \mid D) &= \frac{e^{-\mu_1}\mu_1^k/k! \cdot e^{-\mu_0}\mu_0^{D - k}/(D - k)!}{e^{-(\mu_1 + \mu_0)}(\mu_1 + \mu_0)^D/D!} \\
+&= \binom{D}{k}\Bigl(\frac{\mu_1}{\mu_1 + \mu_0}\Bigr)^k\Bigl(\frac{\mu_0}{\mu_1 + \mu_0}\Bigr)^{D - k} .
+\end{align*}
+Dividing numerator and denominator of $\mu_1/(\mu_1 + \mu_0)$ by $\lambda_0$ gives $\pi$.
+\end{proof}
+
+Under no association $\pi = T_1/(T_1 + T_0)$, the share of person-time that is exposed, and the exact test is a binomial test. An exact
+interval for $\pi$ (Clopper--Pearson) transforms into one for the rate ratio through $\text{IRR} = \{\pi/(1 - \pi)\}\,T_0/T_1$, which is increasing in $\pi$.
+
+\begin{exa}
+\label{exa:rates}
+Among exposed workers $30$ cases occur in $2500$ person-years; among unexposed workers, $25$ cases occur in $5000$
+person-years. The rates are $12$ and $5$ per $1000$ person-years, so
+\[
+\widehat{\text{IRR}} = 2.4, \qquad \text{SE}(\log\widehat{\text{IRR}}) = \sqrt{1/30 + 1/25} = 0.271 ,
+\]
+and the interval is $(1.41,\ 4.08)$. Conditionally on the $55$ cases, under no association $D_1 \sim \text{Bin}(55, 1/3)$. The observed $30$,
+against an expected $18.3$, gives a one-sided exact $P$ of $0.0010$. The exact interval for $\pi$ is $(0.406,\ 0.680)$, which transforms
+to $(1.36,\ 4.26)$ for the rate ratio. The rate difference is $7.0$ per $1000$ person-years, with interval $(2.3,\ 11.7)$.
+\end{exa}
+
+\subsection{What a case-control odds ratio estimates}
+\label{sec:ccsampling}
+
+Section~\ref{sec:estimable} showed that the case-control odds ratio estimates the disease odds ratio, which approximates the risk ratio
+for a rare disease. How the controls are chosen decides what it estimates, and two ways of choosing them remove the need for the
+rare disease assumption altogether.
+
+Consider a cohort followed over a period, in which $A_1$ of $N_1$ exposed and $A_0$ of $N_0$ unexposed people become cases, with $T_1$, $T_0$
+person-years at risk. All cases are taken; controls are sampled in one of three ways.
+\begin{enumerate}
+\item \textbf{Cumulative} sampling: controls from those still free of disease at the end of the period. Their exposure odds estimate
+$(N_1 - A_1)/(N_0 - A_0)$, and the odds ratio estimates
+\[
+\frac{A_1/(N_1 - A_1)}{A_0/(N_0 - A_0)} ,
+\]
+the risk odds ratio.
+\item \textbf{Case-cohort} (case-base) sampling: controls from the whole cohort as it was at the start, regardless of later disease.
+Their exposure odds estimate $N_1/N_0$, and the odds ratio estimates $(A_1/A_0)/(N_1/N_0) = (A_1/N_1)/(A_0/N_0)$, the \emph{risk ratio}.
+\item \textbf{Density} (risk-set) sampling: whenever a case occurs, controls are drawn from those at risk at that moment. A person is then
+eligible as a control for as long as they are at risk, so the chance that a control is exposed is proportional to exposed person-time.
+\end{enumerate}
+
+\begin{thm}[Density sampling]
+\label{thm:density}
+Under density sampling, if the exposure odds among controls estimate $T_1/T_0$, the odds ratio estimates the incidence rate ratio
+$\lambda_1/\lambda_0$, with no rare disease assumption.
+\end{thm}
+
+\begin{proof}
+The expected numbers of cases are $A_1 = \lambda_1 T_1$ and $A_0 = \lambda_0 T_0$, so the exposure odds among cases are $\lambda_1 T_1/(\lambda_0 T_0)$. Each control is
+a person drawn from those at risk at a time point, so it is exposed with probability equal to the exposed share of the person-time at
+risk, and the control exposure odds are $T_1/T_0$. The ratio is $\{\lambda_1 T_1/(\lambda_0 T_0)\}/(T_1/T_0) = \lambda_1/\lambda_0$.
+\end{proof}
+
+A person sampled as a control under density sampling may later become a case, and should then appear in both roles; a person may also
+be sampled as a control more than once. Excluding such people reintroduces the rare disease assumption. Nested case-control studies
+within large cohorts, in which exposure is measured (say, from stored blood) only for the cases and a few matched controls per case,
+use density sampling and estimate rate ratios directly.
+
+\subsection{Problems}
+
+\begin{problem}
+In a cohort study, $32$ of $400$ exposed and $18$ of $600$ unexposed people develop the disease. Estimate the risk ratio, the risk
+difference and the odds ratio, each with a $95\%$ confidence interval.
+\end{problem}
+
+\begin{solution}
+$\hat p_1 = 0.08$ and $\hat p_0 = 0.03$.
+$\widehat{\RR} = 2.67$, with
+\[
+\text{SE}(\log\widehat{\RR}) = \sqrt{1/32 - 1/400 + 1/18 - 1/600} = 0.287
+\]
+and interval $(1.52,\ 4.68)$. $\widehat{\RD} = 0.050$, with
+\[
+\text{SE}(\widehat{\RD}) = \sqrt{0.08 \times 0.92/400 + 0.03 \times 0.97/600} = 0.0152
+\]
+and interval $(0.020,\ 0.080)$. $\widehat{\OR} = (32 \times 582)/(18 \times 368) = 2.81$, with
+\[
+\text{SE}(\log\widehat{\OR}) = \sqrt{1/32 + 1/18 + 1/368 + 1/582} = 0.302
+\]
+and interval $(1.56,\ 5.08)$.
+\end{solution}
+
+\begin{problem}
+\label{prob:symmetry}
+Show that the odds ratio for remaining free of disease is $1/\OR$. Find the risk ratio for remaining free of disease when $p_1 = 0.2$ and
+$p_0 = 0.1$, and compare it with $1/\RR$.
+\end{problem}
+
+\begin{solution}
+The odds of remaining free are $(1 - p_i)/p_i$, the reciprocal of the disease odds, so their ratio is the reciprocal of $\OR$. With
+$p_1 = 0.2$ and $p_0 = 0.1$, $\RR = 2$ but the risk ratio for remaining free is $0.8/0.9 = 0.889$, not $0.5$. The same data are a doubling of the
+risk of disease and an $11\%$ reduction in the chance of staying well. The risk ratio depends on which outcome is called the event;
+the odds ratio does not ($2.25$ one way, $1/2.25$ the other).
+\end{solution}
+
+\begin{problem}
+A case-control study finds no exposed cases among $6$ cases and $20$ exposed among $60$ controls, so the table is $a = 0$, $b = 6$, $c = 20$,
+$d = 40$. Compute the odds ratio and its Woolf interval after adding $\tfrac12$ to every cell. What does the interval say?
+\end{problem}
+
+\begin{solution}
+With the correction, $\widehat{\OR} = (0.5 \times 40.5)/(6.5 \times 20.5) = 0.152$ and $\text{SE}(\log\widehat{\OR}) = \sqrt{2 + 1/6.5 + 1/20.5 + 1/40.5} = 1.49$, so the interval
+is $0.152\,e^{\pm 2.92} = (0.008,\ 2.8)$. The point estimate suggests strong protection, but the interval includes values well above $1$:
+six cases cannot distinguish a protective exposure from a moderately harmful one. The point estimate depends strongly on the
+arbitrary $\tfrac12$ and should not be reported alone.
+\end{solution}
+
+\begin{problem}
+In a population, exposed people contribute $20{,}000$ person-years at risk with an incidence rate of $6$ per $1000$, and unexposed people
+$80{,}000$ person-years with $2$ per $1000$. A density-sampled case-control study takes all cases and four controls per case. Find the
+expected table and its odds ratio.
+\end{problem}
+
+\begin{solution}
+Cases: $120$ exposed and $160$ unexposed, $280$ in all. Controls: $1120$, of whom a share $20{,}000/100{,}000 = 0.2$ are exposed, so $224$ exposed and $896$
+unexposed. The odds ratio is $(120 \times 896)/(160 \times 224) = 3.0 = 6/2$, the rate ratio, as Theorem~\ref{thm:density} says.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{exa:fisher}, verify $P(a = 6 \mid m_1 = 8) = 0.0433$ from the hypergeometric formula, and find the mean and variance of $a$ under
+no association.
+\end{problem}
+
+\begin{solution}
+$P(a = 6) = \binom{10}{6}\binom{12}{2}/\binom{22}{8} = 210 \times 66/319{,}770 = 13{,}860/319{,}770 = 0.0433$. The mean is
+$n_1 m_1/n = 10 \times 8/22 = 3.64$ and the variance $n_1 n_0 m_1 m_0/\{n^2(n - 1)\} = 10 \times 12 \times 8 \times 14/(484 \times 21) = 1.32$. The observed $6$ is
+$(6 - 3.64)/\sqrt{1.32} = 2.05$ standard deviations above the mean.
+\end{solution}
+
+\begin{problem}
+In a case-cohort study, a random $5\%$ of a cohort of $20{,}000$ is sampled at the start as the subcohort; $250$ of its $1000$ members
+are exposed. Over ten years the cohort produces $150$ exposed cases and $200$ unexposed cases. Estimate the ten-year risk ratio. Why is
+the rare disease assumption not needed?
+\end{problem}
+
+\begin{solution}
+The odds ratio of cases against the subcohort is $(150/200)/(250/750) = 2.25$. The subcohort's exposure odds estimate
+$N_1/N_0$, so the odds ratio estimates
+\[
+\frac{A_1/A_0}{N_1/N_0} = \frac{A_1/N_1}{A_0/N_0} ,
+\]
+the ten-year risk ratio. The controls represent the whole cohort at the start, including people who later become cases, so the
+comparison is between the cases and the people at risk at baseline, which is exactly what a risk ratio compares. No approximation is
+involved.
 \end{solution}
 
 \section*{References}
