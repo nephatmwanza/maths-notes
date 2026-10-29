@@ -3025,6 +3025,227 @@ is a reference, and comparing a population with itself gives the trivial answer.
 for direct standardisation, a population whose structure is in the range of those compared.
 \end{solution}
 
+\section{Confounding and stratified analysis}
+\label{sec:stratified}
+
+Standardisation adjusts rates by reweighting. The more general approach, for any measure and any design, is \textbf{stratification}: divide
+the data into strata within which the confounder is constant (or nearly so), estimate the association within each stratum, and then
+decide whether the stratum estimates can be summarised by one number. This section develops the second step and the decision; the
+Mantel--Haenszel procedure of the next section gives the summary estimator in most common use.
+
+\subsection{Stratification}
+
+Within a stratum in which the confounder $C$ takes a single value, $C$ cannot be associated with exposure, so it cannot confound
+(condition 2 of the definition in Section~\ref{sec:confounding}). The stratum-specific estimates are free of confounding by $C$, though
+not by other variables.
+
+\begin{exa}
+\label{exa:strata}
+A case-control study of an exposure and a disease records age in three groups. In the notation of the fourfold
+table, $a$ and $b$ are the exposed and unexposed cases and $c$ and $d$ the exposed and unexposed controls.
+\begin{center}
+\begin{tabular}{lrrrrcc}
+\hline
+Age & $a$ & $b$ & $c$ & $d$ & $\widehat{\OR}_k$ & $v_k$ \\
+\hline
+Under 45 & 9 & 41 & 40 & 320 & 1.76 & 0.164 \\
+45--59 & 30 & 45 & 60 & 180 & 2.00 & 0.078 \\
+60+ & 64 & 26 & 50 & 50 & 2.46 & 0.094 \\
+\hline
+All ages & 103 & 112 & 150 & 550 & 3.37 & \\
+\hline
+\end{tabular}
+\end{center}
+Here $v_k = 1/a + 1/b + 1/c + 1/d$ is the estimated variance of $\log\widehat{\OR}_k$.
+The crude odds ratio is $3.37$, the stratum odds ratios between $1.76$ and $2.46$. Older people are both more often exposed (the proportion
+of controls exposed rises from $11\%$ to $50\%$) and more often cases, so age inflates the crude association. The stratum estimates
+differ from one another by no more than chance would suggest (Example~\ref{exa:woolftest}), and a single adjusted odds ratio of about $2$
+summarises them.
+\end{exa}
+
+The crude estimate can differ from the stratum-specific ones in either direction, and can even reverse direction. That extreme case is
+\textbf{Simpson's paradox} (Problem~\ref{prob:simpson}). There is nothing paradoxical about it once confounding is understood: the crude
+comparison mixes groups with different distributions of the confounder.
+
+\subsection{Effect modification}
+\label{sec:effectmod}
+
+\begin{defn}
+A variable $C$ is an \textbf{effect modifier} on a given scale if the measure of association between $E$ and $D$ on that scale differs between the
+levels of $C$. The measure is then said to be \textbf{heterogeneous}; if it is the same in every stratum it is \textbf{homogeneous}.
+\end{defn}
+
+Confounding and effect modification are different things. Confounding is a bias, to be removed. Effect modification is a feature of the
+world, to be described: if a drug works in men but not in women, the most useful report says so, and a single average hides it. A variable
+can be a confounder, an effect modifier, both, or neither.
+
+Effect modification depends on the scale of measurement.
+
+\begin{prop}
+\label{prop:scale}
+Suppose the exposure has the same risk ratio $\theta \neq 1$ in two strata whose baseline risks $p_{01} \neq p_{02}$ differ. Then the risk differences in the
+two strata differ. Conversely, a common risk difference with different baseline risks implies different risk ratios.
+\end{prop}
+
+\begin{proof}
+The risk differences are $(\theta - 1)p_{01}$ and $(\theta - 1)p_{02}$, unequal since $\theta \neq 1$ and $p_{01} \neq p_{02}$. For the converse, a common difference $\delta \neq 0$ gives risk
+ratios $1 + \delta/p_{01}$ and $1 + \delta/p_{02}$, which differ.
+\end{proof}
+
+So ``is there effect modification?'' has no answer until the scale is named. An exposure that triples the risk in a stratum with baseline
+risk $0.01$ and in one with baseline $0.1$ has a homogeneous risk ratio of $3$ but risk differences of $0.02$ and $0.2$. For public health the
+second scale often matters more: removing the exposure prevents ten times as many cases per person in the high-risk stratum.
+
+When the effect modifier is itself a second exposure, a standard summary of departure from additivity of risks is the \textbf{relative
+excess risk due to interaction},
+\[
+\text{RERI} = \RR_{11} - \RR_{10} - \RR_{01} + 1 ,
+\]
+where $\RR_{ij}$ is the risk ratio for exposure levels $(i, j)$ relative to $(0, 0)$. It is $0$ when the excess risks of the two exposures add, and
+positive when the joint excess exceeds the sum. With $\RR_{10} = 2$, $\RR_{01} = 2.5$ and $\RR_{11} = 6$, the risk ratios combine almost multiplicatively ($2 \times 2.5 = 5$)
+and $\text{RERI} = 2.5$: more than additive. Additive interaction is the scale that bears on how many cases joint exposure causes, and so on
+which groups an intervention should target.
+
+\subsection{Pooling homogeneous estimates}
+\label{sec:pooling}
+
+If the measure is homogeneous, say a common log odds ratio $\beta$, each stratum gives an estimate $\hat\beta_k = \log\widehat{\OR}_k$ with approximate
+variance $v_k$, and the strata are independent. Among all weighted averages, the best uses inverse-variance weights.
+
+\begin{thm}
+\label{thm:ivw}
+Let $\hat\beta_1, \dots, \hat\beta_K$ be independent and unbiased for $\beta$, with variances $v_k$. Among estimators $\sum_k c_k\hat\beta_k$ with $\sum_k c_k = 1$, the variance is
+minimised by $c_k \propto 1/v_k$. With $w_k = 1/v_k$ the minimum-variance estimator and its variance are
+\[
+\hat\beta_W = \frac{\sum_k w_k\hat\beta_k}{\sum_k w_k}, \qquad \Var(\hat\beta_W) = \frac{1}{\sum_k w_k} .
+\]
+\end{thm}
+
+\begin{proof}
+Any such estimator is unbiased, with variance $\sum_k c_k^2 v_k$. By the Cauchy--Schwarz inequality,
+\[
+1 = \Bigl(\sum_k c_k\Bigr)^2 = \Bigl(\sum_k c_k\sqrt{v_k} \cdot \frac{1}{\sqrt{v_k}}\Bigr)^2 \leq \sum_k c_k^2 v_k \sum_k \frac{1}{v_k} ,
+\]
+so $\sum_k c_k^2 v_k \geq 1/\sum_k w_k$, with equality when $c_k\sqrt{v_k}$ is proportional to $1/\sqrt{v_k}$, that is $c_k \propto 1/v_k$. Then $c_k = w_k/\sum_l w_l$ and the variance is
+$\sum_k w_k^2 v_k/(\sum_l w_l)^2 = 1/\sum_l w_l$.
+\end{proof}
+
+Applied to log odds ratios with Woolf's variances, this is the \textbf{Woolf pooled estimator}. Its weakness is that the weights and the
+stratum estimates come from the same small tables: a stratum with a zero cell has an infinite log odds ratio and must be corrected or
+dropped, and with many sparse strata (as in matched studies, where each set is a stratum) the estimator is badly biased. The
+Mantel--Haenszel estimator of the next section avoids both problems.
+
+\subsection{Testing homogeneity}
+
+\begin{prop}
+\label{prop:woolfq}
+Under homogeneity, with the $\hat\beta_k$ approximately normal and the $v_k$ treated as known,
+\[
+Q = \sum_k w_k(\hat\beta_k - \hat\beta_W)^2
+\]
+has approximately the $\chi^2_{K - 1}$ distribution.
+\end{prop}
+
+\begin{proof}
+Let $z_k = \sqrt{w_k}(\hat\beta_k - \beta)$, independent standard normal, and $u$ the unit vector with components $\sqrt{w_k}/\sqrt{\sum_l w_l}$. Then
+$\sqrt{w_k}(\hat\beta_k - \hat\beta_W) = z_k - u_k\,(u^\top z)$, since $u^\top z = \sum_l w_l(\hat\beta_l - \beta)/\sqrt{\sum_l w_l} = \sqrt{\sum_l w_l}\,(\hat\beta_W - \beta)$. So $Q = \|(I - uu^\top)z\|^2$,
+the squared length of the projection of a standard normal vector onto the $(K - 1)$-dimensional subspace orthogonal to $u$, which is $\chi^2_{K - 1}$.
+\end{proof}
+
+The test has low power when the strata are small, so a non-significant result is weak evidence of homogeneity. Its value is in
+flagging large, clear differences, which should then be reported as effect modification.
+
+\begin{exa}
+\label{exa:woolftest}
+In Example~\ref{exa:strata} the weights $1/v_k$ are $6.11$, $12.86$ and $10.63$, and the log odds ratios $0.563$, $0.693$ and $0.901$. Then
+\[
+\hat\beta_W = \frac{6.11 \times 0.563 + 12.86 \times 0.693 + 10.63 \times 0.901}{29.60} = 0.741 ,
+\]
+so the pooled odds ratio is $e^{0.741} = 2.10$, with $\text{SE} = 1/\sqrt{29.60} = 0.184$ and $95\%$ interval $(1.46,\ 3.01)$. The homogeneity statistic is
+\begin{align*}
+Q &= 6.11(0.563 - 0.741)^2 + 12.86(0.693 - 0.741)^2 \\
+&\quad + 10.63(0.901 - 0.741)^2 = 0.49
+\end{align*}
+on $2$ degrees of freedom, $P = 0.78$. Nothing suggests that the odds ratio varies with age, and the age-adjusted estimate $2.10$ replaces the
+crude $3.37$. The test of no association, $z = 0.741/0.184 = 4.03$, is highly significant.
+\end{exa}
+
+\subsection{A strategy for stratified analysis}
+
+\begin{enumerate}
+\item Compute the crude measure and the stratum-specific measures, with confidence intervals.
+\item Judge whether the stratum measures differ materially, by inspection and by a test of homogeneity, bearing in mind its low power.
+\item If they do, report them separately: there is effect modification on this scale. Consider whether another scale is homogeneous.
+\item If they do not, compute a pooled adjusted estimate (Mantel--Haenszel or inverse-variance) and its interval.
+\item Compare the adjusted with the crude estimate. A material difference (a change of $10\%$ or more is a common working rule) indicates
+confounding by the stratifying variable, and the adjusted estimate is reported. For the odds ratio, recall that some change can come
+from non-collapsibility alone (Example~\ref{exa:noncollapse}).
+\end{enumerate}
+
+Stratification runs out of data quickly. With several confounders, each with several levels, the strata multiply and most contain few
+people; the summary estimators of the next section cope with many small strata, and regression models
+cope with many confounders at once.
+
+\subsection{Problems}
+
+\begin{problem}
+\label{prob:simpson}
+In a published comparison of treatments for kidney stones (Charig et al., 1986), results were reported by stone size. Treatment A succeeded in $81$ of $87$ small stones and $192$ of $263$ large stones;
+treatment B in $234$ of $270$ small and $55$ of $80$ large. Find the success rates by stone size and overall, and explain.
+\end{problem}
+
+\begin{solution}
+Small stones: A $0.931$, B $0.867$. Large stones: A $0.730$, B $0.688$. Overall: A $273/350 = 0.780$, B $289/350 = 0.826$. A is better for both sizes but worse
+overall. Treatment A was used mostly for large stones ($263$ of its $350$), which are harder to treat, and B mostly for small ones. Stone
+size is a confounder: it affects success and is associated with the treatment given. The stratified comparison is the valid one.
+\end{solution}
+
+\begin{problem}
+A case-control study stratified by sex gives, for men, $20$ exposed and $80$ unexposed cases and $40$ exposed and $200$ unexposed controls;
+for women, $40$, $20$, $30$ and $150$. Compute the stratum odds ratios with intervals, the Woolf test of homogeneity and the crude odds ratio.
+How should the results be reported?
+\end{problem}
+
+\begin{solution}
+Men: $\widehat{\OR} = (20 \times 200)/(80 \times 40) = 1.25$, $v = 0.0925$, interval $(0.69,\ 2.27)$. Women: $\widehat{\OR} = (40 \times 150)/(20 \times 30) = 10.0$, $v = 0.115$, interval
+$(5.1,\ 19.4)$. The pooled log odds ratio has weights $10.81$ and $8.70$; $Q = 20.8$ on $1$ degree of freedom, $P < 0.0001$. The crude odds ratio is
+$(60 \times 350)/(100 \times 70) = 3.0$. The odds ratio is strongly heterogeneous: the exposure is associated with the disease in women but hardly in
+men. Neither the crude $3.0$ nor a pooled estimate (about $3.2$) describes either sex, and the results should be reported separately.
+\end{solution}
+
+\begin{problem}
+Show that if the odds ratio is homogeneous across two strata with different baseline risks and $\OR \neq 1$, the risk ratio cannot also be
+homogeneous.
+\end{problem}
+
+\begin{solution}
+Suppose $\OR = \psi$ and $\RR = \theta$ in both strata. With baseline risk $p_0$ and $p_1 = \theta p_0$, $\psi = \theta(1 - p_0)/(1 - \theta p_0)$. Solving for $p_0$:
+$\psi - \psi\theta p_0 = \theta - \theta p_0$, so $p_0(\theta - \psi\theta) = \theta - \psi$ and $p_0 = (\psi - \theta)/\{\theta(\psi - 1)\}$, a single value. Two strata with
+different baseline risks cannot share both $\psi$ and $\theta$ unless $\psi = \theta = 1$.
+\end{solution}
+
+\begin{problem}
+Using the weights of Example~\ref{exa:woolftest}, find the pooled estimate if the youngest stratum is omitted, and comment on its
+precision.
+\end{problem}
+
+\begin{solution}
+$\hat\beta_W = (12.86 \times 0.693 + 10.63 \times 0.901)/23.49 = 0.787$, an odds ratio of $2.20$, with $\text{SE} = 1/\sqrt{23.49} = 0.206$. The estimate hardly moves, but
+the standard error rises from $0.184$ to $0.206$, as Theorem~\ref{thm:ivw} implies: every stratum adds to $\sum w_k$, however small its weight.
+\end{solution}
+
+\begin{problem}
+In a cohort, the risk of a disease is $0.02$ in people with neither of two exposures, $0.04$ with exposure A only, $0.05$ with B only and $0.12$
+with both. Compute the risk ratios, the RERI, and say whether there is interaction on the multiplicative scale and on the additive scale.
+\end{problem}
+
+\begin{solution}
+$\RR_{10} = 2$, $\RR_{01} = 2.5$, $\RR_{11} = 6$. On the multiplicative scale the joint ratio expected without interaction is $5$, against $6$ observed, a
+modest departure. On the additive scale $\text{RERI} = 6 - 2 - 2.5 + 1 = 2.5$: the joint excess risk ($0.10$) is much larger than the sum of the separate
+excesses ($0.02 + 0.03 = 0.05$). There is strong additive interaction; preventing either exposure in people who have both prevents more cases
+than the separate effects suggest.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -3047,6 +3268,8 @@ Van Nostrand Reinhold (reprinted by Wiley).
 International Agency for Research on Cancer.
 \item Breslow, N. E., and Day, N. E. (1987), \emph{Statistical Methods in Cancer Research, Vol.~II: The Design and Analysis of Cohort
 Studies}, Lyon, International Agency for Research on Cancer.
+\item Charig, C. R., Webb, D. R., Payne, S. R., and Wickham, J. E. A. (1986), Comparison of treatment of renal calculi by open surgery,
+percutaneous nephrolithotomy, and extracorporeal shockwave lithotripsy, \emph{British Medical Journal}, 292, 879--882.
 \item Cohen, J. (1960), A coefficient of agreement for nominal scales, \emph{Educational and Psychological
 Measurement}, 20, 37--46.
 \item Copeland, K. T., Checkoway, H., McMichael, A. J., and Holbrook, R. H. (1977), Bias due to misclassification in the estimation of relative risk,
@@ -3068,10 +3291,13 @@ distribution, \emph{Statistics in Medicine}, 16, 791--801.
 Journal of Epidemiology}, 99, 325--332.
 \item Rogan, W. J., and Gladen, B. (1978), Estimating prevalence from the results of a screening test, \emph{American Journal of
 Epidemiology}, 107, 71--76.
+\item Simpson, E. H. (1951), The interpretation of interaction in contingency tables, \emph{Journal of the Royal Statistical Society,
+Series B}, 13, 238--241.
 \item Snow, J. (1855), \emph{On the Mode of Communication of Cholera} (2nd ed.), London, John Churchill.
 \item Wacholder, S., McLaughlin, J. K., Silverman, D. T., and Mandel, J. S. (1992), Selection of controls in case-control studies. I.
 Principles, \emph{American Journal of Epidemiology}, 135, 1019--1028.
 \item Walter, S. D. (1976), The estimation and interpretation of attributable risk in health research, \emph{Biometrics}, 32, 829--849.
+\item Woolf, B. (1955), On estimating the relation between blood group and disease, \emph{Annals of Human Genetics}, 19, 251--253.
 \end{enumerate}
 
 \end{document}
