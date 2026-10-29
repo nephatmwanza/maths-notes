@@ -544,7 +544,8 @@ irrigation and for fertiliser, and the number of replicates of each irrigation l
 \begin{solution}
 Irrigation is applied to whole fields, so the field is the experimental unit for irrigation, and each irrigation level has only two replicates, however
 many plots are measured. Fertiliser is applied to plots, so the plot is the experimental unit for fertiliser. The two factors have different
-experimental units and so different experimental errors; this is a split-plot experiment, analysed in a later section. Comparing irrigation levels
+experimental units and so different experimental errors; this is a split-plot experiment, analysed in
+Section~\ref{sec:nested}. Comparing irrigation levels
 against the plot-to-plot variation would be pseudo-replication.
 \end{solution}
 
@@ -5375,6 +5376,559 @@ F_0' = \frac{95.0 + 4.6}{12.4 + 15.8} = 3.53 ,
 \]
 on $2.2$ and $5.3$ degrees of freedom, with $P = 0.10$. Testing against $MS_{AB}$ alone would give $F_0 = 95.0/12.4 = 7.66 > F_{0.05, 2, 6} = 5.14$, a spurious rejection: it ignores the
 contribution $bn\sigma^2_{\tau\gamma}$ of the $AC$ interaction to $E(MS_A)$.
+\end{solution}
+
+\section{Nested and split-plot designs}\label{sec:nested}
+The designs so far have crossed every factor with every other: each level of one appears with each level of the others. Two common structures
+break this pattern. In a \textbf{nested} design the levels of one factor are different for each level of another, so the two cannot be crossed. In a
+\textbf{split-plot} design the factors are crossed, but the randomisation is restricted, so that different factors have different experimental
+units and different errors. Both are analysed with the random-effects tools of Section~\ref{sec:random}.
+
+\subsection{The two-stage nested design}
+\begin{defn}
+Factor $B$ is \textbf{nested} in factor $A$ if each level of $B$ occurs with only one level of $A$. A \textbf{two-stage nested} (or hierarchical) design
+has $a$ levels of $A$, $b$ levels of $B$ within each level of $A$, and $n$ observations on each level of $B$:
+\begin{gather*}
+y_{ijk} = \mu + \tau_i + \beta_{j(i)} + \varepsilon_{(ij)k} , \\
+i = 1, \dots, a , \quad j = 1, \dots, b , \quad k = 1, \dots, n .
+\end{gather*}
+The subscript $j(i)$ says that the $j$th level of $B$ is a different level for each $i$.
+\end{defn}
+
+The labels of the nested factor are arbitrary. In the experiment of Example~\ref{exa:machines}, ``operator $1$'' on machine $1$ and ``operator $1$'' on machine $2$
+are different people, and there is no sense in which they share an effect. So there is no $B$ main effect and no $AB$ interaction; there is only the
+variation of $B$ \emph{within} each level of $A$. Analysing such data as a two-factor factorial is a common mistake (Figure~\ref{fig:nested}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.92]
+\foreach \m in {1,2,3,4} {
+\pgfmathsetmacro{\mx}{2.8*(\m-1)+1.2}
+\fill[blue!20,rounded corners=3pt] ({\mx-0.9},3.1) rectangle ({\mx+0.9},3.75);
+\node[font=\small] at (\mx,3.42) {Machine \m};
+\foreach \o in {1,2,3} {
+\pgfmathsetmacro{\ox}{\mx+0.85*(\o-2)}
+\draw[gray] (\mx,3.1) -- (\ox,2.25);
+\fill[orange!25,rounded corners=2pt] ({\ox-0.36},1.75) rectangle ({\ox+0.36},2.25);
+\node[font=\small] at (\ox,2.0) {O\o};
+\draw[gray] (\ox,1.75) -- ({\ox-0.18},1.0); \draw[gray] (\ox,1.75) -- ({\ox+0.18},1.0);
+\fill[green!50!black] ({\ox-0.18},0.95) circle (2.2pt); \fill[green!50!black] ({\ox+0.18},0.95) circle (2.2pt);}}
+\node[font=\small,anchor=west] at (11.0,3.42) {$\tau_i$};
+\node[font=\small,anchor=west] at (11.0,2.0) {$\beta_{j(i)}$};
+\node[font=\small,anchor=west] at (11.0,0.95) {$\varepsilon_{(ij)k}$};
+\end{tikzpicture}
+\caption{A two-stage nested design: four machines, three operators on each machine, two specimens from each operator. The twelve operators are
+twelve different people; ``O1'' under each machine is only a label.}
+\label{fig:nested}
+\end{figure}
+
+\subhead{The analysis of variance}
+The total variation splits as
+\[
+\sum_{i,j,k}(y_{ijk} - \bar y_{\cdot\cdot\cdot})^2 = bn\sum_i(\bar y_{i\cdot\cdot} - \bar y_{\cdot\cdot\cdot})^2 + n\sum_{i,j}(\bar y_{ij\cdot} - \bar y_{i\cdot\cdot})^2 + \sum_{i,j,k}(y_{ijk} - \bar y_{ij\cdot})^2 ,
+\]
+that is $SST = SS_A + SS_{B(A)} + SSE$, with $a - 1$, $a(b - 1)$ and $ab(n - 1)$ degrees of freedom; the cross products vanish as in the one-way analysis. In computing
+form, with $C = y_{\cdot\cdot\cdot}^2/(abn)$,
+\begin{gather*}
+SS_A = \frac1{bn}\sum_iy_{i\cdot\cdot}^2 - C , \qquad SS_{B(A)} = \frac1n\sum_{i,j}y_{ij\cdot}^2 - \frac1{bn}\sum_iy_{i\cdot\cdot}^2 , \\
+SSE = \sum_{i,j,k}y_{ijk}^2 - \frac1n\sum_{i,j}y_{ij\cdot}^2 .
+\end{gather*}
+Compared with a crossed analysis, $SS_{B(A)} = SS_B + SS_{AB}$: the nested sum of squares collects the variation that a factorial would split into a main
+effect and an interaction.
+
+\begin{thm}\label{thm:nested-ems}
+In the two-stage nested design,
+\begin{center}
+\begin{tabular}{l|cc}
+model & $E(MS_A)$ & $E(MS_{B(A)})$ \\
+\hline
+$A$, $B$ fixed & $\sigma^2 + \dfrac{bn\sum\tau_i^2}{a - 1}$ & $\sigma^2 + \dfrac{n\sum\sum\beta_{j(i)}^2}{a(b - 1)}$ \\[2ex]
+$A$ fixed, $B$ random & $\sigma^2 + n\sigma^2_\beta + \dfrac{bn\sum\tau_i^2}{a - 1}$ & $\sigma^2 + n\sigma^2_\beta$ \\[2ex]
+$A$, $B$ random & $\sigma^2 + n\sigma^2_\beta + bn\sigma^2_\tau$ & $\sigma^2 + n\sigma^2_\beta$
+\end{tabular}
+\end{center}
+and in every case $E(MSE) = \sigma^2$.
+In the fixed case the side conditions are $\sum_i\tau_i = 0$ and $\sum_j\beta_{j(i)} = 0$ for each $i$; random effects are independent normal with mean zero, as in
+Section~\ref{sec:random}.
+\end{thm}
+
+\begin{proof}
+Take the random case; the others are similar. Averaging the model,
+\[
+\bar y_{i\cdot\cdot} - \bar y_{\cdot\cdot\cdot} = (\tau_i - \bar\tau) + (\bar\beta_{\cdot(i)} - \bar\beta) + (\bar\varepsilon_{i\cdot\cdot} - \bar\varepsilon_{\cdot\cdot\cdot}) ,
+\]
+where $\bar\beta_{\cdot(i)}$, the mean of the $b$ effects nested in level $i$, has variance $\sigma^2_\beta/b$. The three terms are independent, so by Lemma~\ref{lem:projection}
+\[
+E(SS_A) = bn(a - 1)\Bigl(\sigma^2_\tau + \frac{\sigma^2_\beta}b + \frac{\sigma^2}{bn}\Bigr) = (a - 1)(\sigma^2 + n\sigma^2_\beta + bn\sigma^2_\tau) .
+\]
+Within level $i$, $\bar y_{ij\cdot} - \bar y_{i\cdot\cdot} = (\beta_{j(i)} - \bar\beta_{\cdot(i)}) + (\bar\varepsilon_{ij\cdot} - \bar\varepsilon_{i\cdot\cdot})$, so $E\sum_j(\bar y_{ij\cdot} - \bar y_{i\cdot\cdot})^2 = (b - 1)(\sigma^2_\beta + \sigma^2/n)$. Summing over the $a$ levels and
+multiplying by $n$ gives $E(SS_{B(A)}) = a(b - 1)(\sigma^2 + n\sigma^2_\beta)$. When $B$ is fixed, $\bar\beta_{\cdot(i)} = 0$ and the $\sigma^2_\beta$ terms are replaced by the corresponding sums of squares
+of constants.
+\end{proof}
+
+So $B(A)$ is always tested against error. $A$ is tested against error if $B$ is fixed, but against $MS_{B(A)}$ if $B$ is random. The second case is the usual one,
+and the reason is the same as in the mixed model: a new sample of operators would change the machine means by an amount of variance $\sigma^2_\beta/b$.
+
+\begin{exa}\label{exa:machines}
+The surface finish of metal parts is being studied. Four machines were selected at random. Because of where the machines stand, each is run by its
+own operators, and three operators were chosen at random for each machine; two specimens from each operator were tested:
+\begin{center}
+\begin{tabular}{c|ccc|ccc}
+& \multicolumn{3}{c|}{machine $1$} & \multicolumn{3}{c}{machine $2$} \\
+operator & $1$ & $2$ & $3$ & $1$ & $2$ & $3$ \\
+\hline
+& $79$, $62$ & $94$, $74$ & $46$, $57$ & $92$, $99$ & $85$, $79$ & $76$, $68$ \\
+total & $141$ & $168$ & $103$ & $191$ & $164$ & $144$ \\
+\hline
+\hline
+& \multicolumn{3}{c|}{machine $3$} & \multicolumn{3}{c}{machine $4$} \\
+operator & $1$ & $2$ & $3$ & $1$ & $2$ & $3$ \\
+\hline
+& $88$, $75$ & $53$, $56$ & $46$, $57$ & $36$, $53$ & $40$, $56$ & $62$, $47$ \\
+total & $163$ & $109$ & $103$ & $89$ & $96$ & $109$
+\end{tabular}
+\end{center}
+The machine totals are $412$, $499$, $375$ and $294$, with $y_{\cdot\cdot\cdot} = 1580$ and $\sum y_{ijk}^2 = 111466$. This is a two-stage nested design: operators are nested in machines,
+since each operator works on one machine only, and both factors are random. The model is
+\[
+y_{ijk} = \mu + \tau_i + \beta_{j(i)} + \varepsilon_{(ij)k} ,
+\]
+where $y_{ijk}$ is the finish of the $k$th specimen of operator $j$ on machine $i$, $\tau_i \sim N(0, \sigma^2_\tau)$ is the effect of machine $i$, $\beta_{j(i)} \sim N(0, \sigma^2_\beta)$ the effect of operator $j$ on that machine,
+and $\varepsilon_{(ij)k} \sim N(0, \sigma^2)$ the specimen error, all independent. With $C = 1580^2/24 = 104016.667$,
+\begin{align*}
+SS_{\mathrm{Machines}} &= \frac{412^2 + 499^2 + 375^2 + 294^2}6 - C = 3617.667 , \\
+SS_{\mathrm{Operators(M)}} &= \frac{141^2 + 168^2 + \dots + 109^2}2 \\
+&\qquad - \frac{412^2 + \dots + 294^2}6 = 2817.667 , \\
+SST &= 111466 - C = 7449.333 , \qquad SSE = 1014.000 .
+\end{align*}
+\begin{center}
+\begin{tabular}{l|ccccc}
+source & SS & df & MS & $E(MS)$ & $F_0$ \\
+\hline
+machines & $3617.667$ & $3$ & $1205.89$ & $\sigma^2 + 2\sigma^2_\beta + 6\sigma^2_\tau$ & $3.42$ \\
+operators (machines) & $2817.667$ & $8$ & $352.21$ & $\sigma^2 + 2\sigma^2_\beta$ & $4.17$ \\
+error & $1014.000$ & $12$ & $84.50$ & $\sigma^2$ & \\
+\hline
+total & $7449.333$ & $23$ & & &
+\end{tabular}
+\end{center}
+For operators, $H_0 : \sigma^2_\beta = 0$ gives $F_0 = 352.21/84.50 = 4.17 > F_{0.05, 8, 12} = 2.85$ ($P = 0.013$): operators on the same machine differ. For machines, $H_0 : \sigma^2_\tau = 0$ gives
+$F_0 = 1205.89/352.21 = 3.42 < F_{0.05, 3, 8} = 4.07$ ($P = 0.073$): no significant machine effect at the $5\%$ level. The variance components are
+\begin{gather*}
+\hat\sigma^2_\tau = \frac{1205.89 - 352.21}6 = 142.3 , \qquad \hat\sigma^2_\beta = \frac{352.21 - 84.50}2 = 133.9 , \\
+\hat\sigma^2 = 84.5 .
+\end{gather*}
+The estimate for machines is the largest of the three, yet it is not significant: with four machines it rests on only three degrees of freedom and is
+judged against the operator variation. The data are consistent with machines mattering as much as operators, but they cannot show it; more
+machines, not more specimens, would be needed.
+\end{exa}
+
+\subhead{Designs with more stages}
+The idea extends to any depth: batches, samples within batches, determinations within samples. In an $m$-stage nested design with all factors random,
+each mean square has expectation $\sigma^2$ plus the components of its own stage and all stages below it, each multiplied by the number of observations
+per level of that stage. The rule for expected mean squares (Result~\ref{res:ems-rule}) covers nested designs if the subscripts of a nested term include
+those in brackets: $B(A)$ has subscripts $i$ and $j$, and $C(B)$ in a three-stage design has $i$, $j$ and $k$. For example, with $a$, $b$, $c$ levels and $n$
+observations,
+\[
+E(MS_A) = \sigma^2 + n\sigma^2_\gamma + cn\sigma^2_\beta + bcn\sigma^2_\tau ,
+\]
+and each stage is tested against the stage below it.
+
+\subsection{The split-plot design}
+\begin{defn}
+A \textbf{split-plot design} has two sizes of experimental unit. The levels of one factor, the \textbf{whole-plot factor}, are randomised to large units,
+the \textbf{whole plots}. Each whole plot is then divided into \textbf{subplots}, and the levels of the second factor, the \textbf{subplot factor}, are randomised
+to the subplots within each whole plot.
+\end{defn}
+
+The design arises when one factor is hard or expensive to change, or must be applied to large areas. Irrigation must be applied to large areas of
+a field; varieties can be sown in small strips. An oven's temperature is slow to change, but several specimens can go into one oven run. Running a
+fully randomised factorial would mean resetting the hard factor for every run. The split plot accepts a cost instead: the whole-plot factor is
+compared on fewer, larger units, with a larger error, while the subplot factor and the interaction are compared within whole plots, with a smaller
+error.
+
+The commonest layout has the whole plots in $r$ complete blocks. Randomisation has two stages: the $a$ whole-plot levels are randomised to the $a$
+whole plots in each block, and the $b$ subplot levels are randomised afresh within each whole plot (Figure~\ref{fig:splitplot}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.92]
+\foreach \bx/\bl/\order in {0/1/{1,3,2},5.6/2/{2,1,3}} {
+\begin{scope}[xshift=\bx cm]
+\draw[gray!70,rounded corners] (-0.2,-0.9) rectangle (5.0,3.5);
+\node[font=\bfseries\small] at (2.4,3.15) {Block \bl};
+\end{scope}}
+% block 1 whole plots: irrigation 1,3,2 ; varieties shuffled
+\foreach \x/\col/\lab/\va/\vb/\vc in {0/blue!12/I1/V2/V1/V3,1.6/blue!45/I3/V3/V2/V1,3.2/blue!28/I2/V1/V3/V2,
+5.6/blue!28/I2/V2/V3/V1,7.2/blue!12/I1/V3/V1/V2,8.8/blue!45/I3/V1/V2/V3} {
+\fill[\col] (\x,0) rectangle ({\x+1.4},2.7);
+\draw[white,line width=1.2pt] (\x,0.9) -- ({\x+1.4},0.9); \draw[white,line width=1.2pt] (\x,1.8) -- ({\x+1.4},1.8);
+\node[font=\small] at ({\x+0.7},2.25) {\va}; \node[font=\small] at ({\x+0.7},1.35) {\vb}; \node[font=\small] at ({\x+0.7},0.45) {\vc};
+\node[font=\small\bfseries] at ({\x+0.7},-0.5) {\lab};}
+\end{tikzpicture}
+\caption{Two blocks of a split-plot experiment. Irrigation (I1--I3, shaded) is randomised to the three whole plots of each block; varieties (V1--V3)
+are randomised afresh to the three subplots of each whole plot.}
+\label{fig:splitplot}
+\end{figure}
+
+\subhead{The model}
+Let $y_{ijk}$ be the response in block $i$, whole-plot level $j$ and subplot level $k$. The model is
+\begin{gather*}
+y_{ijk} = \mu + \rho_i + \tau_j + \delta_{ij} + \beta_k + (\tau\beta)_{jk} + \varepsilon_{ijk} , \\
+i = 1, \dots, r , \quad j = 1, \dots, a , \quad k = 1, \dots, b .
+\end{gather*}
+Here $\rho_i$ is the block effect, $\tau_j$ and $\beta_k$ the fixed effects of the two factors and $(\tau\beta)_{jk}$ their interaction, with the usual side conditions. The term
+$\delta_{ij} \sim N(0, \sigma^2_\delta)$ is the \textbf{whole-plot error}, the deviation of whole plot $(i, j)$ shared by all its subplots, and $\varepsilon_{ijk} \sim N(0, \sigma^2)$ the \textbf{subplot error};
+all random terms are independent. The blocks may be fixed or random ($\rho_i \sim N(0, \sigma^2_\rho)$); the tests for the treatment factors are the same either way.
+
+The model contains two error terms because the experiment has two kinds of experimental unit. Two subplots in the same whole plot share $\delta_{ij}$,
+so their responses are correlated, with correlation $\sigma^2_\delta/(\sigma^2_\delta + \sigma^2)$.
+
+\subhead{The analysis of variance}
+The sums of squares are those of a three-factor analysis (blocks, $A$, $B$) with one observation per cell, regrouped. The whole-plot error is the
+block $\times$ $A$ interaction, and the subplot error is what is left:
+\begin{gather*}
+SS_{\mathrm{WP}} = \frac1b\sum_{i,j}y_{ij\cdot}^2 - C , \qquad E_a = SS_{\mathrm{WP}} - SS_{\mathrm{Blocks}} - SS_A , \\
+E_b = SST - SS_{\mathrm{WP}} - SS_B - SS_{AB} ,
+\end{gather*}
+where $SS_{\mathrm{WP}}$ is the sum of squares between the $ra$ whole-plot totals.
+
+\begin{thm}\label{thm:splitplot}
+In the split-plot model with random blocks, the analysis of variance is
+\begin{center}
+\begin{tabular}{l|cc}
+source & df & $E(MS)$ \\
+\hline
+blocks & $r - 1$ & $\sigma^2 + b\sigma^2_\delta + ab\sigma^2_\rho$ \\
+$A$ & $a - 1$ & $\sigma^2 + b\sigma^2_\delta + \dfrac{rb\sum\tau_j^2}{a - 1}$ \\[1.5ex]
+whole-plot error $E_a$ & $(r - 1)(a - 1)$ & $\sigma^2 + b\sigma^2_\delta$ \\
+\hline
+$B$ & $b - 1$ & $\sigma^2 + \dfrac{ra\sum\beta_k^2}{b - 1}$ \\[1.5ex]
+$AB$ & $(a - 1)(b - 1)$ & $\sigma^2 + \dfrac{r\sum\sum(\tau\beta)_{jk}^2}{(a - 1)(b - 1)}$ \\[1.5ex]
+subplot error $E_b$ & $a(r - 1)(b - 1)$ & $\sigma^2$
+\end{tabular}
+\end{center}
+So $A$ is tested against $MS_{E_a}$, and $B$ and $AB$ against $MS_{E_b}$.
+\end{thm}
+
+\begin{proof}
+The whole-plot means are $\bar y_{ij\cdot} = \mu + \rho_i + \tau_j + \delta_{ij} + \bar\varepsilon_{ij\cdot}$, since the $\beta_k$ and $(\tau\beta)_{jk}$ average to zero over $k$. This is a randomised block model for $a$
+treatments with error $\delta_{ij} + \bar\varepsilon_{ij\cdot}$ of variance $\sigma^2_\delta + \sigma^2/b$. The whole-plot part of the analysis is $b$ times the randomised block analysis of these
+means, so its expected mean squares are $b$ times those of a randomised block design with random blocks and error variance $\sigma^2_\delta + \sigma^2/b$, which gives the first
+three lines.
+
+Within whole plots, $y_{ijk} - \bar y_{ij\cdot} = (\beta_k + (\tau\beta)_{jk}) + (\varepsilon_{ijk} - \bar\varepsilon_{ij\cdot})$: the block, the whole-plot level and $\delta_{ij}$ all cancel. The subplot part of the
+analysis is therefore a function of the constants $\beta_k$, $(\tau\beta)_{jk}$ and of the $\varepsilon$'s alone, and its expected mean squares are those of a fixed effects analysis with
+error variance $\sigma^2$.
+\end{proof}
+
+The proof shows the whole design in two lines. The whole-plot factor is compared using whole-plot means, whose error includes $\delta_{ij}$, while
+everything measured within a whole plot is free of $\delta_{ij}$. Since usually $\sigma^2_\delta > 0$, the subplot comparisons are the more precise.
+
+\subhead{Standard errors of comparisons}
+Four kinds of comparison arise, with different variances. With $\bar y_{\cdot jk}$ the mean of treatment combination $(j, k)$ over blocks:
+\begin{center}
+\begin{tabular}{l|c|c}
+difference between & variance & estimate \\
+\hline
+two $A$ means, $\bar y_{\cdot j\cdot} - \bar y_{\cdot j'\cdot}$ & $2(\sigma^2 + b\sigma^2_\delta)/(rb)$ & $2MS_{E_a}/(rb)$ \\
+two $B$ means, $\bar y_{\cdot\cdot k} - \bar y_{\cdot\cdot k'}$ & $2\sigma^2/(ra)$ & $2MS_{E_b}/(ra)$ \\
+two $B$ levels at one $A$ level & $2\sigma^2/r$ & $2MS_{E_b}/r$ \\
+two $A$ levels at one $B$ level & $2(\sigma^2 + \sigma^2_\delta)/r$ & $2[(b - 1)MS_{E_b} + MS_{E_a}]/(rb)$
+\end{tabular}
+\end{center}
+The first three follow from the model as before; for instance in $\bar y_{\cdot jk} - \bar y_{\cdot jk'}$ the $\delta_{ij}$ cancel, leaving only subplot errors. In the fourth,
+$\bar y_{\cdot jk} - \bar y_{\cdot j'k}$ contains $\bar\delta_{\cdot j} - \bar\delta_{\cdot j'}$ as well as $\bar\varepsilon_{\cdot jk} - \bar\varepsilon_{\cdot j'k}$, so its variance is $2(\sigma^2_\delta + \sigma^2)/r$. No single mean square estimates $\sigma^2 + \sigma^2_\delta$, but
+\[
+\frac{(b - 1)MS_{E_b} + MS_{E_a}}b
+\]
+does, because $\sigma^2_\delta$ has the estimate $(MS_{E_a} - MS_{E_b})/b$. Its degrees of freedom come from Satterthwaite's formula
+(Proposition~\ref{prop:satterthwaite}).
+
+\begin{exa}\label{exa:irrigation}
+Three irrigation schedules (I1 none, I2 moderate, I3 full) and three wheat varieties (V1, V2, V3) were compared in four blocks. In each block, the
+schedules were randomised to three whole plots, and the varieties to three subplots in each whole plot. Yields (t/ha), with whole-plot totals:
+\begin{center}
+\begin{tabular}{cc|ccc|c}
+block & irrigation & V1 & V2 & V3 & total \\
+\hline
+$1$ & I1 & $5.5$ & $5.9$ & $5.8$ & $17.2$ \\
+& I2 & $6.4$ & $7.2$ & $6.9$ & $20.5$ \\
+& I3 & $6.3$ & $7.2$ & $6.3$ & $19.8$ \\
+\hline
+$2$ & I1 & $4.2$ & $5.0$ & $4.3$ & $13.5$ \\
+& I2 & $4.8$ & $5.8$ & $4.9$ & $15.5$ \\
+& I3 & $6.6$ & $8.0$ & $6.9$ & $21.5$ \\
+\hline
+$3$ & I1 & $5.2$ & $5.8$ & $4.9$ & $15.9$ \\
+& I2 & $6.1$ & $6.5$ & $5.8$ & $18.4$ \\
+& I3 & $6.4$ & $7.6$ & $6.3$ & $20.3$ \\
+\hline
+$4$ & I1 & $4.4$ & $5.1$ & $4.8$ & $14.3$ \\
+& I2 & $5.6$ & $6.3$ & $5.6$ & $17.5$ \\
+& I3 & $6.2$ & $7.1$ & $5.9$ & $19.2$
+\end{tabular}
+\end{center}
+The totals are: blocks $57.5$, $50.5$, $54.6$, $51.0$; irrigation $60.9$, $71.9$, $80.8$; varieties $67.7$, $77.5$, $68.4$; grand total $213.6$, with $\sum y^2 = 1298.00$, so
+$C = 213.6^2/36 = 1267.36$. Then
+\begin{gather*}
+SST = 30.640 , \qquad SS_{\mathrm{Blocks}} = 3.602 , \qquad SS_I = 16.562 , \\
+SS_{\mathrm{WP}} = \frac{17.2^2 + 20.5^2 + \dots + 19.2^2}3 - C = 24.547 , \\
+E_a = 24.547 - 3.602 - 16.562 = 4.383 , \\
+SS_V = 4.982 , \qquad SS_{IV} = 0.467 , \\
+E_b = 30.640 - 24.547 - 4.982 - 0.467 = 0.645 .
+\end{gather*}
+\begin{center}
+\begin{tabular}{l|cccc}
+source & SS & df & MS & $F_0$ \\
+\hline
+blocks & $3.602$ & $3$ & $1.201$ & $1.64$ \\
+irrigation & $16.562$ & $2$ & $8.281$ & $11.34$ \\
+whole-plot error & $4.383$ & $6$ & $0.7305$ & \\
+\hline
+varieties & $4.982$ & $2$ & $2.491$ & $69.5$ \\
+irrigation $\times$ varieties & $0.467$ & $4$ & $0.1167$ & $3.26$ \\
+subplot error & $0.645$ & $18$ & $0.0358$ & \\
+\hline
+total & $30.640$ & $35$ & &
+\end{tabular}
+\end{center}
+Irrigation is significant against the whole-plot error ($F_{0.05, 2, 6} = 5.14$, $P = 0.009$). Varieties ($F_{0.05, 2, 18} = 3.55$, $P < 0.0001$) and the interaction ($F_{0.05, 4, 18} = 2.93$, $P = 0.036$) are
+significant against the subplot error. The whole-plot error mean square is $20$ times the subplot one, and $\hat\sigma^2_\delta = (0.7305 - 0.0358)/3 = 0.232$ against $\hat\sigma^2 = 0.036$:
+whole plots vary much more than subplots within them.
+
+The means are
+\begin{center}
+\begin{tabular}{c|ccc|c}
+& V1 & V2 & V3 & mean \\
+\hline
+I1 & $4.83$ & $5.45$ & $4.95$ & $5.08$ \\
+I2 & $5.73$ & $6.45$ & $5.80$ & $5.99$ \\
+I3 & $6.38$ & $7.48$ & $6.35$ & $6.73$ \\
+\hline
+mean & $5.64$ & $6.46$ & $5.70$ & $5.93$
+\end{tabular}
+\end{center}
+and the standard errors of a difference are $\sqrt{2(0.7305)/12} = 0.349$ for two irrigation means, $\sqrt{2(0.0358)/12} = 0.077$ for two variety means, $\sqrt{2(0.0358)/4} = 0.134$ for
+two varieties under the same irrigation, and $\sqrt{2[2(0.0358) + 0.7305]/12} = 0.366$ for two irrigation levels with the same variety. V2 is the best variety under every
+schedule, and its advantage grows with water ($0.6$, $0.7$, $1.1$ t/ha over V1): that is the interaction.
+
+Had the data been analysed as a randomised block design with nine treatments, the two errors would have been pooled into one mean square,
+$(4.383 + 0.645)/24 = 0.209$, and irrigation would have had $F_0 = 8.281/0.209 = 39.5$ on $24$ degrees of freedom. That overstates the evidence about irrigation, which has
+only $(r - 1)(a - 1) = 6$ degrees of freedom of genuine replication, and understates the precision of the variety comparisons.
+\end{exa}
+
+\begin{remark}
+Variants of the design follow the same logic. The whole plots may be in a completely randomised design rather than in blocks; the whole-plot error
+is then the variation between whole plots treated alike. A \textbf{split-split-plot} divides the subplots again, adding a third error. In a
+\textbf{strip-plot} the second factor is also applied in strips, across the blocks at right angles to the first, and there are three errors: one
+for each factor and one for the interaction.
+\end{remark}
+
+\subsection{Split plots with random factors}
+When some factors are random, the expected mean squares come from the rule of Result~\ref{res:ems-rule}. The block becomes an ordinary random factor,
+and the whole-plot error is its interaction with the whole-plot factor. If there is one observation per cell, the highest-order interaction is the
+residual, and it is assumed negligible in what follows.
+
+\begin{exa}\label{exa:sugarbeet}
+A study was made of the effect of inoculation on the root yield of sugar beet planted at different in-row spacings. At each of three locations,
+one of two equal plots was chosen at random to be inoculated. Each plot was divided into four subplots, and the spacings $4$, $6$, $12$ and $18$ cm were
+randomised to them. Inoculation is a fixed factor, and location and spacing are to be treated as random. The yields were
+\begin{center}
+\begin{tabular}{cc|cccc|c}
+location & inoculated & $4$ & $6$ & $12$ & $18$ & total \\
+\hline
+$1$ & yes & $17$ & $17$ & $16$ & $13$ & $63$ \\
+& no & $20$ & $20$ & $22$ & $20$ & $82$ \\
+$2$ & yes & $16$ & $17$ & $15$ & $12$ & $60$ \\
+& no & $18$ & $20$ & $21$ & $19$ & $78$ \\
+$3$ & yes & $17$ & $19$ & $17$ & $13$ & $66$ \\
+& no & $18$ & $21$ & $19$ & $19$ & $77$ \\
+\hline
+total & & $106$ & $114$ & $110$ & $96$ & $426$
+\end{tabular}
+\end{center}
+\emph{Design.} This is a split-plot design with locations as blocks: inoculation is the whole-plot factor, randomised to the two plots at each location,
+and spacing the subplot factor, randomised to the four subplots of each plot.
+
+\emph{Model.} With $i$ for location ($3$ levels, random), $j$ for inoculation ($2$, fixed) and $k$ for spacing ($4$, random),
+\[
+y_{ijk} = \mu + L_i + \tau_j + (L\tau)_{ij} + S_k + (LS)_{ik} + (\tau S)_{jk} + \varepsilon_{ijk} ,
+\]
+where $L_i \sim N(0, \sigma^2_L)$, $S_k \sim N(0, \sigma^2_S)$, the interactions are normal with variances $\sigma^2_{L\tau}$, $\sigma^2_{LS}$, $\sigma^2_{\tau S}$ (those with $\tau$ restricted to sum to zero over $j$),
+$\sum_j\tau_j = 0$, and $\varepsilon_{ijk} \sim N(0, \sigma^2)$ is the residual, which also contains the negligible three-factor interaction. $(L\tau)_{ij}$ is the whole-plot error.
+
+\emph{Expected mean squares.} By the restricted rule, with $Q_\tau = \sum_j\tau_j^2$,
+\begin{align*}
+E(MS_L) &= \sigma^2 + 2\sigma^2_{LS} + 8\sigma^2_L , \\
+E(MS_\tau) &= \sigma^2 + 4\sigma^2_{L\tau} + 3\sigma^2_{\tau S} + 12Q_\tau , \\
+E(MS_{L\tau}) &= \sigma^2 + 4\sigma^2_{L\tau} , \\
+E(MS_S) &= \sigma^2 + 2\sigma^2_{LS} + 6\sigma^2_S , \\
+E(MS_{LS}) &= \sigma^2 + 2\sigma^2_{LS} , \\
+E(MS_{\tau S}) &= \sigma^2 + 3\sigma^2_{\tau S} .
+\end{align*}
+For instance $(L\tau)$ does not enter $E(MS_L)$, because its extra subscript $j$ belongs to a fixed factor, but $(LS)$ does, with coefficient $2$, the number of
+levels of $j$.
+
+\emph{Analysis.} With $C = 426^2/24 = 7561.5$ and $\sum y^2 = 7722$,
+\begin{align*}
+SS_L &= \frac{145^2 + 138^2 + 143^2}8 - C = 3.25 , \\
+SS_\tau &= \frac{189^2 + 237^2}{12} - C = 96.0 , \\
+SS_S &= \frac{106^2 + 114^2 + 110^2 + 96^2}6 - C = 29.83 ,
+\end{align*}
+and with the given $SS_{L\tau} = 4.75$, $SS_{LS} = 4.417$, $SS_{\tau S} = 20$, $SS_E = 2.25$ and $SST = 160.5$:
+\begin{center}
+\begin{tabular}{l|cccc}
+source & SS & df & MS & $F_0$ \\
+\hline
+location & $3.25$ & $2$ & $1.625$ & $1.625/0.736 = 2.21$ \\
+inoculation & $96.00$ & $1$ & $96.000$ & see below \\
+location $\times$ inoculation & $4.75$ & $2$ & $2.375$ & $2.375/0.375 = 6.33$ \\
+spacing & $29.83$ & $3$ & $9.944$ & $9.944/0.736 = 13.51$ \\
+location $\times$ spacing & $4.42$ & $6$ & $0.736$ & $0.736/0.375 = 1.96$ \\
+inoculation $\times$ spacing & $20.00$ & $3$ & $6.667$ & $6.667/0.375 = 17.78$ \\
+residual & $2.25$ & $6$ & $0.375$ & \\
+\hline
+total & $160.50$ & $23$ & &
+\end{tabular}
+\end{center}
+Locations and spacings are tested against location $\times$ spacing. For locations, $F_0 = 2.21 < F_{0.05, 2, 6} = 5.14$: no significant variation between locations. For
+spacings, $F_0 = 13.51 > F_{0.05, 3, 6} = 4.76$ ($P = 0.004$): spacing matters. The inoculation $\times$ spacing interaction is also large ($P = 0.002$): the totals for inoculated
+plots are $50$, $53$, $48$, $38$ across the spacings, and for uninoculated plots $56$, $61$, $62$, $58$, so the loss of yield from inoculation grows with the spacing, from $6$ at $4$ cm to $20$ at $18$ cm (totals over the three locations).
+
+No mean square has the expectation $\sigma^2 + 4\sigma^2_{L\tau} + 3\sigma^2_{\tau S}$ needed to test inoculation, so a quasi-$F$ test is required:
+\begin{align*}
+F_0 &= \frac{MS_\tau}{MS_{L\tau} + MS_{\tau S} - MS_E} \\
+&= \frac{96.0}{2.375 + 6.667 - 0.375} = \frac{96.0}{8.667} = 11.08 ,
+\end{align*}
+with $\hat\nu = 8.667^2/(2.375^2/2 + 6.667^2/3 + 0.375^2/6) = 4.25$ denominator degrees of freedom. Since $F_{0.05, 1, 4.25} = 7.36$ ($P = 0.027$), inoculation has a significant
+effect: on average it lowered yield from $19.75$ to $15.75$.
+\end{exa}
+
+\begin{remark}
+The spacings $4$, $6$, $12$ and $18$ cm look chosen rather than sampled, and treating spacing as \emph{fixed} would be more natural. The rule then drops $3\sigma^2_{\tau S}$ from
+$E(MS_\tau)$ and $2\sigma^2_{LS}$ from $E(MS_L)$, and inoculation has the exact test $MS_\tau/MS_{L\tau}$ against its whole-plot error, the standard split-plot analysis
+(Problem~\ref{prob:beet-fixed}). The choice between fixed and random is part of the model, and it changes the tests.
+\end{remark}
+
+\subsection{Practice problems}
+
+\begin{problem}
+Suppose the four machines of Example~\ref{exa:machines} are the only machines in the factory, while the operators are still a random sample. What changes
+in the model, the tests and the conclusions? Estimate the machine effects.
+\end{problem}
+
+\begin{solution}
+Machines become fixed, with $\sum\tau_i = 0$, and operators (nested, random) give the middle column of Theorem~\ref{thm:nested-ems}:
+\[
+E(MS_{\mathrm{Machines}}) = \sigma^2 + 2\sigma^2_\beta + \frac{6\sum\tau_i^2}3 .
+\]
+The tests are numerically unchanged: machines against operators ($F_0 = 3.42$, $P = 0.073$) and operators against error ($F_0 = 4.17$). But the machine hypothesis
+is now $\tau_1 = \dots = \tau_4 = 0$, about these four machines, and instead of $\sigma^2_\tau$ one estimates the effects $\hat\tau_i = \bar y_{i\cdot\cdot} - \bar y_{\cdot\cdot\cdot}$:
+\[
+\hat\tau_1 = 68.67 - 65.83 = 2.83 , \quad \hat\tau_2 = 17.33 , \quad \hat\tau_3 = -3.33 , \quad \hat\tau_4 = -16.83 .
+\]
+\end{solution}
+
+\begin{problem}
+In a study of a chemical's purity, five batches were chosen at random, two samples were taken from each batch, and two determinations were made
+on each sample. The mean squares were $24.0$ for batches, $6.2$ for samples within batches and $1.4$ for determinations. Write down the model and the
+expected mean squares, test the two hypotheses, and estimate the variance components.
+\end{problem}
+
+\begin{solution}
+The design is nested, with samples within batches and determinations within samples. The model is
+\[
+y_{ijk} = \mu + \tau_i + \beta_{j(i)} + \varepsilon_{(ij)k} ,
+\]
+with batches $\tau_i \sim N(0, \sigma^2_\tau)$, samples $\beta_{j(i)} \sim N(0, \sigma^2_\beta)$ and determination errors $\varepsilon \sim N(0, \sigma^2)$;
+$a = 5$, $b = 2$, $n = 2$, and the degrees of freedom are $4$, $5$ and $10$. The expected mean squares are $\sigma^2 + 2\sigma^2_\beta + 4\sigma^2_\tau$, $\sigma^2 + 2\sigma^2_\beta$ and $\sigma^2$.
+
+Samples: $F_0 = 6.2/1.4 = 4.43 > F_{0.05, 5, 10} = 3.33$ ($P = 0.022$), significant. Batches: $F_0 = 24.0/6.2 = 3.87 < F_{0.05, 4, 5} = 5.19$ ($P = 0.085$), not significant. The estimates are
+\[
+\hat\sigma^2 = 1.4 , \qquad \hat\sigma^2_\beta = \frac{6.2 - 1.4}2 = 2.4 , \qquad \hat\sigma^2_\tau = \frac{24.0 - 6.2}4 = 4.45 .
+\]
+As with the machines, the largest component is not significant, because only five batches were sampled.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{exa:irrigation}, test whether V2 outyields V1 under full irrigation, and whether full irrigation outyields none for variety V2, each with
+a $t$ test at the $5\%$ level.
+\end{problem}
+
+\begin{solution}
+V2 against V1 under I3 is a comparison of subplot levels at one whole-plot level: the difference is $7.475 - 6.375 = 1.10$ with standard error $0.134$ on $18$
+degrees of freedom, so $t = 8.2$, far beyond $t_{0.025, 18} = 2.10$.
+
+I3 against I1 for V2 compares whole-plot levels at one subplot level: the difference is $7.475 - 5.45 = 2.03$ with standard error $0.366$. The degrees of
+freedom are
+\[
+\hat\nu = \frac{\bigl(2(0.0358) + 0.7305\bigr)^2}{\bigl(2(0.0358)\bigr)^2/18 + 0.7305^2/6} = 7.2 ,
+\]
+and $t = 5.5 > t_{0.025, 7.2} = 2.35$. Both differences are significant, but the second, three times the size of its standard error rather than eight, is
+judged against the much larger whole-plot variation.
+\end{solution}
+
+\begin{problem}\label{prob:beet-fixed}
+Reanalyse Example~\ref{exa:sugarbeet} with spacing fixed.
+\end{problem}
+
+\begin{solution}
+With location random and inoculation and spacing fixed, the restricted rule gives
+\begin{align*}
+E(MS_L) &= \sigma^2 + 8\sigma^2_L , & E(MS_S) &= \sigma^2 + 2\sigma^2_{LS} + 6Q_S , \\
+E(MS_\tau) &= \sigma^2 + 4\sigma^2_{L\tau} + 12Q_\tau , & E(MS_{LS}) &= \sigma^2 + 2\sigma^2_{LS} , \\
+E(MS_{L\tau}) &= \sigma^2 + 4\sigma^2_{L\tau} , & E(MS_{\tau S}) &= \sigma^2 + 3Q_{\tau S} .
+\end{align*}
+Inoculation now has an exact test against its whole-plot error: $F_0 = 96.0/2.375 = 40.4 > F_{0.05, 1, 2} = 18.51$ ($P = 0.024$). Spacing is still tested against location $\times$ spacing
+($F_0 = 13.51$), and inoculation $\times$ spacing against the residual ($F_0 = 17.78$). Location is tested against the residual: $F_0 = 1.625/0.375 = 4.33 < F_{0.05, 2, 6} = 5.14$. The
+conclusions are the same, but the inoculation test has only $2$ denominator degrees of freedom, a reminder that three locations give little
+replication of the whole-plot factor.
+\end{solution}
+
+\begin{problem}
+An experiment studies the effect of temperature and heat-treatment time on the strength of steel. Two temperatures and three times are used. The
+oven is heated to one temperature and three specimens are inserted; one is removed after $10$ minutes, one after $20$ and one after $30$. The
+temperature is then changed to the other level and the process repeated. The whole experiment was run in four shifts. Shift and temperature are
+random factors and time is fixed, and the three-factor interaction is assumed negligible.
+\begin{enumerate}[label=(\alph*)]
+\item What design is this?
+\item Write down the model and find the expected mean squares.
+\item The analysis gave $SS = 240.458$ for shift $\times$ temperature, $478.417$ for shift $\times$ time, $795.250$ for temperature $\times$ time, $244.417$ for error and $4403.625$
+in total. Give the degrees of freedom and test the interactions. How would the main effects be tested?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) A split-plot design in blocks. Each shift is a block. Within a shift, the oven run at one temperature is a whole plot, so temperature is the
+whole-plot factor; the three specimens in a run are the subplots, and time is the subplot factor. Temperature is changed only once per shift.
+
+(b) With $i$ for shift ($4$, random), $j$ for temperature ($2$, random) and $k$ for time ($3$, fixed),
+\[
+y_{ijk} = \mu + S_i + T_j + (ST)_{ij} + \gamma_k + (S\gamma)_{ik} + (T\gamma)_{jk} + \varepsilon_{ijk} ,
+\]
+with $S_i$, $T_j$, $(ST)_{ij}$, $(S\gamma)_{ik}$, $(T\gamma)_{jk}$ normal with mean zero and variances $\sigma^2_S, \dots, \sigma^2_{T\gamma}$ (those involving time restricted to sum to zero over $k$), $\sum_k\gamma_k = 0$, and
+$\varepsilon_{ijk} \sim N(0, \sigma^2)$, all independent. $(ST)_{ij}$ is the whole-plot error. By the restricted rule, with $Q_\gamma = \sum_k\gamma_k^2/2$,
+\begin{align*}
+E(MS_S) &= \sigma^2 + 3\sigma^2_{ST} + 6\sigma^2_S , & E(MS_T) &= \sigma^2 + 3\sigma^2_{ST} + 12\sigma^2_T , \\
+E(MS_{ST}) &= \sigma^2 + 3\sigma^2_{ST} , & E(MS_\gamma) &= \sigma^2 + 2\sigma^2_{S\gamma} + 4\sigma^2_{T\gamma} + 8Q_\gamma , \\
+E(MS_{S\gamma}) &= \sigma^2 + 2\sigma^2_{S\gamma} , & E(MS_{T\gamma}) &= \sigma^2 + 4\sigma^2_{T\gamma} ,
+\end{align*}
+and $E(MSE) = \sigma^2$.
+
+(c) The degrees of freedom are $3$ (shift), $1$ (temperature), $3$ (shift $\times$ temperature), $2$ (time), $6$ (shift $\times$ time), $2$ (temperature $\times$ time) and $6$
+(error), $23$ in all. With $MSE = 244.417/6 = 40.74$:
+\begin{itemize}
+\item shift $\times$ temperature: $MS = 80.15$, $F_0 = 1.97 < F_{0.05, 3, 6} = 4.76$;
+\item shift $\times$ time: $MS = 79.74$, $F_0 = 1.96 < F_{0.05, 6, 6} = 4.28$;
+\item temperature $\times$ time: $MS = 397.63$, $F_0 = 9.76 > F_{0.05, 2, 6} = 5.14$ ($P = 0.013$).
+\end{itemize}
+The effect of time depends on the temperature. The remaining $2645.083$ is the total of the three main-effect sums of squares, which the
+information given does not separate. Shift and temperature are tested against shift $\times$ temperature, and time needs a quasi-$F$ test,
+\[
+F_0 = \frac{MS_\gamma}{MS_{S\gamma} + MS_{T\gamma} - MSE} ,
+\]
+since no single mean square has expectation $\sigma^2 + 2\sigma^2_{S\gamma} + 4\sigma^2_{T\gamma}$.
 \end{solution}
 
 \section*{References}
