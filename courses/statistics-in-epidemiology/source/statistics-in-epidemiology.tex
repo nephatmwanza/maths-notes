@@ -3183,7 +3183,7 @@ from non-collapsibility alone (Example~\ref{exa:noncollapse}).
 \end{enumerate}
 
 Stratification runs out of data quickly. With several confounders, each with several levels, the strata multiply and most contain few
-people; the summary estimators of the next section cope with many small strata, and regression models
+people; the summary estimators of the next section cope with many small strata, and regression models (Section~\ref{sec:regression})
 cope with many confounders at once.
 
 \subsection{Problems}
@@ -3790,6 +3790,243 @@ e_0 &= \frac{1 - e^{-0.12}}{0.002} + 0.887 \times \frac{1 - e^{-0.4}}{0.02} + 0.
 years. The answer depends only on the death rates, not on how many people of each age the population contains.
 \end{solution}
 
+\section{Adjustment by regression}
+\label{sec:regression}
+
+Stratification controls confounding by comparing like with like, but it runs out of data. With five confounders of three levels each
+there are $243$ strata, most of them nearly empty, and continuous confounders such as age must be cut into bands that leave residual
+confounding within them. Regression models solve both problems by assuming a form for how risk depends on the confounders, which lets
+information be shared across strata. The two models of this section, logistic regression for risks and odds and Poisson regression for
+rates, are the model-based counterparts of the Mantel--Haenszel odds ratio and rate ratio.
+
+\subsection{Logistic regression}
+
+\begin{defn}
+In the \textbf{logistic regression} model, the probability of disease for a person with exposure $E$ and covariates $C_1, \dots, C_p$ satisfies
+\begin{align*}
+\operatorname{logit} P(D = 1 \mid E, C) &= \log\frac{P(D = 1 \mid E, C)}{P(D = 0 \mid E, C)} \\
+&= \alpha + \beta E + \gamma_1 C_1 + \cdots + \gamma_p C_p .
+\end{align*}
+\end{defn}
+
+\begin{prop}
+\label{prop:logitor}
+In the logistic model, $e^\beta$ is the odds ratio for $E = 1$ against $E = 0$ at any fixed value of the covariates. More generally, $e^{\beta\Delta}$ is the odds ratio for
+a difference $\Delta$ in a continuous $E$.
+\end{prop}
+
+\begin{proof}
+The log odds at $E = e + \Delta$ and $E = e$, with $C$ fixed, differ by $\beta\Delta$, since every other term is the same. The log of the odds ratio is this difference.
+\end{proof}
+
+So the model asserts that the odds ratio is the same in every stratum of the covariates: it is the homogeneity assumption of
+Section~\ref{sec:pooling}, together with an assumption about how the baseline odds vary with $C$. If $C$ is a set of indicators for strata,
+the second assumption is vacuous and the model is exactly the ``common odds ratio'' model that the Mantel--Haenszel estimator addresses.
+Effect modification is modelled by adding product terms such as $\delta\,E C_1$, which make the odds ratio $e^{\beta + \delta C_1}$ depend on $C_1$.
+
+\subhead{Maximum likelihood}
+
+For individuals $i = 1, \dots, n$ with outcomes $y_i \in \{0, 1\}$, covariate vectors $x_i$ (including a leading $1$ and $E$) and $p_i = 1/(1 + e^{-x_i^\top\theta})$, the
+log-likelihood is $\ell(\theta) = \sum_i \{y_i x_i^\top\theta - \log(1 + e^{x_i^\top\theta})\}$, and setting its derivative to zero gives the \textbf{score equations}
+\[
+\sum_i (y_i - p_i)\,x_i = 0 .
+\]
+The log-likelihood is concave, so the solution, when it exists, is unique; it is found by Newton--Raphson (iteratively reweighted least
+squares). The inverse of the information matrix $\sum_i p_i(1 - p_i)x_i x_i^\top$ estimates the variance of $\hat\theta$, giving Wald intervals $\hat\beta \pm 1.96\,\text{SE}$
+for the log odds ratio. Hypotheses are better tested by the \textbf{likelihood ratio} statistic, twice the difference in maximised
+log-likelihoods of nested models, approximately $\chi^2$ with degrees of freedom equal to the number of parameters removed.
+
+The score equation for each indicator variable says that the fitted number of cases with that characteristic equals the observed
+number. With a stratum indicator, observed and fitted cases agree in every stratum; with the exposure, the fitted number of exposed
+cases equals the observed. These are the same balancing conditions that underlie the Mantel--Haenszel test.
+
+\begin{exa}
+\label{exa:logistic}
+Fitting the logistic model with exposure and indicators for the age groups $45$--$59$ and $60+$ to the data of Example~\ref{exa:strata} gives
+\[
+\operatorname{logit} p = -2.086 + 0.740\,E + 0.683\,A_2 + 1.531\,A_3 ,
+\]
+with $\text{SE}(\hat\beta) = 0.182$. The age-adjusted odds ratio is $e^{0.740} = 2.10$, with interval $(1.47,\ 2.99)$, against the Mantel--Haenszel $2.11$ and the crude
+$3.37$. The likelihood ratio test for $E$ (comparing with the model without it) gives $16.2$ on $1$ degree of freedom. The residual deviance,
+$0.50$ on $2$ degrees of freedom, is the likelihood ratio test of the model against the saturated model, which adds the two exposure-by-age
+product terms: there is no evidence of effect modification, as the Woolf and Breslow--Day tests also found. The fitted number of exposed
+cases is $103$, exactly the observed number.
+\end{exa}
+
+\subsection{Logistic regression for case-control data}
+
+The logistic model is written for the probability of disease given exposure, a ``prospective'' quantity, yet a case-control study
+samples on disease. It is a remarkable fact that the model can be fitted to case-control data as if they were prospective.
+
+\begin{thm}[Prentice and Pyke]
+\label{thm:prentice}
+Suppose that in the source population $\operatorname{logit} P(D = 1 \mid x) = \alpha + \beta^\top x$, and that cases are sampled with probability $f_1$ and non-cases with probability
+$f_0$, independently of $x$. Then among sampled people
+\[
+\operatorname{logit} P(D = 1 \mid x,\ \text{sampled}) = \alpha^* + \beta^\top x, \qquad \alpha^* = \alpha + \log(f_1/f_0) .
+\]
+The coefficients $\beta$, and hence all odds ratios, are unchanged; only the intercept is shifted.
+\end{thm}
+
+\begin{proof}
+Write $S$ for the event of being sampled. By Bayes' theorem,
+\[
+\frac{P(D = 1 \mid x, S)}{P(D = 0 \mid x, S)} = \frac{P(S \mid D = 1, x)\,P(D = 1 \mid x)}{P(S \mid D = 0, x)\,P(D = 0 \mid x)} = \frac{f_1}{f_0}\,e^{\alpha + \beta^\top x} ,
+\]
+since sampling depends on disease status only. Taking logs gives the result.
+\end{proof}
+
+So ordinary logistic regression applied to case-control data estimates the population odds ratios correctly, with standard errors
+that are also valid (Prentice and Pyke, 1979, showed that the prospective likelihood gives the correct asymptotic variances). The
+intercept, which carries the baseline risk, cannot be interpreted unless the sampling fractions are known. This extends
+Theorem~\ref{thm:orinv} from one binary exposure to any number of covariates.
+
+\subsection{Conditional logistic regression for matched data}
+
+In a matched study each matched set has its own baseline odds, a separate intercept $\alpha_s$. There are as many intercepts as sets, so
+ordinary maximum likelihood fails: with matched pairs it estimates $\psi^2$ instead of $\psi$, as noted in Section~\ref{sec:mh}. The cure is to
+condition on the number of cases in each set, which eliminates $\alpha_s$.
+
+\begin{prop}
+\label{prop:clogit}
+In a matched set of one case and $M$ controls with covariates $x_0$ (the case) and $x_1, \dots, x_M$, given that exactly one member is a case, the
+probability that it is the one observed is
+\[
+\frac{e^{\beta^\top x_0}}{\sum_{j=0}^{M} e^{\beta^\top x_j}} ,
+\]
+which does not depend on the set's intercept $\alpha_s$.
+\end{prop}
+
+\begin{proof}
+Under the logistic model with intercept $\alpha_s$, the probability that member $j$ is the only case is proportional to
+$e^{\alpha_s + \beta^\top x_j}\prod_{l}\{1 + e^{\alpha_s + \beta^\top x_l}\}^{-1}$: the product over all members of the probability of each one's status, where $j$ contributes its odds of being a case
+times its probability of not being one. The product and the factor $e^{\alpha_s}$ are common to every $j$, and cancel in the ratio of the probability for
+$j = 0$ to the sum over $j$.
+\end{proof}
+
+The \textbf{conditional likelihood} is the product of these terms over sets, maximised over $\beta$. For matched pairs with a binary exposure it
+reduces to the binomial likelihood of Theorem~\ref{thm:pairs}: concordant pairs give $\tfrac12$ whatever $\beta$ is, and discordant pairs give
+$\psi/(1 + \psi)$ or $1/(1 + \psi)$. Conditional logistic regression is to the matched study what the Mantel--Haenszel estimator is to the stratified
+one, with the advantage that it handles several exposures and continuous covariates.
+
+\subsection{Poisson regression for rates}
+
+\begin{defn}
+In the \textbf{Poisson regression} model for grouped follow-up data, cell $j$ (a combination of exposure, age band and period) has $D_j$
+events in $T_j$ person-years, with $D_j \sim \text{Poisson}(\lambda_j T_j)$ independently and
+\[
+\log\lambda_j = x_j^\top\theta, \qquad\text{equivalently}\qquad \log E(D_j) = \log T_j + x_j^\top\theta .
+\]
+The known term $\log T_j$ is called the \textbf{offset}.
+\end{defn}
+
+As in the logistic model, $e^\beta$ for the exposure is the rate ratio at fixed values of the other covariates. The model with indicators for
+age bands and exposure is the ``common rate ratio'' model of Section~\ref{sec:mhrate}. Theorem~\ref{thm:poissonlik} justifies treating
+counts of events over person-time as Poisson even though each person's follow-up was random: the likelihood is the same.
+
+\begin{prop}
+\label{prop:poisscore}
+The score equations of the Poisson model are $\sum_j (D_j - T_j\hat\lambda_j)x_j = 0$. For any indicator variable in the model, the fitted number of events
+among the cells it indicates equals the observed number.
+\end{prop}
+
+\begin{proof}
+The log-likelihood is $\sum_j \{D_j x_j^\top\theta - T_j e^{x_j^\top\theta}\}$ plus a constant. Its gradient is $\sum_j (D_j - T_j e^{x_j^\top\theta})x_j$. The component for an indicator $x_{jk} \in \{0, 1\}$ is
+$\sum_{j: x_{jk} = 1}(D_j - T_j\hat\lambda_j) = 0$.
+\end{proof}
+
+With age indicators and the exposure in the model, the fitted deaths among the exposed equal the observed deaths. The rate ratio is
+therefore the factor by which the unexposed age-specific rates must be multiplied to make the expected deaths among the exposed equal the
+observed ones, an \emph{internal} SMR with the rates estimated jointly.
+
+\begin{exa}
+\label{exa:poisson}
+For the British doctors' data of Example~\ref{exa:doctors}, the Poisson model with five age bands and smoking gives $\hat\beta = 0.355$ with
+$\text{SE} = 0.107$, a rate ratio of $1.43$ with interval $(1.15,\ 1.76)$, almost identical to the Mantel--Haenszel estimate. The fitted number of deaths among
+smokers is $630$, the observed number. But the residual deviance is $12.1$ on $4$ degrees of freedom ($P = 0.016$): the model of a common rate
+ratio does not fit. Adding a term for smoking times age band (coded $0$ to $4$) gives
+\[
+\log\lambda = \text{age effects} + 1.136\,E - 0.309\,E \times \text{band} ,
+\]
+with $\text{SE} = 0.097$ for the product term. The likelihood ratio statistic for it is $10.6$ on $1$ degree of freedom, and the residual deviance falls to $1.5$
+on $3$. The fitted rate ratio is $e^{1.136} = 3.1$ at ages $35$--$44$ and falls by a factor of $e^{-0.309} = 0.73$ per decade, to $0.91$ at $75$--$84$. The model describes
+the effect modification found in Section~\ref{sec:mh} with two parameters instead of five.
+\end{exa}
+
+\subsection{Using models well}
+
+\begin{itemize}
+\item \textbf{The model is an assumption.} A regression coefficient adjusts for confounding only as well as the model describes the
+dependence of risk on the confounders. A continuous confounder entered as a straight line when its effect is curved leaves residual
+confounding; categorising it, or using splines, is safer.
+\item \textbf{Choose confounders by causal reasoning}, as in Section~\ref{sec:dags}: adjust for common causes, not for mediators or
+colliders. Automatic selection by significance tests is not a substitute.
+\item \textbf{Check for effect modification} with product terms and report stratum-specific estimates when it is present.
+\item \textbf{Sparse data} distort maximum likelihood estimates away from the null when there are few events per parameter; with many
+matched sets or strata, conditional methods are needed.
+\item \textbf{Trends.} For an exposure with ordered levels, entering it as a single score tests for a dose--response trend with one degree
+of freedom, more powerful against a monotone effect than the test with one indicator per level.
+\end{itemize}
+
+\subsection{Problems}
+
+\begin{problem}
+Show that for a single $2 \times 2$ table the logistic model $\operatorname{logit} p = \alpha + \beta E$ gives $\hat\beta = \log(ad/bc)$, the log of the crude odds ratio, and $\text{SE}(\hat\beta)$
+equal to Woolf's.
+\end{problem}
+
+\begin{solution}
+With two groups the model is saturated: the score equations make the fitted number of cases among the exposed equal $a$ and among all
+subjects equal $a + b$, so the fitted risks are $a/n_1$ and $b/n_0$. Then $\hat\alpha = \operatorname{logit}(b/n_0) = \log(b/d)$ and $\hat\alpha + \hat\beta = \log(a/c)$, so $\hat\beta = \log(ad/bc)$. The
+information matrix for $(\alpha, \beta)$ is $\begin{pmatrix} w_0 + w_1 & w_1 \\ w_1 & w_1 \end{pmatrix}$ with $w_1 = n_1\hat p_1(1 - \hat p_1) = ac/n_1$ and $w_0 = bd/n_0$. Its inverse has $(2, 2)$ entry $(w_0 + w_1)/(w_0 w_1) = 1/w_0 + 1/w_1$,
+which is $n_0/(bd) + n_1/(ac) = 1/b + 1/d + 1/a + 1/c$.
+\end{solution}
+
+\begin{problem}
+In a case-control study, a logistic regression of disease on systolic blood pressure (mmHg) and other covariates gives a coefficient of
+$0.047$ with standard error $0.012$ for blood pressure. Find the odds ratio, with a $95\%$ interval, for a difference of $10$ mmHg.
+\end{problem}
+
+\begin{solution}
+By Proposition~\ref{prop:logitor} the odds ratio is $e^{10 \times 0.047} = e^{0.47} = 1.60$, with interval $e^{10(0.047 \pm 1.96 \times 0.012)} = (1.26,\ 2.02)$. By
+Theorem~\ref{thm:prentice} this is a valid estimate of the population odds ratio, although the study sampled on disease.
+\end{solution}
+
+\begin{problem}
+In a population, $\operatorname{logit} P(D = 1 \mid E) = -5 + 0.8E$. A case-control study takes every case and $1\%$ of non-cases. What intercept will a logistic regression
+on the study data estimate? If the fitted intercept is $-0.40$ and the sampling fractions are known, what are the estimated risks for
+unexposed and exposed people in the population?
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:prentice}, $\alpha^* = -5 + \log(1/0.01) = -5 + 4.605 = -0.395$. From a fitted $-0.40$ the population intercept is $-0.40 - 4.605 = -5.005$, and with $\hat\beta = 0.8$
+the risks are $1/(1 + e^{5.005}) = 0.0067$ and $1/(1 + e^{4.205}) = 0.0147$. This is Proposition~\ref{prop:fractions} in model form.
+\end{solution}
+
+\begin{problem}
+Using the interaction model of Example~\ref{exa:poisson}, give the fitted smoking rate ratio in each age band, and explain why
+the product term is entered as a single score rather than as four indicators.
+\end{problem}
+
+\begin{solution}
+$e^{1.136 - 0.309k}$ for $k = 0, \dots, 4$: $3.11$, $2.29$, $1.68$, $1.23$, $0.91$. A single score uses one degree of freedom to test and describe a steady decline of the
+log rate ratio with age, which is what the stratum estimates suggest; four indicators would reproduce the five stratum ratios exactly
+(the saturated model) and test heterogeneity of any kind with four degrees of freedom, with less power against a trend. The residual
+deviance of $1.5$ on $3$ degrees of freedom shows that the linear trend describes the data adequately.
+\end{solution}
+
+\begin{problem}
+For a matched set with one case and two controls and a binary exposure, write the conditional likelihood contribution when (a) the case
+is exposed and one control is, (b) the case is unexposed and both controls are exposed, (c) all three are unexposed.
+\end{problem}
+
+\begin{solution}
+With $\psi = e^\beta$, Proposition~\ref{prop:clogit} gives (a) $\psi/(\psi + \psi + 1) = \psi/(2\psi + 1)$; (b) $1/(1 + 2\psi)$; (c) $1/3$, free of $\psi$, so the set carries no
+information. In general a set with an exposed case and $j$ exposed controls contributes $\psi/\{(j + 1)\psi + (2 - j)\}$, and one with an unexposed case
+$1/\{j\psi + (3 - j)\}$. Maximising the product gives the conditional estimate; the Mantel--Haenszel estimate of Problem~\ref{prob:onetwo} is a
+non-iterative approximation to it.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -3808,6 +4045,8 @@ Van Nostrand Reinhold (reprinted by Wiley).
 \begin{enumerate}
 \item Berkson, J. (1946), Limitations of the application of fourfold table analysis to hospital data, \emph{Biometrics Bulletin}, 2,
 47--53.
+\item Breslow, N. E., Day, N. E., Halvorsen, K. T., Prentice, R. L., and Sabai, C. (1978), Estimation of multiple relative risk functions
+in matched case-control studies, \emph{American Journal of Epidemiology}, 108, 299--307.
 \item Breslow, N. E., and Day, N. E. (1980), \emph{Statistical Methods in Cancer Research, Vol.~I: The Analysis of Case-Control Studies}, Lyon,
 International Agency for Research on Cancer.
 \item Breslow, N. E., and Day, N. E. (1987), \emph{Statistical Methods in Cancer Research, Vol.~II: The Design and Analysis of Cohort
@@ -3829,6 +4068,9 @@ distribution, \emph{Statistics in Medicine}, 16, 791--801.
 \item Fleiss, J. L., Levin, B., and Paik, M. C. (2003), \emph{Statistical Methods for Rates and Proportions} (3rd ed.), Hoboken, NJ, Wiley.
 \item Greenland, S., and Robins, J. M. (1985), Estimation of a common effect parameter from sparse follow-up data, \emph{Biometrics}, 41,
 55--68.
+\item Frome, E. L. (1983), The analysis of rates using Poisson regression models, \emph{Biometrics}, 39, 665--674.
+\item Greenland, S., Mansournia, M. A., and Altman, D. G. (2016), Sparse data bias: a problem hiding in plain sight, \emph{British
+Medical Journal}, 352, i1981.
 \item Greenland, S., Pearl, J., and Robins, J. M. (1999), Causal diagrams for epidemiologic research, \emph{Epidemiology}, 10, 37--48.
 \item Greenland, S., Robins, J. M., and Pearl, J. (1999), Confounding and collapsibility in causal inference, \emph{Statistical Science},
 14, 29--46.
@@ -3847,6 +4089,7 @@ Chemotherapy Reports}, 50, 163--170.
 \emph{Psychometrika}, 12, 153--157.
 \item Miettinen, O. S. (1974), Proportion of disease caused or prevented by a given exposure, trait or intervention, \emph{American
 Journal of Epidemiology}, 99, 325--332.
+\item Prentice, R. L., and Pyke, R. (1979), Logistic disease incidence models and case-control studies, \emph{Biometrika}, 66, 403--411.
 \item Robins, J., Breslow, N., and Greenland, S. (1986), Estimators of the Mantel--Haenszel variance consistent in both sparse data and
 large-strata limiting models, \emph{Biometrics}, 42, 311--323.
 \item Rogan, W. J., and Gladen, B. (1978), Estimating prevalence from the results of a screening test, \emph{American Journal of
