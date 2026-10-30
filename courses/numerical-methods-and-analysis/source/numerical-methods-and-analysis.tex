@@ -1287,6 +1287,498 @@ at each step. This method, known in Babylon and described by Heron of Alexandria
 \end{solution}
 
 
+\subsection{Newton's method and the secant method}
+\label{sec:newton}
+
+\subhead{Newton's method}
+Suppose $f\in C^2[a,b]$ and $p_0\in[a,b]$ approximates a root $p$ with $f'(p_0)\neq0$. Taylor's Theorem about $p_0$, evaluated at $p$, gives
+$$0 = f(p) = f(p_0)+(p-p_0)f'(p_0)+\frac{(p-p_0)^2}{2}f''(\xi)$$
+for some $\xi$ between $p_0$ and $p$. If $|p-p_0|$ is small, the last term is much smaller than the others, and dropping it gives
+$p\approx p_0-\frac{f(p_0)}{f'(p_0)}$. This is the next approximation. Repeating it gives \textbf{Newton's method} (also called the
+\textbf{Newton--Raphson method}):
+\begin{equation}\label{eq:newton}
+p_n = p_{n-1}-\frac{f(p_{n-1})}{f'(p_{n-1})},\qquad n\geq1 .
+\end{equation}
+Geometrically, $p_n$ is the point where the tangent line to the graph of $f$ at $(p_{n-1},f(p_{n-1}))$ crosses the $x$-axis
+(Figure~\ref{fig:newton}). In the language of Section~\ref{sec:fixedpoint}, Newton's method is fixed-point iteration with
+$g(x) = x-\frac{f(x)}{f'(x)}$, the function constructed there to have $g'(p) = 0$.
+
+\begin{alg}[Newton's method]
+\label{alg:newton}
+To find a solution of $f(x) = 0$ given an initial approximation $p_0$.
+\begin{enumerate}[label=Step \arabic*:,leftmargin=*]
+\item Set $n = 1$.
+\item While $n\leq N$: if $f'(p_0) = 0$, output ``zero derivative'' and stop; otherwise set $p = p_0-\frac{f(p_0)}{f'(p_0)}$.
+\item If $|p-p_0|<\varepsilon$, output $p$ and stop.
+\item Set $p_0 = p$ and increase $n$ by $1$.
+\item Output ``method failed after $N$ iterations'' and stop.
+\end{enumerate}
+\end{alg}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+% Left: Newton tangents on f(x)=x^3+4x^2-10, X=(x-1)*6+0.5, Y=f/4
+\fill[blue!5,rounded corners] (0,-1.75) rectangle (7,4.4);
+\draw[blue!45,rounded corners] (0,-1.75) rectangle (7,4.4);
+\node[font=\small\bfseries,text=blue!60!black] at (3.5,4.05) {Newton: slide down the tangent};
+\draw[->,gray] (0.2,0) -- (6.8,0);
+\draw[thick,blue!70!black] (1.400,-0.797) -- (1.700,-0.628) -- (2.000,-0.449) -- (2.300,-0.261) -- (2.600,-0.062) -- (2.900,0.146) -- (3.200,0.365) -- (3.500,0.594) -- (3.800,0.833) -- (4.100,1.084) -- (4.400,1.346) -- (4.700,1.618) -- (5.000,1.902) -- (5.300,2.198) -- (5.600,2.505) -- (5.900,2.825) -- (6.200,3.156) -- (6.500,3.500);
+\draw[orange!80!black,thick] (6.5,3.5) -- (3.5,0);
+\draw[orange!80!black,thick] (3.5,0.594) -- (2.74,0);
+\draw[dotted] (6.5,0) -- (6.5,3.5);
+\draw[dotted] (3.5,0) -- (3.5,0.594);
+\foreach \x/\l in {6.5/p_0,3.5/p_1,2.74/p_2} {\fill[green!50!black] (\x,0) circle (1.8pt); \node[font=\scriptsize,below] at (\x,-0.05) {$\l$};}
+\fill[red!70!black] (2.691,0) circle (1.6pt);
+\node[font=\scriptsize,align=center] at (3.5,-1.25) {$p_0 = 2,\ p_1 = 1.5,\ p_2 = 1.3733$; the root is $1.3652$};
+% Right: cycling for x^3-2x+2, X=(x+0.6)*3.2, Y=f*1.15
+\begin{scope}[xshift=7.4cm]
+\fill[red!75!black!6,rounded corners] (0,-1.75) rectangle (7,4.4);
+\draw[red!75!black!50,rounded corners] (0,-1.75) rectangle (7,4.4);
+\node[font=\small\bfseries,text=red!70!black] at (3.5,4.05) {A failure: Newton cycles};
+\draw[->,gray] (0,0) -- (6.9,0);
+\draw[thick,blue!70!black] (0.000,3.432) -- (0.336,3.299) -- (0.672,3.129) -- (1.008,2.929) -- (1.344,2.707) -- (1.680,2.472) -- (2.016,2.231) -- (2.352,1.992) -- (2.688,1.764) -- (3.024,1.554) -- (3.360,1.370) -- (3.696,1.220) -- (4.032,1.113) -- (4.368,1.055) -- (4.704,1.056) -- (5.040,1.123) -- (5.376,1.265) -- (5.712,1.488) -- (6.048,1.802) -- (6.384,2.213) -- (6.720,2.731);
+\draw[orange!80!black,thick,->] (1.92,2.3) -- (5.12,0);
+\draw[orange!80!black,thick,->] (5.12,1.15) -- (1.92,0);
+\draw[dotted] (1.92,0) -- (1.92,2.3);
+\draw[dotted] (5.12,0) -- (5.12,1.15);
+\fill[green!50!black] (1.92,0) circle (1.8pt); \node[font=\scriptsize,below] at (1.92,-0.05) {$p_0=p_2=0$};
+\fill[green!50!black] (5.12,0) circle (1.8pt); \node[font=\scriptsize,below] at (5.12,-0.05) {$p_1=p_3=1$};
+\node[font=\scriptsize,align=center] at (3.5,-1.1) {$f(x) = x^3-2x+2$ from $p_0 = 0$: the tangents\\send $0\to1\to0\to\cdots$; the real root is $-1.769$};
+\end{scope}
+\end{tikzpicture}
+\caption{Newton's method replaces $f$ by its tangent line and steps to where the tangent crosses the axis. Left: on the test function the
+second step already lands close to the root. Right: from a poor starting value the tangents can carry the iterates round a cycle that
+never approaches the root.}
+\label{fig:newton}
+\end{figure}
+
+\begin{exa}
+\label{exa:newtontest}
+Apply Newton's method to the test equation $x^3+4x^2-10 = 0$ with $p_0 = 1.5$.
+\end{exa}
+
+\begin{solution}
+Here $p_n = p_{n-1}-\frac{p_{n-1}^3+4p_{n-1}^2-10}{3p_{n-1}^2+8p_{n-1}}$, and
+\begin{center}
+\begin{tabular}{rlll}
+\hline
+$n$ & $p_n$ & $|p_n-p|$ & $\frac{|p_n-p|}{|p_{n-1}-p|^2}$\\
+\hline
+$0$ & $1.5$ & $1.3\times10^{-1}$ & \\
+$1$ & $1.373333333333$ & $8.1\times10^{-3}$ & $0.446$\\
+$2$ & $1.365262014875$ & $3.2\times10^{-5}$ & $0.487$\\
+$3$ & $1.365230013916$ & $5.0\times10^{-10}$ & $0.490$\\
+$4$ & $1.365230013414$ & $<10^{-15}$ & \\
+\hline
+\end{tabular}
+\end{center}
+The number of correct digits roughly doubles at each step: $2$, $4$, $9$, then full double precision. The last column settles at
+$0.490$, and Theorem~\ref{thm:newtonquad} below explains this number: it is $\frac{f''(p)}{2f'(p)} = \frac{6p+8}{2(3p^2+8p)} = 0.4902$.
+\end{solution}
+
+\begin{exa}
+\label{exa:newtoncos}
+Solve $\cos x - x = 0$ by Newton's method with $p_0 = \frac{\pi}{4}$.
+\end{exa}
+
+\begin{solution}
+With $f(x) = \cos x-x$ and $f'(x) = -\sin x-1$,
+$$p_n = p_{n-1}-\frac{\cos p_{n-1}-p_{n-1}}{-\sin p_{n-1}-1}.$$
+The iterates are $p_1 = 0.7395361335$, $p_2 = 0.7390851781$, $p_3 = 0.7390851332$, with errors $4.5\times10^{-4}$, $4.5\times10^{-8}$ and
+$4\times10^{-16}$. Three Newton steps give full accuracy, against $32$ steps of the fixed-point iteration $p_n = \cos p_{n-1}$ for an error
+of $10^{-6}$ (Example~\ref{exa:cosfp}).
+\end{solution}
+
+\begin{thm}
+\label{thm:newtonconv}
+Let $f\in C^2[a,b]$ and let $p\in(a,b)$ satisfy $f(p) = 0$ and $f'(p)\neq0$. Then there is a $\delta>0$ such that Newton's method
+generates a sequence $\{p_n\}$ converging to $p$ for every $p_0\in[p-\delta,p+\delta]$.
+\end{thm}
+
+\begin{proof}
+Newton's method is fixed-point iteration with $g(x) = x-\frac{f(x)}{f'(x)}$. Since $f'$ is continuous and $f'(p)\neq0$, there is
+$\delta_1>0$ with $f'(x)\neq0$ on $[p-\delta_1,p+\delta_1]\subseteq[a,b]$, so $g$ is defined and continuous there. Its derivative is
+$$g'(x) = 1-\frac{f'(x)^2-f(x)f''(x)}{f'(x)^2} = \frac{f(x)f''(x)}{f'(x)^2},$$
+which is continuous on $[p-\delta_1,p+\delta_1]$ and equals $0$ at $p$ because $f(p) = 0$. So for any $k\in(0,1)$ there is $0<\delta<\delta_1$
+with $|g'(x)|\leq k$ on $[p-\delta,p+\delta]$. For $x$ in this interval the Mean Value Theorem gives
+$$|g(x)-p| = |g(x)-g(p)| = |g'(\xi)|\,|x-p|\leq k|x-p|<\delta,$$
+so $g$ maps $[p-\delta,p+\delta]$ into itself. By the Fixed-Point Theorem the iterates converge to $p$.
+\end{proof}
+
+\begin{thm}
+\label{thm:newtonquad}
+Under the hypotheses of Theorem~\ref{thm:newtonconv}, if $p_n\longrightarrow p$ with $p_n\neq p$, then
+$$\lim_{n\rightarrow\infty}\frac{p_{n+1}-p}{(p_n-p)^2} = \frac{f''(p)}{2f'(p)} .$$
+In particular the convergence is at least quadratic.
+\end{thm}
+
+\begin{proof}
+Taylor's Theorem about $p_n$, evaluated at $p$, gives
+$$0 = f(p) = f(p_n)+(p-p_n)f'(p_n)+\frac{(p-p_n)^2}{2}f''(\xi_n),$$
+with $\xi_n$ between $p_n$ and $p$. Divide by $f'(p_n)$ and rearrange:
+$$p_n-\frac{f(p_n)}{f'(p_n)}-p = \frac{f''(\xi_n)}{2f'(p_n)}(p_n-p)^2,$$
+that is,
+$$p_{n+1}-p = \frac{f''(\xi_n)}{2f'(p_n)}(p_n-p)^2 .$$
+As $n\longrightarrow\infty$, $\xi_n\longrightarrow p$ and $p_n\longrightarrow p$, and the continuity of $f'$ and $f''$ gives the limit.
+\end{proof}
+
+\begin{note}
+The two theorems are \emph{local}: they guarantee convergence only if $p_0$ is close enough to $p$, and they say nothing about how close
+that is. Far from the root Newton's method can behave badly, and in practice it is often started from a point found by a few steps of
+bisection.
+\end{note}
+
+\begin{exa}
+\label{exa:newtonfail}
+Show how Newton's method fails for (a) $f(x) = x^{1/3}$; (b) $f(x) = x^3-2x+2$ with $p_0 = 0$; (c) $f(x) = \arctan x$ with $p_0 = 1.5$.
+\end{exa}
+
+\begin{solution}
+(a) $f'(x) = \frac13x^{-2/3}$, so $p_n = p_{n-1}-\frac{p_{n-1}^{1/3}}{\frac13p_{n-1}^{-2/3}} = p_{n-1}-3p_{n-1} = -2p_{n-1}$. From $p_0 = 0.1$ the
+iterates are $-0.2, 0.4, -0.8, 1.6,\dots$: each step doubles the distance from the root $0$. The theorems do not apply, since $f'(0)$ does
+not exist.
+
+(b) $f(0) = 2$, $f'(0) = -2$ give $p_1 = 1$; then $f(1) = 1$, $f'(1) = 1$ give $p_2 = 0$, and the iterates cycle between $0$ and $1$
+for ever (Figure~\ref{fig:newton}, right). The only real root is $p = -1.7693$, far from the starting value.
+
+(c) $\arctan$ is very flat far from $0$, so its tangent lines cross the axis far away. From $p_0 = 1.5$ the iterates are
+$-1.694, 2.321, -5.114, 32.30,\dots$, which diverge. From $p_0 = 1.3$ they are $-1.162, 0.859, -0.374, 0.034,\dots$ and converge to $0$. There is
+a critical starting value $1.3917$ between the two behaviours.
+\end{solution}
+
+\subhead{The secant method}
+Newton's method needs $f'$, which may be expensive or unavailable. Replacing $f'(p_{n-1})$ by the slope of the line through the last two
+iterates,
+$$f'(p_{n-1})\approx\frac{f(p_{n-1})-f(p_{n-2})}{p_{n-1}-p_{n-2}},$$
+gives the \textbf{secant method}:
+\begin{equation}\label{eq:secant}
+p_n = p_{n-1}-f(p_{n-1})\frac{p_{n-1}-p_{n-2}}{f(p_{n-1})-f(p_{n-2})},\qquad n\geq2 .
+\end{equation}
+It needs two starting values $p_0, p_1$ and only one new evaluation of $f$ per step. The formula is the same as that of false position,
+but the secant method always uses the two most recent iterates, whether or not they bracket the root. It therefore gives up the safety of
+bracketing in exchange for speed.
+
+\begin{exa}
+\label{exa:secant}
+Apply the secant method to $\cos x-x = 0$ with $p_0 = 0.5$, $p_1 = \frac\pi4$, and to the test equation with $p_0 = 1$, $p_1 = 2$.
+\end{exa}
+
+\begin{solution}
+\begin{center}
+\begin{tabular}{rllrll}
+\hline
+\multicolumn{3}{c}{$\cos x-x$} & \multicolumn{3}{c}{$x^3+4x^2-10$}\\
+$n$ & $p_n$ & error & $n$ & $p_n$ & error\\
+\hline
+$2$ & $0.7363841388$ & $2.7\times10^{-3}$ & $2$ & $1.2631578947$ & $1.0\times10^{-1}$\\
+$3$ & $0.7390581392$ & $2.7\times10^{-5}$ & $3$ & $1.3388278388$ & $2.6\times10^{-2}$\\
+$4$ & $0.7390851493$ & $1.6\times10^{-8}$ & $4$ & $1.3666163947$ & $1.4\times10^{-3}$\\
+$5$ & $0.7390851332$ & $9.6\times10^{-14}$ & $5$ & $1.3652119026$ & $1.8\times10^{-5}$\\
+ & & & $6$ & $1.3652300011$ & $1.2\times10^{-8}$\\
+ & & & $7$ & $1.3652300134$ & $1.1\times10^{-13}$\\
+\hline
+\end{tabular}
+\end{center}
+The secant method takes one or two more steps than Newton's method, but each step costs one evaluation of $f$ instead of one of $f$ and
+one of $f'$. On the test problem its first two steps coincide with false position (Example~\ref{exa:falsepos}); from the third step on it
+uses the two latest points, leaves the fixed end point behind, and accelerates: the number of correct digits grows by a factor of about
+$1.6$ per step.
+\end{solution}
+
+To analyse the secant method we use the \textbf{divided differences}
+$$f[x_0,x_1] = \frac{f(x_1)-f(x_0)}{x_1-x_0},\qquad f[x_0,x_1,x_2] = \frac{f[x_1,x_2]-f[x_0,x_1]}{x_2-x_0},$$
+which reappear in interpolation later in the course.
+
+\begin{lem}
+\label{lem:dd2}
+If $f\in C^2$ on an interval containing distinct points $x_0,x_1,x_2$, then $f[x_0,x_1,x_2] = \frac12f''(\xi)$ for some $\xi$ in that
+interval.
+\end{lem}
+
+\begin{proof}
+Let $q(x) = f(x_0)+f[x_0,x_1](x-x_0)+f[x_0,x_1,x_2](x-x_0)(x-x_1)$. Direct substitution shows $q(x_0) = f(x_0)$ and $q(x_1) = f(x_1)$, and
+a short calculation using the definitions shows $q(x_2) = f(x_2)$. So $f-q$ vanishes at three distinct points, and by the Generalized
+Rolle's Theorem (Theorem~\ref{thm:genrolle}) $(f-q)''(\xi) = f''(\xi)-2f[x_0,x_1,x_2] = 0$ for some $\xi$.
+\end{proof}
+
+\begin{thm}
+\label{thm:secant}
+Let $f\in C^2$ near a simple root $p$ ($f(p) = 0\neq f'(p)$), and let the secant iterates $p_n$ converge to $p$, with $e_n = p_n-p\neq0$.
+Then
+$$e_{n+1} = \frac{f[p_{n-1},p_n,p]}{f[p_{n-1},p_n]}\,e_ne_{n-1},\qquad\text{so}\qquad e_{n+1}\approx\frac{f''(p)}{2f'(p)}\,e_ne_{n-1}$$
+for large $n$, and the order of convergence is $\alpha = \frac{1+\sqrt5}{2}\approx1.618$.
+\end{thm}
+
+\begin{proof}
+In divided-difference notation the method is $p_{n+1} = p_n-\frac{f(p_n)}{f[p_{n-1},p_n]}$. Since $f(p) = 0$, $f(p_n) = f[p_n,p]\,e_n$, and
+$$e_{n+1} = e_n-\frac{f[p_n,p]}{f[p_{n-1},p_n]}e_n = \frac{f[p_{n-1},p_n]-f[p_n,p]}{f[p_{n-1},p_n]}\,e_n = \frac{f[p_{n-1},p_n,p](p_{n-1}-p)}{f[p_{n-1},p_n]}\,e_n,$$
+using the definition of $f[p_{n-1},p_n,p]$. This is the first formula. By the Mean Value Theorem and Lemma~\ref{lem:dd2},
+$f[p_{n-1},p_n] = f'(\eta_n)$ and $f[p_{n-1},p_n,p] = \frac12f''(\xi_n)$ with $\eta_n,\xi_n\longrightarrow p$, which gives the
+approximation.
+
+For the order, write $C = \left|\frac{f''(p)}{2f'(p)}\right|$ and suppose $|e_{n+1}|\approx A|e_n|^\alpha$. Then $|e_n|\approx A|e_{n-1}|^\alpha$, so
+$|e_{n-1}|\approx(|e_n|/A)^{1/\alpha}$, and the relation $|e_{n+1}|\approx C|e_n||e_{n-1}|$ becomes
+$$A|e_n|^\alpha\approx C A^{-1/\alpha}|e_n|^{1+1/\alpha}.$$
+For this to hold as $e_n\longrightarrow0$ the exponents must agree: $\alpha = 1+\frac1\alpha$, that is $\alpha^2-\alpha-1 = 0$, whose positive
+root is $\alpha = \frac{1+\sqrt5}{2}$. (A rigorous version of this argument, with explicit bounds, is in the texts by Atkinson and by
+S\"uli and Mayers.)
+\end{proof}
+
+\begin{note}
+Newton's method has order $2$ but needs two function evaluations ($f$ and $f'$) per step; two secant steps cost the same and reduce the
+error with order $1.618^2 = 2.618$. Measured per function evaluation, the secant method is the more efficient of the two
+($\sqrt2\approx1.41$ against $1.618$), which is why it, and the bracketed methods built on it, are popular in practice.
+\end{note}
+
+
+\subsection{Multiple roots and accelerating convergence}
+\label{sec:multiple}
+
+\subhead{Multiple roots}
+Newton's method needs $f'(p)\neq0$. When $f'(p) = 0$ as well as $f(p) = 0$, it still usually converges, but only linearly.
+
+\begin{defn}
+A solution $p$ of $f(x) = 0$ is a \textbf{zero of multiplicity $m$} of $f$ if, for $x\neq p$, $f(x) = (x-p)^mq(x)$ with
+$\lim_{x\rightarrow p}q(x)\neq0$. A zero of multiplicity $1$ is \textbf{simple}.
+\end{defn}
+
+\begin{thm}
+\label{thm:multiplicity}
+Let $f\in C^m[a,b]$ and $p\in(a,b)$. Then $p$ is a zero of multiplicity $m$ if and only if
+$$0 = f(p) = f'(p) = \dots = f^{(m-1)}(p),\qquad f^{(m)}(p)\neq0 .$$
+In particular $p$ is a simple zero exactly when $f(p) = 0\neq f'(p)$.
+\end{thm}
+
+\begin{proof}
+If the derivatives vanish as stated, Taylor's Theorem of order $m-1$ about $p$ gives $f(x) = \frac{f^{(m)}(\xi(x))}{m!}(x-p)^m$, so
+$q(x) = \frac{f^{(m)}(\xi(x))}{m!}\longrightarrow\frac{f^{(m)}(p)}{m!}\neq0$. Conversely, suppose $f(x) = (x-p)^mq(x)$ with
+$q(x)\longrightarrow L\neq0$. If some $f^{(j)}(p)\neq0$ with $j<m$, take the smallest such $j$; by what was just shown, $f(x) = (x-p)^jr(x)$
+with $r(x)\longrightarrow\frac{f^{(j)}(p)}{j!}\neq0$, and then $(x-p)^{m-j}q(x) = r(x)$ would tend both to $0$ and to a non-zero limit.
+So $f^{(j)}(p) = 0$ for $j<m$; and $f^{(m)}(p) = m!\,L\neq0$ by the first part.
+\end{proof}
+
+\begin{thm}
+\label{thm:newtonmult}
+If $p$ is a zero of multiplicity $m\geq2$ of $f$, then Newton's method, started close enough to $p$, converges linearly with
+$$\lim_{n\rightarrow\infty}\frac{p_{n+1}-p}{p_n-p} = 1-\frac1m .$$
+\end{thm}
+
+\begin{proof}
+We prove it for $f(x) = (x-p)^mq(x)$ with $q$ differentiable and $q(p)\neq0$. Then $f'(x) = (x-p)^{m-1}\bigl(mq(x)+(x-p)q'(x)\bigr)$ and
+$$g(x) = x-\frac{f(x)}{f'(x)} = x-\frac{(x-p)q(x)}{mq(x)+(x-p)q'(x)} .$$
+Hence
+\begin{align*}
+\frac{g(x)-p}{x-p} &= 1-\frac{q(x)}{mq(x)+(x-p)q'(x)}\\
+&\longrightarrow1-\frac{q(p)}{mq(p)} = 1-\frac1m\quad(x\longrightarrow p).
+\end{align*}
+So $g'(p) = 1-\frac1m\in(0,1)$, and Corollary~\ref{coro:fprate} gives linear convergence with this constant.
+\end{proof}
+
+\begin{exa}
+\label{exa:double}
+The function $f(x) = e^x-x-1$ has a double zero at $p = 0$, since $f(0) = f'(0) = 0$ and $f''(0) = 1$. Apply Newton's method from
+$p_0 = 1$, and then two remedies.
+\end{exa}
+
+\begin{solution}
+\emph{Newton's method.} The iterates are
+$$0.582,\ 0.319,\ 0.168,\ 0.0863,\ 0.0438,\ 0.0221,\ 0.0111,\ 0.00554,\ 0.00278,\ 0.00139,$$
+each almost exactly half the previous one, as Theorem~\ref{thm:newtonmult} predicts with $m = 2$. Ten steps give only three correct
+decimals.
+
+\emph{Remedy 1: using the multiplicity.} If $m$ is known, the iteration $p_n = p_{n-1}-m\frac{f(p_{n-1})}{f'(p_{n-1})}$ restores quadratic
+convergence (Problem~\ref{prob:mnewton}). With $m = 2$ the iterates are $1.6\times10^{-1}$, $4.5\times10^{-3}$, $3.3\times10^{-6}$,
+$1.1\times10^{-11}$.
+
+\emph{Remedy 2: modified Newton.} If $m$ is unknown, apply Newton's method to $\mu(x) = \frac{f(x)}{f'(x)}$, which has a \emph{simple}
+zero at $p$ (if $f = (x-p)^mq$ then $\mu = \frac{(x-p)q}{mq+(x-p)q'}$). Since $\mu' = \frac{f'^2-ff''}{f'^2}$, this gives
+$$p_n = p_{n-1}-\frac{f(p_{n-1})f'(p_{n-1})}{f'(p_{n-1})^2-f(p_{n-1})f''(p_{n-1})} .$$
+The iterates are $-2.3\times10^{-1}$, $-8.5\times10^{-3}$, $-1.2\times10^{-5}$, $-4.2\times10^{-11}$, and then they stop improving.
+
+The stall is a round-off effect, not a flaw of the method. Near a double root $f(x)\approx\frac{x^2}{2}$ is computed as the difference of
+nearly equal numbers $e^x$ and $x+1$, with an absolute error of order $10^{-16}$; so $f$ cannot be distinguished from $0$ once
+$\frac{x^2}{2}\lesssim10^{-16}$, that is $|x|\lesssim10^{-8}$, and no method can locate a double root more accurately than about the square
+root of the machine precision. The modified formula, which divides by a difference of small quantities, loses a little more.
+\end{solution}
+
+\subhead{Aitken's $\Delta^2$ method}
+Many sequences converge linearly. If $\{p_n\}$ converges linearly to $p$ and $n$ is large, then
+$\frac{p_{n+1}-p}{p_n-p}\approx\frac{p_{n+2}-p}{p_{n+1}-p}$. Treating this as an equation for $p$ and solving gives
+$(p_{n+1}-p)^2\approx(p_{n+2}-p)(p_n-p)$, that is,
+$$p\approx\frac{p_{n+2}p_n-p_{n+1}^2}{p_{n+2}-2p_{n+1}+p_n} = p_n-\frac{(p_{n+1}-p_n)^2}{p_{n+2}-2p_{n+1}+p_n} .$$
+With the \textbf{forward differences} $\Delta p_n = p_{n+1}-p_n$ and $\Delta^2p_n = \Delta(\Delta p_n) = p_{n+2}-2p_{n+1}+p_n$, the new sequence is
+\begin{equation}\label{eq:aitken}
+\hat p_n = p_n-\frac{(\Delta p_n)^2}{\Delta^2p_n} .
+\end{equation}
+(The second form above is the one to compute with: the first subtracts nearly equal products.)
+
+\begin{thm}
+\label{thm:aitken}
+Suppose $p_n\longrightarrow p$ linearly, with $\lim_{n\rightarrow\infty}\frac{p_{n+1}-p}{p_n-p} = \lambda$, $|\lambda|<1$, and $p_n\neq p$ for all $n$.
+Then $\hat p_n$ converges to $p$ faster than $p_n$, in the sense that
+$$\lim_{n\rightarrow\infty}\frac{\hat p_n-p}{p_n-p} = 0 .$$
+\end{thm}
+
+\begin{proof}
+Write $e_n = p_n-p$ and $e_{n+1} = (\lambda+\delta_n)e_n$ with $\delta_n\longrightarrow0$. Then
+\begin{align*}
+\Delta p_n &= e_{n+1}-e_n = (\lambda-1+\delta_n)e_n,\\
+\Delta^2p_n &= e_{n+2}-2e_{n+1}+e_n = \bigl((\lambda+\delta_{n+1})(\lambda+\delta_n)-2(\lambda+\delta_n)+1\bigr)e_n .
+\end{align*}
+Hence
+\begin{align*}
+\frac{\hat p_n-p}{p_n-p} &= 1-\frac{(\Delta p_n)^2}{e_n\Delta^2p_n} = 1-\frac{(\lambda-1+\delta_n)^2}{(\lambda+\delta_{n+1})(\lambda+\delta_n)-2(\lambda+\delta_n)+1}\\
+&\longrightarrow1-\frac{(\lambda-1)^2}{(\lambda-1)^2} = 0,
+\end{align*}
+where $\lambda\neq1$ ensures that the denominator tends to $(\lambda-1)^2\neq0$.
+\end{proof}
+
+\begin{exa}
+\label{exa:aitken}
+Apply Aitken's method to (a) $p_n = \cos\frac1n$, which converges linearly to $1$; (b) the fixed-point iterates $p_{n+1} = \cos p_n$,
+$p_0 = 1$.
+\end{exa}
+
+\begin{solution}
+(a)
+\begin{center}
+\begin{tabular}{rllll}
+\hline
+$n$ & $p_n$ & $\hat p_n$ & $|p_n-1|$ & $|\hat p_n-1|$\\
+\hline
+$1$ & $0.54030$ & $0.96178$ & $4.6\times10^{-1}$ & $3.8\times10^{-2}$\\
+$2$ & $0.87758$ & $0.98213$ & $1.2\times10^{-1}$ & $1.8\times10^{-2}$\\
+$3$ & $0.94496$ & $0.98979$ & $5.5\times10^{-2}$ & $1.0\times10^{-2}$\\
+$4$ & $0.96891$ & $0.99342$ & $3.1\times10^{-2}$ & $6.6\times10^{-3}$\\
+$5$ & $0.98007$ & $0.99541$ & $2.0\times10^{-2}$ & $4.6\times10^{-3}$\\
+\hline
+\end{tabular}
+\end{center}
+The accelerated values are several times closer to $1$, and the advantage grows with $n$.
+
+(b) From $p_0 = 1$, the first Aitken values are $0.72801$, $0.73367$, $0.73691$, $0.73805$, $0.73864$, with errors decreasing from
+$1.1\times10^{-2}$ to $4.5\times10^{-4}$, compared with $2.6\times10^{-1}$ to $5.4\times10^{-2}$ for the corresponding $p_n$. The
+iteration itself is untouched; the extra accuracy comes from post-processing three consecutive terms.
+\end{solution}
+
+\subhead{Steffensen's method}
+Aitken's method can be built into a fixed-point iteration: take three iterates $p_0$, $p_1 = g(p_0)$, $p_2 = g(p_1)$, replace $p_0$ by the
+Aitken value $\hat p_0$, and start again from it. This is \textbf{Steffensen's method}.
+
+\begin{alg}[Steffensen's method]
+\label{alg:steffensen}
+To find a solution of $p = g(p)$ given $p_0$.
+\begin{enumerate}[label=Step \arabic*:,leftmargin=*]
+\item Set $n = 1$.
+\item While $n\leq N$: set $p_1 = g(p_0)$, $p_2 = g(p_1)$ and $p = p_0-\frac{(p_1-p_0)^2}{p_2-2p_1+p_0}$.
+\item If $|p-p_0|<\varepsilon$, output $p$ and stop.
+\item Set $p_0 = p$ and increase $n$ by $1$.
+\item Output ``method failed'' and stop.
+\end{enumerate}
+\end{alg}
+
+It can be shown that if $g'(p)\neq1$ and $g$ is smooth enough, Steffensen's method converges quadratically, without any derivatives.
+
+\begin{exa}
+\label{exa:steffensen}
+Apply Steffensen's method to $x = \cos x$ with $p_0 = 1$.
+\end{exa}
+
+\begin{solution}
+The successive Aitken values are
+$$0.728010361468,\quad 0.739066966909,\quad 0.739085133166,$$
+with errors $1.1\times10^{-2}$, $1.8\times10^{-5}$ and $4.9\times10^{-11}$. Each new error is roughly the square of the previous one times
+a constant: quadratic convergence from an iteration that, used plainly, converges linearly with ratio $0.674$. Each Steffensen step costs two
+evaluations of $g$.
+\end{solution}
+
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Use the bisection method to find $\sqrt[3]{25}$ to within $10^{-4}$, by solving $x^3-25 = 0$ on $[2,3]$. How many iterations does
+Theorem~\ref{thm:bisection} require?
+\end{problem}
+\begin{solution}
+$f(2) = -17<0<2 = f(3)$, so there is a root in $(2,3)$. We need $2^{-N}<10^{-4}$, that is $N\geq14$. Fourteen iterations give
+$p_{14} = 2.92401$, and $\sqrt[3]{25} = 2.9240177$. The first steps are $p_1 = 2.5$ ($f<0$), $p_2 = 2.75$ ($f<0$), $p_3 = 2.875$ ($f<0$),
+$p_4 = 2.9375$ ($f>0$), $p_5 = 2.90625$ ($f<0$).
+\end{solution}
+
+\begin{problem}
+Use Newton's method to compute $\sqrt6$, starting from $p_0 = 1$, and show that the method is Heron's method.
+\end{problem}
+\begin{solution}
+With $f(x) = x^2-6$, $p_n = p_{n-1}-\frac{p_{n-1}^2-6}{2p_{n-1}} = \frac12\left(p_{n-1}+\frac{6}{p_{n-1}}\right)$, which is Heron's iteration
+(Example~\ref{exa:heron}). The iterates are $3.5$, $2.607143$, $2.454256$, $2.449494$, against $\sqrt6 = 2.449490$. The first step overshoots
+because $p_0 = 1$ is far from the root; from then on the convergence is quadratic and from above.
+\end{solution}
+
+\begin{problem}
+Early computers had no division. Show that Newton's method applied to $f(x) = \frac1x-a$ computes $\frac1a$ using only multiplication and
+subtraction, and use it to find $\frac17$ from $p_0 = 0.1$. For which $p_0$ does it converge?
+\end{problem}
+\begin{solution}
+$f'(x) = -\frac{1}{x^2}$, so $p_n = p_{n-1}-\frac{1/p_{n-1}-a}{-1/p_{n-1}^2} = p_{n-1}(2-ap_{n-1})$. With $a = 7$: $0.13$, $0.1417$, $0.14284777$,
+$0.1428571422$, against $\frac17 = 0.1428571429$. Writing $e_n = 1-ap_n$ gives $e_n = e_{n-1}^2$, so the iteration converges exactly when
+$|1-ap_0|<1$, that is $0<p_0<\frac2a$, and then quadratically.
+\end{solution}
+
+\begin{problem}
+Show that $g(x) = \frac{x^2+3}{5}$ has a unique fixed point in $[0,1]$, and find a bound on the number of iterations needed to approximate it
+to within $10^{-5}$ from $p_0 = 1$.
+\end{problem}
+\begin{solution}
+On $[0,1]$, $g$ is increasing with $g(0) = 0.6$ and $g(1) = 0.8$, so it maps $[0,1]$ into itself, and $|g'(x)| = \frac{2x}{5}\leq0.4 = k$.
+By the Fixed-Point Theorem there is a unique fixed point, $p = \frac{5-\sqrt{13}}{2} = 0.6972$. With $|p_1-p_0| = 0.2$, bound~\eqref{eq:fpbound2}
+requires $\frac{0.4^n}{0.6}(0.2)<10^{-5}$, that is $n>11.4$, so $12$ iterations suffice. (Near $p$ the slope is $g'(p) = 0.279$, so fewer are
+needed in practice.)
+\end{solution}
+
+\begin{problem}
+Use the secant method with $p_0 = 0$, $p_1 = 1$ to solve $e^{-x} = x$, and estimate the order of convergence from the errors.
+\end{problem}
+\begin{solution}
+With $f(x) = e^{-x}-x$ the iterates are $0.61270$, $0.56384$, $0.56717036$, $0.5671433066$, $0.5671432904$, with errors $4.6\times10^{-2}$,
+$3.3\times10^{-3}$, $2.7\times10^{-5}$, $1.6\times10^{-8}$, $7.9\times10^{-14}$. The exponents of the errors, about $1.3, 2.5, 4.6, 7.8,
+13.1$, grow by a factor of about $1.7$, close to the theoretical $1.618$.
+\end{solution}
+
+\begin{problem}
+\label{prob:mnewton}
+Let $p$ be a zero of multiplicity $m$ of $f$. Show that $g(x) = x-m\frac{f(x)}{f'(x)}$ has $g'(p) = 0$, so that this iteration converges
+quadratically. Use it with $m = 2$ for $f(x) = 1-\cos x$ from $p_0 = 1$, and compare it with plain Newton.
+\end{problem}
+\begin{solution}
+With $f = (x-p)^mq$, as in the proof of Theorem~\ref{thm:newtonmult}, $\frac{g(x)-p}{x-p} = 1-\frac{mq(x)}{mq(x)+(x-p)q'(x)}\longrightarrow1-1 = 0$,
+so $g'(p) = 0$ and Theorem~\ref{thm:fpquad} gives quadratic convergence. For $1-\cos x$ the root $0$ is double ($f(0) = f'(0) = 0$,
+$f''(0) = 1$). Plain Newton gives $0.454$, $0.223$, $0.111$, $0.0554$, $0.0277$: halving each time. The modified iteration
+$p_n = p_{n-1}-2\frac{1-\cos p_{n-1}}{\sin p_{n-1}}$ gives $-9.3\times10^{-2}$, $6.6\times10^{-5}$, $1.3\times10^{-12}$.
+\end{solution}
+
+\begin{problem}
+Explain why Newton's method for $f(x) = x^3-2x+2$ starting at $p_0 = 0$ fails, and suggest a remedy.
+\end{problem}
+\begin{solution}
+The iterates cycle $0, 1, 0, 1,\dots$ (Example~\ref{exa:newtonfail}). The real root is $-1.7693$, and $f$ has a local minimum at
+$x = \sqrt{2/3}$ and a local maximum at $-\sqrt{2/3}$; starting values to the right of the maximum are pulled towards the minimum, where the
+tangent is nearly horizontal. The remedy is to bracket first: $f(-2) = -2<0<2 = f(-1)$, and a few bisection steps on $[-2,-1]$ give a
+starting value from which Newton converges quadratically (for example $p_0 = -1.5$ gives $-1.8421$, $-1.7728$, $-1.769301$, $-1.7692924$).
+\end{solution}
+
+\begin{problem}
+Show that Aitken's method is exact for a sequence of the form $p_n = p+c\lambda^n$ ($c\neq0$, $0<|\lambda|<1$): that is, $\hat p_n = p$ for
+every $n$.
+\end{problem}
+\begin{solution}
+$\Delta p_n = c\lambda^n(\lambda-1)$ and $\Delta^2p_n = c\lambda^n(\lambda-1)^2$, so
+$\hat p_n = p+c\lambda^n-\frac{c^2\lambda^{2n}(\lambda-1)^2}{c\lambda^n(\lambda-1)^2} = p+c\lambda^n-c\lambda^n = p$. Aitken's method assumes
+exactly this geometric model of the error, and removes the error completely when the model is exact; for other linearly convergent
+sequences the model holds only asymptotically, which is why the improvement grows with $n$.
+\end{solution}
+
+
 \clearpage
 \section*{References}
 \addcontentsline{toc}{section}{References}
@@ -1309,12 +1801,17 @@ Brooks/Cole.
 % Long journal names leave no good break point without hyphenation.
 \sloppy
 \begin{enumerate}
+\item Aitken, A. C. (1926), On Bernoulli's numerical solution of algebraic equations, \emph{Proceedings of the Royal Society
+of Edinburgh}, 46, 289--305.
 \item Dowell, M., and Jarratt, P. (1971), A modified regula falsi method for computing the root of an equation, \emph{BIT
 Numerical Mathematics}, 11, 168--174.
 \item Goldberg, D. (1991), What every computer scientist should know about floating-point arithmetic, \emph{ACM Computing Surveys}, 23,
 5--48.
 \item IEEE (1985), \emph{IEEE Standard for Binary Floating-Point Arithmetic}, ANSI/IEEE Std 754-1985, New York, Institute of Electrical
 and Electronics Engineers.
+\item Newton, I. (1711), \emph{De analysi per aequationes numero terminorum infinitas}, London (written 1669).
+\item Raphson, J. (1690), \emph{Analysis Aequationum Universalis}, London.
+\item Steffensen, J. F. (1933), Remarks on iteration, \emph{Skandinavisk Aktuarietidskrift}, 16, 64--72.
 \item Taylor, B. (1715), \emph{Methodus Incrementorum Directa et Inversa}, London.
 \item Wilkinson, J. H. (1963), \emph{Rounding Errors in Algebraic Processes}, Englewood Cliffs, NJ, Prentice-Hall.
 \end{enumerate}
