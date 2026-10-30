@@ -1,0 +1,183 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>4.4 Matrix factorization — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse2.html">Solutions of Equations in One Variable</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu5.html">The bisection method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu6.html">The method of false position</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu7.html">Fixed-point iteration</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu8.html">Newton’s method and the secant method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu9.html">Multiple roots and accelerating convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse3.html">Zeros of Polynomials and Complex Roots</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu11.html">Complex numbers and the roots of polynomials</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu12.html">Horner’s method and deflation</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu13.html">Müller’s method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu14.html">Newton’s method in the complex plane</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu15.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse4.html">Direct Methods for Solving Linear Systems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu16.html">Linear systems and matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu17.html">Gaussian elimination and backward substitution</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu18.html">Pivoting strategies</a></li>
+<li class="sub"><a class="current" href="numerical-methods-and-analysissu19.html">Matrix factorization</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu20.html">Special types of matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu21.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 2871 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu20.html'>next</a>] [<a href='numerical-methods-and-analysissu18.html'>prev</a>] [<a href='numerical-methods-and-analysissu18.html#tailnumerical-methods-and-analysissu18.html'>prev-tail</a>] [<a href='#tailnumerical-methods-and-analysissu19.html'>tail</a>] [<a href='numerical-methods-and-analysisse4.html#numerical-methods-and-analysissu19.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>4.4   </span> <a id='x25-240004.4'></a>Matrix factorization</h4>
+<!-- l. 2874 --><p class='noindent'>Often several systems with the same matrix \(A\) and different right-hand sides must be solved. Gaussian
+elimination repeats the expensive \(O(n^3)\) work on \(A\) for every \(\mathbf b\). Recording the elimination once, as a
+factorization \(A = LU\), reduces each further solution to \(O(n^2)\) operations.
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 2878 --><p class='noindent'><span class='head'>
+<a id='x25-24001r1'></a>
+<span class='cmbx-10x-x-109'>Theorem 4.4.1 </span>(LU factorization)<span class='cmbx-10x-x-109'>.</span>  </span> If Gaussian elimination can be performed on \(A\mathbf x = \mathbf b\) without
+row interchanges, then \(A = LU\), where \(U\) is the upper triangular matrix produced by the elimination and
+\(L\) is the unit lower triangular matrix (ones on the diagonal) whose entries below the diagonal are
+the multipliers:
+                                           \[L = \begin {pmatrix}1&amp;0&amp;\cdots&amp; 0\\ m_{21}&amp;1&amp;\cdots&amp; 0\\ \vdots&amp;&amp; \ddots&amp; \vdots \\ m_{n1}&amp;m_{n2}&amp;\cdots&amp; 1\end {pmatrix}.\]
+</p>
+</div>
+<!-- l. 2884 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2887 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>Let \(\mathbf m^{(k)} = (0,\dots ,0,m_{k+1,k},\dots ,m_{nk})^T\), with zeros in its first \(k\) entries, and \(\mathbf e_k\) the \(k\)th unit vector. Stage \(k\) of elimination subtracts
+\(m_{jk}\) times row \(k\) from row \(j\) for \(j&gt;k\), which is left multiplication by
+                                                                                      
+                                                                                      
+                                           \[M^{(k)} = I-\mathbf m^{(k)}\mathbf e_k^T .\]
+ So \(U = M^{(n-1)}\cdots M^{(2)}M^{(1)}A\). Since \(\mathbf e_k^T\mathbf m^{(k)} = 0\),
+                                           \[(I-\mathbf m^{(k)}\mathbf e_k^T)(I+\mathbf m^{(k)}\mathbf e_k^T) = I-\mathbf m^{(k)}(\mathbf e_k^T\mathbf m^{(k)})\mathbf e_k^T = I,\]
+ so \(\left (M^{(k)}\right )^{-1} = I+\mathbf m^{(k)}\mathbf e_k^T\), and
+                                           \[A = \left (M^{(1)}\right )^{-1}\left (M^{(2)}\right )^{-1}\cdots \left (M^{(n-1)}\right )^{-1}U .\]
+ Multiplying out the product, every cross term contains a factor \(\mathbf e_j^T\mathbf m^{(k)}\) with \(j&lt;k\), which is \(0\) because the
+first \(k\) entries of \(\mathbf m^{(k)}\) are zero. Hence the product equals \(I+\sum _k\mathbf m^{(k)}\mathbf e_k^T\), which is exactly \(L\).                              □
+</p>
+</div>
+<!-- l. 2898 --><p class='noindent'>Once \(A = LU\) is known, \(A\mathbf x = \mathbf b\) is solved in two triangular steps: first \(L\mathbf y = \mathbf b\) by <span class='cmbx-10x-x-109'>forward substitution</span>, then \(U\mathbf x = \mathbf y\) by backward
+substitution. Each costs about \(n^2\) operations.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 2901 --><p class='noindent'><span class='head'>
+<a id='x25-24002r2'></a>
+<span class='cmbx-10x-x-109'>Example 4.4.2.</span>  </span> Factor the matrix of Example <a href='numerical-methods-and-analysissu17.html#x23-22002r1'>4.2.1<!-- tex4ht:ref: exa:gauss4  --></a> and use the factors to solve \(A\mathbf x = (8,7,14,-7)^T\).
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 2904 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2906 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The elimination in Example <a href='numerical-methods-and-analysissu17.html#x23-22002r1'>4.2.1<!-- tex4ht:ref: exa:gauss4  --></a> used the multipliers \(m_{21} = 2\), \(m_{31} = 3\), \(m_{41} = -1\), \(m_{32} = 4\), \(m_{42} = -3\), \(m_{43} = 0\), so \begin {align*}  A &amp;= \begin {pmatrix}1&amp;1&amp;0&amp;3\\2&amp;1&amp;-1&amp;1\\3&amp;-1&amp;-1&amp;2\\-1&amp;2&amp;3&amp;-1\end {pmatrix}\\ &amp;= \begin {pmatrix}1&amp;0&amp;0&amp;0\\2&amp;1&amp;0&amp;0\\3&amp;4&amp;1&amp;0\\-1&amp;-3&amp;0&amp;1\end {pmatrix}\begin {pmatrix}1&amp;1&amp;0&amp;3\\0&amp;-1&amp;-1&amp;-5\\0&amp;0&amp;3&amp;13\\0&amp;0&amp;0&amp;-13\end {pmatrix} = LU .  \end {align*}
+</p><!-- l. 2913 --><p class='noindent'>Forward substitution in \(L\mathbf y = \mathbf b\):
+                                           \[y_1 = 8,\quad y_2 = 7-2y_1 = -9,\quad y_3 = 14-3y_1-4y_2 = 26,\quad y_4 = -7+y_1+3y_2 = -26 .\]
+ Backward substitution in \(U\mathbf x = \mathbf y\): \(x_4 = 2\), \(x_3 = \frac {26-13x_4}{3} = 0\), \(x_2 = \frac {-9+x_3+5x_4}{-1} = -1\), \(x_1 = 8-x_2-3x_4 = 3\). So \(\mathbf x = (3,-1,0,2)^T\).
+</p>
+</div>
+<div class='newtheorem nt-example'>
+<!-- l. 2919 --><p class='noindent'><span class='head'>
+<a id='x25-24003r3'></a>
+<span class='cmbx-10x-x-109'>Example 4.4.3.</span>  </span> Compare the cost of solving \(k\) systems \(A\mathbf x = \mathbf b_j\) (\(j = 1,\dots ,k\)) by repeated Gaussian elimination
+and by one LU factorization, for \(n = 100\) and \(k = 100\).
+</p>
+</div>
+<!-- l. 2923 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2925 --><p class='noindent'><span class='head'>
+                                                                                      
+                                                                                      
+<span class='cmti-10x-x-109'>Solution.</span> </span> Repeated elimination costs about \(k\cdot \frac {n^3}{3}\) multiplications, that is \(3.3\times 10^7\). One factorization costs
+about \(\frac {n^3}{3}\) and each pair of triangular solves about \(n^2\), a total of about \(\frac {n^3}{3}+kn^2 = 3.3\times 10^5+10^6 = 1.3\times 10^6\): some \(25\) times less. This is why
+the inverse matrix is almost never computed: \(A^{-1}\mathbf b\) costs more than the triangular solves and is less
+accurate.
+</p>
+</div>
+<!-- l. 2932 --><p class='noindent'><span class='cmbx-10x-x-109'>Row interchanges</span>
+</p><!-- l. 2933 --><p class='noindent'>If row interchanges are needed, they can be performed in advance. A <span class='cmbx-10x-x-109'>permutation matrix</span> \(P\) is the
+identity matrix with its rows reordered; \(PA\) reorders the rows of \(A\) in the same way.
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 2936 --><p class='noindent'><span class='head'>
+<a id='x25-24004r4'></a>
+<span class='cmbx-10x-x-109'>Theorem 4.4.4.</span>  </span> If \(A\) is nonsingular, there is a permutation matrix \(P\) such that \(PA = LU\), with \(L\) unit lower
+triangular and \(U\) upper triangular. To solve \(A\mathbf x = \mathbf b\), solve \(L\mathbf y = P\mathbf b\) and then \(U\mathbf x = \mathbf y\).
+</p>
+</div>
+<!-- l. 2940 --><p class='noindent'>
+</p><!-- l. 2942 --><p class='noindent'>The permutation simply records the interchanges made during Gaussian elimination (with or without
+pivoting); applying them to \(A\) first, elimination needs none.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 2945 --><p class='noindent'><span class='head'>
+<a id='x25-24005r5'></a>
+<span class='cmbx-10x-x-109'>Example 4.4.5.</span>  </span> Find a factorization \(PA = LU\) for the matrix of Example <a href='numerical-methods-and-analysissu17.html#x23-22003r2'>4.2.2<!-- tex4ht:ref: exa:gaussswap  --></a>.
+</p>
+</div>
+<!-- l. 2948 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2950 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> Elimination needed one interchange, of rows \(2\) and \(3\). So take
+                                                                                      
+                                                                                      
+                                           \[P = \begin {pmatrix}1&amp;0&amp;0&amp;0\\0&amp;0&amp;1&amp;0\\0&amp;1&amp;0&amp;0\\0&amp;0&amp;0&amp;1\end {pmatrix},\qquad PA = \begin {pmatrix}1&amp;-1&amp;2&amp;-1\\1&amp;1&amp;1&amp;0\\2&amp;-2&amp;3&amp;-3\\1&amp;-1&amp;4&amp;3\end {pmatrix}.\]
+ Elimination on \(PA\) needs no interchange and gives
+                                           \[L = \begin {pmatrix}1&amp;0&amp;0&amp;0\\1&amp;1&amp;0&amp;0\\2&amp;0&amp;1&amp;0\\1&amp;0&amp;-2&amp;1\end {pmatrix},\qquad U = \begin {pmatrix}1&amp;-1&amp;2&amp;-1\\0&amp;2&amp;-1&amp;1\\0&amp;0&amp;-1&amp;-1\\0&amp;0&amp;0&amp;2\end {pmatrix}.\]
+</p>
+</div>
+<!-- l. 2957 --><p class='noindent'><span class='cmbx-10x-x-109'>Direct computation of the factors</span>
+</p><!-- l. 2958 --><p class='noindent'>The factors can be computed directly from the equations \(a_{ij} = \sum _kl_{ik}u_{kj}\), row by row of \(U\) and column by column of \(L\).
+With \(l_{ii} = 1\) (<span class='cmbx-10x-x-109'>Doolittle’s method</span>):
+                                           \[u_{ij} = a_{ij}-\sum _{k=1}^{i-1}l_{ik}u_{kj}\quad (j\geq i),\qquad l_{ji} = \frac 1{u_{ii}}\left (a_{ji}-\sum _{k=1}^{i-1}l_{jk}u_{ki}\right )\quad (j&gt;i).\]
+ <span class='cmbx-10x-x-109'>Crout’s method </span>instead takes \(u_{ii} = 1\) and puts the pivots on the diagonal of \(L\). If \(A = LU\) (Doolittle) and \(D\) is the
+diagonal of \(U\), then \(A = (LD)(D^{-1}U)\) is the Crout factorization.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 2964 --><p class='noindent'><span class='head'>
+<a id='x25-24006r6'></a>
+<span class='cmbx-10x-x-109'>Example 4.4.6.</span>  </span> Find the Doolittle and Crout factorizations of \(A = \begin {pmatrix}2&amp;-1&amp;1\\3&amp;3&amp;9\\3&amp;3&amp;5\end {pmatrix}\).
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 2967 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2969 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> <span class='cmti-10x-x-109'>Doolittle. </span>Row 1 of \(U\) is row 1 of \(A\): \(u_{11} = 2\), \(u_{12} = -1\), \(u_{13} = 1\). Column 1 of \(L\): \(l_{21} = \frac 32\), \(l_{31} = \frac 32\). Row 2 of \(U\): \(u_{22} = 3-\frac 32(-1) = \frac 92\), \(u_{23} = 9-\frac 32(1) = \frac {15}{2}\). Column 2 of \(L\): \(l_{32} = \frac {3-\frac 32(-1)}{9/2} = 1\).
+Finally \(u_{33} = 5-\frac 32(1)-1\cdot \frac {15}{2} = -4\). So
+                                           \[L = \begin {pmatrix}1&amp;0&amp;0\\\frac 32&amp;1&amp;0\\\frac 32&amp;1&amp;1\end {pmatrix},\qquad U = \begin {pmatrix}2&amp;-1&amp;1\\0&amp;\frac 92&amp;\frac {15}2\\0&amp;0&amp;-4\end {pmatrix}.\]
+ <span class='cmti-10x-x-109'>Crout. </span>With \(D = \operatorname {diag}(2,\frac 92,-4)\),
+                                           \[LD = \begin {pmatrix}2&amp;0&amp;0\\3&amp;\frac 92&amp;0\\3&amp;\frac 92&amp;-4\end {pmatrix},\qquad D^{-1}U = \begin {pmatrix}1&amp;-\frac 12&amp;\frac 12\\0&amp;1&amp;\frac 53\\0&amp;0&amp;1\end {pmatrix}.\]
+ In both cases \(\det A = 2\cdot \frac 92\cdot (-4) = -36\), the product of the pivots.
+</p>
+</div>
+                                                                                      
+                                                                                      
+<!-- l. 2980 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu20.html'>next</a>] [<a href='numerical-methods-and-analysissu18.html'>prev</a>] [<a href='numerical-methods-and-analysissu18.html#tailnumerical-methods-and-analysissu18.html'>prev-tail</a>] [<a href='numerical-methods-and-analysissu19.html'>front</a>] [<a href='numerical-methods-and-analysisse4.html#numerical-methods-and-analysissu19.html'>up</a>] </p></div>
+<!-- l. 2980 --><p class='noindent'><a id='tailnumerical-methods-and-analysissu19.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="numerical-methods-and-analysissu18.html">&larr; Previous</a><a class="up" href="numerical-methods-and-analysisse4.html#numerical-methods-and-analysissu19.html">Contents</a><a class="next" href="numerical-methods-and-analysissu20.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/4-4-matrix-factorization" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
