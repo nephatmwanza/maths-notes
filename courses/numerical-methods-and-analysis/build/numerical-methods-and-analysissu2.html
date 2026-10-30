@@ -1,0 +1,288 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>1.2 Round-off errors and computer arithmetic — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="current" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 231 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu3.html'>next</a>] [<a href='numerical-methods-and-analysissu1.html'>prev</a>] [<a href='numerical-methods-and-analysissu1.html#tailnumerical-methods-and-analysissu1.html'>prev-tail</a>] [<a href='#tailnumerical-methods-and-analysissu2.html'>tail</a>] [<a href='numerical-methods-and-analysisse1.html#numerical-methods-and-analysissu2.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>1.2   </span> <a id='x5-40001.2'></a>Round-off errors and computer arithmetic</h4>
+<!-- l. 234 --><p class='noindent'><span class='cmbx-10x-x-109'>Floating-point numbers</span>
+</p><!-- l. 235 --><p class='noindent'>A computer stores a real number in <span class='cmbx-10x-x-109'>floating-point </span>form
+                                           \[\pm \,(0.d_1d_2\ldots d_t)_\beta \times \beta ^{e} = \pm \left (\frac {d_1}{\beta }+\frac {d_2}{\beta ^2}+\dots +\frac {d_t}{\beta ^t}\right )\beta ^e,\]
+ where \(\beta \) is the <span class='cmbx-10x-x-109'>base</span>, \(t\) the number of digits of the <span class='cmbx-10x-x-109'>mantissa</span>, \(0\leq d_i\leq \beta -1\), and the <span class='cmbx-10x-x-109'>exponent</span> \(e\) lies in a fixed range \(L\leq e\leq U\).
+The number is <span class='cmbx-10x-x-109'>normalized </span>if \(d_1\neq 0\). Only finitely many numbers have this form, and they are not evenly
+spaced: between consecutive powers of \(\beta \) there are always the same number of them, so the gaps grow
+with the size of the numbers.
+</p>
+<figure class='figure'> 
+
+                                                                                      
+                                                                                      
+<a id='x5-4001r1'></a>
+                                                                                      
+                                                                                      
+<!-- l. 244 --><p class='noindent'><img alt='M0121272gggβC11xcrcaaaah.2.5hohcppp=o5ouoh2ppnpi181412,ppdpn tiinininenggg=g3dn:rouvpmthesber teshrtwueses elxvrtaeorar pueond nsdigoitiitivntseg;e rvnuoemunbnledyrinsgsp(0taa.kc1eed2sdd t3h)e2 n×ea2er,er en=ei0g,h1b,o2u,r and zero  ' src='numerical-methods-and-analysis0x.svg' />
+</p>
+<figcaption class='caption'><span class='id'>Figure 1: </span><span class='content'>Top: in a floating-point system the spacing doubles at each power of the base, so the
+<span class='cmti-10x-x-109'>relative </span>spacing stays about the same. Bottom: a real number \(x\) between two machine numbers
+is replaced by the one below it (chopping) or by the nearer one (rounding).</span></figcaption><!-- tex4ht:label?: x5-4001r1  -->
+                                                                                      
+                                                                                      
+</figure>
+<div class='newtheorem nt-definition'>
+<!-- l. 276 --><p class='noindent'><span class='head'>
+<a id='x5-4002r1'></a>
+<span class='cmbx-10x-x-109'>Definition 1.2.1.</span>  </span>The <span class='cmbx-10x-x-109'>IEEE 754 double-precision </span>format, used by almost all present-day
+computers, stores a number in 64 bits: one sign bit \(s\), an 11-bit exponent \(c\) and a 52-bit fraction
+\(f\), representing
+                                           \[(-1)^s\,2^{c-1023}\,(1+f), \qquad 0\leq f&lt;1 .\]
+ The leading \(1\) is not stored, so the mantissa effectively has 53 binary digits.
+</p>
+</div>
+<!-- l. 281 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 283 --><p class='noindent'><span class='head'>
+<a id='x5-4003r2'></a>
+<span class='cmbx-10x-x-109'>Example 1.2.2.</span>  </span>Decode the machine number
+                                           \[0\ \ 10000000011\ \ 1011100100010000\ldots 0 .\]
+</p>
+</div>
+<!-- l. 286 --><p class='noindent'>
+</p>
+                                                                                      
+                                                                                      
+<div class='proof'>
+<!-- l. 288 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The sign bit is \(0\), so the number is positive. The exponent is \(c = 2^{10}+2^1+2^0 = 1027\), so the power is \(2^{1027-1023} = 2^4\). The
+fraction is
+                                           \[f = \frac 12+\frac 18+\frac 1{16}+\frac 1{32}+\frac 1{256}+\frac 1{4096} = 0.72290039\ldots \]
+ Hence the number is \(2^4(1+f) = 16\times 1.722900390625 = 27.56640625\). Its neighbours in the format differ from it by \(2^{4-52}\approx 3.6\times 10^{-15}\), and every real number
+within half that distance of it is stored as \(27.56640625\).
+</p>
+</div>
+<div class='newtheorem nt-note'>
+<!-- l. 296 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>In double precision the largest number is \((2-2^{-52})2^{1023}\approx 1.8\times 10^{308}\) and the smallest normalized positive number is
+\(2^{-1022}\approx 2.2\times 10^{-308}\). Results larger than the first cause <span class='cmbx-10x-x-109'>overflow</span>; results smaller than the second cause <span class='cmbx-10x-x-109'>underflow</span>.
+The spacing of the numbers next to \(1\) is \(\varepsilon _{\text {mach}} = 2^{-52}\approx 2.22\times 10^{-16}\), the <span class='cmbx-10x-x-109'>machine epsilon</span>. Double precision therefore
+carries about \(16\) significant decimal digits.
+</p>
+</div>
+<!-- l. 301 --><p class='noindent'>
+</p><!-- l. 303 --><p class='noindent'>For hand calculation it is convenient to work with \(k\)-digit decimal numbers \(\pm 0.d_1d_2\ldots d_k\times 10^n\), \(d_1\neq 0\). Any positive real number
+can be written
+                                           \[y = 0.d_1d_2\ldots d_kd_{k+1}d_{k+2}\ldots \times 10^n .\]
+ Its floating-point form \(\fl (y)\) is obtained by <span class='cmbx-10x-x-109'>chopping</span>, which simply discards the digits \(d_{k+1}d_{k+2}\ldots \), or by <span class='cmbx-10x-x-109'>rounding</span>,
+                                                                                      
+                                                                                      
+which adds \(5\times 10^{n-(k+1)}\) to \(y\) and then chops.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 309 --><p class='noindent'><span class='head'>
+<a id='x5-4004r3'></a>
+<span class='cmbx-10x-x-109'>Example 1.2.3.</span>  </span>Give the five-digit chopping and rounding values of \(\pi = 0.314159265\ldots \times 10^1\).
+</p>
+</div>
+<!-- l. 311 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 313 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> Chopping: \(\fl (\pi ) = 0.31415\times 10^1 = 3.1415\). Rounding: the sixth digit is \(9\geq 5\), so the fifth digit is increased: \(\fl (\pi ) = 0.31416\times 10^1 = 3.1416\).
+</p>
+</div>
+<!-- l. 318 --><p class='noindent'><span class='cmbx-10x-x-109'>Measuring error</span>
+</p>
+<div class='newtheorem nt-definition'>
+<!-- l. 320 --><p class='noindent'><span class='head'>
+<a id='x5-4005r4'></a>
+<span class='cmbx-10x-x-109'>Definition 1.2.4.</span>  </span>Let \(p^*\) be an approximation to \(p\). The <span class='cmbx-10x-x-109'>absolute error </span>is \(|p - p^*|\) and, if \(p\neq 0\), the <span class='cmbx-10x-x-109'>relative
+error </span>is \(\dfrac {|p-p^*|}{|p|}\). The <span class='cmbx-10x-x-109'>percentage error </span>is \(100\) times the relative error.
+</p>
+</div>
+<!-- l. 323 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 325 --><p class='noindent'><span class='head'>
+<a id='x5-4006r5'></a>
+<span class='cmbx-10x-x-109'>Example 1.2.5.</span>  </span> Compare the absolute and relative errors of (a) \(p = 0.3000\times 10^1\) approximated by \(p^* = 0.3100\times 10^1\); (b) \(p = 0.3000\times 10^{-3}\) by \(p^* = 0.3100\times 10^{-3}\);
+(c) \(p = 0.3000\times 10^4\) by \(p^* = 0.3100\times 10^4\).
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 329 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 331 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> In all three cases the relative error is \(\frac {0.0100}{0.3000} = 0.\overline {3}\times 10^{-1}\), a percentage error of \(3.\overline {3}\%\). The absolute errors are
+\(0.1\), \(0.1\times 10^{-4}\) and \(0.1\times 10^3 = 100\). The absolute error depends on the size of the numbers; the relative error does not. For
+this reason the relative error is the better measure of accuracy, and it is the one floating-point
+arithmetic controls.
+</p>
+</div>
+<div class='newtheorem nt-definition'>
+<!-- l. 338 --><p class='noindent'><span class='head'>
+<a id='x5-4007r6'></a>
+<span class='cmbx-10x-x-109'>Definition 1.2.6.</span>  </span>The  number  \(p^*\)  approximates  \(p\)  to  \(t\)  <span class='cmbx-10x-x-109'>significant  digits  </span>if  \(t\)  is  the  largest
+non-negative integer for which
+                                           \[\frac {|p-p^*|}{|p|}\leq 5\times 10^{-t}.\]
+</p>
+</div>
+<!-- l. 341 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 343 --><p class='noindent'><span class='head'>
+<a id='x5-4008r7'></a>
+<span class='cmbx-10x-x-109'>Example 1.2.7.</span>  </span>How many significant digits do \(\frac {22}{7}\), \(3.14\) and \(3.1416\) give for \(\pi \)?
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 345 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 347 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The relative errors are </p>
+<div class='center'>
+<!-- l. 349 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-1'><colgroup id='TBL-1-1g'><col id='TBL-1-1' /><col id='TBL-1-2' /><col id='TBL-1-3' /></colgroup><tr class='hline'><td></td><td></td><td></td></tr><tr id='TBL-1-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-1-1' style='white-space:nowrap; text-align:left;'> \(p^*\) </td><td class='td11' id='TBL-1-1-2' style='white-space:nowrap; text-align:center;'> relative error  </td><td class='td11' id='TBL-1-1-3' style='white-space:nowrap; text-align:center;'> significant digits  </td>
+</tr><tr class='hline'><td></td><td></td><td></td></tr><tr id='TBL-1-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-2-1' style='white-space:nowrap; text-align:left;'> \(22/7 = 3.142857\ldots \)  </td><td class='td11' id='TBL-1-2-2' style='white-space:nowrap; text-align:center;'>      \(4.02\times 10^{-4}\)      </td><td class='td11' id='TBL-1-2-3' style='white-space:nowrap; text-align:center;'>        \(3\)        </td></tr><tr id='TBL-1-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-3-1' style='white-space:nowrap; text-align:left;'>  \(3.14\) </td><td class='td11' id='TBL-1-3-2' style='white-space:nowrap; text-align:center;'>  \(5.07\times 10^{-4}\) </td><td class='td11' id='TBL-1-3-3' style='white-space:nowrap; text-align:center;'>  \(3\)</td>
+</tr><tr id='TBL-1-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-4-1' style='white-space:nowrap; text-align:left;'> \(3.1416\)  </td><td class='td11' id='TBL-1-4-2' style='white-space:nowrap; text-align:center;'>      \(2.34\times 10^{-6}\)      </td><td class='td11' id='TBL-1-4-3' style='white-space:nowrap; text-align:center;'>        \(5\)        </td>
+</tr><tr class='hline'><td></td><td></td><td></td></tr></table>                                                                                      </div></div>
+<!-- l. 360 --><p class='noindent'>For example \(4.02\times 10^{-4}\leq 5\times 10^{-3}\) but \(4.02\times 10^{-4}&gt;5\times 10^{-4}\), so \(\frac {22}{7}\) gives three significant digits. The familiar fraction is no better than
+\(3.14\).
+</p>
+</div>
+<div class='newtheorem nt-theorem'>
+<!-- l. 364 --><p class='noindent'><span class='head'>
+<a id='x5-4009r8'></a>
+<span class='cmbx-10x-x-109'>Theorem 1.2.8.</span>  </span> Let \(y\neq 0\) and let \(\fl (y)\) be its \(k\)-digit decimal floating-point form. Then
+                                           \[\frac {|y-\fl (y)|}{|y|}\leq \begin {cases}10^{-k+1}, &amp; \text {chopping},\\[2pt] \tfrac 12\times 10^{-k+1}, &amp; \text {rounding}.\end {cases}\]
+</p>
+</div>
+<!-- l. 368 --><p class='noindent'>
+</p>
+<div class='proof'>
+                                                                                      
+                                                                                      
+<!-- l. 371 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>Write \(y = 0.d_1d_2\ldots d_kd_{k+1}\ldots \times 10^n\) with \(d_1\neq 0\). For chopping,
+                                           \[\frac {|y-\fl (y)|}{|y|} = \frac {0.d_{k+1}d_{k+2}\ldots \times 10^{n-k}}{0.d_1d_2\ldots \times 10^n} = \frac {0.d_{k+1}d_{k+2}\ldots }{0.d_1d_2\ldots }\times 10^{-k}.\]
+ The numerator is less than \(1\) and, since \(d_1\geq 1\), the denominator is at least \(0.1\). So the ratio is at most \(\frac {1}{0.1}\times 10^{-k} = 10^{-k+1}\).
+For rounding, \(\fl (y)\) is the nearer of the two \(k\)-digit neighbours of \(y\), which are \(10^{n-k}\) apart, so \(|y-\fl (y)|\leq \frac 12\times 10^{n-k}\), and dividing
+by \(|y|\geq 0.1\times 10^n\) gives the bound \(\frac 12\times 10^{-k+1}\).                                                                                               □
+</p>
+</div>
+<!-- l. 378 --><p class='noindent'>The number \(u = \frac 12\beta ^{1-t}\) (here \(\frac 12\times 10^{1-k}\)) is the <span class='cmbx-10x-x-109'>unit round-off</span>. The theorem says exactly that
+                                           \[\fl (y) = y(1+\delta ),\qquad |\delta |\leq u,\]
+ and computer arithmetic is designed so that the same holds for each operation: if \(\odot \) is \(+\), \(-\), \(\times \) or \(\div \), then \(\fl (x\odot y) = (x\odot y)(1+\delta )\)
+with \(|\delta |\leq u\). In this model each single operation is accurate; errors arise from accumulating many operations
+and, above all, from the next phenomenon.
+</p><!-- l. 384 --><p class='noindent'><span class='cmbx-10x-x-109'>Finite-digit arithmetic and loss of significance</span>
+</p><!-- l. 386 --><p class='noindent'>To model a \(k\)-digit computer we replace each arithmetic operation by \begin {align*}  x\oplus y &amp;= \fl (\fl (x)+\fl (y)), &amp; x\ominus y &amp;= \fl (\fl (x)-\fl (y)),\\ x\otimes y &amp;= \fl (\fl (x)\times \fl (y)), &amp; x\oslash y &amp;= \fl (\fl (x)\div \fl (y)).  \end {align*}
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 392 --><p class='noindent'><span class='head'>
+<a id='x5-4010r9'></a>
+<span class='cmbx-10x-x-109'>Example 1.2.9.</span>  </span> Let \(x = \frac 57\), \(y = \frac 13\) and \(u = 0.714251\), \(v = 98765.9\), \(w = 0.111111\times 10^{-4}\). Use five-digit chopping to compute \(x\oplus y\), \(x\ominus u\) and \((x\ominus u)\oslash w\), and find the relative
+errors.
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 396 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 398 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> Here \(\fl (x) = 0.71428\), \(\fl (y) = 0.33333\) and \(\fl (u) = 0.71425\).
+</p><!-- l. 401 --><p class='noindent'>\(x\oplus y = \fl (1.04761) = 0.10476\times 10^1\). The true value is \(\frac {22}{21} = 1.047619\ldots \), so the relative error is \(1.8\times 10^{-5}\): well within the bound \(10^{-4}\) of Theorem <a href='#x5-4009r8'>1.2.8<!-- tex4ht:ref: thm:fl  --></a>.
+</p><!-- l. 404 --><p class='noindent'>\(x\ominus u = 0.71428 - 0.71425 = 0.30000\times 10^{-4}\). The true value is \(x - u = 0.347143\times 10^{-4}\), so the relative error is
+                                           \[\frac {0.347143-0.30000}{0.347143} = 0.136 .\]
+ A single subtraction has produced an answer that is \(14\%\) wrong, although both operands were
+correct to five digits.
+</p><!-- l. 408 --><p class='noindent'>\((x\ominus u)\oslash w = \frac {0.30000\times 10^{-4}}{0.11111\times 10^{-4}} = 0.27000\times 10^1\), against the true value \(3.1243\): the large relative error of the difference is carried into the quotient.
+</p>
+</div>
+<!-- l. 412 --><p class='noindent'>What happened in the subtraction is called <span class='cmbx-10x-x-109'>loss of significance </span>or <span class='cmbx-10x-x-109'>cancellation</span>. The leading four
+digits of \(\fl (x) = 0.71428\) and \(\fl (u) = 0.71425\) agree, so they cancel, and the result has only one significant digit: the digit that came
+from the rounding errors already present in \(x\) and \(u\). Subtracting nearly equal numbers does not
+create error, but it exposes the errors the numbers already carried, by making them large
+relative to the answer. Good numerical practice rearranges a calculation to avoid such
+subtractions.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 418 --><p class='noindent'><span class='head'>
+<a id='x5-4011r10'></a>
+<span class='cmbx-10x-x-109'>Example 1.2.10 </span>(The quadratic formula)<span class='cmbx-10x-x-109'>.</span>  </span> The roots of \(x^2+62.10x+1 = 0\) are \(x_1 = -0.01610724\) and \(x_2 = -62.08390\), to seven significant digits.
+Compute them by the quadratic formula in four-digit rounding arithmetic, and show how to
+avoid the loss of accuracy.
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 422 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 424 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> In four-digit rounding,
+                                           \[b^2 - 4ac = 3856 - 4 = 3852,\qquad \sqrt {3852} = 62.06 .\]
+ The usual formula gives \begin {gather*}  x_1 = \frac {-62.10+62.06}{2} = \frac {-0.04000}{2} = -0.02000,\\ x_2 = \frac {-62.10-62.06}{2} = -62.08 .  \end {gather*} The relative error in \(x_2\) is \(2.6\times 10^{-4}\), but in \(x_1\) it is
+                                           \[\frac {|-0.01611+0.02000|}{0.01611} = 0.24 ,\]
+ because \(-b+\sqrt {b^2-4ac}\) subtracts nearly equal numbers. Rationalizing the numerator removes the subtraction:
+                                           \[x_1 = \frac {-b+\sqrt {b^2-4ac}}{2a}\cdot \frac {-b-\sqrt {b^2-4ac}}{-b-\sqrt {b^2-4ac}} = \frac {-2c}{b+\sqrt {b^2-4ac}} = \frac {-2}{62.10+62.06} = \frac {-2}{124.2} = -0.01610,\]
+ with relative error \(4.5\times 10^{-4}\). The rule is: when \(b&gt;0\) compute \(x_2\) from the usual formula and \(x_1\) from the rationalized
+one (or from \(x_1x_2 = c/a\)); when \(b&lt;0\), do the opposite.
+                                                                                      
+                                                                                      
+</p>
+</div>
+<div class='newtheorem nt-example'>
+<!-- l. 440 --><p class='noindent'><span class='head'>
+<a id='x5-4012r11'></a>
+<span class='cmbx-10x-x-109'>Example 1.2.11 </span>(Nested multiplication)<span class='cmbx-10x-x-109'>.</span>  </span> Evaluate \(f(x) = x^3-6.1x^2+3.2x+1.5\) at \(x = 4.71\) using three-digit arithmetic, both
+directly and in the nested form \(f(x) = ((x-6.1)x+3.2)x+1.5\). The exact value is \(f(4.71) = -14.263899\).
+</p>
+</div>
+<!-- l. 444 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 446 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The intermediate results are: </p>
+<div class='center'>
+<!-- l. 448 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-2'><colgroup id='TBL-2-1g'><col id='TBL-2-1' /><col id='TBL-2-2' /><col id='TBL-2-3' /><col id='TBL-2-4' /><col id='TBL-2-5' /><col id='TBL-2-6' /><col id='TBL-2-7' /></colgroup><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-1-1' style='white-space:nowrap; text-align:left;'>         </td><td class='td11' id='TBL-2-1-2' style='white-space:nowrap; text-align:center;'> \(x^2\) </td><td class='td11' id='TBL-2-1-3' style='white-space:nowrap; text-align:center;'> \(x^3\) </td><td class='td11' id='TBL-2-1-4' style='white-space:nowrap; text-align:center;'> \(6.1x^2\) </td><td class='td11' id='TBL-2-1-5' style='white-space:nowrap; text-align:center;'> \(3.2x\) </td><td class='td11' id='TBL-2-1-6' style='white-space:nowrap; text-align:center;'> direct  </td><td class='td11' id='TBL-2-1-7' style='white-space:nowrap; text-align:center;'> nested  </td></tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-2-1' style='white-space:nowrap; text-align:left;'> chopping </td><td class='td11' id='TBL-2-2-2' style='white-space:nowrap; text-align:center;'>  \(22.1\) </td><td class='td11' id='TBL-2-2-3' style='white-space:nowrap; text-align:center;'>  \(104\) </td><td class='td11' id='TBL-2-2-4' style='white-space:nowrap; text-align:center;'>  \(134\) </td><td class='td11' id='TBL-2-2-5' style='white-space:nowrap; text-align:center;'>  \(15.0\) </td><td class='td11' id='TBL-2-2-6' style='white-space:nowrap; text-align:center;'>  \(-13.5\) </td><td class='td11' id='TBL-2-2-7' style='white-space:nowrap; text-align:center;'>  \(-14.2\)</td>
+</tr><tr id='TBL-2-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-3-1' style='white-space:nowrap; text-align:left;'> rounding  </td><td class='td11' id='TBL-2-3-2' style='white-space:nowrap; text-align:center;'> \(22.2\) </td><td class='td11' id='TBL-2-3-3' style='white-space:nowrap; text-align:center;'> \(105\) </td><td class='td11' id='TBL-2-3-4' style='white-space:nowrap; text-align:center;'> \(135\) </td><td class='td11' id='TBL-2-3-5' style='white-space:nowrap; text-align:center;'> \(15.1\) </td><td class='td11' id='TBL-2-3-6' style='white-space:nowrap; text-align:center;'>   \(-13.4\)   </td><td class='td11' id='TBL-2-3-7' style='white-space:nowrap; text-align:center;'>    \(-14.3\)    </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>                                                                                      </div></div>
+<!-- l. 458 --><p class='noindent'>With chopping, the direct evaluation has relative error \(5.4\%\) and the nested one \(0.45\%\); with rounding, \(6.1\%\) and \(0.25\%\). The
+nested form uses two multiplications instead of four, so it is cheaper, and it avoids the subtraction of
+the large nearly equal numbers \(104\) and \(134\). Nested evaluation of polynomials is called <span class='cmbx-10x-x-109'>Horner’s method</span>;
+we return to it in the section on zeros of polynomials.
+</p>
+</div>
+                                                                                      
+                                                                                      
+<!-- l. 464 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu3.html'>next</a>] [<a href='numerical-methods-and-analysissu1.html'>prev</a>] [<a href='numerical-methods-and-analysissu1.html#tailnumerical-methods-and-analysissu1.html'>prev-tail</a>] [<a href='numerical-methods-and-analysissu2.html'>front</a>] [<a href='numerical-methods-and-analysisse1.html#numerical-methods-and-analysissu2.html'>up</a>] </p></div>
+<!-- l. 464 --><p class='noindent'><a id='tailnumerical-methods-and-analysissu2.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="numerical-methods-and-analysissu1.html">&larr; Previous</a><a class="up" href="numerical-methods-and-analysisse1.html#numerical-methods-and-analysissu2.html">Contents</a><a class="next" href="numerical-methods-and-analysissu3.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/1-2-round-off-errors-and-computer-arithmetic" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
