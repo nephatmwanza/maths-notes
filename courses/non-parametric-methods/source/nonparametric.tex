@@ -1214,6 +1214,175 @@ abuses of significance testing. Fix the alternative first.
 \end{note}
 
 
+\subsection{McNemar's Test for Paired Proportions}
+\label{sec:mcnemar}
+
+The sign test compares two conditions applied to the same subjects when the response
+is a measurement. Often the response is only a yes or no: a voter favours a candidate
+or does not, a patient obtains relief or does not, a specimen tests positive or
+negative. Each subject then gives a \emph{pair} of binary responses, one under each
+condition, and the question is whether the proportion answering ``yes'' differs between
+the two conditions. McNemar's test, proposed by McNemar in 1947, answers it. It is the
+sign test in another form, which is why it belongs in this chapter.
+
+The two proportions come from the same subjects, so they are not independent. The
+usual two-sample test for proportions assumes independent samples and is invalid here.
+The $\chi^{2}$ test of independence on the $2\times 2$ table answers a different
+question --- whether a subject's two responses are \emph{associated}, which they nearly
+always are --- and says nothing about whether the proportions have changed.
+
+\begin{definition}
+Let each of $n$ subjects give a binary response under condition 1 and under
+condition 2, and classify the pairs as
+\begin{center}
+\begin{tabular}{l|cc|c}
+ & Condition 2: yes & Condition 2: no & Total\\\hline
+Condition 1: yes & $a$ & $b$ & $a+b$\\
+Condition 1: no & $c$ & $d$ & $c+d$\\\hline
+Total & $a+c$ & $b+d$ & $n$
+\end{tabular}
+\end{center}
+The pairs counted by $a$ and $d$ are \emph{concordant}: the subject answered the same
+way twice. Those counted by $b$ and $c$ are \emph{discordant}. \emph{McNemar's test} of
+\[H_0:\ P(\text{yes under condition 1}) = P(\text{yes under condition 2})\]
+is based on $b$ and $c$ alone.
+\end{definition}
+
+The concordant pairs drop out for a simple reason. The proportions answering yes are
+$\frac{a+b}{n}$ under condition 1 and $\frac{a+c}{n}$ under condition 2, and their
+difference
+\[\frac{a+b}{n}-\frac{a+c}{n} = \frac{b-c}{n}\]
+does not involve $a$ or $d$ at all. A subject who answers the same way twice says
+nothing about which condition produces more yeses, just as a tied pair says nothing in
+the sign test.
+
+\begin{thm}
+Under $H_0$, and conditionally on the number of discordant pairs $m = b+c$,
+\[b\sim B\left(m, \tfrac12\right).\]
+\end{thm}
+
+\begin{proof}
+Let $p_{10}$ and $p_{01}$ be the probabilities that a subject answers yes--no and
+no--yes. Since $P(\text{yes under 1}) = p_{11}+p_{10}$ and
+$P(\text{yes under 2}) = p_{11}+p_{01}$, the null hypothesis is exactly
+$p_{10} = p_{01}$. Given that a pair is discordant, it is of the yes--no type with
+probability $\frac{p_{10}}{p_{10}+p_{01}}$, which equals $\frac12$ under $H_0$. The
+subjects are independent, so among $m$ discordant pairs the number of yes--no type is
+binomial with parameters $m$ and $\frac12$.
+\end{proof}
+
+This is the sign test. Give each discordant pair a ``$+$'' if it is yes--no and a
+``$-$'' if it is no--yes, and treat concordant pairs as ties, discarding them. Then $b$
+is the number of plus signs among $m$ untied pairs.
+
+\textbf{Test procedure.}
+\begin{enumerate}
+\item[(i).] \textbf{Small $m$ (say $m<25$): exact test.} Refer $\min(b,c)$ to
+$B\left(m,\frac12\right)$. The one-sided $p$-value is $P\left(B\left(m,\frac12\right)\leq\min(b,c)\right)$,
+and for a two-sided test double it.
+\item[(ii).] \textbf{Large $m$: $\chi^{2}$ form.} Use
+\[T = \frac{(b-c)^{2}}{b+c},\]
+which is approximately $\chi^{2}$ on one degree of freedom under $H_0$, and reject when
+$T\geq\chi^{2}_{\alpha,1}$; for $\alpha = 0.05$ this is $3.841$. With the continuity
+correction the statistic is $\frac{(|b-c|-1)^{2}}{b+c}$.
+\item[(iii).] \textbf{One-sided alternatives} use the signed form
+$Z = \frac{b-c}{\sqrt{b+c}}$ referred to $N(0,1)$; $T$ is its square.
+\end{enumerate}
+
+\begin{note}
+The $\chi^{2}$ form follows from the theorem. Under $H_0$, $b$ has mean $\frac{m}{2}$ and
+variance $\frac{m}{4}$, so
+\[Z = \frac{b-\frac{m}{2}}{\sqrt{m/4}} = \frac{2b-m}{\sqrt{m}} = \frac{b-c}{\sqrt{b+c}}
+\quad\text{and}\quad Z^{2} = \frac{(b-c)^{2}}{b+c} = T.\]
+The test depends only on the number of discordant pairs $m$, not on the sample size $n$.
+A survey of $1000$ people of whom only $12$ changed their minds is a small-sample
+problem, and the exact binomial test should be used.
+\end{note}
+
+\begin{example}
+A new rapid test and the standard laboratory test are applied to the same $40$
+specimens:
+\begin{center}
+\begin{tabular}{l|cc}
+ & Standard $+$ & Standard $-$\\\hline
+Rapid $+$ & $20$ & $8$\\
+Rapid $-$ & $2$ & $10$
+\end{tabular}
+\end{center}
+Do the two tests detect positives at the same rate? Use $\alpha = 0.05$.
+
+\textbf{Hypotheses.} $H_0$: the two tests have the same positive rate, against $H_1$:
+the rates differ.
+
+\textbf{Reduce to the discordant pairs.} $b = 8$ specimens were positive on the rapid
+test only and $c = 2$ on the standard test only, so $m = 10$. The rapid test calls
+$\frac{28}{40} = 70\%$ positive and the standard test $\frac{22}{40} = 55\%$.
+
+\textbf{Exact test.} With $m = 10$ the exact binomial test is the right one:
+\[p\text{-value} = 2P\left(B\left(10,\tfrac12\right)\leq 2\right)
+ = 2\cdot\frac{1+10+45}{1024} = \frac{112}{1024} = 0.109.\]
+
+\textbf{Decision.} Since $0.109>0.05$, $H_0$ is not rejected. Eight to two looks
+lopsided, but with only ten informative specimens a split at least that uneven occurs
+by chance about one time in nine.
+\end{example}
+
+\begin{note}
+The approximations disagree here. The uncorrected statistic is
+$T = \frac{6^{2}}{10} = 3.6$, with $p = 0.058$, and the corrected one is
+$\frac{5^{2}}{10} = 2.5$, with $p = 0.114$. The corrected value is much closer to the
+exact $0.109$. With $m = 10$ the uncorrected $\chi^{2}$ form overstates the evidence, which
+is why the exact test is preferred when the discordant pairs are few.
+\end{note}
+
+\begin{example}
+A sample of $120$ migraine sufferers each used drug A for one attack and drug B for
+another, in random order, and recorded whether the drug gave relief within two hours:
+\begin{center}
+\begin{tabular}{l|cc|c}
+ & B: relief & B: no relief & Total\\\hline
+A: relief & $50$ & $35$ & $85$\\
+A: no relief & $15$ & $20$ & $35$\\\hline
+Total & $65$ & $55$ & $120$
+\end{tabular}
+\end{center}
+Is there a difference between the drugs?
+
+\textbf{Discordant pairs.} $b = 35$ patients had relief with A only, and $c = 15$ with B
+only, so $m = 50$, large enough for the $\chi^{2}$ form:
+\[T = \frac{(35-15)^{2}}{35+15} = \frac{400}{50} = 8.0 > 3.841.\]
+$H_0$ is rejected at the $5\%$ level, and the $p$-value is $0.005$. The continuity-corrected
+value $\frac{19^{2}}{50} = 7.22$ and the exact $p$-value
+$2P\left(B\left(50,\tfrac12\right)\leq 15\right) = 0.0066$ agree.
+
+\textbf{Conclusion.} The relief rates, $\frac{85}{120} = 70.8\%$ for A and
+$\frac{65}{120} = 54.2\%$ for B, differ significantly, and drug A is the more effective.
+The $70$ patients who responded the same way to both drugs played no part in the
+decision.
+\end{example}
+
+\begin{remark}
+The test gives a decision; the size of the effect is the difference in proportions,
+estimated by $\hat\delta = \frac{b-c}{n}$. An approximate $95\%$ confidence interval is
+\[\hat\delta\pm 1.96\,\frac{1}{n}\sqrt{(b+c)-\frac{(b-c)^{2}}{n}}.\]
+In the migraine example $\hat\delta = \frac{20}{120} = 0.167$, the standard error is
+$\frac{1}{120}\sqrt{50-\frac{400}{120}} = 0.057$, and the interval is
+$(0.055,\ 0.278)$: drug A gives relief to between about $5$ and $28$ more patients in
+every hundred.
+\end{remark}
+
+\begin{note}
+\textbf{Assumptions.} The $n$ subjects are independent of one another, each gives one
+response under each condition, and each response falls into one of two categories.
+Nothing is assumed about how the two responses of one subject are related; that
+dependence is the reason for the test. Where the order of the conditions could matter,
+as with two drugs or before and after, it should be randomised or the comparison
+interpreted with care. With more than two conditions applied to the same subjects
+--- yes or no under each of $k$ treatments --- the extension is Cochran's $Q$ test,
+which reduces to McNemar's test when $k = 2$.
+\end{note}
+
+
 \subsection{Practice Problems}
 
 \begin{problem}
@@ -1505,8 +1674,8 @@ significant change in voting alignment.
 
 \begin{solution}
 The same people are asked twice, so the two proportions are \emph{paired} and a
-two-sample comparison would be wrong. McNemar's test handles pairing as the sign test
-does: the $a+d = 75$ people who did not change carry no information about the
+two-sample comparison would be wrong. McNemar's test
+(Section~\ref{sec:mcnemar}) handles pairing as the sign test does: the $a+d = 75$ people who did not change carry no information about the
 \emph{direction} of change and are set aside. Each of the $b+c = 25$ who changed is a
 ``plus'' (Democrat to Republican) or a ``minus'' (Republican to Democrat), and under
 $H_0$ (no change in overall alignment) each switch is equally likely to go either way:
@@ -2359,7 +2528,10 @@ sign.
 
 \begin{problem}
 Use the Wilcoxon signed-rank test on the IQ data of the sign-test problem in Section 2,
-\[99,\ 100,\ 90,\ 94,\ 135,\ 108,\ 107,\ 111,\ 119,\ 104,\ 127,\ 109,\ 117,\ 105,\ 125,\]
+\begin{gather*}
+99,\ 100,\ 90,\ 94,\ 135,\ 108,\ 107,\ 111,\\
+119,\ 104,\ 127,\ 109,\ 117,\ 105,\ 125,
+\end{gather*}
 to decide whether there is evidence that the median IQ of drug abusers in the population
 is different from $107$. Use $\alpha = 0.05$. State the assumption this test makes that
 the sign test does not.
