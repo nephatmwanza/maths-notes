@@ -2955,7 +2955,7 @@ Stability with small numbers & poor & good \\
 \end{center}
 Both summaries are adequate when the stratum ratios are roughly constant, and both hide something important when they are not. In
 that case the proper report is the stratum-specific comparison, with a summary only as a supplement. The Mantel--Haenszel methods of
-the next sections give pooled estimates with better statistical properties under the assumption of a common ratio, and a later section
+the next sections give pooled estimates with better statistical properties under the assumption of a common ratio, and Section~\ref{sec:compare}
 sets them side by side with standardisation on one set of data.
 
 \subsection{Problems}
@@ -4027,6 +4027,238 @@ $1/\{j\psi + (3 - j)\}$. Maximising the product gives the conditional estimate; 
 non-iterative approximation to it.
 \end{solution}
 
+\section{Comparison of methods of adjustment}
+\label{sec:compare}
+
+The course has given several ways of adjusting a measure of association for a confounder: direct and indirect standardisation
+(Section~\ref{sec:standard}), inverse-variance pooling (Section~\ref{sec:pooling}), the Mantel--Haenszel estimators (Section~\ref{sec:mh})
+and maximum likelihood in regression models (Section~\ref{sec:regression}). This section applies them all to the same data, explains
+why they agree when they do and differ when they do not, and ends with guidance on choosing among them.
+
+\subsection{Every summary is a weighted average}
+
+With stratum-specific rate ratios $\theta_k = r_{1k}/r_{0k}$, where $r_{ik} = D_{ik}/T_{ik}$, each method of Sections~\ref{sec:standard}--\ref{sec:mh} is a weighted average of the
+$\theta_k$, on the ratio or the log scale. The methods differ only in their weights.
+
+\begin{prop}
+\label{prop:weights}
+The following summaries are weighted averages of the $\theta_k$ with weights proportional to the stated quantities:
+\begin{enumerate}
+\item the CMF with standard population $W_k$: weights $W_k r_{0k}$ (Proposition~\ref{prop:dsr});
+\item the SMR of the exposed with the unexposed rates as standard, $\sum_k D_{1k}/\sum_k T_{1k}r_{0k}$: weights $T_{1k}r_{0k}$, the deaths expected among the exposed;
+\item the Mantel--Haenszel rate ratio: weights $D_{0k}T_{1k}/T_k$;
+\item the inverse-variance estimator, on the log scale: weights $(1/D_{1k} + 1/D_{0k})^{-1}$.
+\end{enumerate}
+\end{prop}
+
+\begin{proof}
+(2) $\sum_k D_{1k} = \sum_k T_{1k}r_{1k} = \sum_k (T_{1k}r_{0k})\,\theta_k$; divide by $\sum_k T_{1k}r_{0k}$. (3) $D_{1k}T_{0k}/T_k = (D_{0k}T_{1k}/T_k)\,\theta_k$, since $D_{1k}T_{0k} = r_{1k}T_{1k}T_{0k} = \theta_k\,r_{0k}T_{0k}T_{1k} = \theta_k D_{0k}T_{1k}$;
+sum and divide. (4) is Theorem~\ref{thm:ivw} with Woolf's variance $1/D_{1k} + 1/D_{0k}$ for a log rate ratio. (1) is Proposition~\ref{prop:dsr}.
+\end{proof}
+
+Two consequences follow. If the $\theta_k$ are all equal, every method estimates the common value, and they differ only in precision. If
+the $\theta_k$ differ, each method estimates a different average, and the differences between methods are a symptom of effect
+modification, not of error in any one of them. Maximum likelihood in the Poisson model with stratum and exposure terms is not an explicit
+weighted average, but under homogeneity it is the most efficient estimator, and under heterogeneity it too estimates a weighted
+average determined by the design.
+
+\subsection{A homogeneous example}
+
+\begin{exa}
+\label{exa:cmp1}
+A cohort of workers is followed for cancer mortality. The exposed are older than the unexposed.
+\begin{center}
+\begin{tabular}{lrrrrc}
+\hline
+ & \multicolumn{2}{c}{Exposed} & \multicolumn{2}{c}{Unexposed} & \\
+Age & Deaths & Person-yrs & Deaths & Person-yrs & $\theta_k$ \\
+\hline
+20--34 & 6 & 12{,}000 & 8 & 30{,}000 & 1.88 \\
+35--49 & 27 & 15{,}000 & 18 & 20{,}000 & 2.00 \\
+50--64 & 60 & 10{,}000 & 26 & 8000 & 1.85 \\
+65--79 & 48 & 3000 & 15 & 2000 & 2.13 \\
+\hline
+Total & 141 & 40{,}000 & 67 & 60{,}000 & 3.16 \\
+\hline
+\end{tabular}
+\end{center}
+The stratum rate ratios are all close to $2$. The methods give:
+\begin{center}
+\begin{tabular}{lcc}
+\hline
+Method & Rate ratio & $95\%$ interval \\
+\hline
+Crude & 3.16 & (2.36,\ 4.22) \\
+Direct, combined standard & 1.96 & (1.46,\ 2.64) \\
+Direct, exposed as standard & 1.97 & (1.45,\ 2.66) \\
+Direct, unexposed as standard & 1.96 & (1.45,\ 2.64) \\
+SMR, unexposed rates as standard & 1.97 & (1.66,\ 2.32) \\
+Mantel--Haenszel & 1.96 & (1.46,\ 2.64) \\
+Inverse-variance & 1.96 & (1.46,\ 2.63) \\
+Poisson maximum likelihood & 1.96 & (1.46,\ 2.63) \\
+\hline
+\end{tabular}
+\end{center}
+Every adjusted estimate is within $1\%$ of $1.96$, against a crude $3.16$; the confounding by age is large, and every method removes it. The
+Poisson model's residual deviance is $0.16$ on $3$ degrees of freedom, confirming homogeneity. The weights of Proposition~\ref{prop:weights} on
+the four strata are similar for all methods (for example $0.07$, $0.23$, $0.43$, $0.27$ for Mantel--Haenszel and $0.05$, $0.19$, $0.45$, $0.31$ for the SMR), and
+with nearly equal $\theta_k$ the weights hardly matter.
+
+The intervals are also nearly the same, with one exception. The SMR interval is narrower because it treats the unexposed rates as known
+constants, when in fact they are estimated from only $67$ deaths. That is reasonable for national rates but not for an internal comparison
+group, and the narrow interval is misleading here.
+\end{exa}
+
+\subsection{A heterogeneous example}
+
+\begin{exa}
+\label{exa:cmp2}
+For the British doctors' data (Example~\ref{exa:doctors}), where the stratum rate ratios fall from $5.74$ to $0.90$ with age:
+\begin{center}
+\begin{tabular}{lcc}
+\hline
+Method & Rate ratio & $95\%$ interval \\
+\hline
+Crude & 1.72 & (1.39,\ 2.12) \\
+Direct, combined standard & 1.42 & (1.15,\ 1.75) \\
+Direct, smokers as standard & 1.42 & (1.15,\ 1.75) \\
+Direct, non-smokers as standard & 1.43 & (1.16,\ 1.76) \\
+SMR, non-smokers' rates as standard & 1.42 & (1.31,\ 1.53) \\
+Mantel--Haenszel & 1.42 & (1.15,\ 1.76) \\
+Inverse-variance & 1.36 & (1.10,\ 1.68) \\
+Poisson maximum likelihood & 1.43 & (1.15,\ 1.76) \\
+\hline
+\end{tabular}
+\end{center}
+Here too most methods agree, because their weights happen to be similar: all put about $85\%$ of the weight on the three oldest strata, where
+most of the deaths are. The inverse-variance estimate is lower because it averages on the log scale. A weighted geometric mean is never larger than the
+corresponding arithmetic mean, and the gap is large when the values are spread out: the ratio $5.74$ in the youngest stratum pulls an
+arithmetic average up far more than a geometric one. The agreement of the other
+methods should not be mistaken for evidence that $1.42$ is a meaningful summary. The deviance of $12.1$ on $4$ degrees of freedom shows that the
+common ratio model fails, and the proper report is the age-specific ratios or the trend model of Example~\ref{exa:poisson}.
+\end{exa}
+
+\subsection{Sparse strata}
+
+The methods differ most when the strata are many and small, as in matched studies. Two simulation experiments show this. In each, a
+case-control study is generated with a true odds ratio of $2$ and a matching or stratifying factor associated with exposure, and
+$2000$ (first experiment) or $500$ (second) replicate studies are analysed by each method.
+
+\begin{exa}
+\label{exa:sim}
+\emph{Matched pairs.} $200$ case-control pairs, with the control's probability of exposure varying from pair to pair between $0.1$ and $0.7$ and
+the case's odds of exposure twice the control's.
+
+\emph{Moderate strata.} $10$ strata, each with $20$ cases and $20$ controls, the control exposure probability rising from $0.1$ to $0.7$ across strata. The true odds ratio is $2$ in both experiments; ML stands for maximum likelihood.
+
+\begin{center}
+\begin{tabular}{lcc}
+\hline
+ & \multicolumn{2}{c}{Median estimate} \\
+Method & Pairs & $10$ strata \\
+\hline
+Crude & 1.84 & 1.77 \\
+Mantel--Haenszel & 2.00 & 2.00 \\
+Conditional ML & 2.00 & -- \\
+Woolf, $\tfrac12$ added to zero cells & 1.39 & 1.96 \\
+Unconditional ML & 4.00 & 2.03 \\
+\hline
+\end{tabular}
+\end{center}
+With moderately large strata all the stratified methods are close to the truth. With pairs, only the Mantel--Haenszel and conditional
+estimators are. The unconditional maximum likelihood estimator, with one intercept per pair, converges to $\psi^2 = 4$
+(Problem~\ref{prob:uml}). Woolf's estimator is dragged towards $1$ by the correction, which dominates tables with only two people in them.
+The crude estimate is biased towards $1$ because matching on a factor associated with exposure makes the controls resemble the cases
+(Section~\ref{sec:matching}).
+\end{exa}
+
+\subsection{Choosing a method}
+
+\begin{center}
+\begin{tabular}{p{3.6cm}p{5.4cm}p{5.4cm}}
+\hline
+Method & Use when & Avoid when \\
+\hline
+Direct standardisation & comparing several populations with stable stratum rates, especially for presentation & strata are small or rates unstable \\
+Indirect standardisation (SMR) & one small population against reference rates that are known well & comparing SMRs of populations with different structures \\
+Inverse-variance pooling & a few large strata; meta-analysis of published estimates & many strata or zero cells \\
+Mantel--Haenszel & any number of strata, large or small; a quick, robust summary & effect modification is present (report strata instead) \\
+Conditional likelihood & matched or finely stratified data; several exposures & -- \\
+Regression (maximum likelihood) & several confounders, continuous variables, trends, effect modification & strata are sparse and modelled by separate intercepts \\
+\hline
+\end{tabular}
+\end{center}
+
+Whatever the method, three steps come first: look at the stratum-specific estimates, ask whether they are homogeneous enough to be
+summarised, and compare the adjusted with the crude estimate to judge the confounding. When the stratum estimates agree, the choice of
+method matters little, as Example~\ref{exa:cmp1} shows. When they disagree, no method rescues a single summary, as Example~\ref{exa:cmp2}
+shows. The methods differ seriously only with sparse data, where Mantel--Haenszel and conditional methods are the safe choice.
+
+\subsection{Problems}
+
+\begin{problem}
+Two age groups have, among the exposed, $10$ deaths in $5000$ person-years and $30$ in $3000$; among the unexposed, $20$ in $20{,}000$ and $15$ in $3000$.
+Compute the crude rate ratio, the CMF with the combined population as standard, the SMR of the exposed against the unexposed rates, and the
+Mantel--Haenszel rate ratio.
+\end{problem}
+
+\begin{solution}
+The rates per $1000$ are $2$ and $10$ (exposed), $1$ and $5$ (unexposed): the ratio is $2$ in both groups. Crude: $(40/8000)/(35/23{,}000) = 3.29$. Combined
+standard $25{,}000$ and $6000$, weights $0.806$ and $0.194$: $\text{DSR}_1 = 3.548$, $\text{DSR}_0 = 1.774$, $\text{CMF} = 2.00$. SMR: $E = 5000 \times 0.001 + 3000 \times 0.005 = 20$ and $O = 40$,
+so $\text{SMR} = 2.00$. Mantel--Haenszel: numerator $10 \times 20{,}000/25{,}000 + 30 \times 3000/6000 = 8 + 15 = 23$, denominator $20 \times 5000/25{,}000 + 15 \times 3000/6000 = 4 + 7.5 = 11.5$, ratio
+$2.00$. With an exactly homogeneous ratio every method recovers it.
+\end{solution}
+
+\begin{problem}
+\label{prob:uml}
+In a matched-pair study with a binary exposure, the unconditional likelihood has an intercept $\alpha_i$ for each pair. Show that maximising over
+the $\alpha_i$ and then over $\psi = e^\beta$ gives $\hat\psi = (n_{10}/n_{01})^2$.
+\end{problem}
+
+\begin{solution}
+Concordant pairs can be fitted perfectly by their intercepts and carry no information about $\beta$. For a discordant pair with the case
+exposed, the likelihood is $\psi u/\{(1 + \psi u)(1 + u)\}$ with $u = e^{\alpha_i}$; its derivative in $u$ vanishes when $1 - \psi u^2 = 0$, so $u = \psi^{-1/2}$, and the maximum is
+$\psi/(1 + \sqrt\psi)^2$. For a pair with the control exposed, the likelihood is $u/\{(1 + u)(1 + \psi u)\}$, maximised at the same $u$, with value $1/(1 + \sqrt\psi)^2$. The
+profile log-likelihood is therefore $n_{10}\log\psi - 2(n_{10} + n_{01})\log(1 + \sqrt\psi)$. With $\phi = \sqrt\psi$, its derivative is
+$2n_{10}/\phi - 2(n_{10} + n_{01})/(1 + \phi)$, zero when $n_{10}(1 + \phi) = (n_{10} + n_{01})\phi$, that is $\phi = n_{10}/n_{01}$. So $\hat\psi = (n_{10}/n_{01})^2$, the square of the consistent
+conditional estimate.
+\end{solution}
+
+\begin{problem}
+Verify the weights in Example~\ref{exa:cmp1} for the SMR. Which stratum carries the most weight, and why?
+\end{problem}
+
+\begin{solution}
+The expected deaths among the exposed at unexposed rates are $T_{1k}r_{0k}$: $12{,}000 \times 0.000267 = 3.2$, $15{,}000 \times 0.0009 = 13.5$, $10{,}000 \times 0.00325 = 32.5$ and
+$3000 \times 0.0075 = 22.5$, total $71.7$. The weights are $0.045$, $0.188$, $0.453$ and $0.314$. The $50$--$64$ stratum carries the most: it has a large share of the
+exposed person-time and a fairly high death rate, so it produces the most expected deaths. The youngest stratum, with the most person-time
+in all but a very low rate, counts for little.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{exa:cmp2}, explain why the SMR interval $(1.31,\ 1.53)$ is much narrower than the Mantel--Haenszel interval $(1.15,\ 1.76)$, and
+suggest how the SMR interval could be corrected.
+\end{problem}
+
+\begin{solution}
+The SMR interval treats the non-smokers' rates as known exactly. Its width reflects only the Poisson variation in the $630$ deaths among
+smokers, while the non-smokers contribute just $101$ deaths and their rates are much less precise. The Mantel--Haenszel variance includes both
+sources. A corrected SMR variance adds the variance of the expected count: $\Var(\log\text{SMR}) \approx 1/O + \Var(E)/E^2$, with
+$\Var(E) = \sum_k T_{1k}^2 D_{0k}/T_{0k}^2$ from the Poisson variances of the reference rates.
+\end{solution}
+
+\begin{problem}
+A colleague reports that ``the four adjustment methods gave rate ratios from $1.36$ to $1.43$, so the result is robust''. Comment, with
+reference to Example~\ref{exa:cmp2}.
+\end{problem}
+
+\begin{solution}
+Agreement between methods shows that the result does not depend on the choice of weights, which is reassuring only if the stratum
+ratios are similar. In Example~\ref{exa:cmp2} they range from $5.7$ to $0.9$, and the methods agree because they all weight the older strata
+heavily. A different population with more young people would give different summaries from every method. The appropriate check of
+robustness is a test of homogeneity, which fails here, and the appropriate report is the age-specific ratios.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -4043,8 +4275,11 @@ Van Nostrand Reinhold (reprinted by Wiley).
 % Long journal names leave no good break point without hyphenation.
 \sloppy
 \begin{enumerate}
+\item Andersen, E. B. (1970), Asymptotic properties of conditional maximum-likelihood estimators, \emph{Journal of the Royal Statistical
+Society, Series B}, 32, 283--301.
 \item Berkson, J. (1946), Limitations of the application of fourfold table analysis to hospital data, \emph{Biometrics Bulletin}, 2,
 47--53.
+\item Breslow, N. E. (1981), Odds ratio estimators when the data are sparse, \emph{Biometrika}, 68, 73--84.
 \item Breslow, N. E., Day, N. E., Halvorsen, K. T., Prentice, R. L., and Sabai, C. (1978), Estimation of multiple relative risk functions
 in matched case-control studies, \emph{American Journal of Epidemiology}, 108, 299--307.
 \item Breslow, N. E., and Day, N. E. (1980), \emph{Statistical Methods in Cancer Research, Vol.~I: The Analysis of Case-Control Studies}, Lyon,
