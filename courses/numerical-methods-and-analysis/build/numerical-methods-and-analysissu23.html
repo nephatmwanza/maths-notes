@@ -1,0 +1,128 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>5.2 Eigenvalues and the spectral radius — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse2.html">Solutions of Equations in One Variable</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu5.html">The bisection method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu6.html">The method of false position</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu7.html">Fixed-point iteration</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu8.html">Newton’s method and the secant method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu9.html">Multiple roots and accelerating convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse3.html">Zeros of Polynomials and Complex Roots</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu11.html">Complex numbers and the roots of polynomials</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu12.html">Horner’s method and deflation</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu13.html">Müller’s method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu14.html">Newton’s method in the complex plane</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu15.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse4.html">Direct Methods for Solving Linear Systems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu16.html">Linear systems and matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu17.html">Gaussian elimination and backward substitution</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu18.html">Pivoting strategies</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu19.html">Matrix factorization</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu20.html">Special types of matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu21.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse5.html">Iterative Techniques in Matrix Algebra</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu22.html">Norms of vectors and matrices</a></li>
+<li class="sub"><a class="current" href="numerical-methods-and-analysissu23.html">Eigenvalues and the spectral radius</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu24.html">The Jacobi and Gauss–Seidel methods</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu25.html">Relaxation methods</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu26.html">Error bounds and iterative refinement</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu27.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 3225 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu24.html'>next</a>] [<a href='numerical-methods-and-analysissu22.html'>prev</a>] [<a href='numerical-methods-and-analysissu22.html#tailnumerical-methods-and-analysissu22.html'>prev-tail</a>] [<a href='#tailnumerical-methods-and-analysissu23.html'>tail</a>] [<a href='numerical-methods-and-analysisse5.html#numerical-methods-and-analysissu23.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>5.2   </span> <a id='x30-290005.2'></a>Eigenvalues and the spectral radius</h4>
+<div class='newtheorem nt-definition'>
+<!-- l. 3228 --><p class='noindent'><span class='head'>
+<a id='x30-29001r1'></a>
+<span class='cmbx-10x-x-109'>Definition 5.2.1.</span>  </span>The <span class='cmbx-10x-x-109'>spectral radius </span>of a square matrix \(A\) is \(\rho (A) = \max |\lambda |\), the maximum taken over all
+(possibly complex) eigenvalues \(\lambda \) of \(A\).
+</p>
+</div>
+<!-- l. 3231 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 3233 --><p class='noindent'><span class='head'>
+<a id='x30-29002r2'></a>
+<span class='cmbx-10x-x-109'>Theorem 5.2.2.</span>  </span>
+     </p><dl class='enumerate-enumitem'><dt class='enumerate-enumitem'>
+  (i) </dt><dd class='enumerate-enumitem'>\(\|A\|_2 = \left [\rho (A^TA)\right ]^{1/2}\).
+     </dd><dt class='enumerate-enumitem'>
+ (ii) </dt><dd class='enumerate-enumitem'>\(\rho (A)\leq \|A\|\) for every natural matrix norm.</dd></dl>
+</div>
+<!-- l. 3239 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 3242 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>(ii) Let \(A\mathbf x = \lambda \mathbf x\) with \(\|\mathbf x\| = 1\) (for complex eigenvalues the same argument works with complex vectors).
+Then \(|\lambda | = \|\lambda \mathbf x\| = \|A\mathbf x\|\leq \|A\|\).
+                                                                                      
+                                                                                      
+</p><!-- l. 3245 --><p class='noindent'>(i) \(A^TA\) is symmetric with eigenvalues \(\mu _i\geq 0\) (since \(\mathbf v^TA^TA\mathbf v = \|A\mathbf v\|_2^2\geq 0\)) and an orthonormal basis of eigenvectors \(\mathbf v_i\). Writing \(\mathbf x = \sum c_i\mathbf v_i\)
+with \(\sum c_i^2 = 1\),
+                                           \[\|A\mathbf x\|_2^2 = \mathbf x^TA^TA\mathbf x = \sum \mu _ic_i^2\leq \max _i\mu _i = \rho (A^TA),\]
+ with equality when \(\mathbf x\) is an eigenvector for the largest \(\mu _i\).                                                   □
+</p>
+</div>
+<div class='newtheorem nt-example'>
+<!-- l. 3251 --><p class='noindent'><span class='head'>
+<a id='x30-29003r3'></a>
+<span class='cmbx-10x-x-109'>Example 5.2.3.</span>  </span>For \(A = \begin {pmatrix}1&amp;1&amp;0\\1&amp;2&amp;1\\-1&amp;1&amp;2\end {pmatrix}\) the eigenvalues are \(0\), \(2\), \(3\), so \(\rho (A) = 3\). The eigenvalues of \(A^TA\) are \(0\), \(7-\sqrt 7 = 4.354\) and \(7+\sqrt 7 = 9.646\), so \(\|A\|_2 = \sqrt {9.646} = 3.106\geq \rho (A)\), while \(\|A\|_\infty = 4\).
+</p>
+</div>
+<!-- l. 3254 --><p class='noindent'>
+</p><!-- l. 3256 --><p class='noindent'>The spectral radius decides whether the powers of a matrix tend to zero, which is exactly what
+iterative methods need.
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 3258 --><p class='noindent'><span class='head'>
+<a id='x30-29004r4'></a>
+<span class='cmbx-10x-x-109'>Theorem 5.2.4.</span>  </span> For a square matrix \(A\), \(A^k\longrightarrow 0\) as \(k\longrightarrow \infty \) if and only if \(\rho (A)&lt;1\).
+</p>
+</div>
+<!-- l. 3261 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 3264 --><p class='noindent'><span class='head'>
+                                                                                      
+                                                                                      
+<span class='cmti-10x-x-109'>Proof.</span> </span>If \(A^k\longrightarrow 0\) and \(A\mathbf v = \lambda \mathbf v\) with \(\mathbf v\neq \mathbf 0\), then \(\lambda ^k\mathbf v = A^k\mathbf v\longrightarrow \mathbf 0\), so \(|\lambda |&lt;1\). For the converse we give the proof when \(A\) has \(n\) independent
+eigenvectors, \(A = SDS^{-1}\) with \(D\) diagonal: then \(A^k = SD^kS^{-1}\), and the diagonal entries \(\lambda _i^k\) of \(D^k\) tend to \(0\) when every \(|\lambda _i|&lt;1\). (The
+general case uses the Jordan form: powers of a Jordan block \(J = \lambda I+N\) have entries \(\binom {k}{j}\lambda ^{k-j}\), which still tend to \(0\)
+when \(|\lambda |&lt;1\).)                                                                                                                 □
+</p>
+</div>
+<div class='newtheorem nt-example'>
+<!-- l. 3270 --><p class='noindent'><span class='head'>
+<a id='x30-29005r5'></a>
+<span class='cmbx-10x-x-109'>Example 5.2.5.</span>  </span>The matrix \(T = \begin {pmatrix}\frac 12&amp;0\\16&amp;\frac 12\end {pmatrix}\) has \(\rho (T) = \frac 12\) but \(\|T\|_\infty = 16.5\). Its powers are \(T^k = \begin {pmatrix}2^{-k}&amp;0\\ 32k\,2^{-k}&amp;2^{-k}\end {pmatrix}\); for instance the \((2,1)\) entry of \(T^3\) is \(12\), but that
+of \(T^{10}\) is \(0.3125\), and \(T^k\longrightarrow 0\). A large norm only delays convergence; the spectral radius decides it.
+</p>
+</div>
+<!-- l. 3274 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 3277 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu24.html'>next</a>] [<a href='numerical-methods-and-analysissu22.html'>prev</a>] [<a href='numerical-methods-and-analysissu22.html#tailnumerical-methods-and-analysissu22.html'>prev-tail</a>] [<a href='numerical-methods-and-analysissu23.html'>front</a>] [<a href='numerical-methods-and-analysisse5.html#numerical-methods-and-analysissu23.html'>up</a>] </p></div>
+<!-- l. 3277 --><p class='noindent'><a id='tailnumerical-methods-and-analysissu23.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="numerical-methods-and-analysissu22.html">&larr; Previous</a><a class="up" href="numerical-methods-and-analysisse5.html#numerical-methods-and-analysissu23.html">Contents</a><a class="next" href="numerical-methods-and-analysissu24.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/5-2-eigenvalues-and-the-spectral-radius" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

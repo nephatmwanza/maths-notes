@@ -1,0 +1,188 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>5.3 The Jacobi and Gauss–Seidel methods — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", tagformat: { number: (n) => `5.` + (n + 1) } }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse2.html">Solutions of Equations in One Variable</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu5.html">The bisection method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu6.html">The method of false position</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu7.html">Fixed-point iteration</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu8.html">Newton’s method and the secant method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu9.html">Multiple roots and accelerating convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse3.html">Zeros of Polynomials and Complex Roots</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu11.html">Complex numbers and the roots of polynomials</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu12.html">Horner’s method and deflation</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu13.html">Müller’s method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu14.html">Newton’s method in the complex plane</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu15.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse4.html">Direct Methods for Solving Linear Systems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu16.html">Linear systems and matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu17.html">Gaussian elimination and backward substitution</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu18.html">Pivoting strategies</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu19.html">Matrix factorization</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu20.html">Special types of matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu21.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse5.html">Iterative Techniques in Matrix Algebra</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu22.html">Norms of vectors and matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu23.html">Eigenvalues and the spectral radius</a></li>
+<li class="sub"><a class="current" href="numerical-methods-and-analysissu24.html">The Jacobi and Gauss–Seidel methods</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu25.html">Relaxation methods</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu26.html">Error bounds and iterative refinement</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu27.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 3277 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu25.html'>next</a>] [<a href='numerical-methods-and-analysissu23.html'>prev</a>] [<a href='numerical-methods-and-analysissu23.html#tailnumerical-methods-and-analysissu23.html'>prev-tail</a>] [<a href='#tailnumerical-methods-and-analysissu24.html'>tail</a>] [<a href='numerical-methods-and-analysisse5.html#numerical-methods-and-analysissu24.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>5.3   </span> <a id='x31-300005.3'></a>The Jacobi and Gauss–Seidel methods</h4>
+<!-- l. 3280 --><p class='noindent'><span class='cmbx-10x-x-109'>The Jacobi method</span>
+</p><!-- l. 3281 --><p class='noindent'>Solve the \(i\)th equation of \(A\mathbf x = \mathbf b\) for \(x_i\) (assuming \(a_{ii}\neq 0\)) and use the old values on the right: \begin {equation} \label {eq:jacobi} x_i^{(k)} = \frac {1}{a_{ii}}\left (b_i-\sum _{j\neq i}a_{ij}x_j^{(k-1)}\right ),\qquad i = 1,\dots ,n .  \end {equation}<a id='x31-30001r2'></a>
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 3286 --><p class='noindent'><span class='head'>
+<a id='x31-30002r1'></a>
+<span class='cmbx-10x-x-109'>Example 5.3.1.</span>  </span> Apply the Jacobi method, from \(\mathbf x^{(0)} = \mathbf 0\), to \begin {align*}  10x_1-x_2+2x_3 &amp;= 6,\\ -x_1+11x_2-x_3+3x_4 &amp;= 25,\\ 2x_1-x_2+10x_3-x_4 &amp;= -11,\\ 3x_2-x_3+8x_4 &amp;= 15,  \end {align*}
+</p><!-- l. 3295 --><p class='noindent'>whose solution is \(\mathbf x = (1,2,-1,1)^T\).
+</p>
+</div>
+<!-- l. 3296 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 3298 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The iteration is \begin {align*}  x_1^{(k)} &amp;= \tfrac {1}{10}x_2^{(k-1)}-\tfrac 15x_3^{(k-1)}+\tfrac 35,\\ x_2^{(k)} &amp;= \tfrac 1{11}x_1^{(k-1)}+\tfrac 1{11}x_3^{(k-1)}-\tfrac 3{11}x_4^{(k-1)}+\tfrac {25}{11},\\ x_3^{(k)} &amp;= -\tfrac 15x_1^{(k-1)}+\tfrac 1{10}x_2^{(k-1)}+\tfrac 1{10}x_4^{(k-1)}-\tfrac {11}{10},\\ x_4^{(k)} &amp;= -\tfrac 38x_2^{(k-1)}+\tfrac 18x_3^{(k-1)}+\tfrac {15}8 .  \end {align*}
+</p>
+<div class='center'>
+<!-- l. 3306 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-15'><colgroup id='TBL-15-1g'><col id='TBL-15-1' /><col id='TBL-15-2' /><col id='TBL-15-3' /><col id='TBL-15-4' /><col id='TBL-15-5' /><col id='TBL-15-6' /></colgroup><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-15-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-15-1-1' style='white-space:nowrap; text-align:right;'> \(k\) </td><td class='td11' id='TBL-15-1-2' style='white-space:nowrap; text-align:right;'> \(x_1^{(k)}\) </td><td class='td11' id='TBL-15-1-3' style='white-space:nowrap; text-align:right;'> \(x_2^{(k)}\) </td><td class='td11' id='TBL-15-1-4' style='white-space:nowrap; text-align:right;'> \(x_3^{(k)}\) </td><td class='td11' id='TBL-15-1-5' style='white-space:nowrap; text-align:right;'> \(x_4^{(k)}\) </td><td class='td11' id='TBL-15-1-6' style='white-space:nowrap; text-align:right;'> \(\frac {\|\mathbf x^{(k)}-\mathbf x^{(k-1)}\|_\infty }{\|\mathbf x^{(k)}\|_\infty }\) </td></tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-15-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-15-2-1' style='white-space:nowrap; text-align:right;'>  \(1\) </td><td class='td11' id='TBL-15-2-2' style='white-space:nowrap; text-align:right;'>  \(0.6000\) </td><td class='td11' id='TBL-15-2-3' style='white-space:nowrap; text-align:right;'>  \(2.2727\) </td><td class='td11' id='TBL-15-2-4' style='white-space:nowrap; text-align:right;'>  \(-1.1000\) </td><td class='td11' id='TBL-15-2-5' style='white-space:nowrap; text-align:right;'>  \(1.8750\) </td><td class='td11' id='TBL-15-2-6' style='white-space:nowrap; text-align:right;'>  \(1\)</td>
+</tr><tr id='TBL-15-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-15-3-1' style='white-space:nowrap; text-align:right;'>  \(2\) </td><td class='td11' id='TBL-15-3-2' style='white-space:nowrap; text-align:right;'> \(1.0473\) </td><td class='td11' id='TBL-15-3-3' style='white-space:nowrap; text-align:right;'> \(1.7159\) </td><td class='td11' id='TBL-15-3-4' style='white-space:nowrap; text-align:right;'> \(-0.8052\) </td><td class='td11' id='TBL-15-3-5' style='white-space:nowrap; text-align:right;'> \(0.8852\) </td><td class='td11' id='TBL-15-3-6' style='white-space:nowrap; text-align:right;'> \(0.577\) </td></tr><tr id='TBL-15-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-15-4-1' style='white-space:nowrap; text-align:right;'>  \(3\) </td><td class='td11' id='TBL-15-4-2' style='white-space:nowrap; text-align:right;'>  \(0.9326\) </td><td class='td11' id='TBL-15-4-3' style='white-space:nowrap; text-align:right;'>  \(2.0533\) </td><td class='td11' id='TBL-15-4-4' style='white-space:nowrap; text-align:right;'>  \(-1.0493\) </td><td class='td11' id='TBL-15-4-5' style='white-space:nowrap; text-align:right;'>  \(1.1309\) </td><td class='td11' id='TBL-15-4-6' style='white-space:nowrap; text-align:right;'>  \(0.164\)</td>
+</tr><tr id='TBL-15-5-' style='vertical-align:baseline;'><td class='td11' id='TBL-15-5-1' style='white-space:nowrap; text-align:right;'>  \(5\) </td><td class='td11' id='TBL-15-5-2' style='white-space:nowrap; text-align:right;'> \(0.9890\) </td><td class='td11' id='TBL-15-5-3' style='white-space:nowrap; text-align:right;'> \(2.0114\) </td><td class='td11' id='TBL-15-5-4' style='white-space:nowrap; text-align:right;'> \(-1.0103\) </td><td class='td11' id='TBL-15-5-5' style='white-space:nowrap; text-align:right;'> \(1.0214\) </td><td class='td11' id='TBL-15-5-6' style='white-space:nowrap; text-align:right;'> \(0.0287\) </td>
+</tr><tr id='TBL-15-6-' style='vertical-align:baseline;'><td class='td11' id='TBL-15-6-1' style='white-space:nowrap; text-align:right;'>  \(8\) </td><td class='td11' id='TBL-15-6-2' style='white-space:nowrap; text-align:right;'> \(1.0006\) </td><td class='td11' id='TBL-15-6-3' style='white-space:nowrap; text-align:right;'> \(1.9987\) </td><td class='td11' id='TBL-15-6-4' style='white-space:nowrap; text-align:right;'> \(-0.9990\) </td><td class='td11' id='TBL-15-6-5' style='white-space:nowrap; text-align:right;'> \(0.9989\) </td><td class='td11' id='TBL-15-6-6' style='white-space:nowrap; text-align:right;'> \(0.00235\) </td>
+</tr><tr id='TBL-15-7-' style='vertical-align:baseline;'><td class='td11' id='TBL-15-7-1' style='white-space:nowrap; text-align:right;'>  \(10\) </td><td class='td11' id='TBL-15-7-2' style='white-space:nowrap; text-align:right;'> \(1.0001\) </td><td class='td11' id='TBL-15-7-3' style='white-space:nowrap; text-align:right;'> \(1.9998\) </td><td class='td11' id='TBL-15-7-4' style='white-space:nowrap; text-align:right;'> \(-0.9998\) </td><td class='td11' id='TBL-15-7-5' style='white-space:nowrap; text-align:right;'> \(0.9998\) </td><td class='td11' id='TBL-15-7-6' style='white-space:nowrap; text-align:right;'> \(0.00042\) </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>                                                                                      </div></div>
+                                                                                      
+                                                                                      
+<!-- l. 3320 --><p class='noindent'>After \(10\) iterations the relative change is below \(10^{-3}\) and every component is within \(2.3\times 10^{-4}\) of the solution.
+</p>
+</div>
+<!-- l. 3323 --><p class='noindent'><span class='cmbx-10x-x-109'>The Gauss–Seidel method</span>
+</p><!-- l. 3324 --><p class='noindent'>When \(x_i^{(k)}\) is computed, the new values \(x_1^{(k)},\dots ,x_{i-1}^{(k)}\) are already known and are presumably better than the old ones.
+The <span class='cmbx-10x-x-109'>Gauss–Seidel method </span>uses them at once: \begin {equation} \label {eq:gs} x_i^{(k)} = \frac {1}{a_{ii}}\left (b_i-\sum _{j&lt;i}a_{ij}x_j^{(k)}-\sum _{j&gt;i}a_{ij}x_j^{(k-1)}\right ),\qquad i = 1,\dots ,n .  \end {equation}<a id='x31-30003r3'></a> It also needs only one vector of storage, overwritten
+in place.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 3331 --><p class='noindent'><span class='head'>
+<a id='x31-30004r2'></a>
+<span class='cmbx-10x-x-109'>Example 5.3.2.</span>  </span> Apply the Gauss–Seidel method to the system of Example <a href='#x31-30002r1'>5.3.1<!-- tex4ht:ref: exa:jacobi  --></a>.
+</p>
+</div>
+<!-- l. 3334 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 3336 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> </p>
+<div class='center'>
+<!-- l. 3337 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-16'><colgroup id='TBL-16-1g'><col id='TBL-16-1' /><col id='TBL-16-2' /><col id='TBL-16-3' /><col id='TBL-16-4' /><col id='TBL-16-5' /><col id='TBL-16-6' /></colgroup><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-16-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-16-1-1' style='white-space:nowrap; text-align:right;'> \(k\) </td><td class='td11' id='TBL-16-1-2' style='white-space:nowrap; text-align:right;'> \(x_1^{(k)}\) </td><td class='td11' id='TBL-16-1-3' style='white-space:nowrap; text-align:right;'> \(x_2^{(k)}\) </td><td class='td11' id='TBL-16-1-4' style='white-space:nowrap; text-align:right;'> \(x_3^{(k)}\) </td><td class='td11' id='TBL-16-1-5' style='white-space:nowrap; text-align:right;'> \(x_4^{(k)}\) </td><td class='td11' id='TBL-16-1-6' style='white-space:nowrap; text-align:right;'> relative change  </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-16-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-16-2-1' style='white-space:nowrap; text-align:right;'>  \(1\) </td><td class='td11' id='TBL-16-2-2' style='white-space:nowrap; text-align:right;'> \(0.6000\) </td><td class='td11' id='TBL-16-2-3' style='white-space:nowrap; text-align:right;'> \(2.3273\) </td><td class='td11' id='TBL-16-2-4' style='white-space:nowrap; text-align:right;'> \(-0.9873\) </td><td class='td11' id='TBL-16-2-5' style='white-space:nowrap; text-align:right;'> \(0.8789\) </td><td class='td11' id='TBL-16-2-6' style='white-space:nowrap; text-align:right;'>             \(1\) </td></tr><tr id='TBL-16-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-16-3-1' style='white-space:nowrap; text-align:right;'>  \(2\) </td><td class='td11' id='TBL-16-3-2' style='white-space:nowrap; text-align:right;'>  \(1.0302\) </td><td class='td11' id='TBL-16-3-3' style='white-space:nowrap; text-align:right;'>  \(2.0369\) </td><td class='td11' id='TBL-16-3-4' style='white-space:nowrap; text-align:right;'>  \(-1.0145\) </td><td class='td11' id='TBL-16-3-5' style='white-space:nowrap; text-align:right;'>  \(0.9843\) </td><td class='td11' id='TBL-16-3-6' style='white-space:nowrap; text-align:right;'>  \(0.211\)</td>
+</tr><tr id='TBL-16-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-16-4-1' style='white-space:nowrap; text-align:right;'>  \(3\) </td><td class='td11' id='TBL-16-4-2' style='white-space:nowrap; text-align:right;'> \(1.0066\) </td><td class='td11' id='TBL-16-4-3' style='white-space:nowrap; text-align:right;'> \(2.0036\) </td><td class='td11' id='TBL-16-4-4' style='white-space:nowrap; text-align:right;'> \(-1.0025\) </td><td class='td11' id='TBL-16-4-5' style='white-space:nowrap; text-align:right;'> \(0.9984\) </td><td class='td11' id='TBL-16-4-6' style='white-space:nowrap; text-align:right;'>             \(0.0167\) </td>
+</tr><tr id='TBL-16-5-' style='vertical-align:baseline;'><td class='td11' id='TBL-16-5-1' style='white-space:nowrap; text-align:right;'>  \(4\) </td><td class='td11' id='TBL-16-5-2' style='white-space:nowrap; text-align:right;'> \(1.0009\) </td><td class='td11' id='TBL-16-5-3' style='white-space:nowrap; text-align:right;'> \(2.0003\) </td><td class='td11' id='TBL-16-5-4' style='white-space:nowrap; text-align:right;'> \(-1.0003\) </td><td class='td11' id='TBL-16-5-5' style='white-space:nowrap; text-align:right;'> \(0.9998\) </td><td class='td11' id='TBL-16-5-6' style='white-space:nowrap; text-align:right;'>             \(0.0029\) </td>
+</tr><tr id='TBL-16-6-' style='vertical-align:baseline;'><td class='td11' id='TBL-16-6-1' style='white-space:nowrap; text-align:right;'>  \(5\) </td><td class='td11' id='TBL-16-6-2' style='white-space:nowrap; text-align:right;'> \(1.0001\) </td><td class='td11' id='TBL-16-6-3' style='white-space:nowrap; text-align:right;'> \(2.0000\) </td><td class='td11' id='TBL-16-6-4' style='white-space:nowrap; text-align:right;'> \(-1.0000\) </td><td class='td11' id='TBL-16-6-5' style='white-space:nowrap; text-align:right;'> \(1.0000\) </td><td class='td11' id='TBL-16-6-6' style='white-space:nowrap; text-align:right;'>             \(0.00038\) </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>                                                                                      </div></div>
+<!-- l. 3350 --><p class='noindent'>Five Gauss–Seidel iterations do the work of ten Jacobi iterations. For instance \(x_2^{(1)} = \frac {1}{11}(0.6000)+\frac {25}{11} = 2.3273\) already uses the new
+\(x_1^{(1)}\).
+</p>
+</div>
+<!-- l. 3354 --><p class='noindent'><span class='cmbx-10x-x-109'>Matrix form and convergence</span>
+</p><!-- l. 3355 --><p class='noindent'>Write \(A = D-L-U\), where \(D\) is the diagonal of \(A\) and \(-L\), \(-U\) are its strictly lower and upper triangular parts. Then the
+Jacobi method is \(D\mathbf x^{(k)} = (L+U)\mathbf x^{(k-1)}+\mathbf b\), and Gauss–Seidel is \((D-L)\mathbf x^{(k)} = U\mathbf x^{(k-1)}+\mathbf b\). Both have the form \begin {equation} \label {eq:stationary} \mathbf x^{(k)} = T\mathbf x^{(k-1)}+\mathbf c,  \end {equation}<a id='x31-30005r4'></a> with
+                                                                                      
+                                                                                      
+                                           \[T_j = D^{-1}(L+U),\qquad T_g = (D-L)^{-1}U .\]
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 3363 --><p class='noindent'><span class='head'>
+<a id='x31-30006r3'></a>
+<span class='cmbx-10x-x-109'>Theorem 5.3.3.</span>  </span> For any \(\mathbf x^{(0)}\), the sequence (<a href='#x31-30005r4'>5.4<!-- tex4ht:ref: eq:stationary  --></a>) converges to the unique solution of \(\mathbf x = T\mathbf x+\mathbf c\) if and only
+if \(\rho (T)&lt;1\). If \(\|T\|&lt;1\) for some natural norm, then
+                                           \[\|\mathbf x-\mathbf x^{(k)}\|\leq \|T\|^k\|\mathbf x^{(0)}-\mathbf x\|\qquad \text {and}\qquad \|\mathbf x-\mathbf x^{(k)}\|\leq \frac {\|T\|^k}{1-\|T\|}\|\mathbf x^{(1)}-\mathbf x^{(0)}\| .\]
+</p>
+</div>
+<!-- l. 3368 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 3371 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>If \(\rho (T)&lt;1\), then \(1\) is not an eigenvalue of \(T\), so \(I-T\) is invertible and \(\mathbf x = T\mathbf x+\mathbf c\) has a unique solution. Subtracting
+it from (<a href='#x31-30005r4'>5.4<!-- tex4ht:ref: eq:stationary  --></a>), the error \(\mathbf e^{(k)} = \mathbf x^{(k)}-\mathbf x\) satisfies \(\mathbf e^{(k)} = T\mathbf e^{(k-1)} = \dots = T^k\mathbf e^{(0)}\), which tends to \(\mathbf 0\) for every \(\mathbf e^{(0)}\) by Theorem <a href='numerical-methods-and-analysissu23.html#x30-29004r4'>5.2.4<!-- tex4ht:ref: thm:convergentmatrix  --></a>. Conversely, if \(\rho (T)\geq 1\),
+choose \(\mathbf x^{(0)}\) so that \(\mathbf e^{(0)}\) is an eigenvector for an eigenvalue with \(|\lambda |\geq 1\); then \(\mathbf e^{(k)} = \lambda ^k\mathbf e^{(0)}\) does not tend to \(\mathbf 0\). The bounds
+follow exactly as in the proof of the Fixed-Point Theorem <a href='numerical-methods-and-analysissu7.html#x11-10013r7'>2.3.7<!-- tex4ht:ref: thm:fixedpoint  --></a>, with \(|g'|\leq k\) replaced by \(\|T\|&lt;1\).            □
+</p>
+</div>
+<!-- l. 3379 --><p class='noindent'>The rate of convergence is governed by \(\rho (T)\): the error is reduced roughly by the factor \(\rho (T)\) per
+iteration. For the system of Example <a href='#x31-30002r1'>5.3.1<!-- tex4ht:ref: exa:jacobi  --></a>, \(\rho (T_j) = 0.426\) and \(\rho (T_g) = 0.0898\), which is why Gauss–Seidel was so much
+faster.
+                                                                                      
+                                                                                      
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 3382 --><p class='noindent'><span class='head'>
+<a id='x31-30007r4'></a>
+<span class='cmbx-10x-x-109'>Theorem 5.3.4.</span>  </span> If \(A\) is strictly diagonally dominant, then both the Jacobi and the Gauss–Seidel
+methods converge for every \(\mathbf b\) and every \(\mathbf x^{(0)}\).
+</p>
+</div>
+<!-- l. 3386 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 3389 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span><span class='cmti-10x-x-109'>Jacobi. </span>The \(i\)th row of \(T_j\) has entries \(-\frac {a_{ij}}{a_{ii}}\) (\(j\neq i\)) and \(0\) on the diagonal, so its absolute row sum is \(\frac {1}{|a_{ii}|}\sum _{j\neq i}|a_{ij}|&lt;1\).
+Hence \(\rho (T_j)\leq \|T_j\|_\infty &lt;1\).
+</p><!-- l. 3392 --><p class='noindent'><span class='cmti-10x-x-109'>Gauss–Seidel. </span>Let \(\lambda \) be an eigenvalue of \(T_g\) with eigenvector \(\mathbf v\), scaled so that \(\|\mathbf v\|_\infty = 1\), and let \(|v_k| = 1\). From \(U\mathbf v = \lambda (D-L)\mathbf v\), the
+\(k\)th component reads
+                                           \[-\sum _{j&gt;k}a_{kj}v_j = \lambda \left (a_{kk}v_k+\sum _{j&lt;k}a_{kj}v_j\right ).\]
+ Taking absolute values and using \(|v_j|\leq 1\),
+                                           \[|\lambda |\left (|a_{kk}|-\sum _{j&lt;k}|a_{kj}|\right )\leq \sum _{j&gt;k}|a_{kj}| .\]
+ By strict diagonal dominance, \(|a_{kk}|-\sum _{j&lt;k}|a_{kj}|&gt;\sum _{j&gt;k}|a_{kj}|\geq 0\), so \(|\lambda |&lt;1\). Hence \(\rho (T_g)&lt;1\).                                                                □
+                                                                                      
+                                                                                      
+</p>
+</div>
+<div class='newtheorem nt-example'>
+<!-- l. 3400 --><p class='noindent'><span class='head'>
+<a id='x31-30008r5'></a>
+<span class='cmbx-10x-x-109'>Example 5.3.5.</span>  </span> Show that the Jacobi method diverges for \(x_1+2x_2 = 3\), \(3x_1+x_2 = 4\), and that it converges after the
+equations are interchanged.
+</p>
+</div>
+<!-- l. 3403 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 3405 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> Here \(T_j = \begin {pmatrix}0&amp;-2\\-3&amp;0\end {pmatrix}\), with eigenvalues \(\pm \sqrt 6\), so \(\rho (T_j) = 2.449&gt;1\). From \(\mathbf 0\) the iterates are \((3,4), (-5,-5), (13,19), (-35,-35),\dots \), moving away from the solution
+\((1,1)\). Interchanging the equations gives \(3x_1+x_2 = 4\), \(x_1+2x_2 = 3\), which is strictly diagonally dominant, and now \(T_j = \begin {pmatrix}0&amp;-\frac 13\\-\frac 12&amp;0\end {pmatrix}\) has \(\rho = \frac 1{\sqrt 6} = 0.408\): the
+iteration converges.
+</p>
+</div>
+                                                                                      
+                                                                                      
+<!-- l. 3413 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu25.html'>next</a>] [<a href='numerical-methods-and-analysissu23.html'>prev</a>] [<a href='numerical-methods-and-analysissu23.html#tailnumerical-methods-and-analysissu23.html'>prev-tail</a>] [<a href='numerical-methods-and-analysissu24.html'>front</a>] [<a href='numerical-methods-and-analysisse5.html#numerical-methods-and-analysissu24.html'>up</a>] </p></div>
+<!-- l. 3413 --><p class='noindent'><a id='tailnumerical-methods-and-analysissu24.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="numerical-methods-and-analysissu23.html">&larr; Previous</a><a class="up" href="numerical-methods-and-analysisse5.html#numerical-methods-and-analysissu24.html">Contents</a><a class="next" href="numerical-methods-and-analysissu25.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/5-3-the-jacobi-and-gauss-seidel-methods" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

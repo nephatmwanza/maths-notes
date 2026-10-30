@@ -1,0 +1,133 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>5.4 Relaxation methods — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", tagformat: { number: (n) => `5.` + (n + 4) } }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse2.html">Solutions of Equations in One Variable</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu5.html">The bisection method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu6.html">The method of false position</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu7.html">Fixed-point iteration</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu8.html">Newton’s method and the secant method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu9.html">Multiple roots and accelerating convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse3.html">Zeros of Polynomials and Complex Roots</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu11.html">Complex numbers and the roots of polynomials</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu12.html">Horner’s method and deflation</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu13.html">Müller’s method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu14.html">Newton’s method in the complex plane</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu15.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse4.html">Direct Methods for Solving Linear Systems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu16.html">Linear systems and matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu17.html">Gaussian elimination and backward substitution</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu18.html">Pivoting strategies</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu19.html">Matrix factorization</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu20.html">Special types of matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu21.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse5.html">Iterative Techniques in Matrix Algebra</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu22.html">Norms of vectors and matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu23.html">Eigenvalues and the spectral radius</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu24.html">The Jacobi and Gauss–Seidel methods</a></li>
+<li class="sub"><a class="current" href="numerical-methods-and-analysissu25.html">Relaxation methods</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu26.html">Error bounds and iterative refinement</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu27.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 3413 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu26.html'>next</a>] [<a href='numerical-methods-and-analysissu24.html'>prev</a>] [<a href='numerical-methods-and-analysissu24.html#tailnumerical-methods-and-analysissu24.html'>prev-tail</a>] [<a href='#tailnumerical-methods-and-analysissu25.html'>tail</a>] [<a href='numerical-methods-and-analysisse5.html#numerical-methods-and-analysissu25.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>5.4   </span> <a id='x32-310005.4'></a>Relaxation methods</h4>
+<!-- l. 3416 --><p class='noindent'>Gauss–Seidel moves each component from \(x_i^{(k-1)}\) to the value \(\tilde x_i\) given by (<a href='numerical-methods-and-analysissu24.html#x31-30003r3'>5.3<!-- tex4ht:ref: eq:gs  --></a>). When the iterates
+approach the solution steadily from one side, moving a little further than that, \(x_i^{(k)} = x_i^{(k-1)}+\omega (\tilde x_i-x_i^{(k-1)})\) with \(\omega &gt;1\),
+speeds convergence. This is the <span class='cmbx-10x-x-109'>successive over-relaxation </span>or <span class='cmbx-10x-x-109'>SOR </span>method: \begin {equation} \label {eq:sor} x_i^{(k)} = (1-\omega )x_i^{(k-1)}+\frac {\omega }{a_{ii}}\left (b_i-\sum _{j&lt;i}a_{ij}x_j^{(k)}-\sum _{j&gt;i}a_{ij}x_j^{(k-1)}\right ).  \end {equation}<a id='x32-31001r5'></a> For \(\omega = 1\) it
+is Gauss–Seidel; \(\omega &lt;1\) is <span class='cmbx-10x-x-109'>under-relaxation</span>, occasionally used to make a divergent iteration
+converge.
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 3424 --><p class='noindent'><span class='head'>
+<a id='x32-31002r1'></a>
+<span class='cmbx-10x-x-109'>Theorem 5.4.1.</span>  </span>
+     </p><dl class='enumerate-enumitem'><dt class='enumerate-enumitem'>
+  (i) </dt><dd class='enumerate-enumitem'>(Kahan) If \(a_{ii}\neq 0\) for all \(i\), SOR can converge only if \(0&lt;\omega &lt;2\).
+     </dd><dt class='enumerate-enumitem'>
+ (ii) </dt><dd class='enumerate-enumitem'>(Ostrowski–Reich) If \(A\) is positive definite and \(0&lt;\omega &lt;2\), SOR converges for every \(\mathbf x^{(0)}\).
+     </dd><dt class='enumerate-enumitem'>
+ (iii) </dt><dd class='enumerate-enumitem'>If \(A\) is positive definite and tridiagonal, then \(\rho (T_g) = \rho (T_j)^2&lt;1\), and the choice of \(\omega \) that minimizes \(\rho (T_\omega )\) is
+                                              \[\omega _{\text {opt}} = \frac {2}{1+\sqrt {1-\rho (T_j)^2}},\qquad \text {with}\qquad \rho (T_{\omega _{\text {opt}}}) = \omega _{\text {opt}}-1 .\]
+     </dd></dl>
+</div>
+<!-- l. 3433 --><p class='noindent'>
+</p><!-- l. 3435 --><p class='noindent'>We prove (i): the SOR iteration matrix is \(T_\omega = (D-\omega L)^{-1}\bigl ((1-\omega )D+\omega U\bigr )\), a product of triangular matrices, so
+                                                                                      
+                                                                                      
+                                           \[\det T_\omega = \frac {\det \bigl ((1-\omega )D\bigr )}{\det D} = (1-\omega )^n .\]
+ Since the determinant is the product of the eigenvalues, \(\rho (T_\omega )^n\geq |\det T_\omega | = |1-\omega |^n\), so \(\rho (T_\omega )\geq |1-\omega |\), which is at least \(1\) unless \(0&lt;\omega &lt;2\). Parts (ii) and
+(iii) are proved in the texts by Burden and Faires and by Atkinson.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 3440 --><p class='noindent'><span class='head'>
+<a id='x32-31003r2'></a>
+<span class='cmbx-10x-x-109'>Example 5.4.2.</span>  </span> Solve
+                                           \[4x_1+3x_2 = 24,\qquad 3x_1+4x_2-x_3 = 30,\qquad -x_2+4x_3 = -24\]
+ (solution \((3,4,-5)^T\)) by Gauss–Seidel and by SOR, and find the optimal \(\omega \).
+</p>
+</div>
+<!-- l. 3445 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 3447 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The matrix is positive definite and tridiagonal. Here \(T_j\) has eigenvalues \(0\) and \(\pm \sqrt {0.625}\), so \(\rho (T_j) = 0.7906\), \(\rho (T_g) = 0.625\) and
+                                                                                      
+                                                                                      
+                                           \[\omega _{\text {opt}} = \frac {2}{1+\sqrt {1-0.625}} = 1.24 .\]
+ From \(\mathbf x^{(0)} = (1,1,1)^T\): </p>
+<div class='center'>
+<!-- l. 3452 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-17'><colgroup id='TBL-17-1g'><col id='TBL-17-1' /><col id='TBL-17-2' /><col id='TBL-17-3' /><col id='TBL-17-4' /></colgroup><tr class='hline'><td></td><td></td><td></td><td></td></tr><tr id='TBL-17-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-17-1-1' style='white-space:nowrap; text-align:right;'> \(k\) </td><td class='td11' id='TBL-17-1-2' style='white-space:nowrap; text-align:left;'> Gauss–Seidel  </td><td class='td11' id='TBL-17-1-3' style='white-space:nowrap; text-align:left;'>  </td><td class='td11' id='TBL-17-1-4' style='white-space:nowrap; text-align:left;'> SOR, \(\omega = 1.25\)  </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td></tr><tr id='TBL-17-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-17-2-1' style='white-space:nowrap; text-align:right;'>  \(1\) </td><td class='td11' id='TBL-17-2-2' style='white-space:nowrap; text-align:left;'> \((5.2500, 3.8125, -5.0469)\)            </td><td class='td11' id='TBL-17-2-3' style='white-space:nowrap; text-align:left;'>  </td><td class='td11' id='TBL-17-2-4' style='white-space:nowrap; text-align:left;'> \((6.3125, 3.5195, -6.6501)\)      </td></tr><tr id='TBL-17-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-17-3-1' style='white-space:nowrap; text-align:right;'>  \(2\) </td><td class='td11' id='TBL-17-3-2' style='white-space:nowrap; text-align:left;'>  \((3.1406, 3.8828, -5.0293)\) </td><td class='td11' id='TBL-17-3-3' style='white-space:nowrap; text-align:left;'> </td><td class='td11' id='TBL-17-3-4' style='white-space:nowrap; text-align:left;'>  \((2.6223, 3.9585, -4.6004)\)</td>
+</tr><tr id='TBL-17-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-17-4-1' style='white-space:nowrap; text-align:right;'>  \(3\) </td><td class='td11' id='TBL-17-4-2' style='white-space:nowrap; text-align:left;'> \((3.0879, 3.9268, -5.0183)\)            </td><td class='td11' id='TBL-17-4-3' style='white-space:nowrap; text-align:left;'>  </td><td class='td11' id='TBL-17-4-4' style='white-space:nowrap; text-align:left;'> \((3.1333, 4.0103, -5.0967)\)      </td>
+</tr><tr id='TBL-17-5-' style='vertical-align:baseline;'><td class='td11' id='TBL-17-5-1' style='white-space:nowrap; text-align:right;'>  \(5\) </td><td class='td11' id='TBL-17-5-2' style='white-space:nowrap; text-align:left;'> \((3.0343, 3.9714, -5.0072)\)            </td><td class='td11' id='TBL-17-5-3' style='white-space:nowrap; text-align:left;'>  </td><td class='td11' id='TBL-17-5-4' style='white-space:nowrap; text-align:left;'> \((3.0037, 4.0029, -5.0057)\)      </td>
+</tr><tr id='TBL-17-6-' style='vertical-align:baseline;'><td class='td11' id='TBL-17-6-1' style='white-space:nowrap; text-align:right;'>  \(7\) </td><td class='td11' id='TBL-17-6-2' style='white-space:nowrap; text-align:left;'> \((3.0134, 3.9888, -5.0028)\)            </td><td class='td11' id='TBL-17-6-3' style='white-space:nowrap; text-align:left;'>  </td><td class='td11' id='TBL-17-6-4' style='white-space:nowrap; text-align:left;'> \((3.0001, 4.0003, -5.0003)\)      </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td></tr></table>                                                                                      </div></div>
+<!-- l. 3465 --><p class='noindent'>Starting from \(\mathbf 0\) and stopping when successive iterates differ by less than \(10^{-7}\), Jacobi needs \(79\) iterations,
+Gauss–Seidel \(35\) and SOR with \(\omega = 1.25\) only \(15\) (Figure <a href='#x32-31004r7'>7<!-- tex4ht:ref: fig:sor  --></a>).
+</p>
+</div>
+<figure class='figure'> 
+
+                                                                                      
+                                                                                      
+<a id='x32-31004r7'></a>
+                                                                                      
+                                                                                      
+<!-- l. 3471 --><p class='noindent'><img alt='  0−−−51015       −7     (0)
+Ek11111234JGSlIω111112571ωG1ir00000000aaOot.0.2.4.6.85050o5tercuRge0p–Sroos, srt:arbiscaa = 3ti–Sωlt5onpe =e:io1.seid sn2re1ts4tol.2rai5in10tgheeter ldainefrtedoiosmn m xeaagna li=inn0esatr ω convergence  ' src='numerical-methods-and-analysis6x.svg' />
+</p>
+<figcaption class='caption'><span class='id'>Figure 7: </span><span class='content'>Iterative methods on the system of Example <a href='#x32-31003r2'>5.4.2<!-- tex4ht:ref: exa:sor  --></a>. Left: the error \(\|\mathbf x^{(k)}-\mathbf x\|_\infty \) falls geometrically,
+by  the  factor  \(\rho (T)\)  per  step:  \(0.79\)  for  Jacobi,  \(0.625\)  for  Gauss–Seidel  and  about  \(0.25\)  for  SOR.  Right:  the
+number of SOR iterations as a function of \(\omega \) has a sharp minimum near the value \(\omega _{\text {opt}}\) predicted by
+Theorem <a href='#x32-31002r1'>5.4.1<!-- tex4ht:ref: thm:sor  --></a>.</span></figcaption><!-- tex4ht:label?: x32-31004r7  -->
+                                                                                      
+                                                                                      
+</figure>
+                                                                                      
+                                                                                      
+<!-- l. 3512 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu26.html'>next</a>] [<a href='numerical-methods-and-analysissu24.html'>prev</a>] [<a href='numerical-methods-and-analysissu24.html#tailnumerical-methods-and-analysissu24.html'>prev-tail</a>] [<a href='numerical-methods-and-analysissu25.html'>front</a>] [<a href='numerical-methods-and-analysisse5.html#numerical-methods-and-analysissu25.html'>up</a>] </p></div>
+<!-- l. 3512 --><p class='noindent'><a id='tailnumerical-methods-and-analysissu25.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="numerical-methods-and-analysissu24.html">&larr; Previous</a><a class="up" href="numerical-methods-and-analysisse5.html#numerical-methods-and-analysissu25.html">Contents</a><a class="next" href="numerical-methods-and-analysissu26.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/5-4-relaxation-methods" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

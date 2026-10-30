@@ -1,0 +1,80 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>5 Iterative Techniques in Matrix Algebra — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse2.html">Solutions of Equations in One Variable</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu5.html">The bisection method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu6.html">The method of false position</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu7.html">Fixed-point iteration</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu8.html">Newton’s method and the secant method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu9.html">Multiple roots and accelerating convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse3.html">Zeros of Polynomials and Complex Roots</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu11.html">Complex numbers and the roots of polynomials</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu12.html">Horner’s method and deflation</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu13.html">Müller’s method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu14.html">Newton’s method in the complex plane</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu15.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse4.html">Direct Methods for Solving Linear Systems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu16.html">Linear systems and matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu17.html">Gaussian elimination and backward substitution</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu18.html">Pivoting strategies</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu19.html">Matrix factorization</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu20.html">Special types of matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu21.html">Practice Problems</a></li>
+<li class="ch"><a class="current" href="numerical-methods-and-analysisse5.html">Iterative Techniques in Matrix Algebra</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu22.html">Norms of vectors and matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu23.html">Eigenvalues and the spectral radius</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu24.html">The Jacobi and Gauss–Seidel methods</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu25.html">Relaxation methods</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu26.html">Error bounds and iterative refinement</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu27.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 3149 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysisli2.html'>next</a>] [<a href='numerical-methods-and-analysisse4.html'>prev</a>] [<a href='numerical-methods-and-analysisse4.html#tailnumerical-methods-and-analysisse4.html'>prev-tail</a>] [<a href='#tailnumerical-methods-and-analysisse5.html'>tail</a>] [<a href='numerical-methods-and-analysis.html#numerical-methods-and-analysisse5.html'>up</a>] </p></div>
+<h3 class='sectionHead'><span class='titlemark'>5   </span> <a id='x28-270005'></a>Iterative Techniques in Matrix Algebra</h3>
+<!-- l. 3152 --><p class='noindent'>Direct methods cost about \(\frac {n^3}{3}\) operations and fill in the zeros of a matrix as they eliminate. The systems
+that arise from differential equations and networks are often very large and <span class='cmti-10x-x-109'>sparse</span>: most entries are
+zero. For them, <span class='cmbx-10x-x-109'>iterative methods</span>, which generate a sequence of approximations \(\mathbf x^{(0)},\mathbf x^{(1)},\dots \) using
+only products with \(A\), are often far cheaper. To say when such a sequence converges, and
+how close an approximation is, we first need a way to measure the size of vectors and
+matrices.
+</p><!-- l. 3158 --><p class='noindent'>
+</p>
+<div class='subsectionTOCS'>
+<span class='subsectionToc'>5.1 <a href='numerical-methods-and-analysissu22.html#x29-280005.1'>Norms of vectors and matrices</a></span>
+<br /><span class='subsectionToc'>5.2 <a href='numerical-methods-and-analysissu23.html#x30-290005.2'>Eigenvalues and the spectral radius</a></span>
+<br /><span class='subsectionToc'>5.3 <a href='numerical-methods-and-analysissu24.html#x31-300005.3'>The Jacobi and Gauss–Seidel methods</a></span>
+<br /><span class='subsectionToc'>5.4 <a href='numerical-methods-and-analysissu25.html#x32-310005.4'>Relaxation methods</a></span>
+<br /><span class='subsectionToc'>5.5 <a href='numerical-methods-and-analysissu26.html#x33-320005.5'>Error bounds and iterative refinement</a></span>
+<br /><span class='subsectionToc'>5.6 <a href='numerical-methods-and-analysissu27.html#x34-330005.6'>Practice Problems</a></span>
+</div>
+
+
+
+
+
+                                                                                      
+                                                                                      
+<!-- l. 3638 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysisli2.html'>next</a>] [<a href='numerical-methods-and-analysisse4.html'>prev</a>] [<a href='numerical-methods-and-analysisse4.html#tailnumerical-methods-and-analysisse4.html'>prev-tail</a>] [<a href='numerical-methods-and-analysisse5.html'>front</a>] [<a href='numerical-methods-and-analysis.html#numerical-methods-and-analysisse5.html'>up</a>] </p></div>
+<!-- l. 3638 --><p class='noindent'><a id='tailnumerical-methods-and-analysisse5.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="numerical-methods-and-analysisse4.html">&larr; Previous</a><a class="up" href="numerical-methods-and-analysis.html#numerical-methods-and-analysisse5.html">Contents</a><a class="next" href="numerical-methods-and-analysisli2.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/5-iterative-techniques-in-matrix-algebra" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

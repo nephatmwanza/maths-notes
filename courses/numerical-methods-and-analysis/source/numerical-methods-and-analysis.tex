@@ -3146,6 +3146,494 @@ the speed of the machine.
 \end{solution}
 
 
+\section{Iterative Techniques in Matrix Algebra}
+\label{sec:iterative}
+
+Direct methods cost about $\frac{n^3}{3}$ operations and fill in the zeros of a matrix as they eliminate. The systems that arise from
+differential equations and networks are often very large and \emph{sparse}: most entries are zero. For them, \textbf{iterative methods},
+which generate a sequence of approximations $\mathbf x^{(0)},\mathbf x^{(1)},\dots$ using only products with $A$, are often far cheaper. To
+say when such a sequence converges, and how close an approximation is, we first need a way to measure the size of vectors and matrices.
+
+
+\subsection{Norms of vectors and matrices}
+\label{sec:norms}
+
+\begin{defn}
+A \textbf{vector norm} on $\mathbb R^n$ is a function $\|\cdot\|$ with, for all $\mathbf x,\mathbf y\in\mathbb R^n$ and $\alpha\in\mathbb R$,
+\begin{enumerate}
+\item[(i)] $\|\mathbf x\|\geq0$, with $\|\mathbf x\| = 0$ only if $\mathbf x = \mathbf 0$;
+\item[(ii)] $\|\alpha\mathbf x\| = |\alpha|\,\|\mathbf x\|$;
+\item[(iii)] $\|\mathbf x+\mathbf y\|\leq\|\mathbf x\|+\|\mathbf y\|$ (the triangle inequality).
+\end{enumerate}
+The three norms used in this course are
+$$\|\mathbf x\|_1 = \sum_{i=1}^n|x_i|,\qquad \|\mathbf x\|_2 = \left(\sum_{i=1}^nx_i^2\right)^{1/2},\qquad \|\mathbf x\|_\infty = \max_{1\leq i\leq n}|x_i| .$$
+\end{defn}
+
+That $\|\cdot\|_1$ and $\|\cdot\|_\infty$ satisfy (i)--(iii) is immediate. For the Euclidean norm $\|\cdot\|_2$ the triangle inequality rests on the
+next result.
+
+\begin{thm}[Cauchy--Schwarz inequality]
+\label{thm:cs}
+For all $\mathbf x,\mathbf y\in\mathbb R^n$, $|\mathbf x^T\mathbf y|\leq\|\mathbf x\|_2\|\mathbf y\|_2$.
+\end{thm}
+
+\begin{proof}
+If $\mathbf y = \mathbf 0$ there is nothing to prove. Otherwise, for every real $t$,
+$$0\leq\|\mathbf x-t\mathbf y\|_2^2 = \|\mathbf x\|_2^2-2t\,\mathbf x^T\mathbf y+t^2\|\mathbf y\|_2^2 .$$
+A quadratic in $t$ that is never negative has non-positive discriminant: $4(\mathbf x^T\mathbf y)^2-4\|\mathbf x\|_2^2\|\mathbf y\|_2^2\leq0$.
+\end{proof}
+
+Then $\|\mathbf x+\mathbf y\|_2^2 = \|\mathbf x\|_2^2+2\mathbf x^T\mathbf y+\|\mathbf y\|_2^2\leq(\|\mathbf x\|_2+\|\mathbf y\|_2)^2$. The norms are
+also comparable: since $\max_i|x_i|^2\leq\sum_ix_i^2\leq n\max_i|x_i|^2$,
+\begin{equation}\label{eq:normequiv}
+\|\mathbf x\|_\infty\leq\|\mathbf x\|_2\leq\sqrt n\,\|\mathbf x\|_\infty .
+\end{equation}
+A sequence of vectors $\mathbf x^{(k)}$ \textbf{converges} to $\mathbf x$ if $\|\mathbf x^{(k)}-\mathbf x\|\longrightarrow0$. By~\eqref{eq:normequiv} this does
+not depend on which of the norms is used, and it is equivalent to convergence of each component.
+
+\begin{exa}
+For $\mathbf x = (-1,1,-2)^T$: $\|\mathbf x\|_1 = 4$, $\|\mathbf x\|_2 = \sqrt6 = 2.449$, $\|\mathbf x\|_\infty = 2$, in agreement
+with~\eqref{eq:normequiv}: $2\leq2.449\leq\sqrt3\cdot2 = 3.464$.
+\end{exa}
+
+\begin{defn}
+For a vector norm $\|\cdot\|$, the \textbf{natural} (or \textbf{induced}) \textbf{matrix norm} is
+$$\|A\| = \max_{\mathbf x\neq\mathbf 0}\frac{\|A\mathbf x\|}{\|\mathbf x\|} = \max_{\|\mathbf x\| = 1}\|A\mathbf x\| .$$
+It measures the largest factor by which $A$ can stretch a vector. Directly from the definition, $\|A\mathbf x\|\leq\|A\|\,\|\mathbf x\|$ and
+$\|AB\|\leq\|A\|\,\|B\|$.
+\end{defn}
+
+\begin{thm}
+\label{thm:infnorm}
+$\displaystyle\|A\|_\infty = \max_{1\leq i\leq n}\sum_{j=1}^n|a_{ij}|$ (the largest row sum) and $\displaystyle\|A\|_1 = \max_{1\leq j\leq n}\sum_{i=1}^n|a_{ij}|$ (the
+largest column sum).
+\end{thm}
+
+\begin{proof}
+Let $R = \max_i\sum_j|a_{ij}|$. If $\|\mathbf x\|_\infty = 1$ then $|(A\mathbf x)_i| = \left|\sum_ja_{ij}x_j\right|\leq\sum_j|a_{ij}|\leq R$ for each $i$, so
+$\|A\|_\infty\leq R$. Conversely, let row $p$ attain the maximum and put $x_j = \sgn a_{pj}$ (or $1$ if $a_{pj} = 0$). Then $\|\mathbf x\|_\infty = 1$
+and $(A\mathbf x)_p = \sum_j|a_{pj}| = R$, so $\|A\|_\infty\geq R$. The proof for $\|A\|_1$ is similar, with $\mathbf x$ a suitable unit vector
+$\mathbf e_q$.
+\end{proof}
+
+\begin{exa}
+For $A = \begin{pmatrix}1&2&-1\\0&3&-1\\5&-1&1\end{pmatrix}$ the row sums of absolute values are $4$, $4$, $7$ and the column sums $6$, $6$, $3$,
+so $\|A\|_\infty = 7$ and $\|A\|_1 = 6$.
+\end{exa}
+
+
+\subsection{Eigenvalues and the spectral radius}
+\label{sec:spectral}
+
+\begin{defn}
+The \textbf{spectral radius} of a square matrix $A$ is $\rho(A) = \max|\lambda|$, the maximum taken over all (possibly complex) eigenvalues
+$\lambda$ of $A$.
+\end{defn}
+
+\begin{thm}
+\label{thm:spectral}
+\begin{enumerate}
+\item[(i)] $\|A\|_2 = \left[\rho(A^TA)\right]^{1/2}$.
+\item[(ii)] $\rho(A)\leq\|A\|$ for every natural matrix norm.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(ii) Let $A\mathbf x = \lambda\mathbf x$ with $\|\mathbf x\| = 1$ (for complex eigenvalues the same argument works with complex vectors). Then
+$|\lambda| = \|\lambda\mathbf x\| = \|A\mathbf x\|\leq\|A\|$.
+
+(i) $A^TA$ is symmetric with eigenvalues $\mu_i\geq0$ (since $\mathbf v^TA^TA\mathbf v = \|A\mathbf v\|_2^2\geq0$) and an orthonormal basis of
+eigenvectors $\mathbf v_i$. Writing $\mathbf x = \sum c_i\mathbf v_i$ with $\sum c_i^2 = 1$,
+$$\|A\mathbf x\|_2^2 = \mathbf x^TA^TA\mathbf x = \sum\mu_ic_i^2\leq\max_i\mu_i = \rho(A^TA),$$
+with equality when $\mathbf x$ is an eigenvector for the largest $\mu_i$.
+\end{proof}
+
+\begin{exa}
+For $A = \begin{pmatrix}1&1&0\\1&2&1\\-1&1&2\end{pmatrix}$ the eigenvalues are $0$, $2$, $3$, so $\rho(A) = 3$. The eigenvalues of $A^TA$ are
+$0$, $7-\sqrt7 = 4.354$ and $7+\sqrt7 = 9.646$, so $\|A\|_2 = \sqrt{9.646} = 3.106\geq\rho(A)$, while $\|A\|_\infty = 4$.
+\end{exa}
+
+The spectral radius decides whether the powers of a matrix tend to zero, which is exactly what iterative methods need.
+
+\begin{thm}
+\label{thm:convergentmatrix}
+For a square matrix $A$, $A^k\longrightarrow0$ as $k\longrightarrow\infty$ if and only if $\rho(A)<1$.
+\end{thm}
+
+\begin{proof}
+If $A^k\longrightarrow0$ and $A\mathbf v = \lambda\mathbf v$ with $\mathbf v\neq\mathbf 0$, then $\lambda^k\mathbf v = A^k\mathbf v\longrightarrow\mathbf 0$, so
+$|\lambda|<1$. For the converse we give the proof when $A$ has $n$ independent eigenvectors, $A = SDS^{-1}$ with $D$ diagonal: then
+$A^k = SD^kS^{-1}$, and the diagonal entries $\lambda_i^k$ of $D^k$ tend to $0$ when every $|\lambda_i|<1$. (The general case uses the
+Jordan form: powers of a Jordan block $J = \lambda I+N$ have entries $\binom{k}{j}\lambda^{k-j}$, which still tend to $0$ when $|\lambda|<1$.)
+\end{proof}
+
+\begin{exa}
+The matrix $T = \begin{pmatrix}\frac12&0\\16&\frac12\end{pmatrix}$ has $\rho(T) = \frac12$ but $\|T\|_\infty = 16.5$. Its powers are
+$T^k = \begin{pmatrix}2^{-k}&0\\ 32k\,2^{-k}&2^{-k}\end{pmatrix}$; for instance the $(2,1)$ entry of $T^3$ is $12$, but that of $T^{10}$ is $0.3125$,
+and $T^k\longrightarrow0$. A large norm only delays convergence; the spectral radius decides it.
+\end{exa}
+
+
+\subsection{The Jacobi and Gauss--Seidel methods}
+\label{sec:jacobigs}
+
+\subhead{The Jacobi method}
+Solve the $i$th equation of $A\mathbf x = \mathbf b$ for $x_i$ (assuming $a_{ii}\neq0$) and use the old values on the right:
+\begin{equation}\label{eq:jacobi}
+x_i^{(k)} = \frac{1}{a_{ii}}\left(b_i-\sum_{j\neq i}a_{ij}x_j^{(k-1)}\right),\qquad i = 1,\dots,n .
+\end{equation}
+
+\begin{exa}
+\label{exa:jacobi}
+Apply the Jacobi method, from $\mathbf x^{(0)} = \mathbf 0$, to
+\begin{align*}
+10x_1-x_2+2x_3 &= 6,\\
+-x_1+11x_2-x_3+3x_4 &= 25,\\
+2x_1-x_2+10x_3-x_4 &= -11,\\
+3x_2-x_3+8x_4 &= 15,
+\end{align*}
+whose solution is $\mathbf x = (1,2,-1,1)^T$.
+\end{exa}
+
+\begin{solution}
+The iteration is
+\begin{align*}
+x_1^{(k)} &= \tfrac{1}{10}x_2^{(k-1)}-\tfrac15x_3^{(k-1)}+\tfrac35,\\
+x_2^{(k)} &= \tfrac1{11}x_1^{(k-1)}+\tfrac1{11}x_3^{(k-1)}-\tfrac3{11}x_4^{(k-1)}+\tfrac{25}{11},\\
+x_3^{(k)} &= -\tfrac15x_1^{(k-1)}+\tfrac1{10}x_2^{(k-1)}+\tfrac1{10}x_4^{(k-1)}-\tfrac{11}{10},\\
+x_4^{(k)} &= -\tfrac38x_2^{(k-1)}+\tfrac18x_3^{(k-1)}+\tfrac{15}8 .
+\end{align*}
+\begin{center}
+\begin{tabular}{rrrrrr}
+\hline
+$k$ & $x_1^{(k)}$ & $x_2^{(k)}$ & $x_3^{(k)}$ & $x_4^{(k)}$ & $\frac{\|\mathbf x^{(k)}-\mathbf x^{(k-1)}\|_\infty}{\|\mathbf x^{(k)}\|_\infty}$\\
+\hline
+$1$ & $0.6000$ & $2.2727$ & $-1.1000$ & $1.8750$ & $1$\\
+$2$ & $1.0473$ & $1.7159$ & $-0.8052$ & $0.8852$ & $0.577$\\
+$3$ & $0.9326$ & $2.0533$ & $-1.0493$ & $1.1309$ & $0.164$\\
+$5$ & $0.9890$ & $2.0114$ & $-1.0103$ & $1.0214$ & $0.0287$\\
+$8$ & $1.0006$ & $1.9987$ & $-0.9990$ & $0.9989$ & $0.00235$\\
+$10$ & $1.0001$ & $1.9998$ & $-0.9998$ & $0.9998$ & $0.00042$\\
+\hline
+\end{tabular}
+\end{center}
+After $10$ iterations the relative change is below $10^{-3}$ and every component is within $2.3\times10^{-4}$ of the solution.
+\end{solution}
+
+\subhead{The Gauss--Seidel method}
+When $x_i^{(k)}$ is computed, the new values $x_1^{(k)},\dots,x_{i-1}^{(k)}$ are already known and are presumably better than the old ones.
+The \textbf{Gauss--Seidel method} uses them at once:
+\begin{equation}\label{eq:gs}
+x_i^{(k)} = \frac{1}{a_{ii}}\left(b_i-\sum_{j<i}a_{ij}x_j^{(k)}-\sum_{j>i}a_{ij}x_j^{(k-1)}\right),\qquad i = 1,\dots,n .
+\end{equation}
+It also needs only one vector of storage, overwritten in place.
+
+\begin{exa}
+\label{exa:gs}
+Apply the Gauss--Seidel method to the system of Example~\ref{exa:jacobi}.
+\end{exa}
+
+\begin{solution}
+\begin{center}
+\begin{tabular}{rrrrrr}
+\hline
+$k$ & $x_1^{(k)}$ & $x_2^{(k)}$ & $x_3^{(k)}$ & $x_4^{(k)}$ & relative change\\
+\hline
+$1$ & $0.6000$ & $2.3273$ & $-0.9873$ & $0.8789$ & $1$\\
+$2$ & $1.0302$ & $2.0369$ & $-1.0145$ & $0.9843$ & $0.211$\\
+$3$ & $1.0066$ & $2.0036$ & $-1.0025$ & $0.9984$ & $0.0167$\\
+$4$ & $1.0009$ & $2.0003$ & $-1.0003$ & $0.9998$ & $0.0029$\\
+$5$ & $1.0001$ & $2.0000$ & $-1.0000$ & $1.0000$ & $0.00038$\\
+\hline
+\end{tabular}
+\end{center}
+Five Gauss--Seidel iterations do the work of ten Jacobi iterations. For instance $x_2^{(1)} = \frac{1}{11}(0.6000)+\frac{25}{11} = 2.3273$ already
+uses the new $x_1^{(1)}$.
+\end{solution}
+
+\subhead{Matrix form and convergence}
+Write $A = D-L-U$, where $D$ is the diagonal of $A$ and $-L$, $-U$ are its strictly lower and upper triangular parts. Then the Jacobi method is
+$D\mathbf x^{(k)} = (L+U)\mathbf x^{(k-1)}+\mathbf b$, and Gauss--Seidel is $(D-L)\mathbf x^{(k)} = U\mathbf x^{(k-1)}+\mathbf b$. Both have the form
+\begin{equation}\label{eq:stationary}
+\mathbf x^{(k)} = T\mathbf x^{(k-1)}+\mathbf c,
+\end{equation}
+with
+$$T_j = D^{-1}(L+U),\qquad T_g = (D-L)^{-1}U .$$
+
+\begin{thm}
+\label{thm:iterconv}
+For any $\mathbf x^{(0)}$, the sequence~\eqref{eq:stationary} converges to the unique solution of $\mathbf x = T\mathbf x+\mathbf c$ if and only if
+$\rho(T)<1$. If $\|T\|<1$ for some natural norm, then
+$$\|\mathbf x-\mathbf x^{(k)}\|\leq\|T\|^k\|\mathbf x^{(0)}-\mathbf x\|\qquad\text{and}\qquad \|\mathbf x-\mathbf x^{(k)}\|\leq\frac{\|T\|^k}{1-\|T\|}\|\mathbf x^{(1)}-\mathbf x^{(0)}\| .$$
+\end{thm}
+
+\begin{proof}
+If $\rho(T)<1$, then $1$ is not an eigenvalue of $T$, so $I-T$ is invertible and $\mathbf x = T\mathbf x+\mathbf c$ has a unique solution.
+Subtracting it from~\eqref{eq:stationary}, the error $\mathbf e^{(k)} = \mathbf x^{(k)}-\mathbf x$ satisfies $\mathbf e^{(k)} = T\mathbf e^{(k-1)} = \dots = T^k\mathbf e^{(0)}$,
+which tends to $\mathbf 0$ for every $\mathbf e^{(0)}$ by Theorem~\ref{thm:convergentmatrix}. Conversely, if $\rho(T)\geq1$, choose $\mathbf x^{(0)}$
+so that $\mathbf e^{(0)}$ is an eigenvector for an eigenvalue with $|\lambda|\geq1$; then $\mathbf e^{(k)} = \lambda^k\mathbf e^{(0)}$ does not tend to
+$\mathbf 0$. The bounds follow exactly as in the proof of the Fixed-Point Theorem~\ref{thm:fixedpoint}, with $|g'|\leq k$ replaced by
+$\|T\|<1$.
+\end{proof}
+
+The rate of convergence is governed by $\rho(T)$: the error is reduced roughly by the factor $\rho(T)$ per iteration. For the system of
+Example~\ref{exa:jacobi}, $\rho(T_j) = 0.426$ and $\rho(T_g) = 0.0898$, which is why Gauss--Seidel was so much faster.
+
+\begin{thm}
+\label{thm:ddconv}
+If $A$ is strictly diagonally dominant, then both the Jacobi and the Gauss--Seidel methods converge for every $\mathbf b$ and every
+$\mathbf x^{(0)}$.
+\end{thm}
+
+\begin{proof}
+\emph{Jacobi.} The $i$th row of $T_j$ has entries $-\frac{a_{ij}}{a_{ii}}$ ($j\neq i$) and $0$ on the diagonal, so its absolute row sum is
+$\frac{1}{|a_{ii}|}\sum_{j\neq i}|a_{ij}|<1$. Hence $\rho(T_j)\leq\|T_j\|_\infty<1$.
+
+\emph{Gauss--Seidel.} Let $\lambda$ be an eigenvalue of $T_g$ with eigenvector $\mathbf v$, scaled so that $\|\mathbf v\|_\infty = 1$, and let
+$|v_k| = 1$. From $U\mathbf v = \lambda(D-L)\mathbf v$, the $k$th component reads
+$$-\sum_{j>k}a_{kj}v_j = \lambda\left(a_{kk}v_k+\sum_{j<k}a_{kj}v_j\right).$$
+Taking absolute values and using $|v_j|\leq1$,
+$$|\lambda|\left(|a_{kk}|-\sum_{j<k}|a_{kj}|\right)\leq\sum_{j>k}|a_{kj}| .$$
+By strict diagonal dominance, $|a_{kk}|-\sum_{j<k}|a_{kj}|>\sum_{j>k}|a_{kj}|\geq0$, so $|\lambda|<1$. Hence $\rho(T_g)<1$.
+\end{proof}
+
+\begin{exa}
+\label{exa:jacobidiverge}
+Show that the Jacobi method diverges for $x_1+2x_2 = 3$, $3x_1+x_2 = 4$, and that it converges after the equations are interchanged.
+\end{exa}
+
+\begin{solution}
+Here $T_j = \begin{pmatrix}0&-2\\-3&0\end{pmatrix}$, with eigenvalues $\pm\sqrt6$, so $\rho(T_j) = 2.449>1$. From $\mathbf 0$ the iterates are
+$(3,4), (-5,-5), (13,19), (-35,-35),\dots$, moving away from the solution $(1,1)$. Interchanging the equations gives $3x_1+x_2 = 4$,
+$x_1+2x_2 = 3$, which is strictly diagonally dominant, and now $T_j = \begin{pmatrix}0&-\frac13\\-\frac12&0\end{pmatrix}$ has $\rho = \frac1{\sqrt6} =
+0.408$: the iteration converges.
+\end{solution}
+
+
+\subsection{Relaxation methods}
+\label{sec:sor}
+
+Gauss--Seidel moves each component from $x_i^{(k-1)}$ to the value $\tilde x_i$ given by~\eqref{eq:gs}. When the iterates approach the
+solution steadily from one side, moving a little further than that, $x_i^{(k)} = x_i^{(k-1)}+\omega(\tilde x_i-x_i^{(k-1)})$ with
+$\omega>1$, speeds convergence. This is the \textbf{successive over-relaxation} or \textbf{SOR} method:
+\begin{equation}\label{eq:sor}
+x_i^{(k)} = (1-\omega)x_i^{(k-1)}+\frac{\omega}{a_{ii}}\left(b_i-\sum_{j<i}a_{ij}x_j^{(k)}-\sum_{j>i}a_{ij}x_j^{(k-1)}\right).
+\end{equation}
+For $\omega = 1$ it is Gauss--Seidel; $\omega<1$ is \textbf{under-relaxation}, occasionally used to make a divergent iteration converge.
+
+\begin{thm}
+\label{thm:sor}
+\begin{enumerate}
+\item[(i)] (Kahan) If $a_{ii}\neq0$ for all $i$, SOR can converge only if $0<\omega<2$.
+\item[(ii)] (Ostrowski--Reich) If $A$ is positive definite and $0<\omega<2$, SOR converges for every $\mathbf x^{(0)}$.
+\item[(iii)] If $A$ is positive definite and tridiagonal, then $\rho(T_g) = \rho(T_j)^2<1$, and the choice of $\omega$ that minimizes
+$\rho(T_\omega)$ is
+$$\omega_{\text{opt}} = \frac{2}{1+\sqrt{1-\rho(T_j)^2}},\qquad\text{with}\qquad\rho(T_{\omega_{\text{opt}}}) = \omega_{\text{opt}}-1 .$$
+\end{enumerate}
+\end{thm}
+
+We prove (i): the SOR iteration matrix is $T_\omega = (D-\omega L)^{-1}\bigl((1-\omega)D+\omega U\bigr)$, a product of triangular matrices, so
+$$\det T_\omega = \frac{\det\bigl((1-\omega)D\bigr)}{\det D} = (1-\omega)^n .$$
+Since the determinant is the product of the eigenvalues, $\rho(T_\omega)^n\geq|\det T_\omega| = |1-\omega|^n$, so $\rho(T_\omega)\geq|1-\omega|$, which
+is at least $1$ unless $0<\omega<2$. Parts (ii) and (iii) are proved in the texts by Burden and Faires and by Atkinson.
+
+\begin{exa}
+\label{exa:sor}
+Solve
+$$4x_1+3x_2 = 24,\qquad 3x_1+4x_2-x_3 = 30,\qquad -x_2+4x_3 = -24$$
+(solution $(3,4,-5)^T$) by Gauss--Seidel and by SOR, and find the optimal $\omega$.
+\end{exa}
+
+\begin{solution}
+The matrix is positive definite and tridiagonal. Here $T_j$ has eigenvalues $0$ and $\pm\sqrt{0.625}$, so $\rho(T_j) = 0.7906$,
+$\rho(T_g) = 0.625$ and
+$$\omega_{\text{opt}} = \frac{2}{1+\sqrt{1-0.625}} = 1.24 .$$
+From $\mathbf x^{(0)} = (1,1,1)^T$:
+\begin{center}
+\begin{tabular}{rlll}
+\hline
+$k$ & Gauss--Seidel & & SOR, $\omega = 1.25$\\
+\hline
+$1$ & $(5.2500, 3.8125, -5.0469)$ & & $(6.3125, 3.5195, -6.6501)$\\
+$2$ & $(3.1406, 3.8828, -5.0293)$ & & $(2.6223, 3.9585, -4.6004)$\\
+$3$ & $(3.0879, 3.9268, -5.0183)$ & & $(3.1333, 4.0103, -5.0967)$\\
+$5$ & $(3.0343, 3.9714, -5.0072)$ & & $(3.0037, 4.0029, -5.0057)$\\
+$7$ & $(3.0134, 3.9888, -5.0028)$ & & $(3.0001, 4.0003, -5.0003)$\\
+\hline
+\end{tabular}
+\end{center}
+Starting from $\mathbf 0$ and stopping when successive iterates differ by less than $10^{-7}$, Jacobi needs $79$ iterations, Gauss--Seidel
+$35$ and SOR with $\omega = 1.25$ only $15$ (Figure~\ref{fig:sor}).
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+% Left: log10 error vs k; x: k*0.15, y: log10(e)*0.25 + 4.3
+\fill[blue!5,rounded corners] (-0.9,-0.75) rectangle (6.7,5.3);
+\draw[blue!45,rounded corners] (-0.9,-0.75) rectangle (6.7,5.3);
+\node[font=\small\bfseries,text=blue!60!black] at (2.9,4.95) {Error per iteration};
+\draw[->,gray] (0,0) -- (6.3,0) node[right,font=\scriptsize,black]{$k$};
+\draw[->,gray] (0,0) -- (0,4.65);
+\foreach \y/\l in {4.3/{10^0},3.05/{10^{-5}},1.8/{10^{-10}},0.55/{10^{-15}}} {\draw[gray] (-0.07,\y) -- (0.07,\y); \node[font=\tiny,left] at (-0.05,\y) {$\l$};}
+\foreach \x in {10,20,30,40} \node[font=\tiny,below] at (\x*0.15,0) {$\x$};
+\draw[thick,red!70!black] (0.0,4.475) -- (0.3,4.405) -- (0.6,4.355) -- (0.9,4.3025) -- (1.2,4.2525) -- (1.5,4.2) -- (1.8,4.15) -- (2.1,4.0975) -- (2.4,4.0475) -- (2.7,3.9975) -- (3.0,3.945) -- (3.3,3.895) -- (3.6,3.8425) -- (3.9,3.7925) -- (4.2,3.7425) -- (4.5,3.69) -- (4.8,3.64) -- (5.1,3.5875) -- (5.4,3.5375) -- (5.7,3.485) -- (6.0,3.435);
+\draw[thick,orange!80!black] (0.0,4.475) -- (0.3,4.27) -- (0.6,4.1675) -- (0.9,4.065) -- (1.2,3.9625) -- (1.5,3.86) -- (1.8,3.7575) -- (2.1,3.6575) -- (2.4,3.555) -- (2.7,3.4525) -- (3.0,3.35) -- (3.3,3.2475) -- (3.6,3.145) -- (3.9,3.045) -- (4.2,2.9425) -- (4.5,2.84) -- (4.8,2.7375) -- (5.1,2.635) -- (5.4,2.5325) -- (5.7,2.4325) -- (6.0,2.33);
+\draw[thick,green!50!black] (0.0,4.475) -- (0.3,4.2325) -- (0.6,3.9625) -- (0.9,3.6325) -- (1.2,3.285) -- (1.5,3.0575) -- (1.8,2.8275) -- (2.1,2.55) -- (2.4,2.2425) -- (2.7,1.8975) -- (3.0,1.475) -- (3.3,1.2125) -- (3.6,0.9475) -- (3.9,0.6575) -- (4.2,0.3);
+\node[font=\scriptsize,red!70!black,anchor=west] at (4.3,3.85) {Jacobi};
+\node[font=\scriptsize,orange!80!black,anchor=west] at (4.3,2.45) {Gauss--Seidel};
+\node[font=\scriptsize,green!50!black,anchor=west] at (4.25,0.75) {SOR, $\omega=1.25$};
+\node[font=\scriptsize] at (2.9,-0.5) {$\log$ scale: straight lines mean linear convergence};
+% Right: iterations vs omega; x: (w-1)*7, y: it*0.035
+\begin{scope}[xshift=7.6cm]
+\fill[orange!6,rounded corners] (-0.75,-0.75) rectangle (6.85,5.3);
+\draw[orange!50,rounded corners] (-0.75,-0.75) rectangle (6.85,5.3);
+\node[font=\small\bfseries,text=orange!80!black] at (3.05,4.95) {Iterations needed against $\omega$};
+\draw[->,gray] (0,0) -- (6.4,0) node[right,font=\scriptsize,black]{$\omega$};
+\draw[->,gray] (0,0) -- (0,4.4);
+\foreach \w/\l in {0/1.0,1.4/1.2,2.8/1.4,4.2/1.6,5.6/1.8} \node[font=\tiny,below] at (\w,0) {$\l$};
+\foreach \n in {25,50,75,100} {\draw[gray] (-0.07,\n*0.035) -- (0.07,\n*0.035); \node[font=\tiny,left] at (-0.05,\n*0.035) {$\n$};}
+\draw[thick,blue!70!black] (0.00,1.225) -- (0.35,1.085) -- (0.70,0.98) -- (1.05,0.84) -- (1.40,0.70) -- (1.75,0.525) -- (2.10,0.56) -- (2.45,0.665) -- (2.80,0.735) -- (3.15,0.875) -- (3.50,0.98) -- (3.85,1.12) -- (4.20,1.295) -- (4.55,1.54) -- (4.90,1.89) -- (5.25,2.275) -- (5.60,2.975) -- (5.95,4.095);
+\foreach \x/\y in {0.00/1.225,0.35/1.085,0.70/0.98,1.05/0.84,1.40/0.70,1.75/0.525,2.10/0.56,2.45/0.665,2.80/0.735,3.15/0.875,3.50/0.98,3.85/1.12,4.20/1.295,4.55/1.54,4.90/1.89,5.25/2.275,5.60/2.975,5.95/4.095} \fill[blue!70!black] (\x,\y) circle (1.3pt);
+\draw[dashed,red!70!black] (1.683,0) -- (1.683,3.2);
+\node[font=\scriptsize,red!70!black,align=center] at (1.7,3.55) {$\omega_{\text{opt}} = 1.24$};
+\node[font=\scriptsize,anchor=west] at (0.1,1.5) {G--S: $35$};
+\node[font=\scriptsize,anchor=west] at (1.9,0.3) {$15$};
+\node[font=\scriptsize] at (3.05,-0.5) {iterations to $10^{-7}$ from $\mathbf x^{(0)} = \mathbf 0$};
+\end{scope}
+\end{tikzpicture}
+\caption{Iterative methods on the system of Example~\ref{exa:sor}. Left: the error $\|\mathbf x^{(k)}-\mathbf x\|_\infty$ falls geometrically,
+by the factor $\rho(T)$ per step: $0.79$ for Jacobi, $0.625$ for Gauss--Seidel and about $0.25$ for SOR. Right: the number of SOR
+iterations as a function of $\omega$ has a sharp minimum near the value $\omega_{\text{opt}}$ predicted by Theorem~\ref{thm:sor}.}
+\label{fig:sor}
+\end{figure}
+
+
+\subsection{Error bounds and iterative refinement}
+\label{sec:condition}
+
+Every method, direct or iterative, produces an approximation $\tilde{\mathbf x}$. Its \textbf{residual} $\mathbf r = \mathbf b-A\tilde{\mathbf x}$
+can be computed, while its error $\mathbf x-\tilde{\mathbf x}$ cannot. A small residual seems reassuring; it may not be.
+
+\begin{exa}
+\label{exa:illcond}
+The system
+$$x_1+2x_2 = 3,\qquad 1.0001x_1+2x_2 = 3.0001$$
+has the solution $(1,1)^T$. Find the residual of the poor approximation $\tilde{\mathbf x} = (3,-0.0001)^T$.
+\end{exa}
+
+\begin{solution}
+$\mathbf r = \mathbf b-A\tilde{\mathbf x} = (3-2.9998,\ 3.0001-3.0001)^T = (0.0002, 0)^T$, so $\|\mathbf r\|_\infty = 0.0002$, while
+$\|\mathbf x-\tilde{\mathbf x}\|_\infty = 2$. The two equations describe nearly parallel lines, and points far apart along them almost satisfy
+both.
+\end{solution}
+
+\begin{defn}
+The \textbf{condition number} of a nonsingular matrix $A$ relative to a natural norm is $K(A) = \|A\|\,\|A^{-1}\|$. Since
+$1 = \|I\| = \|AA^{-1}\|\leq\|A\|\,\|A^{-1}\|$, always $K(A)\geq1$. A matrix is \textbf{well-conditioned} if $K(A)$ is close to $1$ and
+\textbf{ill-conditioned} if $K(A)$ is large.
+\end{defn}
+
+\begin{thm}
+\label{thm:residual}
+If $A\mathbf x = \mathbf b$ with $\mathbf b\neq\mathbf 0$, and $\tilde{\mathbf x}$ has residual $\mathbf r = \mathbf b-A\tilde{\mathbf x}$, then
+$$\|\mathbf x-\tilde{\mathbf x}\|\leq\|A^{-1}\|\,\|\mathbf r\|\qquad\text{and}\qquad\frac{\|\mathbf x-\tilde{\mathbf x}\|}{\|\mathbf x\|}\leq K(A)\frac{\|\mathbf r\|}{\|\mathbf b\|} .$$
+\end{thm}
+
+\begin{proof}
+$A(\mathbf x-\tilde{\mathbf x}) = \mathbf b-A\tilde{\mathbf x} = \mathbf r$, so $\mathbf x-\tilde{\mathbf x} = A^{-1}\mathbf r$ and $\|\mathbf x-\tilde{\mathbf x}\|\leq\|A^{-1}\|\,\|\mathbf r\|$.
+Also $\|\mathbf b\| = \|A\mathbf x\|\leq\|A\|\,\|\mathbf x\|$, so $\frac{1}{\|\mathbf x\|}\leq\frac{\|A\|}{\|\mathbf b\|}$; multiplying the two inequalities
+gives the second bound.
+\end{proof}
+
+So a small relative residual guarantees a small relative error only when $K(A)$ is moderate. For the matrix of Example~\ref{exa:illcond},
+$$A^{-1} = \begin{pmatrix}-10000&10000\\5000.5&-5000\end{pmatrix},\qquad \|A\|_\infty = 3.0001,\quad\|A^{-1}\|_\infty = 20000,\quad K_\infty(A) = 60002 .$$
+The bound gives $\frac{\|\mathbf x-\tilde{\mathbf x}\|_\infty}{\|\mathbf x\|_\infty}\leq60002\cdot\frac{0.0002}{3.0001} = 4$, consistent with the actual
+relative error $2$.
+
+The condition number also measures the sensitivity of the solution to errors in the data. It can be shown that if $\tilde{\mathbf x}$ solves
+the perturbed system $(A+\delta A)\tilde{\mathbf x} = \mathbf b+\delta\mathbf b$ and $\|A^{-1}\|\,\|\delta A\|<1$, then
+$$\frac{\|\mathbf x-\tilde{\mathbf x}\|}{\|\mathbf x\|}\leq\frac{K(A)}{1-K(A)\frac{\|\delta A\|}{\|A\|}}\left(\frac{\|\delta A\|}{\|A\|}+\frac{\|\delta\mathbf b\|}{\|\mathbf b\|}\right).$$
+In particular, rounding the data to $t$ significant digits can produce relative errors of about $K(A)\times10^{-t}$ in the solution: a
+system with $K(A)\approx10^m$ loses about $m$ of the digits carried.
+
+\begin{exa}[Hilbert matrices]
+\label{exa:hilbert}
+The Hilbert matrix $H_n$ has entries $h_{ij} = \frac{1}{i+j-1}$. Its condition numbers grow very rapidly:
+\begin{center}
+\begin{tabular}{rccccc}
+\hline
+$n$ & $3$ & $5$ & $8$ & $10$ & $12$\\
+$K_\infty(H_n)$ & $748$ & $9.4\times10^5$ & $3.4\times10^{10}$ & $3.5\times10^{13}$ & $3.8\times10^{16}$\\
+\hline
+\end{tabular}
+\end{center}
+Solving $H_{10}\mathbf x = H_{10}\mathbf 1$ in double precision (about $16$ digits) by Gaussian elimination with partial pivoting gives a
+solution whose components differ from $1$ by up to $5.9\times10^{-4}$: about $13$ of the $16$ digits are lost, as $K\approx3.5\times10^{13}$
+predicts. For $n = 12$ essentially no correct digits can be expected. Hilbert matrices arise naturally in least-squares fitting by
+polynomials, which is why that problem is usually solved by other means.
+\end{exa}
+
+\subhead{Iterative refinement}
+If $\tilde{\mathbf x}$ was computed from an LU factorization, its accuracy can often be improved cheaply: compute the residual
+$\mathbf r = \mathbf b-A\tilde{\mathbf x}$ (preferably in higher precision), solve $A\mathbf y = \mathbf r$ using the same factors (cost $O(n^2)$),
+and set $\tilde{\mathbf x}\leftarrow\tilde{\mathbf x}+\mathbf y$. Since $A(\tilde{\mathbf x}+\mathbf y) = A\tilde{\mathbf x}+\mathbf r = \mathbf b$
+exactly in exact arithmetic, each step removes most of the remaining error, as long as $K(A)$ is not so large that the correction
+itself is meaningless.
+
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Find $\|\mathbf x\|_1$, $\|\mathbf x\|_2$ and $\|\mathbf x\|_\infty$ for $\mathbf x = (3,-4,0,12)^T$, and $\|A\|_\infty$, $\|A\|_1$ for
+$A = \begin{pmatrix}2&-1&0\\-1&2&-1\\0&-1&2\end{pmatrix}$.
+\end{problem}
+\begin{solution}
+$\|\mathbf x\|_1 = 19$, $\|\mathbf x\|_2 = \sqrt{9+16+144} = 13$, $\|\mathbf x\|_\infty = 12$. For $A$ the absolute row sums are $3, 4, 3$ and, $A$ being
+symmetric, so are the column sums: $\|A\|_\infty = \|A\|_1 = 4$.
+\end{solution}
+
+\begin{problem}
+Perform three iterations of the Jacobi and Gauss--Seidel methods for $3x_1+x_2 = 5$, $x_1+2x_2 = 5$ from $\mathbf 0$. Compare with the exact
+solution.
+\end{problem}
+\begin{solution}
+Jacobi: $x_1^{(k)} = \frac{5-x_2^{(k-1)}}{3}$, $x_2^{(k)} = \frac{5-x_1^{(k-1)}}{2}$ gives $(1.6667,2.5)$, $(0.8333,1.6667)$, $(1.1111,2.0833)$.
+Gauss--Seidel uses the new $x_1$ at once: $(1.6667,1.6667)$, $(1.1111,1.9444)$, $(1.0185,1.9907)$. The solution is $(1,2)$. Here
+$\rho(T_j) = \frac1{\sqrt6} = 0.408$ and $\rho(T_g) = \frac16$, and the Gauss--Seidel errors indeed shrink by a factor of $6$ per step.
+\end{solution}
+
+\begin{problem}
+Show that $\rho(T_g) = \rho(T_j)^2$ for every $2\times2$ matrix with non-zero diagonal.
+\end{problem}
+\begin{solution}
+For $A = \begin{pmatrix}a&b\\c&d\end{pmatrix}$, $T_j = \begin{pmatrix}0&-b/a\\-c/d&0\end{pmatrix}$ has eigenvalues $\pm\sqrt{\frac{bc}{ad}}$, so
+$\rho(T_j)^2 = \left|\frac{bc}{ad}\right|$. Gauss--Seidel gives $x_1^{(k)} = \frac{b_1-bx_2^{(k-1)}}{a}$ and $x_2^{(k)} = \frac{b_2-cx_1^{(k)}}{d}$, so
+$T_g = \begin{pmatrix}0&-\frac ba\\0&\frac{bc}{ad}\end{pmatrix}$, with eigenvalues $0$ and $\frac{bc}{ad}$. Hence $\rho(T_g) = \rho(T_j)^2$: Gauss--Seidel
+converges exactly when Jacobi does, and twice as fast in terms of digits per iteration.
+\end{solution}
+
+\begin{problem}
+For $A = \begin{pmatrix}1&2\\1.0001&2\end{pmatrix}$, compute the solution of $A\mathbf x = \mathbf b$ for $\mathbf b = (3,3.0001)^T$ and for the slightly
+changed $\mathbf b' = (3,3.0002)^T$. Explain the result using $K_\infty(A)$.
+\end{problem}
+\begin{solution}
+The first solution is $(1,1)$. For $\mathbf b'$, $\mathbf x' = A^{-1}\mathbf b' = (-30000+30002,\ 15001.5-15001)^T = (2,0.5)^T$. A relative change of
+$3.3\times10^{-5}$ in $\mathbf b$ has changed the solution by $100\%$ (in $\|\cdot\|_\infty$): an amplification of about $3\times10^4$, of the order of
+$K_\infty(A) = 60002$, as Theorem~\ref{thm:residual} allows.
+\end{solution}
+
+\begin{problem}
+Explain why the SOR method with $\omega = 2.1$ cannot converge for any system, and compute $\omega_{\text{opt}}$ for a positive definite
+tridiagonal matrix with $\rho(T_j) = 0.9$. By what factor is the convergence faster than Gauss--Seidel?
+\end{problem}
+\begin{solution}
+By Theorem~\ref{thm:sor}(i), $\rho(T_\omega)\geq|1-\omega| = 1.1>1$. For $\rho(T_j) = 0.9$, $\omega_{\text{opt}} = \frac{2}{1+\sqrt{0.19}} = 1.393$ and
+$\rho(T_{\omega_{\text{opt}}}) = 0.393$, against $\rho(T_g) = 0.81$. Gauss--Seidel gains $-\log_{10}0.81 = 0.092$ decimal digits per iteration and SOR
+$-\log_{10}0.393 = 0.41$: about $4.4$ times as fast.
+\end{solution}
+
+
 \clearpage
 \section*{References}
 \addcontentsline{toc}{section}{References}
@@ -3178,17 +3666,28 @@ Numerical Mathematics}, 11, 168--174.
 and Besser.
 \item Goldberg, D. (1991), What every computer scientist should know about floating-point arithmetic, \emph{ACM Computing Surveys}, 23,
 5--48.
-\item IEEE (1985), \emph{IEEE Standard for Binary Floating-Point Arithmetic}, ANSI/IEEE Std 754-1985, New York, Institute of Electrical
-and Electronics Engineers.
 \item Horner, W. G. (1819), A new method of solving numerical equations of all orders, by continuous approximation,
 \emph{Philosophical Transactions of the Royal Society of London}, 109, 308--335.
+\item IEEE (1985), \emph{IEEE Standard for Binary Floating-Point Arithmetic}, ANSI/IEEE Std 754-1985, New York, Institute of Electrical
+and Electronics Engineers.
+\item Jacobi, C. G. J. (1845), \"Uber eine neue Aufl\"osungsart der bei der Methode der kleinsten Quadrate vorkommenden
+linearen Gleichungen, \emph{Astronomische Nachrichten}, 22, 297--306.
+\item Kahan, W. (1958), \emph{Gauss--Seidel Methods of Solving Large Systems of Linear Equations}, Ph.D.\ thesis, University of
+Toronto.
 \item Muller, D. E. (1956), A method for solving algebraic equations using an automatic computer, \emph{Mathematical Tables and Other
 Aids to Computation}, 10, 208--215.
 \item Newton, I. (1711), \emph{De analysi per aequationes numero terminorum infinitas}, London (written 1669).
+\item Ostrowski, A. M. (1954), On the linear iteration procedures for symmetric matrices, \emph{Rendiconti di Matematica e delle
+sue Applicazioni}, 13, 140--163.
 \item Raphson, J. (1690), \emph{Analysis Aequationum Universalis}, London.
+\item Seidel, L. (1874), \"Uber ein Verfahren, die Gleichungen, auf welche die Methode der kleinsten Quadrate f\"uhrt, sowie
+line\"are Gleichungen \"uberhaupt, durch successive Ann\"aherung aufzul\"osen, \emph{Abhandlungen der Bayerischen Akademie der
+Wissenschaften}, 11, 81--108.
 \item Steffensen, J. F. (1933), Remarks on iteration, \emph{Skandinavisk Aktuarietidskrift}, 16, 64--72.
 \item Taylor, B. (1715), \emph{Methodus Incrementorum Directa et Inversa}, London.
 \item Wilkinson, J. H. (1963), \emph{Rounding Errors in Algebraic Processes}, Englewood Cliffs, NJ, Prentice-Hall.
+\item Young, D. M. (1954), Iterative methods for solving partial difference equations of elliptic type, \emph{Transactions of the
+American Mathematical Society}, 76, 92--111.
 \end{enumerate}
 
 \end{document}
