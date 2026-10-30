@@ -4259,6 +4259,192 @@ heavily. A different population with more young people would give different summ
 robustness is a test of homogeneity, which fails here, and the appropriate report is the age-specific ratios.
 \end{solution}
 
+\section{Review problems}
+\label{sec:review}
+
+This section draws the course together. Figure~\ref{fig:roadmap} summarises, for each design, what it estimates and how the
+estimate is adjusted for confounding; the problems that follow each combine several sections.
+
+% Summary chart in the panel style of the study-design figure: one coloured
+% band per design, three columns. One picture, so it stays a table on the web.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,
+  hd/.style={font=\small\bfseries,anchor=west},
+  cl/.style={font=\small,anchor=west,align=left}]
+\node[hd] at (0.15,0.55) {Design};
+\node[hd] at (4.35,0.55) {Estimates};
+\node[hd] at (9.75,0.55) {Adjust for confounding with};
+\foreach \i/\c/\d/\e/\a in {
+  0/blue/{Cohort, fixed follow-up}/{risks; RR, RD, OR}/{MH risk ratio or difference; logistic},
+  1/teal/{Cohort, person-time}/{rates; rate ratio and difference}/{standardisation; MH rate ratio; Poisson},
+  2/orange/{Case-control}/{OR (RR if rare or case-cohort; IRR if density-sampled)}/{MH odds ratio; logistic},
+  3/red/{Matched case-control}/{OR within matched sets}/{McNemar; MH; conditional logistic},
+  4/violet/{Cross-sectional}/{prevalence; prevalence ratio, OR}/{MH; logistic}} {
+  \fill[\c!10,rounded corners=4pt] (0,-1.1*\i-0.05) rectangle (15.2,-1.1*\i-1.0);
+  \draw[\c!70!black,thick,rounded corners=4pt] (0,-1.1*\i-0.05) rectangle (15.2,-1.1*\i-1.0);
+  \node[cl,font=\small\bfseries,text=\c!60!black,text width=3.9cm] at (0.15,-1.1*\i-0.525) {\d};
+  \node[cl,text width=5.2cm] at (4.35,-1.1*\i-0.525) {\e};
+  \node[cl,text width=5.3cm] at (9.75,-1.1*\i-0.525) {\a};
+}
+\end{tikzpicture}
+\caption{What each design estimates and how it is adjusted. In every row the first steps are the same: stratum-specific estimates, a
+judgement of homogeneity, then a pooled estimate or a model.}
+\label{fig:roadmap}
+\end{figure}
+
+\subsection{Problems}
+
+\begin{problem}
+\label{prob:outbreak}
+After a wedding, $40$ of $120$ guests develop gastroenteritis. Of $70$ guests who ate the chicken, $35$ became ill; of the $50$ who did not, $5$ did. Of
+$60$ who ate the potato salad, $22$ became ill, against $18$ of the $60$ who did not.
+\begin{enumerate}[label=(\alph*)]
+\item Compute the attack rates and risk ratios for each food. Which is the likely vehicle?
+\item Give a $95\%$ confidence interval for the risk ratio for chicken and test for association.
+\item What proportion of the cases is attributable to the chicken? Check the answer with Miettinen's formula.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Chicken: $35/70 = 0.50$ against $5/50 = 0.10$, $\RR = 5.0$. Potato salad: $22/60 = 0.37$ against $18/60 = 0.30$, $\RR = 1.22$. The chicken is the likely
+vehicle; the weak association with the salad may come from guests who ate both.
+
+(b) $\text{SE}(\log\widehat{\RR}) = \sqrt{1/35 - 1/70 + 1/5 - 1/50} = 0.441$, so the interval is $5.0\,e^{\pm 0.864} = (2.1,\ 11.9)$. By Proposition~\ref{prop:chisq},
+$X^2 = 120(35 \times 45 - 5 \times 35)^2/(70 \times 50 \times 40 \times 80) = 21.0$, $P < 0.0001$.
+
+(c) The overall attack rate is $40/120 = 0.333$, so $\text{PAF} = (0.333 - 0.10)/0.333 = 0.70$. By Miettinen, $P_c = 35/40 = 0.875$ and $\text{AF}_E = 4/5 = 0.8$, giving $0.875 \times 0.8 = 0.70$.
+Seven in ten cases would not have occurred without the chicken; the other cases arose from the background or from another source.
+\end{solution}
+
+\begin{problem}
+A case-control study of $200$ cases and $200$ controls finds $90$ exposed cases and $60$ exposed controls. A validation study shows that the
+exposure questionnaire has sensitivity $0.85$ and specificity $0.95$ in both groups.
+\begin{enumerate}[label=(\alph*)]
+\item Compute the observed odds ratio and the odds ratio corrected for misclassification.
+\item Explain the direction of the difference using a theorem of the course.
+\item Why might the misclassification in fact be differential, and what then?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Observed: $(90 \times 140)/(110 \times 60) = 1.91$. Corrected exposed counts: $(90 - 0.05 \times 200)/0.80 = 100$ among cases and $(60 - 10)/0.80 = 62.5$ among controls,
+so the corrected odds ratio is $(100 \times 137.5)/(100 \times 62.5) = 2.20$.
+
+(b) Nondifferential misclassification of a binary exposure biases the odds ratio towards $1$ (Theorem~\ref{thm:nde}), so the corrected value
+lies further from $1$.
+
+(c) If exposure is recalled at interview after diagnosis, cases may report it more completely than controls (recall bias), giving a
+higher sensitivity among cases. The bias could then be away from the null, and the correction must use separate sensitivities and
+specificities for cases and controls, which needs a validation study within each group.
+\end{solution}
+
+\begin{problem}
+\label{prob:revcohort}
+A cohort study gives, for workers under $50$, $12$ cancer deaths in $8000$ person-years among the exposed and $10$ in $16{,}000$ among the unexposed;
+for workers aged $50$ and over, $40$ in $4000$ and $24$ in $4800$.
+\begin{enumerate}[label=(\alph*)]
+\item Compute the crude and the stratum-specific rate ratios. Is there confounding by age?
+\item Compute the Mantel--Haenszel rate ratio with a $95\%$ interval, and the Mantel--Haenszel test.
+\item Compute the SMR of the exposed using the unexposed rates as standard.
+\item Is a single summary appropriate?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Rates per $1000$ person-years: under $50$, $1.5$ and $0.625$ (ratio $2.4$); $50$ and over, $10$ and $5$ (ratio $2.0$). Crude: $(52/12{,}000)/(34/20{,}800) = 2.65$. The exposed
+are older ($33\%$ of their person-time over $50$, against $23\%$ of the unexposed), and death rates rise with age, so age inflates the crude ratio.
+
+(b) The numerator is $12 \times 16{,}000/24{,}000 + 40 \times 4800/8800 = 8.0 + 21.82 = 29.82$, and the denominator $10 \times 8000/24{,}000 + 24 \times 4000/8800 = 3.33 + 10.91 = 14.24$,
+so $\widehat{\text{IRR}}_{\text{MH}} = 2.09$. The variance of its log is $\sum_k D_k T_{1k}T_{0k}/T_k^2$ divided by the product of numerator and denominator: $(22 \times 8000 \times 16{,}000/24{,}000^2 + 64 \times 4000 \times 4800/8800^2)/(29.82 \times 14.24) = 0.0489$,
+$\text{SE} = 0.221$, interval $(1.36,\ 3.23)$. The test: observed $52$ exposed deaths, expected $36.42$, variance $20.76$, so $X^2 = (52 - 36.42)^2/20.76 = 11.7$.
+
+(c) Expected deaths among the exposed at the unexposed rates: $8000 \times 0.000625 + 4000 \times 0.005 = 5 + 20 = 25$, so $\text{SMR} = 52/25 = 2.08$.
+
+(d) The stratum ratios, $2.4$ and $2.0$, are close; Woolf's homogeneity statistic is $0.13$ on $1$ degree of freedom. A summary of about $2.1$ is appropriate, and
+all the methods give it.
+\end{solution}
+
+\begin{problem}
+A matched case-control study has $150$ pairs. In $36$ pairs only the case was exposed, in $18$ only the control.
+\begin{enumerate}[label=(\alph*)]
+\item Estimate the odds ratio, test for association, and give an exact $95\%$ interval.
+\item A new study is to detect an odds ratio of $2$ with power $0.90$ at $\alpha = 0.05$. If $35\%$ of pairs are discordant, as here, how many pairs are needed?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\hat\psi = 36/18 = 2.0$. McNemar: $(36 - 18)^2/54 = 6.0$, $P = 0.014$. The exact Clopper--Pearson interval for $\pi = \psi/(1 + \psi)$ from $36$ of $54$ is $(0.525,\ 0.789)$, which
+transforms to $(1.11,\ 3.74)$.
+
+(b) By Theorem~\ref{thm:pairs} the discordant pairs are binomial with $\pi = 2/3$ under the alternative and $\tfrac12$ under the null. The one-sample version of
+Theorem~\ref{thm:ss} needs
+\[
+n_d = \frac{\bigl(1.960 \times 0.5 + 1.282\sqrt{(2/3)(1/3)}\bigr)^2}{(2/3 - 1/2)^2} = 90.3 ,
+\]
+so $91$ discordant pairs, and about $91/0.35 = 260$ pairs in all.
+\end{solution}
+
+\begin{problem}
+An observational study reports a risk ratio of $1.8$ for an exposure. A critic suggests an unmeasured confounder.
+\begin{enumerate}[label=(\alph*)]
+\item If the confounder triples the risk and is present in $20\%$ of the unexposed, how common must it be among the exposed to explain the
+whole association?
+\item Could a confounder with risk ratio $1.5$ explain it?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) By Theorem~\ref{thm:confbias} with $\theta = 1$, $1.8 = (1 + 2\pi_1)/(1 + 2 \times 0.2)$, so $1 + 2\pi_1 = 2.52$ and $\pi_1 = 0.76$: the confounder would have to be nearly four times as
+common among the exposed. Whether that is plausible depends on what the confounder is.
+
+(b) No. By Theorem~\ref{thm:cornfield}, a confounder that explains a risk ratio of $1.8$ must have $R_C \geq 1.8$. Directly, $1.8 = (1 + 0.5\pi_1)/(1 + 0.5\pi_0)$ would need
+$\pi_1 \geq 1.6$ even with $\pi_0 = 0$, which is impossible.
+\end{solution}
+
+\begin{problem}
+A serological survey of $2000$ adults finds $64$ positive on an assay with sensitivity $0.90$ and specificity $0.99$. The condition lasts on average
+four years. Assuming a steady state, estimate the prevalence and the incidence rate.
+\end{problem}
+
+\begin{solution}
+The apparent prevalence is $0.032$. By Theorem~\ref{thm:rogan}, $\hat p = (0.032 + 0.99 - 1)/0.89 = 0.0247$. By Theorem~\ref{thm:steady},
+$\hat I = \hat p/\{(1 - \hat p)\bar D\} = 0.0247/(0.9753 \times 4) = 0.0063$ per person-year, about $6.3$ per $1000$. Ignoring the misclassification would give $0.032/(0.968 \times 4) = 8.3$ per
+$1000$, a third too high.
+\end{solution}
+
+\begin{problem}
+A disease has annual incidence $2$ per $100{,}000$. An exposure is carried by $30\%$ of the population, and an odds ratio of $1.5$ is to be detected with
+power $0.80$ at $\alpha = 0.05$.
+\begin{enumerate}[label=(\alph*)]
+\item How many cases and controls are needed in a case-control study with two controls per case?
+\item Roughly how many person-years of follow-up would a cohort study need to accumulate the same number of cases? Comment.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) By \eqref{eq:q1}, $q_1 = 1.5 \times 0.3/(1 + 0.3 \times 0.5) = 0.391$. Theorem~\ref{thm:ss} with $k = 2$ gives $316$ cases and $632$ controls.
+
+(b) $316$ cases at $2$ per $100{,}000$ person-years need about $16$ million person-years: a million people for sixteen years. The case-control study
+reaches the same cases by finding them where they already are, which is why it is the design of choice for rare diseases.
+\end{solution}
+
+\begin{problem}
+A nested case-control study is drawn from a cohort by density sampling: for each case, two controls are chosen from the members of the
+cohort at risk at the time of the case and matched on age. Explain why the Mantel--Haenszel odds ratio over the matched sets estimates
+the age-adjusted incidence rate ratio, and why no rare disease assumption is needed.
+\end{problem}
+
+\begin{solution}
+Each matched set is drawn from a risk set at one moment and one age. Within such a set, the chance that the case is exposed rather than one
+of the controls depends on the exposed and unexposed hazards at that moment, in the ratio $\lambda_1/\lambda_0$, exactly as in the proof of
+Theorem~\ref{thm:density}, applied to an instant instead of a period. If the rate ratio is constant across ages and times, every set is a
+stratum with the same odds ratio $\lambda_1/\lambda_0$, and by Theorem~\ref{thm:mhconsistent} the Mantel--Haenszel estimator over many small strata is
+consistent for it (Problem~\ref{prob:onetwo} gives its form for $1{:}2$ sets). The controls are sampled from people at risk, not from people who
+remained disease-free to the end, so the rarity of the disease plays no part. Matching on age adjusts for it, provided the analysis keeps the
+sets.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
