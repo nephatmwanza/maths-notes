@@ -135,7 +135,7 @@ Theorem to $f'$ between consecutive zeros gives $n-1$ distinct zeros of $f''$, a
 zero, lying in $(x_0,x_n)$.
 \end{proof}
 
-This theorem is the key to the error formula for polynomial interpolation, later in the course.
+This theorem is the key to the error formula for polynomial interpolation (Theorem~\ref{thm:interperr}).
 
 \begin{thm}[Weighted Mean Value Theorem for Integrals]
 \label{thm:wmvt}
@@ -149,7 +149,7 @@ $m\int g\leq\int fg\leq M\int g$. If $\int g = 0$ any $c$ works. Otherwise $\int
 Intermediate Value Theorem it equals $f(c)$ for some $c$.
 \end{proof}
 
-This is the tool that turns an error integral into the closed error terms of the quadrature rules for numerical integration.
+This is the tool that turns an error integral into the closed error terms of the quadrature rules in Section~\ref{sec:quad}.
 
 \begin{thm}[Taylor's Theorem]
 \label{thm:taylor}
@@ -626,7 +626,7 @@ Show that $\frac{e^h-1}{h} = 1+O(h)$ as $h\longrightarrow0$, and find the rate o
 \begin{solution}
 By Taylor's Theorem $e^h = 1+h+\frac{h^2}{2}e^{\xi}$, so $\frac{e^h-1}{h}-1 = \frac h2e^\xi$, which is at most $\frac{e}{2}|h|$ for $|h|\leq
 1$: the rate is $O(h)$. For the symmetric quotient, $e^h-e^{-h} = 2h+\frac{h^3}{3}+\frac{h^5}{60}+\cdots$, so $\frac{e^h-e^{-h}}{2h} =
-1+\frac{h^2}{6}+O(h^4)$: the rate is $O(h^2)$. This is the first sign of a fact used in numerical differentiation: a centred difference is
+1+\frac{h^2}{6}+O(h^4)$: the rate is $O(h^2)$. This is the first sign of a fact used in numerical differentiation (Section~\ref{sec:numdiff}): a centred difference is
 more accurate than a one-sided one.
 \end{solution}
 
@@ -1488,7 +1488,7 @@ $1.6$ per step.
 
 To analyse the secant method we use the \textbf{divided differences}
 $$f[x_0,x_1] = \frac{f(x_1)-f(x_0)}{x_1-x_0},\qquad f[x_0,x_1,x_2] = \frac{f[x_1,x_2]-f[x_0,x_1]}{x_2-x_0},$$
-which reappear in interpolation later in the course.
+which reappear in interpolation (Section~\ref{sec:divdiff}).
 
 \begin{lem}
 \label{lem:dd2}
@@ -3634,6 +3634,1521 @@ $-\log_{10}0.393 = 0.41$: about $4.4$ times as fast.
 \end{solution}
 
 
+\section{Interpolation and Polynomial Approximation}
+\label{sec:interp}
+
+A function is often known only through a table of values: measurements, or values computed at great cost. \textbf{Interpolation}
+constructs a simple function, usually a polynomial, that passes through the tabulated points, and uses it to estimate values between
+them, to differentiate, or to integrate. Polynomials are the natural choice: they are easy to evaluate, differentiate and integrate, and
+they can approximate any continuous function as closely as we please.
+
+\begin{thm}[Weierstrass Approximation Theorem]
+\label{thm:weierstrass}
+If $f$ is continuous on $[a,b]$, then for every $\varepsilon>0$ there is a polynomial $P$ with $|f(x)-P(x)|<\varepsilon$ for all $x\in[a,b]$.
+\end{thm}
+
+(A constructive proof, using Bernstein polynomials, is given in the Real Analysis course on this site.) The theorem says that good
+polynomial approximations exist; it does not say that the obvious ones are good. Taylor polynomials, for example, are accurate only near
+the point of expansion: the Taylor polynomials of $f(x) = \frac1x$ about $x_0 = 1$ give, at $x = 3$, the values $1, -1, 3, -5, 11, -21,\dots$,
+getting worse as the degree grows, while $f(3) = \frac13$. Interpolating polynomials use information spread over the whole interval.
+
+
+\subsection{Interpolation and the Lagrange polynomial}
+\label{sec:lagrange}
+
+Given $n+1$ distinct \textbf{nodes} $x_0,x_1,\dots,x_n$ and values $f(x_0),\dots,f(x_n)$, we seek a polynomial $P$ of degree at most $n$ with
+$P(x_k) = f(x_k)$ for each $k$. The construction rests on the polynomials
+\begin{align*}
+L_{n,k}(x) &= \prod_{\substack{i = 0\\ i\neq k}}^n\frac{x-x_i}{x_k-x_i}\\
+&= \frac{(x-x_0)\cdots(x-x_{k-1})(x-x_{k+1})\cdots(x-x_n)}{(x_k-x_0)\cdots(x_k-x_{k-1})(x_k-x_{k+1})\cdots(x_k-x_n)},
+\end{align*}
+each of degree $n$, with the \textbf{cardinal property}
+$$L_{n,k}(x_i) = \begin{cases}1, & i = k,\\ 0, & i\neq k .\end{cases}$$
+
+\begin{thm}
+\label{thm:lagrange}
+If $x_0,\dots,x_n$ are distinct, there is exactly one polynomial $P$ of degree at most $n$ with $P(x_k) = f(x_k)$, $k = 0,\dots,n$. It is the
+\textbf{Lagrange interpolating polynomial}
+$$P(x) = \sum_{k=0}^nf(x_k)L_{n,k}(x) .$$
+\end{thm}
+
+\begin{proof}
+By the cardinal property, $P(x_i) = \sum_kf(x_k)L_{n,k}(x_i) = f(x_i)$, and $P$ has degree at most $n$. If $Q$ is another such polynomial,
+$P-Q$ has degree at most $n$ and vanishes at the $n+1$ points $x_k$, so $P-Q = 0$ by Corollary~\ref{coro:factor}.
+\end{proof}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+% Left: Lagrange basis for nodes 2, 2.75, 4; X=(x-2)*3, Y=(y+0.6)*2
+\fill[blue!5,rounded corners] (-0.6,-0.6) rectangle (6.6,4.85);
+\draw[blue!45,rounded corners] (-0.6,-0.6) rectangle (6.6,4.85);
+\node[font=\small\bfseries,text=blue!60!black] at (3,4.5) {The Lagrange basis polynomials};
+\draw[->,gray] (-0.2,1.2) -- (6.3,1.2);
+\draw[gray,dashed] (-0.2,3.2) -- (6.3,3.2); \node[font=\tiny,left] at (-0.2,3.2) {$1$}; \node[font=\tiny,left] at (-0.2,1.2) {$0$};
+\draw[thick,red!70!black] (0.000,3.200) -- (0.300,2.847) -- (0.600,2.520) -- (0.900,2.220) -- (1.200,1.947) -- (1.500,1.700) -- (1.800,1.480) -- (2.100,1.287) -- (2.400,1.120) -- (2.700,0.980) -- (3.000,0.867) -- (3.300,0.780) -- (3.600,0.720) -- (3.900,0.687) -- (4.200,0.680) -- (4.500,0.700) -- (4.800,0.747) -- (5.100,0.820) -- (5.400,0.920) -- (5.700,1.047) -- (6.000,1.200);
+\draw[thick,orange!80!black] (0.000,1.200) -- (0.300,1.605) -- (0.600,1.968) -- (0.900,2.288) -- (1.200,2.565) -- (1.500,2.800) -- (1.800,2.992) -- (2.100,3.141) -- (2.400,3.248) -- (2.700,3.312) -- (3.000,3.333) -- (3.300,3.312) -- (3.600,3.248) -- (3.900,3.141) -- (4.200,2.992) -- (4.500,2.800) -- (4.800,2.565) -- (5.100,2.288) -- (5.400,1.968) -- (5.700,1.605) -- (6.000,1.200);
+\draw[thick,green!50!black] (0.000,1.200) -- (0.300,1.148) -- (0.600,1.112) -- (0.900,1.092) -- (1.200,1.088) -- (1.500,1.100) -- (1.800,1.128) -- (2.100,1.172) -- (2.400,1.232) -- (2.700,1.308) -- (3.000,1.400) -- (3.300,1.508) -- (3.600,1.632) -- (3.900,1.772) -- (4.200,1.928) -- (4.500,2.100) -- (4.800,2.288) -- (5.100,2.492) -- (5.400,2.712) -- (5.700,2.948) -- (6.000,3.200);
+\foreach \x/\l in {0/2,2.25/2.75,6/4} {\draw[gray,dotted] (\x,0.5) -- (\x,3.5); \node[font=\scriptsize,below] at (\x,0.5) {$\l$};}
+\node[font=\scriptsize,red!70!black] at (0.75,3.45) {$L_{2,0}$};
+\node[font=\scriptsize,orange!80!black] at (3.6,3.6) {$L_{2,1}$};
+\node[font=\scriptsize,green!50!black] at (5.3,3.2) {$L_{2,2}$};
+\node[font=\scriptsize] at (3,-0.25) {nodes $x_0=2,\ x_1=2.75,\ x_2=4$};
+% Right: Runge, X=(x+1)*3, Y=(y+0.5)*1.6
+\begin{scope}[xshift=7.4cm]
+\fill[red!75!black!6,rounded corners] (-0.4,-0.6) rectangle (6.9,4.85);
+\draw[red!75!black!50,rounded corners] (-0.4,-0.6) rectangle (6.9,4.85);
+\node[font=\small\bfseries,text=red!70!black] at (3.25,4.5) {Runge's phenomenon};
+\draw[->,gray] (-0.1,0.8) -- (6.3,0.8);
+\draw[thick,gray!70!black] (0.000,0.862) -- (0.300,0.875) -- (0.600,0.894) -- (0.900,0.921) -- (1.200,0.960) -- (1.500,1.021) -- (1.800,1.120) -- (2.100,1.292) -- (2.250,1.424) -- (2.400,1.600) -- (2.550,1.824) -- (2.700,2.080) -- (2.850,2.306) -- (3.000,2.400) -- (3.150,2.306) -- (3.300,2.080) -- (3.450,1.824) -- (3.600,1.600) -- (3.750,1.424) -- (3.900,1.292) -- (4.200,1.120) -- (4.500,1.021) -- (4.800,0.960) -- (5.100,0.921) -- (5.400,0.894) -- (5.700,0.875) -- (6.000,0.862);
+\draw[thick,red!70!black] (0.000,0.862) -- (0.075,3.077) -- (0.150,3.878) -- (0.225,3.828) -- (0.300,3.326) -- (0.375,2.643) -- (0.450,1.951) -- (0.525,1.352) -- (0.600,0.894) -- (0.675,0.590) -- (0.750,0.430) -- (0.825,0.389) -- (0.900,0.438) -- (0.975,0.546) -- (1.050,0.684) -- (1.125,0.828) -- (1.200,0.960) -- (1.275,1.068) -- (1.350,1.145) -- (1.425,1.190) -- (1.500,1.206) -- (1.575,1.199) -- (1.650,1.176) -- (1.725,1.147) -- (1.800,1.120) -- (1.875,1.104) -- (1.950,1.105) -- (2.025,1.128) -- (2.100,1.177) -- (2.175,1.250) -- (2.250,1.348) -- (2.325,1.466) -- (2.400,1.600) -- (2.475,1.742) -- (2.550,1.886) -- (2.625,2.025) -- (2.700,2.149) -- (2.775,2.254) -- (2.850,2.334) -- (2.925,2.383) -- (3.000,2.400) -- (3.075,2.383) -- (3.150,2.334) -- (3.225,2.254) -- (3.300,2.149) -- (3.375,2.025) -- (3.450,1.886) -- (3.525,1.742) -- (3.600,1.600) -- (3.675,1.466) -- (3.750,1.348) -- (3.825,1.250) -- (3.900,1.177) -- (3.975,1.128) -- (4.050,1.105) -- (4.125,1.104) -- (4.200,1.120) -- (4.275,1.147) -- (4.350,1.176) -- (4.425,1.199) -- (4.500,1.206) -- (4.575,1.190) -- (4.650,1.145) -- (4.725,1.068) -- (4.800,0.960) -- (4.875,0.828) -- (4.950,0.684) -- (5.025,0.546) -- (5.100,0.438) -- (5.175,0.389) -- (5.250,0.430) -- (5.325,0.590) -- (5.400,0.894) -- (5.475,1.352) -- (5.550,1.951) -- (5.625,2.643) -- (5.700,3.326) -- (5.775,3.828) -- (5.850,3.878) -- (5.925,3.077) -- (6.000,0.862);
+\draw[thick,green!50!black,dashed] (0.000,0.791) -- (0.150,0.937) -- (0.300,0.856) -- (0.450,0.804) -- (0.600,0.834) -- (0.750,0.915) -- (0.900,0.996) -- (1.050,1.041) -- (1.200,1.038) -- (1.350,1.001) -- (1.500,0.958) -- (1.650,0.941) -- (1.800,0.977) -- (1.950,1.082) -- (2.100,1.257) -- (2.250,1.487) -- (2.400,1.746) -- (2.550,1.998) -- (2.700,2.210) -- (2.850,2.351) -- (3.000,2.400) -- (3.150,2.351) -- (3.300,2.210) -- (3.450,1.998) -- (3.600,1.746) -- (3.750,1.487) -- (3.900,1.257) -- (4.050,1.082) -- (4.200,0.977) -- (4.350,0.941) -- (4.500,0.958) -- (4.650,1.001) -- (4.800,1.038) -- (4.950,1.041) -- (5.100,0.996) -- (5.250,0.915) -- (5.400,0.834) -- (5.550,0.804) -- (5.700,0.856) -- (5.850,0.937) -- (6.000,0.791);
+\foreach \x/\y in {0.000/0.862,0.600/0.894,1.200/0.960,1.800/1.120,2.400/1.600,3.000/2.400,3.600/1.600,4.200/1.120,4.800/0.960,5.400/0.894,6.000/0.862} \fill[red!70!black] (\x,\y) circle (1.4pt);
+\node[font=\scriptsize,red!70!black,align=center] at (1.5,3.1) {equally spaced:\\error $1.92$};
+\node[font=\scriptsize,green!40!black,align=center] at (5.15,2.4) {Chebyshev:\\error $0.11$};
+\node[font=\scriptsize] at (3.25,-0.25) {$f(x)=\frac{1}{1+25x^2}$ (grey) on $[-1,1]$, degree $10$};
+\end{scope}
+\end{tikzpicture}
+\caption{Left: the three Lagrange basis polynomials for the nodes $2$, $2.75$, $4$; each equals $1$ at its own node and $0$ at the other
+two, so $\sum f(x_k)L_{2,k}$ takes the right value at every node. Right: Runge's function interpolated at $11$ equally spaced nodes (red)
+oscillates wildly near the ends; at $11$ Chebyshev nodes, which cluster towards the ends (green, dashed), the fit is good everywhere.}
+\label{fig:lagrange}
+\end{figure}
+
+\begin{exa}
+\label{exa:lagrange}
+Use the nodes $x_0 = 2$, $x_1 = 2.75$, $x_2 = 4$ to find the second Lagrange polynomial for $f(x) = \frac1x$, and use it to approximate
+$f(3) = \frac13$.
+\end{exa}
+
+\begin{solution}
+The basis polynomials are
+\begin{align*}
+L_{2,0}(x) &= \frac{(x-2.75)(x-4)}{(2-2.75)(2-4)} = \frac23(x-2.75)(x-4),\\
+L_{2,1}(x) &= \frac{(x-2)(x-4)}{(2.75-2)(2.75-4)} = -\frac{16}{15}(x-2)(x-4),\\
+L_{2,2}(x) &= \frac{(x-2)(x-2.75)}{(4-2)(4-2.75)} = \frac25(x-2)(x-2.75).
+\end{align*}
+With $f(2) = \frac12$, $f(2.75) = \frac4{11}$, $f(4) = \frac14$,
+\begin{align*}
+P(x) &= \frac13(x-2.75)(x-4)-\frac{64}{165}(x-2)(x-4)+\frac1{10}(x-2)(x-2.75)\\
+&= \frac{1}{22}x^2-\frac{35}{88}x+\frac{49}{44} .
+\end{align*}
+So $P(3) = \frac{9}{22}-\frac{105}{88}+\frac{49}{44} = \frac{29}{88} = 0.32955$, an error of $0.0038$.
+\end{solution}
+
+The next theorem gives the error of interpolation. Its form, with an unknown point $\xi(x)$, is the same as that of Taylor's Theorem, and
+its proof is the main use of the Generalized Rolle's Theorem.
+
+\begin{thm}
+\label{thm:interperr}
+Let $x_0,\dots,x_n$ be distinct points of $[a,b]$ and $f\in C^{n+1}[a,b]$. Then for each $x\in[a,b]$ there is $\xi(x)\in(a,b)$ with
+$$f(x) = P(x)+\frac{f^{(n+1)}(\xi(x))}{(n+1)!}(x-x_0)(x-x_1)\cdots(x-x_n),$$
+where $P$ is the interpolating polynomial.
+\end{thm}
+
+\begin{proof}
+If $x$ is a node, both sides equal $f(x)$. Otherwise fix $x$ and define, for $t\in[a,b]$,
+$$g(t) = f(t)-P(t)-\bigl(f(x)-P(x)\bigr)\prod_{i=0}^n\frac{t-x_i}{x-x_i} .$$
+Then $g(x_k) = 0$ for every node, and $g(x) = f(x)-P(x)-\bigl(f(x)-P(x)\bigr) = 0$: so $g$ has $n+2$ distinct zeros. By the Generalized
+Rolle's Theorem (Theorem~\ref{thm:genrolle}), $g^{(n+1)}(\xi) = 0$ for some $\xi\in(a,b)$. Since $P$ has degree at most $n$, $P^{(n+1)} = 0$,
+and the product is a polynomial in $t$ of degree $n+1$ with leading coefficient $\prod_i(x-x_i)^{-1}$, whose $(n+1)$st derivative is
+$\frac{(n+1)!}{\prod_i(x-x_i)}$. So
+$$0 = g^{(n+1)}(\xi) = f^{(n+1)}(\xi)-\bigl(f(x)-P(x)\bigr)\frac{(n+1)!}{\prod_i(x-x_i)},$$
+which rearranges to the stated formula.
+\end{proof}
+
+\begin{exa}
+\label{exa:interperr}
+Bound the error of the approximation in Example~\ref{exa:lagrange}, at $x = 3$ and on the whole of $[2,4]$.
+\end{exa}
+
+\begin{solution}
+Here $f'''(x) = -\frac{6}{x^4}$, whose largest absolute value on $[2,4]$ is $\frac6{16} = 0.375$ at $x = 2$. So
+$$|f(x)-P(x)|\leq\frac{0.375}{3!}|(x-2)(x-2.75)(x-4)| = 0.0625\,|(x-2)(x-2.75)(x-4)| .$$
+At $x = 3$ the product is $|1\cdot0.25\cdot(-1)| = 0.25$, so the error is at most $0.0156$; the actual error is $0.0038$. On $[2,4]$ the
+cubic $(x-2)(x-2.75)(x-4)$ has its largest absolute value $0.5625$ at $x = 3.5$ (found by setting its derivative to zero and comparing with
+the end points), so $|f(x)-P(x)|\leq0.0352$ throughout $[2,4]$.
+\end{solution}
+
+\begin{exa}
+\label{exa:tablestep}
+A table of $e^x$ on $[0,1]$ has equally spaced entries with step $h$. What $h$ ensures that linear interpolation between adjacent entries
+has error at most $10^{-6}$?
+\end{exa}
+
+\begin{solution}
+For $x$ between nodes $x_j$ and $x_{j+1} = x_j+h$, Theorem~\ref{thm:interperr} with $n = 1$ gives
+$$|f(x)-P(x)| = \frac{|f''(\xi)|}{2}|(x-x_j)(x-x_{j+1})|\leq\frac{e}{2}\cdot\frac{h^2}{4} = \frac{eh^2}{8},$$
+since $|(x-x_j)(x-x_j-h)|$ is largest at the midpoint, where it equals $\frac{h^2}4$. We need $\frac{eh^2}{8}\leq10^{-6}$, that is
+$h\leq1.72\times10^{-3}$; a step of $h = 0.001$ is a convenient choice, with error at most $3.4\times10^{-7}$.
+\end{solution}
+
+\subhead{Runge's phenomenon}
+Theorem~\ref{thm:interperr} shows that the error depends on the size of $f^{(n+1)}$ and of the \textbf{nodal polynomial}
+$\prod(x-x_i)$. Raising the degree does not always help. For $f(x) = \frac1{1+25x^2}$ on $[-1,1]$ with equally spaced nodes, the maximum
+error is $0.43$ for $n = 5$, $1.92$ for $n = 10$ and $2.11$ for $n = 15$: the interpolants oscillate more and more violently near the ends
+of the interval (Figure~\ref{fig:lagrange}). The derivatives of this smooth-looking function grow very fast, and the nodal polynomial for
+equally spaced nodes is much larger near the ends than in the middle. Choosing instead the \textbf{Chebyshev nodes}
+$x_i = \cos\frac{(2i+1)\pi}{2n+2}$, which crowd towards the ends and minimize $\max|\prod(x-x_i)|$, gives errors $0.56$, $0.11$ and $0.083$
+for $n = 5, 10, 15$, decreasing as they should. In practice, high-degree interpolation at equally spaced points is avoided, and piecewise
+polynomials (splines, Section~\ref{sec:splines}) are used instead.
+
+
+\subsection{Neville's method}
+\label{sec:neville}
+
+Often we want only the value $P(x)$ at one point, and we do not know in advance how many nodes are needed. Neville's method builds the
+value up recursively from interpolants on fewer points. Let $P_{m_1,m_2,\dots,m_k}$ denote the polynomial interpolating $f$ at the nodes
+$x_{m_1},\dots,x_{m_k}$.
+
+\begin{thm}
+\label{thm:neville}
+Let $x_i\neq x_j$ be two of the nodes $x_0,\dots,x_k$. Then
+$$P(x) = \frac{(x-x_j)P_{0,\dots,j-1,j+1,\dots,k}(x)-(x-x_i)P_{0,\dots,i-1,i+1,\dots,k}(x)}{x_i-x_j}$$
+is the polynomial interpolating $f$ at all of $x_0,\dots,x_k$.
+\end{thm}
+
+\begin{proof}
+Write $Q = P_{\dots\hat j\dots}$ (omitting $x_j$) and $\hat Q = P_{\dots\hat i\dots}$ (omitting $x_i$). The right-hand side has degree at most $k$.
+At a node $x_r$ with $r\neq i,j$, both $Q$ and $\hat Q$ equal $f(x_r)$, so the right-hand side is $\frac{(x_r-x_j)-(x_r-x_i)}{x_i-x_j}f(x_r) = f(x_r)$.
+At $x_i$ it is $\frac{(x_i-x_j)Q(x_i)}{x_i-x_j} = f(x_i)$, and at $x_j$ it is $\frac{-(x_j-x_i)\hat Q(x_j)}{x_i-x_j} = f(x_j)$. By uniqueness it is the
+interpolating polynomial.
+\end{proof}
+
+Writing $Q_{i,j}$ for the polynomial interpolating at the $j+1$ consecutive nodes $x_{i-j},\dots,x_i$, the theorem gives \textbf{Neville's
+method}:
+$$Q_{i,0} = f(x_i),\qquad Q_{i,j}(x) = \frac{(x-x_{i-j})Q_{i,j-1}(x)-(x-x_i)Q_{i-1,j-1}(x)}{x_i-x_{i-j}} .$$
+The entries are computed row by row; each new row uses one more node, and the agreement of successive entries indicates the accuracy.
+
+\begin{exa}
+\label{exa:neville}
+The table gives values of the Bessel function $J_0$ (the solution of $xy''+y'+xy = 0$ with $y(0) = 1$). Use Neville's method to
+approximate $f(1.5)$.
+\begin{center}
+\begin{tabular}{cccccc}
+\hline
+$x$ & $1.0$ & $1.3$ & $1.6$ & $1.9$ & $2.2$\\
+$f(x)$ & $0.7651977$ & $0.6200860$ & $0.4554022$ & $0.2818186$ & $0.1103623$\\
+\hline
+\end{tabular}
+\end{center}
+\end{exa}
+
+\begin{solution}
+For example $Q_{1,1}(1.5) = \frac{(1.5-1.0)(0.6200860)-(1.5-1.3)(0.7651977)}{1.3-1.0} = 0.5233449$. The full table is
+\begin{center}
+\begin{tabular}{llllll}
+\hline
+$x_i$ & $Q_{i,0}$ & $Q_{i,1}$ & $Q_{i,2}$ & $Q_{i,3}$ & $Q_{i,4}$\\
+\hline
+$1.0$ & $0.7651977$ & & & & \\
+$1.3$ & $0.6200860$ & $0.5233449$ & & & \\
+$1.6$ & $0.4554022$ & $0.5102968$ & $0.5124715$ & & \\
+$1.9$ & $0.2818186$ & $0.5132634$ & $0.5112857$ & $0.5118127$ & \\
+$2.2$ & $0.1103623$ & $0.5104270$ & $0.5137361$ & $0.5118302$ & $0.5118200$\\
+\hline
+\end{tabular}
+\end{center}
+The last two columns agree to about $2\times10^{-5}$, and $Q_{4,4}(1.5) = 0.5118200$; the true value is $J_0(1.5) = 0.5118277$.
+\end{solution}
+
+
+\subsection{Divided differences and Newton's interpolation formulas}
+\label{sec:divdiff}
+
+Lagrange's form is awkward when nodes are added, since every basis polynomial changes. Newton's form builds the interpolant one node at a
+time:
+\begin{align*}
+P_n(x) &= a_0+a_1(x-x_0)+a_2(x-x_0)(x-x_1)+\dots\\
+&\quad+a_n(x-x_0)(x-x_1)\cdots(x-x_{n-1}),
+\end{align*}
+so that $P_n = P_{n-1}+a_n(x-x_0)\cdots(x-x_{n-1})$. The coefficients are the divided differences introduced in Section~\ref{sec:newton}:
+$$f[x_i] = f(x_i),\qquad f[x_i,\dots,x_{i+k}] = \frac{f[x_{i+1},\dots,x_{i+k}]-f[x_i,\dots,x_{i+k-1}]}{x_{i+k}-x_i} .$$
+
+\begin{thm}[Newton's divided-difference formula]
+\label{thm:newtondd}
+The interpolating polynomial at $x_0,\dots,x_n$ is
+$$P_n(x) = f[x_0]+\sum_{k=1}^nf[x_0,\dots,x_k](x-x_0)\cdots(x-x_{k-1}) .$$
+\end{thm}
+
+\begin{proof}
+We show that the coefficient $a_n$ of $x^n$ in the interpolant at $x_0,\dots,x_n$ is $f[x_0,\dots,x_n]$, by induction on $n$; the case $n = 0$ is
+clear. By Theorem~\ref{thm:neville} with $i = n$, $j = 0$,
+$$P_{0,\dots,n}(x) = \frac{(x-x_0)P_{1,\dots,n}(x)-(x-x_n)P_{0,\dots,n-1}(x)}{x_n-x_0} .$$
+By induction the leading coefficients of $P_{1,\dots,n}$ and $P_{0,\dots,n-1}$ are $f[x_1,\dots,x_n]$ and $f[x_0,\dots,x_{n-1}]$, so the coefficient of
+$x^n$ above is $\frac{f[x_1,\dots,x_n]-f[x_0,\dots,x_{n-1}]}{x_n-x_0} = f[x_0,\dots,x_n]$. Since $P_n-P_{n-1}$ has degree at most $n$, vanishes at
+$x_0,\dots,x_{n-1}$ and has leading coefficient $f[x_0,\dots,x_n]$, it equals $f[x_0,\dots,x_n](x-x_0)\cdots(x-x_{n-1})$.
+\end{proof}
+
+Comparing the leading coefficient with Theorem~\ref{thm:interperr} applied to the polynomial $f-P_{n-1}$ gives the useful relation
+(generalizing Lemma~\ref{lem:dd2})
+\begin{equation}\label{eq:ddderiv}
+f[x_0,\dots,x_n] = \frac{f^{(n)}(\xi)}{n!}\qquad\text{for some }\xi\text{ between the smallest and largest node.}
+\end{equation}
+
+\begin{exa}
+\label{exa:divdiff}
+Construct the divided-difference table for the Bessel data of Example~\ref{exa:neville}, and use Newton's formula at $x = 1.5$.
+\end{exa}
+
+\begin{solution}
+\begin{center}
+\begin{tabular}{llllll}
+\hline
+$x_i$ & $f[x_i]$ & first & second & third & fourth\\
+\hline
+$1.0$ & $0.7651977$ & & & & \\
+$1.3$ & $0.6200860$ & $-0.4837057$ & & & \\
+$1.6$ & $0.4554022$ & $-0.5489460$ & $-0.1087339$ & & \\
+$1.9$ & $0.2818186$ & $-0.5786120$ & $-0.0494433$ & $0.0658784$ & \\
+$2.2$ & $0.1103623$ & $-0.5715210$ & $0.0118183$ & $0.0680685$ & $0.0018251$\\
+\hline
+\end{tabular}
+\end{center}
+For example,
+\begin{gather*}
+f[x_0,x_1] = \frac{0.6200860-0.7651977}{0.3} = -0.4837057,\\
+f[x_0,x_1,x_2] = \frac{-0.5489460+0.4837057}{0.6} = -0.1087339 .
+\end{gather*}
+The top diagonal gives the coefficients:
+\begin{align*}
+P_4(x) &= 0.7651977-0.4837057(x-1.0)-0.1087339(x-1.0)(x-1.3)\\
+&\quad+0.0658784(x-1.0)(x-1.3)(x-1.6)\\
+&\quad+0.0018251(x-1.0)(x-1.3)(x-1.6)(x-1.9),
+\end{align*}
+and $P_4(1.5) = 0.5118200$, the same value as Neville's method, as it must be. The small last coefficient shows that adding a fifth node
+changed the value by only $0.0018251\times(0.5)(0.2)(-0.1)(-0.4) = 7.3\times10^{-6}$; by~\eqref{eq:ddderiv}, it also estimates
+$\frac{f^{(4)}}{4!}\approx0.0018$.
+\end{solution}
+
+\subhead{Equally spaced nodes}
+When $x_i = x_0+ih$, write $x = x_0+sh$. With the \textbf{forward differences} $\Delta f(x_i) = f(x_{i+1})-f(x_i)$ and $\Delta^k = \Delta(\Delta^{k-1})$,
+induction gives $f[x_0,\dots,x_k] = \frac{\Delta^kf(x_0)}{k!\,h^k}$, and since $(x-x_0)\cdots(x-x_{k-1}) = h^ks(s-1)\cdots(s-k+1)$, Newton's formula
+becomes the \textbf{Newton forward-difference formula}
+$$P_n(x) = \sum_{k=0}^n\binom{s}{k}\Delta^kf(x_0),\qquad\binom sk = \frac{s(s-1)\cdots(s-k+1)}{k!} .$$
+Ordering the nodes backwards from $x_n$, with $x = x_n+sh$ and \textbf{backward differences} $\nabla f(x_i) = f(x_i)-f(x_{i-1})$, gives the
+\textbf{Newton backward-difference formula}
+\begin{align*}
+P_n(x) &= \sum_{k=0}^n(-1)^k\binom{-s}{k}\nabla^kf(x_n)\\
+&= f(x_n)+s\nabla f(x_n)+\frac{s(s+1)}{2}\nabla^2f(x_n)+\cdots .
+\end{align*}
+The forward formula is natural near the beginning of a table and the backward formula near its end: the first few terms already use the
+nearest values.
+
+\begin{exa}
+\label{exa:fwdbwd}
+For the Bessel table ($h = 0.3$), use the forward formula to approximate $f(1.1)$ and the backward formula to approximate $f(2.0)$.
+\end{exa}
+
+\begin{solution}
+The forward differences at $x_0 = 1.0$ are
+\begin{gather*}
+\Delta f = -0.1451117,\qquad\Delta^2f = -0.0195721,\\
+\Delta^3f = 0.0106723,\qquad\Delta^4f = 0.0003548 .
+\end{gather*}
+For $x = 1.1$, $s = \frac13$:
+\begin{align*}
+P_4(1.1) &= 0.7651977+\tfrac13(-0.1451117)+\tfrac{\frac13(-\frac23)}{2}(-0.0195721)\\
+&\quad+\tfrac{\frac13(-\frac23)(-\frac53)}{6}(0.0106723)+\tfrac{\frac13(-\frac23)(-\frac53)(-\frac83)}{24}(0.0003548) = 0.7196460 .
+\end{align*}
+For $x = 2.0$, use the backward differences at $x_4 = 2.2$: $\nabla f = -0.1714563$, $\nabla^2f = 0.0021273$, $\nabla^3f = 0.0110271$,
+$\nabla^4f = 0.0003548$, and $s = \frac{2.0-2.2}{0.3} = -\frac23$:
+\begin{align*}
+P_4(2.0) &= 0.1103623-\tfrac23(-0.1714563)-\tfrac19(0.0021273)\\
+&\quad-\tfrac{4}{81}(0.0110271)-\tfrac{7}{243}(0.0003548) = 0.2238754 .
+\end{align*}
+The true values are $J_0(1.1) = 0.7196220$ and $J_0(2.0) = 0.2238908$.
+\end{solution}
+
+
+\subsection{Hermite interpolation}
+\label{sec:hermite}
+
+If derivatives are known as well as values, a polynomial can match both. The \textbf{Hermite polynomial} $H_{2n+1}$ of degree at most $2n+1$
+satisfies $H(x_i) = f(x_i)$ and $H'(x_i) = f'(x_i)$ at $n+1$ distinct nodes.
+
+\begin{thm}
+\label{thm:hermite}
+If $f\in C^1[a,b]$ and $x_0,\dots,x_n\in[a,b]$ are distinct, there is a unique polynomial of degree at most $2n+1$ agreeing with $f$ and $f'$
+at every node. If $f\in C^{2n+2}[a,b]$, its error is
+$$f(x)-H_{2n+1}(x) = \frac{f^{(2n+2)}(\xi(x))}{(2n+2)!}(x-x_0)^2\cdots(x-x_n)^2 .$$
+\end{thm}
+
+The proof of the error formula repeats that of Theorem~\ref{thm:interperr} with $g(t) = f(t)-H(t)-(f(x)-H(x))\prod\frac{(t-x_i)^2}{(x-x_i)^2}$, which has
+double zeros at the nodes. The easiest way to construct $H$ is by divided differences with each node \textbf{repeated}: set
+$z_{2i} = z_{2i+1} = x_i$, and wherever a first divided difference would divide by zero, use the derivative instead,
+$$f[z_{2i},z_{2i+1}] = f'(x_i),$$
+which is the limit of $f[x_i,x_i+\delta]$ as $\delta\to0$ and agrees with~\eqref{eq:ddderiv}. Then Newton's formula on $z_0,\dots,z_{2n+1}$ gives $H_{2n+1}$.
+
+\begin{exa}
+\label{exa:hermite}
+Using $f$ and $f' = -J_1$ at $1.3$, $1.6$, $1.9$,
+\begin{center}
+\begin{tabular}{cccc}
+\hline
+$x$ & $1.3$ & $1.6$ & $1.9$\\
+$f(x)$ & $0.6200860$ & $0.4554022$ & $0.2818186$\\
+$f'(x)$ & $-0.5220232$ & $-0.5698959$ & $-0.5811571$\\
+\hline
+\end{tabular}
+\end{center}
+find the Hermite polynomial $H_5$ and approximate $f(1.5)$.
+\end{exa}
+
+\begin{solution}
+With the repeated nodes $z_0,\dots,z_5 = 1.3, 1.3, 1.6, 1.6, 1.9, 1.9$ (one row each) the divided-difference table is
+\begin{center}
+\begin{tabular}{llllll}
+\hline
+$f[z]$ & 1st & 2nd & 3rd & 4th & 5th\\
+\hline
+$0.620086$ & & & & & \\
+$0.620086$ & $-0.522023$ & & & & \\
+$0.455402$ & $-0.548946$ & $-0.089743$ & & & \\
+$0.455402$ & $-0.569896$ & $-0.069833$ & $0.066366$ & & \\
+$0.281819$ & $-0.578612$ & $-0.029054$ & $0.067966$ & $0.002667$ & \\
+$0.281819$ & $-0.581157$ & $-0.008484$ & $0.068567$ & $0.001002$ & $-0.002775$\\
+\hline
+\end{tabular}
+\end{center}
+The entries $-0.522023$, $-0.569896$, $-0.581157$ in the first column are the given derivatives. Newton's formula gives
+\begin{align*}
+H_5(x) &= 0.6200860-0.5220232(x-1.3)-0.0897427(x-1.3)^2+0.0663656(x-1.3)^2(x-1.6)\\
+&\quad+0.0026667(x-1.3)^2(x-1.6)^2\\
+&\quad-0.0027747(x-1.3)^2(x-1.6)^2(x-1.9),
+\end{align*}
+and $H_5(1.5) = 0.5118277$, correct to all seven digits: three values and three slopes do better than five values.
+\end{solution}
+
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Construct the Lagrange polynomial through $(0,1)$, $(1,3)$, $(2,7)$ and check it against the divided-difference form.
+\end{problem}
+\begin{solution}
+$P(x) = 1\cdot\frac{(x-1)(x-2)}{2}+3\cdot\frac{x(x-2)}{-1}+7\cdot\frac{x(x-1)}{2} = x^2+x+1$. The divided differences are $f[0,1] = 2$, $f[1,2] = 4$,
+$f[0,1,2] = 1$, so $P(x) = 1+2x+1\cdot x(x-1) = x^2+x+1$, the same polynomial.
+\end{solution}
+
+\begin{problem}
+Use Theorem~\ref{thm:interperr} to show that the polynomial interpolating $f(x) = \sin x$ at $11$ equally spaced points of $[0,\pi]$ has error
+less than $10^{-7}$ throughout the interval.
+\end{problem}
+\begin{solution}
+$|f^{(11)}|\leq1$, and with $h = \frac{\pi}{10}$ the nodal polynomial satisfies $\left|\prod_{i=0}^{10}(x-x_i)\right|\leq\frac{h^{11}}{4}\cdot10!$ (the
+standard bound for equally spaced nodes: the factor nearest $x$ is at most $\frac h2$, the next at most $h$, and so on). So the error is at most
+$\frac{1}{11!}\cdot\frac{h^{11}10!}{4} = \frac{h^{11}}{44} = \frac{(0.31416)^{11}}{44} = 6.7\times10^{-8}$.
+\end{solution}
+
+\begin{problem}
+Show that $f[x_0,x_1,x_2]$ is a symmetric function of its arguments: it does not change if the nodes are permuted.
+\end{problem}
+\begin{solution}
+By Theorem~\ref{thm:newtondd}, $f[x_0,x_1,x_2]$ is the leading coefficient of the polynomial interpolating $f$ at $x_0,x_1,x_2$. That polynomial
+is unique and does not depend on the order in which the nodes are listed, so neither does its leading coefficient. Explicitly,
+$f[x_0,x_1,x_2] = \sum_{i}\frac{f(x_i)}{\prod_{j\neq i}(x_i-x_j)}$, which is visibly symmetric. The same argument applies to divided differences of any
+order.
+\end{solution}
+
+\begin{problem}
+A table of $\ln x$ gives $\ln2 = 0.693147$, $\ln2.2 = 0.788457$, $\ln2.4 = 0.875469$, $\ln2.6 = 0.955511$. Use the backward-difference formula to
+estimate $\ln2.5$ and compare with the true value $0.916291$.
+\end{problem}
+\begin{solution}
+The backward differences at $2.6$ are $\nabla f = 0.080042$, $\nabla^2f = -0.006970$, $\nabla^3f = 0.001328$. With $s = \frac{2.5-2.6}{0.2} = -0.5$,
+\begin{align*}
+P(2.5) &= 0.955511-0.5(0.080042)+\frac{(-0.5)(0.5)}{2}(-0.006970)+\frac{(-0.5)(0.5)(1.5)}{6}(0.001328)\\
+&= 0.955511-0.040021+0.000871-0.000083 = 0.916278,
+\end{align*}
+with error $1.2\times10^{-5}$.
+\end{solution}
+
+\begin{problem}
+Find the Hermite cubic with $H(0) = 0$, $H'(0) = 1$, $H(1) = 1$, $H'(1) = 0$.
+\end{problem}
+\begin{solution}
+Nodes $0,0,1,1$: $f[0,0] = 1$, $f[0,1] = 1$, $f[1,1] = 0$; second differences $f[0,0,1] = 0$, $f[0,1,1] = -1$; third $f[0,0,1,1] = -1$. So
+$H(x) = 0+x+0\cdot x^2-1\cdot x^2(x-1) = x+x^2-x^3$. Check: $H(1) = 1$, $H'(x) = 1+2x-3x^2$ gives $H'(0) = 1$ and $H'(1) = 0$.
+\end{solution}
+
+
+\section{Cubic Splines and Least-Squares Approximation}
+\label{sec:splines}
+
+Section~\ref{sec:interp} showed that a single polynomial through many points can oscillate badly. This section takes two other routes to
+fitting data. \textbf{Splines} still pass through every point, but use a different low-degree polynomial on each subinterval, joined
+smoothly. \textbf{Least squares} gives up passing through the points at all, which is the right choice when the data contain errors of
+measurement: it finds the simple function that comes closest to them on average.
+
+
+\subsection{Cubic spline interpolation}
+\label{sec:cubicspline}
+
+The simplest piecewise interpolant joins consecutive data points by straight lines. It is continuous, but has corners at the nodes. Cubic
+pieces have enough freedom to match values, slopes and curvatures across the nodes.
+
+\begin{defn}
+Let $a = x_0<x_1<\dots<x_n = b$. A \textbf{cubic spline interpolant} $S$ for $f$ is a function that is a cubic polynomial $S_j$ on each
+$[x_j,x_{j+1}]$, $j = 0,\dots,n-1$, such that
+\begin{enumerate}
+\item[(a)] $S_j(x_j) = f(x_j)$ and $S_j(x_{j+1}) = f(x_{j+1})$ for each $j$;
+\item[(b)] $S'_{j+1}(x_{j+1}) = S'_j(x_{j+1})$ and $S''_{j+1}(x_{j+1}) = S''_j(x_{j+1})$ for $j = 0,\dots,n-2$;
+\end{enumerate}
+together with one of the boundary conditions
+\begin{enumerate}
+\item[(c)] $S''(x_0) = S''(x_n) = 0$ (a \textbf{natural} spline), or
+\item[(d)] $S'(x_0) = f'(x_0)$ and $S'(x_n) = f'(x_n)$ (a \textbf{clamped} spline).
+\end{enumerate}
+\end{defn}
+
+So $S$ interpolates $f$ and has continuous first and second derivatives. The natural condition models a flexible strip of wood (the
+draughtsman's ``spline'') pinned at the data points and free at its ends; the clamped condition uses extra information about $f$, and is
+more accurate when that information is available.
+
+\subhead{Constructing the spline}
+Write $S_j(x) = a_j+b_j(x-x_j)+c_j(x-x_j)^2+d_j(x-x_j)^3$ and $h_j = x_{j+1}-x_j$. Condition (a) gives $a_j = f(x_j)$. Since
+$S_j''(x_j) = 2c_j$, continuity of $S''$ gives $c_{j+1} = c_j+3d_jh_j$, so
+$$d_j = \frac{c_{j+1}-c_j}{3h_j} .$$
+Substituting into $S_j(x_{j+1}) = a_{j+1}$ and solving for $b_j$,
+$$b_j = \frac{a_{j+1}-a_j}{h_j}-\frac{h_j}{3}(2c_j+c_{j+1}),$$
+and then continuity of $S'$, $b_j = b_{j-1}+2c_{j-1}h_{j-1}+3d_{j-1}h_{j-1}^2$, becomes the linear system
+\begin{equation}\label{eq:splinesys}
+h_{j-1}c_{j-1}+2(h_{j-1}+h_j)c_j+h_jc_{j+1} = \frac{3}{h_j}(a_{j+1}-a_j)-\frac{3}{h_{j-1}}(a_j-a_{j-1}),\qquad j = 1,\dots,n-1 .
+\end{equation}
+For a natural spline, $c_0 = c_n = 0$; for a clamped spline the two boundary conditions give
+$$2h_0c_0+h_0c_1 = \frac{3}{h_0}(a_1-a_0)-3f'(a),\qquad h_{n-1}c_{n-1}+2h_{n-1}c_n = 3f'(b)-\frac{3}{h_{n-1}}(a_n-a_{n-1}) .$$
+Once the $c_j$ are known, the $b_j$ and $d_j$ follow.
+
+\begin{thm}
+\label{thm:splineunique}
+A function defined at $a = x_0<\dots<x_n = b$ has a unique natural spline interpolant and, if $f'(a)$ and $f'(b)$ are given, a unique clamped
+spline interpolant.
+\end{thm}
+
+\begin{proof}
+In both cases the $c_j$ satisfy a tridiagonal system whose matrix is strictly diagonally dominant: in equation~\eqref{eq:splinesys} the
+diagonal entry is $2(h_{j-1}+h_j)>h_{j-1}+h_j$, the sum of the off-diagonal entries, and the same holds for the boundary rows ($1>0$ in the
+natural case, $2h_0>h_0$ in the clamped case). By Theorem~\ref{thm:diagdom} the system has a unique solution, which determines the
+spline. It can be computed by the tridiagonal Algorithm~\ref{alg:thomas} in $O(n)$ operations.
+\end{proof}
+
+\begin{exa}
+\label{exa:spline3}
+Find the natural cubic spline through $(1,2)$, $(2,3)$, $(3,5)$.
+\end{exa}
+
+\begin{solution}
+Here $h_0 = h_1 = 1$, $c_0 = c_2 = 0$, and~\eqref{eq:splinesys} with $j = 1$ is
+$$4c_1 = 3(5-3)-3(3-2) = 3,\qquad c_1 = \tfrac34 .$$
+Then $b_0 = (3-2)-\frac13\left(0+\frac34\right) = \frac34$, $b_1 = (5-3)-\frac13\left(\frac32+0\right) = \frac32$, $d_0 = \frac{3/4}{3} = \frac14$, $d_1 = \frac{-3/4}{3} = -\frac14$. So
+$$S(x) = \begin{cases}2+\frac34(x-1)+\frac14(x-1)^3, & 1\leq x\leq2,\\[2pt] 3+\frac32(x-2)+\frac34(x-2)^2-\frac14(x-2)^3, & 2\leq x\leq3 .\end{cases}$$
+One checks that both pieces have value $3$, slope $\frac32$ and second derivative $\frac32$ at $x = 2$.
+\end{solution}
+
+\begin{exa}
+\label{exa:splineexp}
+Construct the natural and the clamped cubic splines for $f(x) = e^x$ at $x = 0,1,2,3$, and use each to approximate $\int_0^3e^x\,dx =
+e^3-1 = 19.08554$.
+\end{exa}
+
+\begin{solution}
+With $h_j = 1$, the natural spline system is $4c_1+c_2 = 3(e^2-2e+1)$, $c_1+4c_2 = 3(e^3-2e^2+e)$, and the coefficients are
+\begin{center}
+\begin{tabular}{rrrrr}
+\hline
+$j$ & $a_j$ & $b_j$ & $c_j$ & $d_j$\\
+\hline
+$0$ & $1.00000$ & $1.46600$ & $0$ & $0.25228$\\
+$1$ & $2.71828$ & $2.22285$ & $0.75685$ & $1.69107$\\
+$2$ & $7.38906$ & $8.80977$ & $5.83007$ & $-1.94336$\\
+\hline
+\end{tabular}
+\end{center}
+For the clamped spline, with $f'(0) = 1$ and $f'(3) = e^3$:
+\begin{center}
+\begin{tabular}{rrrrr}
+\hline
+$j$ & $a_j$ & $b_j$ & $c_j$ & $d_j$\\
+\hline
+$0$ & $1.00000$ & $1.00000$ & $0.44468$ & $0.27360$\\
+$1$ & $2.71828$ & $2.71016$ & $1.26548$ & $0.69513$\\
+$2$ & $7.38906$ & $7.32652$ & $3.35087$ & $2.01909$\\
+\hline
+\end{tabular}
+\end{center}
+Integrating each piece, $\int_{x_j}^{x_{j+1}}S_j = a_jh_j+\frac{b_j}2h_j^2+\frac{c_j}3h_j^3+\frac{d_j}4h_j^4$, gives $19.55229$ for the natural spline and
+$19.05965$ for the clamped one: errors $0.47$ and $0.026$. The clamped spline is far better because it uses the true slopes at the ends,
+while the natural condition $S'' = 0$ is false for $e^x$. The same is seen pointwise: at $x = 2.5$ the natural spline gives $13.009$, the clamped
+$12.142$, and $e^{2.5} = 12.182$.
+\end{solution}
+
+\begin{note}
+For the clamped spline there is the error bound
+$$\max_{a\leq x\leq b}|f(x)-S(x)|\leq\frac{5M}{384}\max_jh_j^4,\qquad M = \max_{a\leq x\leq b}|f^{(4)}(x)|,$$
+so halving the spacing reduces the error by a factor of about $16$; the natural spline has the same $O(h^4)$ accuracy in the interior but
+only $O(h^2)$ near the ends unless $f''(a) = f''(b) = 0$. Splines do not suffer from Runge's phenomenon: refining the nodes always improves
+the fit.
+\end{note}
+
+
+\subsection{Discrete least-squares approximation}
+\label{sec:leastsq}
+
+Suppose the data $(x_i,y_i)$, $i = 1,\dots,m$, come from measurements and contain errors. An interpolating polynomial would reproduce the
+errors. Instead we choose a function from a simple family, for instance a straight line $y = a_1x+a_0$, that minimizes the sum of the
+squared deviations
+$$E(a_0,a_1) = \sum_{i=1}^m\bigl(y_i-(a_1x_i+a_0)\bigr)^2 .$$
+Squares are used because they make $E$ a smooth function of the parameters, they penalize large deviations heavily, and (as the
+statistics courses show) they give the best estimates when the errors are independent and normally distributed.
+
+\begin{thm}
+\label{thm:normaleq}
+The line $y = a_1x+a_0$ minimizing $E$ is given by the solution of the \textbf{normal equations}
+$$a_0m+a_1\sum x_i = \sum y_i,\qquad a_0\sum x_i+a_1\sum x_i^2 = \sum x_iy_i ,$$
+that is,
+$$a_1 = \frac{m\sum x_iy_i-\sum x_i\sum y_i}{m\sum x_i^2-\left(\sum x_i\right)^2},\qquad a_0 = \frac{\sum y_i-a_1\sum x_i}{m} .$$
+More generally, the polynomial $P_n(x) = \sum_{k=0}^na_kx^k$ ($n<m-1$) minimizing $E = \sum_i(y_i-P_n(x_i))^2$ satisfies the $n+1$ normal
+equations
+$$\sum_{k=0}^na_k\sum_{i=1}^mx_i^{j+k} = \sum_{i=1}^my_ix_i^j,\qquad j = 0,1,\dots,n,$$
+which have a unique solution when the $x_i$ are distinct.
+\end{thm}
+
+\begin{proof}
+$E$ is a quadratic function of $a_0,\dots,a_n$, bounded below by $0$, so at a minimum $\frac{\partial E}{\partial a_j} = 0$ for each $j$:
+$$0 = \frac{\partial E}{\partial a_j} = -2\sum_i\bigl(y_i-P_n(x_i)\bigr)x_i^j ,$$
+which rearranges to the normal equations. In matrix form, with $X$ the $m\times(n+1)$ matrix of entries $x_i^k$, the equations are
+$X^TX\mathbf a = X^T\mathbf y$. If the $x_i$ are distinct and $m>n$, then $X\mathbf v = \mathbf 0$ means that the polynomial with coefficients $\mathbf v$
+vanishes at $m>n$ points, so $\mathbf v = \mathbf 0$; hence $X^TX$ is positive definite ($\mathbf v^TX^TX\mathbf v = \|X\mathbf v\|_2^2>0$), the solution is
+unique, and since $E$ is then a strictly convex quadratic, it is the minimum.
+\end{proof}
+
+\begin{exa}
+\label{exa:lslinear}
+Find the least-squares line for the data
+\begin{center}
+\begin{tabular}{ccccccccccc}
+\hline
+$x_i$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ & $8$ & $9$ & $10$\\
+$y_i$ & $1.3$ & $3.5$ & $4.2$ & $5.0$ & $7.0$ & $8.8$ & $10.1$ & $12.5$ & $13.0$ & $15.6$\\
+\hline
+\end{tabular}
+\end{center}
+\end{exa}
+
+\begin{solution}
+The sums are $\sum x_i = 55$, $\sum x_i^2 = 385$, $\sum y_i = 81.0$, $\sum x_iy_i = 572.4$. So
+\begin{gather*}
+a_1 = \frac{10(572.4)-55(81.0)}{10(385)-55^2} = \frac{1269}{825} = 1.538,\\
+a_0 = \frac{81.0-1.538(55)}{10} = -0.360,
+\end{gather*}
+and the line is $y = 1.538x-0.360$, with $E = 2.34$. The interpolating polynomial of degree $9$ through these ten points would pass through
+every one of them, but would oscillate between them; the line captures the trend.
+\end{solution}
+
+\begin{exa}
+\label{exa:lsquad}
+Fit a quadratic $P_2(x) = a_0+a_1x+a_2x^2$ by least squares to
+\begin{center}
+\begin{tabular}{cccccc}
+\hline
+$x_i$ & $0$ & $0.25$ & $0.50$ & $0.75$ & $1.00$\\
+$y_i$ & $1.0000$ & $1.2840$ & $1.6487$ & $2.1170$ & $2.7183$\\
+\hline
+\end{tabular}
+\end{center}
+\end{exa}
+
+\begin{solution}
+The power sums are $\sum x_i^k = 5, 2.5, 1.875, 1.5625, 1.3828$ for $k = 0,\dots,4$, and $\sum y_ix_i^k = 8.7680, 5.4514, 4.4015$ for $k = 0,1,2$.
+The normal equations
+\begin{align*}
+5a_0+2.5a_1+1.875a_2 &= 8.7680,\\
+2.5a_0+1.875a_1+1.5625a_2 &= 5.4514,\\
+1.875a_0+1.5625a_1+1.3828a_2 &= 4.4015
+\end{align*}
+have the solution $a_0 = 1.00514$, $a_1 = 0.86418$, $a_2 = 0.84366$, so $P_2(x) = 1.00514+0.86418x+0.84366x^2$, with $E = 2.74\times10^{-4}$.
+(The data are values of $e^x$, and the quadratic follows them to within about $0.01$.)
+\end{solution}
+
+\subhead{Fitting other forms}
+Data that grow exponentially are often fitted by $y = be^{ax}$. Minimizing $\sum(y_i-be^{ax_i})^2$ leads to non-linear equations, so in practice
+one takes logarithms, $\ln y = \ln b+ax$, and fits a straight line to $(x_i,\ln y_i)$. This minimizes the squared errors of the logarithms
+rather than of the data, which is a slightly different criterion, but it is simple and usually adequate.
+
+\begin{exa}
+\label{exa:lsexp}
+Fit $y = be^{ax}$ to the data
+\begin{center}
+\begin{tabular}{cccccc}
+\hline
+$x_i$ & $1.00$ & $1.25$ & $1.50$ & $1.75$ & $2.00$\\
+$y_i$ & $5.10$ & $5.79$ & $6.53$ & $7.45$ & $8.46$\\
+\hline
+\end{tabular}
+\end{center}
+\end{exa}
+
+\begin{solution}
+With $Y_i = \ln y_i$: $\sum x_i = 7.5$, $\sum x_i^2 = 11.875$, $\sum Y_i = 9.40534$, $\sum x_iY_i = 14.42409$. The normal equations give
+$$a = \frac{5(14.42409)-7.5(9.40534)}{5(11.875)-7.5^2} = 0.5057,\qquad\ln b = \frac{9.40534-0.5057(7.5)}{5} = 1.1225,$$
+so $b = 3.072$ and $y = 3.072e^{0.5057x}$. The sum of squared deviations of the data from this curve is $1.2\times10^{-3}$.
+\end{solution}
+
+\begin{note}
+The normal-equation matrix for polynomial fitting on $[0,1]$ with many equally spaced points is close to a multiple of the Hilbert matrix
+of Example~\ref{exa:hilbert}, and becomes very ill-conditioned as the degree grows. For degrees beyond about $5$, least-squares problems are
+solved instead with orthogonal polynomials or with a QR factorization of $X$, which avoid forming $X^TX$.
+\end{note}
+
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Find the natural cubic spline through $(0,0)$, $(1,1)$, $(2,0)$, and evaluate it at $x = 0.5$.
+\end{problem}
+\begin{solution}
+$h_0 = h_1 = 1$, $c_0 = c_2 = 0$, $4c_1 = 3(0-1)-3(1-0) = -6$, so $c_1 = -1.5$. Then $b_0 = 1-\frac13(-1.5) = 1.5$, $d_0 = \frac{-1.5}{3} = -0.5$, and
+$S_0(x) = 1.5x-0.5x^3$; by symmetry $S_1(x) = 1-1.5(x-1)^2+0.5(x-1)^3$. At $x = 0.5$, $S(0.5) = 0.75-0.0625 = 0.6875$.
+\end{solution}
+
+\begin{problem}
+Show that a clamped cubic spline that interpolates a cubic polynomial $f$ (with the correct end slopes) is $f$ itself.
+\end{problem}
+\begin{solution}
+The cubic $f$ itself satisfies all the conditions of the definition: it interpolates, it is $C^2$, and its end slopes are $f'(a)$ and $f'(b)$. By
+Theorem~\ref{thm:splineunique} the clamped spline is unique, so it is $f$. (The natural spline reproduces $f$ only if $f''(a) = f''(b) = 0$.)
+\end{solution}
+
+\begin{problem}
+Fit a least-squares line to $(0,1)$, $(1,3)$, $(2,4)$, $(3,4)$ and compute the residuals.
+\end{problem}
+\begin{solution}
+$m = 4$, $\sum x = 6$, $\sum x^2 = 14$, $\sum y = 12$, $\sum xy = 23$. So $a_1 = \frac{4(23)-6(12)}{4(14)-36} = \frac{20}{20} = 1$ and $a_0 = \frac{12-6}{4} = 1.5$:
+$y = x+1.5$. The residuals $y_i-(x_i+1.5)$ are $-0.5, 0.5, 0.5, -0.5$; they sum to zero, as the first normal equation guarantees, and $E = 1$.
+\end{solution}
+
+\begin{problem}
+Show that the least-squares line always passes through the point $(\bar x,\bar y)$ of means.
+\end{problem}
+\begin{solution}
+The first normal equation, divided by $m$, reads $a_0+a_1\bar x = \bar y$, where $\bar x = \frac1m\sum x_i$ and $\bar y = \frac1m\sum y_i$. So
+$(\bar x,\bar y)$ lies on the line.
+\end{solution}
+
+\begin{problem}
+Explain how to fit $y = bx^a$ to positive data by a linear least-squares problem, and fit it to $(1,3)$, $(2,12)$, $(4,48)$.
+\end{problem}
+\begin{solution}
+Taking logarithms, $\ln y = \ln b+a\ln x$, a straight line in $(\ln x,\ln y)$. Here $(\ln x,\ln y) = (0,\ln3)$, $(\ln2,\ln12)$, $(\ln4,\ln48)$, and
+$\ln12-\ln3 = \ln4 = 2\ln2$, $\ln48-\ln3 = \ln16 = 4\ln2$: the points lie exactly on a line of slope $2$ through $(0,\ln3)$. So $y = 3x^2$, with
+zero error.
+\end{solution}
+
+
+\section{Numerical Differentiation and Integration}
+\label{sec:diffint}
+
+Derivatives and integrals of functions known only through tables, or too complicated to treat exactly, must be approximated from
+function values. The idea throughout is the same: replace $f$ by an interpolating polynomial, differentiate or integrate the polynomial,
+and use the interpolation error formula of Theorem~\ref{thm:interperr} to obtain the error.
+
+
+\subsection{Numerical differentiation}
+\label{sec:numdiff}
+
+The definition $f'(x_0) = \lim_{h\rightarrow0}\frac{f(x_0+h)-f(x_0)}{h}$ suggests the \textbf{forward-difference formula}
+$$f'(x_0)\approx\frac{f(x_0+h)-f(x_0)}{h}$$
+(the \textbf{backward-difference formula} when $h<0$). By Taylor's Theorem, $f(x_0+h) = f(x_0)+hf'(x_0)+\frac{h^2}2f''(\xi)$, so
+$$f'(x_0) = \frac{f(x_0+h)-f(x_0)}{h}-\frac h2f''(\xi):$$
+the error is $O(h)$.
+
+\subhead{Formulas from interpolation}
+More accurate formulas come from differentiating the Lagrange polynomial through $n+1$ points. Differentiating the identity of
+Theorem~\ref{thm:interperr} and evaluating at a node $x_j$ gives
+$$f'(x_j) = \sum_{k=0}^nf(x_k)L'_{n,k}(x_j)+\frac{f^{(n+1)}(\xi(x_j))}{(n+1)!}\prod_{\substack{k = 0\\ k\neq j}}^n(x_j-x_k),$$
+because the term involving $\frac{d}{dx}f^{(n+1)}(\xi(x))$ is multiplied by the nodal polynomial, which vanishes at $x_j$. With three equally
+spaced points this gives the following formulas, with $\xi$ in the interval spanned by the points used.
+
+\begin{thm}
+\label{thm:threepoint}
+Three-point endpoint formula:
+$$f'(x_0) = \frac{1}{2h}\bigl[-3f(x_0)+4f(x_0+h)-f(x_0+2h)\bigr]+\frac{h^2}{3}f'''(\xi_0) .$$
+Three-point midpoint formula:
+$$f'(x_0) = \frac{1}{2h}\bigl[f(x_0+h)-f(x_0-h)\bigr]-\frac{h^2}{6}f'''(\xi_1) .$$
+\end{thm}
+
+\begin{proof}
+For the midpoint formula, expand to third order about $x_0$:
+$$f(x_0\pm h) = f(x_0)\pm hf'(x_0)+\frac{h^2}2f''(x_0)\pm\frac{h^3}{6}f'''(\xi_\pm) .$$
+Subtracting, the even terms cancel: $f(x_0+h)-f(x_0-h) = 2hf'(x_0)+\frac{h^3}{6}\bigl(f'''(\xi_+)+f'''(\xi_-)\bigr)$. By the Intermediate Value
+Theorem the average of $f'''(\xi_+)$ and $f'''(\xi_-)$ is $f'''(\xi_1)$ for some $\xi_1$, and dividing by $2h$ gives the formula. The endpoint
+formula follows in the same way from the expansions of $f(x_0+h)$ and $f(x_0+2h)$, choosing the combination that cancels the $f''$ terms.
+\end{proof}
+
+The midpoint formula has half the error constant of the endpoint formula and uses one fewer new value, so it is preferred whenever values on
+both sides are available; the endpoint formula is for the ends of a table. Using five points gives the \textbf{five-point midpoint formula}
+$$f'(x_0) = \frac{1}{12h}\bigl[f(x_0-2h)-8f(x_0-h)+8f(x_0+h)-f(x_0+2h)\bigr]+\frac{h^4}{30}f^{(5)}(\xi),$$
+which is $O(h^4)$.
+
+\begin{exa}
+\label{exa:numdiff}
+Values of $f(x) = xe^x$ are given below. Approximate $f'(2.0) = 22.167168$ by each formula.
+\begin{center}
+\begin{tabular}{cccccc}
+\hline
+$x$ & $1.8$ & $1.9$ & $2.0$ & $2.1$ & $2.2$\\
+$f(x)$ & $10.889365$ & $12.703199$ & $14.778112$ & $17.148957$ & $19.855030$\\
+\hline
+\end{tabular}
+\end{center}
+\end{exa}
+
+\begin{solution}
+\begin{center}
+\begin{tabular}{lll}
+\hline
+formula & approximation & error\\
+\hline
+forward, $h = 0.1$ & $\frac{17.148957-14.778112}{0.1} = 23.708450$ & $1.5\times10^{0}$\\
+backward, $h = 0.1$ & $\frac{14.778112-12.703199}{0.1} = 20.749130$ & $1.4\times10^{0}$\\
+three-point endpoint, $h = 0.1$ & $22.032310$ & $1.3\times10^{-1}$\\
+three-point endpoint, $h = -0.1$ & $22.054525$ & $1.1\times10^{-1}$\\
+three-point midpoint, $h = 0.2$ & $22.414163$ & $2.5\times10^{-1}$\\
+three-point midpoint, $h = 0.1$ & $22.228790$ & $6.2\times10^{-2}$\\
+five-point midpoint, $h = 0.1$ & $22.166999$ & $1.7\times10^{-4}$\\
+\hline
+\end{tabular}
+\end{center}
+Halving $h$ in the midpoint formula reduced the error by a factor of $4$, as $O(h^2)$ predicts, and the five-point formula is several hundred
+times more accurate than the three-point ones from the same data.
+\end{solution}
+
+\subhead{Round-off error}
+Numerical differentiation is \emph{unstable}: the formulas divide a small difference of nearly equal function values by the small number
+$h$. Suppose each value is computed with an error of at most $\varepsilon$ and $|f'''|\leq M$. Then the computed midpoint quotient differs from
+$f'(x_0)$ by at most
+\begin{equation}\label{eq:diffround}
+e(h) = \frac{\varepsilon}{h}+\frac{h^2}{6}M .
+\end{equation}
+The first term grows as $h$ shrinks; the second shrinks. Setting $e'(h) = 0$ gives the best step $h = \left(\frac{3\varepsilon}{M}\right)^{1/3}$: making $h$
+smaller than this makes the result \emph{worse}.
+
+\begin{exa}
+\label{exa:diffround}
+Approximate $f'(0.900)$ for $f(x) = \sin x$ by the three-point midpoint formula, using values of $\sin x$ rounded to five decimal places.
+\end{exa}
+
+\begin{solution}
+The true value is $\cos0.9 = 0.62161$.
+\begin{center}
+\begin{tabular}{lllll}
+\hline
+$h$ & $\sin(0.9+h)$ & $\sin(0.9-h)$ & approximation & error\\
+\hline
+$0.1$ & $0.84147$ & $0.71736$ & $0.62055$ & $-1.06\times10^{-3}$\\
+$0.05$ & $0.81342$ & $0.75128$ & $0.62140$ & $-2.1\times10^{-4}$\\
+$0.01$ & $0.78950$ & $0.77707$ & $0.62150$ & $-1.1\times10^{-4}$\\
+$0.005$ & $0.78643$ & $0.78021$ & $0.62200$ & $3.9\times10^{-4}$\\
+$0.001$ & $0.78395$ & $0.78270$ & $0.62500$ & $3.4\times10^{-3}$\\
+\hline
+\end{tabular}
+\end{center}
+The error is smallest for $h$ between $0.01$ and $0.05$ and then grows again. With $\varepsilon = 5\times10^{-6}$ and $M = \max|{-\cos x}|\leq1$,
+the theory gives the optimal step $h = (3\times5\times10^{-6})^{1/3} = 0.025$ (Figure~\ref{fig:quadrature}, right).
+\end{solution}
+
+\subhead{Richardson extrapolation}
+If an approximation $N(h)$ of a quantity $M$ has an error with a known form, approximations for two values of $h$ can be combined to
+cancel the leading error term. Suppose
+$$M = N_1(h)+K_1h^2+K_2h^4+\cdots .$$
+Replacing $h$ by $\frac h2$ gives $M = N_1(\frac h2)+K_1\frac{h^2}{4}+K_2\frac{h^4}{16}+\cdots$. Multiplying this by $4$, subtracting the first equation
+and dividing by $3$ eliminates the $h^2$ term:
+$$M = N_2(h)+O(h^4),\qquad N_2(h) = N_1\!\left(\frac h2\right)+\frac{N_1(\frac h2)-N_1(h)}{3} .$$
+This is \textbf{Richardson extrapolation}. It can be repeated: if only even powers of $h$ occur, $N_{j}(h) = N_{j-1}(\frac h2)+\frac{N_{j-1}(\frac h2)-N_{j-1}(h)}{4^{j-1}-1}$
+removes the next term each time.
+
+\begin{exa}
+\label{exa:richardson}
+Combine the two midpoint approximations of Example~\ref{exa:numdiff} by Richardson extrapolation.
+\end{exa}
+
+\begin{solution}
+The midpoint formula has an error expansion in even powers of $h$ (by the symmetry of the Taylor series), and $N_1(0.2) = 22.414163$,
+$N_1(0.1) = 22.228790$. So
+$$N_2(0.2) = 22.228790+\frac{22.228790-22.414163}{3} = 22.166999,$$
+with error $1.7\times10^{-4}$: the accuracy of the five-point formula, obtained by combining two three-point results. (In fact this
+combination \emph{is} the five-point formula.)
+\end{solution}
+
+
+\subsection{Elements of numerical integration}
+\label{sec:quad}
+
+To approximate $\int_a^bf(x)\,dx$, \textbf{numerical quadrature} uses a weighted sum $\sum a_if(x_i)$. Integrating the Lagrange
+polynomial through equally spaced nodes gives the \textbf{Newton--Cotes formulas}. The two simplest are the following.
+
+\begin{thm}[Trapezoidal rule]
+\label{thm:trap}
+With $h = b-a$,
+$$\int_a^bf(x)\,dx = \frac h2\bigl[f(a)+f(b)\bigr]-\frac{h^3}{12}f''(\xi),\qquad\xi\in(a,b).$$
+\end{thm}
+
+\begin{proof}
+The linear interpolant at $x_0 = a$, $x_1 = b$ has error $\frac{f''(\xi(x))}{2}(x-a)(x-b)$. Its integral is $\frac h2[f(a)+f(b)]$, the area of a trapezoid.
+The error integral is $\frac12\int_a^bf''(\xi(x))(x-a)(x-b)\,dx$; since $(x-a)(x-b)$ does not change sign on $[a,b]$, the Weighted Mean Value
+Theorem (Theorem~\ref{thm:wmvt}) gives
+$$\frac{f''(\xi)}{2}\int_a^b(x-a)(x-b)\,dx = \frac{f''(\xi)}{2}\left(-\frac{h^3}{6}\right) = -\frac{h^3}{12}f''(\xi) .$$
+\end{proof}
+
+\begin{thm}[Simpson's rule]
+\label{thm:simpson}
+With $h = \frac{b-a}{2}$ and $x_1 = a+h$,
+$$\int_a^bf(x)\,dx = \frac h3\bigl[f(a)+4f(x_1)+f(b)\bigr]-\frac{h^5}{90}f^{(4)}(\xi),\qquad\xi\in(a,b).$$
+\end{thm}
+
+\begin{proof}
+Integrating the quadratic interpolant gives the weights $\frac h3,\frac{4h}3,\frac h3$. For the error, the direct approach gives only $O(h^4)$,
+because the cubic $(x-a)(x-x_1)(x-b)$ changes sign. Instead expand $f$ about $x_1$:
+$f(x) = f(x_1)+f'(x_1)(x-x_1)+\frac{f''(x_1)}{2}(x-x_1)^2+\frac{f'''(x_1)}{6}(x-x_1)^3+\frac{f^{(4)}(\xi(x))}{24}(x-x_1)^4$. Integrating over
+$[x_1-h,x_1+h]$, the odd powers vanish by symmetry, and the Weighted Mean Value Theorem applied to $(x-x_1)^4\geq0$ gives
+$$\int_a^bf = 2hf(x_1)+\frac{h^3}{3}f''(x_1)+\frac{f^{(4)}(\xi_1)}{60}h^5 .$$
+Replacing $f''(x_1)$ by the central difference $\frac{f(a)-2f(x_1)+f(b)}{h^2}-\frac{h^2}{12}f^{(4)}(\xi_2)$ (derived by adding the Taylor expansions of
+$f(x_1\pm h)$) gives
+$$\int_a^bf = \frac h3[f(a)+4f(x_1)+f(b)]-\frac{h^5}{12}\left[\frac13f^{(4)}(\xi_2)-\frac15f^{(4)}(\xi_1)\right],$$
+and a more careful argument shows that the bracket can be replaced by $\frac{2}{15}f^{(4)}(\xi)$, giving $-\frac{h^5}{90}f^{(4)}(\xi)$.
+\end{proof}
+
+\begin{defn}
+The \textbf{degree of precision} of a quadrature formula is the largest $n$ such that the formula is exact for $x^k$, $k = 0,1,\dots,n$.
+\end{defn}
+
+The error terms show that the trapezoidal rule has degree of precision $1$ and Simpson's rule degree $3$: one more than its number of
+intervals suggests, because the error involves $f^{(4)}$, which vanishes for cubics. The same happens for every Newton--Cotes formula
+with an odd number of points. With four points, $h = \frac{b-a}3$, integration of the cubic interpolant gives \textbf{Simpson's three-eighths
+rule}
+$$\int_a^bf(x)\,dx = \frac{3h}{8}\bigl[f(x_0)+3f(x_1)+3f(x_2)+f(x_3)\bigr]-\frac{3h^5}{80}f^{(4)}(\xi),$$
+which also has degree of precision $3$, with a slightly smaller error constant than Simpson's rule over the same interval.
+
+\begin{exa}
+\label{exa:newtoncotes}
+Compare the trapezoidal rule, Simpson's rule and Simpson's three-eighths rule for $\int_0^2f(x)\,dx$ for several functions.
+\end{exa}
+
+\begin{solution}
+\begin{center}
+\begin{tabular}{lcccccc}
+\hline
+$f(x)$ & $x^2$ & $x^4$ & $\frac1{x+1}$ & $\sqrt{1+x^2}$ & $\sin x$ & $e^x$\\
+\hline
+exact & $2.667$ & $6.400$ & $1.099$ & $2.958$ & $1.416$ & $6.389$\\
+trapezoidal & $4.000$ & $16.000$ & $1.333$ & $3.236$ & $0.909$ & $8.389$\\
+Simpson & $2.667$ & $6.667$ & $1.111$ & $2.964$ & $1.425$ & $6.421$\\
+Simpson $\frac38$ & $2.667$ & $6.519$ & $1.105$ & $2.960$ & $1.420$ & $6.403$\\
+\hline
+\end{tabular}
+\end{center}
+Both Simpson rules are exact for $x^2$ (degree of precision $3$); neither is exact for $x^4$. For the trapezoidal rule, $h = 2$ is far too
+large; the next subsection shows how to use these rules on small subintervals.
+\end{solution}
+
+
+\subsection{Composite numerical integration}
+\label{sec:composite}
+
+High-order Newton--Cotes formulas on a single interval are unreliable (their weights become negative and large, and the
+interpolating polynomials suffer from Runge's phenomenon). Instead, the interval is divided into many small subintervals, and a low-order
+rule is used on each.
+
+\begin{thm}[Composite trapezoidal and Simpson's rules]
+\label{thm:composite}
+Let $h = \frac{b-a}{n}$ and $x_j = a+jh$.
+\begin{enumerate}
+\item[(a)] If $f\in C^2[a,b]$,
+$$\int_a^bf(x)\,dx = \frac h2\left[f(a)+2\sum_{j=1}^{n-1}f(x_j)+f(b)\right]-\frac{b-a}{12}h^2f''(\mu)$$
+for some $\mu\in(a,b)$.
+\item[(b)] If $f\in C^4[a,b]$ and $n$ is even,
+$$\int_a^bf(x)\,dx = \frac h3\left[f(a)+4\sum_{j=1}^{n/2}f(x_{2j-1})+2\sum_{j=1}^{n/2-1}f(x_{2j})+f(b)\right]-\frac{b-a}{180}h^4f^{(4)}(\mu).$$
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(b) Apply Simpson's rule to each of the $\frac n2$ intervals $[x_{2j-2},x_{2j}]$ and add. The total error is
+$-\frac{h^5}{90}\sum_{j=1}^{n/2}f^{(4)}(\xi_j)$. The average $\frac{2}{n}\sum f^{(4)}(\xi_j)$ lies between the minimum and maximum of $f^{(4)}$, so by the
+Intermediate Value Theorem it equals $f^{(4)}(\mu)$ for some $\mu$, and the error is $-\frac{h^5}{90}\cdot\frac n2f^{(4)}(\mu) = -\frac{b-a}{180}h^4f^{(4)}(\mu)$,
+since $nh = b-a$. Part (a) is proved in the same way from Theorem~\ref{thm:trap}.
+\end{proof}
+
+\begin{exa}
+\label{exa:composite}
+Determine values of $h$ that guarantee an error less than $2\times10^{-5}$ for $\int_0^\pi\sin x\,dx = 2$ by the composite trapezoidal rule
+and by the composite Simpson's rule, and compare the actual errors.
+\end{exa}
+
+\begin{solution}
+Since $|f''|,|f^{(4)}|\leq1$, the trapezoidal rule needs $\frac{\pi h^2}{12}<2\times10^{-5}$, that is $h<8.74\times10^{-3}$, or $n = \frac\pi h\geq360$.
+Simpson's rule needs $\frac{\pi h^4}{180}<2\times10^{-5}$, that is $h<0.1849$, or $n\geq18$ (even). The actual results:
+\begin{center}
+\begin{tabular}{rllll}
+\hline
+$n$ & trapezoidal & error & Simpson & error\\
+\hline
+$4$ & $1.8961189$ & $1.0\times10^{-1}$ & $2.0045598$ & $4.6\times10^{-3}$\\
+$8$ & $1.9742316$ & $2.6\times10^{-2}$ & $2.0002692$ & $2.7\times10^{-4}$\\
+$16$ & $1.9935703$ & $6.4\times10^{-3}$ & $2.0000166$ & $1.7\times10^{-5}$\\
+$18$ & $1.9949205$ & $5.1\times10^{-3}$ & $2.0000103$ & $1.0\times10^{-5}$\\
+\hline
+\end{tabular}
+\end{center}
+Doubling $n$ divides the trapezoidal error by $4$ and the Simpson error by $16$, as $O(h^2)$ and $O(h^4)$ predict. For a function as smooth
+as this, the higher-order rule is enormously more efficient: $18$ function values against $361$.
+\end{solution}
+
+\begin{note}
+Composite rules are stable with respect to round-off. If each $f(x_j)$ carries an error at most $\varepsilon$, the error in the composite
+Simpson sum is at most $\frac h3\varepsilon\left(1+4\cdot\frac n2+2(\frac n2-1)+1\right) = nh\varepsilon = (b-a)\varepsilon$, independent of $h$. Unlike
+numerical differentiation, integration does not amplify round-off as $h$ shrinks.
+\end{note}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+% Left: trapezoid vs Simpson on f(x)=1+0.8 sin(1.6x), [0,2]; X=3x, Y=1.4 f
+\fill[blue!5,rounded corners] (-0.4,-0.7) rectangle (6.6,4.3);
+\draw[blue!45,rounded corners] (-0.4,-0.7) rectangle (6.6,4.3);
+\node[font=\small\bfseries,text=blue!60!black] at (3.1,3.95) {Trapezoid versus Simpson};
+\fill[orange!25] (0,0) -- (0,1.4) -- (6,1.335) -- (6,0) -- cycle;
+\draw[thick,blue!70!black] (0.000,1.400) -- (0.300,1.578) -- (0.600,1.752) -- (0.900,1.917) -- (1.200,2.069) -- (1.500,2.203) -- (1.800,2.317) -- (2.100,2.408) -- (2.400,2.473) -- (2.700,2.510) -- (3.000,2.520) -- (3.300,2.500) -- (3.600,2.452) -- (3.900,2.378) -- (4.200,2.278) -- (4.500,2.157) -- (4.800,2.015) -- (5.100,1.858) -- (5.400,1.690) -- (5.700,1.514) -- (6.000,1.335);
+\draw[thick,green!50!black,dashed] (0.000,1.400) -- (0.300,1.616) -- (0.600,1.808) -- (0.900,1.978) -- (1.200,2.124) -- (1.500,2.248) -- (1.800,2.348) -- (2.100,2.426) -- (2.400,2.480) -- (2.700,2.511) -- (3.000,2.520) -- (3.300,2.505) -- (3.600,2.467) -- (3.900,2.406) -- (4.200,2.322) -- (4.500,2.215) -- (4.800,2.085) -- (5.100,1.932) -- (5.400,1.756) -- (5.700,1.557) -- (6.000,1.335);
+\draw[orange!80!black,thick] (0,1.4) -- (6,1.335);
+\foreach \x/\y in {0/1.4,3/2.52,6/1.335} \fill[red!70!black] (\x,\y) circle (1.8pt);
+\draw[->,gray] (-0.1,0) -- (6.3,0);
+\foreach \x/\l in {0/a,3/{x_1},6/b} \node[font=\scriptsize,below] at (\x,0) {$\l$};
+\node[font=\scriptsize,orange!80!black,align=center] at (3,0.65) {trapezoid area $1.953$};
+\node[font=\scriptsize,green!40!black] at (3,2.85) {Simpson's parabola: $3.051$};
+\node[font=\scriptsize,align=center] at (3.1,-0.45) {exact $\int_0^2(1+0.8\sin1.6x)\,dx = 2.999$};
+% Right: total error of the midpoint difference vs h, log-log
+\begin{scope}[xshift=7.2cm]
+\fill[red!75!black!6,rounded corners] (-0.75,-0.7) rectangle (6.85,4.3);
+\draw[red!75!black!50,rounded corners] (-0.75,-0.7) rectangle (6.85,4.3);
+\node[font=\small\bfseries,text=red!70!black] at (3.05,3.95) {Differentiation: error against $h$};
+\draw[->,gray] (0,0) -- (6.4,0) node[right,font=\scriptsize,black]{$h$};
+\draw[->,gray] (0,0) -- (0,3.7);
+\foreach \x/\l in {0.72/{10^{-3}},3.12/{10^{-2}},5.52/{10^{-1}}} \node[font=\tiny,below] at (\x,0) {$\l$};
+\foreach \y/\l in {1.3/{10^{-4}},2.6/{10^{-3}}} {\draw[gray] (-0.06,\y) -- (0.06,\y); \node[font=\tiny,left] at (0,\y) {$\l$};}
+\draw[thin,orange!80!black,dashed] (0.000,3.899) -- (0.800,3.465) -- (1.600,3.032) -- (2.400,2.599) -- (3.200,2.165) -- (4.000,1.732) -- (4.800,1.299) -- (5.600,0.865) -- (6.240,0.519);
+\draw[thin,blue!70!black,dashed] (2.880,0.028) -- (3.520,0.722) -- (4.160,1.415) -- (4.800,2.108) -- (5.440,2.802) -- (6.080,3.495) -- (6.240,3.668);
+\draw[thick,red!70!black] (0.000,3.899) -- (0.480,3.639) -- (0.960,3.379) -- (1.440,3.119) -- (1.920,2.859) -- (2.400,2.601) -- (2.880,2.348) -- (3.360,2.115) -- (3.680,1.993) -- (3.840,1.951) -- (4.000,1.930) -- (4.160,1.933) -- (4.320,1.965) -- (4.640,2.116) -- (4.960,2.361) -- (5.280,2.661) -- (5.600,2.988) -- (5.920,3.327) -- (6.240,3.671);
+\foreach \x/\y in {5.52/2.633,4.80/1.719,3.12/1.354,2.40/2.068,0.72/3.289} \fill[black] (\x,\y) circle (1.6pt);
+\draw[dotted] (4.06,0) -- (4.06,1.93);
+\node[font=\scriptsize,red!70!black] at (4.06,0.25) {$h_{\text{opt}}$};
+\node[font=\scriptsize,orange!80!black,align=center] at (1.3,1.55) {round-off\\$\varepsilon/h$};
+\node[font=\scriptsize,blue!70!black,align=center] at (5.5,1.0) {truncation\\$h^2M/6$};
+\node[font=\scriptsize] at (3.05,-0.45) {bound $e(h)$ (red) and observed errors (dots)};
+\end{scope}
+\end{tikzpicture}
+\caption{Left: on one interval the trapezoidal rule integrates the chord and Simpson's rule the parabola through three points; the parabola
+follows the curve far more closely. Right: for the midpoint difference with five-digit data (Example~\ref{exa:diffround}), the error bound
+$\frac\varepsilon h+\frac{h^2M}6$ is the sum of a round-off term that grows as $h$ shrinks and a truncation term that grows with $h$; the observed
+errors follow the same U shape, with the best $h$ near $0.025$.}
+\label{fig:quadrature}
+\end{figure}
+
+
+\subsection{Romberg integration}
+\label{sec:romberg}
+
+The composite trapezoidal rule $R_{k,1}$ with $2^{k-1}$ subintervals has an error expansion in even powers of $h$ (the Euler--Maclaurin
+formula), so Richardson extrapolation applies:
+$$R_{k,j} = R_{k,j-1}+\frac{R_{k,j-1}-R_{k-1,j-1}}{4^{j-1}-1},\qquad j = 2,\dots,k .$$
+This is \textbf{Romberg integration}. The trapezoidal values themselves are cheap to compute recursively, because each new one reuses all the
+previous function values: with $h_k = \frac{b-a}{2^{k-1}}$,
+$$R_{k,1} = \frac12\left[R_{k-1,1}+h_{k-1}\sum_{i=1}^{2^{k-2}}f\bigl(a+(2i-1)h_k\bigr)\right] .$$
+
+\begin{exa}
+\label{exa:romberg}
+Apply Romberg integration to $\int_0^\pi\sin x\,dx$, using $1, 2, 4, \dots, 32$ subintervals.
+\end{exa}
+
+\begin{solution}
+The Romberg table, with $R_{k,1}$ in the first column, is
+\begin{center}
+\begin{tabular}{llllll}
+\hline
+$0$ & & & & & \\
+$1.570796$ & $2.094395$ & & & & \\
+$1.896119$ & $2.004560$ & $1.998571$ & & & \\
+$1.974232$ & $2.000269$ & $1.999983$ & $2.000006$ & & \\
+$1.993570$ & $2.000017$ & $2.000000$ & $2.000000$ & $2.000000$ & \\
+$1.998393$ & $2.000001$ & $2.000000$ & $2.000000$ & $2.000000$ & $2.000000$\\
+\hline
+\end{tabular}
+\end{center}
+The first column is the composite trapezoidal rule, which after $33$ function evaluations is still in error by $1.6\times10^{-3}$. The
+extrapolated values are correct to eight decimals. (The second column is exactly the composite Simpson's rule.)
+\end{solution}
+
+
+\subsection{Gaussian quadrature}
+\label{sec:gauss}
+
+Newton--Cotes formulas fix the nodes in advance. If the nodes are chosen as well as the weights, an $n$-point formula
+$\sum_{i=1}^nc_if(x_i)$ has $2n$ free parameters, and can be made exact for all polynomials of degree up to $2n-1$. On $[-1,1]$ the optimal
+nodes are the roots of the Legendre polynomial $P_n$.
+
+\begin{thm}
+\label{thm:gaussquad}
+Let $x_1,\dots,x_n$ be the roots of the $n$th Legendre polynomial $P_n$ and $c_i = \int_{-1}^1\prod_{j\neq i}\frac{x-x_j}{x_i-x_j}\,dx$. Then
+$\int_{-1}^1P(x)\,dx = \sum_{i=1}^nc_iP(x_i)$ for every polynomial $P$ of degree less than $2n$.
+\end{thm}
+
+\begin{proof}
+For degree less than $n$, the formula integrates the interpolating polynomial at the $n$ nodes, which is $P$ itself. For degree less than
+$2n$, divide by $P_n$: $P = QP_n+R$ with $Q$ and $R$ of degree less than $n$. The Legendre polynomial $P_n$ is orthogonal on $[-1,1]$ to every
+polynomial of lower degree, so $\int_{-1}^1QP_n = 0$ and $\int P = \int R$. At the nodes $P_n(x_i) = 0$, so $P(x_i) = R(x_i)$ and
+$\sum c_iP(x_i) = \sum c_iR(x_i) = \int R$, by the first case.
+\end{proof}
+
+For two and three points the nodes and weights are
+\begin{center}
+\begin{tabular}{lll}
+\hline
+$n$ & nodes $x_i$ & weights $c_i$\\
+\hline
+$2$ & $\pm\frac{1}{\sqrt3} = \pm0.5773502692$ & $1,\ 1$\\
+$3$ & $0,\ \pm\sqrt{0.6} = \pm0.7745966692$ & $\frac89,\ \frac59,\ \frac59$\\
+\hline
+\end{tabular}
+\end{center}
+An integral over $[a,b]$ is transformed to $[-1,1]$ by $x = \frac{(b-a)t+(a+b)}{2}$:
+$$\int_a^bf(x)\,dx = \frac{b-a}{2}\int_{-1}^1f\!\left(\frac{(b-a)t+(a+b)}{2}\right)dt .$$
+
+\begin{exa}
+\label{exa:gaussquad}
+Approximate $\int_1^{1.5}e^{-x^2}\,dx = 0.1093643$ by Gaussian quadrature with $n = 2$ and $n = 3$, and compare with Simpson's rule.
+\end{exa}
+
+\begin{solution}
+Here $x = \frac{t+5}{4}$ and $dx = \frac{dt}{4}$, so $\int_1^{1.5}e^{-x^2}dx = \frac14\int_{-1}^1e^{-(t+5)^2/16}\,dt$. With $n = 2$,
+$$\frac14\left[e^{-(5-0.5773503)^2/16}+e^{-(5+0.5773503)^2/16}\right] = 0.1094003,$$
+error $3.6\times10^{-5}$. With $n = 3$, using the nodes $0,\pm0.7745967$ and weights $\frac89,\frac59,\frac59$, the result is $0.1093642$, error
+$6.5\times10^{-8}$. Simpson's rule, with the same three function values' worth of work at $1, 1.25, 1.5$, gives $0.1093104$, error
+$5.4\times10^{-5}$. For smooth integrands Gaussian quadrature is the most accurate rule for a given number of evaluations.
+\end{solution}
+
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Use the three-point midpoint formula with $h = 0.1$ and $h = 0.05$ to approximate $f'(1)$ for $f(x) = e^x$, and apply Richardson
+extrapolation.
+\end{problem}
+\begin{solution}
+$N_1(0.1) = \frac{e^{1.1}-e^{0.9}}{0.2} = 2.7228146$ and $N_1(0.05) = \frac{e^{1.05}-e^{0.95}}{0.1} = 2.7194146$. Then $N_2 = 2.7194146+\frac{2.7194146-2.7228146}{3}
+= 2.7182813$, against $e = 2.7182818$: the error falls from $1.1\times10^{-3}$ to $5\times10^{-7}$.
+\end{solution}
+
+\begin{problem}
+Show that Simpson's rule is exact for $f(x) = x^3$ on $[0,2]$ but not for $x^4$, and find its error for $x^4$ from the error formula.
+\end{problem}
+\begin{solution}
+$\frac13[0+4(1)+8] = 4 = \int_0^2x^3$. For $x^4$: $\frac13[0+4+16] = \frac{20}{3} = 6.6667$, while $\int_0^2x^4 = 6.4$; the error is $-0.2667$. The formula gives
+$-\frac{h^5}{90}f^{(4)} = -\frac{1}{90}\cdot24 = -0.2667$ exactly, since $f^{(4)} = 24$ is constant.
+\end{solution}
+
+\begin{problem}
+How many subintervals does the composite trapezoidal rule need to approximate $\int_1^2\ln x\,dx$ with error below $10^{-5}$? And composite
+Simpson's rule?
+\end{problem}
+\begin{solution}
+$f'' = -\frac{1}{x^2}$, $|f''|\leq1$, so the trapezoidal rule needs $\frac{1}{12}h^2<10^{-5}$, $h<0.01095$, $n\geq92$. $f^{(4)} = -\frac{6}{x^4}$, $|f^{(4)}|\leq6$, so
+Simpson needs $\frac{6}{180}h^4<10^{-5}$, $h<0.1316$, $n\geq8$ (even).
+\end{solution}
+
+\begin{problem}
+Approximate $\int_0^1e^{-x^2}dx = 0.7468241$ by Gaussian quadrature with $n = 2$.
+\end{problem}
+\begin{solution}
+$x = \frac{t+1}{2}$, so the integral is $\frac12\int_{-1}^1e^{-(t+1)^2/4}dt\approx\frac12\left[e^{-(0.4226497)^2/4}+e^{-(1.5773503)^2/4}\right] = \frac12[0.9563243+0.5368651] = 0.7465947$,
+error $2.3\times10^{-4}$, from just two function values.
+\end{solution}
+
+\begin{problem}
+Show that the second column of the Romberg table, $R_{k,2}$, is the composite Simpson's rule with $2^{k-1}$ subintervals.
+\end{problem}
+\begin{solution}
+Let $T_n$ be the trapezoidal rule with $n$ subintervals of width $h$, and $T_{2n}$ the one with $2n$ subintervals of width $\frac h2$. Then
+$R_{k,2} = \frac{4T_{2n}-T_n}{3}$. In $4T_{2n}$ each original node $x_j$ (interior) has weight $4\cdot\frac h2 = 2h$ and each midpoint weight $2h$; in $T_n$ the
+interior nodes have weight $h$. So $\frac{4T_{2n}-T_n}{3}$ gives the midpoints weight $\frac{2h}{3} = \frac{4}{3}\cdot\frac h2$, the interior original nodes weight
+$\frac{2h-h}{3} = \frac23\cdot\frac h2$, and the ends weight $\frac{h-h/2}{3} = \frac13\cdot\frac h2$: exactly Simpson's weights $1,4,2,4,\dots,4,1$ times $\frac{h/2}{3}$.
+\end{solution}
+
+
+\section{Initial-Value Problems for Ordinary Differential Equations}
+\label{sec:ivp}
+
+Differential equations describe how a quantity changes: the motion of a body, the growth of a population, the decay of a drug in the
+body. Most of them cannot be solved in closed form, so we compute approximations at a set of points. This section treats the
+\textbf{initial-value problem}
+\begin{equation}\label{eq:ivp}
+\frac{dy}{dt} = f(t,y),\qquad a\leq t\leq b,\qquad y(a) = \alpha .
+\end{equation}
+The methods produce approximations $w_i\approx y(t_i)$ at the \textbf{mesh points} $t_i = a+ih$, $i = 0,1,\dots,N$, with \textbf{step size}
+$h = \frac{b-a}{N}$.
+
+
+\subsection{The theory of initial-value problems}
+\label{sec:ivptheory}
+
+Before approximating a solution we should know that there is one, that it is unique, and that it does not change wildly when the data
+change slightly (since the data, and every computation, contain errors).
+
+\begin{defn}
+A function $f(t,y)$ satisfies a \textbf{Lipschitz condition} in $y$ on a set $D\subseteq\mathbb R^2$ if there is a constant $L>0$, the
+\textbf{Lipschitz constant}, with
+$$|f(t,y_1)-f(t,y_2)|\leq L|y_1-y_2|\qquad\text{for all }(t,y_1),(t,y_2)\in D .$$
+\end{defn}
+
+If $D$ is convex in $y$ and $\left|\frac{\partial f}{\partial y}\right|\leq L$ on $D$, then $f$ is Lipschitz with constant $L$, by the Mean Value Theorem:
+$f(t,y_1)-f(t,y_2) = \frac{\partial f}{\partial y}(t,\eta)(y_1-y_2)$.
+
+\begin{thm}[Existence and uniqueness]
+\label{thm:picard}
+Let $D = \{(t,y): a\leq t\leq b,\ -\infty<y<\infty\}$ and let $f$ be continuous on $D$ and Lipschitz in $y$. Then the initial-value
+problem~\eqref{eq:ivp} has a unique solution $y(t)$ for $a\leq t\leq b$.
+\end{thm}
+
+The proof constructs the solution by \textbf{Picard iteration}, $y_{k+1}(t) = \alpha+\int_a^tf(s,y_k(s))\,ds$, which is fixed-point iteration in a space of
+functions; the Lipschitz condition makes the map a contraction (compare the Fixed-Point Theorem~\ref{thm:fixedpoint}). The details are
+given in courses on differential equations.
+
+\begin{defn}
+Problem~\eqref{eq:ivp} is \textbf{well posed} if it has a unique solution and if, for every $\varepsilon>0$, there is $k>0$ such that any
+\textbf{perturbed problem} $\frac{dz}{dt} = f(t,z)+\delta(t)$, $z(a) = \alpha+\varepsilon_0$, with $|\varepsilon_0|<\varepsilon$ and $|\delta(t)|<\varepsilon$, has a unique
+solution with $|z(t)-y(t)|<k\varepsilon$ for all $t$.
+\end{defn}
+
+Under the hypotheses of Theorem~\ref{thm:picard} the problem is also well posed. Numerical methods always solve a perturbed problem, so
+well-posedness is what makes their results meaningful.
+
+\begin{exa}
+\label{exa:lipschitz}
+Show that $f(t,y) = y-t^2+1$ satisfies a Lipschitz condition on $D = \{0\leq t\leq2,\ y\in\mathbb R\}$, so that
+$$y' = y-t^2+1,\qquad 0\leq t\leq2,\qquad y(0) = 0.5$$
+is well posed, and verify that its solution is $y(t) = (t+1)^2-0.5e^t$.
+\end{exa}
+
+\begin{solution}
+$\frac{\partial f}{\partial y} = 1$, so $L = 1$ will do, and $f$ is continuous; Theorem~\ref{thm:picard} applies. For the solution,
+$y' = 2(t+1)-0.5e^t$ and $y-t^2+1 = t^2+2t+1-0.5e^t-t^2+1 = 2t+2-0.5e^t$: they agree, and $y(0) = 1-0.5 = 0.5$. This problem is used as the test
+problem for every method of this section.
+\end{solution}
+
+
+\subsection{Euler's method}
+\label{sec:euler}
+
+Taylor's Theorem about $t_i$ gives $y(t_{i+1}) = y(t_i)+hy'(t_i)+\frac{h^2}2y''(\xi_i) = y(t_i)+hf(t_i,y(t_i))+\frac{h^2}{2}y''(\xi_i)$. Dropping the
+remainder gives \textbf{Euler's method}:
+\begin{equation}\label{eq:euler}
+w_0 = \alpha,\qquad w_{i+1} = w_i+hf(t_i,w_i),\quad i = 0,1,\dots,N-1 .
+\end{equation}
+Geometrically, each step follows the tangent line of the solution curve through $(t_i,w_i)$ for a time $h$.
+
+\begin{exa}
+\label{exa:euler}
+Apply Euler's method to the test problem of Example~\ref{exa:lipschitz} with $h = 0.2$.
+\end{exa}
+
+\begin{solution}
+$w_1 = 0.5+0.2(0.5-0+1) = 0.8$, $w_2 = 0.8+0.2(0.8-0.04+1) = 1.152$, and so on:
+\begin{center}
+\begin{tabular}{rllll}
+\hline
+$t_i$ & $w_i$ & $y(t_i)$ & $|y(t_i)-w_i|$ & bound~\eqref{eq:eulerbound}\\
+\hline
+$0.2$ & $0.8000000$ & $0.8292986$ & $0.029$ & $0.038$\\
+$0.4$ & $1.1520000$ & $1.2140877$ & $0.062$ & $0.083$\\
+$0.6$ & $1.5504000$ & $1.6489406$ & $0.099$ & $0.140$\\
+$1.0$ & $2.4581760$ & $2.6408591$ & $0.183$ & $0.291$\\
+$1.4$ & $3.4517734$ & $3.7324000$ & $0.281$ & $0.517$\\
+$2.0$ & $4.8657845$ & $5.3054720$ & $0.440$ & $1.08$\\
+\hline
+\end{tabular}
+\end{center}
+The error grows steadily as $t$ increases; Euler's method is simple but not very accurate.
+\end{solution}
+
+\begin{thm}[Error bound for Euler's method]
+\label{thm:eulerbound}
+Suppose $f$ is continuous and Lipschitz in $y$ with constant $L$ on $D$, and $|y''(t)|\leq M$ on $[a,b]$. Then the Euler approximations
+satisfy
+\begin{equation}\label{eq:eulerbound}
+|y(t_i)-w_i|\leq\frac{hM}{2L}\left[e^{L(t_i-a)}-1\right],\qquad i = 0,1,\dots,N .
+\end{equation}
+\end{thm}
+
+\begin{proof}
+Subtracting~\eqref{eq:euler} from the Taylor expansion, the errors $e_i = y(t_i)-w_i$ satisfy
+$$e_{i+1} = e_i+h\bigl[f(t_i,y(t_i))-f(t_i,w_i)\bigr]+\frac{h^2}{2}y''(\xi_i),$$
+so $|e_{i+1}|\leq(1+hL)|e_i|+\frac{h^2M}{2}$. Unrolling this inequality, with $e_0 = 0$,
+$$|e_{i+1}|\leq\frac{h^2M}{2}\sum_{j=0}^{i}(1+hL)^j = \frac{h^2M}{2}\cdot\frac{(1+hL)^{i+1}-1}{hL} .$$
+Since $1+x\leq e^x$, $(1+hL)^{i+1}\leq e^{(i+1)hL} = e^{L(t_{i+1}-a)}$, which gives the bound.
+\end{proof}
+
+For the test problem, $L = 1$ and $y'' = 2-0.5e^t$, so $|y''|\leq0.5e^2-2 = 1.6945 = M$ on $[0,2]$, and the bound is
+$0.1(1.6945)(e^{t_i}-1)$, as in the last column above. The bound is \emph{linear in $h$}: Euler's method has global error $O(h)$. At $t = 2$
+the errors for $h = 0.2, 0.1, 0.05, 0.025$ are $0.440$, $0.242$, $0.127$ and $0.065$, roughly halving with $h$.
+
+\begin{defn}
+The \textbf{local truncation error} of a one-step method $w_{i+1} = w_i+h\phi(t_i,w_i)$ is
+$$\tau_{i+1}(h) = \frac{y(t_{i+1})-y(t_i)}{h}-\phi(t_i,y(t_i)),$$
+the amount by which the exact solution fails to satisfy the method, per unit step. A method is of \textbf{order} $p$ if $\tau_{i+1}(h) = O(h^p)$.
+\end{defn}
+
+For Euler's method $\tau_{i+1}(h) = \frac h2y''(\xi_i) = O(h)$, so it is of order $1$; the global error is of the same order as the local
+truncation error, which is the typical situation for a stable one-step method.
+
+
+\subsection{Higher-order Taylor methods}
+\label{sec:taylormethods}
+
+Keeping more terms of the Taylor series gives higher order. Since $y' = f(t,y)$, the higher derivatives of $y$ are obtained by
+differentiating $f$ along the solution: $y'' = f'(t,y) = \frac{\partial f}{\partial t}+\frac{\partial f}{\partial y}f$, and so on. The
+\textbf{Taylor method of order $n$} is
+$$w_{i+1} = w_i+hT^{(n)}(t_i,w_i),\qquad T^{(n)} = f+\frac h2f'+\dots+\frac{h^{n-1}}{n!}f^{(n-1)},$$
+with local truncation error $O(h^n)$.
+
+\begin{exa}
+\label{exa:taylor2}
+Apply the Taylor method of order $2$ to the test problem with $h = 0.2$.
+\end{exa}
+
+\begin{solution}
+Here $f' = \frac{d}{dt}(y-t^2+1) = y'-2t = y-t^2+1-2t$, so
+$$w_{i+1} = w_i+h\left[(w_i-t_i^2+1)+\frac h2(w_i-t_i^2+1-2t_i)\right] .$$
+The first step is $w_1 = 0.5+0.2[1.5+0.1(1.5)] = 0.83$, against $y(0.2) = 0.8292986$. At $t = 1$ and $t = 2$ the values are $2.6486459$ and
+$5.3476843$, with errors $7.8\times10^{-3}$ and $4.2\times10^{-2}$: ten times smaller than Euler's.
+\end{solution}
+
+Taylor methods need the derivatives of $f$, which are often complicated. The methods of the next subsection reach the same order using
+only values of $f$.
+
+
+\subsection{Runge--Kutta methods}
+\label{sec:rk}
+
+\textbf{Runge--Kutta methods} evaluate $f$ at several points within each step and combine the values so as to reproduce the Taylor method
+to a given order.
+
+\subhead{Second-order methods}
+Look for a method $w_{i+1} = w_i+h\,a_1f(t_i+\alpha_1,w_i+\beta_1)$ that agrees with $T^{(2)} = f+\frac h2\left(f_t+f_yf\right)$ up to $O(h^2)$. By
+Taylor's Theorem in two variables,
+$$a_1f(t+\alpha_1,y+\beta_1) = a_1f+a_1\alpha_1f_t+a_1\beta_1f_y+O(\alpha_1^2+\beta_1^2) .$$
+Matching coefficients requires $a_1 = 1$, $\alpha_1 = \frac h2$ and $\beta_1 = \frac h2f(t,y)$. This gives the \textbf{midpoint method}
+$$w_{i+1} = w_i+hf\!\left(t_i+\frac h2,\ w_i+\frac h2f(t_i,w_i)\right),$$
+which evaluates the slope at the midpoint of the Euler step. Allowing two terms, $a_1f(t,y)+a_2f(t+\alpha_2,y+\delta_2f(t,y))$, gives a
+one-parameter family of second-order methods; the choice $a_1 = a_2 = \frac12$, $\alpha_2 = \delta_2 = h$ is the \textbf{modified Euler method}
+(also called Heun's method or the improved Euler method):
+$$w_{i+1} = w_i+\frac h2\Bigl[f(t_i,w_i)+f\bigl(t_{i+1},\ w_i+hf(t_i,w_i)\bigr)\Bigr].$$
+It takes an Euler step to predict $w_{i+1}$, evaluates the slope there, and averages it with the slope at the start: the trapezoidal rule
+applied to $\int_{t_i}^{t_{i+1}}y'\,dt$. Both methods have local truncation error $O(h^2)$.
+
+\subhead{The classical fourth-order method}
+The most widely used method is the \textbf{Runge--Kutta method of order four}:
+\begin{align*}
+k_1 &= hf(t_i,w_i),\\
+k_2 &= hf\!\left(t_i+\frac h2,\ w_i+\frac12k_1\right),\\
+k_3 &= hf\!\left(t_i+\frac h2,\ w_i+\frac12k_2\right),\\
+k_4 &= hf(t_{i+1},\ w_i+k_3),\\
+w_{i+1} &= w_i+\frac16(k_1+2k_2+2k_3+k_4).
+\end{align*}
+It has local truncation error $O(h^4)$, provided $y\in C^5$. When $f$ does not depend on $y$, it reduces to Simpson's rule for
+$\int_{t_i}^{t_{i+1}}f(t)\,dt$.
+
+\begin{exa}
+\label{exa:rk4}
+Apply the modified Euler, midpoint and fourth-order Runge--Kutta methods to the test problem with $h = 0.2$.
+\end{exa}
+
+\begin{solution}
+For Runge--Kutta, the first step is
+\begin{align*}
+k_1 &= 0.2(1.5) = 0.3, & k_2 &= 0.2f(0.1,0.65) = 0.328,\\
+k_3 &= 0.2f(0.1,0.664) = 0.3308, & k_4 &= 0.2f(0.2,0.8308) = 0.35816,
+\end{align*}
+so $w_1 = 0.5+\frac16(0.3+0.656+0.6616+0.35816) = 0.8292933$, against $y(0.2) = 0.8292986$. The results:
+\begin{center}
+\begin{tabular}{rlllll}
+\hline
+$t_i$ & exact & Euler & modified Euler & midpoint & RK4\\
+\hline
+$0.4$ & $1.2140877$ & $6.2\times10^{-2}$ & $7.2\times10^{-3}$ & $2.7\times10^{-3}$ & $1.1\times10^{-5}$\\
+$1.0$ & $2.6408591$ & $1.8\times10^{-1}$ & $2.3\times10^{-2}$ & $7.7\times10^{-3}$ & $3.6\times10^{-5}$\\
+$1.6$ & $4.2834838$ & $3.3\times10^{-1}$ & $4.8\times10^{-2}$ & $1.3\times10^{-2}$ & $7.4\times10^{-5}$\\
+$2.0$ & $5.3054720$ & $4.4\times10^{-1}$ & $7.2\times10^{-2}$ & $1.5\times10^{-2}$ & $1.1\times10^{-4}$\\
+\hline
+\end{tabular}
+\end{center}
+(The entries are the errors $|y(t_i)-w_i|$.) RK4 uses four evaluations of $f$ per step, Euler one, so a fair comparison gives Euler a step of
+$0.05$; even then its error at $t = 2$ is $0.127$, a thousand times larger than RK4's. Halving $h$ in RK4 divides its error at $t = 2$ by about
+$16$: $1.1\times10^{-4}$, $7.0\times10^{-6}$, $4.4\times10^{-7}$ for $h = 0.2, 0.1, 0.05$, confirming fourth order.
+\end{solution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\fill[blue!5,rounded corners] (-0.3,-0.4) rectangle (15.5,4.3);
+\draw[blue!45,rounded corners] (-0.3,-0.4) rectangle (15.5,4.3);
+\node[font=\small\bfseries,text=blue!60!black] at (7.6,3.95) {One step of each method from $(t_i,w_i)$: where the slope is sampled};
+% Euler
+\begin{scope}
+\draw[->,gray] (0,0.3) -- (4.4,0.3);
+\draw[thick,blue!70!black] (0.3,0.8) .. controls (1.6,1.1) and (2.8,1.9) .. (4.0,2.9);
+\draw[thick,orange!80!black,->] (0.3,0.8) -- (4.0,1.75);
+\fill (0.3,0.8) circle (1.8pt); \fill[orange!80!black] (4.0,1.75) circle (1.8pt);
+\node[font=\scriptsize] at (2.2,3.4) {\textbf{Euler}: slope at start};
+\node[font=\scriptsize,anchor=north] at (0.3,0.25) {$t_i$}; \node[font=\scriptsize,anchor=north] at (4.0,0.25) {$t_{i+1}$};
+\end{scope}
+% Modified Euler
+\begin{scope}[xshift=5.2cm]
+\draw[->,gray] (0,0.3) -- (4.4,0.3);
+\draw[thick,blue!70!black] (0.3,0.8) .. controls (1.6,1.1) and (2.8,1.9) .. (4.0,2.9);
+\draw[gray,dashed] (0.3,0.8) -- (4.0,1.75);
+\draw[gray,dashed] (4.0,1.75) -- (4.3,2.25);
+\draw[thick,green!50!black,->] (0.3,0.8) -- (4.0,2.62);
+\fill (0.3,0.8) circle (1.8pt); \fill[green!50!black] (4.0,2.62) circle (1.8pt);
+\node[font=\scriptsize,align=center] at (2.2,3.4) {\textbf{Modified Euler}: average of the\\slopes at start and predicted end};
+\node[font=\scriptsize,anchor=north] at (0.3,0.25) {$t_i$}; \node[font=\scriptsize,anchor=north] at (4.0,0.25) {$t_{i+1}$};
+\end{scope}
+% RK4
+\begin{scope}[xshift=10.5cm]
+\draw[->,gray] (0,0.3) -- (4.6,0.3);
+\draw[thick,blue!70!black] (0.3,0.8) .. controls (1.6,1.1) and (2.8,1.9) .. (4.0,2.9);
+\foreach \x/\y/\l in {0.3/0.8/k_1,2.15/1.4/k_2,2.15/1.55/k_3,4.0/2.85/k_4} \fill[red!70!black] (\x,\y) circle (1.6pt);
+\node[font=\tiny,red!70!black,anchor=north west] at (0.3,0.8) {$k_1$};
+\node[font=\tiny,red!70!black,anchor=north west] at (2.15,1.4) {$k_2$};
+\node[font=\tiny,red!70!black,anchor=south east] at (2.15,1.55) {$k_3$};
+\node[font=\tiny,red!70!black,anchor=north west] at (4.0,2.85) {$k_4$};
+\draw[thick,red!70!black,->] (0.3,0.8) -- (4.0,2.88);
+\node[font=\scriptsize,align=center] at (2.3,3.4) {\textbf{RK4}: four slopes,\\weights $\frac16,\frac26,\frac26,\frac16$};
+\node[font=\scriptsize,anchor=north] at (0.3,0.25) {$t_i$}; \node[font=\scriptsize,anchor=north] at (2.15,0.25) {$t_i+\frac h2$}; \node[font=\scriptsize,anchor=north] at (4.0,0.25) {$t_{i+1}$};
+\end{scope}
+\end{tikzpicture}
+\caption{Euler's method follows the slope at the start of the step and falls below a curve that bends upward. Modified Euler averages that
+slope with the slope at the end of the Euler prediction (dashed). RK4 samples the slope four times, at the start, twice at the midpoint and
+at the end, and combines them like Simpson's rule; it lands almost exactly on the solution curve (blue).}
+\label{fig:rk}
+\end{figure}
+
+
+\subsection{Systems and higher-order equations}
+\label{sec:systems}
+
+Every method of this section applies, without change, to a system $\mathbf y' = \mathbf f(t,\mathbf y)$, $\mathbf y(a) = \boldsymbol\alpha$, with the scalars
+$w_i$, $k_j$ replaced by vectors. A higher-order equation is reduced to a system: for
+$$y^{(m)} = f\left(t,y,y',\dots,y^{(m-1)}\right),$$
+put $u_1 = y$, $u_2 = y'$, \dots, $u_m = y^{(m-1)}$. Then $u_1' = u_2$, \dots, $u_{m-1}' = u_m$, $u_m' = f(t,u_1,\dots,u_m)$.
+
+\begin{exa}
+\label{exa:system}
+Use RK4 with $h = 0.1$ for
+\begin{gather*}
+y''-2y'+2y = e^{2t}\sin t,\qquad 0\leq t\leq1,\\
+y(0) = -0.4,\qquad y'(0) = -0.6,
+\end{gather*}
+whose exact solution is $y(t) = 0.2e^{2t}(\sin t-2\cos t)$.
+\end{exa}
+
+\begin{solution}
+With $u_1 = y$, $u_2 = y'$, the system is
+$$u_1' = u_2,\qquad u_2' = e^{2t}\sin t-2u_1+2u_2,\qquad u_1(0) = -0.4,\ u_2(0) = -0.6 .$$
+The first step uses vector stages:
+\begin{align*}
+\mathbf k_1 &= 0.1\bigl(-0.6,\ 0-2(-0.4)+2(-0.6)\bigr) = (-0.06,\ -0.04),\\
+\mathbf k_2 &= (-0.062,\ -0.0324764),\\
+\mathbf k_3 &= (-0.0616238,\ -0.0315241),\\
+\mathbf k_4 &= (-0.0631524,\ -0.0217864),
+\end{align*}
+so $\mathbf w_1 = (-0.4617333,\ -0.6316312)$, against $y(0.1) = -0.4617330$ and $y'(0.1) = -0.6316311$. Continuing to $t = 1$ gives
+$w_{10} = -0.3533989$, against $y(1) = -0.3533944$, an error of $4.5\times10^{-6}$; the derivative is obtained as a by-product.
+\end{solution}
+
+
+\subsection{Stability}
+\label{sec:stability}
+
+A method is useful only if small errors (round-off, or the local truncation errors themselves) are not amplified from step to step. The
+standard check applies the method to the \textbf{test equation}
+$$y' = \lambda y,\qquad y(0) = \alpha,\qquad\lambda<0,$$
+whose exact solution $\alpha e^{\lambda t}$ decays. Euler's method gives $w_{i+1} = (1+h\lambda)w_i$, so $w_i = (1+h\lambda)^i\alpha$, which decays only if
+$|1+h\lambda|<1$, that is
+$$h<\frac{2}{|\lambda|} .$$
+For RK4 one finds $w_{i+1} = Q(h\lambda)w_i$ with $Q(z) = 1+z+\frac{z^2}2+\frac{z^3}6+\frac{z^4}{24}$, and $|Q(z)|<1$ for real $z$ only when
+$-2.785<z<0$. Each explicit method has such a \textbf{region of absolute stability}, and the step size must keep $h\lambda$ inside it.
+
+\begin{exa}
+\label{exa:stiff}
+Apply Euler's method and RK4 with $h = 0.1$ to $y' = -30y$, $y(0) = \frac13$, on $[0,1]$.
+\end{exa}
+
+\begin{solution}
+The exact solution $\frac13e^{-30t}$ is $3.1\times10^{-14}$ at $t = 1$. Here $h\lambda = -3$. For Euler, $1+h\lambda = -2$: the approximations are
+$-0.667, 1.333, -2.667, 5.333,\dots$, and $w_{10} = 341.3$. For RK4, $Q(-3) = 1.375$, and $w_{10} = \frac13(1.375)^{10} = 8.05$. Both methods produce
+growing oscillations from a solution that decays to zero. The cure is a smaller step: Euler is stable for $h<\frac{2}{30} = 0.0667$, RK4
+for $h<0.0928$.
+
+Equations whose solutions contain rapidly decaying components, like this one, are called \textbf{stiff}. They force explicit methods to
+use tiny steps long after the rapid component has died away, and are solved in practice by implicit methods, which have much larger
+stability regions; these are treated in more advanced courses.
+\end{solution}
+
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Use Euler's method with $h = 0.5$ to approximate the solution of $y' = te^{3t}-2y$, $y(0) = 0$, at $t = 1$, and compare with the exact value
+$y(1) = \frac15e^3-\frac1{25}e^3+\frac1{25}e^{-2} = 3.2191$.
+\end{problem}
+\begin{solution}
+$w_1 = 0+0.5(0-0) = 0$, $w_2 = 0+0.5\bigl(0.5e^{1.5}-0\bigr) = 1.1204$. The error, $2.10$, is huge: the solution grows like $e^{3t}$, and $h = 0.5$ is
+far too large for Euler's method to follow it. (With $h = 0.05$ the error falls to $0.23$.)
+\end{solution}
+
+\begin{problem}
+For $y' = y$, $y(0) = 1$, carry out one step with $h = 0.1$ of Euler's method, the modified Euler method and RK4. Show that the results are
+the Taylor polynomials of $e^{0.1}$ of degrees $1$, $2$ and $4$.
+\end{problem}
+\begin{solution}
+Euler: $1+0.1 = 1.1$. Modified Euler: $1+\frac{0.1}2(1+1.1) = 1.105 = 1+h+\frac{h^2}2$. RK4: $k_1 = 0.1$, $k_2 = 0.1(1.05) = 0.105$,
+$k_3 = 0.1(1.0525) = 0.10525$, $k_4 = 0.1(1.10525) = 0.110525$, and $w_1 = 1+\frac16(0.1+0.21+0.2105+0.110525) = 1.1051708\overline3 = 1+h+\frac{h^2}2+\frac{h^3}6+\frac{h^4}{24}$.
+The errors against $e^{0.1} = 1.1051709$ are $5.2\times10^{-3}$, $1.7\times10^{-4}$ and $8.5\times10^{-8}$.
+\end{solution}
+
+\begin{problem}
+Find a Lipschitz constant for $f(t,y) = t^2y+\sin y$ on $D = \{0\leq t\leq1,\ y\in\mathbb R\}$.
+\end{problem}
+\begin{solution}
+$\left|\frac{\partial f}{\partial y}\right| = |t^2+\cos y|\leq1+1 = 2$, so $L = 2$.
+\end{solution}
+
+\begin{problem}
+Write $y'''+2y''-y'+y = \cos t$, $y(0) = 1$, $y'(0) = 0$, $y''(0) = -1$ as a first-order system, and do one Euler step with $h = 0.1$.
+\end{problem}
+\begin{solution}
+With $u_1 = y$, $u_2 = y'$, $u_3 = y''$: $u_1' = u_2$, $u_2' = u_3$, $u_3' = \cos t-2u_3+u_2-u_1$, with $\mathbf u(0) = (1,0,-1)$. Since
+$\mathbf f(0,\mathbf u(0)) = (0,-1,1+2+0-1) = (0,-1,2)$, one Euler step gives $\mathbf u(0.1)\approx(1,-0.1,-0.8)$.
+\end{solution}
+
+\begin{problem}
+What is the largest step size for which Euler's method is stable for $y' = -100y$? For RK4?
+\end{problem}
+\begin{solution}
+Euler needs $h<\frac{2}{100} = 0.02$, and RK4 needs $100h<2.785$, $h<0.0279$. For such equations the step size is set by stability, not by the
+accuracy wanted.
+\end{solution}
+
+
 \clearpage
 \section*{References}
 \addcontentsline{toc}{section}{References}
@@ -3662,6 +5177,7 @@ of Edinburgh}, 46, 289--305.
 Cholesky), \emph{Bulletin G\'eod\'esique}, 2, 67--77.
 \item Dowell, M., and Jarratt, P. (1971), A modified regula falsi method for computing the root of an equation, \emph{BIT
 Numerical Mathematics}, 11, 168--174.
+\item Euler, L. (1768), \emph{Institutionum Calculi Integralis}, Vol.~I, St Petersburg, Imperial Academy of Sciences.
 \item Gauss, C. F. (1809), \emph{Theoria Motus Corporum Coelestium in Sectionibus Conicis Solem Ambientium}, Hamburg, Perthes
 and Besser.
 \item Goldberg, D. (1991), What every computer scientist should know about floating-point arithmetic, \emph{ACM Computing Surveys}, 23,
@@ -3674,15 +5190,28 @@ and Electronics Engineers.
 linearen Gleichungen, \emph{Astronomische Nachrichten}, 22, 297--306.
 \item Kahan, W. (1958), \emph{Gauss--Seidel Methods of Solving Large Systems of Linear Equations}, Ph.D.\ thesis, University of
 Toronto.
+\item Kutta, W. (1901), Beitrag zur n\"aherungsweisen Integration totaler Differentialgleichungen, \emph{Zeitschrift f\"ur Mathematik und
+Physik}, 46, 435--453.
+\item Lagrange, J. L. (1795), Le\c{c}ons \'el\'ementaires sur les math\'ematiques, \emph{Journal de l'\'Ecole Polytechnique}, 2, 173--278.
 \item Muller, D. E. (1956), A method for solving algebraic equations using an automatic computer, \emph{Mathematical Tables and Other
 Aids to Computation}, 10, 208--215.
 \item Newton, I. (1711), \emph{De analysi per aequationes numero terminorum infinitas}, London (written 1669).
 \item Ostrowski, A. M. (1954), On the linear iteration procedures for symmetric matrices, \emph{Rendiconti di Matematica e delle
 sue Applicazioni}, 13, 140--163.
 \item Raphson, J. (1690), \emph{Analysis Aequationum Universalis}, London.
+\item Richardson, L. F. (1911), The approximate arithmetical solution by finite differences of physical problems involving differential
+equations, \emph{Philosophical Transactions of the Royal Society of London, Series A}, 210, 307--357.
+\item Romberg, W. (1955), Vereinfachte numerische Integration, \emph{Det Kongelige Norske Videnskabers Selskab Forhandlinger}, 28,
+30--36.
+\item Runge, C. (1895), \"Uber die numerische Aufl\"osung von Differentialgleichungen, \emph{Mathematische Annalen}, 46, 167--178.
+\item Runge, C. (1901), \"Uber empirische Funktionen und die Interpolation zwischen \"aquidistanten Ordinaten, \emph{Zeitschrift f\"ur
+Mathematik und Physik}, 46, 224--243.
+\item Schoenberg, I. J. (1946), Contributions to the problem of approximation of equidistant data by analytic functions, \emph{Quarterly
+of Applied Mathematics}, 4, 45--99 and 112--141.
 \item Seidel, L. (1874), \"Uber ein Verfahren, die Gleichungen, auf welche die Methode der kleinsten Quadrate f\"uhrt, sowie
 line\"are Gleichungen \"uberhaupt, durch successive Ann\"aherung aufzul\"osen, \emph{Abhandlungen der Bayerischen Akademie der
 Wissenschaften}, 11, 81--108.
+\item Simpson, T. (1743), \emph{Mathematical Dissertations on a Variety of Physical and Analytical Subjects}, London.
 \item Steffensen, J. F. (1933), Remarks on iteration, \emph{Skandinavisk Aktuarietidskrift}, 16, 64--72.
 \item Taylor, B. (1715), \emph{Methodus Incrementorum Directa et Inversa}, London.
 \item Wilkinson, J. H. (1963), \emph{Rounding Errors in Algebraic Processes}, Englewood Cliffs, NJ, Prentice-Hall.
