@@ -1,0 +1,105 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>3.3 Müller’s method — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", tagformat: { number: (n) => `3.` + (n + 0) } }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse2.html">Solutions of Equations in One Variable</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu5.html">The bisection method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu6.html">The method of false position</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu7.html">Fixed-point iteration</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu8.html">Newton’s method and the secant method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu9.html">Multiple roots and accelerating convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse3.html">Zeros of Polynomials and Complex Roots</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu11.html">Complex numbers and the roots of polynomials</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu12.html">Horner’s method and deflation</a></li>
+<li class="sub"><a class="current" href="numerical-methods-and-analysissu13.html">Müller’s method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu14.html">Newton’s method in the complex plane</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu15.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 1962 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu14.html'>next</a>] [<a href='numerical-methods-and-analysissu12.html'>prev</a>] [<a href='numerical-methods-and-analysissu12.html#tailnumerical-methods-and-analysissu12.html'>prev-tail</a>] [<a href='#tailnumerical-methods-and-analysissu13.html'>tail</a>] [<a href='numerical-methods-and-analysisse3.html#numerical-methods-and-analysissu13.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>3.3   </span> <a id='x18-170003.3'></a>Müller’s method</h4>
+<!-- l. 1965 --><p class='noindent'>Newton’s method and the secant method approximate \(f\) by a straight line. <span class='cmbx-10x-x-109'>Müller’s method</span>
+approximates it by the parabola through the last three iterates and takes the root of the parabola that
+is nearer to the last iterate. Because a parabola can have complex roots, the method moves off the
+real axis on its own and can find complex roots of a real polynomial from real starting
+values.
+</p><!-- l. 1969 --><p class='noindent'>Given \(x_0, x_1, x_2\), write the parabola through \((x_k,f(x_k))\), \(k = 0,1,2\), in the form
+                                           \[p(x) = a(x-x_2)^2+b(x-x_2)+c .\]
+ The three conditions give \(c = f(x_2)\) and, with \(h_1 = x_1-x_0\), \(h_2 = x_2-x_1\), \(\delta _1 = \frac {f(x_1)-f(x_0)}{h_1}\), \(\delta _2 = \frac {f(x_2)-f(x_1)}{h_2}\),
+                                           \[a = \frac {\delta _2-\delta _1}{h_2+h_1},\qquad b = \delta _2+h_2a .\]
+ The roots of \(p\) satisfy \(x-x_2 = \frac {-2c}{b\pm \sqrt {b^2-4ac}}\) (the rationalized quadratic formula of Example <a href='numerical-methods-and-analysissu2.html#x5-4011r10'>1.2.10<!-- tex4ht:ref: exa:quadratic  --></a>). Choosing the sign that
+makes the denominator larger in modulus gives the root nearer to \(x_2\) and avoids cancellation: \begin {equation} \label {eq:muller} x_3 = x_2-\frac {2c}{b+\sgn (b)\sqrt {b^2-4ac}},  \end {equation}<a id='x18-17001r1'></a> where, for
+complex \(b\), the sign is chosen so that \(|b\pm \sqrt {b^2-4ac}|\) is the larger of the two. The process is then repeated with
+\(x_1, x_2, x_3\).
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 1981 --><p class='noindent'><span class='head'>
+<a id='x18-17002r1'></a>
+                                                                                      
+                                                                                      
+<span class='cmbx-10x-x-109'>Example 3.3.1.</span>  </span> Apply Müller’s method to \(f(x) = x^4-3x^3+x^2+x+1\) with (a) \(x_0 = 0.5\), \(x_1 = -0.5\), \(x_2 = 0\); (b) \(x_0 = 0.5\), \(x_1 = 1\), \(x_2 = 1.5\); (c) \(x_0 = 2.5\), \(x_1 = 2\), \(x_2 = 2.25\).
+</p>
+</div>
+<!-- l. 1985 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 1987 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> (a) First step by hand: \(f(0.5) = 1.4375\), \(f(-0.5) = 1.1875\), \(f(0) = 1\). So \(h_1 = -1\), \(h_2 = 0.5\), \(\delta _1 = 0.25\), \(\delta _2 = -0.375\), and
+                                           \[a = \frac {-0.375-0.25}{-0.5} = 1.25,\qquad b = -0.375+0.5(1.25) = 0.25,\qquad c = 1 .\]
+ Then  \(b^2-4ac = -4.9375\),  whose  square  root  is  \(2.2220i\):  the  parabola  has  no  real  roots.  Both  choices  of  sign  give
+denominators \(0.25\pm 2.2220i\) of equal modulus; taking \(0.25-2.2220i\),
+                                           \[x_3 = 0-\frac {2}{0.25-2.2220i} = -\frac {2(0.25+2.2220i)}{0.0625+4.9375} = -0.1-0.8888i .\]
+ The method has left the real axis. Continuing: </p>
+<div class='center'>
+<!-- l. 1995 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-13'><colgroup id='TBL-13-1g'><col id='TBL-13-1' /><col id='TBL-13-2' /><col id='TBL-13-3' /></colgroup><tr class='hline'><td></td><td></td><td></td></tr><tr id='TBL-13-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-1-1' style='white-space:nowrap; text-align:right;'> \(n\) </td><td class='td11' id='TBL-13-1-2' style='white-space:nowrap; text-align:left;'> \(x_n\) </td><td class='td11' id='TBL-13-1-3' style='white-space:nowrap; text-align:left;'> \(|f(x_n)|\) </td></tr><tr class='hline'><td></td><td></td><td></td></tr><tr id='TBL-13-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-2-1' style='white-space:nowrap; text-align:right;'>  \(3\) </td><td class='td11' id='TBL-13-2-2' style='white-space:nowrap; text-align:left;'>  \(-0.1000000-0.8888194i\) </td><td class='td11' id='TBL-13-2-3' style='white-space:nowrap; text-align:left;'>  \(3.0\)</td>
+</tr><tr id='TBL-13-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-3-1' style='white-space:nowrap; text-align:right;'>  \(4\) </td><td class='td11' id='TBL-13-3-2' style='white-space:nowrap; text-align:left;'> \(-0.4921457-0.4470307i\) </td><td class='td11' id='TBL-13-3-3' style='white-space:nowrap; text-align:left;'> \(0.76\) </td></tr><tr id='TBL-13-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-4-1' style='white-space:nowrap; text-align:right;'>  \(5\) </td><td class='td11' id='TBL-13-4-2' style='white-space:nowrap; text-align:left;'>  \(-0.3522257-0.4841324i\) </td><td class='td11' id='TBL-13-4-3' style='white-space:nowrap; text-align:left;'>  \(0.18\)</td>
+</tr><tr id='TBL-13-5-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-5-1' style='white-space:nowrap; text-align:right;'>  \(6\) </td><td class='td11' id='TBL-13-5-2' style='white-space:nowrap; text-align:left;'> \(-0.3402286-0.4430356i\) </td><td class='td11' id='TBL-13-5-3' style='white-space:nowrap; text-align:left;'> \(1.6\times 10^{-2}\) </td>
+</tr><tr id='TBL-13-6-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-6-1' style='white-space:nowrap; text-align:right;'>  \(7\) </td><td class='td11' id='TBL-13-6-2' style='white-space:nowrap; text-align:left;'> \(-0.3390947-0.4466565i\) </td><td class='td11' id='TBL-13-6-3' style='white-space:nowrap; text-align:left;'> \(1.1\times 10^{-4}\) </td>
+</tr><tr id='TBL-13-7-' style='vertical-align:baseline;'><td class='td11' id='TBL-13-7-1' style='white-space:nowrap; text-align:right;'>  \(8\) </td><td class='td11' id='TBL-13-7-2' style='white-space:nowrap; text-align:left;'> \(-0.3390928-0.4466301i\) </td><td class='td11' id='TBL-13-7-3' style='white-space:nowrap; text-align:left;'> \(1.9\times 10^{-8}\) </td>
+</tr><tr class='hline'><td></td><td></td><td></td></tr></table>                                                                                      </div></div>
+                                                                                      
+                                                                                      
+<!-- l. 2009 --><p class='noindent'>The limit \(-0.3390928-0.4466301i\) is a root, and so is its conjugate.
+</p><!-- l. 2011 --><p class='noindent'>(b) From these real starting values the parabolas have real roots and the iterates \(1.4063\), \(1.38878\), \(1.3893896\), \(1.3893907\) converge to the
+real root \(1.3893907\).
+</p><!-- l. 2014 --><p class='noindent'>(c) The iterates \(2.2866683\), \(2.2888169\), \(2.2887950\) converge to the real root \(2.2887950\).
+</p><!-- l. 2016 --><p class='noindent'>So the quartic has the four roots \(2.2887950\), \(1.3893907\) and \(-0.3390928\pm 0.4466301i\), all found by one method.
+</p>
+</div>
+<div class='newtheorem nt-note'>
+<!-- l. 2019 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>Müller’s method is not guaranteed to converge from every starting point, but in practice
+it rarely fails, which makes it a standard first method for polynomial roots. Near a simple root
+its order of convergence is about \(1.84\) (the positive root of \(\alpha ^3 = \alpha ^2+\alpha +1\)), between that of the secant method and
+Newton’s method, and it needs only one new function value per step.
+</p>
+</div>
+<!-- l. 2023 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 2026 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu14.html'>next</a>] [<a href='numerical-methods-and-analysissu12.html'>prev</a>] [<a href='numerical-methods-and-analysissu12.html#tailnumerical-methods-and-analysissu12.html'>prev-tail</a>] [<a href='numerical-methods-and-analysissu13.html'>front</a>] [<a href='numerical-methods-and-analysisse3.html#numerical-methods-and-analysissu13.html'>up</a>] </p></div>
+<!-- l. 2026 --><p class='noindent'><a id='tailnumerical-methods-and-analysissu13.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="numerical-methods-and-analysissu12.html">&larr; Previous</a><a class="up" href="numerical-methods-and-analysisse3.html#numerical-methods-and-analysissu13.html">Contents</a><a class="next" href="numerical-methods-and-analysissu14.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/3-3-m-ller-s-method" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

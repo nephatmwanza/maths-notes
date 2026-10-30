@@ -1,0 +1,166 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>3.4 Newton’s method in the complex plane — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse2.html">Solutions of Equations in One Variable</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu5.html">The bisection method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu6.html">The method of false position</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu7.html">Fixed-point iteration</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu8.html">Newton’s method and the secant method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu9.html">Multiple roots and accelerating convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse3.html">Zeros of Polynomials and Complex Roots</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu11.html">Complex numbers and the roots of polynomials</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu12.html">Horner’s method and deflation</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu13.html">Müller’s method</a></li>
+<li class="sub"><a class="current" href="numerical-methods-and-analysissu14.html">Newton’s method in the complex plane</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu15.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 2026 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu15.html'>next</a>] [<a href='numerical-methods-and-analysissu13.html'>prev</a>] [<a href='numerical-methods-and-analysissu13.html#tailnumerical-methods-and-analysissu13.html'>prev-tail</a>] [<a href='#tailnumerical-methods-and-analysissu14.html'>tail</a>] [<a href='numerical-methods-and-analysisse3.html#numerical-methods-and-analysissu14.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>3.4   </span> <a id='x19-180003.4'></a>Newton’s method in the complex plane</h4>
+<!-- l. 2029 --><p class='noindent'>Newton’s formula \(z_{n+1} = z_n-\frac {f(z_n)}{f'(z_n)}\) makes sense for complex \(z\) whenever \(f\) has a complex derivative.
+</p>
+<div class='newtheorem nt-definition'>
+<!-- l. 2031 --><p class='noindent'><span class='head'>
+<a id='x19-18001r1'></a>
+<span class='cmbx-10x-x-109'>Definition 3.4.1.</span>  </span>A function \(f\) of a complex variable is <span class='cmbx-10x-x-109'>differentiable </span>at \(z_0\) if
+                                           \[f'(z_0) = \lim _{h\rightarrow 0}\frac {f(z_0+h)-f(z_0)}{h}\]
+ exists, where \(h\longrightarrow 0\) through complex values. It is <span class='cmbx-10x-x-109'>analytic </span>on an open set if it is differentiable at
+every point of the set. Polynomials, \(e^z\), \(\sin z\) and \(\cos z\) are analytic everywhere, with the familiar derivatives.
+</p>
+</div>
+<!-- l. 2036 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 2038 --><p class='noindent'><span class='head'>
+<a id='x19-18002r2'></a>
+<span class='cmbx-10x-x-109'>Theorem 3.4.2 </span>(Cauchy–Riemann equations)<span class='cmbx-10x-x-109'>.</span>  </span> Write \(z = x+iy\) and \(f(z) = u(x,y)+iv(x,y)\) with \(u, v\) real. If \(f\) is differentiable at
+\(z_0 = x_0+iy_0\), then the partial derivatives of \(u\) and \(v\) exist at \((x_0,y_0)\) and satisfy
+                                                                                      
+                                                                                      
+                                           \[u_x = v_y,\qquad u_y = -v_x,\]
+ and \(f'(z_0) = u_x+iv_x\).
+</p>
+</div>
+<!-- l. 2044 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2047 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>Let \(h\longrightarrow 0\) along the real axis, \(h = t\) real: \begin {align*}  f'(z_0) &amp;= \lim _{t\rightarrow 0}\left (\frac {u(x_0+t,y_0)-u(x_0,y_0)}{t}+i\frac {v(x_0+t,y_0)-v(x_0,y_0)}{t}\right )\\ &amp;= u_x+iv_x .  \end {align*}
+</p><!-- l. 2052 --><p class='noindent'>Now let \(h = it\) along the imaginary axis: \begin {align*}  f'(z_0) &amp;= \lim _{t\rightarrow 0}\left (\frac {u(x_0,y_0+t)-u(x_0,y_0)}{it}+i\frac {v(x_0,y_0+t)-v(x_0,y_0)}{it}\right )\\ &amp;= -iu_y+v_y .  \end {align*}
+</p><!-- l. 2057 --><p class='noindent'>The two limits are equal, so comparing real and imaginary parts, \(u_x = v_y\) and \(v_x = -u_y\).                            □
+</p>
+</div>
+<!-- l. 2060 --><p class='noindent'>For example \(f(z) = z^2 = (x^2-y^2)+i(2xy)\) has \(u_x = 2x = v_y\) and \(u_y = -2y = -v_x\), while \(f(z) = \bar z = x-iy\) has \(u_x = 1\neq -1 = v_y\) and is differentiable nowhere. The Cauchy–Riemann equations
+explain what complex Newton actually does.
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 2063 --><p class='noindent'><span class='head'>
+<a id='x19-18003r3'></a>
+<span class='cmbx-10x-x-109'>Theorem 3.4.3.</span>  </span> Let \(f = u+iv\) be analytic and \(f'(z_n)\neq 0\). Then the complex Newton step \(z_{n+1} = z_n-\frac {f(z_n)}{f'(z_n)}\), written in real
+coordinates \(z_n = x_n+iy_n\), is exactly the Newton step for the real system of two equations
+                                           \[u(x,y) = 0,\qquad v(x,y) = 0 .\]
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 2068 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2071 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>Newton’s method for a system \(F(x,y) = 0\) with \(F = (u,v)\) replaces \(F\) by its linear approximation and solves \(J\Delta = -F\),
+where \(J\) is the Jacobian matrix of partial derivatives. By the Cauchy–Riemann equations,
+                                           \[J = \begin {pmatrix}u_x &amp; u_y\\ v_x &amp; v_y\end {pmatrix} = \begin {pmatrix}u_x &amp; -v_x\\ v_x &amp; u_x\end {pmatrix} .\]
+ Multiplying a complex number \(\Delta x+i\Delta y\) by \(f' = u_x+iv_x\) gives \((u_x\Delta x-v_x\Delta y)+i(v_x\Delta x+u_x\Delta y)\), which is \(J\) applied to \((\Delta x,\Delta y)\). So the system \(J\Delta = -F\) says \(f'(z_n)(\Delta x+i\Delta y) = -f(z_n)\), which
+is the complex Newton step.                                                                                     □
+</p>
+</div>
+<!-- l. 2078 --><p class='noindent'>So complex Newton inherits everything proved for Newton’s method: near a simple root (\(f'(p)\neq 0\)) it converges
+quadratically, with the same proof as Theorem <a href='numerical-methods-and-analysissu8.html#x12-11012r5'>2.4.5<!-- tex4ht:ref: thm:newtonquad  --></a> (the expansion \(f(z) = f(z_n)+f'(z_n)(z-z_n)+O(|z-z_n|^2)\) holds for analytic \(f\)). The theorem
+also explains why the Jacobian of an analytic function is so special: it is a rotation combined with a
+scaling.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 2082 --><p class='noindent'><span class='head'>
+<a id='x19-18004r4'></a>
+<span class='cmbx-10x-x-109'>Example 3.4.4.</span>  </span> (a) Solve \(z^2+1 = 0\) by Newton’s method from \(z_0 = 1+i\). (b) What happens from the real
+starting value \(z_0 = 0.5\)?
+</p>
+</div>
+<!-- l. 2085 --><p class='noindent'>
+</p>
+<div class='proof'>
+                                                                                      
+                                                                                      
+<!-- l. 2087 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> (a) \(z_{n+1} = z_n-\frac {z_n^2+1}{2z_n} = \frac 12\left (z_n-\frac {1}{z_n}\right )\). From \(z_0 = 1+i\), \(\frac {1}{1+i} = \frac {1-i}{2}\) and \(z_1 = \frac 12\left (1+i-\frac {1-i}{2}\right ) = 0.25+0.75i\). Continuing, \begin {gather*}  z_2 = -0.075+0.975i,\qquad z_3 = 0.0017157+0.9973039i,\\ z_4 = -0.0000046+1.0000022i,  \end {gather*} with errors \(|z_n-i|\) of \(3.5\times 10^{-1}\), \(7.9\times 10^{-2}\), \(3.2\times 10^{-3}\), \(5.1\times 10^{-6}\), \(1.3\times 10^{-11}\): quadratic convergence to the root
+\(i\).
+</p><!-- l. 2097 --><p class='noindent'>(b) If \(z_0\) is real, every \(z_n\) is real, since the formula involves only real arithmetic. The iterates \(-0.75, 0.2917, -1.5685, -0.4654, 0.8415,\dots \) wander along
+the real axis and never approach \(\pm i\). To find complex roots of a real polynomial with Newton’s method,
+the starting value must itself be complex.
+</p>
+</div>
+<div class='newtheorem nt-example'>
+<!-- l. 2102 --><p class='noindent'><span class='head'>
+<a id='x19-18005r5'></a>
+<span class='cmbx-10x-x-109'>Example 3.4.5.</span>  </span> Apply Newton’s method to \(z^3-1 = 0\) from \(z_0 = -1+i\), and describe how the root reached depends
+on the starting value.
+</p>
+</div>
+<!-- l. 2105 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2107 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> Here \(z_{n+1} = z_n-\frac {z_n^3-1}{3z_n^2} = \frac {2z_n^3+1}{3z_n^2}\). From \(-1+i\):
+                                           \[-0.6667+0.8333i,\quad -0.5087+0.8411i,\quad -0.4993+0.8663i,\quad -0.49999991+0.86602490i,\]
+ converging quadratically to \(e^{2\pi i/3} = -0.5+0.8660254i\).
+</p><!-- l. 2112 --><p class='noindent'>Figure <a href='#x19-18006r5'>5<!-- tex4ht:ref: fig:basins  --></a> colours each starting point of the square \(|\operatorname {Re}z|,|\operatorname {Im}z|\leq 1.5\) by the root to which Newton’s method
+converges  from  it.  Near  each  root  the  <span class='cmbx-10x-x-109'>basin  of  attraction </span>is  a  large  simple  region,  as
+Theorem <a href='numerical-methods-and-analysissu8.html#x12-11011r4'>2.4.4<!-- tex4ht:ref: thm:newtonconv  --></a> predicts. But the three basins meet along an intricate boundary: every point
+of the boundary of one basin is also a boundary point of the other two, and arbitrarily close
+                                                                                      
+                                                                                      
+to it are starting points that lead to each root. Starting values far from all roots can give
+unpredictable results, which is the complex counterpart of the failures in Example <a href='numerical-methods-and-analysissu8.html#x12-11013r6'>2.4.6<!-- tex4ht:ref: exa:newtonfail  --></a>.
+</p>
+</div>
+<figure class='figure'> 
+
+                                                                                      
+                                                                                      
+<a id='x19-18006r5'></a>
+                                                                                      
+                                                                                      
+<!-- l. 2121 --><p class='noindent'><img alt='B−1R1ba1.5e.5ls.ziuei5:n 1s; oorfangNee:w et2πoin∕3;’ gsr meeent:h eo−d2πi∕f3or z3 = 1   ' src='numerical-methods-and-analysis4x.svg' />
+</p>
+<figcaption class='caption'><span class='id'>Figure 5: </span><span class='content'>Each starting point \(z_0\) is coloured by the cube root of unity (white dots) to which
+Newton’s method converges from it. Close to a root the basin is a simple region; between the
+roots the three colours interleave on every scale.</span></figcaption><!-- tex4ht:label?: x19-18006r5  -->
+                                                                                      
+                                                                                      
+</figure>
+                                                                                      
+                                                                                      
+<!-- l. 2508 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu15.html'>next</a>] [<a href='numerical-methods-and-analysissu13.html'>prev</a>] [<a href='numerical-methods-and-analysissu13.html#tailnumerical-methods-and-analysissu13.html'>prev-tail</a>] [<a href='numerical-methods-and-analysissu14.html'>front</a>] [<a href='numerical-methods-and-analysisse3.html#numerical-methods-and-analysissu14.html'>up</a>] </p></div>
+<!-- l. 2508 --><p class='noindent'><a id='tailnumerical-methods-and-analysissu14.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="numerical-methods-and-analysissu13.html">&larr; Previous</a><a class="up" href="numerical-methods-and-analysisse3.html#numerical-methods-and-analysissu14.html">Contents</a><a class="next" href="numerical-methods-and-analysissu15.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/3-4-newton-s-method-in-the-complex-plane" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

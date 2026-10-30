@@ -1,0 +1,160 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>3.2 Horner’s method and deflation — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse2.html">Solutions of Equations in One Variable</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu5.html">The bisection method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu6.html">The method of false position</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu7.html">Fixed-point iteration</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu8.html">Newton’s method and the secant method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu9.html">Multiple roots and accelerating convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse3.html">Zeros of Polynomials and Complex Roots</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu11.html">Complex numbers and the roots of polynomials</a></li>
+<li class="sub"><a class="current" href="numerical-methods-and-analysissu12.html">Horner’s method and deflation</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu13.html">Müller’s method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu14.html">Newton’s method in the complex plane</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu15.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 1867 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu13.html'>next</a>] [<a href='numerical-methods-and-analysissu11.html'>prev</a>] [<a href='numerical-methods-and-analysissu11.html#tailnumerical-methods-and-analysissu11.html'>prev-tail</a>] [<a href='#tailnumerical-methods-and-analysissu12.html'>tail</a>] [<a href='numerical-methods-and-analysisse3.html#numerical-methods-and-analysissu12.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>3.2   </span> <a id='x17-160003.2'></a>Horner’s method and deflation</h4>
+<!-- l. 1870 --><p class='noindent'>To evaluate \(P(x_0)\) we use the nested form already met in Example <a href='numerical-methods-and-analysissu2.html#x5-4012r11'>1.2.11<!-- tex4ht:ref: exa:horner  --></a>:
+                                           \[P(x_0) = \Bigl (\cdots \bigl ((a_nx_0+a_{n-1})x_0+a_{n-2}\bigr )x_0+\dots +a_1\Bigr )x_0+a_0 ,\]
+ which needs only \(n\) multiplications and \(n\) additions. The intermediate values do more than evaluate
+\(P\).
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 1874 --><p class='noindent'><span class='head'>
+<a id='x17-16001r1'></a>
+<span class='cmbx-10x-x-109'>Theorem 3.2.1 </span>(Horner’s Method)<span class='cmbx-10x-x-109'>.</span>  </span> Let \(P(x) = \sum _{k=0}^na_kx^k\) and define
+                                           \[b_n = a_n,\qquad b_k = a_k+b_{k+1}x_0\quad (k = n-1,n-2,\dots ,0).\]
+ Then \(b_0 = P(x_0)\). Moreover, if \(Q(x) = b_nx^{n-1}+b_{n-1}x^{n-2}+\dots +b_2x+b_1\), then
+                                                                                      
+                                                                                      
+                                           \[P(x) = (x-x_0)Q(x)+b_0 .\]
+ In particular \(P'(x_0) = Q(x_0)\), and if \(P(x_0) = 0\) then \(P(x) = (x-x_0)Q(x)\) (the <span class='cmbx-10x-x-109'>factor theorem</span>).
+</p>
+</div>
+<!-- l. 1881 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 1884 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>Expand the right-hand side: \begin {align*}  (x-x_0)Q(x)+b_0 &amp;= b_nx^n+(b_{n-1}-b_nx_0)x^{n-1}+\dots \\ &amp;\qquad +(b_1-b_2x_0)x+(b_0-b_1x_0) .  \end {align*}
+</p><!-- l. 1889 --><p class='noindent'>By the definition of the \(b_k\), each bracket \(b_k-b_{k+1}x_0\) equals \(a_k\), and \(b_n = a_n\); so the right-hand side is \(P(x)\). Setting \(x = x_0\) gives \(P(x_0) = b_0\).
+Differentiating, \(P'(x) = Q(x)+(x-x_0)Q'(x)\), and so \(P'(x_0) = Q(x_0)\).                                                                                          □
+</p>
+</div>
+<!-- l. 1893 --><p class='noindent'>The \(b_k\) are conveniently arranged as a table, <span class='cmbx-10x-x-109'>synthetic division</span>: write the coefficients in the top row,
+bring down \(a_n\), and at each step multiply by \(x_0\), write the product under the next coefficient, and add.
+Applying the same process to the \(b_k\) (the coefficients of \(Q\)) gives \(Q(x_0) = P'(x_0)\). So one Newton step for a polynomial
+needs only two passes of Horner’s method.
+</p>
+<div class='newtheorem'>
+<!-- l. 1897 --><p class='noindent'><span class='head'>
+<a id='x17-16002r2'></a>
+<span class='cmbx-10x-x-109'>Algorithm 3.2.2 </span>(Horner’s method for \(P(x_0)\) and \(P'(x_0)\))<span class='cmbx-10x-x-109'>.</span>  </span> Input: degree \(n\), coefficients \(a_0,\dots ,a_n\), and \(x_0\). Output: \(y = P(x_0)\) and
+\(z = P'(x_0)\).
+       </p><dl class='enumerate-enumitem'><dt class='enumerate-enumitem'>
+Step 1: </dt><dd class='enumerate-enumitem'>Set \(y = a_n\) and \(z = a_n\).
+       </dd><dt class='enumerate-enumitem'>
+Step 2: </dt><dd class='enumerate-enumitem'>For \(j = n-1, n-2,\dots ,1\): set \(y = x_0y+a_j\) and \(z = x_0z+y\).
+       </dd><dt class='enumerate-enumitem'>
+Step 3: </dt><dd class='enumerate-enumitem'>Set \(y = x_0y+a_0\). Output \(y\) and \(z\).</dd></dl>
+</div>
+<!-- l. 1905 --><p class='noindent'>
+</p>
+                                                                                      
+                                                                                      
+<div class='newtheorem nt-example'>
+<!-- l. 1907 --><p class='noindent'><span class='head'>
+<a id='x17-16006r3'></a>
+<span class='cmbx-10x-x-109'>Example 3.2.3.</span>  </span> Let \(P(x) = 2x^4-3x^2+3x-4\). Use Horner’s method to compute \(P(-2)\) and \(P'(-2)\), and then find a root by Newton’s
+method from \(x_0 = -2\).
+</p>
+</div>
+<!-- l. 1911 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 1913 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The coefficients are \(2, 0, -3, 3, -4\) (note the zero for the missing \(x^3\) term). Synthetic division by \(x_0 = -2\):
+</p>
+<div class='center'>
+<!-- l. 1915 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-11'><colgroup id='TBL-11-1g'><col id='TBL-11-1' /></colgroup><colgroup id='TBL-11-2g'><col id='TBL-11-2' /><col id='TBL-11-3' /><col id='TBL-11-4' /><col id='TBL-11-5' /><col id='TBL-11-6' /></colgroup><tr id='TBL-11-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-11-1-1' style='white-space:nowrap; text-align:right;'>  </td><td class='td11' id='TBL-11-1-2' style='white-space:nowrap; text-align:right;'> \(2\) </td><td class='td11' id='TBL-11-1-3' style='white-space:nowrap; text-align:right;'> \(0\) </td><td class='td11' id='TBL-11-1-4' style='white-space:nowrap; text-align:right;'> \(-3\) </td><td class='td11' id='TBL-11-1-5' style='white-space:nowrap; text-align:right;'> \(3\) </td><td class='td11' id='TBL-11-1-6' style='white-space:nowrap; text-align:right;'> \(-4\) </td></tr><tr id='TBL-11-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-11-2-1' style='white-space:nowrap; text-align:right;'>  \(x_0 = -2\) </td><td class='td11' id='TBL-11-2-2' style='white-space:nowrap; text-align:right;'> </td><td class='td11' id='TBL-11-2-3' style='white-space:nowrap; text-align:right;'>  \(-4\) </td><td class='td11' id='TBL-11-2-4' style='white-space:nowrap; text-align:right;'>  \(8\) </td><td class='td11' id='TBL-11-2-5' style='white-space:nowrap; text-align:right;'>  \(-10\) </td><td class='td11' id='TBL-11-2-6' style='white-space:nowrap; text-align:right;'>  \(14\)</td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-11-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-11-3-1' style='white-space:nowrap; text-align:right;'>   </td><td class='td11' id='TBL-11-3-2' style='white-space:nowrap; text-align:right;'> \(2\) </td><td class='td11' id='TBL-11-3-3' style='white-space:nowrap; text-align:right;'> \(-4\) </td><td class='td11' id='TBL-11-3-4' style='white-space:nowrap; text-align:right;'> \(5\) </td><td class='td11' id='TBL-11-3-5' style='white-space:nowrap; text-align:right;'> \(-7\) </td><td class='td11' id='TBL-11-3-6' style='white-space:nowrap; text-align:right;'> \(10\) </td>
+</tr></table>                                                                                      </div></div>
+<!-- l. 1923 --><p class='noindent'>So \(P(-2) = 10\) and \(Q(x) = 2x^3-4x^2+5x-7\). Dividing \(Q\) by \(x+2\) in the same way: </p>
+<div class='center'>
+<!-- l. 1924 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-12'><colgroup id='TBL-12-1g'><col id='TBL-12-1' /></colgroup><colgroup id='TBL-12-2g'><col id='TBL-12-2' /><col id='TBL-12-3' /><col id='TBL-12-4' /><col id='TBL-12-5' /></colgroup><tr id='TBL-12-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-12-1-1' style='white-space:nowrap; text-align:right;'>  </td><td class='td11' id='TBL-12-1-2' style='white-space:nowrap; text-align:right;'> \(2\) </td><td class='td11' id='TBL-12-1-3' style='white-space:nowrap; text-align:right;'> \(-4\) </td><td class='td11' id='TBL-12-1-4' style='white-space:nowrap; text-align:right;'> \(5\) </td><td class='td11' id='TBL-12-1-5' style='white-space:nowrap; text-align:right;'> \(-7\) </td></tr><tr id='TBL-12-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-12-2-1' style='white-space:nowrap; text-align:right;'>  \(x_0 = -2\) </td><td class='td11' id='TBL-12-2-2' style='white-space:nowrap; text-align:right;'> </td><td class='td11' id='TBL-12-2-3' style='white-space:nowrap; text-align:right;'>  \(-4\) </td><td class='td11' id='TBL-12-2-4' style='white-space:nowrap; text-align:right;'>  \(16\) </td><td class='td11' id='TBL-12-2-5' style='white-space:nowrap; text-align:right;'>  \(-42\)</td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-12-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-12-3-1' style='white-space:nowrap; text-align:right;'>   </td><td class='td11' id='TBL-12-3-2' style='white-space:nowrap; text-align:right;'> \(2\) </td><td class='td11' id='TBL-12-3-3' style='white-space:nowrap; text-align:right;'> \(-8\) </td><td class='td11' id='TBL-12-3-4' style='white-space:nowrap; text-align:right;'> \(21\) </td><td class='td11' id='TBL-12-3-5' style='white-space:nowrap; text-align:right;'> \(-49\) </td>
+</tr></table>                                                                                      </div></div>
+<!-- l. 1932 --><p class='noindent'>So \(P'(-2) = Q(-2) = -49\), and Newton’s method gives \(x_1 = -2-\frac {10}{-49} = -1.795918\). Continuing in the same way,
+                                                                                      
+                                                                                      
+                                           \[x_2 = -1.742432917,\qquad x_3 = -1.738970235,\qquad x_4 = -1.738956257,\qquad x_5 = -1.738956256,\]
+ with \(P(x_4) = 4\times 10^{-4}\) and \(P(x_5) = 7\times 10^{-9}\). Direct differentiation agrees: \(P'(x) = 8x^3-6x+3\) gives \(P'(-2) = -49\).
+</p>
+</div>
+<!-- l. 1937 --><p class='noindent'><span class='cmbx-10x-x-109'>Deflation</span>
+</p><!-- l. 1938 --><p class='noindent'>Once an approximate root \(\hat x_1\) has been found, Horner’s method gives \(P(x)\approx (x-\hat x_1)Q_1(x)\), and the remaining roots of \(P\) are
+approximately the roots of the <span class='cmbx-10x-x-109'>deflated </span>polynomial \(Q_1\), of degree one less. Repeating this finds all the
+roots.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 1941 --><p class='noindent'><span class='head'>
+<a id='x17-16007r4'></a>
+<span class='cmbx-10x-x-109'>Example 3.2.4.</span>  </span> Find all the roots of \(P(x) = 2x^4-3x^2+3x-4\).
+</p>
+</div>
+<!-- l. 1944 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 1946 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> Dividing by \(x-\hat x_1\) with \(\hat x_1 = -1.738956256\) gives the deflated cubic
+                                           \[Q_1(x) = 2x^3-3.477912513x^2+3.047937724x-2.300230374 .\]
+ Newton’s method on \(Q_1\) from \(x_0 = 1\) gives the real root \(\hat x_2 = 1.254881884\), and deflating again leaves a quadratic whose
+roots, by the quadratic formula (in complex arithmetic), are
+                                                                                      
+                                                                                      
+                                           \[\hat x_{3,4} = 0.2420372\pm 0.9262455i .\]
+ So \(P\) has two real roots, \(-1.7389563\) and \(1.2548819\), and a pair of conjugate complex roots, as Theorem <a href='numerical-methods-and-analysissu11.html#x16-15004r4'>3.1.4<!-- tex4ht:ref: thm:conjroots  --></a> allows.
+</p>
+</div>
+<div class='newtheorem nt-note'>
+<!-- l. 1955 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>Each deflation uses an approximate root, so the coefficients of \(Q_k\) carry the errors of all the
+earlier roots, and the later roots can be noticeably less accurate. Two precautions help. First,
+find and deflate the roots of smallest modulus first. Second, use each root found from a deflated
+polynomial only as a starting value, and refine it by a few Newton steps on the original \(P\).
+</p>
+</div>
+<!-- l. 1959 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 1962 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu13.html'>next</a>] [<a href='numerical-methods-and-analysissu11.html'>prev</a>] [<a href='numerical-methods-and-analysissu11.html#tailnumerical-methods-and-analysissu11.html'>prev-tail</a>] [<a href='numerical-methods-and-analysissu12.html'>front</a>] [<a href='numerical-methods-and-analysisse3.html#numerical-methods-and-analysissu12.html'>up</a>] </p></div>
+<!-- l. 1962 --><p class='noindent'><a id='tailnumerical-methods-and-analysissu12.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="numerical-methods-and-analysissu11.html">&larr; Previous</a><a class="up" href="numerical-methods-and-analysisse3.html#numerical-methods-and-analysissu12.html">Contents</a><a class="next" href="numerical-methods-and-analysissu13.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/3-2-horner-s-method-and-deflation" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
