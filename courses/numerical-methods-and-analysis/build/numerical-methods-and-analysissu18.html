@@ -1,0 +1,174 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>4.3 Pivoting strategies — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse2.html">Solutions of Equations in One Variable</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu5.html">The bisection method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu6.html">The method of false position</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu7.html">Fixed-point iteration</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu8.html">Newton’s method and the secant method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu9.html">Multiple roots and accelerating convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse3.html">Zeros of Polynomials and Complex Roots</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu11.html">Complex numbers and the roots of polynomials</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu12.html">Horner’s method and deflation</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu13.html">Müller’s method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu14.html">Newton’s method in the complex plane</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu15.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse4.html">Direct Methods for Solving Linear Systems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu16.html">Linear systems and matrices</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu17.html">Gaussian elimination and backward substitution</a></li>
+<li class="sub"><a class="current" href="numerical-methods-and-analysissu18.html">Pivoting strategies</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 2770 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu17.html'>prev</a>] [<a href='numerical-methods-and-analysissu17.html#tailnumerical-methods-and-analysissu17.html'>prev-tail</a>] [<a href='#tailnumerical-methods-and-analysissu18.html'>tail</a>] [<a href='numerical-methods-and-analysisse4.html#numerical-methods-and-analysissu18.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>4.3   </span> <a id='x24-230004.3'></a>Pivoting strategies</h4>
+<!-- l. 2773 --><p class='noindent'>Algorithm <a href='numerical-methods-and-analysissu17.html#x23-22004r3'>4.2.3<!-- tex4ht:ref: alg:gauss  --></a> interchanges rows only when a pivot is exactly zero. In finite-digit arithmetic a pivot
+that is merely <span class='cmti-10x-x-109'>small </span>is just as dangerous, because it produces large multipliers, and large multipliers
+magnify round-off errors.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 2776 --><p class='noindent'><span class='head'>
+<a id='x24-23001r1'></a>
+<span class='cmbx-10x-x-109'>Example 4.3.1.</span>  </span> The system \begin {align*}  0.003000x_1+59.14x_2 &amp;= 59.17,\\ 5.291x_1-6.130x_2 &amp;= 46.78  \end {align*}
+</p><!-- l. 2783 --><p class='noindent'>has the exact solution \(x_1 = 10.00\), \(x_2 = 1.000\). Solve it by Gaussian elimination in four-digit rounding arithmetic.
+</p>
+</div>
+<!-- l. 2784 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2786 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The pivot \(a_{11} = 0.003000\) is small, and the multiplier is
+                                           \[m_{21} = \frac {5.291}{0.003000} = 1763.\overline {6}\ \to \ 1764 .\]
+ Then, rounding each product and difference to four digits, \begin {align*}  a_{22}&amp;: -6.130-1764(59.14) = -6.130-104300 = -104300,\\ b_2&amp;: 46.78-1764(59.17) = 46.78-104400 = -104400 .  \end {align*}
+</p><!-- l. 2794 --><p class='noindent'>So \(x_2 = \frac {-104400}{-104300} = 1.001\), close to the true value, but
+                                                                                      
+                                                                                      
+                                           \[x_1 = \frac {59.17-59.14(1.001)}{0.003000} = \frac {59.17-59.20}{0.003000} = -10.00 ,\]
+ which has the wrong sign. The small error of \(0.001\) in \(x_2\) was multiplied by \(\frac {59.14}{0.003000}\approx 20000\) in the computation of
+\(x_1\).
+</p>
+</div>
+<!-- l. 2800 --><p class='noindent'>The remedy is to choose as pivot the entry of largest magnitude available.
+</p>
+<div class='newtheorem nt-definition'>
+<!-- l. 2802 --><p class='noindent'><span class='head'>
+<a id='x24-23002r2'></a>
+<span class='cmbx-10x-x-109'>Definition 4.3.2.</span>  </span>In <span class='cmbx-10x-x-109'>partial pivoting </span>(or <span class='cmbx-10x-x-109'>maximal column pivoting</span>), at stage \(i\) we find
+the smallest \(p\geq i\) with
+                                           \[|a_{pi}| = \max _{i\leq k\leq n}|a_{ki}|\]
+ and interchange rows \(i\) and \(p\) before eliminating. Then every multiplier satisfies \(|m_{ji}|\leq 1\).
+</p>
+</div>
+<!-- l. 2806 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 2808 --><p class='noindent'><span class='head'>
+<a id='x24-23003r3'></a>
+<span class='cmbx-10x-x-109'>Example 4.3.3.</span>  </span>Solve  the  system  of  Example <a href='#x24-23001r1'>4.3.1<!-- tex4ht:ref: exa:smallpivot  --></a>  with  partial  pivoting,  in  four-digit
+rounding arithmetic.
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 2810 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2812 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> In column \(1\), \(|5.291|&gt;|0.003000|\), so the equations are interchanged: \begin {align*}  5.291x_1-6.130x_2 &amp;= 46.78,\\ 0.003000x_1+59.14x_2 &amp;= 59.17 .  \end {align*}
+</p><!-- l. 2818 --><p class='noindent'>Now \(m_{21} = \frac {0.003000}{5.291} = 0.0005670\), and \(a_{22} = 59.14+0.0005670(6.130) = 59.14\), \(b_2 = 59.17-0.0005670(46.78) = 59.14\). Hence \(x_2 = 1.000\) and \(x_1 = \frac {46.78+6.130(1.000)}{5.291} = 10.00\), both correct to four digits.
+</p>
+</div>
+<!-- l. 2822 --><p class='noindent'>Partial pivoting compares the sizes of entries in one column, and it can be fooled when the equations
+are on very different scales.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 2824 --><p class='noindent'><span class='head'>
+<a id='x24-23004r4'></a>
+<span class='cmbx-10x-x-109'>Example 4.3.4.</span>  </span> Multiply the first equation of Example <a href='#x24-23001r1'>4.3.1<!-- tex4ht:ref: exa:smallpivot  --></a> by \(10^4\): \begin {align*}  30.00x_1+591400x_2 &amp;= 591700,\\ 5.291x_1-6.130x_2 &amp;= 46.78 .  \end {align*}
+</p><!-- l. 2831 --><p class='noindent'>The solution is unchanged. Solve the system with partial pivoting in four-digit arithmetic.
+</p>
+</div>
+<!-- l. 2832 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2834 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> Now \(|30.00|&gt;|5.291|\), so partial pivoting does not interchange the rows. The multiplier is \(m_{21} = \frac {5.291}{30.00} = 0.1764\), and the
+computation repeats that of Example <a href='#x24-23001r1'>4.3.1<!-- tex4ht:ref: exa:smallpivot  --></a> with every number in the first row scaled by \(10^4\): it
+produces \(x_2 = 1.001\) and \(x_1 = -10.00\) again. The pivot \(30.00\) is not small in absolute terms, but it is small compared with
+the other entry \(591400\) of its own row, and that is what matters.
+</p>
+</div>
+<div class='newtheorem nt-definition'>
+                                                                                      
+                                                                                      
+<!-- l. 2841 --><p class='noindent'><span class='head'>
+<a id='x24-23005r5'></a>
+<span class='cmbx-10x-x-109'>Definition 4.3.5.</span>  </span>In <span class='cmbx-10x-x-109'>scaled partial pivoting</span>, before elimination we compute for each row
+the scale factor
+                                           \[s_i = \max _{1\leq j\leq n}|a_{ij}| .\]
+ At stage \(i\) we choose as pivot row the smallest \(p\geq i\) with
+                                           \[\frac {|a_{pi}|}{s_p} = \max _{i\leq k\leq n}\frac {|a_{ki}|}{s_k},\]
+ and interchange rows \(i\) and \(p\) (together with their scale factors). The scale factors are computed
+only once, at the start.
+</p>
+</div>
+<!-- l. 2847 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 2849 --><p class='noindent'><span class='head'>
+<a id='x24-23006r6'></a>
+<span class='cmbx-10x-x-109'>Example 4.3.6.</span>  </span>Solve the system of Example <a href='#x24-23004r4'>4.3.4<!-- tex4ht:ref: exa:scaledpivot  --></a> with scaled partial pivoting.
+</p>
+</div>
+<!-- l. 2851 --><p class='noindent'>
+</p>
+<div class='proof'>
+                                                                                      
+                                                                                      
+<!-- l. 2853 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The scale factors are
+                                           \[s_1 = \max \{30.00,\ 591400\} = 591400,\qquad s_2 = \max \{5.291,\ 6.130\} = 6.130 ,\]
+ so the scaled candidates for the pivot are
+                                           \[\frac {|a_{11}|}{s_1} = \frac {30.00}{591400} = 0.5073\times 10^{-4},\qquad \frac {|a_{21}|}{s_2} = \frac {5.291}{6.130} = 0.8631,\]
+ so the rows are interchanged. Elimination now uses the multiplier \(m_{21} = \frac {30.00}{5.291} = 5.670\), giving \(a_{22} = 591400+5.670(6.130) = 591400\) and \(b_2 = 591700-5.670(46.78) = 591400\). Hence \(x_2 = 1.000\) and \(x_1 = \frac {46.78+6.130}{5.291} = 10.00\):
+the correct solution.
+</p>
+</div>
+<div class='newtheorem nt-note'>
+<!-- l. 2862 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>Partial pivoting adds about \(\frac {n^2}{2}\) comparisons to the work, which is negligible beside the
+\(\frac {n^3}3\) operations of elimination, and it is used in essentially all practical software. Scaled partial
+pivoting  adds  about  \(\frac {n^2}{2}\)  divisions  as  well.  <span class='cmbx-10x-x-109'>Complete </span>(or  <span class='cmbx-10x-x-109'>total</span>)  pivoting  searches  the  whole
+remaining  submatrix  for  the  largest  entry  and  interchanges  columns  as  well  as  rows;  it  is
+more robust but adds about \(\frac {n^3}{3}\) comparisons, and is used only when the extra safety is essential.
+For matrices of the special kinds met in the next subsection (diagonally dominant or positive
+definite), no pivoting is needed at all.
+</p>
+</div>
+<!-- l. 2868 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 2872 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu17.html'>prev</a>] [<a href='numerical-methods-and-analysissu17.html#tailnumerical-methods-and-analysissu17.html'>prev-tail</a>] [<a href='numerical-methods-and-analysissu18.html'>front</a>] [<a href='numerical-methods-and-analysisse4.html#numerical-methods-and-analysissu18.html'>up</a>] </p></div>
+<!-- l. 2872 --><p class='noindent'><a id='tailnumerical-methods-and-analysissu18.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="numerical-methods-and-analysissu17.html">&larr; Previous</a><a class="up" href="numerical-methods-and-analysisse4.html#numerical-methods-and-analysissu18.html">Contents</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/4-3-pivoting-strategies" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

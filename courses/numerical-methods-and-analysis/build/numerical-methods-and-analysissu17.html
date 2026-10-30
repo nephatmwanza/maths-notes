@@ -1,0 +1,199 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>4.2 Gaussian elimination and backward substitution — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse2.html">Solutions of Equations in One Variable</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu5.html">The bisection method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu6.html">The method of false position</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu7.html">Fixed-point iteration</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu8.html">Newton’s method and the secant method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu9.html">Multiple roots and accelerating convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse3.html">Zeros of Polynomials and Complex Roots</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu11.html">Complex numbers and the roots of polynomials</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu12.html">Horner’s method and deflation</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu13.html">Müller’s method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu14.html">Newton’s method in the complex plane</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu15.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse4.html">Direct Methods for Solving Linear Systems</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu16.html">Linear systems and matrices</a></li>
+<li class="sub"><a class="current" href="numerical-methods-and-analysissu17.html">Gaussian elimination and backward substitution</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu18.html">Pivoting strategies</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 2618 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu18.html'>next</a>] [<a href='numerical-methods-and-analysissu16.html'>prev</a>] [<a href='numerical-methods-and-analysissu16.html#tailnumerical-methods-and-analysissu16.html'>prev-tail</a>] [<a href='#tailnumerical-methods-and-analysissu17.html'>tail</a>] [<a href='numerical-methods-and-analysisse4.html#numerical-methods-and-analysissu17.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>4.2   </span> <a id='x23-220004.2'></a>Gaussian elimination and backward substitution</h4>
+<!-- l. 2621 --><p class='noindent'><span class='cmbx-10x-x-109'>Gaussian elimination </span>uses row operations of type (ii) to create zeros below the diagonal, one
+column at a time. At stage \(i\) the entry \(a_{ii}\), the <span class='cmbx-10x-x-109'>pivot</span>, is used to eliminate \(x_i\) from equations \(i+1,\dots ,n\): equation \(E_j\) is
+replaced by \(E_j-m_{ji}E_i\) with the <span class='cmbx-10x-x-109'>multiplier</span>
+                                           \[m_{ji} = \frac {a_{ji}}{a_{ii}} .\]
+ After \(n-1\) stages the system is <span class='cmbx-10x-x-109'>upper triangular</span>, and it is solved from the bottom up by <span class='cmbx-10x-x-109'>backward
+substitution</span>:
+                                           \[x_n = \frac {a_{n,n+1}}{a_{nn}},\qquad x_i = \frac {1}{a_{ii}}\left (a_{i,n+1}-\sum _{j=i+1}^na_{ij}x_j\right ),\quad i = n-1,\dots ,1,\]
+ where \(a_{i,n+1}\) denotes the (modified) right-hand side.
+</p>
+<figure class='figure'> 
+
+                                                                                      
+                                                                                      
+<a id='x23-22001r6'></a>
+                                                                                      
+                                                                                      
+<!-- l. 2631 --><p class='noindent'><img alt='upper triangular:
+E∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗0∗∗∗∗0∗∗∗∗0∗∗∗∗∗∗∗∗∗0∗∗&amp;limination clears one column at a time; back substitution then  solves upward   ' src='numerical-methods-and-analysis5x.svg' />
+</p>
+<figcaption class='caption'><span class='id'>Figure 6: </span><span class='content'>The stages of Gaussian elimination on a \(4\times 4\) system. At each stage the circled pivot is
+used to put zeros below it; the last column (green) is the right-hand side, which is transformed
+along with \(A\). After \(n-1\) stages the system is triangular.</span></figcaption><!-- tex4ht:label?: x23-22001r6  -->
+                                                                                      
+                                                                                      
+</figure>
+<div class='newtheorem nt-example'>
+<!-- l. 2660 --><p class='noindent'><span class='head'>
+<a id='x23-22002r1'></a>
+<span class='cmbx-10x-x-109'>Example 4.2.1.</span>  </span> Solve by Gaussian elimination and backward substitution: \begin {align*}  x_1+x_2+3x_4 &amp;= 4,\\ 2x_1+x_2-x_3+x_4 &amp;= 1,\\ 3x_1-x_2-x_3+2x_4 &amp;= -3,\\ -x_1+2x_2+3x_3-x_4 &amp;= 4 .  \end {align*}
+</p>
+</div>
+<!-- l. 2669 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2671 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The augmented matrix and the first stage (pivot \(a_{11} = 1\), multipliers \(m_{21} = 2\), \(m_{31} = 3\), \(m_{41} = -1\)):
+                                           \[\left [\begin {array}{rrrr|r}1&amp;1&amp;0&amp;3&amp;4\\2&amp;1&amp;-1&amp;1&amp;1\\3&amp;-1&amp;-1&amp;2&amp;-3\\-1&amp;2&amp;3&amp;-1&amp;4\end {array}\right ]\longrightarrow \left [\begin {array}{rrrr|r}1&amp;1&amp;0&amp;3&amp;4\\0&amp;-1&amp;-1&amp;-5&amp;-7\\0&amp;-4&amp;-1&amp;-7&amp;-15\\0&amp;3&amp;3&amp;2&amp;8\end {array}\right ].\]
+ Second stage, pivot \(a_{22} = -1\), multipliers \(m_{32} = 4\), \(m_{42} = -3\):
+                                           \[\left [\begin {array}{rrrr|r}1&amp;1&amp;0&amp;3&amp;4\\0&amp;-1&amp;-1&amp;-5&amp;-7\\0&amp;0&amp;3&amp;13&amp;13\\0&amp;0&amp;0&amp;-13&amp;-13\end {array}\right ].\]
+ The third stage has nothing to do (\(m_{43} = 0\)). Backward substitution gives \begin {align*}  x_4 &amp;= \frac {-13}{-13} = 1, &amp; x_3 &amp;= \frac {13-13x_4}{3} = 0,\\ x_2 &amp;= \frac {-7+x_3+5x_4}{-1} = 2, &amp; x_1 &amp;= 4-x_2-3x_4 = -1 .  \end {align*}
+</p><!-- l. 2682 --><p class='noindent'>The solution is \((x_1,x_2,x_3,x_4) = (-1,2,0,1)\), which can be checked by substitution.
+</p>
+</div>
+                                                                                      
+                                                                                      
+<!-- l. 2685 --><p class='noindent'>If a pivot is zero, elimination cannot continue as it stands; but if \(A\) is nonsingular, some entry below
+the zero pivot in its column is non-zero, and interchanging the two rows lets elimination
+proceed.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 2688 --><p class='noindent'><span class='head'>
+<a id='x23-22003r2'></a>
+<span class='cmbx-10x-x-109'>Example 4.2.2.</span>  </span> Solve \begin {align*}  x_1-x_2+2x_3-x_4 &amp;= -8,\\ 2x_1-2x_2+3x_3-3x_4 &amp;= -20,\\ x_1+x_2+x_3 &amp;= -2,\\ x_1-x_2+4x_3+3x_4 &amp;= 4 .  \end {align*}
+</p>
+</div>
+<!-- l. 2697 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2699 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The first stage, with \(m_{21} = 2\), \(m_{31} = m_{41} = 1\), gives
+                                           \[\left [\begin {array}{rrrr|r}1&amp;-1&amp;2&amp;-1&amp;-8\\0&amp;0&amp;-1&amp;-1&amp;-4\\0&amp;2&amp;-1&amp;1&amp;6\\0&amp;0&amp;2&amp;4&amp;12\end {array}\right ].\]
+ The pivot \(a_{22}\) is now \(0\), so we interchange \(E_2\) and \(E_3\) (the first row below with a non-zero entry in column
+2):
+                                           \[\left [\begin {array}{rrrr|r}1&amp;-1&amp;2&amp;-1&amp;-8\\0&amp;2&amp;-1&amp;1&amp;6\\0&amp;0&amp;-1&amp;-1&amp;-4\\0&amp;0&amp;2&amp;4&amp;12\end {array}\right ].\]
+ No elimination is needed in column 2. In column 3, \(m_{43} = -2\) gives the last row \((0,0,0,2\mid 4)\). Backward substitution:
+\(x_4 = 2\), \(x_3 = \frac {-4+x_4}{-1} = 2\), \(x_2 = \frac {6+x_3-x_4}{2} = 3\), \(x_1 = -8+x_2-2x_3+x_4 = -7\).
+                                                                                      
+                                                                                      
+</p>
+</div>
+<div class='newtheorem'>
+<!-- l. 2708 --><p class='noindent'><span class='head'>
+<a id='x23-22004r3'></a>
+<span class='cmbx-10x-x-109'>Algorithm 4.2.3 </span>(Gaussian elimination with backward substitution)<span class='cmbx-10x-x-109'>.</span>  </span> Input: the \(n\times (n+1)\) augmented matrix
+\(A = (a_{ij})\). Output: the solution \(x_1,\dots ,x_n\), or a message that the system has no unique solution.
+       </p><dl class='enumerate-enumitem'><dt class='enumerate-enumitem'>
+Step 1: </dt><dd class='enumerate-enumitem'>For \(i = 1,\dots ,n-1\) do Steps 2–4.
+       </dd><dt class='enumerate-enumitem'>
+Step 2: </dt><dd class='enumerate-enumitem'>Let \(p\) be the smallest integer with \(i\leq p\leq n\) and \(a_{pi}\neq 0\). If there is none, output “no unique solution”
+       and stop.
+       </dd><dt class='enumerate-enumitem'>
+Step 3: </dt><dd class='enumerate-enumitem'>If \(p\neq i\), interchange rows \(p\) and \(i\).
+       </dd><dt class='enumerate-enumitem'>
+Step 4: </dt><dd class='enumerate-enumitem'>For \(j = i+1,\dots ,n\): set \(m_{ji} = a_{ji}/a_{ii}\) and replace row \(j\) by row \(j-m_{ji}\cdot \)row \(i\).
+       </dd><dt class='enumerate-enumitem'>
+Step 5: </dt><dd class='enumerate-enumitem'>If \(a_{nn} = 0\), output “no unique solution” and stop.
+       </dd><dt class='enumerate-enumitem'>
+Step 6: </dt><dd class='enumerate-enumitem'>Set \(x_n = a_{n,n+1}/a_{nn}\).
+       </dd><dt class='enumerate-enumitem'>
+Step 7: </dt><dd class='enumerate-enumitem'>For \(i = n-1,\dots ,1\): set \(x_i = \left (a_{i,n+1}-\sum _{j=i+1}^na_{ij}x_j\right )\big /a_{ii}\).
+       </dd><dt class='enumerate-enumitem'>
+Step 8: </dt><dd class='enumerate-enumitem'>Output \(x_1,\dots ,x_n\).</dd></dl>
+</div>
+<!-- l. 2722 --><p class='noindent'>
+</p><!-- l. 2724 --><p class='noindent'><span class='cmbx-10x-x-109'>Operation count</span>
+</p><!-- l. 2725 --><p class='noindent'>The cost of an algorithm is measured by the number of arithmetic operations it performs.
+Multiplications and divisions take longer than additions and subtractions on many machines, so they
+are counted separately.
+</p>
+<div class='newtheorem nt-theorem'>
+<!-- l. 2728 --><p class='noindent'><span class='head'>
+<a id='x23-22013r4'></a>
+                                                                                      
+                                                                                      
+<span class='cmbx-10x-x-109'>Theorem 4.2.4.</span>  </span> Gaussian elimination with backward substitution on an \(n\times n\) system requires
+                                           \[\frac {n^3}{3}+n^2-\frac {n}{3}\ \text { multiplications/divisions}\qquad \text {and}\qquad \frac {n^3}{3}+\frac {n^2}{2}-\frac {5n}{6}\ \text { additions/subtractions.}\]
+</p>
+</div>
+<!-- l. 2732 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2735 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span><span class='cmti-10x-x-109'>Elimination. </span>At stage \(i\) there are \(n-i\) rows to modify. For each, computing \(m_{ji}\) takes \(1\) division,
+and replacing the row takes \(n-i+1\) multiplications and \(n-i+1\) subtractions (columns \(i+1\) to \(n+1\); column \(i\) is simply
+set to zero). So stage \(i\) costs \((n-i)(n-i+2)\) multiplications/divisions and \((n-i)(n-i+1)\) subtractions. With \(k = n-i\) running from \(1\)
+to \(n-1\), and using \(\sum _{k=1}^{m}k = \frac {m(m+1)}2\) and \(\sum _{k=1}^mk^2 = \frac {m(m+1)(2m+1)}{6}\) with \(m = n-1\),
+                                           \[\sum _{k=1}^{n-1}k(k+2) = \frac {2n^3+3n^2-5n}{6},\qquad \sum _{k=1}^{n-1}k(k+1) = \frac {n^3-n}{3} .\]
+ <span class='cmti-10x-x-109'>Backward substitution. </span>Computing \(x_i\) takes \(n-i\) multiplications, \(n-i-1\) additions, \(1\) subtraction and \(1\) division.
+Summing over \(i\) gives \(\frac {n^2+n}{2}\) multiplications/divisions and \(\frac {n^2-n}{2}\) additions/subtractions.
+</p><!-- l. 2743 --><p class='noindent'>Adding the two parts gives the totals stated.                                                                □
+</p>
+</div>
+<div class='newtheorem nt-example'>
+<!-- l. 2746 --><p class='noindent'><span class='head'>
+<a id='x23-22014r5'></a>
+                                                                                      
+                                                                                      
+<span class='cmbx-10x-x-109'>Example 4.2.5.</span>  </span>How does the work grow with \(n\)?
+</p>
+</div>
+<!-- l. 2748 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 2750 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> </p>
+<div class='center'>
+<!-- l. 2751 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-14'><colgroup id='TBL-14-1g'><col id='TBL-14-1' /><col id='TBL-14-2' /><col id='TBL-14-3' /></colgroup><tr class='hline'><td></td><td></td><td></td></tr><tr id='TBL-14-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-14-1-1' style='white-space:nowrap; text-align:right;'> \(n\) </td><td class='td11' id='TBL-14-1-2' style='white-space:nowrap; text-align:right;'> multiplications/divisions  </td><td class='td11' id='TBL-14-1-3' style='white-space:nowrap; text-align:right;'> additions/subtractions  </td>
+</tr><tr class='hline'><td></td><td></td><td></td></tr><tr id='TBL-14-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-14-2-1' style='white-space:nowrap; text-align:right;'>  \(3\) </td><td class='td11' id='TBL-14-2-2' style='white-space:nowrap; text-align:right;'>                     \(17\) </td><td class='td11' id='TBL-14-2-3' style='white-space:nowrap; text-align:right;'>                    \(11\) </td></tr><tr id='TBL-14-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-14-3-1' style='white-space:nowrap; text-align:right;'>  \(10\) </td><td class='td11' id='TBL-14-3-2' style='white-space:nowrap; text-align:right;'>  \(430\) </td><td class='td11' id='TBL-14-3-3' style='white-space:nowrap; text-align:right;'>  \(375\)</td>
+</tr><tr id='TBL-14-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-14-4-1' style='white-space:nowrap; text-align:right;'>  \(50\) </td><td class='td11' id='TBL-14-4-2' style='white-space:nowrap; text-align:right;'>                     \(44{,}150\) </td><td class='td11' id='TBL-14-4-3' style='white-space:nowrap; text-align:right;'>                    \(42{,}875\) </td>
+</tr><tr id='TBL-14-5-' style='vertical-align:baseline;'><td class='td11' id='TBL-14-5-1' style='white-space:nowrap; text-align:right;'>  \(100\) </td><td class='td11' id='TBL-14-5-2' style='white-space:nowrap; text-align:right;'>                     \(343{,}300\) </td><td class='td11' id='TBL-14-5-3' style='white-space:nowrap; text-align:right;'>                    \(338{,}250\) </td>
+</tr><tr id='TBL-14-6-' style='vertical-align:baseline;'><td class='td11' id='TBL-14-6-1' style='white-space:nowrap; text-align:right;'>  \(1000\) </td><td class='td11' id='TBL-14-6-2' style='white-space:nowrap; text-align:right;'>                     \(334{,}333{,}000\) </td><td class='td11' id='TBL-14-6-3' style='white-space:nowrap; text-align:right;'>                    \(333{,}832{,}500\) </td>
+</tr><tr class='hline'><td></td><td></td><td></td></tr></table>                                                                                      </div></div>
+<!-- l. 2764 --><p class='noindent'>For large \(n\) both counts are about \(\frac {n^3}{3}\): doubling \(n\) multiplies the work by \(8\). The elimination dominates;
+backward substitution costs only \(O(n^2)\). Solving by Cramer’s rule, by contrast, needs \(n+1\) determinants, and
+computing each by cofactor expansion takes about \(n!\) operations, which is hopeless already for
+\(n = 20\).
+</p>
+</div>
+                                                                                      
+                                                                                      
+<!-- l. 2770 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu18.html'>next</a>] [<a href='numerical-methods-and-analysissu16.html'>prev</a>] [<a href='numerical-methods-and-analysissu16.html#tailnumerical-methods-and-analysissu16.html'>prev-tail</a>] [<a href='numerical-methods-and-analysissu17.html'>front</a>] [<a href='numerical-methods-and-analysisse4.html#numerical-methods-and-analysissu17.html'>up</a>] </p></div>
+<!-- l. 2770 --><p class='noindent'><a id='tailnumerical-methods-and-analysissu17.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="numerical-methods-and-analysissu16.html">&larr; Previous</a><a class="up" href="numerical-methods-and-analysisse4.html#numerical-methods-and-analysissu17.html">Contents</a><a class="next" href="numerical-methods-and-analysissu18.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/4-2-gaussian-elimination-and-backward-substitution" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

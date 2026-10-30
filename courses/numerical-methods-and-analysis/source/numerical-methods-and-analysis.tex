@@ -2569,6 +2569,305 @@ for large $|x|$.)
 \end{solution}
 
 
+\section{Direct Methods for Solving Linear Systems}
+\label{sec:linsys}
+
+Linear systems are the commonest problem of scientific computation; most of the later methods of this course (interpolation, splines,
+least squares, implicit methods for differential equations) end by solving one. This section treats \textbf{direct methods}, which give the
+exact solution in a finite number of steps if the arithmetic is exact. Their accuracy in finite-digit arithmetic depends on how they are
+organized, and the main practical lesson is the need for \emph{pivoting}.
+
+
+\subsection{Linear systems and matrices}
+\label{sec:matrices}
+
+A system of $n$ linear equations in $n$ unknowns,
+\begin{align*}
+a_{11}x_1+a_{12}x_2+\dots+a_{1n}x_n &= b_1,\\
+&\ \,\vdots\\
+a_{n1}x_1+a_{n2}x_2+\dots+a_{nn}x_n &= b_n,
+\end{align*}
+is written $A\mathbf x = \mathbf b$, where $A = (a_{ij})$ is the $n\times n$ \textbf{coefficient matrix} and $\mathbf x$, $\mathbf b$ are column
+vectors. For hand computation it is convenient to work with the \textbf{augmented matrix} $[A,\mathbf b]$, which carries the right-hand side
+as an extra column.
+
+Three \textbf{elementary row operations} change a system into an equivalent one, with the same solutions:
+\begin{enumerate}
+\item[(i)] multiply equation $E_i$ by a non-zero constant: $(\lambda E_i)\to(E_i)$;
+\item[(ii)] add a multiple of equation $E_j$ to $E_i$: $(E_i+\lambda E_j)\to(E_i)$;
+\item[(iii)] interchange two equations: $(E_i)\leftrightarrow(E_j)$.
+\end{enumerate}
+Each operation can be undone by an operation of the same kind, which is why the solution set does not change.
+
+\begin{thm}
+\label{thm:invertible}
+For an $n\times n$ matrix $A$ the following are equivalent:
+\begin{enumerate}
+\item[(a)] $A\mathbf x = \mathbf 0$ has only the solution $\mathbf x = \mathbf 0$;
+\item[(b)] $A\mathbf x = \mathbf b$ has a unique solution for every $\mathbf b$;
+\item[(c)] $A$ is nonsingular, that is, $A^{-1}$ exists;
+\item[(d)] $\det A\neq0$;
+\item[(e)] Gaussian elimination with row interchanges can be carried out on $A\mathbf x = \mathbf b$ for every $\mathbf b$.
+\end{enumerate}
+\end{thm}
+
+This is the basic theorem of linear algebra, and it is proved in linear algebra courses. In this section we take it as known and
+concentrate on (e): how elimination is carried out, what it costs, and how to keep its errors small.
+
+
+\subsection{Gaussian elimination and backward substitution}
+\label{sec:gauss}
+
+\textbf{Gaussian elimination} uses row operations of type (ii) to create zeros below the diagonal, one column at a time. At stage $i$ the
+entry $a_{ii}$, the \textbf{pivot}, is used to eliminate $x_i$ from equations $i+1,\dots,n$: equation $E_j$ is replaced by $E_j-m_{ji}E_i$
+with the \textbf{multiplier}
+$$m_{ji} = \frac{a_{ji}}{a_{ii}} .$$
+After $n-1$ stages the system is \textbf{upper triangular}, and it is solved from the bottom up by \textbf{backward substitution}:
+$$x_n = \frac{a_{n,n+1}}{a_{nn}},\qquad x_i = \frac{1}{a_{ii}}\left(a_{i,n+1}-\sum_{j=i+1}^na_{ij}x_j\right),\quad i = n-1,\dots,1,$$
+where $a_{i,n+1}$ denotes the (modified) right-hand side.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.95]
+\fill[blue!5,rounded corners] (-0.3,-1.15) rectangle (15.6,3.05);
+\draw[blue!45,rounded corners] (-0.3,-1.15) rectangle (15.6,3.05);
+\node[font=\small\bfseries,text=blue!60!black] at (7.65,2.7) {Elimination clears one column at a time; back substitution then solves upward};
+\foreach \k in {0,1,2,3}{
+  \begin{scope}[xshift=\k*3.55cm]
+  \foreach \i in {1,...,4}{\foreach \j in {1,...,5}{
+     \pgfmathtruncatemacro{\z}{(\j<\i) && (\j<=\k) ? 1 : 0}
+     \pgfmathtruncatemacro{\p}{(\j==\i) && (\i==\k+1) && (\k<3) ? 1 : 0}
+     \ifnum\z=1 \node[font=\scriptsize,gray] at (\j*0.5,2.2-\i*0.5) {$0$};
+     \else\ifnum\p=1 \node[draw=red!70!black,fill=red!15,circle,inner sep=1pt,font=\scriptsize] at (\j*0.5,2.2-\i*0.5) {$\ast$};
+     \else\ifnum\j=5 \node[font=\scriptsize,green!40!black] at (\j*0.5,2.2-\i*0.5) {$\ast$};
+     \else \node[font=\scriptsize,blue!70!black] at (\j*0.5,2.2-\i*0.5) {$\ast$};\fi\fi\fi
+  }}
+  \draw[gray] (2.25,2.0) -- (2.25,-0.1);
+  \draw[gray] (0.25,2.0) -- (0.25,-0.1) (2.75,2.0) -- (2.75,-0.1);
+  \end{scope}
+}
+\foreach \k in {0,1,2} \draw[->,thick,orange!80!black] (\k*3.55+2.95,0.95) -- (\k*3.55+3.65,0.95);
+\node[font=\scriptsize,align=center] at (1.5,-0.55) {$[A,\mathbf b]$; pivot $a_{11}$};
+\node[font=\scriptsize,align=center] at (5.05,-0.55) {column 1 cleared};
+\node[font=\scriptsize,align=center] at (8.6,-0.55) {column 2 cleared};
+\node[font=\scriptsize,align=center] at (12.15,-0.55) {upper triangular:\\back-substitute};
+\end{tikzpicture}
+\caption{The stages of Gaussian elimination on a $4\times4$ system. At each stage the circled pivot is used to put zeros below it; the
+last column (green) is the right-hand side, which is transformed along with $A$. After $n-1$ stages the system is triangular.}
+\label{fig:elimination}
+\end{figure}
+
+\begin{exa}
+\label{exa:gauss4}
+Solve by Gaussian elimination and backward substitution:
+\begin{align*}
+x_1+x_2+3x_4 &= 4,\\
+2x_1+x_2-x_3+x_4 &= 1,\\
+3x_1-x_2-x_3+2x_4 &= -3,\\
+-x_1+2x_2+3x_3-x_4 &= 4 .
+\end{align*}
+\end{exa}
+
+\begin{solution}
+The augmented matrix and the first stage (pivot $a_{11} = 1$, multipliers $m_{21} = 2$, $m_{31} = 3$, $m_{41} = -1$):
+$$\left[\begin{array}{rrrr|r}1&1&0&3&4\\2&1&-1&1&1\\3&-1&-1&2&-3\\-1&2&3&-1&4\end{array}\right]\longrightarrow
+\left[\begin{array}{rrrr|r}1&1&0&3&4\\0&-1&-1&-5&-7\\0&-4&-1&-7&-15\\0&3&3&2&8\end{array}\right].$$
+Second stage, pivot $a_{22} = -1$, multipliers $m_{32} = 4$, $m_{42} = -3$:
+$$\left[\begin{array}{rrrr|r}1&1&0&3&4\\0&-1&-1&-5&-7\\0&0&3&13&13\\0&0&0&-13&-13\end{array}\right].$$
+The third stage has nothing to do ($m_{43} = 0$). Backward substitution gives
+\begin{align*}
+x_4 &= \frac{-13}{-13} = 1, & x_3 &= \frac{13-13x_4}{3} = 0,\\
+x_2 &= \frac{-7+x_3+5x_4}{-1} = 2, & x_1 &= 4-x_2-3x_4 = -1 .
+\end{align*}
+The solution is $(x_1,x_2,x_3,x_4) = (-1,2,0,1)$, which can be checked by substitution.
+\end{solution}
+
+If a pivot is zero, elimination cannot continue as it stands; but if $A$ is nonsingular, some entry below the zero pivot in its column is
+non-zero, and interchanging the two rows lets elimination proceed.
+
+\begin{exa}
+\label{exa:gaussswap}
+Solve
+\begin{align*}
+x_1-x_2+2x_3-x_4 &= -8,\\
+2x_1-2x_2+3x_3-3x_4 &= -20,\\
+x_1+x_2+x_3 &= -2,\\
+x_1-x_2+4x_3+3x_4 &= 4 .
+\end{align*}
+\end{exa}
+
+\begin{solution}
+The first stage, with $m_{21} = 2$, $m_{31} = m_{41} = 1$, gives
+$$\left[\begin{array}{rrrr|r}1&-1&2&-1&-8\\0&0&-1&-1&-4\\0&2&-1&1&6\\0&0&2&4&12\end{array}\right].$$
+The pivot $a_{22}$ is now $0$, so we interchange $E_2$ and $E_3$ (the first row below with a non-zero entry in column 2):
+$$\left[\begin{array}{rrrr|r}1&-1&2&-1&-8\\0&2&-1&1&6\\0&0&-1&-1&-4\\0&0&2&4&12\end{array}\right].$$
+No elimination is needed in column 2. In column 3, $m_{43} = -2$ gives the last row $(0,0,0,2\mid4)$. Backward substitution:
+$x_4 = 2$, $x_3 = \frac{-4+x_4}{-1} = 2$, $x_2 = \frac{6+x_3-x_4}{2} = 3$, $x_1 = -8+x_2-2x_3+x_4 = -7$.
+\end{solution}
+
+\begin{alg}[Gaussian elimination with backward substitution]
+\label{alg:gauss}
+Input: the $n\times(n+1)$ augmented matrix $A = (a_{ij})$. Output: the solution $x_1,\dots,x_n$, or a message that the system has no
+unique solution.
+\begin{enumerate}[label=Step \arabic*:,leftmargin=*]
+\item For $i = 1,\dots,n-1$ do Steps 2--4.
+\item Let $p$ be the smallest integer with $i\leq p\leq n$ and $a_{pi}\neq0$. If there is none, output ``no unique solution'' and stop.
+\item If $p\neq i$, interchange rows $p$ and $i$.
+\item For $j = i+1,\dots,n$: set $m_{ji} = a_{ji}/a_{ii}$ and replace row $j$ by row $j-m_{ji}\cdot$row $i$.
+\item If $a_{nn} = 0$, output ``no unique solution'' and stop.
+\item Set $x_n = a_{n,n+1}/a_{nn}$.
+\item For $i = n-1,\dots,1$: set $x_i = \left(a_{i,n+1}-\sum_{j=i+1}^na_{ij}x_j\right)\big/a_{ii}$.
+\item Output $x_1,\dots,x_n$.
+\end{enumerate}
+\end{alg}
+
+\subhead{Operation count}
+The cost of an algorithm is measured by the number of arithmetic operations it performs. Multiplications and divisions take longer than
+additions and subtractions on many machines, so they are counted separately.
+
+\begin{thm}
+\label{thm:opcount}
+Gaussian elimination with backward substitution on an $n\times n$ system requires
+$$\frac{n^3}{3}+n^2-\frac{n}{3}\ \text{ multiplications/divisions}\qquad\text{and}\qquad \frac{n^3}{3}+\frac{n^2}{2}-\frac{5n}{6}\ \text{ additions/subtractions.}$$
+\end{thm}
+
+\begin{proof}
+\emph{Elimination.} At stage $i$ there are $n-i$ rows to modify. For each, computing $m_{ji}$ takes $1$ division, and replacing the row
+takes $n-i+1$ multiplications and $n-i+1$ subtractions (columns $i+1$ to $n+1$; column $i$ is simply set to zero). So stage $i$ costs
+$(n-i)(n-i+2)$ multiplications/divisions and $(n-i)(n-i+1)$ subtractions. With $k = n-i$ running from $1$ to $n-1$, and using
+$\sum_{k=1}^{m}k = \frac{m(m+1)}2$ and $\sum_{k=1}^mk^2 = \frac{m(m+1)(2m+1)}{6}$ with $m = n-1$,
+$$\sum_{k=1}^{n-1}k(k+2) = \frac{2n^3+3n^2-5n}{6},\qquad \sum_{k=1}^{n-1}k(k+1) = \frac{n^3-n}{3} .$$
+\emph{Backward substitution.} Computing $x_i$ takes $n-i$ multiplications, $n-i-1$ additions, $1$ subtraction and $1$ division. Summing over
+$i$ gives $\frac{n^2+n}{2}$ multiplications/divisions and $\frac{n^2-n}{2}$ additions/subtractions.
+
+Adding the two parts gives the totals stated.
+\end{proof}
+
+\begin{exa}
+How does the work grow with $n$?
+\end{exa}
+
+\begin{solution}
+\begin{center}
+\begin{tabular}{rrr}
+\hline
+$n$ & multiplications/divisions & additions/subtractions\\
+\hline
+$3$ & $17$ & $11$\\
+$10$ & $430$ & $375$\\
+$50$ & $44{,}150$ & $42{,}875$\\
+$100$ & $343{,}300$ & $338{,}250$\\
+$1000$ & $334{,}333{,}000$ & $333{,}832{,}500$\\
+\hline
+\end{tabular}
+\end{center}
+For large $n$ both counts are about $\frac{n^3}{3}$: doubling $n$ multiplies the work by $8$. The elimination dominates; backward
+substitution costs only $O(n^2)$. Solving by Cramer's rule, by contrast, needs $n+1$ determinants, and computing each by cofactor
+expansion takes about $n!$ operations, which is hopeless already for $n = 20$.
+\end{solution}
+
+
+\subsection{Pivoting strategies}
+\label{sec:pivoting}
+
+Algorithm~\ref{alg:gauss} interchanges rows only when a pivot is exactly zero. In finite-digit arithmetic a pivot that is merely
+\emph{small} is just as dangerous, because it produces large multipliers, and large multipliers magnify round-off errors.
+
+\begin{exa}
+\label{exa:smallpivot}
+The system
+\begin{align*}
+0.003000x_1+59.14x_2 &= 59.17,\\
+5.291x_1-6.130x_2 &= 46.78
+\end{align*}
+has the exact solution $x_1 = 10.00$, $x_2 = 1.000$. Solve it by Gaussian elimination in four-digit rounding arithmetic.
+\end{exa}
+
+\begin{solution}
+The pivot $a_{11} = 0.003000$ is small, and the multiplier is
+$$m_{21} = \frac{5.291}{0.003000} = 1763.\overline{6}\ \to\ 1764 .$$
+Then, rounding each product and difference to four digits,
+\begin{align*}
+a_{22}&: -6.130-1764(59.14) = -6.130-104300 = -104300,\\
+b_2&: 46.78-1764(59.17) = 46.78-104400 = -104400 .
+\end{align*}
+So $x_2 = \frac{-104400}{-104300} = 1.001$, close to the true value, but
+$$x_1 = \frac{59.17-59.14(1.001)}{0.003000} = \frac{59.17-59.20}{0.003000} = -10.00 ,$$
+which has the wrong sign. The small error of $0.001$ in $x_2$ was multiplied by $\frac{59.14}{0.003000}\approx20000$ in the
+computation of $x_1$.
+\end{solution}
+
+The remedy is to choose as pivot the entry of largest magnitude available.
+
+\begin{defn}
+In \textbf{partial pivoting} (or \textbf{maximal column pivoting}), at stage $i$ we find the smallest $p\geq i$ with
+$$|a_{pi}| = \max_{i\leq k\leq n}|a_{ki}|$$
+and interchange rows $i$ and $p$ before eliminating. Then every multiplier satisfies $|m_{ji}|\leq1$.
+\end{defn}
+
+\begin{exa}
+Solve the system of Example~\ref{exa:smallpivot} with partial pivoting, in four-digit rounding arithmetic.
+\end{exa}
+
+\begin{solution}
+In column $1$, $|5.291|>|0.003000|$, so the equations are interchanged:
+\begin{align*}
+5.291x_1-6.130x_2 &= 46.78,\\
+0.003000x_1+59.14x_2 &= 59.17 .
+\end{align*}
+Now $m_{21} = \frac{0.003000}{5.291} = 0.0005670$, and $a_{22} = 59.14+0.0005670(6.130) = 59.14$, $b_2 = 59.17-0.0005670(46.78) =
+59.14$. Hence $x_2 = 1.000$ and $x_1 = \frac{46.78+6.130(1.000)}{5.291} = 10.00$, both correct to four digits.
+\end{solution}
+
+Partial pivoting compares the sizes of entries in one column, and it can be fooled when the equations are on very different scales.
+
+\begin{exa}
+\label{exa:scaledpivot}
+Multiply the first equation of Example~\ref{exa:smallpivot} by $10^4$:
+\begin{align*}
+30.00x_1+591400x_2 &= 591700,\\
+5.291x_1-6.130x_2 &= 46.78 .
+\end{align*}
+The solution is unchanged. Solve the system with partial pivoting in four-digit arithmetic.
+\end{exa}
+
+\begin{solution}
+Now $|30.00|>|5.291|$, so partial pivoting does not interchange the rows. The multiplier is $m_{21} = \frac{5.291}{30.00} = 0.1764$, and the
+computation repeats that of Example~\ref{exa:smallpivot} with every number in the first row scaled by $10^4$: it produces $x_2 = 1.001$
+and $x_1 = -10.00$ again. The pivot $30.00$ is not small in absolute terms, but it is small compared with the other entry $591400$ of its
+own row, and that is what matters.
+\end{solution}
+
+\begin{defn}
+In \textbf{scaled partial pivoting}, before elimination we compute for each row the scale factor
+$$s_i = \max_{1\leq j\leq n}|a_{ij}| .$$
+At stage $i$ we choose as pivot row the smallest $p\geq i$ with
+$$\frac{|a_{pi}|}{s_p} = \max_{i\leq k\leq n}\frac{|a_{ki}|}{s_k},$$
+and interchange rows $i$ and $p$ (together with their scale factors). The scale factors are computed only once, at the start.
+\end{defn}
+
+\begin{exa}
+Solve the system of Example~\ref{exa:scaledpivot} with scaled partial pivoting.
+\end{exa}
+
+\begin{solution}
+The scale factors are
+$$s_1 = \max\{30.00,\ 591400\} = 591400,\qquad s_2 = \max\{5.291,\ 6.130\} = 6.130 ,$$
+so the scaled candidates for the pivot are
+$$\frac{|a_{11}|}{s_1} = \frac{30.00}{591400} = 0.5073\times10^{-4},\qquad\frac{|a_{21}|}{s_2} = \frac{5.291}{6.130} = 0.8631,$$
+so the rows are interchanged. Elimination now uses the multiplier $m_{21} = \frac{30.00}{5.291} = 5.670$, giving $a_{22} = 591400+5.670(6.130)
+= 591400$ and $b_2 = 591700-5.670(46.78) = 591400$. Hence $x_2 = 1.000$ and $x_1 = \frac{46.78+6.130}{5.291} = 10.00$: the correct solution.
+\end{solution}
+
+\begin{note}
+Partial pivoting adds about $\frac{n^2}{2}$ comparisons to the work, which is negligible beside the $\frac{n^3}3$ operations of elimination,
+and it is used in essentially all practical software. Scaled partial pivoting adds about $\frac{n^2}{2}$ divisions as well. \textbf{Complete}
+(or \textbf{total}) pivoting searches the whole remaining submatrix for the largest entry and interchanges columns as well as rows; it is
+more robust but adds about $\frac{n^3}{3}$ comparisons, and is used only when the extra safety is essential. For matrices of the special
+kinds met in the next subsection (diagonally dominant or positive definite), no pivoting is needed at all.
+\end{note}
+
+
 \clearpage
 \section*{References}
 \addcontentsline{toc}{section}{References}
@@ -2595,6 +2894,8 @@ Brooks/Cole.
 of Edinburgh}, 46, 289--305.
 \item Dowell, M., and Jarratt, P. (1971), A modified regula falsi method for computing the root of an equation, \emph{BIT
 Numerical Mathematics}, 11, 168--174.
+\item Gauss, C. F. (1809), \emph{Theoria Motus Corporum Coelestium in Sectionibus Conicis Solem Ambientium}, Hamburg, Perthes
+and Besser.
 \item Goldberg, D. (1991), What every computer scientist should know about floating-point arithmetic, \emph{ACM Computing Surveys}, 23,
 5--48.
 \item IEEE (1985), \emph{IEEE Standard for Binary Floating-Point Arithmetic}, ANSI/IEEE Std 754-1985, New York, Institute of Electrical
