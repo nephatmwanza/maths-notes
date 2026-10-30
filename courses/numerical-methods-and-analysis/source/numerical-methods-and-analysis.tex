@@ -104,7 +104,7 @@ If $f$ is continuous on $[a,b]$ and $K$ is any number between $f(a)$ and $f(b)$,
 \end{thm}
 
 In particular, if $f(a)$ and $f(b)$ have opposite signs, $f$ has a zero in $(a,b)$. This is the basis of the bisection method in
-the next section.
+Section~\ref{sec:bisection}.
 
 \begin{thm}[Extreme Value Theorem]
 \label{thm:evt}
@@ -640,6 +640,338 @@ below $10^{-6}$ needs $n>10^6$ terms. For $q_n$ the ratio is exactly $\frac{1}{1
 terms suffice. Sublinear convergence is far too slow for practical use.
 \end{solution}
 
+\section{Solutions of Equations in One Variable}
+\label{sec:roots}
+
+One of the oldest problems of numerical analysis is to find a \textbf{root}, or \textbf{zero}, of an equation $f(x) = 0$: a number $p$
+with $f(p) = 0$. Except for special equations (linear and quadratic ones, for instance) there is no formula for the root, and it must
+be approximated by a sequence $p_0, p_1, p_2,\dots$ that converges to it. This section develops the main methods, proves when and how
+fast they converge, and compares them on the same problems.
+
+Throughout the section we use the equation
+\begin{equation}\label{eq:test}
+f(x) = x^3+4x^2-10 = 0
+\end{equation}
+as a common test problem. Since $f(1) = -5<0$ and $f(2) = 14>0$, the Intermediate Value Theorem gives a root in $(1,2)$; and since
+$f'(x) = 3x^2+8x>0$ there, the root is unique. Its value is $p = 1.365230013$ to ten significant digits.
+
+
+\subsection{The bisection method}
+\label{sec:bisection}
+
+Suppose $f$ is continuous on $[a,b]$ and $f(a)$ and $f(b)$ have opposite signs. Then $f$ has a root in $(a,b)$. The \textbf{bisection
+method} halves the interval, keeps the half on which $f$ still changes sign, and repeats.
+
+\begin{alg}[Bisection]
+\label{alg:bisection}
+To find a solution of $f(x) = 0$, given $f$ continuous on $[a,b]$ with $f(a)f(b)<0$.
+
+\emph{Input:} end points $a, b$; tolerance $\varepsilon$; maximum number of iterations $N$.\\
+\emph{Output:} an approximate solution $p$, or a message of failure.
+\begin{enumerate}[label=Step \arabic*:,leftmargin=*]
+\item Set $a_1 = a$, $b_1 = b$, $n = 1$.
+\item While $n\leq N$ do Steps 3--5.
+\item Set $p_n = a_n+\frac{b_n-a_n}{2}$, the midpoint.
+\item If $f(p_n) = 0$ or $\frac{b_n-a_n}{2}<\varepsilon$, output $p_n$ and stop.
+\item If $\sgn f(a_n)\cdot\sgn f(p_n)>0$, set $a_{n+1} = p_n$, $b_{n+1} = b_n$; otherwise set $a_{n+1} = a_n$, $b_{n+1} = p_n$. Increase $n$
+by $1$.
+\item Output ``method failed after $N$ iterations'' and stop.
+\end{enumerate}
+\end{alg}
+
+\begin{note}
+Two details of the algorithm are deliberate. The midpoint is computed as $a_n+\frac{b_n-a_n}{2}$ rather than $\frac{a_n+b_n}{2}$: when $a_n$ and
+$b_n$ are close, rounding can make the second form fall outside $[a_n,b_n]$, while the first adds a small correction to a good
+approximation. And the sign test uses $\sgn f(a_n)\cdot\sgn f(p_n)$ rather than the product $f(a_n)f(p_n)$, which can underflow to $0$
+or overflow when the values are very small or very large.
+\end{note}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+% Left panel: bisection on f(x)=x^3+4x^2-10, x in [1,2] -> X=(x-1)*6+0.5, Y=f/4
+\fill[blue!5,rounded corners] (0,-3.1) rectangle (7,4.4);
+\draw[blue!45,rounded corners] (0,-3.1) rectangle (7,4.4);
+\node[font=\small\bfseries,text=blue!60!black] at (3.5,4.05) {Bisection: halve the bracket};
+\draw[->,gray] (0.2,0) -- (6.8,0);
+\draw[thick,blue!70!black] (0.500,-1.250) -- (0.650,-1.180) -- (0.800,-1.108) -- (0.950,-1.034) -- (1.100,-0.957) -- (1.250,-0.878) -- (1.400,-0.797) -- (1.550,-0.714) -- (1.700,-0.628) -- (1.850,-0.540) -- (2.000,-0.449) -- (2.150,-0.356) -- (2.300,-0.261) -- (2.450,-0.163) -- (2.600,-0.062) -- (2.750,0.041) -- (2.900,0.146) -- (3.050,0.254) -- (3.200,0.365) -- (3.350,0.478) -- (3.500,0.594) -- (3.650,0.712) -- (3.800,0.833) -- (3.950,0.957) -- (4.100,1.084) -- (4.250,1.213) -- (4.400,1.346) -- (4.550,1.480) -- (4.700,1.618) -- (4.850,1.759) -- (5.000,1.902) -- (5.150,2.049) -- (5.300,2.198) -- (5.450,2.350) -- (5.600,2.505) -- (5.750,2.664) -- (5.900,2.825) -- (6.050,2.989) -- (6.200,3.156) -- (6.350,3.327) -- (6.500,3.500);
+\fill[red!70!black] (2.691,0) circle (2pt);
+\node[font=\scriptsize,red!70!black,above left] at (2.691,0) {$p$};
+\node[font=\scriptsize,blue!70!black] at (5.3,3.2) {$f$};
+% nested brackets
+\foreach \y/\l/\r/\n in {-1.65/0.5/6.5/1,-2.05/0.5/3.5/2,-2.45/2.0/3.5/3,-2.85/2.0/2.75/4}{
+  \draw[|-|,thick,orange!80!black] (\l,\y) -- (\r,\y);
+  \node[font=\scriptsize,anchor=east] at (0.45,\y) {$\n$};
+}
+\foreach \x/\y in {3.5/-1.65,2.0/-2.05,2.75/-2.45,2.375/-2.85} \fill[green!50!black] (\x,\y) circle (1.8pt);
+\draw[dashed,red!60!black] (2.691,0) -- (2.691,-3.0);
+% Right panel: false position chords pivoting on b
+\begin{scope}[xshift=7.4cm]
+\fill[orange!6,rounded corners] (0,-3.1) rectangle (7,4.4);
+\draw[orange!50,rounded corners] (0,-3.1) rectangle (7,4.4);
+\node[font=\small\bfseries,text=orange!80!black] at (3.5,4.05) {False position: follow the chord};
+\draw[->,gray] (0.2,0) -- (6.8,0);
+\draw[thick,blue!70!black] (0.500,-1.250) -- (0.650,-1.180) -- (0.800,-1.108) -- (0.950,-1.034) -- (1.100,-0.957) -- (1.250,-0.878) -- (1.400,-0.797) -- (1.550,-0.714) -- (1.700,-0.628) -- (1.850,-0.540) -- (2.000,-0.449) -- (2.150,-0.356) -- (2.300,-0.261) -- (2.450,-0.163) -- (2.600,-0.062) -- (2.750,0.041) -- (2.900,0.146) -- (3.050,0.254) -- (3.200,0.365) -- (3.350,0.478) -- (3.500,0.594) -- (3.650,0.712) -- (3.800,0.833) -- (3.950,0.957) -- (4.100,1.084) -- (4.250,1.213) -- (4.400,1.346) -- (4.550,1.480) -- (4.700,1.618) -- (4.850,1.759) -- (5.000,1.902) -- (5.150,2.049) -- (5.300,2.198) -- (5.450,2.350) -- (5.600,2.505) -- (5.750,2.664) -- (5.900,2.825) -- (6.050,2.989) -- (6.200,3.156) -- (6.350,3.327) -- (6.500,3.500);
+\draw[orange!80!black] (6.5,3.5) -- (0.5,-1.25);
+\draw[orange!80!black] (6.5,3.5) -- (2.079,-0.401);
+\draw[orange!80!black] (6.5,3.5) -- (2.533,-0.108);
+\foreach \x in {2.079,2.533,2.651} \fill[green!50!black] (\x,0) circle (1.8pt);
+\draw[dotted] (2.079,0) -- (2.079,-0.401);
+\draw[dotted] (2.533,0) -- (2.533,-0.108);
+\fill[red!70!black] (6.5,3.5) circle (2pt);
+\node[font=\scriptsize,anchor=west] at (6.5,3.3) {$b$};
+\node[font=\scriptsize,anchor=north east] at (2.05,-0.02) {$p_1$};
+\node[font=\scriptsize,anchor=south] at (2.6,0.12) {$p_2,p_3$};
+\node[font=\scriptsize,align=center] at (3.5,-2.1) {every chord pivots on the fixed end $(b,f(b))$;\\the iterates creep up to $p$ from one side};
+\end{scope}
+\end{tikzpicture}
+\caption{The two bracketing methods on $f(x) = x^3+4x^2-10$, $[a,b] = [1,2]$. Left: the first four bisection brackets (orange) and their
+midpoints (green); each bracket is half the previous one and always contains the root $p$. Right: false position replaces the midpoint by
+the point where the chord crosses the axis. Because $f$ is convex, the right end point never moves.}
+\label{fig:bracketing}
+\end{figure}
+
+\begin{exa}
+\label{exa:bisection}
+Apply the bisection method to $f(x) = x^3+4x^2-10$ on $[1,2]$.
+\end{exa}
+
+\begin{solution}
+The first thirteen iterations are:
+\begin{center}
+\begin{tabular}{rllll}
+\hline
+$n$ & $a_n$ & $b_n$ & $p_n$ & $f(p_n)$\\
+\hline
+$1$ & $1.0$ & $2.0$ & $1.5$ & $2.375$\\
+$2$ & $1.0$ & $1.5$ & $1.25$ & $-1.79688$\\
+$3$ & $1.25$ & $1.5$ & $1.375$ & $0.16211$\\
+$4$ & $1.25$ & $1.375$ & $1.3125$ & $-0.84839$\\
+$5$ & $1.3125$ & $1.375$ & $1.34375$ & $-0.35098$\\
+$6$ & $1.34375$ & $1.375$ & $1.359375$ & $-0.09641$\\
+$7$ & $1.359375$ & $1.375$ & $1.3671875$ & $0.03236$\\
+$8$ & $1.359375$ & $1.3671875$ & $1.36328125$ & $-0.03215$\\
+$9$ & $1.36328125$ & $1.3671875$ & $1.365234375$ & $0.000072$\\
+$10$ & $1.36328125$ & $1.365234375$ & $1.364257813$ & $-0.01605$\\
+$11$ & $1.364257813$ & $1.365234375$ & $1.364746094$ & $-0.00799$\\
+$12$ & $1.364746094$ & $1.365234375$ & $1.364990234$ & $-0.00396$\\
+$13$ & $1.364990234$ & $1.365234375$ & $1.365112305$ & $-0.00194$\\
+\hline
+\end{tabular}
+\end{center}
+After $13$ iterations the root lies in $[a_{14},b_{14}] = [1.365112305, 1.365234375]$, so $p_{13}$ is within $\frac{b_{13}-a_{13}}{2} =
+1.2\times10^{-4}$ of it. In fact $|p-p_{13}| = 1.18\times10^{-4}$. Notice that $p_9$ is much better, with error $4.4\times10^{-6}$: bisection
+pays no attention to the size of $f(p_n)$ and may discard a good approximation.
+\end{solution}
+
+\begin{thm}
+\label{thm:bisection}
+Suppose $f\in C[a,b]$ and $f(a)f(b)<0$. Then the bisection method generates a sequence $\{p_n\}$ converging to a zero $p$ of $f$, with
+$$|p_n-p|\leq\frac{b-a}{2^n},\qquad n\geq1 .$$
+\end{thm}
+
+\begin{proof}
+By construction each interval $[a_n,b_n]$ has $f(a_n)f(b_n)\leq0$ and length
+$$b_n-a_n = \frac{b-a}{2^{n-1}} .$$
+The left end points $a_n$ form an increasing sequence bounded above by $b$, and the right end points $b_n$ a decreasing sequence bounded
+below by $a$; both converge, and since $b_n-a_n\longrightarrow0$ they have the same limit $p$. By continuity
+$f(p)^2 = \lim f(a_n)f(b_n)\leq0$, so $f(p) = 0$. Finally $p$ and $p_n = \frac{a_n+b_n}{2}$ both lie in $[a_n,b_n]$, and $p_n$ is its
+midpoint, so
+$$|p_n-p|\leq\frac{b_n-a_n}{2} = \frac{b-a}{2^n}.$$
+\end{proof}
+
+The theorem says that $p_n = p+O(2^{-n})$: each iteration gains one binary digit, so about $3.3$ iterations are needed per decimal digit.
+It also tells us in advance how many iterations are needed.
+
+\begin{exa}
+How many bisection iterations on $[1,2]$ guarantee an error less than $10^{-3}$ for the root of~\eqref{eq:test}? How many are needed to
+find $\sqrt3$ to within $10^{-4}$ by solving $x^2-3 = 0$ on $[1,2]$?
+\end{exa}
+
+\begin{solution}
+We need $2^{-N}(2-1)<10^{-3}$, that is, $N>\log_2 10^3 = 9.97$; so $N = 10$ iterations suffice. This is a guarantee, not a prediction: the table above shows errors
+$1.95\times10^{-3}$, $4.4\times10^{-6}$ and $9.7\times10^{-4}$ at $n = 8, 9, 10$, so the actual error does not decrease at every step, but it is
+below $10^{-3}$ from $n = 10$ on, as promised.
+For $\sqrt3$ we need $N>\log_2 10^4 = 13.3$, so $N = 14$. Indeed $p_{14} = 1.73199463$, with error $5.6\times10^{-5}$.
+\end{solution}
+
+\subhead{Stopping criteria}
+In practice $p$ is unknown, and one of the following tests is used to stop, with a tolerance $\varepsilon>0$:
+\begin{align*}
+&\text{(i)} && |p_N-p_{N-1}|<\varepsilon,\\
+&\text{(ii)} && \frac{|p_N-p_{N-1}|}{|p_N|}<\varepsilon\quad (p_N\neq0),\\
+&\text{(iii)} && |f(p_N)|<\varepsilon .
+\end{align*}
+None of them is foolproof, and it is worth knowing why.
+
+\begin{exa}
+Show by examples that (i) and (iii) can stop far from a root.
+\end{exa}
+
+\begin{solution}
+For (i): the partial sums $p_n = \sum_{k=1}^n\frac1k$ satisfy $|p_n-p_{n-1}| = \frac1n\longrightarrow0$, yet $p_n\longrightarrow\infty$. Small
+steps do not mean that the sequence is close to its limit, or even that it has one.
+
+For (iii): let $f(x) = (x-1)^{10}$, whose only root is $p = 1$. At $x = 1.1$, $f(x) = 10^{-10}$, so (iii) with $\varepsilon = 10^{-9}$
+accepts $1.1$, which is wrong in the first decimal. When $f$ is very flat near the root, $|f|$ is small over a wide interval. The opposite
+can also happen: if $f$ is very steep, $|f(p_N)|$ can be large although $p_N$ is very close to $p$.
+
+When nothing is known about $f$, test (ii) is the best of the three, because it measures the step relative to the size of the answer.
+For bisection we can do better than all three: the bracket half-width $\frac{b_n-a_n}{2}$, used in Step 4, is a guaranteed bound.
+\end{solution}
+
+\begin{exa}
+\label{exa:ex3x}
+Show that $e^x = 3x$ has two roots, and locate the smaller one by six steps of bisection.
+\end{exa}
+
+\begin{solution}
+Let $g(x) = e^x-3x$. Then $g(0) = 1>0$, $g(1) = e-3<0$ and $g(2) = e^2-6>0$, so there is a root in each of $(0,1)$ and $(1,2)$. There are
+no others: $g''(x) = e^x>0$, so $g$ is convex and can cross zero at most twice. Bisection on $[0,1]$ gives
+$$p_1 = 0.5,\ p_2 = 0.75,\ p_3 = 0.625,\ p_4 = 0.5625,\ p_5 = 0.59375,\ p_6 = 0.609375,$$
+with signs of $g(p_n)$: $+,-,-,+,+,+$. So the root lies in $[0.609375, 0.625]$; it is $0.6190613$, within the guaranteed
+$2^{-6} = 0.016$ of $p_6$. The other root is $1.5121346$.
+\end{solution}
+
+\begin{note}
+Bisection always converges once a sign change has been found, which makes it the safest method in this section. Its weaknesses are that
+it is slow (linear in the sense of the bound, gaining one bit per step), that it uses only the signs of $f$, and that it needs a sign
+change to start. A root at which $f$ touches the axis without crossing, such as the root $1$ of $(x-1)^2$, cannot be found by bisection
+at all. In practice bisection is often used to find a good starting point for the faster methods of the next subsections.
+\end{note}
+
+
+\subsection{The method of false position}
+\label{sec:falsepos}
+
+Bisection uses only the signs of $f(a_n)$ and $f(b_n)$. If $|f(a_n)|$ is much smaller than $|f(b_n)|$, the root is probably closer to
+$a_n$, and the \textbf{method of false position} (\emph{regula falsi}) uses this. It replaces the midpoint by the point where the
+straight line through $(a_n,f(a_n))$ and $(b_n,f(b_n))$ crosses the axis:
+\begin{equation}\label{eq:falsepos}
+p_n = b_n-f(b_n)\frac{b_n-a_n}{f(b_n)-f(a_n)} = \frac{a_nf(b_n)-b_nf(a_n)}{f(b_n)-f(a_n)},
+\end{equation}
+and then keeps, as bisection does, the subinterval on which $f$ changes sign.
+
+\begin{alg}[False position]
+\label{alg:falsepos}
+To find a solution of $f(x) = 0$, given $f$ continuous on $[a,b]$ with $f(a)f(b)<0$.
+\begin{enumerate}[label=Step \arabic*:,leftmargin=*]
+\item Set $a_1 = a$, $b_1 = b$, $n = 1$.
+\item While $n\leq N$: compute $p_n$ from~\eqref{eq:falsepos}.
+\item If $|p_n-p_{n-1}|<\varepsilon$ (for $n\geq2$), output $p_n$ and stop.
+\item If $\sgn f(a_n)\cdot\sgn f(p_n)>0$, set $a_{n+1} = p_n$, $b_{n+1} = b_n$; otherwise $a_{n+1} = a_n$, $b_{n+1} = p_n$. Increase $n$ by $1$.
+\item Output ``method failed'' and stop.
+\end{enumerate}
+\end{alg}
+
+\begin{exa}
+\label{exa:falsepos}
+Apply the method of false position to $f(x) = x^3+4x^2-10$ on $[1,2]$, and compare it with bisection.
+\end{exa}
+
+\begin{solution}
+The first step uses the chord from $(1,-5)$ to $(2,14)$:
+$$p_1 = 2-14\cdot\frac{2-1}{14-(-5)} = 2-\frac{14}{19} = 1.263157895,$$
+and $f(p_1) = -1.6022<0$, so the new bracket is $[1.263157895, 2]$. Continuing:
+\begin{center}
+\begin{tabular}{rllll}
+\hline
+$n$ & $a_n$ & $b_n$ & $p_n$ & $|p_n-p|$\\
+\hline
+$1$ & $1$ & $2$ & $1.263157895$ & $1.0\times10^{-1}$\\
+$2$ & $1.263157895$ & $2$ & $1.338827839$ & $2.6\times10^{-2}$\\
+$3$ & $1.338827839$ & $2$ & $1.358546342$ & $6.7\times10^{-3}$\\
+$4$ & $1.358546342$ & $2$ & $1.363547440$ & $1.7\times10^{-3}$\\
+$5$ & $1.363547440$ & $2$ & $1.364807032$ & $4.2\times10^{-4}$\\
+$6$ & $1.364807032$ & $2$ & $1.365123718$ & $1.1\times10^{-4}$\\
+$7$ & $1.365123718$ & $2$ & $1.365203304$ & $2.7\times10^{-5}$\\
+$8$ & $1.365203304$ & $2$ & $1.365223302$ & $6.7\times10^{-6}$\\
+$9$ & $1.365223302$ & $2$ & $1.365228327$ & $1.7\times10^{-6}$\\
+$10$ & $1.365228327$ & $2$ & $1.365229590$ & $4.2\times10^{-7}$\\
+\hline
+\end{tabular}
+\end{center}
+After $10$ steps the error is $4.2\times10^{-7}$, compared with $9.7\times10^{-4}$ for bisection. Two features of the table stand out:
+the right end point $b_n = 2$ never changes, and each error is almost exactly a quarter of the previous one. The next theorem explains
+both.
+\end{solution}
+
+\begin{thm}
+\label{thm:falsepos}
+Let $f\in C^2[a,b]$ with $f(a)<0<f(b)$ and $f''>0$ on $[a,b]$. Then $f$ has exactly one root $p$ in $(a,b)$, and the method of false
+position started on $[a,b]$ keeps $b_n = b$ for every $n$, produces increasing iterates $a<p_1<p_2<\dots<p$, and converges to $p$. The
+convergence is linear:
+$$\lim_{n\rightarrow\infty}\frac{p_{n+1}-p}{p_n-p} = 1-\frac{(b-p)f'(p)}{f(b)} = \lambda,\qquad 0<\lambda<1 .$$
+\end{thm}
+
+\begin{proof}
+\emph{Uniqueness.} A root exists by the Intermediate Value Theorem. If there were two roots $p<q$ in $(a,b)$, write
+$p = \theta a+(1-\theta)q$ with $\theta\in(0,1)$. Convexity gives $f(p)\leq\theta f(a)+(1-\theta)f(q) = \theta f(a)<0$, contradicting
+$f(p) = 0$.
+
+\emph{The right end point is fixed.} Suppose $a_n<p<b_n = b$ with $f(a_n)<0$. Since $f''>0$, the graph of $f$ on $[a_n,b]$ lies below
+the chord joining its end points. At the point $p_n$ where the chord is zero, therefore, $f(p_n)<0$. So $p_n$ lies to the left of $p$,
+the sign test keeps $b_{n+1} = b$ and moves the left end point to $a_{n+1} = p_n$. Also $p_n>a_n$, since the chord is negative at
+$a_n$. By induction $a<p_1<p_2<\dots<p$.
+
+\emph{Convergence.} The sequence $\{p_n\}$ is increasing and bounded above by $p$, so it converges to some $q\leq p$. Since
+$p_{n+1} = b-f(b)\frac{b-p_n}{f(b)-f(p_n)}$ and $f$ is continuous, letting $n\longrightarrow\infty$ gives
+$q = b-f(b)\frac{b-q}{f(b)-f(q)}$, which simplifies to $f(q)(b-q) = 0$. As $q\leq p<b$, $f(q) = 0$, and by uniqueness $q = p$.
+
+\emph{Rate.} Write $e_n = p_n-p$. From the second form of~\eqref{eq:falsepos} with $a_n = p_n$, $b_n = b$,
+$$e_{n+1} = \frac{p_nf(b)-bf(p_n)}{f(b)-f(p_n)}-p = \frac{e_nf(b)-(b-p)f(p_n)}{f(b)-f(p_n)} .$$
+Dividing by $e_n$ and using $\frac{f(p_n)}{e_n} = \frac{f(p_n)-f(p)}{p_n-p}\longrightarrow f'(p)$ and $f(p_n)\longrightarrow0$,
+$$\frac{e_{n+1}}{e_n} = \frac{f(b)-(b-p)\frac{f(p_n)}{e_n}}{f(b)-f(p_n)}\longrightarrow\frac{f(b)-(b-p)f'(p)}{f(b)} .$$
+Since $f'' > 0$, $f'$ is increasing. By the Mean Value Theorem, $f(p)-f(a) = f'(\zeta)(p-a)$ for some $\zeta\in(a,p)$, so
+$f'(p)>f'(\zeta) = \frac{-f(a)}{p-a}>0$; and $f(b) = f(b)-f(p) = f'(\eta)(b-p)$ for some $\eta\in(p,b)$, with $f'(\eta)>f'(p)$. Hence
+$0<(b-p)f'(p)<f(b)$, and $0<\lambda<1$.
+\end{proof}
+
+For the test problem, $p = 1.36523$, $f'(p) = 3p^2+8p = 16.51$ and $f(2) = 14$, so $\lambda = 1-\frac{0.63477\times16.51}{14} =
+0.2513$: exactly the ratio seen in the table. The same reasoning applies with $f''<0$ or with $f(a)>0$; in each case one end point stays
+fixed. False position is therefore usually faster than bisection when $\lambda<\frac12$. It can also be much slower.
+
+\begin{exa}
+\label{exa:x10}
+Compare bisection and false position for $f(x) = x^{10}-1$ on $[0,1.3]$, with root $p = 1$.
+\end{exa}
+
+\begin{solution}
+Here $f$ is convex, $f(1.3) = 12.79$ is large and $f$ is very flat on most of $[0,1]$. The chords are almost horizontal, so the fixed end
+point $b = 1.3$ pulls the iterates only slowly towards $1$:
+\begin{center}
+\begin{tabular}{rllllll}
+\hline
+$n$ & $1$ & $5$ & $10$ & $20$ & $40$ & $60$\\
+\hline
+$|p_n-1|$ & $0.906$ & $0.592$ & $0.313$ & $0.0447$ & $2.4\times10^{-4}$ & $1.1\times10^{-6}$\\
+\hline
+\end{tabular}
+\end{center}
+False position needs $52$ iterations to reach an error below $10^{-5}$, while bisection needs $14$. The theorem predicts the asymptotic
+ratio $\lambda = 1-\frac{0.3\times10}{12.79} = 0.765$, compared with bisection's guaranteed factor $\frac12$. False position is faster only
+when the fixed end point is not too far from the root.
+\end{solution}
+
+\subhead{A modified method}
+The slowness comes from the end point that never moves. The \textbf{Illinois modification} removes it: whenever the same end point is
+retained twice in a row, the stored value of $f$ at that end point is halved before the next chord is drawn. This tilts the chord
+towards the stale end point, and the next iterate usually lands on the other side of the root, so both end points move.
+
+\begin{exa}
+Apply the Illinois modification to $x^{10}-1$ on $[0,1.3]$ and to $x^3+4x^2-10$ on $[1,2]$.
+\end{exa}
+
+\begin{solution}
+For $x^{10}-1$ the iterates are
+$$0.0943,\ 0.1818,\ 0.3330,\ 0.5634,\ 0.8464,\ 1.0749,\ 0.9455,\ 0.9828,\ 1.0041,\ 0.99968,\ 0.9999941,$$
+reaching an error below $10^{-5}$ after $11$ iterations instead of $52$; from the sixth step on they fall alternately on both sides of the
+root. For the test problem the errors after steps $4$ to $7$ are $1.5\times10^{-4}$, $9.0\times10^{-7}$, $8.9\times10^{-7}$ and
+$3.9\times10^{-13}$. The Illinois method still brackets the root at every step, so it keeps the safety of bisection, and its convergence is
+superlinear (of order about $1.44$).
+\end{solution}
+
+
 \clearpage
 \section*{References}
 \addcontentsline{toc}{section}{References}
@@ -662,6 +994,8 @@ Brooks/Cole.
 % Long journal names leave no good break point without hyphenation.
 \sloppy
 \begin{enumerate}
+\item Dowell, M., and Jarratt, P. (1971), A modified regula falsi method for computing the root of an equation, \emph{BIT
+Numerical Mathematics}, 11, 168--174.
 \item Goldberg, D. (1991), What every computer scientist should know about floating-point arithmetic, \emph{ACM Computing Surveys}, 23,
 5--48.
 \item IEEE (1985), \emph{IEEE Standard for Binary Floating-Point Arithmetic}, ANSI/IEEE Std 754-1985, New York, Institute of Electrical

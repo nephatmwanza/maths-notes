@@ -1,0 +1,217 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>2.1 The bisection method — Numerical Methods and Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='numerical-methods-and-analysis.css' rel='stylesheet' type='text/css' /> 
+<meta content='numerical-methods-and-analysis.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"fl": "\\operatorname{fl}", "sgn": "\\operatorname{sgn}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Numerical Methods and Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="numerical-methods-and-analysisse1.html">Mathematical Preliminaries and Error Analysis</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu1.html">Review of calculus</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu2.html">Round-off errors and computer arithmetic</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu3.html">Algorithms and convergence</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu4.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="numerical-methods-and-analysisse2.html">Solutions of Equations in One Variable</a></li>
+<li class="sub"><a class="current" href="numerical-methods-and-analysissu5.html">The bisection method</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysissu6.html">The method of false position</a></li>
+<li class="sub"><a class="" href="numerical-methods-and-analysisli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 659 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu6.html'>next</a>] [<a href='#tailnumerical-methods-and-analysissu5.html'>tail</a>] [<a href='numerical-methods-and-analysisse2.html#numerical-methods-and-analysissu5.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>2.1   </span> <a id='x9-80002.1'></a>The bisection method</h4>
+<!-- l. 662 --><p class='noindent'>Suppose \(f\) is continuous on \([a,b]\) and \(f(a)\) and \(f(b)\) have opposite signs. Then \(f\) has a root in \((a,b)\). The <span class='cmbx-10x-x-109'>bisection
+method </span>halves the interval, keeps the half on which \(f\) still changes sign, and repeats.
+</p>
+<div class='newtheorem'>
+<!-- l. 665 --><p class='noindent'><span class='head'>
+<a id='x9-8001r1'></a>
+<span class='cmbx-10x-x-109'>Algorithm 2.1.1 </span>(Bisection)<span class='cmbx-10x-x-109'>.</span>  </span> To find a solution of \(f(x) = 0\), given \(f\) continuous on \([a,b]\) with \(f(a)f(b)&lt;0\).
+</p><!-- l. 669 --><p class='noindent'><span class='cmti-10x-x-109'>Input: </span>end points \(a, b\); tolerance \(\varepsilon \); maximum number of iterations \(N\).<br class='newline' /><span class='cmti-10x-x-109'>Output: </span>an approximate solution \(p\), or a message of failure.
+                                                                                      
+                                                                                      
+       </p><dl class='enumerate-enumitem'><dt class='enumerate-enumitem'>
+Step 1: </dt><dd class='enumerate-enumitem'>Set \(a_1 = a\), \(b_1 = b\), \(n = 1\).
+       </dd><dt class='enumerate-enumitem'>
+Step 2: </dt><dd class='enumerate-enumitem'>While \(n\leq N\) do Steps 3–5.
+       </dd><dt class='enumerate-enumitem'>
+Step 3: </dt><dd class='enumerate-enumitem'>Set \(p_n = a_n+\frac {b_n-a_n}{2}\), the midpoint.
+       </dd><dt class='enumerate-enumitem'>
+Step 4: </dt><dd class='enumerate-enumitem'>If \(f(p_n) = 0\) or \(\frac {b_n-a_n}{2}&lt;\varepsilon \), output \(p_n\) and stop.
+       </dd><dt class='enumerate-enumitem'>
+Step 5: </dt><dd class='enumerate-enumitem'>If \(\sgn f(a_n)\cdot \sgn f(p_n)&gt;0\), set \(a_{n+1} = p_n\), \(b_{n+1} = b_n\); otherwise set \(a_{n+1} = a_n\), \(b_{n+1} = p_n\). Increase \(n\) by \(1\).
+       </dd><dt class='enumerate-enumitem'>
+Step 6: </dt><dd class='enumerate-enumitem'>Output “method failed after \(N\) iterations” and stop.</dd></dl>
+</div>
+<!-- l. 680 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-note'>
+<!-- l. 682 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>Two details of the algorithm are deliberate. The midpoint is computed as \(a_n+\frac {b_n-a_n}{2}\) rather than
+\(\frac {a_n+b_n}{2}\): when \(a_n\) and \(b_n\) are close, rounding can make the second form fall outside \([a_n,b_n]\), while the first adds
+a small correction to a good approximation. And the sign test uses \(\sgn f(a_n)\cdot \sgn f(p_n)\) rather than the product \(f(a_n)f(p_n)\),
+which can underflow to \(0\) or overflow when the values are very small or very large.
+</p>
+</div>
+<!-- l. 687 --><p class='noindent'>
+</p>
+<figure class='figure'> 
+
+                                                                                      
+                                                                                      
+<a id='x9-8008r2'></a>
+                                                                                      
+                                                                                      
+<!-- l. 691 --><p class='noindent'><img alt='Bpf1234Fbppeia,veslprthesyece c it phtioooernsrda:itetpishiv caoorlntseev: open ufoptlthhletoeo fiwxpbe frtdroah emcenkdoec (nthbeo,f sr(iddbe));
+ 12 3   ' src='numerical-methods-and-analysis1x.svg' />
+</p>
+<figcaption class='caption'><span class='id'>Figure 2: </span><span class='content'>The two bracketing methods on \(f(x) = x^3+4x^2-10\), \([a,b] = [1,2]\). Left: the first four bisection brackets (orange)
+and their midpoints (green); each bracket is half the previous one and always contains the root
+\(p\). Right: false position replaces the midpoint by the point where the chord crosses the axis.
+Because \(f\) is convex, the right end point never moves.</span></figcaption><!-- tex4ht:label?: x9-8008r2  -->
+                                                                                      
+                                                                                      
+</figure>
+<div class='newtheorem nt-example'>
+<!-- l. 734 --><p class='noindent'><span class='head'>
+<a id='x9-8009r2'></a>
+<span class='cmbx-10x-x-109'>Example 2.1.2.</span>  </span> Apply the bisection method to \(f(x) = x^3+4x^2-10\) on \([1,2]\).
+</p>
+</div>
+<!-- l. 737 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 739 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> The first thirteen iterations are: </p>
+<div class='center'>
+<!-- l. 741 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-4'><colgroup id='TBL-4-1g'><col id='TBL-4-1' /><col id='TBL-4-2' /><col id='TBL-4-3' /><col id='TBL-4-4' /><col id='TBL-4-5' /></colgroup><tr class='hline'><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-4-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-1-1' style='white-space:nowrap; text-align:right;'> \(n\) </td><td class='td11' id='TBL-4-1-2' style='white-space:nowrap; text-align:left;'> \(a_n\) </td><td class='td11' id='TBL-4-1-3' style='white-space:nowrap; text-align:left;'> \(b_n\) </td><td class='td11' id='TBL-4-1-4' style='white-space:nowrap; text-align:left;'> \(p_n\) </td><td class='td11' id='TBL-4-1-5' style='white-space:nowrap; text-align:left;'> \(f(p_n)\) </td></tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-4-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-2-1' style='white-space:nowrap; text-align:right;'>  \(1\) </td><td class='td11' id='TBL-4-2-2' style='white-space:nowrap; text-align:left;'>  \(1.0\) </td><td class='td11' id='TBL-4-2-3' style='white-space:nowrap; text-align:left;'>  \(2.0\) </td><td class='td11' id='TBL-4-2-4' style='white-space:nowrap; text-align:left;'>  \(1.5\) </td><td class='td11' id='TBL-4-2-5' style='white-space:nowrap; text-align:left;'>  \(2.375\)</td>
+</tr><tr id='TBL-4-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-3-1' style='white-space:nowrap; text-align:right;'>  \(2\) </td><td class='td11' id='TBL-4-3-2' style='white-space:nowrap; text-align:left;'> \(1.0\) </td><td class='td11' id='TBL-4-3-3' style='white-space:nowrap; text-align:left;'> \(1.5\) </td><td class='td11' id='TBL-4-3-4' style='white-space:nowrap; text-align:left;'> \(1.25\) </td><td class='td11' id='TBL-4-3-5' style='white-space:nowrap; text-align:left;'> \(-1.79688\) </td></tr><tr id='TBL-4-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-4-1' style='white-space:nowrap; text-align:right;'>  \(3\) </td><td class='td11' id='TBL-4-4-2' style='white-space:nowrap; text-align:left;'>  \(1.25\) </td><td class='td11' id='TBL-4-4-3' style='white-space:nowrap; text-align:left;'>  \(1.5\) </td><td class='td11' id='TBL-4-4-4' style='white-space:nowrap; text-align:left;'>  \(1.375\) </td><td class='td11' id='TBL-4-4-5' style='white-space:nowrap; text-align:left;'>  \(0.16211\)</td>
+</tr><tr id='TBL-4-5-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-5-1' style='white-space:nowrap; text-align:right;'>  \(4\) </td><td class='td11' id='TBL-4-5-2' style='white-space:nowrap; text-align:left;'> \(1.25\) </td><td class='td11' id='TBL-4-5-3' style='white-space:nowrap; text-align:left;'> \(1.375\) </td><td class='td11' id='TBL-4-5-4' style='white-space:nowrap; text-align:left;'> \(1.3125\) </td><td class='td11' id='TBL-4-5-5' style='white-space:nowrap; text-align:left;'> \(-0.84839\) </td></tr><tr id='TBL-4-6-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-6-1' style='white-space:nowrap; text-align:right;'>  \(5\) </td><td class='td11' id='TBL-4-6-2' style='white-space:nowrap; text-align:left;'>  \(1.3125\) </td><td class='td11' id='TBL-4-6-3' style='white-space:nowrap; text-align:left;'>  \(1.375\) </td><td class='td11' id='TBL-4-6-4' style='white-space:nowrap; text-align:left;'>  \(1.34375\) </td><td class='td11' id='TBL-4-6-5' style='white-space:nowrap; text-align:left;'>  \(-0.35098\)</td>
+</tr><tr id='TBL-4-7-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-7-1' style='white-space:nowrap; text-align:right;'>  \(6\) </td><td class='td11' id='TBL-4-7-2' style='white-space:nowrap; text-align:left;'> \(1.34375\) </td><td class='td11' id='TBL-4-7-3' style='white-space:nowrap; text-align:left;'> \(1.375\) </td><td class='td11' id='TBL-4-7-4' style='white-space:nowrap; text-align:left;'> \(1.359375\) </td><td class='td11' id='TBL-4-7-5' style='white-space:nowrap; text-align:left;'> \(-0.09641\) </td></tr><tr id='TBL-4-8-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-8-1' style='white-space:nowrap; text-align:right;'>  \(7\) </td><td class='td11' id='TBL-4-8-2' style='white-space:nowrap; text-align:left;'>  \(1.359375\) </td><td class='td11' id='TBL-4-8-3' style='white-space:nowrap; text-align:left;'>  \(1.375\) </td><td class='td11' id='TBL-4-8-4' style='white-space:nowrap; text-align:left;'>  \(1.3671875\) </td><td class='td11' id='TBL-4-8-5' style='white-space:nowrap; text-align:left;'>  \(0.03236\)</td>
+</tr><tr id='TBL-4-9-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-9-1' style='white-space:nowrap; text-align:right;'>  \(8\) </td><td class='td11' id='TBL-4-9-2' style='white-space:nowrap; text-align:left;'> \(1.359375\) </td><td class='td11' id='TBL-4-9-3' style='white-space:nowrap; text-align:left;'> \(1.3671875\) </td><td class='td11' id='TBL-4-9-4' style='white-space:nowrap; text-align:left;'> \(1.36328125\) </td><td class='td11' id='TBL-4-9-5' style='white-space:nowrap; text-align:left;'> \(-0.03215\) </td>
+</tr><tr id='TBL-4-10-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-10-1' style='white-space:nowrap; text-align:right;'>  \(9\) </td><td class='td11' id='TBL-4-10-2' style='white-space:nowrap; text-align:left;'> \(1.36328125\) </td><td class='td11' id='TBL-4-10-3' style='white-space:nowrap; text-align:left;'> \(1.3671875\) </td><td class='td11' id='TBL-4-10-4' style='white-space:nowrap; text-align:left;'> \(1.365234375\) </td><td class='td11' id='TBL-4-10-5' style='white-space:nowrap; text-align:left;'> \(0.000072\) </td>
+</tr><tr id='TBL-4-11-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-11-1' style='white-space:nowrap; text-align:right;'>  \(10\) </td><td class='td11' id='TBL-4-11-2' style='white-space:nowrap; text-align:left;'> \(1.36328125\) </td><td class='td11' id='TBL-4-11-3' style='white-space:nowrap; text-align:left;'> \(1.365234375\) </td><td class='td11' id='TBL-4-11-4' style='white-space:nowrap; text-align:left;'> \(1.364257813\) </td><td class='td11' id='TBL-4-11-5' style='white-space:nowrap; text-align:left;'> \(-0.01605\) </td>
+</tr><tr id='TBL-4-12-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-12-1' style='white-space:nowrap; text-align:right;'>  \(11\) </td><td class='td11' id='TBL-4-12-2' style='white-space:nowrap; text-align:left;'> \(1.364257813\) </td><td class='td11' id='TBL-4-12-3' style='white-space:nowrap; text-align:left;'> \(1.365234375\) </td><td class='td11' id='TBL-4-12-4' style='white-space:nowrap; text-align:left;'> \(1.364746094\) </td><td class='td11' id='TBL-4-12-5' style='white-space:nowrap; text-align:left;'> \(-0.00799\) </td>
+</tr><tr id='TBL-4-13-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-13-1' style='white-space:nowrap; text-align:right;'>  \(12\) </td><td class='td11' id='TBL-4-13-2' style='white-space:nowrap; text-align:left;'> \(1.364746094\) </td><td class='td11' id='TBL-4-13-3' style='white-space:nowrap; text-align:left;'> \(1.365234375\) </td><td class='td11' id='TBL-4-13-4' style='white-space:nowrap; text-align:left;'> \(1.364990234\) </td><td class='td11' id='TBL-4-13-5' style='white-space:nowrap; text-align:left;'> \(-0.00396\) </td>
+</tr><tr id='TBL-4-14-' style='vertical-align:baseline;'><td class='td11' id='TBL-4-14-1' style='white-space:nowrap; text-align:right;'>  \(13\) </td><td class='td11' id='TBL-4-14-2' style='white-space:nowrap; text-align:left;'> \(1.364990234\) </td><td class='td11' id='TBL-4-14-3' style='white-space:nowrap; text-align:left;'> \(1.365234375\) </td><td class='td11' id='TBL-4-14-4' style='white-space:nowrap; text-align:left;'> \(1.365112305\) </td><td class='td11' id='TBL-4-14-5' style='white-space:nowrap; text-align:left;'> \(-0.00194\) </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td></tr></table>                                                                                      </div></div>
+<!-- l. 762 --><p class='noindent'>After \(13\) iterations the root lies in \([a_{14},b_{14}] = [1.365112305, 1.365234375]\), so \(p_{13}\) is within \(\frac {b_{13}-a_{13}}{2} = 1.2\times 10^{-4}\) of it. In fact \(|p-p_{13}| = 1.18\times 10^{-4}\). Notice that \(p_9\) is much better, with error \(4.4\times 10^{-6}\):
+bisection pays no attention to the size of \(f(p_n)\) and may discard a good approximation.
+</p>
+</div>
+<div class='newtheorem nt-theorem'>
+<!-- l. 767 --><p class='noindent'><span class='head'>
+<a id='x9-8010r3'></a>
+<span class='cmbx-10x-x-109'>Theorem 2.1.3.</span>  </span> Suppose \(f\in C[a,b]\) and \(f(a)f(b)&lt;0\). Then the bisection method generates a sequence \(\{p_n\}\) converging
+to a zero \(p\) of \(f\), with
+                                                                                      
+                                                                                      
+                                           \[|p_n-p|\leq \frac {b-a}{2^n},\qquad n\geq 1 .\]
+</p>
+</div>
+<!-- l. 771 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 774 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>By construction each interval \([a_n,b_n]\) has \(f(a_n)f(b_n)\leq 0\) and length
+                                           \[b_n-a_n = \frac {b-a}{2^{n-1}} .\]
+ The left end points \(a_n\) form an increasing sequence bounded above by \(b\), and the right end points
+\(b_n\) a decreasing sequence bounded below by \(a\); both converge, and since \(b_n-a_n\longrightarrow 0\) they have the same limit
+\(p\). By continuity \(f(p)^2 = \lim f(a_n)f(b_n)\leq 0\), so \(f(p) = 0\). Finally \(p\) and \(p_n = \frac {a_n+b_n}{2}\) both lie in \([a_n,b_n]\), and \(p_n\) is its midpoint, so
+                                           \[|p_n-p|\leq \frac {b_n-a_n}{2} = \frac {b-a}{2^n}.\]
+                                                                                     □
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 783 --><p class='noindent'>The theorem says that \(p_n = p+O(2^{-n})\): each iteration gains one binary digit, so about \(3.3\) iterations are needed per
+decimal digit. It also tells us in advance how many iterations are needed.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 786 --><p class='noindent'><span class='head'>
+<a id='x9-8011r4'></a>
+<span class='cmbx-10x-x-109'>Example 2.1.4.</span>  </span>How many bisection iterations on \([1,2]\) guarantee an error less than \(10^{-3}\) for the root
+of (<a href='numerical-methods-and-analysisse2.html#x8-7001r1'>2.1<!-- tex4ht:ref: eq:test  --></a>)? How many are needed to find \(\sqrt 3\) to within \(10^{-4}\) by solving \(x^2-3 = 0\) on \([1,2]\)?
+</p>
+</div>
+<!-- l. 789 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 791 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> We need \(2^{-N}(2-1)&lt;10^{-3}\), that is, \(N&gt;\log _2 10^3 = 9.97\); so \(N = 10\) iterations suffice. This is a guarantee, not a prediction: the
+table above shows errors \(1.95\times 10^{-3}\), \(4.4\times 10^{-6}\) and \(9.7\times 10^{-4}\) at \(n = 8, 9, 10\), so the actual error does not decrease at every step, but it
+is below \(10^{-3}\) from \(n = 10\) on, as promised. For \(\sqrt 3\) we need \(N&gt;\log _2 10^4 = 13.3\), so \(N = 14\). Indeed \(p_{14} = 1.73199463\), with error \(5.6\times 10^{-5}\).
+</p>
+</div>
+<!-- l. 798 --><p class='noindent'><span class='cmbx-10x-x-109'>Stopping criteria</span>
+</p><!-- l. 799 --><p class='noindent'>In practice \(p\) is unknown, and one of the following tests is used to stop, with a tolerance \(\varepsilon &gt;0\):
+\begin {align*}  &amp;\text {(i)} &amp;&amp; |p_N-p_{N-1}|&lt;\varepsilon ,\\ &amp;\text {(ii)} &amp;&amp; \frac {|p_N-p_{N-1}|}{|p_N|}&lt;\varepsilon \quad (p_N\neq 0),\\ &amp;\text {(iii)} &amp;&amp; |f(p_N)|&lt;\varepsilon .  \end {align*}
+</p><!-- l. 805 --><p class='noindent'>None of them is foolproof, and it is worth knowing why.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 807 --><p class='noindent'><span class='head'>
+<a id='x9-8012r5'></a>
+<span class='cmbx-10x-x-109'>Example 2.1.5.</span>  </span>Show by examples that (i) and (iii) can stop far from a root.
+</p>
+</div>
+<!-- l. 809 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<div class='proof'>
+<!-- l. 811 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> For (i): the partial sums \(p_n = \sum _{k=1}^n\frac 1k\) satisfy \(|p_n-p_{n-1}| = \frac 1n\longrightarrow 0\), yet \(p_n\longrightarrow \infty \). Small steps do not mean that the sequence is
+close to its limit, or even that it has one.
+</p><!-- l. 815 --><p class='noindent'>For (iii): let \(f(x) = (x-1)^{10}\), whose only root is \(p = 1\). At \(x = 1.1\), \(f(x) = 10^{-10}\), so (iii) with \(\varepsilon = 10^{-9}\) accepts \(1.1\), which is wrong in the first decimal.
+When \(f\) is very flat near the root, \(|f|\) is small over a wide interval. The opposite can also happen:
+if \(f\) is very steep, \(|f(p_N)|\) can be large although \(p_N\) is very close to \(p\).
+</p><!-- l. 819 --><p class='noindent'>When nothing is known about \(f\), test (ii) is the best of the three, because it measures the step
+relative to the size of the answer. For bisection we can do better than all three: the bracket
+half-width \(\frac {b_n-a_n}{2}\), used in Step 4, is a guaranteed bound.
+</p>
+</div>
+<div class='newtheorem nt-example'>
+<!-- l. 823 --><p class='noindent'><span class='head'>
+<a id='x9-8013r6'></a>
+<span class='cmbx-10x-x-109'>Example 2.1.6.</span>  </span> Show that \(e^x = 3x\) has two roots, and locate the smaller one by six steps of bisection.
+</p>
+</div>
+<!-- l. 826 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 828 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Solution.</span> </span> Let \(g(x) = e^x-3x\). Then \(g(0) = 1&gt;0\), \(g(1) = e-3&lt;0\) and \(g(2) = e^2-6&gt;0\), so there is a root in each of \((0,1)\) and \((1,2)\). There are no others: \(g''(x) = e^x&gt;0\), so \(g\) is
+convex and can cross zero at most twice. Bisection on \([0,1]\) gives
+                                           \[p_1 = 0.5,\ p_2 = 0.75,\ p_3 = 0.625,\ p_4 = 0.5625,\ p_5 = 0.59375,\ p_6 = 0.609375,\]
+ with signs of \(g(p_n)\): \(+,-,-,+,+,+\). So the root lies in \([0.609375, 0.625]\); it is \(0.6190613\), within the guaranteed \(2^{-6} = 0.016\) of \(p_6\). The other root is \(1.5121346\).
+                                                                                      
+                                                                                      
+</p>
+</div>
+<div class='newtheorem nt-note'>
+<!-- l. 836 --><p class='noindent'><span class='head'>
+<span class='cmbx-10x-x-109'>Note.</span>  </span>Bisection always converges once a sign change has been found, which makes it the safest
+method in this section. Its weaknesses are that it is slow (linear in the sense of the bound,
+gaining one bit per step), that it uses only the signs of \(f\), and that it needs a sign change to start.
+A root at which \(f\) touches the axis without crossing, such as the root \(1\) of \((x-1)^2\), cannot be found by
+bisection at all. In practice bisection is often used to find a good starting point for the faster
+methods of the next subsections.
+</p>
+</div>
+<!-- l. 841 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 844 --><div class='crosslinks'><p class='noindent'>[<a href='numerical-methods-and-analysissu6.html'>next</a>] [<a href='numerical-methods-and-analysissu5.html'>front</a>] [<a href='numerical-methods-and-analysisse2.html#numerical-methods-and-analysissu5.html'>up</a>] </p></div>
+<!-- l. 844 --><p class='noindent'><a id='tailnumerical-methods-and-analysissu5.html'></a> </p> 
+<nav class="pagenav"><a class="up" href="numerical-methods-and-analysisse2.html#numerical-methods-and-analysissu5.html">Contents</a><a class="next" href="numerical-methods-and-analysissu6.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="numerical-methods-and-analysis/2-1-the-bisection-method" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
