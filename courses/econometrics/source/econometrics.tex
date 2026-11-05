@@ -661,8 +661,8 @@ firmly rejected.
 The confidence interval is \emph{not} $r \pm 1.96\,\mathrm{se}$. It uses Fisher's transformation $z = \tanh^{-1} r$, which is approximately
 normal with variance $\frac{1}{n-3}$. Here $\tanh^{-1}(-0.4555) = -0.4917$, so the interval for $\tanh^{-1}\rho$ is
 $-0.4917 \pm 1.96/\sqrt{47} = (-0.7776, -0.2058)$, and applying $\tanh$ to both ends gives the printed $(-0.651, -0.203)$. The interval is
-asymmetric about $r$ because the correlation is bounded by $\pm 1$. Why the transformation works is an application of the delta method, proved
-with the large-sample theory later in the course.
+asymmetric about $r$ because the correlation is bounded by $\pm 1$. Why the transformation works is an application of the delta method
+(Example~\ref{ex:oddsdelta}).
 
 \textbf{Stata:} \texttt{correlate sr pop15 pop75 dpi ddpi}, and \texttt{pwcorr sr pop15, sig} for the $p$-value. \textbf{EViews:} select the
 series, open them as a group and choose \emph{View $\to$ Covariance Analysis}, ticking \emph{Correlation} and \emph{t-statistic}.
@@ -1307,7 +1307,7 @@ an individual observation (outer). Both are narrowest at $\bar X = 6$ and widen 
 \begin{software}[A two-variable regression]
 \label{sw:lm}
 The savings data of Example~\ref{ex:lcs}, with the savings rate regressed on the share of the population under 15:
-\begin{verbatim}
+{\small\begin{verbatim}
 > fit <- lm(sr ~ pop15, data = LifeCycleSavings)
 > summary(fit)
 
@@ -1328,7 +1328,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 Residual standard error: 4.03 on 48 degrees of freedom
 Multiple R-squared:  0.2075,    Adjusted R-squared:  0.191
 F-statistic: 12.57 on 1 and 48 DF,  p-value: 0.0008866
-\end{verbatim}
+\end{verbatim}}
 \textbf{Reading the output}, line by line against the theory of this section.
 \begin{itemize}
 \item \texttt{Residuals}: the five-number summary of the $e_i$. Their mean is zero by Theorem~\ref{thm:resid2}, so it is not printed; a median
@@ -1352,7 +1352,7 @@ $p$-value from $t_{48}$. The stars are a convention of R's, not a substitute for
 \begin{software}[The analysis of variance and confidence intervals]
 \label{sw:anova}
 The decomposition of Theorem~\ref{thm:anova2}, and intervals for the coefficients:
-\begin{verbatim}
+{\small\begin{verbatim}
 > anova(fit)
 Analysis of Variance Table
 
@@ -1364,7 +1364,7 @@ Residuals 48 779.51   16.24
                  2.5 %      97.5 %
 (Intercept) 12.9129180 22.08027686
 pop15       -0.3494978 -0.09653739
-\end{verbatim}
+\end{verbatim}}
 \textbf{Reading the output.} ESS $= 204.12$ on 1 degree of freedom and RSS $= 779.51$ on 48. Their sum is TSS $= 983.63$, and
 $R^2 = 204.12/983.63 = 0.2075$. The residual mean square $16.24 = s^2 = 4.03^2$. The interval for the slope is
 $-0.2230 \pm t_{0.025,48}(0.0629)$ with $t_{0.025,48} = 2.011$. It excludes zero, consistent with the $t$ test.
@@ -1376,7 +1376,7 @@ $-0.2230 \pm t_{0.025,48}(0.0629)$ with $t_{0.025,48} = 2.011$. It excludes zero
 \begin{software}[Predicting the mean and an individual]
 \label{sw:predict}
 Predictions at \texttt{pop15} $= 25$ and $45$, near the two ends of the data:
-\begin{verbatim}
+{\small\begin{verbatim}
 > new <- data.frame(pop15 = c(25, 45))
 > predict(fit, new, interval = "confidence")
         fit       lwr       upr
@@ -1386,7 +1386,7 @@ Predictions at \texttt{pop15} $= 25$ and $45$, near the two ends of the data:
         fit        lwr      upr
 1 11.921158  3.6390423 20.20327
 2  7.460807 -0.8178472 15.73946
-\end{verbatim}
+\end{verbatim}}
 \textbf{Reading the output.} The point predictions are the same for both questions; only the intervals differ. The mean savings rate of
 countries with 25\% under 15 is estimated to lie between $10.2\%$ and $13.6\%$. A single such country could have a savings rate anywhere from
 $3.6\%$ to $20.2\%$. The prediction interval is about five times as wide, because $s = 4.03$ is large compared with the precision of the line. Its
@@ -1666,8 +1666,8 @@ $e^{s^2/2}$. When $s$ is small, as in Example~\ref{ex:subs}, the correction is n
 factor is $e^{0.125} = 1.13$, a $13\%$ difference.
 
 \subhead{The precision of $\hat g$}
-The growth rate $\hat g = e^b - 1$ is a non-linear function of $b$, so its standard error is not simply $\operatorname{se}(b)$. The delta method,
-proved with the large-sample theory later in the course, gives the approximation
+The growth rate $\hat g = e^b - 1$ is a non-linear function of $b$, so its standard error is not simply $\operatorname{se}(b)$. The delta method
+(Theorem~\ref{thm:delta}) gives the approximation
 \[
 \operatorname{se}(\hat g) \approx \left|\frac{d\hat g}{db}\right|\operatorname{se}(b) = e^b\operatorname{se}(b) .
 \]
@@ -1916,7 +1916,7 @@ likelihood, and the difference in log-likelihoods is $\frac n2\log(\text{RSS}_1/
 \begin{software}[A constant growth curve]
 \label{sw:growth}
 Transformations are written directly in the model formula:
-\begin{verbatim}
+{\small\begin{verbatim}
 > subs <- c(38.1, 80.0, 170.4, 354.5, 744.4); T <- -2:2
 > g <- lm(log(subs) ~ T)
 > summary(g)$coef
@@ -1926,7 +1926,7 @@ T           0.743341 0.001943052  382.5635 3.938668e-08
 > b <- coef(g)["T"]; exp(b) - 1
       T
 1.10295
-\end{verbatim}
+\end{verbatim}}
 \textbf{Reading the output.} The slope $0.7433$ and intercept $5.1287 = \overline{\log Y}$ agree with the hand calculation of
 Example~\ref{ex:subs}. The growth rate is computed from the coefficient, not printed by \texttt{lm}: $\hat g = 1.103$, or $110\%$ a year. The tiny
 standard errors reflect an almost exact fit with only three residual degrees of freedom, and should not be over-interpreted: five points that lie
@@ -1939,7 +1939,7 @@ delta-method standard error. \textbf{EViews:} \texttt{ls log(subs) c t}; then \t
 \begin{software}[Comparing a linear and a linear-log model]
 \label{sw:linlog}
 For the savings data, the savings rate against income per head, in levels and in logarithms:
-\begin{verbatim}
+{\small\begin{verbatim}
 > f1 <- lm(sr ~ dpi, data = LifeCycleSavings)
 > f2 <- lm(sr ~ log(dpi), data = LifeCycleSavings)
 > c(summary(f1)$r.squared, summary(f2)$r.squared)
@@ -1948,7 +1948,7 @@ For the savings data, the savings rate against income per head, in levels and in
             Estimate Std. Error   t value   Pr(>|t|)
 (Intercept) 1.756107  4.0203461 0.4368048 0.66421166
 log(dpi)    1.207970  0.6063571 1.9921764 0.05205621
-\end{verbatim}
+\end{verbatim}}
 \textbf{Reading the output.} Both models explain \texttt{sr}, so their $R^2$ values are comparable, and the linear-log form fits better. Income per head
 ranges from about \$89 to \$4\,000, and a model in which each extra dollar matters equally across that range is implausible. The coefficient means
 that a $10\%$ higher income per head is associated with a savings rate higher by $1.208 \times \log 1.1 = 0.115$ percentage points, roughly
@@ -1960,13 +1960,13 @@ $1.208/10$. The $p$-value of $0.052$ is borderline, and income on its own explai
 \begin{software}[Box--Cox comparison of a linear and a growth model]
 \label{sw:boxcox}
 For the subscriber data, compare a linear trend in $Y$ with the growth curve, after scaling by the geometric mean:
-\begin{verbatim}
+{\small\begin{verbatim}
 > gm <- exp(mean(log(subs))); ys <- subs / gm
 > rss_lin <- sum(resid(lm(ys ~ T))^2)
 > rss_log <- sum(resid(lm(log(ys) ~ T))^2)
 > c(gm, rss_lin, rss_log)
 [1] 1.688035e+02 1.652347e+00 1.132636e-04
-\end{verbatim}
+\end{verbatim}}
 \textbf{Reading the output.} On the common scale the growth curve's residual sum of squares is about $14\,600$ times smaller. By
 Theorem~\ref{thm:boxcox} the log-likelihood difference is $\frac52\log 14\,589 = 24.0$ in favour of the growth curve, an overwhelming
 margin. The $R^2$ values ($0.858$ and $0.99998$) happened to point the same way here, but they could not have been relied on to do so.
@@ -2105,6 +2105,591 @@ the Box--Cox criterion prefers.
 (b) Scaling $Y$ by $\tilde Y = 4.2$ divides every residual of the linear model by $4.2$, so its RSS becomes $12.6/4.2^2 = 0.714$. In the log model,
 $\log(Y/\tilde Y) = \log Y - \log\tilde Y$ only shifts the intercept, so the residuals and RSS are unchanged at $0.84$. The linear model has the
 smaller scaled RSS, so it is preferred, with a log-likelihood margin of $\frac{40}{2}\log(0.84/0.714) = 3.25$.
+\end{solution}
+
+%======================================================================
+\section{Large-Sample Theory and the Autoregressive Equation}
+\label{sec:asym}
+
+The results of Section~\ref{sec:twovar} are \emph{exact}: unbiasedness and the Gauss--Markov theorem hold for every sample size, and under
+normality the $t$ and $F$ distributions are exact. They rest on assumption (A1), that the disturbances have mean zero conditional on \emph{all}
+the regressor values, past and future. In time series that assumption fails as soon as a lagged value of the dependent variable is used as a
+regressor, and in cross sections normality is rarely credible. Without these assumptions exact results are usually unobtainable, and
+econometrics instead asks what happens as the sample size grows. This section builds the tools for that question and applies them to the
+first model that needs them, the autoregressive equation $Y_t = \alpha + \beta Y_{t-1} + u_t$.
+
+\subsection{Why exact theory breaks down}
+\label{ssec:whyasym}
+
+In the autoregressive equation the regressor in period $t + 1$ is $Y_t$, which contains $u_t$. So $u_t$ is correlated with a regressor, not in
+its own equation but in the next. (A1) requires $E(u_t \mid Y_0, Y_1, \dots, Y_{T-1}) = 0$, and this fails because $Y_t$, which is in the
+conditioning set, depends on $u_t$. The proof of unbiasedness in Theorem~\ref{thm:moments2} therefore does not apply, and in fact the least
+squares estimator of $\beta$ is biased in every finite sample (Software~\ref{sw:arbias} measures the bias).
+
+What survives is weaker but still useful: $u_t$ is uncorrelated with the regressor in its own equation, $Y_{t-1}$, because $Y_{t-1}$ depends
+only on earlier disturbances. That contemporaneous condition is enough for least squares to be \emph{consistent}, that is, to converge to $\beta$
+as $T \to \infty$, and for its sampling distribution to be approximately normal in large samples. Making those statements precise is the work of
+this section.
+
+\subsection{Convergence in probability}
+\label{ssec:plim}
+
+\begin{defn}
+A sequence of random variables $X_n$ \textbf{converges in probability} to a constant $c$, written $X_n \xrightarrow{p} c$ or $\plim X_n = c$, if for
+every $\varepsilon > 0$
+\[
+\lim_{n\to\infty} P\bigl(|X_n - c| > \varepsilon\bigr) = 0 .
+\]
+An estimator $\hat\theta_n$ of $\theta$ is \textbf{consistent} if $\hat\theta_n \xrightarrow{p} \theta$.
+\end{defn}
+
+Consistency says that, with a large enough sample, the estimator is close to the truth with probability as high as we like. It is the minimal
+requirement for an estimator. An inconsistent estimator remains wrong, by an amount that does not shrink, however much data is collected.
+
+\begin{lem}[Markov and Chebyshev inequalities]
+\label{lem:cheb}
+If $W \geq 0$ and $a > 0$, then $P(W \geq a) \leq E(W)/a$. Consequently, for any random variable $X$ with finite variance and any $\varepsilon > 0$,
+\[
+P\bigl(|X - E(X)| \geq \varepsilon\bigr) \leq \frac{\Var(X)}{\varepsilon^2}, \qquad
+P\bigl(|X - c| \geq \varepsilon\bigr) \leq \frac{E\bigl[(X - c)^2\bigr]}{\varepsilon^2} .
+\]
+\end{lem}
+
+\begin{proof}
+Since $W \geq a\,\mathbf 1\{W \geq a\}$ pointwise, $E(W) \geq aP(W \geq a)$. Apply this to $W = (X - c)^2$ and $a = \varepsilon^2$, noting that
+$|X - c| \geq \varepsilon$ exactly when $(X - c)^2 \geq \varepsilon^2$; the case $c = E(X)$ is the first inequality.
+\end{proof}
+
+\begin{thm}[Mean square convergence implies consistency]
+\label{thm:mse}
+If $E(\hat\theta_n) \to \theta$ and $\Var(\hat\theta_n) \to 0$, then $\hat\theta_n \xrightarrow{p} \theta$.
+\end{thm}
+
+\begin{proof}
+$E\bigl[(\hat\theta_n - \theta)^2\bigr] = \Var(\hat\theta_n) + \bigl(E(\hat\theta_n) - \theta\bigr)^2 \to 0$, and by Lemma~\ref{lem:cheb},
+$P\bigl(|\hat\theta_n - \theta| \geq \varepsilon\bigr) \leq E\bigl[(\hat\theta_n - \theta)^2\bigr]/\varepsilon^2 \to 0$.
+\end{proof}
+
+\begin{thm}[Weak law of large numbers]
+\label{thm:wlln}
+Let $X_1, X_2, \dots$ be uncorrelated with common mean $\mu$ and variances bounded by a constant $K$. Then $\bar X_n \xrightarrow{p} \mu$.
+\end{thm}
+
+\begin{proof}
+$E(\bar X_n) = \mu$ and $\Var(\bar X_n) = n^{-2}\sum\Var(X_i) \leq K/n \to 0$. Apply Theorem~\ref{thm:mse}.
+\end{proof}
+
+For independent and identically distributed variables the conclusion holds under the weaker condition that $E|X_i| < \infty$, with no variance
+required (Khinchine's theorem). Versions for dependent but stationary sequences, needed for time series, are stated in
+Section~\ref{ssec:ar1}.
+
+\begin{thm}[Continuous mapping]
+\label{thm:cmt}
+If $X_n \xrightarrow{p} c$ and $g$ is continuous at $c$, then $g(X_n) \xrightarrow{p} g(c)$. The same holds for vectors: if
+$X_n \xrightarrow{p} c$ and $Y_n \xrightarrow{p} d$ then $X_n + Y_n \xrightarrow{p} c + d$, $X_nY_n \xrightarrow{p} cd$, and $X_n/Y_n \xrightarrow{p} c/d$ if $d \neq 0$.
+\end{thm}
+
+\begin{proof}
+Given $\varepsilon > 0$, continuity gives a $\delta > 0$ with $|g(x) - g(c)| < \varepsilon$ whenever $|x - c| < \delta$. So the event
+$|g(X_n) - g(c)| \geq \varepsilon$ is contained in the event $|X_n - c| \geq \delta$, whose probability tends to zero. For two sequences, apply the same
+argument to $g(x, y)$ continuous at $(c, d)$, using
+$P\bigl(\|(X_n, Y_n) - (c, d)\| \geq \delta\bigr) \leq P(|X_n - c| \geq \delta/2) + P(|Y_n - d| \geq \delta/2)$.
+\end{proof}
+
+This is what makes $\plim$ so much easier to work with than expectation. $E(1/X) \neq 1/E(X)$ in general, but $\plim(1/X_n) = 1/\plim X_n$; and
+$E(X_n/Y_n)$ is usually intractable, while $\plim(X_n/Y_n)$ is simply the ratio of the two limits.
+
+\begin{exa}
+\label{ex:bernoulli}
+Let $Y_1, \dots, Y_n$ be a random sample from the Bernoulli distribution with $P(Y = 1) = \theta$, $0 < \theta < 1$.
+\begin{enumerate}[label=(\roman*)]
+\item $E(\bar Y) = \theta$ and $\Var(\bar Y) = \theta(1 - \theta)/n \to 0$, so $\bar Y$ is consistent for $\theta$ by Theorem~\ref{thm:mse}.
+\item The odds $\Upsilon = \theta/(1 - \theta)$ is a continuous function of $\theta$ on $(0, 1)$, so by Theorem~\ref{thm:cmt}
+$\hat\Upsilon = \bar Y/(1 - \bar Y)$ is consistent for $\Upsilon$. It is not unbiased: in a finite sample $\bar Y = 1$ has positive probability, and
+then $\hat\Upsilon$ is not even defined. Consistency survives such defects because their probability vanishes.
+\item Let $\bar Y$ be the mean annual earnings of a sample of $n$ workers with secondary education and $\bar Z$ that of an independent sample of
+$n$ graduates, with population means $\mu_Y > 0$ and $\mu_Z$. The percentage by which graduates' mean earnings exceed secondary-educated
+workers' is $100(\mu_Z/\mu_Y - 1)$. Since $\bar Y \xrightarrow{p} \mu_Y$ and $\bar Z \xrightarrow{p} \mu_Z$, Theorem~\ref{thm:cmt} gives
+\[
+100\left(\frac{\bar Z}{\bar Y} - 1\right) \xrightarrow{p} 100\left(\frac{\mu_Z}{\mu_Y} - 1\right),
+\]
+a consistent estimator, although $E(\bar Z/\bar Y) \neq \mu_Z/\mu_Y$ in general.
+\end{enumerate}
+\end{exa}
+
+\begin{exa}
+\label{ex:zest}
+A random sample $X_1, \dots, X_n$ is drawn from a population with mean $\mu$ and variance $\sigma^2 > 0$. Consider
+\[
+Z_n = \frac12X_1 + \frac14X_2 + \frac18X_3 + \dots + \frac{1}{2^n}X_n .
+\]
+(i) $E(Z_n) = \mu\sum_{i=1}^n 2^{-i} = \mu\,\dfrac{\frac12(1 - 2^{-n})}{1 - \frac12} = \mu(1 - 2^{-n})$, which tends to $\mu$: $Z_n$ is biased but
+asymptotically unbiased.
+
+(ii) Is $Z_n$ consistent? Its variance is
+\[
+\Var(Z_n) = \sigma^2\sum_{i=1}^n 4^{-i} = \sigma^2\,\frac{\frac14(1 - 4^{-n})}{1 - \frac14} = \frac{\sigma^2}{3}(1 - 4^{-n}) \to \frac{\sigma^2}{3} ,
+\]
+which does \emph{not} tend to zero, so Theorem~\ref{thm:mse} cannot be used. That alone does not prove inconsistency: a variance that fails to vanish is
+compatible with convergence in probability in pathological cases. The proof uses the structure of $Z_n$. Let
+$Z_\infty = \sum_{i=1}^\infty 2^{-i}X_i$. Then
+\[
+E\bigl[(Z_\infty - Z_n)^2\bigr] = \Var\Bigl(\sum_{i>n}2^{-i}X_i\Bigr) + \Bigl(\mu\sum_{i>n}2^{-i}\Bigr)^2 = \frac{\sigma^2}{3}4^{-n} + \mu^2 4^{-n} \to 0 ,
+\]
+so $Z_n - Z_\infty \xrightarrow{p} 0$. If also $Z_n \xrightarrow{p} \mu$, then $Z_\infty = Z_n + (Z_\infty - Z_n) \xrightarrow{p} \mu$; but $Z_\infty$ does not depend on
+$n$, so it would equal $\mu$ with probability one. That is impossible, since $\Var(Z_\infty) = \sigma^2/3 > 0$. Hence $Z_n$ is \emph{not} consistent.
+
+The reason is plain from the weights. Half of the weight is on $X_1$ alone, whatever $n$ is, so the estimator never averages out the noise in
+the first observation. Consistency needs every observation's weight to shrink to zero, as the weights $1/n$ of $\bar X_n$ do.
+\end{exa}
+
+\subsection{Convergence in distribution}
+\label{ssec:dist}
+
+Consistency says where an estimator goes; to make inferences we also need to know how it is distributed around its limit in large samples.
+
+\begin{defn}
+$X_n$ \textbf{converges in distribution} to a random variable $X$, written $X_n \xrightarrow{d} X$, if $P(X_n \leq x) \to P(X \leq x)$ at every $x$
+where the distribution function of $X$ is continuous. The distribution of $X$ is the \textbf{limiting distribution} of $X_n$.
+\end{defn}
+
+\begin{thm}[Central limit theorem, Lindeberg--L\'evy]
+\label{thm:clt}
+Let $X_1, X_2, \dots$ be independent and identically distributed with mean $\mu$ and finite variance $\sigma^2 > 0$. Then
+\[
+\sqrt n\,(\bar X_n - \mu) \xrightarrow{d} N(0, \sigma^2) .
+\]
+\end{thm}
+
+\begin{proof}
+We prove it under the extra assumption that the moment generating function of $X_i$ exists near zero; the general proof is the same with the
+characteristic function in its place. Let $W_i = (X_i - \mu)/\sigma$, with moment generating function $M(s)$, and
+$S_n = \sqrt n(\bar X_n - \mu)/\sigma = n^{-1/2}\sum W_i$. By independence,
+\[
+M_{S_n}(t) = \bigl[M(t/\sqrt n)\bigr]^n .
+\]
+Since $E(W) = 0$ and $E(W^2) = 1$, Taylor's theorem gives $M(s) = 1 + \frac12s^2 + r(s)$ with $r(s)/s^2 \to 0$ as $s \to 0$. Hence
+\[
+\log M_{S_n}(t) = n\log\Bigl(1 + \frac{t^2}{2n} + r(t/\sqrt n)\Bigr) \longrightarrow \frac{t^2}{2},
+\]
+because $n\,r(t/\sqrt n) = t^2\,r(t/\sqrt n)/(t/\sqrt n)^2 \to 0$ and $n\log(1 + c_n/n) \to c$ whenever $c_n \to c$. The limit $e^{t^2/2}$ is the moment
+generating function of $N(0, 1)$, and convergence of moment generating functions on a neighbourhood of zero implies convergence in distribution
+(Curtiss's continuity theorem). Multiplying by $\sigma$ gives the result.
+\end{proof}
+
+The CLT is the reason the normal distribution is everywhere in econometrics. Estimators are, to a first approximation, averages, and averages
+are approximately normal whatever the distribution of what is averaged. Two tools transfer that normality from averages to the estimators
+built from them.
+
+\begin{thm}[Slutsky]
+\label{thm:slutsky}
+If $X_n \xrightarrow{d} X$ and $Y_n \xrightarrow{p} c$, a constant, then
+\[
+X_n + Y_n \xrightarrow{d} X + c, \qquad Y_nX_n \xrightarrow{d} cX, \qquad X_n/Y_n \xrightarrow{d} X/c \ \ (c \neq 0) .
+\]
+\end{thm}
+
+\begin{proof}
+We prove the first statement; the others follow by similar arguments. Let $F$ be the distribution function of $X$, and let $x$ be such that $F$ is
+continuous at $x - c$. For $\varepsilon > 0$ such that $F$ is continuous at $x - c \pm \varepsilon$,
+\begin{align*}
+P(X_n + Y_n \leq x) &\leq P(X_n \leq x - c + \varepsilon) + P(|Y_n - c| > \varepsilon),\\
+P(X_n + Y_n \leq x) &\geq P(X_n \leq x - c - \varepsilon) - P(|Y_n - c| > \varepsilon) .
+\end{align*}
+Letting $n \to \infty$, the limit of $P(X_n + Y_n \leq x)$ lies between $F(x - c - \varepsilon)$ and $F(x - c + \varepsilon)$. Letting $\varepsilon \to 0$ through
+continuity points, both bounds tend to $F(x - c) = P(X + c \leq x)$.
+\end{proof}
+
+\begin{thm}[The delta method]
+\label{thm:delta}
+If $\sqrt n(T_n - \theta) \xrightarrow{d} N(0, v)$ and $g$ is differentiable at $\theta$ with $g'(\theta) \neq 0$, then
+\[
+\sqrt n\bigl(g(T_n) - g(\theta)\bigr) \xrightarrow{d} N\bigl(0, g'(\theta)^2v\bigr) .
+\]
+\end{thm}
+
+\begin{proof}
+First, $T_n \xrightarrow{p} \theta$: by Slutsky, $T_n - \theta = n^{-1/2}\cdot\sqrt n(T_n - \theta) \xrightarrow{d} 0 \cdot N(0, v) = 0$, and convergence in
+distribution to a constant is convergence in probability to it. Define $h(t) = \bigl(g(t) - g(\theta)\bigr)/(t - \theta)$ for $t \neq \theta$ and
+$h(\theta) = g'(\theta)$. Differentiability makes $h$ continuous at $\theta$, so $h(T_n) \xrightarrow{p} g'(\theta)$ by Theorem~\ref{thm:cmt}. Then
+\[
+\sqrt n\bigl(g(T_n) - g(\theta)\bigr) = h(T_n)\cdot\sqrt n(T_n - \theta) \xrightarrow{d} g'(\theta)\,N(0, v)
+\]
+by Slutsky's theorem.
+\end{proof}
+
+In practice the theorem is used as an approximation:
+$\operatorname{se}\bigl(g(T_n)\bigr) \approx |g'(T_n)|\operatorname{se}(T_n)$. This is the formula used for the growth rate $\hat g = e^b - 1$ in
+Section~\ref{ssec:growth}, with $g'(b) = e^b$.
+
+\begin{exa}
+\label{ex:oddsdelta}
+For the Bernoulli odds of Example~\ref{ex:bernoulli}, $\sqrt n(\bar Y - \theta) \xrightarrow{d} N\bigl(0, \theta(1 - \theta)\bigr)$ by the CLT. With
+$g(\theta) = \theta/(1 - \theta)$, $g'(\theta) = 1/(1 - \theta)^2$, so
+\[
+\sqrt n(\hat\Upsilon - \Upsilon) \xrightarrow{d} N\left(0,\ \frac{\theta}{(1 - \theta)^3}\right) .
+\]
+With $n = 400$ and $\bar Y = 0.2$, $\hat\Upsilon = 0.25$ and $\operatorname{se}(\hat\Upsilon) \approx \sqrt{0.2/(0.8^3 \times 400)} = 0.031$.
+
+The delta method also explains the Fisher transformation used in Software~\ref{sw:cor}. For a bivariate normal sample the correlation satisfies
+$\sqrt n(r - \rho) \xrightarrow{d} N\bigl(0, (1 - \rho^2)^2\bigr)$. The variance depends on $\rho$, which is unknown. With $g(r) = \tanh^{-1}r$,
+$g'(\rho) = 1/(1 - \rho^2)$ and the limiting variance becomes $(1 - \rho^2)^2/(1 - \rho^2)^2 = 1$, free of $\rho$. That is why $\tanh^{-1}r$ has variance
+close to $1/n$, refined in practice to $1/(n - 3)$. A function chosen to make the variance constant in this way is a \emph{variance-stabilising
+transformation}.
+\end{exa}
+
+\subsection{Least squares in large samples}
+\label{ssec:olsasym}
+
+Suppose now that $(X_i, Y_i)$, $i = 1, \dots, n$, are independent draws from a population in which
+\[
+Y_i = \alpha + \beta X_i + u_i, \qquad E(u_i) = 0, \qquad \Cov(X_i, u_i) = 0 ,
+\]
+with finite fourth moments. This is far weaker than (A1): nothing is said about the conditional mean of $u$, only that it is uncorrelated with $X$.
+
+\begin{thm}
+\label{thm:olsconsistent}
+Under these conditions, with $\Var(X) > 0$:
+\begin{enumerate}[label=(\roman*)]
+\item $b \xrightarrow{p} \beta$: least squares is consistent;
+\item if also $E(u_i^2 \mid X_i) = \sigma^2$, then $\sqrt n(b - \beta) \xrightarrow{d} N\bigl(0, \sigma^2/\Var(X)\bigr)$;
+\item without that condition, $\sqrt n(b - \beta) \xrightarrow{d} N\Bigl(0,\ E\bigl[(X - \mu_X)^2u^2\bigr]\big/\Var(X)^2\Bigr)$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+Write
+\[
+b - \beta = \frac{\frac1n\sum (X_i - \bar X)u_i}{\frac1n\sum (X_i - \bar X)^2} .
+\]
+The denominator is $\frac1n\sum (X_i - \mu_X)^2 - (\bar X - \mu_X)^2 \xrightarrow{p} \Var(X)$ by the law of large numbers and Theorem~\ref{thm:cmt}. Likewise
+the numerator is $\frac1n\sum (X_i - \mu_X)u_i - (\bar X - \mu_X)\bar u \xrightarrow{p} \Cov(X, u) - 0 = 0$. So $b - \beta \xrightarrow{p} 0/\Var(X) = 0$, which is (i).
+
+For (ii) and (iii), multiply the numerator by $\sqrt n$:
+\[
+\frac{1}{\sqrt n}\sum (X_i - \mu_X)u_i - \sqrt n(\bar X - \mu_X)\,\bar u .
+\]
+The terms $(X_i - \mu_X)u_i$ are independent and identically distributed with mean $\Cov(X, u) = 0$ and variance $E\bigl[(X - \mu_X)^2u^2\bigr]$, so the first
+term converges in distribution to $N\bigl(0, E[(X - \mu_X)^2u^2]\bigr)$ by the CLT. In the second, $\sqrt n(\bar X - \mu_X)$ converges in distribution and
+$\bar u \xrightarrow{p} 0$, so the product converges to zero by Slutsky. Dividing by the denominator, which converges in probability to $\Var(X)$, and
+applying Slutsky again gives (iii). Under $E(u^2 \mid X) = \sigma^2$, iterated expectations give
+$E\bigl[(X - \mu_X)^2u^2\bigr] = \sigma^2\Var(X)$, and (iii) reduces to (ii).
+\end{proof}
+
+Three lessons follow. First, consistency needs only zero \emph{correlation} between regressor and disturbance; zero conditional mean was needed for
+unbiasedness. Second, the large-sample variance in (ii) is $\sigma^2/(n\Var(X))$, which is what $\sigma^2/\sum x_i^2$ estimates, so the usual standard
+error and the usual $t$ test are justified in large samples \emph{without normality}: $t$ is then approximately $N(0, 1)$ rather than exactly
+$t_{n-2}$. Third, when the variance of $u$ depends on $X$, (iii) shows that the usual formula is wrong. The correct ``sandwich'' variance is the basis
+of the heteroscedasticity-robust standard errors of the section on heteroscedasticity.
+
+\subsection{The autoregressive scheme}
+\label{ssec:ar1}
+
+\begin{defn}
+The \textbf{first-order autoregressive scheme}, AR(1), is
+\[
+Y_t = \alpha + \beta Y_{t-1} + u_t ,
+\]
+where the $u_t$ are uncorrelated with mean $0$ and variance $\sigma^2$, and $u_t$ is uncorrelated with all earlier values of $Y$. A process is
+\textbf{covariance stationary} if its mean and variance are constant over time and $\Cov(Y_t, Y_{t+k})$ depends only on the lag $k$, not on $t$.
+\end{defn}
+
+Substituting the equation into itself $s$ times gives
+\[
+Y_t = \alpha(1 + \beta + \dots + \beta^{s}) + (u_t + \beta u_{t-1} + \dots + \beta^{s}u_{t-s}) + \beta^{s+1}Y_{t-s-1} .
+\]
+If the scheme started long ago and $|\beta| < 1$, the last term vanishes as $s \to \infty$ and
+\begin{equation}
+\label{eq:ma-inf}
+Y_t = \alpha(1 + \beta + \beta^2 + \cdots) + (u_t + \beta u_{t-1} + \beta^2u_{t-2} + \cdots) = \frac{\alpha}{1 - \beta} + \sum_{j=0}^\infty \beta^ju_{t-j} .
+\end{equation}
+$Y_t$ is the accumulation of all past shocks, each discounted geometrically by its age.
+
+\begin{thm}
+\label{thm:ar1}
+If $|\beta| < 1$, the AR(1) scheme \eqref{eq:ma-inf} is covariance stationary with
+\begin{align*}
+E(Y_t) &= \frac{\alpha}{1 - \beta}, \qquad \Var(Y_t) = \gamma_0 = \frac{\sigma^2}{1 - \beta^2},\\
+\gamma_k &= \Cov(Y_t, Y_{t+k}) = \beta^k\gamma_0, \qquad \rho_k = \frac{\gamma_k}{\gamma_0} = \beta^k, \qquad k = 0, 1, 2, \dots
+\end{align*}
+If $|\beta| \geq 1$ the series $\alpha\sum\beta^j$ does not converge and $E(Y_t)$ does not exist for a process started in the infinite past.
+\end{thm}
+
+\begin{proof}
+The geometric series $\sum\beta^j$ converges to $1/(1 - \beta)$ exactly when $|\beta| < 1$, which gives the mean. The shocks are uncorrelated with
+common variance, so $\Var(Y_t) = \sigma^2\sum_{j\geq0}\beta^{2j} = \sigma^2/(1 - \beta^2)$. For the autocovariance, write
+$Y_{t+k} - \mu = \sum_{i\geq0}\beta^iu_{t+k-i}$. The terms with $i < k$ involve shocks after $t$, uncorrelated with $Y_t$; setting $i = j + k$ in the
+rest,
+\[
+\gamma_k = \Cov\Bigl(\sum_j\beta^ju_{t-j},\ \sum_j\beta^{j+k}u_{t-j}\Bigr) = \sigma^2\sum_{j\geq0}\beta^j\beta^{j+k} = \beta^k\frac{\sigma^2}{1 - \beta^2} .
+\]
+None of these depends on $t$, so the process is covariance stationary.
+\end{proof}
+
+The autocorrelations decay geometrically: a shock's influence fades by the factor $\beta$ each period. The closer $\beta$ is to one, the more
+persistent the process. At $\beta = 1$ the process becomes the \textbf{random walk with drift} $Y_t = \alpha + Y_{t-1} + u_t$. Starting from a
+fixed $Y_0$, $Y_t = Y_0 + \alpha t + \sum_{s=1}^t u_s$, with variance $t\sigma^2$, which grows without bound. A random walk has no fixed mean to return
+to, and it is not stationary. Figure~\ref{fig:arpaths} shows the difference. Whether an economic series behaves like the first panel or the last
+has large consequences for regression, and it is the subject of the section on unit roots.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[ttl/.style={font=\small\bfseries,anchor=west}]
+\begin{scope}[shift={(0,0)}]
+\fill[blue!7,rounded corners=4pt] (-0.3,-0.25) rectangle (4.5,3.35);
+\node[ttl,blue!60!black] at (-0.1,3.05) {$\beta = 0.5$};
+\draw[gray,dashed] (0,2.267) -- (4.2,2.267);
+\draw[blue!70!black,thick] plot coordinates {(0.000,2.188) (0.042,2.231) (0.084,2.047) (0.126,1.975) (0.168,2.278) (0.210,2.148) (0.252,2.384) (0.294,2.408) (0.336,2.331) (0.378,2.165) (0.420,2.105) (0.462,2.140) (0.504,1.998) (0.546,2.098) (0.588,2.029) (0.630,2.150) (0.672,2.178) (0.714,2.341) (0.756,2.225) (0.798,2.158) (0.840,2.121) (0.882,2.192) (0.924,2.170) (0.966,2.265) (1.008,2.276) (1.050,2.272) (1.092,2.244) (1.134,2.153) (1.176,2.181) (1.218,2.092) (1.260,2.032) (1.302,2.024) (1.344,2.236) (1.386,2.041) (1.428,2.038) (1.470,2.217) (1.512,2.217) (1.554,2.448) (1.596,2.276) (1.638,2.225) (1.680,2.028) (1.722,2.150) (1.764,2.327) (1.806,2.181) (1.848,2.342) (1.890,2.259) (1.932,1.971) (1.974,2.236) (2.016,2.348) (2.058,2.337) (2.100,2.407) (2.142,2.306) (2.184,2.177) (2.226,2.289) (2.268,2.299) (2.310,2.355) (2.352,2.290) (2.394,2.337) (2.436,2.500) (2.478,2.391) (2.520,2.216) (2.562,2.553) (2.604,2.394) (2.646,2.070) (2.688,2.240) (2.730,2.479) (2.772,2.268) (2.814,2.124) (2.856,2.114) (2.898,2.291) (2.940,2.339) (2.982,2.287) (3.024,2.175) (3.066,2.251) (3.108,2.408) (3.150,2.358) (3.192,2.221) (3.234,2.304) (3.276,2.143) (3.318,2.258) (3.360,2.254) (3.402,2.302) (3.444,2.204) (3.486,2.114) (3.528,2.492) (3.570,2.299) (3.612,2.110) (3.654,2.256) (3.696,2.147) (3.738,2.006) (3.780,2.297) (3.822,2.145) (3.864,2.331) (3.906,2.226) (3.948,2.315) (3.990,2.244) (4.032,2.432) (4.074,2.197) (4.116,2.420) (4.158,2.263)};
+\end{scope}
+\begin{scope}[shift={(5.1,0)}]
+\fill[orange!9,rounded corners=4pt] (-0.3,-0.25) rectangle (4.5,3.35);
+\node[ttl,orange!80!black] at (-0.1,3.05) {$\beta = 0.95$};
+\draw[gray,dashed] (0,2.267) -- (4.2,2.267);
+\draw[orange!85!black,thick] plot coordinates {(0.000,2.188) (0.042,2.195) (0.084,1.997) (0.126,1.829) (0.168,2.008) (0.210,1.896) (0.252,2.091) (0.294,2.183) (0.336,2.181) (0.378,2.052) (0.420,1.952) (0.462,1.921) (0.504,1.733) (0.546,1.726) (0.588,1.600) (0.630,1.635) (0.672,1.636) (0.714,1.786) (0.756,1.731) (0.798,1.671) (0.840,1.610) (0.882,1.640) (0.924,1.613) (0.966,1.692) (1.008,1.731) (1.050,1.759) (1.092,1.759) (1.134,1.682) (1.176,1.682) (1.218,1.580) (1.260,1.467) (1.302,1.382) (1.344,1.517) (1.386,1.344) (1.428,1.274) (1.470,1.388) (1.512,1.407) (1.554,1.656) (1.596,1.605) (1.638,1.592) (1.680,1.408) (1.722,1.453) (1.764,1.613) (1.806,1.529) (1.848,1.685) (1.890,1.668) (1.932,1.406) (1.974,1.567) (2.016,1.698) (2.058,1.756) (2.100,1.887) (2.142,1.875) (2.184,1.786) (2.226,1.876) (2.268,1.917) (2.310,2.007) (2.352,1.999) (2.394,2.071) (2.436,2.279) (2.478,2.286) (2.520,2.172) (2.562,2.489) (2.604,2.462) (2.646,2.192) (2.688,2.267) (2.730,2.493) (2.772,2.376) (2.814,2.228) (2.856,2.148) (2.898,2.255) (2.940,2.316) (2.982,2.297) (3.024,2.194) (3.066,2.228) (3.108,2.379) (3.150,2.394) (3.192,2.296) (3.234,2.355) (3.276,2.208) (3.318,2.265) (3.360,2.256) (3.402,2.299) (3.444,2.216) (3.486,2.098) (3.528,2.408) (3.570,2.320) (3.612,2.145) (3.654,2.218) (3.696,2.107) (3.738,1.914) (3.780,2.092) (3.822,1.964) (3.864,2.104) (3.906,2.040) (3.948,2.119) (3.990,2.080) (4.032,2.266) (4.074,2.114) (4.116,2.310) (4.158,2.228)};
+\end{scope}
+\begin{scope}[shift={(10.2,0)}]
+\fill[red!7,rounded corners=4pt] (-0.3,-0.25) rectangle (4.5,3.35);
+\node[ttl,red!65!black] at (-0.1,3.05) {$\beta = 1$ (random walk)};
+\draw[gray,dashed] (0,2.267) -- (4.2,2.267);
+\draw[red!65!black,thick] plot coordinates {(0.000,2.188) (0.042,2.191) (0.084,1.989) (0.126,1.808) (0.168,1.965) (0.210,1.840) (0.252,2.017) (0.294,2.100) (0.336,2.094) (0.378,1.960) (0.420,1.849) (0.462,1.803) (0.504,1.598) (0.546,1.564) (0.588,1.411) (0.630,1.412) (0.672,1.382) (0.714,1.501) (0.756,1.422) (0.798,1.334) (0.840,1.243) (0.882,1.241) (0.924,1.182) (0.966,1.229) (1.008,1.239) (1.050,1.240) (1.092,1.215) (1.134,1.113) (1.176,1.083) (1.218,0.952) (1.260,0.805) (1.302,0.680) (1.344,0.770) (1.386,0.560) (1.428,0.444) (1.470,0.509) (1.512,0.484) (1.554,0.690) (1.596,0.608) (1.638,0.562) (1.680,0.344) (1.722,0.347) (1.764,0.466) (1.806,0.349) (1.848,0.468) (1.890,0.422) (1.932,0.130) (1.974,0.248) (2.016,0.344) (2.058,0.374) (2.100,0.479) (2.142,0.448) (2.184,0.339) (2.226,0.406) (2.268,0.427) (2.310,0.499) (2.352,0.478) (2.394,0.537) (2.436,0.735) (2.478,0.743) (2.520,0.630) (2.562,0.942) (2.604,0.926) (2.646,0.666) (2.688,0.738) (2.730,0.964) (2.772,0.858) (2.814,0.715) (2.856,0.634) (2.898,0.734) (2.940,0.795) (2.982,0.778) (3.024,0.676) (3.066,0.707) (3.108,0.856) (3.150,0.877) (3.192,0.785) (3.234,0.846) (3.276,0.703) (3.318,0.757) (3.360,0.748) (3.402,0.790) (3.444,0.709) (3.486,0.588) (3.528,0.890) (3.570,0.810) (3.612,0.637) (3.654,0.704) (3.696,0.590) (3.738,0.389) (3.780,0.550) (3.822,0.413) (3.864,0.538) (3.906,0.465) (3.948,0.534) (3.990,0.487) (4.032,0.664) (4.074,0.512) (4.116,0.700) (4.158,0.620)};
+\end{scope}
+\end{tikzpicture}
+\caption{One hundred periods of $Y_t = \beta Y_{t-1} + u_t$ for three values of $\beta$, driven by the \emph{same} shocks and drawn on the same
+vertical scale. The dashed line is zero, the mean of the two stationary processes. With $\beta = 0.5$ the series hugs its mean; with $\beta = 0.95$ it
+wanders in long swings but returns; the random walk drifts away and does not come back.}
+\label{fig:arpaths}
+\end{figure}
+
+\subhead{Least squares for the AR(1) model}
+The least squares estimator $b = \sum_t (Y_t - \bar Y)(Y_{t-1} - \bar Y_{-1})/\sum_t (Y_{t-1} - \bar Y_{-1})^2$, from regressing $Y_t$ on $Y_{t-1}$, has the
+form of Theorem~\ref{thm:olsconsistent} with $X_t = Y_{t-1}$, but the pairs are no longer independent. The time-series versions of the law of large
+numbers and the central limit theorem replace independence by stationarity together with a condition that the dependence dies out, and the
+$u_t$ by a martingale difference sequence. With them one obtains, for $|\beta| < 1$ and independent identically distributed $u_t$,
+\[
+b \xrightarrow{p} \beta, \qquad \sqrt T(b - \beta) \xrightarrow{d} N(0,\ 1 - \beta^2) .
+\]
+The variance is the $\sigma^2/\Var(X)$ of Theorem~\ref{thm:olsconsistent}(ii) with $\Var(X) = \Var(Y_{t-1}) = \sigma^2/(1 - \beta^2)$. In finite samples $b$ is
+biased towards zero. A classical approximation, due to Kendall and to Marriott and Pope, is
+\[
+E(b) \approx \beta - \frac{1 + 3\beta}{T} .
+\]
+The bias is of order $1/T$, while the standard deviation is of order $1/\sqrt T$. In large samples the bias is negligible beside the sampling
+error, but in the short annual series common in macroeconomics it is not.
+
+\subsection{Maximum likelihood for the autoregressive equation}
+\label{ssec:ar1ml}
+
+Suppose now that the $u_t$ are independent $N(0, \sigma^2)$ and the observations are $Y_1, \dots, Y_T$. The joint density factors as
+$f(Y_1)\prod_{t=2}^T f(Y_t \mid Y_{t-1})$, and given $Y_{t-1}$, $Y_t \sim N(\alpha + \beta Y_{t-1}, \sigma^2)$.
+
+\begin{thm}
+\label{thm:ar1ml}
+\begin{enumerate}[label=(\roman*)]
+\item The \textbf{conditional} log-likelihood, which treats $Y_1$ as fixed, is
+\[
+\ell_c(\alpha, \beta, \sigma^2) = -\frac{T-1}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{t=2}^T (Y_t - \alpha - \beta Y_{t-1})^2 ,
+\]
+and it is maximised by the least squares estimates of $\alpha$ and $\beta$, with $\hat\sigma^2 = \text{RSS}/(T - 1)$.
+\item If $|\beta| < 1$ and the process is stationary, $Y_1 \sim N\bigl(\alpha/(1 - \beta),\ \sigma^2/(1 - \beta^2)\bigr)$, and the \textbf{exact} log-likelihood is
+\[
+\ell(\alpha, \beta, \sigma^2) = \ell_c - \frac12\log\frac{2\pi\sigma^2}{1 - \beta^2} - \frac{1 - \beta^2}{2\sigma^2}\left(Y_1 - \frac{\alpha}{1 - \beta}\right)^2 .
+\]
+Its maximiser is not least squares and must be found numerically.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) The conditional density of each $Y_t$ is normal with mean $\alpha + \beta Y_{t-1}$ and variance $\sigma^2$; the log of the product of $T - 1$ such
+densities is $\ell_c$. For any $\sigma^2$, $\ell_c$ is maximised over $(\alpha, \beta)$ by minimising the sum of squares, which is least squares.
+Setting $\partial\ell_c/\partial\sigma^2 = -\frac{T-1}{2\sigma^2} + \frac{\text{RSS}}{2\sigma^4} = 0$ gives $\hat\sigma^2 = \text{RSS}/(T - 1)$.
+
+(ii) Add $\log f(Y_1)$ for the stated normal distribution, which is Theorem~\ref{thm:ar1} with normal shocks. The extra terms involve $\beta$
+non-linearly through $1 - \beta^2$, so the first-order conditions are no longer linear.
+\end{proof}
+
+The two estimators differ only through one observation's contribution out of $T$, so they have the same large-sample distribution. In small
+samples the exact likelihood uses the information in $Y_1$, and it automatically keeps $|\hat\beta| < 1$, since the term $\log(1 - \beta^2)$ tends to
+$-\infty$ as $|\beta| \to 1$. The general theory of maximum likelihood, which shows that such estimators are consistent, asymptotically normal and
+efficient, is developed in its own section.
+
+\subsection{Large samples in software}
+\label{ssec:software4}
+
+\begin{software}[A Monte Carlo study of least squares bias]
+\label{sw:arbias}
+A Monte Carlo experiment answers questions that theory answers only approximately: generate many samples from a known model, estimate on
+each, and look at the distribution of the estimates. Here $Y_t = 1 + 0.75Y_{t-1} + u_t$ with $u_t \sim N(0, 1)$, 2\,000 samples for each length
+$T$:
+{\small\begin{verbatim}
+> set.seed(2026)
+> ar1_ols <- function(T, beta = 0.75, alpha = 1) {
++   y <- numeric(T + 50); y[1] <- alpha / (1 - beta)
++   for (t in 2:(T + 50)) y[t] <- alpha + beta * y[t - 1] + rnorm(1)
++   y <- y[-(1:50)]                     # discard a burn-in
++   coef(lm(y[-1] ~ y[-T]))[2] }
+> for (T in c(20, 50, 200, 1000)) {
++   b <- replicate(2000, ar1_ols(T))
++   cat(sprintf("T = %4d  mean b = %.4f  approx bias = %.4f  sd = %.4f\n",
++       T, mean(b), -(1 + 3 * 0.75) / T, sd(b))) }
+T =   20  mean b = 0.5796  approx bias = -0.1625  sd = 0.1949
+T =   50  mean b = 0.6778  approx bias = -0.0650  sd = 0.1143
+T =  200  mean b = 0.7326  approx bias = -0.0163  sd = 0.0500
+T = 1000  mean b = 0.7479  approx bias = -0.0032  sd = 0.0209
+\end{verbatim}}
+\textbf{Reading the output.} With twenty observations the average estimate is $0.580$, a bias of $-0.170$, close to the approximation $-0.1625$. The
+bias falls roughly in proportion to $1/T$, and by $T = 1000$ it is negligible: this is consistency at work. The standard deviation falls like
+$1/\sqrt T$. The asymptotic value $\sqrt{(1 - 0.75^2)/T}$ is $0.047$ at $T = 200$ and $0.021$ at $T = 1000$, close to the simulated $0.050$ and $0.021$.
+The first 50 values of each series are discarded so that the process has forgotten its starting value. That ``burn-in'' is standard practice
+whenever a stationary process is simulated.
+
+\textbf{Stata:} \texttt{simulate b = r(b), reps(2000): myprog} with a program that generates one series and regresses it. \textbf{EViews:} a program
+loop with \texttt{for} and \texttt{nrnd}, storing \texttt{@coefs(2)} in a vector.
+\end{software}
+
+\begin{software}[Least squares, conditional and exact maximum likelihood]
+\label{sw:arima}
+One simulated series of 100 observations from an AR(1) with $\beta = 0.75$ and mean $4$, estimated three ways:
+{\small\begin{verbatim}
+> set.seed(7)
+> y <- arima.sim(list(ar = 0.75), n = 100) + 4
+> coef(lm(y[-1] ~ y[-100]))
+(Intercept)     y[-100]
+  1.1509721   0.7310427
+> fit_css <- arima(y, order = c(1, 0, 0), method = "CSS")
+> fit_ml  <- arima(y, order = c(1, 0, 0), method = "ML")
+> rbind(CSS = coef(fit_css), ML = coef(fit_ml))
+          ar1 intercept
+CSS 0.7310431  4.279385
+ML  0.7548207  4.461537
+\end{verbatim}}
+\textbf{Reading the output.} Conditional maximum likelihood (\texttt{CSS}, ``conditional sum of squares'') reproduces least squares to six
+decimals, as Theorem~\ref{thm:ar1ml}(i) says it must. Note that \texttt{arima} reports the process \emph{mean}, labelled \texttt{intercept}, not $\alpha$.
+The two are linked by $\mu = \alpha/(1 - \beta)$, and indeed $1.1510/(1 - 0.7310) = 4.279$. Exact maximum likelihood, which also uses the distribution of
+the first observation, gives the somewhat different $\hat\beta = 0.755$. With $T = 100$ the gap is well within one standard error, about $0.07$.
+
+\textbf{Stata:} \texttt{arima y, ar(1)} (exact ML by default; \texttt{condition} for conditional). \textbf{EViews:} \texttt{ls y c ar(1)}, which
+estimates by non-linear least squares; the ARMA options choose conditional or exact ML.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Consider the autoregressive scheme $Y_t = \alpha + \beta Y_{t-1} + U_t$, where the $U_t$ are independent and identically distributed with
+$E(U_t) = 0$ and $\Var(U_t) = \sigma^2$. Assuming the scheme started a long time ago, it can be written
+\[
+Y_t = \alpha(1 + \beta + \beta^2 + \cdots) + (U_t + \beta U_{t-1} + \beta^2U_{t-2} + \cdots) .
+\]
+\begin{enumerate}[label=(\roman*)]
+\item Find $E(Y_t)$ and state the condition under which it exists.
+\item Find $\Var(Y_t)$.
+\item Find the autocovariances of orders one and two.
+\item Using (iii), find the autocovariance function and give reasons why the scheme is covariance stationary.
+\item Why is the scheme $Y_t = 0.05 + 0.95Y_{t-1} + U_t$ covariance stationary?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(i) $E(Y_t) = \alpha\sum_{j\geq0}\beta^j = \alpha/(1 - \beta)$, which exists if and only if $|\beta| < 1$, the condition for the geometric series to converge.
+
+(ii) The $U$'s are uncorrelated with common variance, so $\Var(Y_t) = \sigma^2(1 + \beta^2 + \beta^4 + \cdots) = \sigma^2/(1 - \beta^2)$.
+
+(iii) $Y_{t+1} - \mu = U_{t+1} + \beta(Y_t - \mu)$ and $U_{t+1}$ is uncorrelated with $Y_t$, so $\gamma_1 = \beta\Var(Y_t) = \beta\sigma^2/(1 - \beta^2)$. Similarly
+$Y_{t+2} - \mu = U_{t+2} + \beta U_{t+1} + \beta^2(Y_t - \mu)$ gives $\gamma_2 = \beta^2\sigma^2/(1 - \beta^2)$.
+
+(iv) The same argument with $k$ steps gives $\gamma_k = \beta^k\sigma^2/(1 - \beta^2)$, $k = 0, 1, 2, \dots$ The mean, the variance and every
+autocovariance are free of $t$, and $\gamma_k$ depends only on the lag $k$, so the scheme is covariance stationary (Theorem~\ref{thm:ar1}).
+
+(v) $|\beta| = 0.95 < 1$. Its mean is $0.05/(1 - 0.95) = 1$ and its variance $\sigma^2/(1 - 0.9025) = 10.26\sigma^2$. With $\beta$ this close to one the process is
+highly persistent ($\rho_{10} = 0.95^{10} = 0.60$), but it does return to its mean.
+\end{solution}
+
+\begin{problem}
+A time series is described by
+\begin{align*}
+Y_t = {}& 10\left(1 + \frac34 + \left(\frac34\right)^2 + \cdots\right)\\
+&+ \left(U_t + \frac34U_{t-1} + \left(\frac34\right)^2U_{t-2} + \cdots\right),
+\end{align*}
+where $E(U_t) = 0$, $\Var(U_t) = \sigma^2$ and $\Cov(U_t, U_{t+k}) = 0$ for all $k \neq 0$. Find $E(Y_t)$, $\Var(Y_t)$, $\Cov(Y_t, Y_{t+k})$ for
+$k = 1, 2, 3$, and the first three autocorrelations, and describe the pattern.
+\end{problem}
+
+\begin{solution}
+This is the AR(1) scheme with $\alpha = 10$ and $\beta = \frac34$. By Theorem~\ref{thm:ar1},
+\[
+E(Y_t) = \frac{10}{1 - \frac34} = 40, \qquad \Var(Y_t) = \frac{\sigma^2}{1 - \frac{9}{16}} = \frac{16}{7}\sigma^2 = 2.286\sigma^2 ,
+\]
+\[
+\gamma_1 = \tfrac34\cdot\tfrac{16}{7}\sigma^2 = \tfrac{12}{7}\sigma^2, \qquad
+\gamma_2 = \tfrac{9}{16}\cdot\tfrac{16}{7}\sigma^2 = \tfrac{9}{7}\sigma^2, \qquad
+\gamma_3 = \tfrac{27}{64}\cdot\tfrac{16}{7}\sigma^2 = \tfrac{27}{28}\sigma^2 .
+\]
+The autocorrelations are $\rho_1 = 0.75$, $\rho_2 = 0.5625$, $\rho_3 = 0.4219$: each is $\frac34$ of the one before. They decay geometrically, the
+signature of a stationary AR(1).
+\end{solution}
+
+\begin{problem}
+Let $Y_1, \dots, Y_n$ be a random sample from a Bernoulli population with $P(Y = 1) = \theta$, $0 < \theta < 1$.
+\begin{enumerate}[label=(\alph*)]
+\item Show that $\bar Y$ is consistent for $\theta$, and hence find a consistent estimator of the odds $\theta/(1 - \theta)$.
+\item Find the limiting distribution of $\sqrt n\bigl(\log\hat\Upsilon - \log\Upsilon\bigr)$, where $\hat\Upsilon$ is your estimator.
+\item In a sample of 500 households, 120 own a refrigerator. Give an approximate $95\%$ confidence interval for the odds of ownership.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) As in Example~\ref{ex:bernoulli}, $\Var(\bar Y) = \theta(1 - \theta)/n \to 0$ with $E(\bar Y) = \theta$, so $\bar Y \xrightarrow{p} \theta$, and
+$\bar Y/(1 - \bar Y) \xrightarrow{p} \theta/(1 - \theta)$ by the continuous mapping theorem.
+
+(b) $\log\Upsilon = \log\theta - \log(1 - \theta)$ has derivative $\frac1\theta + \frac{1}{1 - \theta} = \frac{1}{\theta(1 - \theta)}$. By the delta method,
+\[
+\sqrt n(\log\hat\Upsilon - \log\Upsilon) \xrightarrow{d} N\left(0,\ \frac{\theta(1 - \theta)}{\theta^2(1 - \theta)^2}\right) = N\left(0,\ \frac{1}{\theta(1 - \theta)}\right) .
+\]
+
+(c) $\bar Y = 0.24$, $\hat\Upsilon = 0.24/0.76 = 0.316$, $\log\hat\Upsilon = -1.153$ with standard error $1/\sqrt{500(0.24)(0.76)} = 0.105$. The interval for the
+log-odds is $-1.153 \pm 1.96(0.105) = (-1.358, -0.948)$, and exponentiating gives $(0.257, 0.388)$ for the odds. Working on the log scale keeps the
+interval positive and makes it asymmetric, as it should be for a ratio.
+\end{solution}
+
+\begin{problem}
+Show that the sample variance $S_n^2 = \frac1n\sum (X_i - \bar X)^2$ of a random sample with $E(X_i^4) < \infty$ is consistent for $\sigma^2$, and deduce that
+$S_n$ is consistent for $\sigma$. Is the version with divisor $n - 1$ also consistent?
+\end{problem}
+
+\begin{solution}
+$S_n^2 = \frac1n\sum X_i^2 - \bar X^2$. By the law of large numbers $\frac1n\sum X_i^2 \xrightarrow{p} E(X^2)$ (the $X_i^2$ are independent with finite variance)
+and $\bar X \xrightarrow{p} \mu$, so by continuous mapping $S_n^2 \xrightarrow{p} E(X^2) - \mu^2 = \sigma^2$, and $S_n = \sqrt{S_n^2} \xrightarrow{p} \sigma$ since the square
+root is continuous. The version with divisor $n - 1$ is $\frac{n}{n-1}S_n^2$, and $\frac{n}{n-1} \to 1$, so it is consistent too. Consistency cannot
+distinguish between them; unbiasedness does.
+\end{solution}
+
+\begin{problem}
+In the regression through the origin $Y_i = \beta X_i + u_i$ with $(X_i, u_i)$ independent and identically distributed, $E(u_i) = 0$ and
+$E(X_i^2) > 0$, the estimator is $\tilde b = \sum X_iY_i/\sum X_i^2$. Find $\plim\tilde b$ when
+\begin{enumerate}[label=(\alph*)]
+\item $E(X_iu_i) = 0$;
+\item the true model has an intercept, $Y_i = \alpha + \beta X_i + u_i$ with $E(X_iu_i) = 0$ and $\alpha \neq 0$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\tilde b = \beta + \frac{\frac1n\sum X_iu_i}{\frac1n\sum X_i^2} \xrightarrow{p} \beta + \frac{E(Xu)}{E(X^2)} = \beta$.
+
+(b) Now $\tilde b = \beta + \frac{\alpha\frac1n\sum X_i + \frac1n\sum X_iu_i}{\frac1n\sum X_i^2} \xrightarrow{p} \beta + \frac{\alpha\mu_X}{E(X^2)}$. Omitting the intercept is
+inconsistent unless $\mu_X = 0$; the error does not go away with more data. This is the large-sample counterpart of the bias noted in
+Problem~\ref{prob:origin}.
+\end{solution}
+
+\begin{problem}
+Using Chebyshev's inequality, find a sample size $n$ that guarantees that the sample proportion of a Bernoulli population is within $0.05$ of $\theta$
+with probability at least $0.95$, whatever the value of $\theta$. Compare with the sample size suggested by the central limit theorem, and explain the
+difference.
+\end{problem}
+
+\begin{solution}
+$P(|\bar Y - \theta| \geq 0.05) \leq \theta(1 - \theta)/(n \times 0.0025) \leq 0.25/(0.0025n) = 100/n$, using $\theta(1 - \theta) \leq \frac14$. This is at most $0.05$ if
+$n \geq 2000$. The CLT gives $1.96\sqrt{0.25/n} \leq 0.05$, so $n \geq 385$. Chebyshev's bound holds for every distribution with that variance and every
+$n$, so it must cover the worst case and is very conservative. The CLT approximation uses the near-normal shape of $\bar Y$, which is accurate for
+$n$ in the hundreds.
 \end{solution}
 
 \section*{References}

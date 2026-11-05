@@ -1,0 +1,130 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>4.7 Large samples in software — Econometrics</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='econometrics.css' rel='stylesheet' type='text/css' /> 
+<meta content='econometrics.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"Var": "\\operatorname{Var}", "Cov": "\\operatorname{Cov}", "Corr": "\\operatorname{Corr}", "plim": "\\operatorname{plim}", "tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Econometrics</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="econometricsse1.html">The Nature of Econometrics</a></li>
+<li class="sub"><a class="" href="econometricssu1.html">Economic models and econometric models</a></li>
+<li class="sub"><a class="" href="econometricssu2.html">Types of economic data</a></li>
+<li class="sub"><a class="" href="econometricssu3.html">Describing a bivariate relationship</a></li>
+<li class="sub"><a class="" href="econometricssu4.html">The conditional expectation function</a></li>
+<li class="sub"><a class="" href="econometricssu5.html">The software workflow</a></li>
+<li class="sub"><a class="" href="econometricssu6.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse2.html">The Two-Variable Linear Model</a></li>
+<li class="sub"><a class="" href="econometricssu7.html">The model and its assumptions</a></li>
+<li class="sub"><a class="" href="econometricssu8.html">Least squares</a></li>
+<li class="sub"><a class="" href="econometricssu9.html">Properties of the least squares estimators</a></li>
+<li class="sub"><a class="" href="econometricssu10.html">Inference</a></li>
+<li class="sub"><a class="" href="econometricssu11.html">Prediction</a></li>
+<li class="sub"><a class="" href="econometricssu12.html">Regression in software</a></li>
+<li class="sub"><a class="" href="econometricssu13.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse3.html">Functional Form</a></li>
+<li class="sub"><a class="" href="econometricssu14.html">Time as a regressor</a></li>
+<li class="sub"><a class="" href="econometricssu15.html">Constant growth curves</a></li>
+<li class="sub"><a class="" href="econometricssu16.html">Transformations of the variables</a></li>
+<li class="sub"><a class="" href="econometricssu17.html">The logistic curve</a></li>
+<li class="sub"><a class="" href="econometricssu18.html">Choosing the functional form</a></li>
+<li class="sub"><a class="" href="econometricssu19.html">Functional form in software</a></li>
+<li class="sub"><a class="" href="econometricssu20.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse4.html">Large-Sample Theory and the Autoregressive Equation</a></li>
+<li class="sub"><a class="" href="econometricssu21.html">Why exact theory breaks down</a></li>
+<li class="sub"><a class="" href="econometricssu22.html">Convergence in probability</a></li>
+<li class="sub"><a class="" href="econometricssu23.html">Convergence in distribution</a></li>
+<li class="sub"><a class="" href="econometricssu24.html">Least squares in large samples</a></li>
+<li class="sub"><a class="" href="econometricssu25.html">The autoregressive scheme</a></li>
+<li class="sub"><a class="" href="econometricssu26.html">Maximum likelihood for the autoregressive equation</a></li>
+<li class="sub"><a class="current" href="econometricssu27.html">Large samples in software</a></li>
+<li class="sub"><a class="" href="econometricssu28.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="econometricsli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 2515 --><div class='crosslinks'><p class='noindent'>[<a href='econometricssu28.html'>next</a>] [<a href='econometricssu26.html'>prev</a>] [<a href='econometricssu26.html#taileconometricssu26.html'>prev-tail</a>] [<a href='#taileconometricssu27.html'>tail</a>] [<a href='econometricsse4.html#econometricssu27.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>4.7   </span> <a id='x33-320004.7'></a>Large samples in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 2518 --><p class='noindent'><span class='head'>
+<a id='x33-32001r1'></a>
+<span class='cmbx-10x-x-109'>Software 4.7.1 </span>(A Monte Carlo study of least squares bias)<span class='cmbx-10x-x-109'>.</span>  </span> A Monte Carlo experiment answers
+questions that theory answers only approximately: generate many samples from a known model,
+estimate on each, and look at the distribution of the estimates. Here \(Y_t = 1 + 0.75Y_{t-1} + u_t\) with \(u_t \sim N(0, 1)\), 2 000 samples for each
+length \(T\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-11'>
+&gt; set.seed(2026)
+&gt; ar1_ols &lt;- function(T, beta = 0.75, alpha = 1) {
++   y &lt;- numeric(T + 50); y[1] &lt;- alpha / (1 - beta)
++   for (t in 2:(T + 50)) y[t] &lt;- alpha + beta * y[t - 1] + rnorm(1)
++   y &lt;- y[-(1:50)]                     # discard a burn-in
++   coef(lm(y[-1] ~ y[-T]))[2] }
+&gt; for (T in c(20, 50, 200, 1000)) {
++   b &lt;- replicate(2000, ar1_ols(T))
++   cat(sprintf("T = %4d  mean b = %.4f  approx bias = %.4f  sd = %.4f\n",
++       T, mean(b), -(1 + 3 * 0.75) / T, sd(b))) }
+T =   20  mean b = 0.5796  approx bias = -0.1625  sd = 0.1949
+T =   50  mean b = 0.6778  approx bias = -0.0650  sd = 0.1143
+T =  200  mean b = 0.7326  approx bias = -0.0163  sd = 0.0500
+T = 1000  mean b = 0.7479  approx bias = -0.0032  sd = 0.0209
+</pre>
+<!-- l. 2538 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>With twenty observations the average estimate is \(0.580\), a bias of \(-0.170\), close
+to the approximation \(-0.1625\). The bias falls roughly in proportion to \(1/T\), and by \(T = 1000\) it is negligible: this is
+consistency at work. The standard deviation falls like \(1/\sqrt T\). The asymptotic value \(\sqrt {(1 - 0.75^2)/T}\) is \(0.047\) at \(T = 200\) and \(0.021\) at \(T = 1000\),
+close to the simulated \(0.050\) and \(0.021\). The first 50 values of each series are discarded so that the process
+has forgotten its starting value. That “burn-in” is standard practice whenever a stationary
+process is simulated.
+</p><!-- l. 2545 --><p class='noindent'><span class='cmbx-10x-x-109'>Stata: </span><span class='cmtt-10x-x-109'>simulate b = r(b), reps(2000): myprog </span>with a program that generates one series
+and regresses it. <span class='cmbx-10x-x-109'>EViews: </span>a program loop with <span class='cmtt-10x-x-109'>for </span>and <span class='cmtt-10x-x-109'>nrnd</span>, storing <span class='cmtt-10x-x-109'>@coefs(2) </span>in a vector.
+</p>
+</div>
+<!-- l. 2547 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 2549 --><p class='noindent'><span class='head'>
+<a id='x33-32002r2'></a>
+<span class='cmbx-10x-x-109'>Software 4.7.2 </span>(Least squares, conditional and exact maximum likelihood)<span class='cmbx-10x-x-109'>.</span>  </span> One simulated series of
+100 observations from an AR(1) with \(\beta = 0.75\) and mean \(4\), estimated three ways:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-12'>
+&gt; set.seed(7)
+&gt; y &lt;- arima.sim(list(ar = 0.75), n = 100) + 4
+&gt; coef(lm(y[-1] ~ y[-100]))
+(Intercept)     y[-100]
+  1.1509721   0.7310427
+&gt; fit_css &lt;- arima(y, order = c(1, 0, 0), method = "CSS")
+&gt; fit_ml  &lt;- arima(y, order = c(1, 0, 0), method = "ML")
+&gt; rbind(CSS = coef(fit_css), ML = coef(fit_ml))
+          ar1 intercept
+CSS 0.7310431  4.279385
+ML  0.7548207  4.461537
+</pre>
+<!-- l. 2564 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>Conditional maximum likelihood (<span class='cmtt-10x-x-109'>CSS</span>, “conditional sum of squares”)
+reproduces least squares to six decimals, as Theorem <a href='econometricssu26.html#x32-31001r1'>4.6.1<!-- tex4ht:ref: thm:ar1ml  --></a>(i) says it must. Note that <span class='cmtt-10x-x-109'>arima</span>
+reports the process <span class='cmti-10x-x-109'>mean</span>, labelled <span class='cmtt-10x-x-109'>intercept</span>, not \(\alpha \). The two are linked by \(\mu = \alpha /(1 - \beta )\), and indeed \(1.1510/(1 - 0.7310) = 4.279\). Exact
+maximum likelihood, which also uses the distribution of the first observation, gives the somewhat
+different \(\hat \beta = 0.755\). With \(T = 100\) the gap is well within one standard error, about \(0.07\).
+</p><!-- l. 2570 --><p class='noindent'><span class='cmbx-10x-x-109'>Stata: </span><span class='cmtt-10x-x-109'>arima y, ar(1) </span>(exact ML by default; <span class='cmtt-10x-x-109'>condition </span>for conditional). <span class='cmbx-10x-x-109'>EViews: </span><span class='cmtt-10x-x-109'>ls y c
+ar(1)</span>, which estimates by non-linear least squares; the ARMA options choose conditional or
+exact ML.
+</p>
+</div>
+<!-- l. 2572 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 2574 --><div class='crosslinks'><p class='noindent'>[<a href='econometricssu28.html'>next</a>] [<a href='econometricssu26.html'>prev</a>] [<a href='econometricssu26.html#taileconometricssu26.html'>prev-tail</a>] [<a href='econometricssu27.html'>front</a>] [<a href='econometricsse4.html#econometricssu27.html'>up</a>] </p></div>
+<!-- l. 2574 --><p class='noindent'><a id='taileconometricssu27.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="econometricssu26.html">&larr; Previous</a><a class="up" href="econometricsse4.html#econometricssu27.html">Contents</a><a class="next" href="econometricssu28.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="econometrics/4-7-large-samples-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
