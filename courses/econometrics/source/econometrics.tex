@@ -1540,6 +1540,573 @@ correlated with the regressor, violating (A1). The slope is a correct estimate o
 the elderly share. Including both variables, in a multiple regression, is the remedy.
 \end{solution}
 
+%======================================================================
+\section{Functional Form}
+\label{sec:form}
+
+The model $Y = \alpha + \beta X + u$ is linear in two senses: linear in the variable $X$ and linear in the parameters $\alpha$ and $\beta$. Least
+squares and all the theory of Section~\ref{sec:twovar} need only the second. Any relation that becomes linear in its parameters after the
+variables are transformed can be estimated by the same formulas, applied to the transformed variables. That covers a great deal of economics:
+constant growth, constant elasticities, diminishing returns, saturation. This section works through the standard forms, the economic meaning of
+the coefficient in each, and the question of how to choose between them.
+
+\subsection{Time as a regressor}
+\label{ssec:trend}
+
+The simplest use of a regressor that is not an economic variable is a time trend,
+\[
+Y_t = \alpha + \beta t + u_t, \qquad t = 1, \dots, T,
+\]
+which estimates the average change in $Y$ per period. Because the values of $t$ are known and evenly spaced, the arithmetic simplifies,
+especially if time is measured from the middle of the sample.
+
+\begin{thm}
+\label{thm:centredtrend}
+If the time index takes the values $T_i$ with $\sum T_i = 0$ (for example $-2, -1, 0, 1, 2$ for five years), the least squares estimates of the
+trend line $Y = \alpha + \beta T + u$ are
+\[
+b = \frac{\sum Y_iT_i}{\sum T_i^2}, \qquad a = \bar Y .
+\]
+\end{thm}
+
+\begin{proof}
+With $\bar T = 0$, the deviation $T_i - \bar T$ is $T_i$ itself, so
+\[
+b = \frac{\sum (Y_i - \bar Y)(T_i - \bar T)}{\sum (T_i - \bar T)^2} = \frac{\sum Y_iT_i - \bar Y\sum T_i}{\sum T_i^2} = \frac{\sum Y_iT_i}{\sum T_i^2} .
+\]
+Then $a = \bar Y - b\bar T = \bar Y$.
+\end{proof}
+
+Centring the time index changes the meaning of the intercept, which becomes the fitted value at the middle of the sample rather than at
+some arbitrary origin, but it changes nothing else. The slope, the fitted values and the residuals are the same however time is numbered, by
+Theorem~\ref{thm:corrinv} applied to $T$.
+
+\subsection{Constant growth curves}
+\label{ssec:growth}
+
+Most economic aggregates do not grow by a constant \emph{amount} each period; they grow by a roughly constant \emph{proportion}. A series that
+grows at the rate $g$ per period satisfies $Y_t = Y_0(1 + g)^t$. Taking logarithms,
+\begin{equation}
+\label{eq:growth}
+\log Y_t = \log Y_0 + t\log(1 + g) = \alpha + \beta t ,
+\end{equation}
+a linear trend in $\log Y$. Adding a disturbance gives the \textbf{constant growth curve} $\log Y_t = \alpha + \beta t + u_t$, estimated by
+regressing $\log Y$ on $t$.
+
+\begin{thm}
+\label{thm:growth}
+In the constant growth curve,
+\begin{enumerate}[label=(\roman*)]
+\item $\beta = \log(1 + g)$, so the estimated growth rate per period is $\hat g = e^b - 1$;
+\item $\beta$ itself is the \emph{instantaneous} (continuously compounded) growth rate: $\dfrac{1}{Y}\dfrac{dY}{dt} = \beta$ for the
+deterministic part $Y = e^{\alpha + \beta t}$;
+\item the growth rate over a sub-period of length $1/m$ (a month, if periods are years and $m = 12$) is $(1 + g)^{1/m} - 1 = e^{\beta/m} - 1$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) is \eqref{eq:growth}. (ii) $\frac{d}{dt}e^{\alpha + \beta t} = \beta e^{\alpha + \beta t}$. (iii) Compounding the sub-period rate $m$ times must
+give one period's growth: $(1 + g_m)^m = 1 + g = e^{\beta}$.
+\end{proof}
+
+For small $g$, $\log(1 + g) \approx g$ and the slope can be read directly as a growth rate. For the large rates of new technologies the
+difference is substantial, as the next example shows.
+
+\begin{exa}
+\label{ex:subs}
+The number of mobile telephone subscribers in Zambia, in thousands, is given for 2010--2014:
+\begin{center}
+\begin{tabular}{c|ccccc}
+Year & 2010 & 2011 & 2012 & 2013 & 2014\\\hline
+$Y$ (thousands) & 38.1 & 80.0 & 170.4 & 354.5 & 744.4\\
+$T$ & $-2$ & $-1$ & $0$ & $1$ & $2$\\
+$\log Y$ & 3.6402 & 4.3820 & 5.1381 & 5.8707 & 6.6126
+\end{tabular}
+\end{center}
+Estimate the annual growth rate by fitting a constant growth curve.
+
+\emph{Solution.} By Theorem~\ref{thm:centredtrend} with $\sum T_i^2 = 10$,
+\begin{align*}
+b &= \frac{\sum T_i\log Y_i}{\sum T_i^2} = \frac{-2(3.6402) - 4.3820 + 5.8707 + 2(6.6126)}{10} = \frac{7.4334}{10} = 0.7433,\\
+a &= \overline{\log Y} = 5.1287 .
+\end{align*}
+The estimated annual growth rate is $\hat g = e^{0.7433} - 1 = 1.103$: subscribers grew by about $110\%$ a year, more than doubling each year.
+Reading the slope directly as $74\%$ a year would be a serious error, since the approximation $\log(1 + g) \approx g$ is good only for small $g$.
+The instantaneous rate is $74.3\%$ a year.
+
+The fit is almost perfect: the residuals of $\log Y$ are all below $0.01$ in absolute value, and $R^2 = 0.99998$. By contrast, a straight-line
+trend in $Y$ itself has $R^2 = 0.858$ and residuals of $98.0, -28.8, -107.1, -91.7, 129.5$: positive at both ends and negative in the middle, the
+signature of fitting a straight line to a curve.
+
+The example carries a warning. Extrapolating the fitted curve six more years gives $744.4 \times 2.103^6 \approx 64$ million subscribers, about
+three times the population of Zambia. Growth at a constant rate is a description of one phase of a process, not a law. A technology that is
+spreading through a population must eventually saturate, and the logistic curve of Section~\ref{ssec:logistic} is the standard model for
+that.
+\end{exa}
+
+\subhead{Back to levels: the retransformation problem}
+The growth curve is estimated in logarithms, but forecasts are usually wanted in levels. The obvious forecast $e^{a + bt}$ is not an estimate of
+$E(Y_t)$.
+
+\begin{thm}
+\label{thm:lognormal}
+If $\log Y = \alpha + \beta t + u$ with $u \sim N(0, \sigma^2)$, then
+\[
+\operatorname{median}(Y) = e^{\alpha + \beta t}, \qquad E(Y) = e^{\alpha + \beta t + \sigma^2/2} .
+\]
+\end{thm}
+
+\begin{proof}
+$Y = e^{\alpha + \beta t}e^{u}$. The exponential is increasing, so the median of $e^u$ is $e^0 = 1$. The moment generating function of
+$N(0, \sigma^2)$ is $E(e^{su}) = e^{s^2\sigma^2/2}$, and $s = 1$ gives $E(e^u) = e^{\sigma^2/2}$.
+\end{proof}
+
+So $e^{a + bt}$ estimates the median, and it underestimates the mean by the factor $e^{\sigma^2/2}$. The usual correction multiplies the forecast by
+$e^{s^2/2}$. When $s$ is small, as in Example~\ref{ex:subs}, the correction is negligible. When $\log Y$ is noisy it is not: with $s = 0.5$ the
+factor is $e^{0.125} = 1.13$, a $13\%$ difference.
+
+\subhead{The precision of $\hat g$}
+The growth rate $\hat g = e^b - 1$ is a non-linear function of $b$, so its standard error is not simply $\operatorname{se}(b)$. The delta method,
+proved with the large-sample theory later in the course, gives the approximation
+\[
+\operatorname{se}(\hat g) \approx \left|\frac{d\hat g}{db}\right|\operatorname{se}(b) = e^b\operatorname{se}(b) .
+\]
+In Example~\ref{ex:subs}, $\operatorname{se}(b) = 0.00194$, so $\operatorname{se}(\hat g) \approx 2.103 \times 0.00194 = 0.0041$: the growth rate is
+$110.3\%$ with a standard error of $0.4$ percentage points.
+
+\subsection{Transformations of the variables}
+\label{ssec:transform}
+
+Three further transformations recur throughout applied economics. Each makes the model linear in its parameters, and each implies a
+different relation between $X$ and $Y$. The key to using them is to know what the slope coefficient \emph{means} in each case.
+
+\begin{defn}
+For a relation $Y = f(X)$, the \textbf{marginal effect} is $dY/dX$, the \textbf{elasticity} is $\eta = \dfrac{dY}{dX}\dfrac{X}{Y}$, the percentage
+change in $Y$ per $1\%$ change in $X$, and the \textbf{semi-elasticity} is $\dfrac{1}{Y}\dfrac{dY}{dX}$, the proportional change in $Y$ per unit
+change in $X$.
+\end{defn}
+
+\begin{thm}
+\label{thm:forms}
+For the deterministic part of each model, the marginal effect and the elasticity are:
+\begin{center}
+\renewcommand{\arraystretch}{1.6}
+\begin{tabular}{lccc}
+Model & Equation & $dY/dX$ & Elasticity $\eta$\\\hline
+Linear & $Y = \alpha + \beta X$ & $\beta$ & $\beta X/Y$\\
+Log-log & $\log Y = \alpha + \beta\log X$ & $\beta Y/X$ & $\beta$\\
+Log-linear & $\log Y = \alpha + \beta X$ & $\beta Y$ & $\beta X$\\
+Linear-log & $Y = \alpha + \beta\log X$ & $\beta/X$ & $\beta/Y$\\
+Reciprocal & $Y = \alpha + \beta/X$ & $-\beta/X^2$ & $-\beta/(XY)$
+\end{tabular}
+\end{center}
+\end{thm}
+
+\begin{proof}
+Each follows by differentiation and the identity $\eta = \dfrac{d\log Y}{d\log X}$, which holds because
+$d\log Y = dY/Y$ and $d\log X = dX/X$.
+\begin{itemize}
+\item Log-log: $\eta = d\log Y/d\log X = \beta$ directly, and $dY/dX = \eta Y/X$.
+\item Log-linear: $d\log Y/dX = \beta$, so $dY/dX = \beta Y$, and $\eta = \beta X$.
+\item Linear-log: $dY/dX = \beta\, d\log X/dX = \beta/X$, and $\eta = (\beta/X)(X/Y) = \beta/Y$.
+\item Reciprocal: $dY/dX = -\beta/X^2$, and $\eta = -\beta/(XY)$. \qedhere
+\end{itemize}
+\end{proof}
+
+\subhead{Log-log: constant elasticity}
+The log-log model is $Y = AX^{\beta}e^{u}$, the form of the Cobb--Douglas function of Example~\ref{ex:cobb} and of most estimated demand
+functions. Its single attraction is that the elasticity is the same at every point and is read directly from the coefficient. That is also its
+restriction: a demand curve along which the price elasticity is constant cannot become more elastic as price rises.
+
+\subhead{Log-linear: growth and returns}
+When $\log Y = \alpha + \beta X + u$, a unit increase in $X$ multiplies $Y$ by $e^{\beta}$, so the \emph{exact} percentage effect is
+$100(e^{\beta} - 1)$. The approximation $100\beta$ is good for $|\beta| < 0.1$ and poor beyond it. The constant growth curve is the case $X = t$. A
+second leading case is the wage equation $\log w = \alpha + \beta S + u$ of Example~\ref{ex:wages}, where $\beta$ is the \emph{return to schooling}:
+$\beta = 0.08$ means each year of schooling is associated with wages $100(e^{0.08} - 1) = 8.3\%$ higher.
+
+\subhead{Linear-log: diminishing effects}
+When $Y = \alpha + \beta\log X + u$, a $1\%$ rise in $X$ changes $Y$ by about $\beta/100$ \emph{units}, whatever the level of $X$. Each successive
+kwacha of $X$ has a smaller effect, since $dY/dX = \beta/X$. This is Working's form of the Engel curve, in which the budget share of food falls
+linearly in the logarithm of income.
+
+\subhead{Reciprocal: an asymptote}
+In $Y = \alpha + \beta/X$, as $X \to \infty$, $Y \to \alpha$. The curve approaches a floor or a ceiling, such as the average cost curve
+approaching marginal cost, or the original Phillips curve, in which wage inflation falls towards a lower limit as unemployment rises.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  panel/.style={rounded corners=6pt},
+  ttl/.style={font=\small\bfseries,align=center},
+  capt/.style={font=\footnotesize,align=center}]
+% log-log
+\begin{scope}[shift={(0,0)}]
+\fill[blue!8,panel] (-0.5,-1.0) rectangle (4.3,4.2);
+\node[ttl,blue!60!black] at (1.9,3.8) {Log-log};
+\draw[->,gray] (0,0) -- (4,0) node[below left,font=\scriptsize] {$X$};
+\draw[->,gray] (0,0) -- (0,3.4) node[left,font=\scriptsize] {$Y$};
+\draw[thick,blue!70!black,domain=0.02:3.8,samples=60] plot (\x,{1.2*\x^0.4});
+\draw[thick,red!70!black,domain=0.02:3.8,samples=60] plot (\x,{0.12*\x^2});
+\draw[thick,teal!70!black,domain=0.35:3.8,samples=60] plot (\x,{0.9/\x});
+\node[font=\scriptsize,red!70!black] at (3.1,0.7) {$\beta>1$};
+\node[font=\scriptsize,blue!70!black] at (3.2,2.5) {$0<\beta<1$};
+\node[font=\scriptsize,teal!70!black] at (0.95,2.75) {$\beta<0$};
+\node[capt] at (1.9,-0.55) {constant elasticity $\beta$};
+\end{scope}
+% log-linear
+\begin{scope}[shift={(5.2,0)}]
+\fill[orange!10,panel] (-0.5,-1.0) rectangle (4.3,4.2);
+\node[ttl,orange!80!black] at (1.9,3.8) {Log-linear};
+\draw[->,gray] (0,0) -- (4,0) node[below left,font=\scriptsize] {$X$};
+\draw[->,gray] (0,0) -- (0,3.4) node[left,font=\scriptsize] {$Y$};
+\draw[thick,orange!85!black,domain=0:3.8,samples=60] plot (\x,{0.25*exp(0.65*\x)});
+\draw[thick,orange!50!black,domain=0:3.8,samples=60] plot (\x,{3.0*exp(-0.6*\x)});
+\node[font=\scriptsize,orange!85!black] at (3.2,3.15) {$\beta>0$};
+\node[font=\scriptsize,orange!50!black] at (3.35,0.55) {$\beta<0$};
+\node[capt] at (1.9,-0.55) {constant growth rate $\beta$};
+\end{scope}
+% linear-log
+\begin{scope}[shift={(0,-5.6)}]
+\fill[teal!10,panel] (-0.5,-1.0) rectangle (4.3,4.2);
+\node[ttl,teal!70!black] at (1.9,3.8) {Linear-log};
+\draw[->,gray] (0,0) -- (4,0) node[below left,font=\scriptsize] {$X$};
+\draw[->,gray] (0,0) -- (0,3.4) node[left,font=\scriptsize] {$Y$};
+\draw[thick,teal!70!black,domain=0.25:3.8,samples=60] plot (\x,{1.6+1.0*ln(\x)});
+\node[capt] at (1.9,-0.55) {diminishing effect $\beta/X$};
+\end{scope}
+% reciprocal
+\begin{scope}[shift={(5.2,-5.6)}]
+\fill[red!8,panel] (-0.5,-1.0) rectangle (4.3,4.2);
+\node[ttl,red!65!black] at (1.9,3.8) {Reciprocal};
+\draw[->,gray] (0,0) -- (4,0) node[below left,font=\scriptsize] {$X$};
+\draw[->,gray] (0,0) -- (0,3.4) node[left,font=\scriptsize] {$Y$};
+\draw[dashed,gray] (0,0.8) -- (3.9,0.8) node[above left,font=\scriptsize] {$\alpha$};
+\draw[thick,red!65!black,domain=0.42:3.8,samples=60] plot (\x,{0.8+1.0/\x});
+\node[capt] at (1.9,-0.55) {asymptote $Y\to\alpha$};
+\end{scope}
+\end{tikzpicture}
+\caption{The shapes implied by four functional forms. Each becomes a straight line after the transformation that defines it, so each is
+estimated by least squares on the transformed variables.}
+\label{fig:forms}
+\end{figure}
+
+\subsection{The logistic curve}
+\label{ssec:logistic}
+
+Many economic variables are proportions, bounded by $0$ and $1$: the share of households owning a mobile phone, the fraction of firms
+exporting, the probability that a loan is repaid. A straight line in $X$ eventually leaves the interval $[0, 1]$, so it cannot be the right model
+over a wide range. The logistic curve stays inside it.
+
+\begin{thm}
+\label{thm:logit}
+The logistic function
+\[
+Y = \frac{e^{\alpha + \beta X}}{1 + e^{\alpha + \beta X}}
+\]
+lies strictly between $0$ and $1$, and it is linearised by the \textbf{logit} transformation:
+\[
+\log\frac{Y}{1 - Y} = \alpha + \beta X .
+\]
+Its marginal effect is $dY/dX = \beta Y(1 - Y)$, which is largest, at $\beta/4$, where $Y = \frac12$.
+\end{thm}
+
+\begin{proof}
+Write $z = \alpha + \beta X$. Since $e^z > 0$, $0 < e^z/(1 + e^z) < 1$. Then
+\[
+1 - Y = \frac{1}{1 + e^z}, \qquad \frac{Y}{1 - Y} = e^z, \qquad \log\frac{Y}{1 - Y} = z = \alpha + \beta X .
+\]
+Differentiating $Y = (1 + e^{-z})^{-1}$,
+\[
+\frac{dY}{dX} = \beta\frac{e^{-z}}{(1 + e^{-z})^2} = \beta Y(1 - Y) ,
+\]
+and $Y(1 - Y)$ is maximised at $Y = \frac12$, where it equals $\frac14$.
+\end{proof}
+
+The ratio $Y/(1 - Y)$ is the \textbf{odds}, so the logit is the log-odds and $\beta$ is the change in the log-odds per unit of $X$. The curve is
+S-shaped (Figure~\ref{fig:logistic}). Growth is slow at first, fastest at the midpoint and slow again as the population saturates, which is the
+classic pattern of the diffusion of a new technology. In its early phase, when $Y$ is small, $\log(Y/(1 - Y)) \approx \log Y$, and the logistic is
+indistinguishable from the constant growth curve. That is why Example~\ref{ex:subs} looked like constant growth, and why its extrapolation was
+absurd.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.55cm,y=3.2cm]
+\fill[teal!6,rounded corners=4pt] (-7.6,-0.25) rectangle (8.6,1.22);
+\draw[->,gray] (-7,0) -- (8,0) node[below left,font=\small,black] {$X$};
+\draw[->,gray] (-7,0) -- (-7,1.12) node[above right,font=\small,black] {$Y$};
+\draw[dashed,gray] (-7,1) -- (7.6,1) node[right,font=\scriptsize,black] {$1$};
+\draw[dashed,gray] (-7,0.5) -- (0,0.5) -- (0,0);
+\node[font=\scriptsize,anchor=east] at (-7,0.5) {$\tfrac12$};
+\draw[very thick,teal!70!black,domain=-6.8:7.5,samples=80] plot (\x,{1/(1+exp(-0.8*\x))});
+\draw[thick,orange!85!black,dashed,domain=-6.8:-0.6,samples=60] plot (\x,{exp(0.8*\x)});
+\node[font=\scriptsize,orange!85!black,align=left,anchor=west] at (-6.8,0.72) {constant growth\\$Y\approx e^{\alpha+\beta X}$};
+\node[font=\scriptsize,teal!70!black,anchor=west] at (1.6,0.68) {steepest at $Y=\tfrac12$, slope $\beta/4$};
+\end{tikzpicture}
+\caption{The logistic curve with its early-phase approximation. For small $Y$ the two are indistinguishable. They separate as the
+population approaches saturation.}
+\label{fig:logistic}
+\end{figure}
+
+When the data are observed proportions $p_i$ from groups of size $n_i$, the logit regression $\log\bigl(p_i/(1 - p_i)\bigr) = \alpha + \beta X_i + v_i$
+can be fitted by least squares, with two cautions. The transformation is undefined if any $p_i$ is $0$ or $1$. And the variance of the logit of a
+proportion is approximately $1/\bigl(n_iP_i(1 - P_i)\bigr)$, which changes with $P_i$, so the disturbances are heteroscedastic and weighted least
+squares is more efficient. When the data are individual $0$--$1$ outcomes rather than proportions, the logit must instead be estimated by
+maximum likelihood, the subject of the section on limited dependent variables.
+
+\subsection{Choosing the functional form}
+\label{ssec:choose}
+
+Economic theory sometimes dictates the form: a Cobb--Douglas technology is log-log by assumption. More often it only restricts it (demand falls
+with price) and the data must decide. Three tools help.
+
+\subhead{Plots and residuals}
+Plot $Y$ against $X$, and plot the residuals of a trial model against $X$ and against the fitted values. Systematic curvature in the residuals,
+as in the linear trend of Example~\ref{ex:subs}, means the form is wrong. A spread that fans out as the fitted values grow suggests that a
+logarithmic dependent variable would stabilise the variance.
+
+\subhead{$R^2$ is comparable only for the same dependent variable}
+$R^2$ measures the share of the variance of the \emph{dependent variable} explained. The models $Y = \alpha + \beta X$ and $Y = \alpha + \beta\log X$
+explain the same variable, so their $R^2$ values can be compared. The models $Y = \alpha + \beta X$ and $\log Y = \alpha + \beta X$ do not: one explains
+the variation in $Y$ and the other the variation in $\log Y$, and a higher $R^2$ for one says nothing about which fits the data better.
+
+\subhead{The Box--Cox transformation}
+The linear and logarithmic forms are both members of one family.
+
+\begin{defn}
+For $Y > 0$, the \textbf{Box--Cox transformation} with parameter $\lambda$ is
+\[
+Y^{(\lambda)} = \begin{cases} \dfrac{Y^{\lambda} - 1}{\lambda}, & \lambda \neq 0,\\[6pt] \log Y, & \lambda = 0. \end{cases}
+\]
+\end{defn}
+
+\begin{thm}
+\label{thm:boxcox}
+\begin{enumerate}[label=(\roman*)]
+\item $Y^{(\lambda)}$ is continuous in $\lambda$ at $\lambda = 0$, and $\lambda = 1$ gives $Y - 1$, a linear model in $Y$.
+\item Suppose $Y_i^{(\lambda)} = \alpha + \beta X_i + u_i$ with $u_i$ independent $N(0, \sigma^2)$. After maximising over $\alpha$, $\beta$ and $\sigma^2$, the
+log-likelihood of $\lambda$, as a density for the observed $Y$'s, is
+\[
+\ell(\lambda) = \text{const} - \frac n2\log\frac{\text{RSS}(\lambda)}{n} + (\lambda - 1)\sum\log Y_i ,
+\]
+where $\text{RSS}(\lambda)$ is the residual sum of squares from regressing $Y^{(\lambda)}$ on $X$.
+\item If the data are first divided by their geometric mean $\tilde Y = \exp\bigl(\frac1n\sum\log Y_i\bigr)$, the last term vanishes, and models with
+different $\lambda$ can be compared by their residual sums of squares alone.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $Y^{\lambda} = e^{\lambda\log Y}$, so by l'H\^opital's rule
+$\lim_{\lambda\to0}(e^{\lambda\log Y} - 1)/\lambda = \lim_{\lambda\to0}\log Y\,e^{\lambda\log Y} = \log Y$.
+
+(ii) The normal model is a density for $Z_i = Y_i^{(\lambda)}$. To obtain the density of $Y_i$, multiply by the Jacobian
+$dZ_i/dY_i = Y_i^{\lambda - 1}$, which contributes $(\lambda - 1)\sum\log Y_i$ to the log-likelihood. The normal part, maximised over $\alpha$, $\beta$
+and $\sigma^2$, is $-\frac n2\log(2\pi\hat\sigma^2) - \frac n2$ with $\hat\sigma^2 = \text{RSS}(\lambda)/n$; this is shown for the general linear model in
+the section on maximum likelihood.
+
+(iii) For $Y_i^* = Y_i/\tilde Y$, $\sum\log Y_i^* = \sum\log Y_i - n\log\tilde Y = 0$.
+\end{proof}
+
+The Jacobian term is the reason $R^2$ and RSS cannot be compared across a linear and a logarithmic dependent variable: the two models put
+probability on different scales. Scaling by the geometric mean puts them on the same scale. The model with the smaller RSS then has the higher
+likelihood, and the difference in log-likelihoods is $\frac n2\log(\text{RSS}_1/\text{RSS}_2)$.
+
+\subsection{Functional form in software}
+\label{ssec:software3}
+
+\begin{software}[A constant growth curve]
+\label{sw:growth}
+Transformations are written directly in the model formula:
+\begin{verbatim}
+> subs <- c(38.1, 80.0, 170.4, 354.5, 744.4); T <- -2:2
+> g <- lm(log(subs) ~ T)
+> summary(g)$coef
+            Estimate  Std. Error   t value     Pr(>|t|)
+(Intercept) 5.128735 0.002747891 1866.4259 3.391861e-10
+T           0.743341 0.001943052  382.5635 3.938668e-08
+> b <- coef(g)["T"]; exp(b) - 1
+      T
+1.10295
+\end{verbatim}
+\textbf{Reading the output.} The slope $0.7433$ and intercept $5.1287 = \overline{\log Y}$ agree with the hand calculation of
+Example~\ref{ex:subs}. The growth rate is computed from the coefficient, not printed by \texttt{lm}: $\hat g = 1.103$, or $110\%$ a year. The tiny
+standard errors reflect an almost exact fit with only three residual degrees of freedom, and should not be over-interpreted: five points that lie
+on a smooth curve say little about how long the curve will continue.
+
+\textbf{Stata:} \texttt{generate lnsubs = ln(subs)}, \texttt{regress lnsubs T}, then \texttt{nlcom exp(\_b[T]) - 1}, which also gives the
+delta-method standard error. \textbf{EViews:} \texttt{ls log(subs) c t}; then \texttt{scalar g = exp(@coefs(2)) - 1}.
+\end{software}
+
+\begin{software}[Comparing a linear and a linear-log model]
+\label{sw:linlog}
+For the savings data, the savings rate against income per head, in levels and in logarithms:
+\begin{verbatim}
+> f1 <- lm(sr ~ dpi, data = LifeCycleSavings)
+> f2 <- lm(sr ~ log(dpi), data = LifeCycleSavings)
+> c(summary(f1)$r.squared, summary(f2)$r.squared)
+[1] 0.04855805 0.07636831
+> summary(f2)$coef
+            Estimate Std. Error   t value   Pr(>|t|)
+(Intercept) 1.756107  4.0203461 0.4368048 0.66421166
+log(dpi)    1.207970  0.6063571 1.9921764 0.05205621
+\end{verbatim}
+\textbf{Reading the output.} Both models explain \texttt{sr}, so their $R^2$ values are comparable, and the linear-log form fits better. Income per head
+ranges from about \$89 to \$4\,000, and a model in which each extra dollar matters equally across that range is implausible. The coefficient means
+that a $10\%$ higher income per head is associated with a savings rate higher by $1.208 \times \log 1.1 = 0.115$ percentage points, roughly
+$1.208/10$. The $p$-value of $0.052$ is borderline, and income on its own explains little of the variation in savings rates.
+
+\textbf{Stata:} \texttt{generate lndpi = ln(dpi)}, then \texttt{regress sr lndpi}. \textbf{EViews:} \texttt{ls sr c log(dpi)}.
+\end{software}
+
+\begin{software}[Box--Cox comparison of a linear and a growth model]
+\label{sw:boxcox}
+For the subscriber data, compare a linear trend in $Y$ with the growth curve, after scaling by the geometric mean:
+\begin{verbatim}
+> gm <- exp(mean(log(subs))); ys <- subs / gm
+> rss_lin <- sum(resid(lm(ys ~ T))^2)
+> rss_log <- sum(resid(lm(log(ys) ~ T))^2)
+> c(gm, rss_lin, rss_log)
+[1] 1.688035e+02 1.652347e+00 1.132636e-04
+\end{verbatim}
+\textbf{Reading the output.} On the common scale the growth curve's residual sum of squares is about $14\,600$ times smaller. By
+Theorem~\ref{thm:boxcox} the log-likelihood difference is $\frac52\log 14\,589 = 24.0$ in favour of the growth curve, an overwhelming
+margin. The $R^2$ values ($0.858$ and $0.99998$) happened to point the same way here, but they could not have been relied on to do so.
+
+\textbf{Stata:} \texttt{boxcox subs T} estimates $\lambda$ by maximum likelihood. \textbf{EViews} has no built-in Box--Cox command; the scaled
+comparison above is done with two \texttt{ls} commands on the scaled series.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Consider the linear trend $Y = \alpha + \beta T + U$, with $Y$ observed annually for five years and $T$ assigned the integer values $-2$ to $2$. Show
+that
+\[
+b = \frac{\sum (Y_i - \bar Y)(T_i - \bar T)}{\sum (T_i - \bar T)^2}
+\]
+reduces to $b = \sum Y_iT_i/\sum T_i^2$. What is the corresponding estimate of $\alpha$, and how is it interpreted?
+\end{problem}
+
+\begin{solution}
+$\sum T_i = -2 - 1 + 0 + 1 + 2 = 0$, so $\bar T = 0$ and $T_i - \bar T = T_i$. The numerator is
+$\sum (Y_i - \bar Y)T_i = \sum Y_iT_i - \bar Y\sum T_i = \sum Y_iT_i$, and the denominator is $\sum T_i^2 = 10$. So $b = \sum Y_iT_i/10$
+(Theorem~\ref{thm:centredtrend}). The intercept is $a = \bar Y - b\bar T = \bar Y$, the fitted value of $Y$ at $T = 0$, the middle year of the
+sample.
+\end{solution}
+
+\begin{problem}
+The annual consumption of petroleum in Zambia is believed to grow exponentially at a constant proportionate rate $g$ per year:
+\begin{center}
+\begin{tabular}{c|ccccc}
+Year & 2014 & 2015 & 2016 & 2017 & 2018\\\hline
+Consumption & 30.5 & 80.8 & 175.1 & 367.9 & 812.9
+\end{tabular}
+\end{center}
+\begin{enumerate}[label=(\alph*)]
+\item Estimate the annual growth rate $g$ and interpret it.
+\item Forecast consumption for 2019.
+\item Estimate the constant monthly growth rate.
+\item The residual variance of the log regression is $s^2 = 0.00583$. Adjust the forecast in (b) to estimate mean consumption in 2019, and comment.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Code the years $T = -2, \dots, 2$. The logarithms of consumption are
+\[
+3.4177,\quad 4.3920,\quad 5.1654,\quad 5.9078,\quad 6.7006,
+\]
+with mean $5.1167$. Then
+\[
+b = \frac{-2(3.4177) - 4.3920 + 5.9078 + 2(6.7006)}{10} = \frac{8.0816}{10} = 0.8082 ,
+\]
+and $\hat g = e^{0.8082} - 1 = 1.244$. Consumption grew by about $124\%$ a year, more than doubling annually. The instantaneous rate is $80.8\%$.
+
+(b) 2019 is $T = 3$, so $\widehat{\log Y} = 5.1167 + 3(0.8082) = 7.5413$ and $\hat Y = e^{7.5413} = 1884$.
+
+(c) $e^{0.8082/12} - 1 = 0.0697$, about $7.0\%$ a month. Compounded over twelve months, $1.0697^{12} = 2.244$, which recovers the annual factor.
+
+(d) By Theorem~\ref{thm:lognormal}, $e^{s^2/2} = e^{0.00292} = 1.0029$, so the estimated mean is $1884 \times 1.0029 = 1890$. The correction is
+under $0.3\%$, small because the growth curve fits so closely. The much larger uncertainty is whether growth of $124\%$ a year can continue at
+all: the forecast assumes the 2014--2018 pattern holds for another year.
+\end{solution}
+
+\begin{problem}
+Find the transformation that linearises
+\[
+Y = \frac{e^{\alpha + \beta X}}{1 + e^{\alpha + \beta X}} .
+\]
+If $Y = 0.2$ when $X = 0$ and $Y = 0.8$ when $X = 2$, find $\alpha$ and $\beta$, and the value of $X$ at which $Y = \frac12$.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:logit}, $\log\bigl(Y/(1 - Y)\bigr) = \alpha + \beta X$. At $X = 0$, $\alpha = \log(0.2/0.8) = \log 0.25 = -1.386$. At $X = 2$,
+$\log(0.8/0.2) = \log 4 = 1.386 = \alpha + 2\beta$, so $\beta = 1.386$. $Y = \frac12$ where the log-odds are zero, at $X = -\alpha/\beta = 1$. That is
+the midpoint, by the symmetry of the logistic curve about its point of inflection.
+\end{solution}
+
+\begin{problem}
+An estimated Phillips curve relates wage inflation $\pi$ (\% per year) to the unemployment rate $U$ (\%):
+\[
+\hat\pi = 1.5 + \frac{12}{U} .
+\]
+\begin{enumerate}[label=(\alph*)]
+\item What does the model imply about inflation as unemployment becomes very high?
+\item Find the marginal effect and the elasticity of inflation with respect to unemployment at $U = 4$.
+\item By how much must unemployment rise, from $4\%$, to reduce inflation by one percentage point?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) As $U \to \infty$, $\hat\pi \to 1.5$: wage inflation falls towards a floor of $1.5\%$ but never below it.
+
+(b) At $U = 4$, $\hat\pi = 1.5 + 3 = 4.5$. The marginal effect is $-12/U^2 = -0.75$ percentage points of inflation per point of unemployment. The
+elasticity is $-0.75 \times 4/4.5 = -0.667$.
+
+(c) Inflation of $3.5$ requires $12/U = 2$, so $U = 6$: unemployment must rise by two points. The marginal effect of $-0.75$ would suggest
+$1.33$ points, but it applies only to small changes, and the effect weakens as $U$ rises.
+\end{solution}
+
+\begin{problem}
+In a wage equation $\log w = \alpha + \beta S + \delta D + u$, where $S$ is years of schooling and $D = 1$ for workers in the formal sector, the
+estimates are $b = 0.12$ and $d = 0.35$. Interpret both, giving exact and approximate percentage effects, and explain which interpretation should
+be reported.
+\end{problem}
+
+\begin{solution}
+An extra year of schooling multiplies the wage by $e^{0.12} = 1.1275$, an exact effect of $12.7\%$; the approximation $100b$ gives $12\%$. Formal
+sector workers earn $e^{0.35} - 1 = 41.9\%$ more than otherwise similar informal workers, against an approximation of $35\%$. The exact figures
+should be reported, especially for the dummy variable: a dummy changes discretely from $0$ to $1$, so the derivative-based approximation has no
+special claim to validity, and here it understates the gap by seven percentage points.
+\end{solution}
+
+\begin{problem}
+Prove that in the logistic model the elasticity of $Y$ with respect to $X$ is $\beta X(1 - Y)$. Show that for small $Y$ it is approximately the
+elasticity $\beta X$ of the log-linear model, and explain why.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:logit}, $dY/dX = \beta Y(1 - Y)$, so $\eta = \beta Y(1 - Y)X/Y = \beta X(1 - Y)$. As $Y \to 0$, $1 - Y \to 1$ and
+$\eta \to \beta X$, the elasticity of $\log Y = \alpha + \beta X$ (Theorem~\ref{thm:forms}). For small $Y$, $Y = e^z/(1 + e^z) \approx e^z$, because $e^z$ is
+small, so the logistic is approximately the exponential curve and has the same elasticity. The factor $1 - Y$ is the brake applied by saturation.
+\end{solution}
+
+\begin{problem}
+For a sample of $40$ observations, the regression of $Y$ on $X$ has residual sum of squares $12.6$ and the regression of $\log Y$ on $X$ has residual
+sum of squares $0.84$. The geometric mean of $Y$ is $4.2$.
+\begin{enumerate}[label=(\alph*)]
+\item Explain why the two residual sums of squares cannot be compared directly.
+\item Without re-estimating, compute the residual sums of squares of both models after $Y$ is scaled by its geometric mean, and say which model
+the Box--Cox criterion prefers.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) They are measured in different units: squared units of $Y$ for the first and squared log units for the second.
+
+(b) Scaling $Y$ by $\tilde Y = 4.2$ divides every residual of the linear model by $4.2$, so its RSS becomes $12.6/4.2^2 = 0.714$. In the log model,
+$\log(Y/\tilde Y) = \log Y - \log\tilde Y$ only shifts the intercept, so the residuals and RSS are unchanged at $0.84$. The linear model has the
+smaller scaled RSS, so it is preferred, with a log-likelihood margin of $\frac{40}{2}\log(0.84/0.714) = 3.25$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
