@@ -37,7 +37,10 @@ from html import escape, unescape
 from pathlib import Path
 
 # Recognised theorem-like environments, in the order we test for them.
+# "software" comes first: its panels carry titles such as "Software (A first
+# example)", and testing "example" earlier would mistag them.
 THEOREM_TYPES = [
+    "software",
     "definition", "theorem", "lemma", "proposition", "corollary",
     "example", "exercise", "remark", "note", "conjecture",
     "problem", "technique", "fact",
