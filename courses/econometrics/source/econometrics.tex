@@ -834,6 +834,712 @@ precise.
 (c) Stata: \texttt{tsset Year}, then \texttt{correlate D.Employed D.GNP}. EViews: \texttt{group g d(employed) d(gnp)}, then \texttt{g.cor}.
 \end{solution}
 
+%======================================================================
+\section{The Two-Variable Linear Model}
+\label{sec:twovar}
+
+Section~\ref{sec:intro} showed that the best linear predictor of $Y$ given $X$ always exists and is given by population moments. This section
+estimates it from a sample, establishes the properties of the estimator under explicit assumptions, and builds the machinery of inference: standard
+errors, $t$ tests, confidence intervals and prediction intervals. Everything here is done with sums, so that the ideas are visible without
+matrix algebra. With the $k$-variable model the same results are re-derived in matrix form for any number of regressors, and the two-variable
+results become special cases.
+
+\subsection{The model and its assumptions}
+\label{ssec:assump2}
+
+\begin{defn}
+\label{def:clrm2}
+The \textbf{two-variable linear regression model} is
+\[
+Y_i = \alpha + \beta X_i + u_i , \qquad i = 1, \dots, n ,
+\]
+with the following assumptions.
+\begin{enumerate}[label=(A\arabic*)]
+\item \textbf{Exogeneity}: $E(u_i \mid X_1, \dots, X_n) = 0$ for every $i$.
+\item \textbf{Homoscedasticity}: $\Var(u_i \mid X_1, \dots, X_n) = \sigma^2$, the same for every $i$.
+\item \textbf{No autocorrelation}: $\Cov(u_i, u_j \mid X_1, \dots, X_n) = 0$ for $i \neq j$.
+\item \textbf{Variation in the regressor}: the $X_i$ are not all equal, so $\sum x_i^2 > 0$.
+\item \textbf{Normality} (needed only for exact small-sample inference): conditionally on the $X$'s, the $u_i$ are normally distributed.
+\end{enumerate}
+\end{defn}
+
+Johnston, like many texts, states the assumptions for \emph{fixed} (non-stochastic) $X$: the regressor values are treated as chosen in advance,
+as in an experiment, and only $u$ is random. Conditioning on the $X$'s, as above, gives the same results for random regressors: every expectation
+below is conditional on $X_1, \dots, X_n$, and the $X$'s are treated as constants within it. The conditional formulation is the honest one for
+economic data, where the regressors are as random as the dependent variable.
+
+Each assumption has an economic meaning, and each is the subject of a later section that asks what happens when it fails.
+\begin{itemize}
+\item (A1) says that the disturbance contains nothing systematically related to $X$. It fails when a relevant variable correlated with $X$ is
+omitted, when $X$ is measured with error, or when $X$ and $Y$ are determined jointly, as price and quantity are in a market. Its failure biases
+least squares, and that is the most serious problem in applied econometrics.
+\item (A2) fails when the spread of $Y$ around the line changes with $X$: the food spending of rich households varies more than that of poor
+ones. Least squares stays unbiased, but its usual standard errors are wrong.
+\item (A3) fails in time series, where a shock to this quarter's consumption persists into the next. Again least squares stays unbiased but its
+standard errors are wrong.
+\item (A4) is needed for the estimator to exist at all: a line cannot be fitted through points that all share the same $X$.
+\end{itemize}
+
+\subsection{Least squares}
+\label{ssec:ls2}
+
+For any candidate line $a + bX$, the \textbf{residuals} are $e_i = Y_i - a - bX_i$. The least squares estimates minimise the residual sum of
+squares
+\[
+S(a, b) = \sum_{i=1}^n (Y_i - a - bX_i)^2 .
+\]
+
+\begin{thm}
+\label{thm:ols2}
+Under (A4), $S$ has a unique minimum at
+\begin{equation}
+\label{eq:ols2}
+b = \frac{\sum x_i y_i}{\sum x_i^2}, \qquad a = \bar Y - b\bar X ,
+\end{equation}
+where $x_i = X_i - \bar X$ and $y_i = Y_i - \bar Y$.
+\end{thm}
+
+\begin{proof}
+Setting the partial derivatives to zero gives the \textbf{normal equations}
+\begin{align*}
+\frac{\partial S}{\partial a} &= -2\sum (Y_i - a - bX_i) = 0 ,\\
+\frac{\partial S}{\partial b} &= -2\sum X_i(Y_i - a - bX_i) = 0 ,
+\end{align*}
+that is,
+\begin{align*}
+\sum Y_i &= na + b\sum X_i ,\\
+\sum X_iY_i &= a\sum X_i + b\sum X_i^2 .
+\end{align*}
+The first gives $a = \bar Y - b\bar X$. Substituting into the second and using
+$\sum X_iY_i - n\bar X\bar Y = \sum x_iy_i$ and $\sum X_i^2 - n\bar X^2 = \sum x_i^2$ gives $b\sum x_i^2 = \sum x_iy_i$. Under (A4) this has the unique
+solution \eqref{eq:ols2}.
+
+The point is a minimum because $S$ is a convex quadratic: its Hessian is
+\[
+2\begin{pmatrix} n & \sum X_i \\ \sum X_i & \sum X_i^2 \end{pmatrix},
+\]
+with positive diagonal and determinant $4\bigl(n\sum X_i^2 - (\sum X_i)^2\bigr) = 4n\sum x_i^2 > 0$.
+\end{proof}
+
+The \textbf{fitted values} are $\hat Y_i = a + bX_i$ and the residuals $e_i = Y_i - \hat Y_i$. The normal equations are statements about the
+residuals, and they give the residuals four properties that are used constantly.
+
+\begin{thm}
+\label{thm:resid2}
+The least squares residuals satisfy
+\begin{enumerate}[label=(\roman*)]
+\item $\sum e_i = 0$, so the residuals have mean zero and $\bar{\hat Y} = \bar Y$;
+\item $\sum X_i e_i = 0$ and $\sum x_i e_i = 0$: the residuals are uncorrelated with the regressor in the sample;
+\item $\sum \hat Y_i e_i = 0$: the residuals are uncorrelated with the fitted values;
+\item the fitted line passes through the point of means $(\bar X, \bar Y)$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) and the first part of (ii) are the two normal equations. Then $\sum x_ie_i = \sum X_ie_i - \bar X\sum e_i = 0$.
+(iii) $\sum \hat Y_ie_i = a\sum e_i + b\sum X_ie_i = 0$. (iv) is $a = \bar Y - b\bar X$.
+\end{proof}
+
+These are the sample versions of $E(v) = 0$ and $\Cov(X, v) = 0$ for the best linear predictor in Theorem~\ref{thm:blp}. Least squares imposes on
+the sample exactly the conditions that define the population best linear predictor, which is why it estimates it. That idea, ``impose the sample
+version of a population moment condition'', is the method of moments, and it returns in full generality with GMM.
+
+\subhead{The decomposition of the sum of squares}
+In deviation form $\hat y_i = \hat Y_i - \bar Y = bx_i$, and $y_i = \hat y_i + e_i$.
+
+\begin{thm}
+\label{thm:anova2}
+\[
+\underbrace{\sum y_i^2}_{\text{TSS}} = \underbrace{\sum \hat y_i^2}_{\text{ESS}} + \underbrace{\sum e_i^2}_{\text{RSS}},
+\qquad\text{with}\qquad \text{ESS} = b^2\sum x_i^2 = b\sum x_iy_i .
+\]
+\end{thm}
+
+\begin{proof}
+Square $y_i = bx_i + e_i$ and sum: $\sum y_i^2 = b^2\sum x_i^2 + 2b\sum x_ie_i + \sum e_i^2$. The middle term is zero by
+Theorem~\ref{thm:resid2}(ii). Finally $b^2\sum x_i^2 = b\sum x_iy_i$ by \eqref{eq:ols2}.
+\end{proof}
+
+The total variation in $Y$ about its mean splits into a part explained by the regression and a residual part. The proportion explained is the
+\textbf{coefficient of determination}
+\[
+R^2 = \frac{\text{ESS}}{\text{TSS}} = 1 - \frac{\text{RSS}}{\text{TSS}}, \qquad 0 \leq R^2 \leq 1 .
+\]
+
+\begin{thm}
+\label{thm:r2r}
+In the two-variable model $R^2 = r^2$, the square of the sample correlation of $X$ and $Y$.
+\end{thm}
+
+\begin{proof}
+$R^2 = \dfrac{b\sum x_iy_i}{\sum y_i^2} = \dfrac{(\sum x_iy_i)^2}{\sum x_i^2\sum y_i^2} = r^2$.
+\end{proof}
+
+\begin{exa}
+\label{ex:hand2}
+Five households report monthly income $X$ (thousands of kwacha) and monthly food expenditure $Y$ (hundreds of kwacha):
+\begin{center}
+\begin{tabular}{c|ccccc}
+$X_i$ & 2 & 4 & 6 & 8 & 10\\
+$Y_i$ & 3 & 4 & 6 & 6 & 9
+\end{tabular}
+\end{center}
+Here $\bar X = 6$ and $\bar Y = 5.6$. The deviations are
+\[
+x = (-4, -2, 0, 2, 4), \qquad y = (-2.6, -1.6, 0.4, 0.4, 3.4),
+\]
+so
+\begin{gather*}
+\sum x_i^2 = 40, \qquad \sum y_i^2 = 21.2,\\
+\sum x_iy_i = 10.4 + 3.2 + 0 + 0.8 + 13.6 = 28 .
+\end{gather*}
+Hence
+\[
+b = \frac{28}{40} = 0.7, \qquad a = 5.6 - 0.7(6) = 1.4 .
+\]
+Each extra K1\,000 of income is associated with K70 more food spending: the marginal propensity to spend on food is $0.07$, once the units are
+allowed for. The fitted values are $2.8, 4.2, 5.6, 7.0, 8.4$, and the residuals are
+\[
+e = (0.2,\ -0.2,\ 0.4,\ -1.0,\ 0.6),
+\]
+which sum to zero, and $\sum x_ie_i = -0.8 + 0.4 + 0 - 2.0 + 2.4 = 0$, as Theorem~\ref{thm:resid2} requires. The sums of squares are
+\[
+\text{RSS} = 0.04 + 0.04 + 0.16 + 1 + 0.36 = 1.6, \qquad \text{ESS} = 0.7 \times 28 = 19.6, \qquad \text{TSS} = 21.2 ,
+\]
+and $R^2 = 19.6/21.2 = 0.9245$. Income accounts for about $92\%$ of the variation in food spending in this small sample.
+\end{exa}
+
+\subsection{Properties of the least squares estimators}
+\label{ssec:prop2}
+
+The estimates $a$ and $b$ are computed from a sample. Another sample would give different values, and their sampling distribution is what tells us
+how far they may be from $\alpha$ and $\beta$. In this subsection all expectations are conditional on the $X$'s, which may therefore be treated as
+constants.
+
+\begin{lem}
+\label{lem:blinear}
+Let $w_i = x_i/\sum x_j^2$. Then $\sum w_i = 0$, $\sum w_iX_i = \sum w_ix_i = 1$, $\sum w_i^2 = 1/\sum x_i^2$, and
+\[
+b = \sum w_iY_i = \beta + \sum w_iu_i .
+\]
+\end{lem}
+
+\begin{proof}
+$\sum w_i = \sum x_i/\sum x_j^2 = 0$ because deviations sum to zero. $\sum w_ix_i = \sum x_i^2/\sum x_j^2 = 1$, and since
+$X_i = x_i + \bar X$, $\sum w_iX_i = \sum w_ix_i + \bar X\sum w_i = 1$. $\sum w_i^2 = \sum x_i^2/(\sum x_j^2)^2$. Next,
+$b = \sum x_iy_i/\sum x_j^2 = \sum w_i(Y_i - \bar Y) = \sum w_iY_i$. Finally, substituting $Y_i = \alpha + \beta X_i + u_i$,
+\[
+b = \alpha\sum w_i + \beta\sum w_iX_i + \sum w_iu_i = \beta + \sum w_iu_i . \qedhere
+\]
+\end{proof}
+
+The lemma expresses $b$ as a \emph{linear} function of the $Y$'s, and its sampling error $b - \beta$ as a weighted sum of the disturbances.
+Everything else follows from it.
+
+\begin{thm}
+\label{thm:moments2}
+Under (A1)--(A4),
+\begin{align*}
+E(b) &= \beta, & \Var(b) &= \frac{\sigma^2}{\sum x_i^2},\\
+E(a) &= \alpha, & \Var(a) &= \sigma^2\left(\frac1n + \frac{\bar X^2}{\sum x_i^2}\right),\\
+& & \Cov(a, b) &= -\frac{\bar X\sigma^2}{\sum x_i^2} .
+\end{align*}
+\end{thm}
+
+\begin{proof}
+By Lemma~\ref{lem:blinear} and (A1), $E(b) = \beta + \sum w_iE(u_i) = \beta$. By (A2) and (A3), the variance of a weighted sum of uncorrelated
+terms with common variance is
+\[
+\Var(b) = \Var\Bigl(\sum w_iu_i\Bigr) = \sigma^2\sum w_i^2 = \frac{\sigma^2}{\sum x_i^2} .
+\]
+For the intercept, averaging the model gives $\bar Y = \alpha + \beta\bar X + \bar u$, so
+\[
+a - \alpha = \bar Y - b\bar X - \alpha = \bar u - (b - \beta)\bar X .
+\]
+Hence $E(a) = \alpha$. Now $\Cov(\bar u, b) = \Cov\bigl(\frac1n\sum u_i, \sum w_iu_i\bigr) = \frac{\sigma^2}{n}\sum w_i = 0$, so
+\begin{align*}
+\Var(a) &= \Var(\bar u) + \bar X^2\Var(b) = \frac{\sigma^2}{n} + \frac{\bar X^2\sigma^2}{\sum x_i^2},\\
+\Cov(a, b) &= \Cov\bigl(\bar u - (b - \beta)\bar X,\ b\bigr) = -\bar X\Var(b) . \qedhere
+\end{align*}
+\end{proof}
+
+The formula $\Var(b) = \sigma^2/\sum x_i^2$ says what makes a slope precisely estimated: little noise ($\sigma^2$ small) and a wide spread of the
+regressor ($\sum x_i^2$ large). The spread grows with the sample size, but it also depends on \emph{where} the $X$'s are. Twenty observations bunched
+together tell us less about the slope than ten spread far apart. The covariance of $a$ and $b$ has the opposite sign to $\bar X$: when the data lie
+to the right of the origin, a line that is too steep must have too low an intercept to pass near the point of means.
+
+\begin{exa}
+\label{ex:researchers}
+Two researchers fit $Y = \alpha + \beta x + u$ to different data sets of eight observations each:
+\begin{center}
+\begin{tabular}{cc@{\qquad}cc}
+\multicolumn{2}{c}{Researcher 1} & \multicolumn{2}{c}{Researcher 2}\\
+$Y$ & $x$ & $Y$ & $x$\\\hline
+4.0, 4.5, 4.5, 3.5 & 3 & 2.0, 2.5, 2.5, 1.5 & 1\\
+4.5, 4.5, 5.5, 5.0 & 4 & 11.5, 10.5, 10.5, 11.0 & 10
+\end{tabular}
+\end{center}
+They obtain the slope estimates $0.750$ and $0.972$, with standard errors $0.339$ and $0.038$. Why is the first standard error so much larger?
+
+\emph{Solution.} The standard error is $s/\sqrt{\sum x_i^2}$, so either the residual scatter $s$ or the spread $\sum x_i^2$ must differ. Here the
+residual scatter is the same. With only two distinct $x$ values the fitted line passes through the two group means, so each residual is a
+deviation from its group mean. In both data sets these are $(-0.125,\ 0.375,\ 0.375,\ -0.625)$ at the lower $x$ and the values
+$-0.375, -0.375, 0.625, 0.125$, in some order, at the upper $x$. So both regressions have $\text{RSS} = 1.375$ and $s = \sqrt{1.375/6} = 0.479$. The spreads are very
+different. Researcher 1's $x$ takes the values $3$ and $4$, mean $3.5$, so $\sum x_i^2 = 8(0.5)^2 = 2$. Researcher 2's takes $1$ and $10$, mean
+$5.5$, so $\sum x_i^2 = 8(4.5)^2 = 162$. The ratio of standard errors is therefore
+\[
+\frac{0.479/\sqrt{2}}{0.479/\sqrt{162}} = \sqrt{81} = 9,
+\]
+and indeed $0.339/0.038 \approx 9$. The second researcher's slope is measured nine times as precisely, entirely because the regressor values are
+nine times as far apart. With the same scatter about the line, a line pinned down at two widely separated points is far less free to tilt.
+(Examination versions of this question quote the second slope as $0.970$. Least squares on the data gives $0.9722$.)
+\end{exa}
+
+\subhead{The Gauss--Markov theorem}
+Least squares is not the only way to estimate $\beta$. The slope through the first and last observations is another, as is the average of the
+slopes from the point of means to each observation. Why prefer least squares?
+
+\begin{thm}[Gauss--Markov]
+\label{thm:gm2}
+Under (A1)--(A4), $b$ has the smallest variance among all linear unbiased estimators of $\beta$: if $\tilde\beta = \sum c_iY_i$ is unbiased for
+$\beta$ whatever the values of $\alpha$ and $\beta$, then $\Var(\tilde\beta) \geq \Var(b)$, with equality only if $c_i = w_i$ for all $i$. The
+corresponding statement holds for $a$.
+\end{thm}
+
+\begin{proof}
+$E(\tilde\beta) = \sum c_i(\alpha + \beta X_i) = \alpha\sum c_i + \beta\sum c_iX_i$. For this to equal $\beta$ for all $\alpha$ and $\beta$ we need
+\[
+\sum c_i = 0 \qquad\text{and}\qquad \sum c_iX_i = 1 .
+\]
+Then $\tilde\beta = \beta + \sum c_iu_i$ and $\Var(\tilde\beta) = \sigma^2\sum c_i^2$. Write $c_i = w_i + d_i$. Both $c$ and $w$ satisfy the two
+conditions, so $\sum d_i = 0$ and $\sum d_iX_i = 0$, and therefore
+\[
+\sum w_id_i = \frac{\sum x_id_i}{\sum x_j^2} = \frac{\sum X_id_i - \bar X\sum d_i}{\sum x_j^2} = 0 .
+\]
+Hence
+\[
+\Var(\tilde\beta) = \sigma^2\Bigl(\sum w_i^2 + 2\sum w_id_i + \sum d_i^2\Bigr) = \Var(b) + \sigma^2\sum d_i^2 \geq \Var(b),
+\]
+with equality only if every $d_i = 0$. The argument for $a$ is identical, with the unbiasedness conditions $\sum c_i = 1$ and $\sum c_iX_i = 0$.
+\end{proof}
+
+Least squares is therefore \textbf{BLUE}, the best linear unbiased estimator. The theorem needs no normality. Its limits matter as much as its
+content. It compares only \emph{linear} and \emph{unbiased} estimators, so a biased or non-linear estimator may do better: ridge regression, for
+instance, trades a little bias for a large fall in variance. And it relies on (A2) and (A3): when the disturbances are heteroscedastic or
+autocorrelated, least squares is still linear and unbiased but no longer best, and generalised least squares takes its place.
+
+\subhead{Estimating $\sigma^2$}
+The variances in Theorem~\ref{thm:moments2} involve the unknown $\sigma^2$. The natural estimate uses the residuals, but the divisor must be $n - 2$,
+not $n$.
+
+\begin{thm}
+\label{thm:s2two}
+Under (A1)--(A4), $E\bigl(\sum e_i^2\bigr) = (n-2)\sigma^2$, so
+\[
+s^2 = \frac{\sum e_i^2}{n-2}
+\]
+is an unbiased estimator of $\sigma^2$.
+\end{thm}
+
+\begin{proof}
+From $y_i = \beta x_i + (u_i - \bar u)$ and $\hat y_i = bx_i$, the residual is
+\[
+e_i = y_i - bx_i = (u_i - \bar u) - (b - \beta)x_i .
+\]
+Squaring and summing,
+\[
+\sum e_i^2 = \sum (u_i - \bar u)^2 - 2(b - \beta)\sum x_i(u_i - \bar u) + (b - \beta)^2\sum x_i^2 .
+\]
+Now $\sum x_i(u_i - \bar u) = \sum x_iu_i = (b - \beta)\sum x_i^2$ by Lemma~\ref{lem:blinear}, so the last two terms combine to
+$-(b - \beta)^2\sum x_i^2$. Taking expectations, $E\sum (u_i - \bar u)^2 = (n-1)\sigma^2$, the familiar result for a sample variance, and
+$E\bigl[(b - \beta)^2\bigr]\sum x_i^2 = \Var(b)\sum x_i^2 = \sigma^2$. Hence $E\sum e_i^2 = (n-1)\sigma^2 - \sigma^2 = (n-2)\sigma^2$.
+\end{proof}
+
+The residuals are not $n$ free numbers: they satisfy the two linear restrictions $\sum e_i = 0$ and $\sum x_ie_i = 0$. Two degrees of freedom have
+been used to estimate $\alpha$ and $\beta$, and the divisor $n - 2$ is the number that remain. The estimated standard errors are
+\[
+\operatorname{se}(b) = \frac{s}{\sqrt{\sum x_i^2}}, \qquad
+\operatorname{se}(a) = s\sqrt{\frac1n + \frac{\bar X^2}{\sum x_i^2}} .
+\]
+
+\subsection{Inference}
+\label{ssec:inf2}
+
+Under the normality assumption (A5), $b = \beta + \sum w_iu_i$ is a linear combination of independent normal variables, so
+\[
+b \sim N\!\left(\beta,\ \frac{\sigma^2}{\sum x_i^2}\right), \qquad\text{that is}\qquad \frac{b - \beta}{\sigma/\sqrt{\sum x_i^2}} \sim N(0, 1) .
+\]
+Replacing $\sigma$ by $s$ changes the distribution, because of two further facts:
+\[
+\frac{(n-2)s^2}{\sigma^2} \sim \chi^2_{n-2}, \qquad s^2 \text{ is independent of } (a, b) .
+\]
+Both are consequences of the theory of quadratic forms in normal variables, proved for the general linear model with the theory of quadratic forms. Granting them, the
+ratio of a standard normal to the square root of an independent $\chi^2$ over its degrees of freedom is Student's $t$:
+
+\begin{thm}
+\label{thm:t2}
+Under (A1)--(A5),
+\[
+\frac{b - \beta}{\operatorname{se}(b)} \sim t_{n-2}, \qquad \frac{a - \alpha}{\operatorname{se}(a)} \sim t_{n-2} .
+\]
+\end{thm}
+
+\begin{proof}
+\[
+\frac{b - \beta}{\operatorname{se}(b)} = \frac{(b - \beta)\big/\bigl(\sigma/\sqrt{\sum x_i^2}\bigr)}{\sqrt{\bigl[(n-2)s^2/\sigma^2\bigr]\big/(n-2)}} ,
+\]
+a standard normal divided by the square root of an independent $\chi^2_{n-2}$ over $n - 2$. The argument for $a$ is the same.
+\end{proof}
+
+Three standard procedures follow, with $t_{\alpha/2}$ the upper $\alpha/2$ point of $t_{n-2}$.
+\begin{enumerate}[label=(\roman*)]
+\item \textbf{Confidence interval}: $b \pm t_{\alpha/2}\operatorname{se}(b)$ covers $\beta$ with probability $1 - \alpha$.
+\item \textbf{Test} of $H_0\colon \beta = \beta_0$: reject at level $\alpha$ against $\beta \neq \beta_0$ if
+$|b - \beta_0|/\operatorname{se}(b) > t_{\alpha/2}$. The interval in (i) is exactly the set of $\beta_0$ that this test does not reject.
+\item \textbf{Test of the regression}: $H_0\colon \beta = 0$, that $X$ has no linear effect on $Y$. Its $t$ ratio is the one every regression program prints.
+\end{enumerate}
+
+\begin{thm}
+\label{thm:ft2}
+The statistic
+\[
+F = \frac{\text{ESS}/1}{\text{RSS}/(n-2)}
+\]
+is the square of the $t$ ratio for $H_0\colon \beta = 0$, and under $H_0$ it has the $F_{1,\,n-2}$ distribution. It is also equal to
+$\dfrac{r^2(n-2)}{1 - r^2}$, the square of the $t$ statistic for zero correlation used in Section~\ref{ssec:software}.
+\end{thm}
+
+\begin{proof}
+$\text{ESS} = b^2\sum x_i^2$ and $\text{RSS}/(n-2) = s^2$, so $F = b^2\sum x_i^2/s^2 = \bigl(b/\operatorname{se}(b)\bigr)^2$. The square of a $t_{n-2}$ variable
+is $F_{1,n-2}$. Dividing numerator and denominator by TSS, $F = (n-2)R^2/(1 - R^2)$, and $R^2 = r^2$ by Theorem~\ref{thm:r2r}.
+\end{proof}
+
+\begin{exa}
+\label{ex:hand2inf}
+In Example~\ref{ex:hand2}, $s^2 = 1.6/3 = 0.5333$, so
+\[
+\operatorname{se}(b) = \sqrt{0.5333/40} = 0.1155, \qquad t = \frac{0.7}{0.1155} = 6.06 .
+\]
+With $3$ degrees of freedom, $t_{0.025} = 3.182$. The hypothesis $\beta = 0$ is rejected at the $5\%$ level, and the $95\%$ confidence interval is
+\[
+0.7 \pm 3.182(0.1155) = 0.7 \pm 0.367 = (0.333,\ 1.067) .
+\]
+The interval is wide, as it must be with five observations, but it excludes zero. As a check on Theorem~\ref{thm:ft2},
+$F = 19.6/0.5333 = 36.75 = 6.06^2$.
+\end{exa}
+
+\subsection{Prediction}
+\label{ssec:pred2}
+
+Given a new value $X_0$, the regression predicts $\hat Y_0 = a + bX_0$. Two different questions can be asked about the accuracy of this
+prediction, and they have different answers.
+\begin{enumerate}[label=(\roman*)]
+\item How accurately does $\hat Y_0$ estimate the \emph{mean} response $E(Y_0) = \alpha + \beta X_0$? This is the question a policy-maker asks:
+what is average food spending at an income of K7\,000?
+\item How accurately does $\hat Y_0$ predict an \emph{individual} value $Y_0 = \alpha + \beta X_0 + u_0$? This is the question asked about one
+particular household.
+\end{enumerate}
+
+\begin{thm}
+\label{thm:pred2}
+Let $u_0$ be uncorrelated with $u_1, \dots, u_n$, with mean $0$ and variance $\sigma^2$. Then under (A1)--(A4),
+\begin{align*}
+\Var\bigl(\hat Y_0 - E(Y_0)\bigr) &= \sigma^2\left(\frac1n + \frac{(X_0 - \bar X)^2}{\sum x_i^2}\right),\\
+\Var(Y_0 - \hat Y_0) &= \sigma^2\left(1 + \frac1n + \frac{(X_0 - \bar X)^2}{\sum x_i^2}\right).
+\end{align*}
+\end{thm}
+
+\begin{proof}
+From the proof of Theorem~\ref{thm:moments2}, $a - \alpha = \bar u - (b - \beta)\bar X$, so
+\[
+\hat Y_0 - E(Y_0) = (a - \alpha) + (b - \beta)X_0 = \bar u + (b - \beta)(X_0 - \bar X) .
+\]
+Since $\Cov(\bar u, b) = 0$, its variance is $\sigma^2/n + (X_0 - \bar X)^2\sigma^2/\sum x_i^2$. The prediction error for an individual is
+$e_0 = Y_0 - \hat Y_0 = u_0 - \bigl(\hat Y_0 - E(Y_0)\bigr)$. The new disturbance $u_0$ is uncorrelated with the sample, and so with $a$ and $b$, which
+adds $\sigma^2$ to the variance.
+\end{proof}
+
+Both variances are smallest at $X_0 = \bar X$ and grow quadratically away from it: predictions are least reliable far from the bulk of the data,
+and extrapolation beyond the observed range is the least reliable of all. The extra $\sigma^2$ in the second formula does not shrink as the sample
+grows. However well the line is estimated, an individual household's spending still varies about it. Under (A5) the intervals are
+\begin{align*}
+\text{mean:}\quad & \hat Y_0 \pm t_{\alpha/2}\, s\sqrt{\frac1n + \frac{(X_0 - \bar X)^2}{\sum x_i^2}} ,\\
+\text{individual:}\quad & \hat Y_0 \pm t_{\alpha/2}\, s\sqrt{1 + \frac1n + \frac{(X_0 - \bar X)^2}{\sum x_i^2}} .
+\end{align*}
+
+\begin{exa}
+\label{ex:hand2pred}
+In Example~\ref{ex:hand2}, at $X_0 = 7$, $\hat Y_0 = 1.4 + 0.7(7) = 6.3$ and $(X_0 - \bar X)^2/\sum x_i^2 = 1/40$. With $s = 0.7303$,
+\begin{align*}
+\text{mean:}\quad & 6.3 \pm 3.182(0.7303)\sqrt{0.2 + 0.025} = 6.3 \pm 1.102 = (5.20,\ 7.40),\\
+\text{individual:}\quad & 6.3 \pm 3.182(0.7303)\sqrt{1.225} = 6.3 \pm 2.572 = (3.73,\ 8.87) .
+\end{align*}
+Figure~\ref{fig:bands} draws both bands over the whole range. The inner band is the uncertainty about the line, and the outer band adds
+the scatter of individual households about it.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.75cm,y=0.42cm]
+\fill[blue!4,rounded corners=4pt] (-1.2,-3.2) rectangle (13.4,14.4);
+\draw[->,gray] (-0.3,0) -- (12.8,0) node[right,font=\small,black] {$X$};
+\draw[->,gray] (0,-2.4) -- (0,13.8) node[above right,font=\small,black] {$Y$};
+\foreach \x in {2,4,...,12} \draw[gray] (\x,0) -- (\x,-0.25) node[below,font=\scriptsize,black] {\x};
+\foreach \y in {4,8,12} \draw[gray] (0,\y) -- (-0.15,\y) node[left,font=\scriptsize,black] {\y};
+\fill[orange!25,opacity=0.8] plot coordinates {(0,-1.968) (1,-1.04) (2,-0.14) (3,0.726) (4,1.55) (5,2.328) (6,3.054) (7,3.728) (8,4.35) (9,4.926) (10,5.46) (11,5.96) (12,6.432)}
+  -- plot coordinates {(12,13.168) (11,12.24) (10,11.34) (9,10.474) (8,9.65) (7,8.872) (6,8.146) (5,7.472) (4,6.85) (3,6.274) (2,5.74) (1,5.24) (0,4.768)} -- cycle;
+\fill[blue!25,opacity=0.9] plot coordinates {(0,-1.038) (1,-0.011) (2,1) (3,1.985) (4,2.927) (5,3.798) (6,4.561) (7,5.198) (8,5.727) (9,6.185) (10,6.6) (11,6.989) (12,7.362)}
+  -- plot coordinates {(12,12.238) (11,11.211) (10,10.2) (9,9.215) (8,8.273) (7,7.402) (6,6.639) (5,6.002) (4,5.473) (3,5.015) (2,4.6) (1,4.211) (0,3.838)} -- cycle;
+\draw[very thick,blue!70!black] (0,1.4) -- (12,9.8);
+\foreach \p in {(2,3),(4,4),(6,6),(8,6),(10,9)} \fill[red!70!black] \p circle (2.4pt);
+\draw[dashed,gray] (6,-0.3) -- (6,13.5);
+\node[font=\scriptsize,gray,anchor=south] at (6,13.5) {$\bar X$};
+\node[font=\scriptsize,anchor=west,align=left] at (0.3,12.6) {\textcolor{blue!70!black}{inner: mean response}\\\textcolor{orange!80!black}{outer: individual $Y$}};
+\end{tikzpicture}
+\caption{Least squares line for the five households of Example~\ref{ex:hand2}, with $95\%$ confidence bands for the mean response (inner) and for
+an individual observation (outer). Both are narrowest at $\bar X = 6$ and widen with distance from it.}
+\label{fig:bands}
+\end{figure}
+
+\subsection{Regression in software}
+\label{ssec:software2}
+
+\begin{software}[A two-variable regression]
+\label{sw:lm}
+The savings data of Example~\ref{ex:lcs}, with the savings rate regressed on the share of the population under 15:
+\begin{verbatim}
+> fit <- lm(sr ~ pop15, data = LifeCycleSavings)
+> summary(fit)
+
+Call:
+lm(formula = sr ~ pop15, data = LifeCycleSavings)
+
+Residuals:
+   Min     1Q Median     3Q    Max
+-8.637 -2.374  0.349  2.022 11.155
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept) 17.49660    2.27972   7.675 6.85e-10 ***
+pop15       -0.22302    0.06291  -3.545 0.000887 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 4.03 on 48 degrees of freedom
+Multiple R-squared:  0.2075,    Adjusted R-squared:  0.191
+F-statistic: 12.57 on 1 and 48 DF,  p-value: 0.0008866
+\end{verbatim}
+\textbf{Reading the output}, line by line against the theory of this section.
+\begin{itemize}
+\item \texttt{Residuals}: the five-number summary of the $e_i$. Their mean is zero by Theorem~\ref{thm:resid2}, so it is not printed; a median
+near zero and roughly symmetric quartiles are what (A5) would lead one to expect.
+\item \texttt{Estimate}: $a = 17.497$ and $b = -0.223$. A country whose share of under-15s is one percentage point higher saves, on average,
+$0.22$ percentage points less of its income.
+\item \texttt{Std.\ Error}: $\operatorname{se}(b) = s/\sqrt{\sum x_i^2}$. Here $\sum x_i^2 = 4103.95$ and $s = 4.03$, so
+$4.03/64.06 = 0.0629$.
+\item \texttt{t value}: the estimate divided by its standard error, the statistic for $H_0\colon\beta = 0$. \texttt{Pr(>|t|)} is its two-sided
+$p$-value from $t_{48}$. The stars are a convention of R's, not a substitute for reading the $p$-value.
+\item \texttt{Residual standard error}: $s = \sqrt{\text{RSS}/(n-2)}$, with $48 = 50 - 2$ degrees of freedom.
+\item \texttt{Multiple R-squared}: $R^2 = 0.2075 = (-0.4555)^2$, the squared correlation of Section~\ref{ssec:software}
+(Theorem~\ref{thm:r2r}). The adjusted $R^2$ is explained with the $k$-variable model.
+\item \texttt{F-statistic}: $12.57 = (-3.545)^2$, with the same $p$-value as the $t$ test, by Theorem~\ref{thm:ft2}.
+\end{itemize}
+
+\textbf{Stata:} \texttt{regress sr pop15}. Stata prints the ANOVA table above the coefficients, with confidence intervals in place of $p$-value stars.
+\textbf{EViews:} \texttt{ls sr c pop15}, where \texttt{c} is EViews' name for the constant.
+\end{software}
+
+\begin{software}[The analysis of variance and confidence intervals]
+\label{sw:anova}
+The decomposition of Theorem~\ref{thm:anova2}, and intervals for the coefficients:
+\begin{verbatim}
+> anova(fit)
+Analysis of Variance Table
+
+Response: sr
+          Df Sum Sq Mean Sq F value    Pr(>F)
+pop15      1 204.12  204.12  12.569 0.0008866 ***
+Residuals 48 779.51   16.24
+> confint(fit)
+                 2.5 %      97.5 %
+(Intercept) 12.9129180 22.08027686
+pop15       -0.3494978 -0.09653739
+\end{verbatim}
+\textbf{Reading the output.} ESS $= 204.12$ on 1 degree of freedom and RSS $= 779.51$ on 48. Their sum is TSS $= 983.63$, and
+$R^2 = 204.12/983.63 = 0.2075$. The residual mean square $16.24 = s^2 = 4.03^2$. The interval for the slope is
+$-0.2230 \pm t_{0.025,48}(0.0629)$ with $t_{0.025,48} = 2.011$. It excludes zero, consistent with the $t$ test.
+
+\textbf{Stata:} the ANOVA table is printed by \texttt{regress} itself. \textbf{EViews:} the confidence intervals are under
+\emph{View $\to$ Coefficient Diagnostics $\to$ Confidence Intervals}.
+\end{software}
+
+\begin{software}[Predicting the mean and an individual]
+\label{sw:predict}
+Predictions at \texttt{pop15} $= 25$ and $45$, near the two ends of the data:
+\begin{verbatim}
+> new <- data.frame(pop15 = c(25, 45))
+> predict(fit, new, interval = "confidence")
+        fit       lwr       upr
+1 11.921158 10.206061 13.636255
+2  7.460807  5.762507  9.159107
+> predict(fit, new, interval = "prediction")
+        fit        lwr      upr
+1 11.921158  3.6390423 20.20327
+2  7.460807 -0.8178472 15.73946
+\end{verbatim}
+\textbf{Reading the output.} The point predictions are the same for both questions; only the intervals differ. The mean savings rate of
+countries with 25\% under 15 is estimated to lie between $10.2\%$ and $13.6\%$. A single such country could have a savings rate anywhere from
+$3.6\%$ to $20.2\%$. The prediction interval is about five times as wide, because $s = 4.03$ is large compared with the precision of the line. Its
+lower limit at 45\% under 15 is negative, an impossible savings rate. That is a reminder that the normal disturbance of (A5) is an approximation,
+and a poor one near a natural boundary.
+
+\textbf{Stata:} after \texttt{regress}, \texttt{predict yhat, xb}; \texttt{predict sem, stdp} gives the standard error for the mean and
+\texttt{predict sef, stdf} that for an individual. \textbf{EViews:} \emph{Proc $\to$ Forecast} in the equation window, which produces the
+forecast and its standard error (the individual one).
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+For the data
+\begin{center}
+\begin{tabular}{c|cccccc}
+$X$ & 1 & 2 & 3 & 4 & 5 & 6\\
+$Y$ & 6 & 9 & 9 & 12 & 14 & 16
+\end{tabular}
+\end{center}
+\begin{enumerate}[label=(\alph*)]
+\item compute $a$, $b$, the residuals and $R^2$;
+\item compute $s^2$ and $\operatorname{se}(b)$, and test $\beta = 2$ at the $5\%$ level;
+\item give a $95\%$ prediction interval for $Y$ at $X = 8$, and explain why it should be treated with caution.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\bar X = 3.5$ and $\bar Y = 11$. The deviations are $x = (-2.5, -1.5, -0.5, 0.5, 1.5, 2.5)$ and $y = (-5, -2, -2, 1, 3, 5)$, so
+$\sum x_i^2 = 17.5$, $\sum x_iy_i = 12.5 + 3 + 1 + 0.5 + 4.5 + 12.5 = 34$ and $\sum y_i^2 = 68$. Hence $b = 34/17.5 = 1.9429$ and
+$a = 11 - 1.9429(3.5) = 4.2$. The fitted values are $6.143, 8.086, 10.029, 11.971, 13.914, 15.857$, and the residuals are
+$-0.143, 0.914, -1.029, 0.029, 0.086, 0.143$, which sum to zero. ESS $= b\sum x_iy_i = 66.057$, so RSS $= 68 - 66.057 = 1.943$ and
+$R^2 = 66.057/68 = 0.9714$.
+
+(b) $s^2 = 1.943/4 = 0.4857$, so $\operatorname{se}(b) = \sqrt{0.4857/17.5} = 0.1666$. Then $t = (1.9429 - 2)/0.1666 = -0.34$. Since
+$|t| < t_{0.025,4} = 2.776$, the hypothesis $\beta = 2$ is not rejected.
+
+(c) $\hat Y_0 = 4.2 + 1.9429(8) = 19.743$. The variance factor is $1 + \frac16 + (8 - 3.5)^2/17.5 = 2.3238$, so the interval is
+$19.743 \pm 2.776\sqrt{0.4857 \times 2.3238} = 19.743 \pm 2.950 = (16.79,\ 22.69)$. $X = 8$ lies outside the observed range $1$ to $6$, so the
+prediction is an extrapolation. The interval allows for sampling error in $a$ and $b$, but it assumes that the straight line continues beyond the
+data, which nothing in the data can confirm.
+\end{solution}
+
+\begin{problem}
+Show that if $Y$ is measured in kwacha instead of thousands of kwacha, so that every $Y_i$ is multiplied by $1000$, then $a$, $b$ and their
+standard errors are multiplied by $1000$, while the $t$ ratios and $R^2$ are unchanged. What happens if instead $X$ is multiplied by $1000$?
+\end{problem}
+
+\begin{solution}
+With $Y^* = 1000Y$, the deviations are $y^* = 1000y$, so $b^* = \sum x_iy_i^*/\sum x_i^2 = 1000b$ and $a^* = \bar Y^* - b^*\bar X = 1000a$. The
+residuals are $e^* = 1000e$, so $s^* = 1000s$ and both standard errors scale by $1000$. Each $t$ ratio is a ratio of two quantities scaled by $1000$,
+so it is unchanged; $R^2 = 1 - \text{RSS}/\text{TSS}$ is a ratio of two sums each scaled by $10^6$. If instead $X^* = 1000X$, then $x^* = 1000x$ and
+$b^* = b/1000$, $\operatorname{se}(b^*) = s/\sqrt{10^6\sum x_i^2} = \operatorname{se}(b)/1000$. The intercept, its standard error, the residuals, $s$,
+the $t$ ratios and $R^2$ are all unchanged. Changing units changes the size of a coefficient but never the evidence about it.
+\end{solution}
+
+\begin{problem}
+Let $b_{YX}$ be the slope of the least squares regression of $Y$ on $X$, and $b_{XY}$ that of $X$ on $Y$.
+\begin{enumerate}[label=(\alph*)]
+\item Show that $b_{YX}b_{XY} = r^2$.
+\item Deduce that the two fitted lines coincide only if $|r| = 1$, and explain why regressing $X$ on $Y$ and inverting does not give the
+regression of $Y$ on $X$.
+\item Verify (a) on the data of Example~\ref{ex:hand2}, for which the regression of $X$ on $Y$ has slope $1.3208$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Since $b_{YX} = \sum xy/\sum x^2$ and $b_{XY} = \sum xy/\sum y^2$,
+\[
+b_{YX}b_{XY} = \frac{(\sum xy)^2}{\sum x^2\sum y^2} = r^2 .
+\]
+
+(b) Both lines pass through $(\bar X, \bar Y)$. In the $(X, Y)$ plane the first has slope $b_{YX}$ and the second, written as $Y$ against $X$,
+has slope $1/b_{XY}$. They coincide only if $b_{YX} = 1/b_{XY}$, that is $r^2 = 1$. When $|r| < 1$, $1/b_{XY} = b_{YX}/r^2$ is steeper than
+$b_{YX}$. The two regressions answer different questions, minimising vertical and horizontal distances respectively, and each is the best linear
+predictor of its own dependent variable.
+
+(c) $b_{YX}b_{XY} = 0.7 \times 1.3208 = 0.9245$, which is $R^2$ from Example~\ref{ex:hand2}.
+\end{solution}
+
+\begin{problem}
+\label{prob:origin}
+\textbf{Regression through the origin.} Economic theory sometimes implies $\alpha = 0$, for example in a proportional consumption function
+$C = \beta Y$.
+\begin{enumerate}[label=(\alph*)]
+\item Show that least squares on $Y_i = \beta X_i + u_i$ gives $\tilde b = \sum X_iY_i/\sum X_i^2$, with variance $\sigma^2/\sum X_i^2$ under (A1)--(A3).
+\item Show that the residuals of this regression need not sum to zero, and explain why $1 - \text{RSS}/\text{TSS}$ can then be negative.
+\item Compute $\tilde b$ for the data of Example~\ref{ex:hand2}.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Minimising $\sum (Y_i - \beta X_i)^2$ gives the single normal equation $\sum X_i(Y_i - \tilde bX_i) = 0$, so $\tilde b = \sum X_iY_i/\sum X_i^2$.
+Substituting the model, $\tilde b = \beta + \sum X_iu_i/\sum X_i^2$, with variance $\sigma^2\sum X_i^2/(\sum X_i^2)^2 = \sigma^2/\sum X_i^2$.
+
+(b) The only normal equation is $\sum X_ie_i = 0$. There is no equation $\sum e_i = 0$, because there is no intercept to estimate. The proof of
+Theorem~\ref{thm:anova2} used $\sum e_i = 0$ to drop a cross term, so TSS $=$ ESS $+$ RSS fails, and RSS can exceed $\sum y_i^2$ when the line
+through the origin fits worse than a horizontal line at $\bar Y$. Software therefore reports an ``uncentred'' $R^2$, $1 - \text{RSS}/\sum Y_i^2$,
+for such regressions, which is not comparable with the usual one.
+
+(c) $\sum X_iY_i = 6 + 16 + 36 + 48 + 90 = 196$ and $\sum X_i^2 = 220$, so $\tilde b = 0.891$. It is larger than $b = 0.7$ because forcing the line
+through the origin, when the data suggest a positive intercept, steepens it. Note also that $\sum X_i^2 = 220 > \sum x_i^2 = 40$, so $\tilde b$ has a
+smaller variance than $b$. That is a gain if $\alpha$ really is zero; if it is not, $\tilde b$ is biased.
+\end{solution}
+
+\begin{problem}
+Under (A1)--(A4) show that the estimator $\check\beta = (Y_n - Y_1)/(X_n - X_1)$, the slope through the first and last observations, is linear and
+unbiased, and find its variance. Verify directly that its variance is at least $\sigma^2/\sum x_i^2$ for the $X$ values of Example~\ref{ex:hand2}.
+\end{problem}
+
+\begin{solution}
+$\check\beta = \sum c_iY_i$ with $c_1 = -1/(X_n - X_1)$, $c_n = 1/(X_n - X_1)$ and all other $c_i = 0$. Then $\sum c_i = 0$ and
+$\sum c_iX_i = (X_n - X_1)/(X_n - X_1) = 1$, so it is unbiased by the argument of Theorem~\ref{thm:gm2}. Its variance is
+$\sigma^2\sum c_i^2 = 2\sigma^2/(X_n - X_1)^2$. With $X = 2, 4, 6, 8, 10$, this is $2\sigma^2/64 = 0.03125\sigma^2$, against
+$\Var(b) = \sigma^2/40 = 0.025\sigma^2$. The end-point estimator is unbiased but $25\%$ more variable, because it throws away the three middle
+observations.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:researchers}, suppose researcher 1 could choose eight new $x$ values anywhere in the interval $[3, 4]$ to estimate the slope.
+Which design minimises $\Var(b)$? What is the risk of that design, and how would a careful researcher hedge against it?
+\end{problem}
+
+\begin{solution}
+$\Var(b) = \sigma^2/\sum x_i^2$ is minimised by making $\sum (x_i - \bar x)^2$ as large as possible, which for eight points in $[3, 4]$ means four at $3$
+and four at $4$. That is exactly the design used, with $\sum x_i^2 = 2$. Within the interval nothing better is possible; the second researcher
+did better only by sampling a much wider range. The risk is that a design with only two distinct $x$ values cannot detect curvature: any
+function at all can be passed through two points. A careful researcher places a few observations in the middle of the range, accepting a slightly
+larger $\Var(b)$ in exchange for being able to check linearity.
+\end{solution}
+
+\begin{problem}
+Using R on the \texttt{LifeCycleSavings} data, regress \texttt{sr} on \texttt{pop75} instead of \texttt{pop15}.
+\begin{enumerate}[label=(\alph*)]
+\item From the correlation $0.317$ in Software~\ref{sw:cor}, predict $R^2$ and the $t$ ratio on the slope before running the regression.
+\item Explain why the positive slope on \texttt{pop75} should not be read as evidence that old people save.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $R^2 = r^2 = 0.317^2 = 0.100$, and by Theorem~\ref{thm:ft2}
+\[
+t = \frac{r\sqrt{n-2}}{\sqrt{1 - r^2}} = \frac{0.317\sqrt{48}}{\sqrt{0.900}} = 2.32 .
+\]
+The R command \texttt{summary(lm(sr \textasciitilde{} pop75, data = LifeCycleSavings))} confirms both, up to rounding of $r$.
+
+(b) \texttt{pop75} is correlated $-0.908$ with \texttt{pop15}. Countries with many elderly people have few children, so the two-variable
+regression on \texttt{pop75} picks up the effect of having few young dependants. The omitted variable \texttt{pop15} sits in the disturbance and is
+correlated with the regressor, violating (A1). The slope is a correct estimate of the best linear predictor and a biased estimate of any effect of
+the elderly share. Including both variables, in a multiple regression, is the remedy.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 

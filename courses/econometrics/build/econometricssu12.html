@@ -1,0 +1,166 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>2.6 Regression in software — Econometrics</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='econometrics.css' rel='stylesheet' type='text/css' /> 
+<meta content='econometrics.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"Var": "\\operatorname{Var}", "Cov": "\\operatorname{Cov}", "Corr": "\\operatorname{Corr}", "plim": "\\operatorname{plim}", "tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Econometrics</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="econometricsse1.html">The Nature of Econometrics</a></li>
+<li class="sub"><a class="" href="econometricssu1.html">Economic models and econometric models</a></li>
+<li class="sub"><a class="" href="econometricssu2.html">Types of economic data</a></li>
+<li class="sub"><a class="" href="econometricssu3.html">Describing a bivariate relationship</a></li>
+<li class="sub"><a class="" href="econometricssu4.html">The conditional expectation function</a></li>
+<li class="sub"><a class="" href="econometricssu5.html">The software workflow</a></li>
+<li class="sub"><a class="" href="econometricssu6.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse2.html">The Two-Variable Linear Model</a></li>
+<li class="sub"><a class="" href="econometricssu7.html">The model and its assumptions</a></li>
+<li class="sub"><a class="" href="econometricssu8.html">Least squares</a></li>
+<li class="sub"><a class="" href="econometricssu9.html">Properties of the least squares estimators</a></li>
+<li class="sub"><a class="" href="econometricssu10.html">Inference</a></li>
+<li class="sub"><a class="" href="econometricssu11.html">Prediction</a></li>
+<li class="sub"><a class="current" href="econometricssu12.html">Regression in software</a></li>
+<li class="sub"><a class="" href="econometricssu13.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="econometricsli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 1304 --><div class='crosslinks'><p class='noindent'>[<a href='econometricssu13.html'>next</a>] [<a href='econometricssu11.html'>prev</a>] [<a href='econometricssu11.html#taileconometricssu11.html'>prev-tail</a>] [<a href='#taileconometricssu12.html'>tail</a>] [<a href='econometricsse2.html#econometricssu12.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>2.6   </span> <a id='x16-150002.6'></a>Regression in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 1307 --><p class='noindent'><span class='head'>
+<a id='x16-15001r1'></a>
+<span class='cmbx-10x-x-109'>Software 2.6.1 </span>(A two-variable regression)<span class='cmbx-10x-x-109'>.</span>  </span> The savings data of Example <a href='econometricssu3.html#x6-5006r5'>1.3.5<!-- tex4ht:ref: ex:lcs  --></a>, with the savings
+rate regressed on the share of the population under 15:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-5'>
+&gt; fit &lt;- lm(sr ~ pop15, data = LifeCycleSavings)
+&gt; summary(fit)
+
+Call:
+lm(formula = sr ~ pop15, data = LifeCycleSavings)
+
+Residuals:
+   Min     1Q Median     3Q    Max
+-8.637 -2.374  0.349  2.022 11.155
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)
+(Intercept) 17.49660    2.27972   7.675 6.85e-10 ***
+pop15       -0.22302    0.06291  -3.545 0.000887 ***
+---
+Signif. codes:  0 ’***’ 0.001 ’**’ 0.01 ’*’ 0.05 ’.’ 0.1 ’ ’ 1
+
+Residual standard error: 4.03 on 48 degrees of freedom
+Multiple R-squared:  0.2075,    Adjusted R-squared:  0.191
+F-statistic: 12.57 on 1 and 48 DF,  p-value: 0.0008866
+</pre>
+<!-- l. 1331 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output</span>, line by line against the theory of this section. </p>
+     <ul class='itemize1'>
+     <li class='itemize'><span class='cmtt-10x-x-109'>Residuals</span>: the five-number summary of the \(e_i\). Their mean is zero by Theorem <a href='econometricssu8.html#x12-11003r2'>2.2.2<!-- tex4ht:ref: thm:resid2  --></a>, so it
+     is not printed; a median near zero and roughly symmetric quartiles are what (A5) would
+     lead one to expect.
+     </li>
+     <li class='itemize'><span class='cmtt-10x-x-109'>Estimate</span>: \(a = 17.497\) and \(b = -0.223\). A country whose share of under-15s is one percentage point higher saves,
+     on average, \(0.22\) percentage points less of its income.
+     </li>
+     <li class='itemize'><span class='cmtt-10x-x-109'>Std. Error</span>: \(\operatorname {se}(b) = s/\sqrt {\sum x_i^2}\). Here \(\sum x_i^2 = 4103.95\) and \(s = 4.03\), so \(4.03/64.06 = 0.0629\).
+     </li>
+     <li class='itemize'><span class='cmtt-10x-x-109'>t value</span>: the estimate divided by its standard error, the statistic for \(H_0\colon \beta = 0\). <span class='cmtt-10x-x-109'>Pr(&gt;|t|) </span>is its
+     two-sided \(p\)-value from \(t_{48}\). The stars are a convention of R’s, not a substitute for reading the
+     \(p\)-value.
+                                                                                      
+                                                                                      
+     </li>
+     <li class='itemize'><span class='cmtt-10x-x-109'>Residual standard error</span>: \(s = \sqrt {\text {RSS}/(n-2)}\), with \(48 = 50 - 2\) degrees of freedom.
+     </li>
+     <li class='itemize'><span class='cmtt-10x-x-109'>Multiple R-squared</span>:  \(R^2 = 0.2075 = (-0.4555)^2\),  the  squared  correlation  of  Section <a href='econometricssu5.html#x8-70001.5'>1.5<!-- tex4ht:ref: ssec:software  --></a>  (Theorem <a href='econometricssu8.html#x12-11009r4'>2.2.4<!-- tex4ht:ref: thm:r2r  --></a>).  The
+     adjusted \(R^2\) is explained with the \(k\)-variable model.
+     </li>
+     <li class='itemize'><span class='cmtt-10x-x-109'>F-statistic</span>: \(12.57 = (-3.545)^2\), with the same \(p\)-value as the \(t\) test, by Theorem <a href='econometricssu10.html#x14-13005r2'>2.4.2<!-- tex4ht:ref: thm:ft2  --></a>.</li></ul>
+<!-- l. 1348 --><p class='noindent'><span class='cmbx-10x-x-109'>Stata: </span><span class='cmtt-10x-x-109'>regress sr pop15</span>. Stata prints the ANOVA table above the coefficients, with confidence
+intervals in place of \(p\)-value stars. <span class='cmbx-10x-x-109'>EViews: </span><span class='cmtt-10x-x-109'>ls sr c pop15</span>, where <span class='cmtt-10x-x-109'>c </span>is EViews’ name for the
+constant.
+</p>
+</div>
+<!-- l. 1350 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1352 --><p class='noindent'><span class='head'>
+<a id='x16-15002r2'></a>
+<span class='cmbx-10x-x-109'>Software 2.6.2 </span>(The analysis of variance and confidence intervals)<span class='cmbx-10x-x-109'>.</span>  </span> The decomposition of
+Theorem <a href='econometricssu8.html#x12-11008r3'>2.2.3<!-- tex4ht:ref: thm:anova2  --></a>, and intervals for the coefficients:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-6'>
+&gt; anova(fit)
+Analysis of Variance Table
+
+Response: sr
+          Df Sum Sq Mean Sq F value    Pr(&gt;F)
+pop15      1 204.12  204.12  12.569 0.0008866 ***
+Residuals 48 779.51   16.24
+&gt; confint(fit)
+                 2.5 %      97.5 %
+(Intercept) 12.9129180 22.08027686
+pop15       -0.3494978 -0.09653739
+</pre>
+<!-- l. 1367 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>ESS \(= 204.12\) on 1 degree of freedom and RSS \(= 779.51\) on 48. Their sum is TSS \(= 983.63\), and \(R^2 = 204.12/983.63 = 0.2075\). The
+residual mean square \(16.24 = s^2 = 4.03^2\). The interval for the slope is \(-0.2230 \pm t_{0.025,48}(0.0629)\) with \(t_{0.025,48} = 2.011\). It excludes zero, consistent with the \(t\)
+test.
+</p><!-- l. 1372 --><p class='noindent'><span class='cmbx-10x-x-109'>Stata: </span>the ANOVA table is printed by <span class='cmtt-10x-x-109'>regress </span>itself. <span class='cmbx-10x-x-109'>EViews: </span>the confidence intervals are under
+<span class='cmti-10x-x-109'>View</span> \(\to \) <span class='cmti-10x-x-109'>Coefficient Diagnostics</span> \(\to \) <span class='cmti-10x-x-109'>Confidence Intervals</span>.
+</p>
+</div>
+<!-- l. 1374 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1376 --><p class='noindent'><span class='head'>
+<a id='x16-15003r3'></a>
+<span class='cmbx-10x-x-109'>Software 2.6.3 </span>(Predicting the mean and an individual)<span class='cmbx-10x-x-109'>.</span>  </span> Predictions at <span class='cmtt-10x-x-109'>pop15</span> \(= 25\) and \(45\), near the two
+ends of the data:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-7'>
+&gt; new &lt;- data.frame(pop15 = c(25, 45))
+&gt; predict(fit, new, interval = "confidence")
+        fit       lwr       upr
+1 11.921158 10.206061 13.636255
+2  7.460807  5.762507  9.159107
+&gt; predict(fit, new, interval = "prediction")
+        fit        lwr      upr
+1 11.921158  3.6390423 20.20327
+2  7.460807 -0.8178472 15.73946
+</pre>
+<!-- l. 1389 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The point predictions are the same for both questions; only the intervals
+differ. The mean savings rate of countries with 25% under 15 is estimated to lie between \(10.2\%\) and \(13.6\%\). A
+single such country could have a savings rate anywhere from \(3.6\%\) to \(20.2\%\). The prediction interval is
+about five times as wide, because \(s = 4.03\) is large compared with the precision of the line. Its
+lower limit at 45% under 15 is negative, an impossible savings rate. That is a reminder
+that the normal disturbance of (A5) is an approximation, and a poor one near a natural
+boundary.
+</p><!-- l. 1396 --><p class='noindent'><span class='cmbx-10x-x-109'>Stata: </span>after <span class='cmtt-10x-x-109'>regress</span>, <span class='cmtt-10x-x-109'>predict yhat, xb</span>; <span class='cmtt-10x-x-109'>predict sem, stdp </span>gives the standard error for
+the mean and <span class='cmtt-10x-x-109'>predict sef, stdf </span>that for an individual. <span class='cmbx-10x-x-109'>EViews: </span><span class='cmti-10x-x-109'>Proc</span> \(\to \) <span class='cmti-10x-x-109'>Forecast </span>in
+the equation window, which produces the forecast and its standard error (the individual
+one).
+</p>
+</div>
+<!-- l. 1399 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 1401 --><div class='crosslinks'><p class='noindent'>[<a href='econometricssu13.html'>next</a>] [<a href='econometricssu11.html'>prev</a>] [<a href='econometricssu11.html#taileconometricssu11.html'>prev-tail</a>] [<a href='econometricssu12.html'>front</a>] [<a href='econometricsse2.html#econometricssu12.html'>up</a>] </p></div>
+<!-- l. 1401 --><p class='noindent'><a id='taileconometricssu12.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="econometricssu11.html">&larr; Previous</a><a class="up" href="econometricsse2.html#econometricssu12.html">Contents</a><a class="next" href="econometricssu13.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="econometrics/2-6-regression-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
