@@ -4206,6 +4206,508 @@ width comes from the disturbance variance, the $1$ in $1 + x_0'(X'X)^{-1}x_0$: t
 country's savings rate can be predicted.
 \end{solution}
 
+%======================================================================
+\section{Specification Error and Structural Change}
+\label{sec:spec}
+
+Everything so far assumed that the model is correctly specified: the right regressors, the right functional form, and the same coefficients for
+every observation. Applied work consists largely of finding out whether those assumptions hold. This section studies what goes wrong when
+variables are wrongly omitted or included, and develops the main tests of parameter constancy: the Chow forecast and break tests, recursive
+residuals, and the RESET test of functional form. Dummy variables, which are both a modelling tool and the machinery behind several of these
+tests, are treated along the way.
+
+\subsection{Omitted and irrelevant variables}
+\label{ssec:omitted}
+
+Partition the regressors as $X = [X_1\ \ X_2]$ with $k_1$ and $k_2$ columns, and suppose the true model is
+\[
+Y = X_1\beta_1 + X_2\beta_2 + U ,
+\]
+satisfying (A1)--(A4). Let $P_{12} = (X_1'X_1)^{-1}X_1'X_2$, the $k_1 \times k_2$ matrix of coefficients from regressing each column of $X_2$ on $X_1$.
+
+\begin{thm}[Omitted variables]
+\label{thm:ovb}
+Let $\tilde b_1 = (X_1'X_1)^{-1}X_1'Y$ be the estimator from the \emph{short} regression of $Y$ on $X_1$ alone, and let $b_1$ be the corresponding part
+of the \emph{long} regression on $[X_1\ \ X_2]$. Then:
+\begin{enumerate}[label=(\roman*)]
+\item $\tilde b_1 = b_1 + P_{12}b_2$ exactly, in every sample;
+\item $E(\tilde b_1) = \beta_1 + P_{12}\beta_2$, so $\tilde b_1$ is biased unless $P_{12}\beta_2 = 0$;
+\item $\Var(\tilde b_1) = \sigma^2(X_1'X_1)^{-1}$, and $\Var(b_1) - \Var(\tilde b_1)$ is psd;
+\item the short regression's $s^2$ has $E(\tilde s^2) = \sigma^2 + \beta_2'X_2'M_1X_2\beta_2/(n - k_1) \geq \sigma^2$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) Substitute the long-regression decomposition $Y = X_1b_1 + X_2b_2 + e$, with $X_1'e = 0$, into $\tilde b_1$:
+$\tilde b_1 = b_1 + (X_1'X_1)^{-1}X_1'X_2b_2 + (X_1'X_1)^{-1}X_1'e = b_1 + P_{12}b_2$.
+
+(ii) Take expectations, using $E(b) = \beta$ for the long regression, which is correctly specified.
+
+(iii) $\tilde b_1 = \beta_1 + P_{12}\beta_2 + (X_1'X_1)^{-1}X_1'U$, with variance $\sigma^2(X_1'X_1)^{-1}$. In the long regression, by the Frisch--Waugh--Lovell
+theorem applied with the roles of $X_1$ and $X_2$ exchanged, $\Var(b_1) = \sigma^2(X_1'M_2X_1)^{-1}$. Since
+$X_1'X_1 - X_1'M_2X_1 = X_1'(I - M_2)X_1$ is psd, $(X_1'M_2X_1)^{-1} - (X_1'X_1)^{-1}$ is psd (inversion reverses the order of pd matrices).
+
+(iv) The short residuals are $\tilde e = M_1Y = M_1X_2\beta_2 + M_1U$. By Theorem~\ref{thm:linvec}(iii),
+$E(\tilde e'\tilde e) = \sigma^2\tr M_1 + \beta_2'X_2'M_1X_2\beta_2 = \sigma^2(n - k_1) + \beta_2'X_2'M_1X_2\beta_2$.
+\end{proof}
+
+Part (i) is the \textbf{omitted variable formula}. With one included and one omitted regressor (each with an intercept) it says
+\[
+\tilde b_1 = b_1 + \delta\,b_2 ,
+\]
+where $\delta$ is the slope from regressing the omitted variable on the included one. The bias $\delta\beta_2$ has the sign of the product of the omitted
+variable's effect and its correlation with the included variable:
+\begin{center}
+\begin{tabular}{l|cc}
+ & $\Corr(X_1, X_2) > 0$ & $\Corr(X_1, X_2) < 0$\\\hline
+$\beta_2 > 0$ & upward bias & downward bias\\
+$\beta_2 < 0$ & downward bias & upward bias
+\end{tabular}
+\end{center}
+In the wage equation of Example~\ref{ex:wages}, ability raises wages ($\beta_2 > 0$) and is positively correlated with schooling, so omitting it biases the
+return to schooling upwards.
+
+Parts (iii) and (iv) describe a trade-off. The short regression is biased, but its estimates have \emph{smaller} variance, while its estimate of
+$\sigma^2$ is too large, so its reported standard errors are not even right for the smaller true variance. Omitting a relevant variable is almost never
+a good bargain for inference, because the conventional standard errors misrepresent the uncertainty, whatever the mean squared error comparison.
+
+\begin{thm}[Irrelevant variables]
+\label{thm:irrelevant}
+If $\beta_2 = 0$, the long regression's $b_1$ is still unbiased for $\beta_1$, and its $s^2$ is unbiased for $\sigma^2$, but $\Var(b_1) - \Var(\tilde b_1)$ is psd: the
+estimates are less precise than those from the correctly specified short regression.
+\end{thm}
+
+\begin{proof}
+The long regression is correctly specified (with $\beta_2 = 0$), so Theorem~\ref{thm:bmoments} and Theorem~\ref{thm:residqf} apply. The variance comparison is
+Theorem~\ref{thm:ovb}(iii), which did not depend on $\beta_2$.
+\end{proof}
+
+Including an irrelevant variable costs precision, by the variance inflation factor of Problem~\ref{prob:vif}: nothing if the irrelevant variable is
+uncorrelated with the others, a great deal if it is highly correlated with them. Omitting a relevant one costs unbiasedness. The asymmetry is why
+applied economists usually err towards including a variable when theory suggests it.
+
+\begin{exa}
+\label{ex:ovbsavings}
+In the savings data, regress \texttt{sr} on \texttt{pop75} alone (short), on \texttt{pop15} and \texttt{pop75} (long), and \texttt{pop15} on \texttt{pop75}
+(auxiliary). The slopes are
+\[
+\tilde b_{75} = 1.0987, \qquad b_{75} = -1.9341,\ b_{15} = -0.4708, \qquad \delta = -6.4412 .
+\]
+The formula gives $b_{75} + \delta b_{15} = -1.9341 + (-6.4412)(-0.4708) = 1.0987$, exactly the short coefficient. The positive short-regression coefficient
+on the elderly share is entirely omitted-variable bias. A country with more elderly people has many fewer children ($\delta = -6.44$), and children reduce
+saving ($b_{15} < 0$), so the bias $\delta b_{15} = +3.03$ is large and positive. It more than reverses the true negative partial effect.
+\end{exa}
+
+\subsection{The Chow forecast test}
+\label{ssec:chowf}
+
+An estimated relationship is of little use if it changes from one period to the next. The first test of stability asks whether a model estimated on
+part of the data predicts the rest. Divide the $n$ observations into a first set of $n_1$, used for estimation, and a second set of $n_2$, used for
+prediction:
+\[
+Y_{(1)} = X_{(1)}\beta + U_{(1)}, \qquad Y_{(2)} = X_{(2)}\beta + U_{(2)} ,
+\]
+with $n_1 > k$ and $X_{(1)}$ of rank $k$. Let $b_{(1)} = (X_{(1)}'X_{(1)})^{-1}X_{(1)}'Y_{(1)}$, and define the vector of prediction errors
+\[
+d = Y_{(2)} - X_{(2)}b_{(1)} .
+\]
+
+\begin{thm}
+\label{thm:chowd}
+If the same model with $E(U) = 0$ and $\Var(U) = \sigma^2I_n$ holds for both sets, then
+\[
+E(d) = 0, \qquad \Var(d) = \sigma^2\bigl[I_{n_2} + X_{(2)}(X_{(1)}'X_{(1)})^{-1}X_{(2)}'\bigr] .
+\]
+Under normality, with $e_{(1)}$ the residuals from the first set,
+\[
+F = \frac{d'\bigl[I_{n_2} + X_{(2)}(X_{(1)}'X_{(1)})^{-1}X_{(2)}'\bigr]^{-1}d\,/\,n_2}{e_{(1)}'e_{(1)}/(n_1 - k)} \sim F_{n_2,\ n_1-k} .
+\]
+\end{thm}
+
+\begin{proof}
+$b_{(1)} = \beta + (X_{(1)}'X_{(1)})^{-1}X_{(1)}'U_{(1)}$, so
+\[
+d = X_{(2)}\beta + U_{(2)} - X_{(2)}b_{(1)} = U_{(2)} - X_{(2)}(X_{(1)}'X_{(1)})^{-1}X_{(1)}'U_{(1)} .
+\]
+Both terms have mean zero, so $E(d) = 0$. $U_{(1)}$ and $U_{(2)}$ are uncorrelated, so the variance is the sum of the two variances:
+\begin{align*}
+\Var(d) &= \sigma^2I_{n_2} + X_{(2)}(X_{(1)}'X_{(1)})^{-1}X_{(1)}'(\sigma^2I)X_{(1)}(X_{(1)}'X_{(1)})^{-1}X_{(2)}'\\
+&= \sigma^2\bigl[I + X_{(2)}(X_{(1)}'X_{(1)})^{-1}X_{(2)}'\bigr] .
+\end{align*}
+Under normality, $d$ is normal and the numerator of $F$, multiplied by $n_2/\sigma^2$, is $\chi^2_{n_2}$ by Theorem~\ref{thm:qf1}(ii). The denominator is
+$\sigma^2\chi^2_{n_1-k}/(n_1 - k)$ by Theorem~\ref{thm:residqf}, applied to the first set. They are independent: $e_{(1)} = M_{(1)}U_{(1)}$ is independent of
+$(X_{(1)}'X_{(1)})^{-1}X_{(1)}'U_{(1)}$ by Theorem~\ref{thm:residqf}(vi), and of $U_{(2)}$ because the two sets are independent.
+\end{proof}
+
+The variance of $d$ has two parts: the variance of the new disturbances, and the uncertainty in $b_{(1)}$ carried into the prediction. It is the
+matrix version of Theorem~\ref{thm:predk}. The statistic has a much simpler form, which is how it is computed in practice.
+
+\begin{thm}
+\label{thm:chowfrss}
+Let $\text{RSS}$ be the residual sum of squares from the regression on all $n$ observations and $\text{RSS}_1 = e_{(1)}'e_{(1)}$ that from the first $n_1$.
+Then the statistic of Theorem~\ref{thm:chowd} equals
+\[
+F = \frac{(\text{RSS} - \text{RSS}_1)/n_2}{\text{RSS}_1/(n_1 - k)} .
+\]
+\end{thm}
+
+\begin{proof}
+Add to the full-sample regression one dummy variable for each observation of the second set: an $n \times n_2$ matrix $D = \binom{0}{I_{n_2}}$, so the model
+is $Y = X\beta + D\gamma + U$. Each dummy fits its own observation exactly, so this augmented regression has zero residuals in the second set, and in
+the first set it is the regression on $X_{(1)}$ alone. Its residual sum of squares is $\text{RSS}_1$, its coefficients on $X$ are $b_{(1)}$, and its dummy
+coefficients are $\hat\gamma = Y_{(2)} - X_{(2)}b_{(1)} = d$. The hypothesis $\gamma = 0$ imposes $n_2$ restrictions, and the restricted model is the full-sample
+regression, with residual sum of squares RSS. Theorem~\ref{thm:rls} gives $F = \bigl((\text{RSS} - \text{RSS}_1)/n_2\bigr)\big/\bigl(\text{RSS}_1/(n - k - n_2)\bigr)$, with
+$n - k - n_2 = n_1 - k$. The Wald form of the same test uses $\hat\gamma = d$ and its estimated variance, which is the expression in Theorem~\ref{thm:chowd}. By
+Theorem~\ref{thm:rls} the two forms are equal.
+\end{proof}
+
+The forecast test needs only $n_2 \geq 1$; in particular it works when the second period is too short to estimate the model on its own. A large $F$
+says that the first period's relationship does not predict the second period: something has changed.
+
+\subsection{The Chow test of structural change}
+\label{ssec:chowb}
+
+When both sets are large enough to estimate the model separately ($n_1 > k$ and $n_2 > k$), a sharper question can be asked: are the coefficients the
+same in both? The unrestricted model allows different coefficients,
+\[
+Y_{(1)} = X_{(1)}\beta_{(1)} + U_{(1)}, \qquad Y_{(2)} = X_{(2)}\beta_{(2)} + U_{(2)} ,
+\]
+and $H_0\colon \beta_{(1)} = \beta_{(2)}$ imposes $k$ restrictions.
+
+\begin{thm}[Chow test]
+\label{thm:chowbreak}
+If the disturbances are $N(0, \sigma^2I_n)$ in both sets, with the \emph{same} $\sigma^2$, then under $H_0$
+\[
+F = \frac{\bigl(\text{RSS} - (\text{RSS}_1 + \text{RSS}_2)\bigr)/k}{(\text{RSS}_1 + \text{RSS}_2)/(n - 2k)} \sim F_{k,\ n-2k} ,
+\]
+where $\text{RSS}_1$ and $\text{RSS}_2$ come from the separate regressions and RSS from the pooled regression.
+\end{thm}
+
+\begin{proof}
+Stack the unrestricted model as one regression with the block-diagonal regressor matrix $\begin{pmatrix} X_{(1)} & 0 \\ 0 & X_{(2)} \end{pmatrix}$ and $2k$
+coefficients. Its normal equations separate into those of the two subsamples, so its residual sum of squares is $\text{RSS}_1 + \text{RSS}_2$ with
+$n - 2k$ degrees of freedom. The restricted model, with $\beta_{(1)} = \beta_{(2)}$, is the pooled regression. Apply Theorem~\ref{thm:rls} with $q = k$.
+\end{proof}
+
+The equal-variance assumption is essential and easily overlooked: the denominator pools the two residual variances. If the disturbance variance
+also changed between the periods, the test's size is wrong. A first check compares $s_1^2 = \text{RSS}_1/(n_1 - k)$ with $s_2^2 = \text{RSS}_2/(n_2 - k)$ by
+their ratio, which is $F_{n_2-k,\,n_1-k}$ under equal variances (the Goldfeld--Quandt test of the section on heteroscedasticity).
+
+\begin{exa}
+\label{ex:chowfood}
+Per capita food consumption $q$ was estimated by
+\[
+\log q = \alpha + \beta_1\log p + \beta_2\log Y + u ,
+\]
+using annual averages for two periods of fifteen years each, before and after a wave of privatisation of state-owned companies. The residual sums
+of squares are
+\begin{center}
+\begin{tabular}{lcc}
+Period & $n$ & RSS\\\hline
+Before privatisation & 15 & 0.1151\\
+After privatisation & 15 & 0.0544\\
+Both combined & 30 & 0.2866
+\end{tabular}
+\end{center}
+Did the coefficients remain stable after privatisation? Use the $5\%$ level.
+
+\emph{Solution.} With $k = 3$ and $n = 30$, $\text{RSS}_1 + \text{RSS}_2 = 0.1695$ and
+\[
+F = \frac{(0.2866 - 0.1695)/3}{0.1695/24} = \frac{0.03903}{0.007063} = 5.53 .
+\]
+The $5\%$ point of $F_{3,24}$ is $3.01$, so stability is rejected ($p = 0.005$). The demand relation shifted between the two periods.
+
+The equal-variance assumption is plausible here: $s_1^2 = 0.1151/12 = 0.00959$ and $s_2^2 = 0.0544/12 = 0.00453$, a ratio of $2.12$, below the $5\%$ point of
+$F_{12,12}$, which is $2.69$. The test cannot say \emph{which} coefficients changed, the intercept, the price elasticity or the income elasticity. Dummy
+variables answer that.
+\end{exa}
+
+\subsection{Dummy variables}
+\label{ssec:dummies}
+
+A \textbf{dummy variable} takes the value $1$ for observations in a category and $0$ otherwise: female, urban, after privatisation, December. Dummies let a
+regression shift between groups without splitting the sample.
+
+\subhead{Intercept and slope dummies}
+With $D_i = 1$ for observations in the second period,
+\[
+Y_i = \alpha + \beta X_i + \gamma D_i + \delta D_iX_i + u_i
+\]
+gives the line $\alpha + \beta X$ in the first period and $(\alpha + \gamma) + (\beta + \delta)X$ in the second. $\gamma$ is a shift in the intercept and $\delta$ a
+change in the slope; $t$ tests on them, or an $F$ test on both, say \emph{which} part of the relation changed.
+
+\begin{thm}
+\label{thm:dummychow}
+In the regression of $Y$ on $X$, $D$ and every interaction $D \times X_j$ (including $D$ itself as the interaction with the constant), the residual
+sum of squares is $\text{RSS}_1 + \text{RSS}_2$, and the $F$ test that all the dummy coefficients are zero is exactly the Chow test of
+Theorem~\ref{thm:chowbreak}.
+\end{thm}
+
+\begin{proof}
+The fully interacted model has the same column space as the block-diagonal model in the proof of Theorem~\ref{thm:chowbreak}: in the first set
+the regressors are $X_{(1)}$ and zeros, in the second $X_{(2)}$ and $X_{(2)}$, and $[X_{(2)}\ \ X_{(2)}]$ spans the same space as $[0\ \ X_{(2)}]$ together with
+$[X_{(2)}\ \ 0]$. Equal column spaces give equal fitted values and residuals (Section~\ref{ssec:geometry}). Setting the $k$ dummy coefficients to zero
+gives the pooled regression.
+\end{proof}
+
+Setting only some dummy coefficients to zero gives the more specific tests. ``Did only the intercept change?'' compares the model with $D$ alone to
+the fully interacted model. When the Chow test rejects, this is how the source of the instability is found.
+
+\subhead{Several categories and the dummy variable trap}
+A variable with $m$ categories, such as the four quarters, is represented by $m - 1$ dummies, with one category as the base. Including all $m$
+together with an intercept makes $X$ rank-deficient, because the dummies sum to the constant column. This is the \textbf{dummy variable trap},
+a case of perfect multicollinearity. Each dummy coefficient measures the difference from the base category. Seasonal dummies used in this
+way remove fixed seasonal patterns, and by the Frisch--Waugh--Lovell theorem including them is equivalent to deseasonalising every variable by
+subtracting its seasonal means.
+
+\subsection{Recursive residuals and the CUSUM test}
+\label{ssec:cusum}
+
+The Chow tests need the break date to be known. When it is not, \emph{recursive} estimation tracks the coefficients through the sample. For
+$t = k + 1, \dots, n$, let $b_{t-1}$ be the least squares estimate from the first $t - 1$ observations and $X_{t-1}$ their regressor matrix. The
+\textbf{recursive residual} is the standardised one-step-ahead prediction error,
+\[
+w_t = \frac{Y_t - x_t'b_{t-1}}{\sqrt{1 + x_t'(X_{t-1}'X_{t-1})^{-1}x_t}} .
+\]
+
+\begin{thm}
+\label{thm:recursive}
+Under the classical normal model, the $n - k$ recursive residuals $w_{k+1}, \dots, w_n$ are independent $N(0, \sigma^2)$.
+\end{thm}
+
+\begin{proof}
+By Theorem~\ref{thm:predk}, $Y_t - x_t'b_{t-1}$ is normal with mean zero and variance $\sigma^2\bigl(1 + x_t'(X_{t-1}'X_{t-1})^{-1}x_t\bigr)$, so $w_t \sim N(0, \sigma^2)$. For
+independence, take $s < t$. Then $w_s$ is a linear function of $Y_1, \dots, Y_s$, all of which are used in $b_{t-1}$, and the prediction error at $t$ is
+uncorrelated with any linear function $a'Y_{1:t-1}$ that has mean zero for all $\beta$. Indeed, $\Cov\bigl(a'U_{1:t-1},\ u_t - x_t'(b_{t-1} - \beta)\bigr) =
+-\sigma^2a'X_{t-1}(X_{t-1}'X_{t-1})^{-1}x_t$, and $a'X_{t-1} = 0$ for such a function, since its mean $a'X_{t-1}\beta$ is zero for every $\beta$. Since $w_s$ has mean zero for every $\beta$, the two are
+uncorrelated, and jointly normal, so they are independent.
+\end{proof}
+
+Under correct specification the recursive residuals are therefore white noise. If the coefficients change at some point, the predictions after the
+change are systematically wrong, and the $w_t$ start to have a non-zero mean. The \textbf{CUSUM} statistic of Brown, Durbin and Evans plots the
+cumulative sum
+\[
+W_t = \frac1{\hat\sigma}\sum_{j=k+1}^t w_j, \qquad t = k + 1, \dots, n ,
+\]
+which under the null wanders around zero like a random walk. Crossing the lines $\pm a\bigl(\sqrt{n - k} + 2(t - k)/\sqrt{n - k}\bigr)$, with $a = 0.948$ for a $5\%$ test,
+signals instability. The companion CUSUMSQ test uses cumulative sums of $w_t^2$ and is sensitive to changes in the variance.
+
+\subsection{Testing functional form: RESET}
+\label{ssec:reset}
+
+Ramsey's \textbf{RESET} test asks whether powers of the fitted values add explanatory power. If the true relation is non-linear in the regressors, the
+squares and cubes of $\hat Y = Xb$ will pick up some of the neglected curvature. The test adds $\hat Y^2$ and $\hat Y^3$ (or more powers) to the regression and
+applies the $F$ test of Theorem~\ref{thm:rls} to their coefficients. It is a general-purpose check rather than a test against a specific alternative: a
+rejection says that something is wrong with the specification, often the functional form or an omitted variable correlated with powers of the
+fitted values, without saying what. The test is approximate, because $\hat Y$ is itself estimated, but its $F$ distribution is a good guide.
+
+\subsection{Specification tests in software}
+\label{ssec:software8}
+
+\begin{software}[Dummy variables and omitted-variable bias: the 1983 seat-belt law]
+\label{sw:seatbelt}
+R's \texttt{Seatbelts} data record monthly UK car-driver deaths from 1969 to 1984, with kilometres driven, the real petrol price, and a dummy
+\texttt{law} equal to one from February 1983, when wearing a front seat belt became compulsory. Regress log deaths on log kilometres, log petrol price,
+the law dummy and eleven monthly dummies; then add a linear trend:
+{\small\begin{verbatim}
+> sb <- data.frame(Seatbelts)
+> sb$month <- factor(cycle(Seatbelts[, "drivers"]))
+> m <- lm(log(drivers) ~ log(kms) + log(PetrolPrice) + law + month,
++         data = sb)
+> summary(m)$coef[c(1:4), ]
+                   Estimate Std. Error   t value     Pr(>|t|)
+(Intercept)       7.9934777 0.47968603 16.663978 4.176961e-38
+log(kms)         -0.1568296 0.04575640 -3.427490 7.575927e-04
+log(PetrolPrice) -0.4027112 0.05663307 -7.110884 2.739724e-11
+law              -0.1614110 0.02266780 -7.120716 2.592012e-11
+> sb$t <- 1:192
+> m2 <- update(m, . ~ . + t)
+> summary(m2)$coef[c(2:4, 16), 1:3]
+                     Estimate   Std. Error   t value
+log(kms)          0.432120223 0.1208090215  3.576887
+log(PetrolPrice) -0.286746370 0.0573535455 -4.999628
+law              -0.150397278 0.0212633632 -7.073071
+t                -0.001954302 0.0003749919 -5.211585
+\end{verbatim}}
+\textbf{Reading the output.} \texttt{factor(month)} makes R create eleven monthly dummies, January being the base, so the dummy trap is avoided
+automatically. In the first model the law coefficient is $-0.161$: deaths were $100(e^{-0.161} - 1) = 14.9\%$ lower after the law, other things equal, with a
+$t$ ratio of $-7.1$. But the kilometre elasticity is \emph{negative}, implying that more driving means fewer deaths, which is implausible. Over the sixteen
+years traffic grew steadily while cars and roads became safer, so kilometres driven are correlated $0.78$ with time. Without a trend, $\log(\text{kms})$
+partly stands in for the omitted improvement in safety. Theorem~\ref{thm:ovb}(i) predicts the sign of the bias: safety improvement lowers deaths, and it
+is positively correlated with kms, so the bias is downward. With the trend included, the elasticity is $+0.43$, as it should be, and the trend
+coefficient says deaths fell by about $0.2\%$ a month for other reasons. The law effect barely moves, to $-0.150$ ($-14.0\%$): it was not much
+correlated with the omitted trend, because it is a step at a single date.
+
+\textbf{Stata:} \texttt{regress ln\_drivers ln\_kms ln\_petrol law i.month}. \textbf{EViews:} \texttt{ls log(drivers) c log(kms)
+log(petrolprice) law @expand(@month, @droplast)}.
+\end{software}
+
+\begin{software}[Chow tests at a known date]
+\label{sw:chow}
+Without the law dummy, do the coefficients differ before and after February 1983? The first set has $169$ months and the second $23$; with
+$k = 14$ coefficients both are long enough for the break test:
+{\small\begin{verbatim}
+> pre <- sb$law == 0
+> m0 <- lm(log(drivers) ~ log(kms) + log(PetrolPrice) + month,
++          data = sb)
+> m1 <- update(m0, subset = pre); m2 <- update(m0, subset = !pre)
+> RSS <- deviance(m0); RSS1 <- deviance(m1); RSS2 <- deviance(m2)
+> k <- length(coef(m0)); n <- nrow(sb)
+> Fb <- ((RSS - RSS1 - RSS2)/k) / ((RSS1 + RSS2)/(n - 2*k))
+> c(F = Fb, p = pf(Fb, k, n - 2*k, lower = FALSE))
+           F            p
+4.496431e+00 8.130793e-07
+> Ff <- ((RSS - RSS1)/sum(!pre)) / (RSS1/(sum(pre) - k))
+> c(F = Ff, p = pf(Ff, sum(!pre), sum(pre) - k, lower = FALSE))
+           F            p
+2.812683e+00 8.499661e-05
+\end{verbatim}}
+\textbf{Reading the output.} The break test (Theorem~\ref{thm:chowbreak}) gives $F = 4.50$ on $(14, 164)$ degrees of freedom, and the forecast test
+(Theorem~\ref{thm:chowfrss}) gives $F = 2.81$ on $(23, 155)$. Both reject stability decisively: the pre-law relation does not describe the post-law months. The
+seat-belt dummy in Software~\ref{sw:seatbelt} is the specific alternative that explains the instability: an intercept shift at the date of the law.
+These data are monthly, and the residuals may well be autocorrelated, in which case the $F$ distributions are only approximate; the next sections
+develop the tools to check.
+
+\textbf{Stata:} \texttt{estat sbknown, break(tm(1983m2))} after \texttt{regress} on \texttt{tsset} data. \textbf{EViews:} \emph{View $\to$ Stability
+Diagnostics $\to$ Chow Breakpoint Test} (or \emph{Chow Forecast Test}), entering the break date.
+\end{software}
+
+\begin{software}[The RESET test]
+\label{sw:reset}
+For the savings regression, add the squares and cubes of the fitted values:
+{\small\begin{verbatim}
+> LCS <- LifeCycleSavings; LCS$yh <- fitted(fit)
+> fr <- lm(sr ~ pop15 + pop75 + dpi + ddpi + I(yh^2) + I(yh^3),
++          data = LCS)
+> anova(fit, fr)
+  Res.Df    RSS Df Sum of Sq      F Pr(>F)
+1     45 650.71
+2     43 616.32  2    34.396 1.1999 0.3111
+\end{verbatim}}
+\textbf{Reading the output.} The powers of $\hat Y$ reduce the residual sum of squares by $34.4$, giving $F = 1.20$ with $p = 0.31$. There is no evidence
+against the linear specification. (The table's header lines are omitted here.) \texttt{I(yh\textasciicircum2)} protects the power from being read as formula syntax. (R's \texttt{lmtest} package automates
+this as \texttt{resettest(fit)}.)
+
+\textbf{Stata:} \texttt{estat ovtest} after \texttt{regress}. \textbf{EViews:} \emph{View $\to$ Stability Diagnostics $\to$ Ramsey RESET Test}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Consider $Y = X\beta + U$ with $\beta$ a $k$-vector and $U \sim N(0, \sigma^2I)$. The $n$ observations are split into $n_1$, used for estimation, and $n_2$, used for
+prediction. With the usual notation, let $d = Y_{(2)} - X_{(2)}b_{(1)}$, where $b_{(1)}$ is the least squares estimator from the first set and
+$\hat Y_{(2)} = X_{(2)}b_{(1)}$. Assuming that the same model holds for both sets, find $E(d)$ and $\Cov(d)$.
+\end{problem}
+
+\begin{solution}
+See Theorem~\ref{thm:chowd}. Substitute $Y_{(2)} = X_{(2)}\beta + U_{(2)}$ and
+\[
+b_{(1)} = \beta + (X_{(1)}'X_{(1)})^{-1}X_{(1)}'U_{(1)}
+\]
+to obtain
+\[
+d = U_{(2)} - X_{(2)}(X_{(1)}'X_{(1)})^{-1}X_{(1)}'U_{(1)} ,
+\]
+so $E(d) = 0$, and since $U_{(1)}$ and $U_{(2)}$ are uncorrelated,
+\[
+\Cov(d) = \sigma^2\bigl[I_{n_2} + X_{(2)}(X_{(1)}'X_{(1)})^{-1}X_{(2)}'\bigr] .
+\]
+The first term is the variance of the new disturbances and the second the sampling error in $b_{(1)}$ propagated into the predictions. Note that $\Cov(d)$
+is not diagonal: all the prediction errors share the same estimation error.
+\end{solution}
+
+\begin{problem}
+The annual recurrent expenditure $E$ of a secondary school was regressed on its number of students $N$, $E = \alpha + \beta N + U$, using a cross section
+of 74 schools in Lusaka, 40 public and 34 private:
+\begin{center}
+\begin{tabular}{lcc}
+School type & Number of schools & RSS\\\hline
+Public & 40 & 1.2150\\
+Private & 34 & 3.4895\\
+All schools & 74 & 8.9160
+\end{tabular}
+\end{center}
+\begin{enumerate}[label=(\alph*)]
+\item Test at the $5\%$ level whether estimating the relation separately for the two types of school is a significant improvement.
+\item Check the assumption on which the test relies, and comment.
+\item How would you test whether the two types differ only in their intercepts?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) This is the Chow test with $k = 2$ and $n = 74$. $\text{RSS}_1 + \text{RSS}_2 = 4.7045$, so
+\[
+F = \frac{(8.9160 - 4.7045)/2}{4.7045/70} = \frac{2.1058}{0.06721} = 31.3 .
+\]
+The $5\%$ point of $F_{2,70}$ is $3.13$, so the hypothesis of a common relation is rejected overwhelmingly ($p \approx 2 \times 10^{-10}$). Separate regressions
+fit much better.
+
+(b) The test assumes equal disturbance variances in the two groups. $s_1^2 = 1.2150/38 = 0.0320$ for public schools and $s_2^2 = 3.4895/32 = 0.1090$ for private
+schools, a ratio of $3.41$. The $5\%$ point of $F_{32,38}$ is about $1.75$, so equal variances are clearly rejected: private schools' spending is much more
+variable. The Chow $F$ statistic therefore does not have its nominal distribution. With a ratio of $31$, the conclusion is unlikely to change, but a
+version robust to unequal variances should be used: a Wald test using each group's own variance estimate, or the heteroscedasticity-robust tests
+of the section on heteroscedasticity.
+
+(c) Fit $E = \alpha + \gamma D + \beta N + \delta DN + U$ with $D = 1$ for private schools, and test $\delta = 0$ with a $t$ test. If it is not rejected, the
+types share a slope and differ only in their intercept $\gamma$. This requires the full data, not just the three residual sums of squares.
+\end{solution}
+
+\begin{problem}
+Show that in Example~\ref{ex:chowfood} the Chow forecast test, treating the second fifteen years as the prediction period, gives
+\[
+F = \frac{(0.2866 - 0.1151)/15}{0.1151/12} ,
+\]
+and evaluate it. Why can this test be used even when the second period has fewer observations than coefficients, while the break test cannot?
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:chowfrss}, with $n_2 = 15$ and $n_1 - k = 12$, $F = (0.1715/15)/(0.1151/12) = 0.01143/0.00959 = 1.19$. The $5\%$ point of $F_{15,12}$ is about $2.62$, so
+the forecast test does \emph{not} reject, although the break test did. The forecast test asks whether the first period's coefficients predict the second
+period acceptably; the break test asks whether the coefficients are equal. They are different questions, and the break test is more powerful when
+both periods can be estimated. The forecast test needs no estimate from the second period, only predictions into it, so it works with any
+$n_2 \geq 1$. The break test needs $\text{RSS}_2$, which requires $n_2 > k$.
+\end{solution}
+
+\begin{problem}
+The true model is $Y = \beta_1 + \beta_2X_2 + \beta_3X_3 + u$, but $Y$ is regressed on $X_2$ alone (with an intercept). In the sample, $\sum x_2^2 = 50$,
+$\sum x_2x_3 = -20$, and $\beta_3 = 3$.
+\begin{enumerate}[label=(\alph*)]
+\item Find the bias of the short-regression slope.
+\item If $\beta_2 = 1$, what does the short regression estimate on average?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The auxiliary slope is $\delta = \sum x_2x_3/\sum x_2^2 = -20/50 = -0.4$, so the bias is $\delta\beta_3 = -0.4 \times 3 = -1.2$.
+
+(b) $E(\tilde b_2) = 1 - 1.2 = -0.2$: the short regression gets the \emph{sign} of the effect wrong. A negatively correlated omitted variable with a positive
+effect can reverse a true positive relation, as \texttt{pop15} did for \texttt{pop75} in Example~\ref{ex:ovbsavings}.
+\end{solution}
+
+\begin{problem}
+Quarterly data on consumption $C_t$ and income $Y_t$ are available. Write a model with a common slope and a different intercept in each quarter, and
+explain why it cannot include four quarterly dummies together with a constant. How would you test for the presence of seasonality?
+\end{problem}
+
+\begin{solution}
+$C_t = \alpha + \gamma_2Q_{2t} + \gamma_3Q_{3t} + \gamma_4Q_{4t} + \beta Y_t + u_t$, where $Q_{jt} = 1$ in quarter $j$; the first quarter is the base, and $\gamma_j$ is the difference
+between quarter $j$'s intercept and the first quarter's. With all four dummies and a constant, $Q_1 + Q_2 + Q_3 + Q_4 = \iota$, so the columns of $X$ are linearly
+dependent, $X'X$ is singular, and the coefficients are not identified: the dummy variable trap. (Dropping the constant instead and keeping all four
+dummies is equivalent.) Seasonality is tested by the $F$ test of $\gamma_2 = \gamma_3 = \gamma_4 = 0$, comparing this model with the model without dummies, with $q = 3$.
+\end{solution}
+
+\begin{problem}
+Prove that the recursive residuals from a regression sum, in squares, to the full-sample residual sum of squares: $\sum_{t=k+1}^n w_t^2 = e'e$.
+\end{problem}
+
+\begin{solution}
+Let $S_t$ be the residual sum of squares from the first $t$ observations. Adding observation $t$ to a regression on $t - 1$ observations increases the
+residual sum of squares by exactly $w_t^2$. This follows from the Chow forecast test with $n_2 = 1$: by Theorem~\ref{thm:chowfrss}, the increase $S_t - S_{t-1}$
+equals the Wald numerator $d^2/(1 + x_t'(X_{t-1}'X_{t-1})^{-1}x_t)$ with $d = Y_t - x_t'b_{t-1}$, which is $w_t^2$. With $k$ observations the regression fits exactly,
+so $S_k = 0$. Summing, $e'e = S_n = \sum_{t=k+1}^n (S_t - S_{t-1}) = \sum_{t=k+1}^n w_t^2$. So the recursive residuals are $n - k$ independent pieces into which the residual
+sum of squares is decomposed, matching its $n - k$ degrees of freedom.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
