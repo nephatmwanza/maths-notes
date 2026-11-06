@@ -7707,6 +7707,613 @@ residual variance; the right one uses $\hat u = y - xb$, because the structural 
 Software~\ref{sw:market} the error made the standard error a quarter too small, but it can go either way, depending on the sign of $\sigma_{uv}$.
 \end{solution}
 
+\section{Simultaneous Equations, SUR and Vector Autoregressions}
+\label{sec:systems}
+
+Economic variables are usually determined jointly, and many questions concern a system of equations rather than one: supply and demand,
+consumption and income, wages and prices, the several components of a demand system. This section treats systems in three ways. Structural
+simultaneous equations models, the founding problem of econometrics at the Cowles Commission, raise the question of identification. Seemingly
+unrelated regressions exploit correlation between the disturbances of equations that are otherwise separate. And vector autoregressions,
+introduced by Sims (1980) as an alternative to structural models, treat every variable as endogenous and let the data speak; with cointegrated
+variables they become vector error correction models, and Johansen's method tests for the number of cointegrating relations.
+
+\subsection{Structural and reduced forms}
+\label{ssec:structural}
+
+\begin{defn}
+A \textbf{simultaneous equations model} for $G$ endogenous variables $y_t$ and $K$ exogenous variables $x_t$ is
+\[
+By_t + \Gamma x_t = u_t, \qquad t = 1, \dots, n,
+\]
+where $B$ is a non-singular $G \times G$ matrix, $\Gamma$ is $G \times K$, and the structural disturbances $u_t$ have mean zero, covariance matrix $\Sigma$, and are
+uncorrelated with $x_t$. Each row is a \textbf{structural equation}, normalised so that one coefficient of $B$ in it equals one. Solving for $y_t$ gives the
+\textbf{reduced form}
+\[
+y_t = \Pi x_t + v_t, \qquad \Pi = -B^{-1}\Gamma, \qquad v_t = B^{-1}u_t .
+\]
+\end{defn}
+
+Each endogenous variable is expressed in the reduced form as a function of the exogenous variables alone. Since $v_t$ is uncorrelated with $x_t$,
+least squares applied to each reduced-form equation estimates $\Pi$ consistently. The structural equations are another matter: each contains
+endogenous variables on the right, correlated with its disturbance, so least squares is inconsistent, as in Section~\ref{ssec:endog}.
+
+\begin{exa}
+\label{ex:market}
+In the market model
+\[
+\text{demand: } q_t = \alpha_0 + \alpha_1p_t + \alpha_2\,\text{inc}_t + u_{dt}, \qquad \text{supply: } q_t = \beta_0 + \beta_1p_t + \beta_2w_t + u_{st},
+\]
+with income $\text{inc}_t$ shifting demand and a cost or weather variable $w_t$ shifting supply, equating the two gives
+\[
+p_t = \frac{\alpha_0 - \beta_0 + \alpha_2\,\text{inc}_t - \beta_2w_t + u_{dt} - u_{st}}{\beta_1 - \alpha_1},
+\]
+and $q_t$ follows by substitution. Both reduced-form equations have the form $\pi_0 + \pi_1\text{inc}_t + \pi_2w_t + v_t$. The ratios of reduced-form coefficients
+recover the slopes:
+\[
+\frac{\pi_{q2}}{\pi_{p2}} = \alpha_1, \qquad \frac{\pi_{q1}}{\pi_{p1}} = \beta_1 .
+\]
+The first holds because a change in $w$ shifts supply along a fixed demand curve, so the induced changes in $q$ and $p$ lie on the demand curve; the
+second because a change in income shifts demand along the supply curve. This is \textbf{indirect least squares}: estimate the reduced form, then solve
+for the structural parameters.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.85cm,y=0.85cm,>={Stealth[length=2mm]}]
+\fill[blue!5,rounded corners=4pt] (-0.8,-0.8) rectangle (15.4,5.5);
+\begin{scope}
+\draw[->] (0,0) -- (6.5,0) node[below,font=\small] {$q$};
+\draw[->] (0,0) -- (0,5) node[left,font=\small] {$p$};
+\draw[thick,orange!85!black] (0.5,0.5) -- (6,4.6) node[right,font=\scriptsize] {$S$};
+\foreach \c/\l in {3.2/D_1, 4.4/D_2, 5.6/D_3}
+  \draw[thick,blue!70!black] (\c-3.2,4.6) -- (\c+0.6,0.6) node[below,font=\scriptsize] {$\l$};
+\foreach \x/\y in {2.49/1.98, 3.19/2.51, 3.89/3.03}
+  \fill[red!70!black] (\x,\y) circle (2.2pt);
+\node[font=\small\bfseries,anchor=west,blue!60!black] at (0.4,5.15) {Demand shifts trace out supply};
+\end{scope}
+\begin{scope}[shift={(8.2,0)}]
+\draw[->] (0,0) -- (6.5,0) node[below,font=\small] {$q$};
+\draw[->] (0,0) -- (0,5) node[left,font=\small] {$p$};
+\draw[thick,blue!70!black] (0.5,4.6) -- (6,0.5) node[right,font=\scriptsize] {$D$};
+\foreach \c/\l in {0.2/S_1, 1.4/S_2, 2.6/S_3}
+  \draw[thick,orange!85!black] (\c+0.3,0.5) node[below,font=\scriptsize] {$\l$} -- (\c+3.8,4.3);
+\foreach \x/\y in {2.74/2.93, 3.45/2.40, 4.16/1.87}
+  \fill[red!70!black] (\x,\y) circle (2.2pt);
+\node[font=\small\bfseries,anchor=west,orange!80!black] at (0.4,5.15) {Supply shifts trace out demand};
+\end{scope}
+\end{tikzpicture}
+\caption{Identification by exclusion. The equilibrium points (red) lie on the curve that does \emph{not} shift. A variable that enters only the demand
+equation identifies the supply curve, and one that enters only the supply equation identifies the demand curve. If neither curve had its own shifter,
+the points would be a cloud from which neither slope could be recovered.}
+\label{fig:identify}
+\end{figure}
+
+\subsection{Identification}
+\label{ssec:identify}
+
+The reduced form contains everything the data can tell us. The question is whether the structural parameters can be recovered from it. They cannot
+in general: if $F$ is any non-singular $G \times G$ matrix, the model $FBy_t + F\Gamma x_t = Fu_t$ has the same reduced form, since $(FB)^{-1}F\Gamma = B^{-1}\Gamma$. The two
+structures are \textbf{observationally equivalent}. An equation is \textbf{identified} if the prior restrictions on it, usually that certain variables are
+excluded, rule out every such $F$ except those that leave it unchanged.
+
+\begin{thm}[Order and rank conditions]
+\label{thm:rank}
+Write $A = [B\ \ \Gamma]$, of order $G \times (G + K)$, and suppose the restrictions on the first equation are that certain variables are excluded, so that
+$\alpha_1'\Phi = 0$, where $\alpha_1'$ is the first row of $A$ and the columns of $\Phi$ select the excluded variables. Then the first equation is identified if and
+only if
+\[
+\rank(A\Phi) = G - 1 \qquad\text{(rank condition)}.
+\]
+A necessary condition is that at least $G - 1$ variables be excluded from the equation; equivalently, the number of exogenous variables excluded from
+the equation must be at least the number of endogenous variables included on its right-hand side (\textbf{order condition}).
+\end{thm}
+
+\begin{proof}
+An admissible transformation replaces the first equation by a linear combination $f'A$ of all the equations, and it must satisfy the same restrictions,
+$f'A\Phi = 0$. The true equation corresponds to $f = e_1$, and $e_1'A\Phi = \alpha_1'\Phi = 0$, so the first row of $A\Phi$ is zero. The equation is identified if the only solutions are
+$f = ce_1$, that is, if the solution space of $f'(A\Phi) = 0$ has dimension one. That dimension is $G - \rank(A\Phi)$, so identification holds if and only if $\rank(A\Phi) = G - 1$.
+Since $A\Phi$ has as many columns as there are exclusions, the rank cannot exceed their number, which gives the order condition. If the equation includes
+$G_1$ endogenous variables and $K_1$ exogenous ones, it excludes $(G - G_1) + (K - K_1)$ variables, and the order condition $(G - G_1) + (K - K_1) \geq G - 1$ is
+$K - K_1 \geq G_1 - 1$.
+\end{proof}
+
+The order condition counts; the rank condition checks that the excluded variables actually appear elsewhere in the system, in a way that distinguishes
+the equation from combinations of the others. An equation is \textbf{exactly identified} if the order condition holds with equality and the rank
+condition holds, \textbf{overidentified} if more variables are excluded than needed, and \textbf{underidentified} otherwise. In the market model each equation
+excludes one exogenous variable and includes one endogenous regressor, so both are exactly identified. If the supply equation had no $w$, the demand
+equation would be underidentified, as the right panel of Figure~\ref{fig:identify} would then collapse to a single point.
+
+The excluded exogenous variables are exactly the instruments of Section~\ref{sec:iv}, and identification is the rank condition of the instrumental variables
+estimator. For an exactly identified equation, indirect least squares and 2SLS coincide, by Theorem~\ref{thm:tsls}(i), since both are the IV estimator with the
+exogenous variables as instruments.
+
+\subsection{Estimating a system}
+\label{ssec:3sls}
+
+\textbf{Limited-information} methods estimate one equation at a time, using only the exclusions in that equation: 2SLS, and the limited-information
+maximum likelihood estimator (LIML) of Anderson and Rubin (1949), which has the same asymptotic distribution but is better behaved with many or weak
+instruments. \textbf{Full-information} methods estimate all equations together, using all the restrictions and the correlation between the structural
+disturbances. The most common is \textbf{three-stage least squares} (3SLS) of Zellner and Theil (1962): estimate each equation by 2SLS, use the residuals to
+estimate $\Sigma$, and apply generalised least squares to the stacked system, with the instruments as in 2SLS. 3SLS is asymptotically efficient among IV
+estimators when all the equations are correctly specified, and equal to 2SLS when every equation is exactly identified or $\Sigma$ is diagonal.
+Full-information maximum likelihood (FIML) has the same asymptotic distribution as 3SLS under normality. The price of system methods is
+robustness: a misspecification in one equation contaminates the estimates of all the others. Software~\ref{sw:sur} shows the same danger for the simpler
+system that follows.
+
+\subsection{Seemingly unrelated regressions}
+\label{ssec:sur}
+
+Zellner (1962) considered $G$ equations that are related only through their disturbances:
+\[
+y_i = X_i\beta_i + u_i, \qquad i = 1, \dots, G, \qquad E(u_{it}u_{jt}) = \sigma_{ij}, \qquad E(u_{it}u_{js}) = 0 \ (t \neq s) .
+\]
+Each equation satisfies the classical assumptions on its own, and least squares is unbiased equation by equation. But demand equations for several goods
+are hit by common shocks; so are investment equations for firms in the same industry, or death rates for different groups of road users in the same
+month. Stacking the equations as $y = X\beta + u$, with $X = \operatorname{diag}(X_1, \dots, X_G)$ block diagonal, gives $\Var(u) = \Sigma \otimes I_n$, where $\otimes$ is the Kronecker
+product. Aitken's theorem then gives the GLS estimator
+\[
+b_{\text{SUR}} = \bigl[X'(\Sigma^{-1} \otimes I_n)X\bigr]^{-1}X'(\Sigma^{-1} \otimes I_n)y ,
+\]
+using $(\Sigma \otimes I)^{-1} = \Sigma^{-1} \otimes I$. In practice $\Sigma$ is estimated from the least squares residuals, $\hat\sigma_{ij} = e_i'e_j/n$, giving feasible SUR.
+
+\begin{thm}
+\label{thm:surols}
+SUR is identical to least squares equation by equation if either
+\begin{enumerate}[label=(\roman*)]
+\item $\Sigma$ is diagonal; or
+\item every equation has the same regressors, $X_i = X_0$ for all $i$.
+\end{enumerate}
+More generally, if the regressors of one equation are a subset of those of another, SUR gives least squares for the equation with fewer regressors.
+\end{thm}
+
+\begin{proof}
+(i) If $\Sigma$ is diagonal, $X'(\Sigma^{-1} \otimes I)X$ is block diagonal with blocks $X_i'X_i/\sigma_{ii}$, and $X'(\Sigma^{-1} \otimes I)y$ has blocks $X_i'y_i/\sigma_{ii}$; the $\sigma_{ii}$ cancel.
+
+(ii) Now $X = I_G \otimes X_0$. Using $(A \otimes B)(C \otimes D) = AC \otimes BD$,
+\[
+X'(\Sigma^{-1} \otimes I)X = \Sigma^{-1} \otimes X_0'X_0, \qquad X'(\Sigma^{-1} \otimes I)y = (\Sigma^{-1} \otimes X_0')y,
+\]
+so $b_{\text{SUR}} = (\Sigma \otimes (X_0'X_0)^{-1})(\Sigma^{-1} \otimes X_0')y = (I_G \otimes (X_0'X_0)^{-1}X_0')y$, which is least squares on each equation. The subset result is proved
+in the same way, partitioning the larger regressor matrix; we verify it numerically in Software~\ref{sw:sur}.
+\end{proof}
+
+The efficiency gain comes from information in the other equations' residuals about this equation's disturbance, and it requires both correlated
+disturbances and regressors that differ across equations. It is largest when the correlation is high and the regressors of the different equations
+are weakly correlated with each other. Whether SUR is worth the trouble can be tested: under $H_0\colon\Sigma$ diagonal, the Breusch--Pagan LM statistic
+$n\sum_{i<j}r_{ij}^2$, with $r_{ij}$ the correlation between the least squares residuals of equations $i$ and $j$, is asymptotically $\chi^2_{G(G-1)/2}$.
+
+\subsection{Vector autoregressions}
+\label{ssec:var}
+
+Sims (1980) argued that the exclusion restrictions that identify structural macroeconomic models are often ``incredible'': there is rarely a
+convincing reason why a variable should appear in one equation and not another. His alternative was to model every variable as depending on lags of
+all of them.
+
+\begin{defn}
+A \textbf{vector autoregression} of order $p$, VAR($p$), for a $G \times 1$ vector $y_t$ is
+\[
+y_t = c + A_1y_{t-1} + \dots + A_py_{t-p} + \varepsilon_t,
+\]
+where the $A_j$ are $G \times G$ matrices and $\varepsilon_t$ are independent with mean zero and covariance matrix $\Sigma$. The variable $y_2$ \textbf{does not
+Granger-cause} $y_1$ if the coefficients of all lags of $y_2$ in the equation for $y_1$ are zero, so that past $y_2$ does not help to forecast $y_1$ once
+past $y_1$ is known.
+\end{defn}
+
+\begin{thm}
+\label{thm:var}
+\begin{enumerate}[label=(\roman*)]
+\item The VAR is stable (stationary) if and only if all eigenvalues of the $Gp \times Gp$ \textbf{companion matrix}
+\[
+C = \begin{bmatrix}
+A_1 & A_2 & \cdots & A_{p-1} & A_p\\
+I & 0 & \cdots & 0 & 0\\
+\vdots & & \ddots & & \vdots\\
+0 & 0 & \cdots & I & 0
+\end{bmatrix}
+\]
+lie strictly inside the unit circle.
+\item Least squares applied to each equation separately is identical to SUR on the whole system, and, conditionally on the first $p$ observations
+and under normality, to maximum likelihood.
+\item A stable VAR has the moving average representation $y_t = \mu + \sum_{h=0}^\infty\Psi_h\varepsilon_{t-h}$, with $\Psi_0 = I$ and
+\[
+\Psi_h = \sum_{j=1}^{\min(h, p)}A_j\Psi_{h-j}, \qquad h \geq 1 .
+\]
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) Stack $Y_t = (y_t', y_{t-1}', \dots, y_{t-p+1}')'$. Then $Y_t = \tilde c + CY_{t-1} + E_t$, with $E_t = (\varepsilon_t', 0, \dots, 0)'$, a VAR(1). Iterating, $Y_t$ depends on $C^hE_{t-h}$, and
+$C^h \to 0$ if and only if every eigenvalue of $C$ has modulus less than one, which is the condition for the infinite sum to converge, as for the AR(1)
+scheme in Theorem~\ref{thm:ar1}.
+
+(ii) Every equation has the same regressors, a constant and $p$ lags of all the variables, so Theorem~\ref{thm:surols}(ii) applies. With normal $\varepsilon_t$ the
+conditional likelihood is that of a SUR system, which is maximised by GLS, here least squares.
+
+(iii) Substitute $y_{t-j} = \mu + \sum_h\Psi_h\varepsilon_{t-j-h}$ into the VAR and match the coefficients of $\varepsilon_{t-h}$ on both sides: the coefficient of $\varepsilon_{t-h}$ on the right is
+$\sum_jA_j\Psi_{h-j}$, with $\Psi_m = 0$ for $m < 0$, and on the left it is $\Psi_h$.
+\end{proof}
+
+The matrix $\Psi_h$ gives the \textbf{impulse responses}: its $(i, j)$ element is the effect on $y_{i,t+h}$ of a unit shock to the $j$th disturbance at time $t$. But the
+disturbances of different equations are correlated, so a shock to one rarely occurs without the others. The usual remedy is to orthogonalise: with the
+Cholesky factorisation $\Sigma = LL'$, $L$ lower triangular, the shocks $\eta_t = L^{-1}\varepsilon_t$ are uncorrelated with unit variance, and the responses to them are $\Psi_hL$. The
+price is an ordering assumption: the first variable's shock may affect all the others within the period, while the last variable's shock affects only
+itself. Different orderings can give different answers, and the ordering should be justified by economic timing. Granger causality is tested by the $F$
+test of the relevant exclusion, and the lag order is chosen by an information criterion,
+\[
+\text{AIC}(p) = \log|\hat\Sigma_p| + \frac{2K_p}{n}, \qquad \text{BIC}(p) = \log|\hat\Sigma_p| + \frac{K_p\log n}{n},
+\]
+where $K_p$ is the total number of coefficients, all the models being fitted to the same sample.
+
+Granger causality is a statement about prediction, not about causation in the sense of Section~\ref{sec:iv}. A variable that is chosen by forward-looking
+agents, such as a share price or an interest rate, Granger-causes the variables it anticipates even if it has no effect on them.
+
+\subsection{Cointegrated systems: the vector error correction model}
+\label{ssec:vecm}
+
+\begin{thm}
+\label{thm:vecm}
+The VAR($k$) in levels $y_t = c + A_1y_{t-1} + \dots + A_ky_{t-k} + \varepsilon_t$ can be written as the \textbf{vector error correction model}
+\[
+\Delta y_t = c + \Pi y_{t-1} + \sum_{j=1}^{k-1}\Gamma_j\Delta y_{t-j} + \varepsilon_t, \qquad \Pi = -\Bigl(I - \sum_{i=1}^kA_i\Bigr), \qquad \Gamma_j = -\sum_{i=j+1}^kA_i .
+\]
+If each element of $y_t$ is $I(1)$, then
+\begin{enumerate}[label=(\roman*)]
+\item $\rank\Pi = 0$ means that there is no cointegration, and the model is a VAR in differences;
+\item $0 < \rank\Pi = r < G$ means that there are exactly $r$ linearly independent cointegrating vectors, and $\Pi = \alpha\beta'$ with $\alpha$ and $\beta$ of order $G \times r$: the columns
+of $\beta$ are the cointegrating vectors and $\alpha$ holds the speeds of adjustment;
+\item $\rank\Pi = G$ is impossible, since it would make $y_t$ stationary.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+The algebra is that of Theorem~\ref{thm:adfform}, with matrices in place of scalars. For (ii) and (iii): every term other than $\Pi y_{t-1}$ in the error
+correction form is $I(0)$, so $\Pi y_{t-1}$ must be $I(0)$ too. If $\Pi = 0$ this is automatic. If $\Pi$ has rank $r$, write $\Pi = \alpha\beta'$ with $\alpha$ and $\beta$ of full column rank $r$; then
+$\beta'y_{t-1} = (\alpha'\alpha)^{-1}\alpha'\Pi y_{t-1}$ is $I(0)$, so the $r$ columns of $\beta$ are cointegrating vectors. If $r = G$, $\Pi$ is invertible and $y_{t-1} = \Pi^{-1}(\Pi y_{t-1})$ would be
+$I(0)$, contradicting the assumption.
+\end{proof}
+
+\subhead{Johansen's procedure}
+Johansen (1988) estimated the VECM by maximum likelihood with the rank of $\Pi$ restricted. Let $R_{0t}$ and $R_{1t}$ be the residuals from regressing $\Delta y_t$ and
+$y_{t-1}$ on a constant and the lagged differences, and $S_{ij} = \frac1n\sum_tR_{it}R_{jt}'$. The problem reduces to $R_{0t} = \alpha\beta'R_{1t} + \varepsilon_t$, a regression with a coefficient matrix of
+reduced rank.
+
+\begin{thm}[Johansen]
+\label{thm:johansen}
+Let $\hat\lambda_1 > \dots > \hat\lambda_G$ be the eigenvalues of $S_{11}^{-1}S_{10}S_{00}^{-1}S_{01}$, and $\hat v_1, \dots, \hat v_G$ the corresponding eigenvectors. Under normality, the maximum
+likelihood estimate of $\beta$ with rank $r$ is $[\hat v_1 \cdots \hat v_r]$, and the maximised log-likelihood is
+\[
+\ell_r = \text{const} - \frac n2\log|S_{00}| - \frac n2\sum_{i=1}^r\log(1 - \hat\lambda_i) .
+\]
+The likelihood ratio statistic for $H_0\colon\rank\Pi \leq r$ against $\rank\Pi = G$ is therefore the \textbf{trace statistic}
+\[
+\text{trace}(r) = -n\sum_{i=r+1}^G\log(1 - \hat\lambda_i) .
+\]
+\end{thm}
+
+\begin{proof}[Sketch of proof]
+For fixed $\beta$, the regression of $R_{0t}$ on $\beta'R_{1t}$ gives $\hat\alpha(\beta) = S_{01}\beta(\beta'S_{11}\beta)^{-1}$ and residual covariance $S_{00} - S_{01}\beta(\beta'S_{11}\beta)^{-1}\beta'S_{10}$, and the concentrated
+log-likelihood is $-\frac n2$ times the log of its determinant. By the formula for the determinant of a partitioned matrix,
+\[
+\bigl|S_{00} - S_{01}\beta(\beta'S_{11}\beta)^{-1}\beta'S_{10}\bigr| = |S_{00}|\,\frac{\bigl|\beta'(S_{11} - S_{10}S_{00}^{-1}S_{01})\beta\bigr|}{|\beta'S_{11}\beta|} .
+\]
+Minimising the ratio over $\beta$ is a generalised eigenvalue problem, solved by the eigenvectors of $S_{11}^{-1}S_{10}S_{00}^{-1}S_{01}$ belonging to the $r$ largest eigenvalues, and
+its minimum is $\prod_{i\leq r}(1 - \hat\lambda_i)$. Differencing $\ell_G$ and $\ell_r$ gives the trace statistic.
+\end{proof}
+
+The $\hat\lambda_i$ are the squared canonical correlations between $\Delta y_t$ and $y_{t-1}$ after the short-run dynamics have been removed: a large $\hat\lambda_i$ means a combination of
+the levels that strongly predicts the changes, which is what a cointegrating relation does. The tests are applied in sequence, $r = 0, 1, \dots$, and
+the first $r$ not rejected is the estimated rank. The trace statistic has a non-standard distribution, of the Dickey--Fuller type; with an unrestricted
+constant, the $5\%$ critical values of Osterwald-Lenum (1992) for $G - r = 1, 2, 3, 4$ are $3.76$, $15.41$, $29.68$ and $47.21$. A simulation of $5000$ pairs of independent
+random walks with drift, of length $150$, gives $3.30$ and $15.74$ for the first two, close to these asymptotic values. If the $\alpha$ coefficient of a
+variable is zero, that variable does not adjust to the disequilibrium: it is \textbf{weakly exogenous} for $\beta$, and drives the system's common trend.
+
+\subsection{Systems in software}
+\label{ssec:software14}
+
+\begin{software}[Indirect least squares and 2SLS in a market]
+\label{sw:ils}
+A simulated market with the structure of Example~\ref{ex:market}, true demand slope $-1.5$ and supply slope $2$; the function \texttt{tsls} is that of Software~\ref{sw:market}:
+{\small\begin{verbatim}
+> set.seed(2); n <- 500
+> inc <- rnorm(n, 10, 4); w <- rnorm(n, 5, 2)  # demand and supply shifters
+> ud <- rnorm(n, 0, 3); us <- rnorm(n, 0, 3)
+> p <- (40 + 0.8 * inc + 3 * w + ud - us) / 3.5 # market-clearing price
+> q <- 50 - 1.5 * p + 0.8 * inc + ud            # on the demand curve
+> rf.p <- coef(lm(p ~ inc + w)); rf.q <- coef(lm(q ~ inc + w))
+> rbind(p = rf.p, q = rf.q)                     # the reduced form
+  (Intercept)       inc          w
+p    11.51861 0.2291435  0.8411853
+q    32.58003 0.4768458 -1.2580431
+> c(ILS.demand = rf.q[["w"]] / rf.p[["w"]],
++   ILS.supply = rf.q[["inc"]] / rf.p[["inc"]])
+ILS.demand ILS.supply 
+ -1.495560   2.080992 
+> tsls <- function(y, X, Z) {
++   Xh <- Z %*% solve(crossprod(Z), crossprod(Z, X))
++   b <- solve(crossprod(Xh), crossprod(Xh, y))
++   u <- y - X %*% b; s2 <- sum(u^2) / (length(y) - ncol(X))
++   list(b = drop(b), se = sqrt(diag(s2 * solve(crossprod(Xh)))))
++ }
+> Z <- cbind(1, inc, w)
+> dem <- tsls(q, cbind(1, p, inc), Z); sup <- tsls(q, cbind(1, p, w), Z)
+> round(rbind(demand = dem$b, supply = sup$b), 3)
+                   p    inc
+demand 49.807 -1.496  0.820
+supply  8.610  2.081 -3.009
+> round(c(OLS.demand = coef(lm(q ~ p + inc))[["p"]],
++         OLS.supply = coef(lm(q ~ p + w))[["p"]]), 3)
+OLS.demand OLS.supply 
+    -0.926      0.882 
+\end{verbatim}}
+\textbf{Reading the output.} The ratio of the reduced-form coefficients of $w$ gives the demand slope, $-1.258/0.841 = -1.496$, and the ratio of the income coefficients gives the
+supply slope, $0.477/0.229 = 2.081$. 2SLS on each equation, with all the exogenous variables as instruments, reproduces these slopes exactly, as it must for
+exactly identified equations. Least squares gives $-0.93$ and $0.88$: each structural regression mixes the two curves.
+
+\textbf{Stata:} \texttt{reg3 (q p inc) (q p w), 2sls} for 2SLS on each equation, or \texttt{reg3} alone for 3SLS. \textbf{EViews:} create a \emph{System} object
+with the two equations and the instrument list, then \emph{Estimate} by 2SLS or 3SLS.
+\end{software}
+
+\begin{software}[SUR: front and rear seat passengers]
+\label{sw:sur}
+The \texttt{Seatbelts} data also record monthly front-seat and rear-seat passengers killed or seriously injured. The 1983 law required front-seat
+occupants only to wear belts. Monthly shocks such as weather affect both groups, so their equations, with the regressors of Software~\ref{sw:seatbelt}
+plus the trend, form a natural SUR system. The block-diagonal stacked matrix is built with \texttt{Matrix::bdiag}:
+{\small\begin{verbatim}
+> sb <- data.frame(Seatbelts); sb$t <- 1:192
+> sb$month <- factor(cycle(Seatbelts[, "drivers"]))
+> X1 <- model.matrix(~ log(kms) + log(PetrolPrice) + law + month + t, sb)
+> X2 <- X1[, colnames(X1) != "law"]             # rear equation without law
+> y1 <- log(sb$front); y2 <- log(sb$rear)
+> sur <- function(ys, Xs) {                     # feasible GLS on the stack
++   n <- length(ys[[1]]); X <- as.matrix(Matrix::bdiag(Xs)); y <- unlist(ys)
++   E <- sapply(1:2, function(i) lm.fit(Xs[[i]], ys[[i]])$residuals)
++   W <- kronecker(solve(crossprod(E) / n), diag(n))
++   V <- solve(t(X) %*% W %*% X); b <- drop(V %*% t(X) %*% W %*% y)
++   list(b = b, se = sqrt(diag(V)), r = cor(E)[1, 2])
++ }
+> j <- which(colnames(X1) == "law")             # position of law in eq. 1
+> ols1 <- coef(summary(lm(y1 ~ X1 - 1)))[j, 1:2]
+> ols2 <- coef(summary(lm(y2 ~ X1 - 1)))[j, 1:2]
+> s1 <- sur(list(y1, y2), list(X1, X1))         # same regressors
+> s2 <- sur(list(y1, y2), list(X1, X2))         # law excluded from rear
+> round(rbind(OLS.front = ols1, OLS.rear = ols2,
++   SUR.same = c(s1$b[j], s1$se[j]), SUR.restr = c(s2$b[j], s2$se[j])), 4)
+          Estimate Std. Error
+OLS.front  -0.2228     0.0248
+OLS.rear    0.1128     0.0275
+SUR.same   -0.2228     0.0238
+SUR.restr  -0.2886     0.0175
+> c(r = s1$r, LM.diag = 192 * s1$r^2)           # Breusch-Pagan, diagonal
+         r    LM.diag 
+ 0.7079925 96.2406404 
+\end{verbatim}}
+\textbf{Reading the output.} The residual correlation between the two equations is $0.71$, and the Breusch--Pagan statistic $96.2$ on $1$ degree of freedom
+rejects a diagonal $\Sigma$ overwhelmingly. With the law dummy in both equations the regressors are the same, and SUR reproduces least squares exactly,
+$-0.2228$, as Theorem~\ref{thm:surols}(ii) says. (The standard error is smaller only because SUR divides by $n$ rather than $n - k$:
+$0.0248\sqrt{176/192} = 0.0238$.) The rear-seat equation shows a surprise: rear casualties \emph{rose} by $100(e^{0.113} - 1) = 12\%$ after the law, an increase that
+Harvey and Durbin (1986) also found in their analysis of the law for the Department of Transport; one explanation offered is risk compensation, drivers
+who feel safer driving less carefully. If one imposes the plausible-looking restriction that the law did not affect rear passengers, by dropping it from that equation,
+the regressors differ and SUR now ``gains'': the front-seat effect becomes $-0.289$ with a standard error of $0.018$. But the restriction is false, and the
+gain is illusory. SUR has transferred the misspecification of the rear equation into the front equation, as system methods do. The rear equation itself,
+whose regressors are a subset of the front's, is unchanged from least squares, as the last part of the theorem says.
+
+\textbf{Stata:} \texttt{sureg (lfront lkms lpetrol law i.month t) (lrear lkms lpetrol i.month t)}, with \texttt{, corr} for the Breusch--Pagan test.
+\textbf{EViews:} a \emph{System} object estimated by \emph{Seemingly Unrelated Regression}.
+\end{software}
+
+\begin{software}[Lag selection and Johansen's test]
+\label{sw:johansen}
+Return to the sales and leading indicator series of Software~\ref{sw:adf}. Choose the order of the VAR in levels by BIC on a common sample, and
+compute Johansen's statistics by the steps of Theorem~\ref{thm:johansen}:
+{\small\begin{verbatim}
+> Y <- cbind(sales = as.numeric(BJsales), lead = as.numeric(BJsales.lead))
+> bic <- function(k, P = 9) {                   # levels VAR(k), common sample
++   idx <- (P + 1):nrow(Y)
++   X <- cbind(1, do.call(cbind, lapply(1:k, function(j) Y[idx - j, ])))
++   E <- Y[idx, ] - X %*% solve(crossprod(X), crossprod(X, Y[idx, ]))
++   m <- length(idx); log(det(crossprod(E) / m)) + log(m) * 2 * ncol(X) / m
++ }
+> round(sapply(1:8, bic), 3)
+[1] -1.831 -1.928 -4.610 -4.507 -4.571 -4.575 -4.494 -4.460
+> johansen <- function(Y, k) {                  # VAR(k) in levels, constant
++   D <- diff(Y); idx <- k:nrow(D); m <- length(idx)
++   Z <- cbind(1, do.call(cbind,
++                         lapply(seq_len(k - 1), function(j) D[idx - j, ])))
++   res <- function(M) M - Z %*% solve(crossprod(Z), crossprod(Z, M))
++   R0 <- res(D[idx, ]); R1 <- res(Y[idx, ])    # Y[idx, ] is Y(t-1)
++   S00 <- crossprod(R0) / m; S11 <- crossprod(R1) / m
++   S01 <- crossprod(R0, R1) / m
++   e <- eigen(solve(S11, t(S01)) %*% solve(S00, S01))
++   lam <- Re(e$values); b <- Re(e$vectors[, 1])
++   list(lambda = lam, trace = rev(cumsum(rev(-m * log(1 - lam)))),
++        beta = b / b[1])
++ }
+> jo <- johansen(Y, 3); lapply(jo, round, 3)
+$lambda
+[1] 0.944 0.006
+
+$trace
+[1] 424.802   0.837
+
+$beta
+[1]   1.000 -18.169
+
+> round(sapply(2:8, function(k) johansen(Y, k)$trace[1]), 1)
+[1]  55.6 424.8  75.3  25.3  12.9   8.7   6.3
+\end{verbatim}}
+\textbf{Reading the output.} BIC chooses $k = 3$. The trace statistic for $r = 0$ is $424.8$, far above $15.41$, and for $r \leq 1$ it is $0.84$, below $3.76$: there is exactly one
+cointegrating vector, $\text{sales} - 18.17\,\text{lead}$, close to the Engle--Granger estimate $17.34$ of Software~\ref{sw:eg} (which used the indicator three periods earlier).
+The first canonical correlation is enormous, $\hat\lambda_1 = 0.944$, because the indicator predicts the change in sales so well. The last line is a warning: the
+trace statistic for $r = 0$ falls from $424.8$ to $6.3$ as the lag order rises from $3$ to $8$, and with $k \geq 6$ the test no longer rejects. Over-fitting the short-run
+dynamics absorbs the long-run relation into the lags, and the power of the test collapses.
+
+\textbf{Stata:} \texttt{varsoc sales lead} for lag selection, \texttt{vecrank sales lead, lags(3)} for the trace test. \textbf{EViews:} in a \emph{Group}, \emph{View $\to$
+Cointegration Test $\to$ Johansen System Cointegration Test}.
+\end{software}
+
+\begin{software}[The VECM: adjustment and Granger causality]
+\label{sw:vecm}
+Estimate the VECM with the Johansen cointegrating vector and $k - 1 = 2$ lagged differences, and test Granger causality in each direction (lags of the other
+variable together with the error correction term, which contains both):
+{\small\begin{verbatim}
+> options(show.signif.stars = FALSE)
+> D <- diff(Y); idx <- 3:nrow(D)                # VECM, 2 lagged differences
+> ec <- drop(Y[idx, ] %*% jo$beta)              # sales - 18.17 lead, lagged
+> X <- cbind(ec, D[idx - 1, ], D[idx - 2, ])
+> colnames(X) <- c("ec", "ds1", "dl1", "ds2", "dl2")
+> ds <- D[idx, 1]; dl <- D[idx, 2]
+> vs <- lm(ds ~ X); vl <- lm(dl ~ X)
+> round(rbind(sales = coef(summary(vs))["Xec", ],
++             lead = coef(summary(vl))["Xec", ]), 4)
+      Estimate Std. Error  t value Pr(>|t|)
+sales  -0.2597     0.0053 -48.7421   0.0000
+lead    0.0047     0.0052   0.8973   0.3711
+> gc <- function(y, keep) {                     # F test of the dropped terms
++   anova(lm(y ~ X[, keep]), lm(y ~ X))[2, c("F", "Pr(>F)")]
++ }
+> rbind(lead.to.sales = gc(ds, c("ds1", "ds2")), # drops ec, dl1, dl2
++       sales.to.lead = gc(dl, c("dl1", "dl2"))) # drops ec, ds1, ds2
+                      F Pr(>F)
+lead.to.sales 1014.8068 <2e-16
+sales.to.lead    1.1457 0.3329
+\end{verbatim}}
+\textbf{Reading the output.} Sales adjust strongly to the disequilibrium: $\hat\alpha = -0.260$ with $t = -48.7$, so a quarter of any gap between sales and $18.17$ times the
+indicator closes each period. The indicator does not adjust at all ($\hat\alpha = 0.005$, $t = 0.90$): it is weakly exogenous, and it carries the common stochastic
+trend that sales follow. Granger causality is overwhelming from the indicator to sales ($F = 1015$) and absent in the other direction ($p = 0.33$). The
+indicator deserves its name.
+
+\textbf{Stata:} \texttt{vec sales lead, lags(3)}, then \texttt{vargranger}. \textbf{EViews:} estimate a \emph{VAR} object as a \emph{Vector Error Correction}
+model; \emph{View $\to$ Lag Structure $\to$ Granger Causality}.
+\end{software}
+
+\begin{software}[Impulse responses]
+\label{sw:irf}
+Responses of both variables, in levels, to an orthogonalised shock to the indicator, computed by the recursion of Theorem~\ref{thm:var}(iii) from the
+VAR(3) in levels. The indicator is ordered first, so its shock may move sales in the same period:
+{\small\begin{verbatim}
+> k <- 3; idx <- (k + 1):nrow(Y)                # levels VAR(3)
+> XV <- cbind(1, do.call(cbind, lapply(1:k, function(j) Y[idx - j, ])))
+> B <- solve(crossprod(XV), crossprod(XV, Y[idx, ]))
+> E <- Y[idx, ] - XV %*% B; S <- crossprod(E) / length(idx)
+> A <- lapply(1:k, function(j) t(B[2 * j + 0:1, ]))      # A1, A2, A3
+> Psi <- list(diag(2))                          # MA coefficient matrices
+> for (h in 1:15) Psi[[h + 1]] <- Reduce(`+`,
++   lapply(1:min(h, k), function(j) A[[j]] %*% Psi[[h + 1 - j]]))
+> L <- t(chol(S[2:1, 2:1]))[2:1, 2:1]           # Cholesky, lead ordered first
+> resp <- sapply(Psi, function(M) M %*% L[, 2]) # responses to a lead shock
+> dimnames(resp) <- list(c("sales", "lead"), paste0("h", 0:15))
+> round(resp[, c(1:7, 11, 16)], 2)
+        h0   h1   h2   h3   h4   h5   h6  h10  h15
+sales 0.01 0.01 0.03 1.31 1.57 1.83 2.02 2.67 2.87
+lead  0.28 0.13 0.15 0.14 0.18 0.16 0.16 0.16 0.16
+\end{verbatim}}
+\textbf{Reading the output.} A one-standard-deviation shock to the indicator raises it by $0.28$ at once, and it settles $0.16$ higher for good. Sales do not respond
+for three periods, then jump by $1.31$ and climb towards $2.87$. The long-run ratio, $2.87/0.16 \approx 18$, is the cointegrating coefficient: in the long run sales move with
+the indicator in the proportion fixed by $\beta$. The three-period delay is the lag that Box and Jenkins found. Ordering sales first would change little
+here, because the contemporaneous correlation of the two disturbances is small; in macroeconomic VARs the ordering often matters a great deal.
+
+\textbf{Stata:} \texttt{var sales lead, lags(1/3)}, then \texttt{irf create} and \texttt{irf graph oirf}. \textbf{EViews:} \emph{View $\to$ Impulse Response} in a
+\emph{VAR} object, choosing the Cholesky ordering.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+A three-equation model has endogenous variables $y_1, y_2, y_3$ and exogenous variables $x_1, x_2, x_3$, with the following pattern of included variables
+($\times$ included, $0$ excluded):
+\begin{center}
+\begin{tabular}{lcccccc}
+& $y_1$ & $y_2$ & $y_3$ & $x_1$ & $x_2$ & $x_3$\\
+\hline
+Equation 1 & $\times$ & $\times$ & $0$ & $\times$ & $0$ & $0$\\
+Equation 2 & $0$ & $\times$ & $\times$ & $\times$ & $\times$ & $0$\\
+Equation 3 & $\times$ & $0$ & $\times$ & $0$ & $0$ & $\times$
+\end{tabular}
+\end{center}
+Apply the order condition to each equation.
+\end{problem}
+
+\begin{solution}
+With $G = 3$, each equation needs at least $G - 1 = 2$ exclusions. Equation 1 excludes $y_3, x_2, x_3$: three exclusions, so it is overidentified by the order
+condition (it has one endogenous regressor and two excluded exogenous variables). Equation 2 excludes $y_1$ and $x_3$: two, exactly identified (two
+endogenous variables included, one on the right, and one excluded exogenous variable). Equation 3 excludes $y_2, x_1, x_2$: three, overidentified. The rank
+condition must still be checked. For equation 2 the excluded variables are $y_1$ and $x_3$, and their coefficients in equations 1 and 3 form the matrix
+$\begin{bmatrix} b_{11} & 0\\ b_{31} & \gamma_{33}\end{bmatrix}$, whose determinant $b_{11}\gamma_{33}$ is non-zero because both variables are included where marked. The rank is $2 = G - 1$, so equation 2
+is identified.
+\end{solution}
+
+\begin{problem}
+In the model $C_t = \alpha + \beta Y_t + u_t$, $Y_t = C_t + I_t$, with $I_t$ exogenous, the estimated reduced form is $\hat Y_t = 120 + 2.5I_t$ and $\hat C_t = 120 + 1.5I_t$.
+Find the indirect least squares estimates of $\alpha$ and $\beta$, and explain why they must agree with IV using $I_t$ as the instrument.
+\end{problem}
+
+\begin{solution}
+The reduced form is $Y_t = \alpha/(1 - \beta) + I_t/(1 - \beta) + v_t$ and $C_t = \alpha/(1 - \beta) + \beta I_t/(1 - \beta) + v_t$. The ratio of the $I_t$ coefficients is $\beta = 1.5/2.5 = 0.6$, and the multiplier
+$1/(1 - \beta) = 2.5$ is consistent with it. Then $\alpha/(1 - \beta) = 120$ gives $\alpha = 48$. The equation is exactly identified, with one excluded exogenous variable and one
+endogenous regressor, and in that case ILS and IV are the same estimator: $\hat\beta_{\text{IV}} = \sum i_tc_t/\sum i_ty_t$ is exactly the ratio of the reduced-form slopes $\sum i_tc_t/\sum i_t^2$
+and $\sum i_ty_t/\sum i_t^2$.
+\end{solution}
+
+\begin{problem}
+In the market model of Example~\ref{ex:market}, suppose the supply equation contains no exogenous variable: $q_t = \beta_0 + \beta_1p_t + u_{st}$. Show that the demand
+equation is not identified by exhibiting a different structure with the same reduced form. Is the supply equation identified?
+\end{problem}
+
+\begin{solution}
+Take any $\lambda \neq 0$ and form a weighted average of the two equations, each normalised on $q$: the combination
+$(1 - \lambda)(\text{demand}) + \lambda(\text{supply})$ is
+\begin{align*}
+q_t = {}&[(1 - \lambda)\alpha_0 + \lambda\beta_0] + [(1 - \lambda)\alpha_1 + \lambda\beta_1]p_t\\
+&+ (1 - \lambda)\alpha_2\text{inc}_t + \text{disturbance}.
+\end{align*}
+It has exactly the form of the demand
+equation (it contains $p$ and income), and together with the supply equation it implies the same reduced form, so the data cannot distinguish it from
+the true demand curve. The supply equation excludes income, which appears in demand, so it is exactly identified: income shifts demand along it.
+\end{solution}
+
+\begin{problem}
+A VAR(1) for two variables has $A_1 = \begin{bmatrix} 0.5 & 0.2\\ 0.1 & 0.4\end{bmatrix}$.
+\begin{enumerate}[label=(\alph*)]
+\item Is it stable?
+\item Find the impulse responses $\Psi_1$ and $\Psi_2$ to the non-orthogonalised shocks.
+\item Does $y_2$ Granger-cause $y_1$?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The characteristic equation is $\lambda^2 - 0.9\lambda + (0.2 - 0.02) = \lambda^2 - 0.9\lambda + 0.18 = 0$, with roots $0.6$ and $0.3$, both inside the unit circle: stable.
+
+(b) $\Psi_1 = A_1$, and $\Psi_2 = A_1^2 = \begin{bmatrix} 0.27 & 0.18\\ 0.09 & 0.18\end{bmatrix}$. A unit shock to $y_2$ raises $y_1$ by $0.2$ after one period and $0.18$ after two.
+
+(c) Yes: the coefficient of $y_{2,t-1}$ in the equation for $y_1$ is $0.2 \neq 0$.
+\end{solution}
+
+\begin{problem}
+In a bivariate VECM, $\Pi = \begin{bmatrix} -0.4 & 0.8\\ 0.2 & -0.4\end{bmatrix}$.
+\begin{enumerate}[label=(\alph*)]
+\item Find the rank of $\Pi$, and write $\Pi = \alpha\beta'$ with $\beta$ normalised so that its first element is $1$.
+\item Interpret the cointegrating relation and the adjustment coefficients.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The determinant is $0.16 - 0.16 = 0$ and $\Pi \neq 0$, so the rank is $1$. The second column is $-2$ times the first, so $\Pi = \alpha\beta'$ with $\beta = (1, -2)'$ and
+$\alpha = (-0.4, 0.2)'$.
+
+(b) The long-run relation is $y_1 = 2y_2$. When $y_1$ is above $2y_2$, the disequilibrium $y_{1,t-1} - 2y_{2,t-1}$ is positive, and $y_1$ falls ($\alpha_1 = -0.4$) while $y_2$ rises
+($\alpha_2 = 0.2$): both variables move to close the gap, $y_1$ faster.
+\end{solution}
+
+\begin{problem}
+Prove the Kronecker product identities used in Theorem~\ref{thm:surols}: $(A \otimes B)(C \otimes D) = AC \otimes BD$ when the products are defined, and
+$(A \otimes B)^{-1} = A^{-1} \otimes B^{-1}$ for non-singular $A$ and $B$. Hence show that $(\Sigma \otimes I_n)^{-1} = \Sigma^{-1} \otimes I_n$.
+\end{problem}
+
+\begin{solution}
+$A \otimes B$ is the block matrix with $(i, j)$ block $a_{ij}B$. The $(i, k)$ block of the product is $\sum_ja_{ij}B\,c_{jk}D = \bigl(\sum_ja_{ij}c_{jk}\bigr)BD = (AC)_{ik}BD$, which is the $(i, k)$ block of
+$AC \otimes BD$. Then $(A \otimes B)(A^{-1} \otimes B^{-1}) = AA^{-1} \otimes BB^{-1} = I \otimes I = I$, which proves the inverse formula, and with $A = \Sigma$, $B = I_n$ it gives $(\Sigma \otimes I_n)^{-1} = \Sigma^{-1} \otimes I_n$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -7733,6 +8340,8 @@ Software~\ref{sw:market} the error made the standard error a quarter too small, 
 \subhead{Further reading}
 \begin{enumerate}
 \item Aitken, A. C. (1935), On least squares and linear combination of observations, \emph{Proceedings of the Royal Society of Edinburgh}, 55, 42--48.
+\item Anderson, T. W., and Rubin, H. (1949), Estimation of the parameters of a single equation in a complete system of stochastic equations,
+\emph{Annals of Mathematical Statistics}, 20, 46--63.
 \item Angrist, J. D. (1990), Lifetime earnings and the Vietnam era draft lottery: evidence from Social Security administrative records,
 \emph{American Economic Review}, 80, 313--336.
 \item Angrist, J. D., and Krueger, A. B. (1991), Does compulsory school attendance affect schooling and earnings?, \emph{Quarterly Journal of
@@ -7747,6 +8356,8 @@ instruments and the endogenous explanatory variable is weak, \emph{Journal of th
 \item Breusch, T. S. (1978), Testing for autocorrelation in dynamic linear models, \emph{Australian Economic Papers}, 17, 334--355.
 \item Breusch, T. S., and Pagan, A. R. (1979), A simple test for heteroscedasticity and random coefficient variation, \emph{Econometrica}, 47,
 1287--1294.
+\item Breusch, T. S., and Pagan, A. R. (1980), The Lagrange multiplier test and its applications to model specification in econometrics,
+\emph{Review of Economic Studies}, 47, 239--253.
 \item Chow, G. C. (1960), Tests of equality between sets of coefficients in two linear regressions, \emph{Econometrica}, 28, 591--605.
 \item Cochrane, D., and Orcutt, G. H. (1949), Application of least squares regression to relationships containing auto-correlated error terms,
 \emph{Journal of the American Statistical Association}, 44, 32--61.
@@ -7766,9 +8377,12 @@ American Statistical Association}, 74, 427--431.
 \item Godfrey, L. G. (1978), Testing against general autoregressive and moving average error models when the regressors include lagged
 dependent variables, \emph{Econometrica}, 46, 1293--1301.
 \item Goldfeld, S. M., and Quandt, R. E. (1965), Some tests for homoscedasticity, \emph{Journal of the American Statistical Association}, 60, 539--547.
+\item Granger, C. W. J. (1969), Investigating causal relations by econometric models and cross-spectral methods, \emph{Econometrica}, 37, 424--438.
 \item Granger, C. W. J., and Newbold, P. (1974), Spurious regressions in econometrics, \emph{Journal of Econometrics}, 2, 111--120.
 \item Haavelmo, T. (1943), The statistical implications of a system of simultaneous equations, \emph{Econometrica}, 11, 1--12.
 \item Haavelmo, T. (1944), The probability approach in econometrics, \emph{Econometrica}, 12 (Supplement), 1--118.
+\item Harvey, A. C., and Durbin, J. (1986), The effects of seat belt legislation on British road casualties: a case study in structural time series
+modelling, \emph{Journal of the Royal Statistical Society, Series A}, 149, 187--227.
 \item Hausman, J. A. (1978), Specification tests in econometrics, \emph{Econometrica}, 46, 1251--1271.
 \item Hendry, D. F., and Mizon, G. E. (1978), Serial correlation as a convenient simplification, not a nuisance: a comment on a study of the demand
 for money by the Bank of England, \emph{Economic Journal}, 88, 549--563.
@@ -7787,6 +8401,8 @@ Relationships}, Oxford, Oxford University Press, 267--276.
 139--162.
 \item Newey, W. K., and West, K. D. (1987), A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix,
 \emph{Econometrica}, 55, 703--708.
+\item Osterwald-Lenum, M. (1992), A note with quantiles of the asymptotic distribution of the maximum likelihood cointegration rank test
+statistics, \emph{Oxford Bulletin of Economics and Statistics}, 54, 461--472.
 \item Perron, P. (1989), The great crash, the oil price shock, and the unit root hypothesis, \emph{Econometrica}, 57, 1361--1401.
 \item Phillips, P. C. B. (1986), Understanding spurious regressions in econometrics, \emph{Journal of Econometrics}, 33, 311--340.
 \item Prais, S. J., and Winsten, C. B. (1954), Trend estimators and serial correlation, Cowles Commission Discussion Paper No.~383, Chicago.
@@ -7795,11 +8411,16 @@ Statistical Society, Series B}, 31, 350--371.
 \item Said, S. E., and Dickey, D. A. (1984), Testing for unit roots in autoregressive-moving average models of unknown order, \emph{Biometrika},
 71, 599--607.
 \item Sargan, J. D. (1958), The estimation of economic relationships using instrumental variables, \emph{Econometrica}, 26, 393--415.
+\item Sims, C. A. (1980), Macroeconomics and reality, \emph{Econometrica}, 48, 1--48.
 \item Staiger, D., and Stock, J. H. (1997), Instrumental variables regression with weak instruments, \emph{Econometrica}, 65, 557--586.
 \item Stock, J. H. (1987), Asymptotic properties of least squares estimators of cointegrating vectors, \emph{Econometrica}, 55, 1035--1056.
 \item White, H. (1980), A heteroskedasticity-consistent covariance matrix estimator and a direct test for heteroskedasticity, \emph{Econometrica},
 48, 817--838.
 \item Wu, D.-M. (1973), Alternative tests of independence between stochastic regressors and disturbances, \emph{Econometrica}, 41, 733--750.
+\item Zellner, A. (1962), An efficient method of estimating seemingly unrelated regressions and tests for aggregation bias, \emph{Journal of the
+American Statistical Association}, 57, 348--368.
+\item Zellner, A., and Theil, H. (1962), Three-stage least squares: simultaneous estimation of simultaneous equations, \emph{Econometrica}, 30,
+54--78.
 \end{enumerate}
 
 \end{document}
