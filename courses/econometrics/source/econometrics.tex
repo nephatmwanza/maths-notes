@@ -7199,6 +7199,514 @@ in agreement with the scaling by $n$ in the lemma. In the stationary case $E(Y_{
 why the stationary theory gives normal limits at rate $\sqrt n$.
 \end{solution}
 
+\section{Instrumental Variables}
+\label{sec:iv}
+
+Every result so far has rested on the assumption that the regressors are uncorrelated with the disturbance. In economics that assumption fails
+routinely. Price and quantity are determined together by supply and demand; income and consumption are determined together through the national
+accounts; education is chosen by people whose unobserved ability also affects their earnings; and most economic variables are measured with error.
+In each case least squares is biased and inconsistent, and the bias does not shrink as the sample grows. The method of instrumental variables
+restores consistency by using variables that move the regressor but are unrelated to the disturbance. This section develops the method, its
+efficient form, two-stage least squares, its weaknesses, and the tests that go with it.
+
+\subsection{Endogenous regressors}
+\label{ssec:endog}
+
+A regressor is \textbf{endogenous} if it is correlated with the disturbance, and \textbf{exogenous} otherwise. In the model $Y = X\beta + U$, the least squares estimator
+satisfies
+\[
+b = \beta + \Bigl(\frac1nX'X\Bigr)^{-1}\frac1nX'U \xrightarrow{p} \beta + Q^{-1}\gamma, \qquad Q = \plim\tfrac1nX'X, \quad \gamma = \plim\tfrac1nX'U ,
+\]
+by the argument of Theorem~\ref{thm:olsconsistent}. If any element of $\gamma$ is non-zero, $b$ is inconsistent, and in general every coefficient is affected, not just
+that of the endogenous regressor. Three mechanisms produce endogeneity.
+
+\subhead{Omitted variables}
+If $Y = X\beta + W\delta + \varepsilon$ and $W$ is omitted, the disturbance is $W\delta + \varepsilon$, correlated with $X$ whenever $W$ is. This is Theorem~\ref{thm:ovb} in the language of
+endogeneity. The classic example is ability in an earnings equation: it raises earnings and is correlated with schooling, so the least squares
+return to schooling is biased upwards.
+
+\subhead{Measurement error}
+
+\begin{thm}
+\label{thm:atten}
+Let $Y_i = \alpha + \beta X_i^* + \varepsilon_i$, but suppose that $X_i^*$ is observed with error, as $X_i = X_i^* + m_i$, where $m_i$ has mean zero and variance $\sigma_m^2$ and is
+uncorrelated with $X_i^*$ and $\varepsilon_i$. Then the least squares slope of $Y$ on $X$ satisfies
+\[
+\plim b = \lambda\beta, \qquad \lambda = \frac{\sigma_*^2}{\sigma_*^2 + \sigma_m^2} ,
+\]
+where $\sigma_*^2 = \Var(X^*)$. The estimate is biased towards zero (\textbf{attenuation}), by the factor $\lambda$, the \textbf{reliability} of $X$.
+\end{thm}
+
+\begin{proof}
+In terms of the observed $X$, $Y_i = \alpha + \beta X_i + (\varepsilon_i - \beta m_i)$, and the disturbance $\varepsilon_i - \beta m_i$ is correlated with $X_i$: $\Cov(X_i, \varepsilon_i - \beta m_i) = -\beta\sigma_m^2$.
+Hence
+\[
+\plim b = \frac{\Cov(X, Y)}{\Var(X)} = \frac{\beta\Cov(X^* + m, X^*)}{\Var(X^* + m)} = \frac{\beta\sigma_*^2}{\sigma_*^2 + \sigma_m^2} .
+\]
+\end{proof}
+
+Error in the dependent variable is harmless by comparison: it adds to the disturbance and inflates the variance, but leaves least squares consistent.
+With several regressors, measurement error in one of them biases its own coefficient towards zero and contaminates the others through their
+correlation with it.
+
+\subhead{Simultaneity}
+Haavelmo's (1943) example is the simplest. Consumption depends on income, $C_t = \alpha + \beta Y_t + u_t$, and income is consumption plus investment,
+$Y_t = C_t + I_t$, where investment is determined outside the model. Solving the two equations,
+\[
+Y_t = \frac{\alpha + I_t + u_t}{1 - \beta} ,
+\]
+so a positive consumption shock raises income: $\Cov(Y_t, u_t) = \sigma_u^2/(1 - \beta)$.
+
+\begin{thm}
+\label{thm:haavelmo}
+In Haavelmo's model, with $I_t$ uncorrelated with $u_t$, the least squares estimate of the marginal propensity to consume satisfies
+\[
+\plim b = \beta + (1 - \beta)\frac{\sigma_u^2}{\sigma_I^2 + \sigma_u^2} > \beta .
+\]
+\end{thm}
+
+\begin{proof}
+$\Var(Y) = (\sigma_I^2 + \sigma_u^2)/(1 - \beta)^2$ and $\Cov(Y, u) = \sigma_u^2/(1 - \beta)$, so $\plim b - \beta = \Cov(Y, u)/\Var(Y) = (1 - \beta)\sigma_u^2/(\sigma_I^2 + \sigma_u^2)$.
+\end{proof}
+
+The bias is upward, and it is worse when consumption shocks are large relative to the variation in investment. Simultaneity is the general
+problem of the next section; here we need only its symptom, a regressor correlated with the disturbance.
+
+\subsection{The instrumental variables estimator}
+\label{ssec:ivest}
+
+\begin{defn}
+In the model $Y = X\beta + U$ with $X$ of order $n \times k$, an $n \times \ell$ matrix $Z$ of \textbf{instruments}, with $\ell \geq k$, satisfies
+\begin{enumerate}[label=(\roman*)]
+\item \emph{exogeneity}: $\plim\frac1nZ'U = 0$;
+\item \emph{relevance}: $\plim\frac1nZ'X = Q_{ZX}$ has rank $k$;
+\end{enumerate}
+together with $\plim\frac1nZ'Z = Q_{ZZ}$ positive definite. The exogenous columns of $X$, including the constant, serve as their own instruments, so $Z$
+contains them. The equation is \textbf{exactly identified} if $\ell = k$ and \textbf{overidentified} if $\ell > k$.
+\end{defn}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[v/.style={circle,draw,thick,minimum size=9mm,font=\small},>={Stealth[length=2.5mm]}]
+\fill[blue!5,rounded corners=4pt] (-1.2,-1.9) rectangle (8.2,2.3);
+\node[v,fill=green!15] (Z) at (0,0) {$Z$};
+\node[v,fill=orange!15] (X) at (3.5,0) {$X$};
+\node[v,fill=blue!12] (Y) at (7,0) {$Y$};
+\node[v,dashed,fill=red!8] (U) at (5.25,1.6) {$U$};
+\draw[->,thick,green!40!black] (Z) -- node[below,font=\scriptsize] {relevance} (X);
+\draw[->,thick] (X) -- node[below,font=\scriptsize] {$\beta$} (Y);
+\draw[->,thick,red!60!black] (U) -- (X);
+\draw[->,thick,red!60!black] (U) -- (Y);
+\draw[red!60!black,dotted,thick] (Z) -- node[pos=0.45,above,sloped,font=\scriptsize] {$\times$ no link: exogeneity} (U);
+\draw[gray!70!black,dotted,thick] (Z) to[bend right=30] node[pos=0.5,below,font=\scriptsize] {$\times$ no direct effect} (Y);
+\end{tikzpicture}
+\caption{The logic of an instrument. $U$ affects both $X$ and $Y$, so the association between them mixes $\beta$ with the effect of $U$. The instrument $Z$
+moves $X$ but is unrelated to $U$ and affects $Y$ only through $X$; the part of the variation in $X$ that comes from $Z$ is therefore free of $U$, and
+identifies $\beta$.}
+\label{fig:ivlogic}
+\end{figure}
+
+Condition (ii) for $\ell = k$ says that $Z'X$ is non-singular; it requires at least as many excluded instruments as endogenous regressors (the
+\textbf{order condition}), and that they be correlated with the endogenous regressors in a non-degenerate way (the \textbf{rank condition}).
+
+\begin{thm}
+\label{thm:ivest}
+If $\ell = k$, the \textbf{instrumental variables} (IV) estimator
+\[
+b_{\text{IV}} = (Z'X)^{-1}Z'Y
+\]
+is consistent for $\beta$. If moreover the rows $(z_i', u_i)$ are independent with $E(u_i^2 \mid z_i) = \sigma^2$, then
+\[
+\sqrt n(b_{\text{IV}} - \beta) \xrightarrow{d} N\bigl(0,\ \sigma^2Q_{ZX}^{-1}Q_{ZZ}Q_{XZ}^{-1}\bigr), \qquad Q_{XZ} = Q_{ZX}' ,
+\]
+and $\sigma^2$ is estimated consistently by $s^2 = \hat u'\hat u/(n - k)$ with $\hat u = Y - Xb_{\text{IV}}$.
+\end{thm}
+
+\begin{proof}
+$b_{\text{IV}} = (Z'X)^{-1}Z'(X\beta + U) = \beta + \bigl(\frac1nZ'X\bigr)^{-1}\frac1nZ'U$. The first factor converges to $Q_{ZX}^{-1}$ and the second to zero, so $b_{\text{IV}} \xrightarrow{p} \beta$
+by Slutsky's theorem. For the distribution, $\frac{1}{\sqrt n}Z'U = \frac{1}{\sqrt n}\sum z_iu_i$ is a scaled sum of independent vectors with mean zero and variance
+$E(u_i^2z_iz_i') = \sigma^2E(z_iz_i')$, so it converges to $N(0, \sigma^2Q_{ZZ})$ by the central limit theorem. Multiplying by $Q_{ZX}^{-1}$ gives the stated variance. For $s^2$,
+$\hat u = U - X(b_{\text{IV}} - \beta)$, and $\frac1n\hat u'\hat u = \frac1nU'U - 2\frac1nU'X(b_{\text{IV}} - \beta) + (b_{\text{IV}} - \beta)'\frac1nX'X(b_{\text{IV}} - \beta) \xrightarrow{p} \sigma^2$, since $b_{\text{IV}} - \beta \xrightarrow{p} 0$.
+\end{proof}
+
+In the two-variable case with a single instrument, in deviations,
+\[
+b_{\text{IV}} = \frac{\sum z_iy_i}{\sum z_ix_i}, \qquad \frac{\text{asymptotic variance of } b_{\text{IV}}}{\text{asymptotic variance of } b} = \frac{1}{r_{xz}^2},
+\]
+where $r_{xz}$ is the correlation between $x$ and $z$, when both estimators are consistent. The price of consistency is precision, and it is high
+when the instrument is only weakly correlated with the regressor: with $r_{xz} = 0.3$ the IV standard error is more than three times that of least
+squares.
+
+\begin{exa}
+\label{ex:wald}
+With a binary instrument $z_i \in \{0, 1\}$, the IV slope is the \textbf{Wald estimator}
+\[
+b_{\text{IV}} = \frac{\bar y_1 - \bar y_0}{\bar x_1 - \bar x_0},
+\]
+the difference in mean outcomes between the two instrument groups divided by the difference in mean regressor. (In deviations
+$\sum(z_i - \bar z)y_i = n_1(\bar y_1 - \bar y)$ and $\bar y_1 - \bar y = \frac{n_0}{n}(\bar y_1 - \bar y_0)$, and likewise for $x$.) Angrist (1990) used the Vietnam draft lottery as
+the instrument for military service. With illustrative round numbers: if men with low lottery numbers earned \$900 less a year and were $16$ percentage points more likely to have
+served, the IV estimate of the effect of service is $-900/0.16 = -\$5\,625$ a year. The instrument is credible because the lottery number was random,
+and so unrelated to anything else that affects earnings.
+\end{exa}
+
+\subsection{Two-stage least squares}
+\label{ssec:tsls}
+
+With more instruments than regressors, $Z'X$ is not square, and there are many ways to combine the instruments. The best, under
+homoscedasticity, is to use the fitted values from the regression of $X$ on $Z$.
+
+\begin{thm}
+\label{thm:tsls}
+Let $P_Z = Z(Z'Z)^{-1}Z'$ and $\hat X = P_ZX$. The \textbf{two-stage least squares} (2SLS) estimator is
+\[
+b_{\text{2SLS}} = (\hat X'X)^{-1}\hat X'Y = (X'P_ZX)^{-1}X'P_ZY .
+\]
+\begin{enumerate}[label=(\roman*)]
+\item It is the least squares coefficient in the regression of $Y$ on $\hat X$ (the ``second stage''), and it equals $b_{\text{IV}}$ when $\ell = k$.
+\item Under the conditions of Theorem~\ref{thm:ivest}, $\sqrt n(b_{\text{2SLS}} - \beta) \xrightarrow{d} N\bigl(0,\ \sigma^2(Q_{XZ}Q_{ZZ}^{-1}Q_{ZX})^{-1}\bigr)$, estimated by $s^2(\hat X'\hat X)^{-1}$
+with $s^2$ computed from $Y - Xb_{\text{2SLS}}$.
+\item Among all IV estimators that use $k$ linear combinations $ZA$ of the instruments, 2SLS has the smallest asymptotic variance.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $P_Z$ is symmetric and idempotent, so $\hat X'\hat X = X'P_ZX = \hat X'X$, and the least squares coefficient of $Y$ on $\hat X$ is $(\hat X'\hat X)^{-1}\hat X'Y = b_{\text{2SLS}}$. If $\ell = k$, $Z'X$ is
+square and invertible, and
+\begin{align*}
+\bigl(X'Z(Z'Z)^{-1}Z'X\bigr)^{-1}X'Z(Z'Z)^{-1}Z'Y &= (Z'X)^{-1}(Z'Z)(X'Z)^{-1}X'Z(Z'Z)^{-1}Z'Y\\
+&= (Z'X)^{-1}Z'Y .
+\end{align*}
+
+(ii) $b_{\text{2SLS}}$ is the IV estimator of Theorem~\ref{thm:ivest} with the $k$ instruments $\hat X$. Writing $\hat X = Z\hat\Pi$ with $\hat\Pi = (Z'Z)^{-1}Z'X \xrightarrow{p} Q_{ZZ}^{-1}Q_{ZX}$, its
+asymptotic variance is $\sigma^2(\Pi'Q_{ZX})^{-1}\Pi'Q_{ZZ}\Pi(Q_{XZ}\Pi)^{-1}$ with $\Pi = Q_{ZZ}^{-1}Q_{ZX}$, and substituting gives $\sigma^2(Q_{XZ}Q_{ZZ}^{-1}Q_{ZX})^{-1}$.
+
+(iii) With instruments $W = ZA$, the IV estimator has asymptotic variance $\sigma^2$ times the probability limit of
+$n(W'X)^{-1}W'W(X'W)^{-1} = n(X'P_WX)^{-1}$, where $P_W$ is the projection on the columns of $W$. Since the columns of $W$ lie in the column space of $Z$,
+$P_Z - P_W$ is the projection on the part of that space orthogonal to $W$, and is positive semi-definite. Hence $X'P_ZX - X'P_WX$ is psd, and so
+$(X'P_WX)^{-1} - (X'P_ZX)^{-1}$ is psd, by the rule that $A - B$ psd implies $B^{-1} - A^{-1}$ psd for positive definite $A$ and $B$.
+\end{proof}
+
+The name describes the computation: regress each endogenous regressor on all the instruments, then regress $Y$ on the fitted values. But running the
+second stage by hand gives the wrong standard errors. Its residuals are $Y - \hat Xb$, not $Y - Xb$, and they estimate the wrong variance;
+Software~\ref{sw:market} shows the error. The first stage also has diagnostic value: its $F$ statistic for the excluded instruments measures how
+strongly they move the endogenous regressor.
+
+\subhead{Weak instruments}
+The asymptotic theory can be a poor guide in finite samples when the instruments are only weakly correlated with the regressor. 2SLS is then
+biased towards least squares; with $\ell$ excluded instruments and a first-stage $F$ statistic $F$, the bias of 2SLS relative to that of least squares is
+roughly $1/F$. The standard errors are too small, and $t$ tests over-reject. In the exactly identified case the IV estimator has no finite mean at all,
+and its distribution has very fat tails. Staiger and Stock (1997) proposed the rule of thumb that the first-stage $F$ should exceed $10$; Bound, Jaeger and
+Baker (1995) showed that a famous study using quarter of birth as an instrument for schooling gave estimates close to least squares even with
+random instruments. Software~\ref{sw:weakiv} illustrates both effects. A weak instrument is worse than useless if it is also slightly
+endogenous: the inconsistency of IV is $\plim\frac1n z'u/\plim\frac1n z'x$, and a small denominator magnifies a small numerator.
+
+\subsection{Testing endogeneity and instrument validity}
+\label{ssec:ivtests}
+
+\subhead{The Hausman test}
+If $X$ is in fact exogenous, both least squares and IV are consistent, and least squares is more efficient. If $X$ is endogenous, only IV is consistent.
+Hausman (1978) proposed testing exogeneity by comparing the two.
+
+\begin{lem}
+\label{lem:hausman}
+Let $\hat\beta_E$ be asymptotically efficient and $\hat\beta_C$ consistent, both asymptotically normal under $H_0$. Then the difference $q = \hat\beta_C - \hat\beta_E$ is
+asymptotically uncorrelated with $\hat\beta_E$, and $\Var(q) = \Var(\hat\beta_C) - \Var(\hat\beta_E)$ asymptotically.
+\end{lem}
+
+\begin{proof}
+Suppose $\Cov(\hat\beta_E, q) = C \neq 0$. For any matrix $A$ the estimator $\hat\beta_E + Aq$ is consistent, with variance $\Var(\hat\beta_E) + AC' + CA' + A\Var(q)A'$. Taking
+$A = -tC\Var(q)^{-1}$ with a small $t > 0$ gives $\Var(\hat\beta_E) - 2tC\Var(q)^{-1}C' + t^2C\Var(q)^{-1}C'$, which for small $t$ is smaller than $\Var(\hat\beta_E)$ by a
+non-zero psd matrix, contradicting efficiency. So $C = 0$, and then $\Var(\hat\beta_C) = \Var(\hat\beta_E + q) = \Var(\hat\beta_E) + \Var(q)$.
+\end{proof}
+
+\begin{thm}[Hausman]
+\label{thm:hausman}
+Under $H_0$ that $X$ is exogenous, with homoscedastic disturbances,
+\[
+H = (b_{\text{IV}} - b)'\bigl[\widehat\Var(b_{\text{IV}}) - \widehat\Var(b)\bigr]^{-1}(b_{\text{IV}} - b) \xrightarrow{d} \chi^2_q,
+\]
+where $q$ is the number of endogenous regressors being tested (a generalised inverse is used if the matrix is singular). Equivalently, let $\hat V = M_ZX_1$ be the first-stage residuals for the suspect regressors $X_1$; then the
+least squares coefficient of $X$ in the regression of $Y$ on $X$ and $\hat V$ equals $b_{\text{2SLS}}$, and the Wald test of the coefficients of $\hat V$ is asymptotically equivalent
+to $H$.
+\end{thm}
+
+\begin{proof}
+The $\chi^2$ limit follows from Lemma~\ref{lem:hausman}, with $b$ efficient under $H_0$ by the Gauss--Markov theorem, and the quadratic-form result of
+Theorem~\ref{thm:qf1}. For the regression form, take one suspect regressor and write $X = [X_1\ X_2]$, with $X_2$ exogenous and included in $Z$. By the
+Frisch--Waugh--Lovell Theorem~\ref{thm:fwl}, the coefficients of $X$ in the regression of $Y$ on $X$ and $\hat V$ are those of the regression of $M_{\hat V}Y$ on $M_{\hat V}X$.
+Now $\hat V'X_1 = X_1'M_ZX_1 = \hat V'\hat V$ and $\hat V'X_2 = 0$, so $M_{\hat V}X_1 = X_1 - \hat V = P_ZX_1$ and $M_{\hat V}X_2 = X_2 = P_ZX_2$: $M_{\hat V}X = \hat X$. Since $\hat X'\hat V = 0$,
+$\hat X'M_{\hat V}Y = \hat X'Y$, and the coefficient is $(\hat X'\hat X)^{-1}\hat X'Y = b_{\text{2SLS}}$. The coefficient of $\hat V$ measures how far least squares departs from 2SLS, and a
+zero coefficient means that the two coincide.
+\end{proof}
+
+The regression form, often called the Durbin--Wu--Hausman or \textbf{control function} test, is easy to run and to make robust to
+heteroscedasticity, by using robust standard errors for the coefficient of $\hat V$. The intuition is attractive: $\hat V$ is the part of $X_1$ not explained by
+the instruments, the part suspected of being correlated with $U$. If it has no explanatory power for $Y$, there is no evidence of endogeneity.
+
+\subhead{The Sargan test of overidentifying restrictions}
+Exogeneity of the instruments cannot be tested when the equation is exactly identified: the IV residuals are orthogonal to $Z$ by construction.
+With $\ell > k$ there are $\ell - k$ surplus restrictions, and they can be tested.
+
+\begin{thm}[Sargan]
+\label{thm:sargan}
+Let $\hat u$ be the 2SLS residuals. Under the hypothesis that all the instruments are exogenous, with homoscedastic disturbances,
+\[
+S = nR^2 \xrightarrow{d} \chi^2_{\ell - k},
+\]
+where $R^2$ is from the regression of $\hat u$ on $Z$.
+\end{thm}
+
+\begin{proof}[Sketch of proof]
+$S = \hat u'P_Z\hat u/(\hat u'\hat u/n)$. Writing $\hat u = U - X(b_{\text{2SLS}} - \beta)$ and substituting the expression for $b_{\text{2SLS}} - \beta$ shows that, asymptotically,
+$P_Z\hat u/\sigma$ behaves like $(P_Z - P_{\hat X})U/\sigma$. Since $\hat X$ lies in the column space of $Z$, $P_Z - P_{\hat X}$ is a projection of rank $\ell - k$, and the quadratic
+form in $U/\sigma$ is asymptotically $\chi^2_{\ell - k}$ by Theorem~\ref{thm:qf1}, the asymptotic normality of $\frac{1}{\sqrt n}Z'U$ taking the place of exact normality.
+\end{proof}
+
+The test has a serious limitation: it can only detect instruments that disagree with each other. If all the instruments are invalid in the same
+way, they agree, the test does not reject, and all the estimates are wrong together. A rejection says that at least one instrument is invalid,
+without saying which. In the end the case for an instrument rests on economic argument: why should it affect $Y$ only through $X$?
+
+\subsection{Instrumental variables in software}
+\label{ssec:software13}
+
+The function \texttt{tsls} below computes 2SLS with the correct standard errors and returns the residuals $Y - Xb$; it is used in all four panels.
+
+\begin{software}[Simultaneity in a market, and the second-stage trap]
+\label{sw:market}
+A market with demand $q = 100 - 2p + u_d$ and supply $q = 20 + 3p - 4w + u_s$, where $w$ shifts supply (weather, or input costs) but not demand, so it
+is a valid instrument for price in the demand equation:
+{\small\begin{verbatim}
+> tsls <- function(y, X, Z) {               # 2SLS with correct standard errors
++   Xh <- Z %*% solve(crossprod(Z), crossprod(Z, X))
++   b <- solve(crossprod(Xh), crossprod(Xh, y))
++   u <- y - X %*% b; s2 <- sum(u^2) / (length(y) - ncol(X))
++   list(b = drop(b), se = sqrt(diag(s2 * solve(crossprod(Xh)))), u = drop(u))
++ }
+> set.seed(4); n <- 200
+> w  <- rnorm(n, 5, 1)                      # cost shifter (weather)
+> ud <- rnorm(n, 0, 4); us <- rnorm(n, 0, 4)
+> p  <- (80 + 4 * w + ud - us) / 5          # equilibrium price
+> q  <- 100 - 2 * p + ud                    # demand: slope -2
+> X <- cbind(1, p); Z <- cbind(1, w)
+> iv <- tsls(q, X, Z)
+> naive <- lm(q ~ fitted(lm(p ~ w)))        # second stage by hand
+> rbind(OLS = coef(summary(lm(q ~ p)))[2, 1:2], IV = c(iv$b[2], iv$se[2]),
++       naive2nd = coef(summary(naive))[2, 1:2])
+           Estimate Std. Error
+OLS      -0.3910552  0.1727943
+IV       -1.9211272  0.3387597
+naive2nd -1.9211272  0.2563027
+\end{verbatim}}
+\textbf{Reading the output.} Least squares estimates the demand slope as $-0.39$, nowhere near the true $-2$: price is correlated with the demand shock,
+because a positive $u_d$ raises the equilibrium price, so the regression traces out a mixture of the demand and supply curves. Its probability limit,
+from the variances of the simulated shocks, is $-2 + \Cov(p, u_d)/\Var(p) = -2 + 3.2/1.92 = -0.33$. IV recovers $-1.92$. The second stage run by hand gives the
+same estimate but a standard error of $0.256$ instead of the correct $0.339$: it understates the uncertainty by a quarter, because it computes the
+residuals from $\hat p$ instead of $p$.
+
+\textbf{Stata:} \texttt{ivregress 2sls q (p = w)}, with \texttt{estat firststage} for the first stage. \textbf{EViews:} \texttt{tsls q c p @ c w}, the instruments listed after \texttt{@}.
+\end{software}
+
+\begin{software}[Weak instruments]
+\label{sw:weakiv}
+$2000$ samples of size $100$ from $y = x + u$, $x = \pi(z_1 + \dots + z_5) + v$ with $\Corr(u, v) = 0.5$, for five values of the first-stage coefficient $\pi$:
+{\small\begin{verbatim}
+> set.seed(5)
+> weak <- function(pi, n = 100, l = 5, R = 2000) {
++   r <- replicate(R, {
++     Z <- matrix(rnorm(n * l), n); v <- rnorm(n)
++     u <- 0.5 * v + sqrt(0.75) * rnorm(n)  # Corr(u, v) = 0.5
++     x <- Z %*% rep(pi, l) + v; y <- x + u # true beta = 1
++     fs <- lm(x ~ Z); F <- summary(fs)$fstatistic[1]
++     xh <- fitted(fs); b <- sum(xh * y) / sum(xh * x)
++     e <- y - b * x; se <- sqrt(sum(e^2) / (n - 1) / sum(xh^2))
++     c(ols = sum(x * y) / sum(x^2), tsls = b, F = F,
++       reject = abs((b - 1) / se) > 1.96)
++   })
++   rowMeans(r)
++ }
+> tab <- sapply(c(0.02, 0.05, 0.1, 0.2, 0.5), weak)
+> colnames(tab) <- paste0("pi=", c(0.02, 0.05, 0.1, 0.2, 0.5)); round(tab, 3)
+        pi=0.02 pi=0.05 pi=0.1 pi=0.2 pi=0.5
+ols       1.499   1.495  1.476  1.418  1.222
+tsls      1.479   1.409  1.255  1.098  1.015
+F.value   1.030   1.263  2.075  5.150 26.328
+reject    0.228   0.223  0.166  0.116  0.066
+\end{verbatim}}
+\textbf{Reading the output.} The rows give the mean least squares and 2SLS estimates (the truth is $1$), the mean first-stage $F$, and the rejection rate of
+a nominal $5\%$ $t$ test of the true value. With $\pi = 0.02$, $F \approx 1$ and 2SLS, at $1.48$, is no better than least squares at $1.50$; the $t$ test rejects the truth $23\%$ of
+the time. As the instruments strengthen, the bias falls roughly as $1/F$: with $F = 5.2$ the 2SLS bias is $0.098$, about a quarter of the least squares bias $0.418$,
+and with $F = 26$ it is $0.015$, and the test is close to its nominal size. The rule $F > 10$ is the boundary between these regimes.
+
+\textbf{Stata:} \texttt{estat firststage} reports the $F$ and the Stock--Yogo critical values. \textbf{EViews:} \emph{View $\to$ IV Diagnostics $\to$ Weak
+Instrument Diagnostics}.
+\end{software}
+
+\begin{software}[Measurement error and the Hausman test]
+\label{sw:survey}
+The \texttt{survey} data in R's recommended package \texttt{MASS} record, for $237$ statistics students, their height in centimetres and the spans of the writing
+and non-writing hands. Each span measures the same thing, hand size, with error. Regress height on the writing-hand span, using the other span as
+the instrument, in the spirit of Theorem~\ref{thm:atten}:
+{\small\begin{verbatim}
+> library(MASS)
+> d <- na.omit(survey[, c("Height", "Wr.Hnd", "NW.Hnd", "Sex")]); n <- nrow(d)
+> y <- d$Height; X <- cbind(1, d$Wr.Hnd)
+> ols <- lm(Height ~ Wr.Hnd, data = d)
+> iv1 <- tsls(y, X, cbind(1, d$NW.Hnd))
+> c(n = n, F.first = summary(lm(Wr.Hnd ~ NW.Hnd, data = d))$fstatistic[[1]])
+       n  F.first 
+ 207.000 2637.647 
+> rbind(OLS = coef(summary(ols))[2, 1:2], IV = c(iv1$b[2], iv1$se[2]))
+    Estimate Std. Error
+OLS 3.121788  0.2895470
+IV  3.147388  0.3005942
+> H <- unname((iv1$b[2] - coef(ols)[2])^2 /
++             (iv1$se[2]^2 - vcov(ols)[2, 2]))  # Hausman
+> v <- resid(lm(Wr.Hnd ~ NW.Hnd, data = d))  # control-function form
+> c(H = H, p = pchisq(H, 1, lower.tail = FALSE),
++   t.v = coef(summary(lm(Height ~ Wr.Hnd + v, data = d)))["v", 3])
+         H          p        t.v 
+ 0.1005195  0.7512071 -0.3164351 
+\end{verbatim}}
+\textbf{Reading the output.} With $207$ complete records, the first-stage $F$ is $2638$: the two spans have correlation $0.96$, so the instrument is very strong. The
+IV slope, $3.15$ cm of height per cm of span, is barely above the least squares $3.12$. The reliability of the writing-hand span, estimated by
+$\Cov(X, Z)/\Var(X) = 1.00$, says that the hands were measured accurately, and Theorem~\ref{thm:atten} then predicts almost no attenuation. The Hausman statistic is
+$0.10$ ($p = 0.75$), and the control-function $t$ ratio is $-0.316$, whose square is the same $0.10$, as Theorem~\ref{thm:hausman} says. Exogeneity is not rejected, and least
+squares, with its smaller standard error, is preferred. IV is a remedy for a problem that must first be shown to exist.
+
+\textbf{Stata:} \texttt{ivregress 2sls Height (Wr\_Hnd = NW\_Hnd)}, then \texttt{estat endogenous}. \textbf{EViews:} \emph{View $\to$ IV Diagnostics $\to$ Regressor
+Endogeneity Test}.
+\end{software}
+
+\begin{software}[An invalid instrument and the Sargan test]
+\label{sw:sargan}
+Add sex as a second instrument. It is certainly relevant, since men have larger hands, but it is not valid, because sex affects height directly,
+over and above hand size:
+{\small\begin{verbatim}
+> Z2 <- cbind(1, d$NW.Hnd, d$Sex == "Male")   # add Sex as a second instrument
+> iv2 <- tsls(y, X, Z2)
+> S <- n * summary(lm(iv2$u ~ Z2[, -1]))$r.squared
+> c(b = iv2$b[2], Sargan = S, p = pchisq(S, 1, lower.tail = FALSE))
+           b       Sargan            p 
+3.172708e+00 4.716980e+01 6.509561e-12 
+> coef(summary(lm(Height ~ Wr.Hnd + Sex, data = d)))[, 1:2]
+              Estimate Std. Error
+(Intercept) 137.686951  5.7131129
+Wr.Hnd        1.594446  0.3229395
+SexMale       9.489814  1.2286579
+\end{verbatim}}
+\textbf{Reading the output.} The Sargan statistic is $47.2$ on $\ell - k = 1$ degree of freedom, $p \approx 10^{-11}$: the two instruments disagree decisively. The last regression
+shows why: holding hand span fixed, men are $9.5$ cm taller, so sex belongs in the equation, and the disturbance of the equation without it is correlated
+with sex. Here the test identifies the culprit because we know which instrument is the doubtful one; in general it does not. Including sex as a
+regressor and using the other hand's span as the instrument would give a valid, exactly identified estimate.
+
+\textbf{Stata:} \texttt{estat overid} after \texttt{ivregress}. \textbf{EViews:} the $J$-statistic is printed with every \texttt{tsls} output, and
+\emph{View $\to$ IV Diagnostics $\to$ Instrument Orthogonality Test} tests subsets.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+A survey measures household income with error. The variance of true income is $36$ and the variance of the measurement error is $12$. The
+true marginal propensity to spend on food is $0.15$.
+\begin{enumerate}[label=(\alph*)]
+\item Find the probability limit of the least squares estimate.
+\item A second, independent measurement of income is available. Explain how to use it to obtain a consistent estimate.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) By Theorem~\ref{thm:atten}, $\lambda = 36/(36 + 12) = 0.75$, so $\plim b = 0.75 \times 0.15 = 0.1125$.
+
+(b) Use the second measurement $Z$ as an instrument for the first. It is correlated with true income, so it is relevant, and its error is
+independent of the first measurement's error and of the disturbance, so it is uncorrelated with $\varepsilon - \beta m$. Then $b_{\text{IV}} = \sum zy/\sum zx \xrightarrow{p} 0.15$.
+\end{solution}
+
+\begin{problem}
+In Haavelmo's model $C_t = \alpha + \beta Y_t + u_t$, $Y_t = C_t + I_t$, suppose $\beta = 0.8$, $\sigma_u^2 = 4$ and $\sigma_I^2 = 36$.
+\begin{enumerate}[label=(\alph*)]
+\item Find the probability limit of the least squares estimate of $\beta$.
+\item Show that IV with $I_t$ as the instrument is consistent, and write the estimator.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) By Theorem~\ref{thm:haavelmo}, $\plim b = 0.8 + 0.2 \times 4/40 = 0.82$.
+
+(b) $I_t$ is uncorrelated with $u_t$ by assumption and correlated with $Y_t$ through $Y_t = (\alpha + I_t + u_t)/(1 - \beta)$. So $b_{\text{IV}} = \sum i_tc_t/\sum i_ty_t$, in deviations, and
+$\plim b_{\text{IV}} = \Cov(I, C)/\Cov(I, Y)$. Since $C = Y - I$, $\Cov(I, C) = \Cov(I, Y) - \sigma_I^2$, with $\Cov(I, Y) = \sigma_I^2/(1 - \beta)$, so $\plim b_{\text{IV}} = 1 - (1 - \beta) = \beta$.
+\end{solution}
+
+\begin{problem}
+For five observations $z = (1, 2, 3, 4, 5)$, $x = (2, 3, 5, 4, 6)$ and $y = (4, 5, 9, 8, 11)$, compute the least squares and IV estimates of the slope and
+intercept in $y = \alpha + \beta x + u$, with $z$ as the instrument for $x$.
+\end{problem}
+
+\begin{solution}
+The means are $\bar z = 3$, $\bar x = 4$ and $\bar y = 7.4$. In deviations, $\sum zx = 9$, $\sum zy = 17$, $\sum x^2 = 10$ and $\sum xy = 18$. So $b = 18/10 = 1.8$ with intercept
+$7.4 - 1.8(4) = 0.2$, and $b_{\text{IV}} = 17/9 = 1.889$ with intercept $7.4 - 1.889(4) = -0.156$. Both lines pass through the means; they differ in the slope, which IV computes from the
+covariation with $z$ instead of with $x$ itself.
+\end{solution}
+
+\begin{problem}
+An earnings equation $\log w = \beta_1 + \beta_2S + \beta_3\text{exper} + \beta_4\text{exper}^2 + u$ is estimated with schooling $S$ treated as endogenous. Instruments available are
+parents' education (two variables) and distance to the nearest college.
+\begin{enumerate}[label=(\alph*)]
+\item Is the equation identified? How many overidentifying restrictions are there?
+\item Least squares gives $\hat\beta_2 = 0.074$ (s.e. $0.004$) and 2SLS gives $0.101$ (s.e. $0.013$). Carry out the Hausman test.
+\item The Sargan statistic is $6.9$. What do you conclude, and what are the limits of the conclusion?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) There is one endogenous regressor and three excluded instruments, so the order condition holds with $\ell - k = 2$ overidentifying restrictions.
+(Experience and its square are treated as exogenous and are their own instruments.) The rank condition requires the instruments to be jointly
+significant in the first stage.
+
+(b) $H = (0.101 - 0.074)^2/(0.013^2 - 0.004^2) = 0.000729/0.000153 = 4.76$, which exceeds the $\chi^2_1$ $5\%$ point $3.84$: exogeneity of schooling is rejected at $5\%$ (but not at $1\%$,
+$6.63$).
+
+(c) Against $\chi^2_2$, with $5\%$ point $5.99$ and $1\%$ point $9.21$, the overidentifying restrictions are rejected at $5\%$ but not at $1\%$: there is some evidence that at
+least one instrument is invalid. Parents' education may affect earnings directly, through networks or inherited ability, and so is suspect. But
+the test cannot say which instrument is at fault, and it would not detect a problem common to all three.
+\end{solution}
+
+\begin{problem}
+Prove the Wald estimator formula of Example~\ref{ex:wald}: with a binary instrument, $b_{\text{IV}} = (\bar y_1 - \bar y_0)/(\bar x_1 - \bar x_0)$. In a study, the $n_1$ people with $z = 1$ have mean
+outcome $12.4$ and mean regressor $14.1$, and the $n_0$ people with $z = 0$ have $11.2$ and $12.6$. Find $b_{\text{IV}}$.
+\end{problem}
+
+\begin{solution}
+With $\bar z = n_1/n$,
+\begin{align*}
+\sum(z_i - \bar z)y_i &= \sum_{z_i = 1}y_i - \bar z\sum y_i = n_1\bar y_1 - \frac{n_1}{n}(n_1\bar y_1 + n_0\bar y_0)\\
+&= \frac{n_1n_0}{n}(\bar y_1 - \bar y_0) .
+\end{align*}
+The same calculation for $x$ gives
+$\frac{n_1n_0}{n}(\bar x_1 - \bar x_0)$, and the ratio is the Wald estimator. Here $b_{\text{IV}} = (12.4 - 11.2)/(14.1 - 12.6) = 1.2/1.5 = 0.8$.
+\end{solution}
+
+\begin{problem}
+\label{prob:secondstage}
+In the model $y = \beta x + u$ with one endogenous regressor and first stage $x = \pi z + v$, let $b$ be the 2SLS estimate, $\hat x = \hat\pi z$ and $\hat v = x - \hat x$.
+\begin{enumerate}[label=(\alph*)]
+\item Show that the second-stage residuals are $y - \hat xb = \hat u + \hat vb$, where $\hat u = y - xb$.
+\item Find the probability limit of $\frac1n\sum(y_i - \hat x_ib)^2$, and explain why the second stage run by hand gives the wrong standard error.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $y - \hat xb = (y - xb) + (x - \hat x)b = \hat u + \hat vb$.
+
+(b) As $n \to \infty$, $b \to \beta$, $\hat\pi \to \pi$, $\hat u_i$ behaves like $u_i$ and $\hat v_i$ like $v_i$, so
+\[
+\frac1n\sum(y_i - \hat x_ib)^2 \xrightarrow{p} E(u + \beta v)^2 = \sigma_u^2 + 2\beta\sigma_{uv} + \beta^2\sigma_v^2 .
+\]
+This is the variance of $u + \beta v = y - \beta\pi z$, the disturbance of the reduced form, not $\sigma_u^2$. The hand-run second stage therefore uses the wrong
+residual variance; the right one uses $\hat u = y - xb$, because the structural disturbance is defined with the actual regressor $x$. In
+Software~\ref{sw:market} the error made the standard error a quarter too small, but it can go either way, depending on the sign of $\sigma_{uv}$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -7225,10 +7733,16 @@ why the stationary theory gives normal limits at rate $\sqrt n$.
 \subhead{Further reading}
 \begin{enumerate}
 \item Aitken, A. C. (1935), On least squares and linear combination of observations, \emph{Proceedings of the Royal Society of Edinburgh}, 55, 42--48.
+\item Angrist, J. D. (1990), Lifetime earnings and the Vietnam era draft lottery: evidence from Social Security administrative records,
+\emph{American Economic Review}, 80, 313--336.
+\item Angrist, J. D., and Krueger, A. B. (1991), Does compulsory school attendance affect schooling and earnings?, \emph{Quarterly Journal of
+Economics}, 106, 979--1014.
 \item Angrist, J. D., and Pischke, J.-S. (2009), \emph{Mostly Harmless Econometrics}, Princeton, Princeton University Press.
 \item Anscombe, F. J. (1973), Graphs in statistical analysis, \emph{The American Statistician}, 27, 17--21.
 \item Belsley, D. A., Kuh, E., and Welsch, R. E. (1980), \emph{Regression Diagnostics}, New York, Wiley.
 \item Bollerslev, T. (1986), Generalized autoregressive conditional heteroskedasticity, \emph{Journal of Econometrics}, 31, 307--327.
+\item Bound, J., Jaeger, D. A., and Baker, R. M. (1995), Problems with instrumental variables estimation when the correlation between the
+instruments and the endogenous explanatory variable is weak, \emph{Journal of the American Statistical Association}, 90, 443--450.
 \item Box, G. E. P., and Jenkins, G. M. (1976), \emph{Time Series Analysis: Forecasting and Control} (revised ed.), San Francisco, Holden-Day.
 \item Breusch, T. S. (1978), Testing for autocorrelation in dynamic linear models, \emph{Australian Economic Papers}, 17, 334--355.
 \item Breusch, T. S., and Pagan, A. R. (1979), A simple test for heteroscedasticity and random coefficient variation, \emph{Econometrica}, 47,
@@ -7238,6 +7752,7 @@ why the stationary theory gives normal limits at rate $\sqrt n$.
 \emph{Journal of the American Statistical Association}, 44, 32--61.
 \item Dickey, D. A., and Fuller, W. A. (1979), Distribution of the estimators for autoregressive time series with a unit root, \emph{Journal of the
 American Statistical Association}, 74, 427--431.
+\item Durbin, J. (1954), Errors in variables, \emph{Review of the International Statistical Institute}, 22, 23--32.
 \item Durbin, J. (1970), Testing for serial correlation in least-squares regression when some of the regressors are lagged dependent variables,
 \emph{Econometrica}, 38, 410--421.
 \item Durbin, J., and Watson, G. S. (1950, 1951), Testing for serial correlation in least squares regression, I and II, \emph{Biometrika}, 37,
@@ -7252,7 +7767,9 @@ American Statistical Association}, 74, 427--431.
 dependent variables, \emph{Econometrica}, 46, 1293--1301.
 \item Goldfeld, S. M., and Quandt, R. E. (1965), Some tests for homoscedasticity, \emph{Journal of the American Statistical Association}, 60, 539--547.
 \item Granger, C. W. J., and Newbold, P. (1974), Spurious regressions in econometrics, \emph{Journal of Econometrics}, 2, 111--120.
+\item Haavelmo, T. (1943), The statistical implications of a system of simultaneous equations, \emph{Econometrica}, 11, 1--12.
 \item Haavelmo, T. (1944), The probability approach in econometrics, \emph{Econometrica}, 12 (Supplement), 1--118.
+\item Hausman, J. A. (1978), Specification tests in econometrics, \emph{Econometrica}, 46, 1251--1271.
 \item Hendry, D. F., and Mizon, G. E. (1978), Serial correlation as a convenient simplification, not a nuisance: a comment on a study of the demand
 for money by the Bank of England, \emph{Economic Journal}, 88, 549--563.
 \item Hildreth, C., and Lu, J. Y. (1960), Demand relations with autocorrelated disturbances, Technical Bulletin 276, Michigan State University
@@ -7277,9 +7794,12 @@ Relationships}, Oxford, Oxford University Press, 267--276.
 Statistical Society, Series B}, 31, 350--371.
 \item Said, S. E., and Dickey, D. A. (1984), Testing for unit roots in autoregressive-moving average models of unknown order, \emph{Biometrika},
 71, 599--607.
+\item Sargan, J. D. (1958), The estimation of economic relationships using instrumental variables, \emph{Econometrica}, 26, 393--415.
+\item Staiger, D., and Stock, J. H. (1997), Instrumental variables regression with weak instruments, \emph{Econometrica}, 65, 557--586.
 \item Stock, J. H. (1987), Asymptotic properties of least squares estimators of cointegrating vectors, \emph{Econometrica}, 55, 1035--1056.
 \item White, H. (1980), A heteroskedasticity-consistent covariance matrix estimator and a direct test for heteroskedasticity, \emph{Econometrica},
 48, 817--838.
+\item Wu, D.-M. (1973), Alternative tests of independence between stochastic regressors and disturbances, \emph{Econometrica}, 41, 733--750.
 \end{enumerate}
 
 \end{document}
