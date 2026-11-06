@@ -4708,6 +4708,458 @@ so $S_k = 0$. Summing, $e'e = S_n = \sum_{t=k+1}^n (S_t - S_{t-1}) = \sum_{t=k+1
 sum of squares is decomposed, matching its $n - k$ degrees of freedom.
 \end{solution}
 
+%======================================================================
+\section{Maximum Likelihood and Generalised Least Squares}
+\label{sec:ml}
+
+Least squares was motivated by a criterion, minimising the sum of squared residuals, and justified by the Gauss--Markov theorem. Maximum
+likelihood starts instead from a full probability model for the data and chooses the parameter values under which the observed sample is most
+probable. For the normal linear model the two coincide, but maximum likelihood extends to models where least squares has nothing to say:
+limited dependent variables, systems of equations, models with non-spherical disturbances. It also supplies a general theory of efficiency and a
+general triple of tests. This section develops that theory and applies it to the linear model, first with spherical disturbances and then with
+the general covariance matrix $\sigma^2\Omega$, which leads to generalised least squares.
+
+\subsection{The likelihood principle}
+\label{ssec:likelihood}
+
+Let the data $y$ have density $f(y; \theta)$, depending on a parameter vector $\theta$ of dimension $p$. Regarded as a function of $\theta$ for the observed
+$y$, $L(\theta) = f(y; \theta)$ is the \textbf{likelihood}, and $\ell(\theta) = \log L(\theta)$ the \textbf{log-likelihood}. The \textbf{maximum likelihood estimator}
+(MLE) $\hat\theta$ maximises $\ell$. Define
+\[
+s(\theta) = \frac{\partial\ell}{\partial\theta} \quad\text{(the score)}, \qquad
+I(\theta) = -E\left[\frac{\partial^2\ell}{\partial\theta\,\partial\theta'}\right] \quad\text{(the information matrix)} .
+\]
+Under ``regularity conditions'', chiefly that the support of $f$ does not depend on $\theta$ and that differentiation and integration can be
+interchanged, these quantities have two key properties.
+
+\begin{thm}
+\label{thm:score}
+At the true parameter value, $E[s(\theta)] = 0$ and $\Var[s(\theta)] = E[s(\theta)s(\theta)'] = I(\theta)$. The second statement is the
+\textbf{information matrix equality}.
+\end{thm}
+
+\begin{proof}
+Differentiate $\int f(y; \theta)\,dy = 1$ with respect to $\theta$:
+\[
+0 = \int\frac{\partial f}{\partial\theta}\,dy = \int\frac{\partial\log f}{\partial\theta}f\,dy = E(s) .
+\]
+Differentiate $\int s(\theta)f\,dy = 0$ once more with respect to $\theta'$:
+\[
+0 = \int\frac{\partial s}{\partial\theta'}f\,dy + \int s\frac{\partial f}{\partial\theta'}\,dy = E\left[\frac{\partial^2\ell}{\partial\theta\,\partial\theta'}\right] + E(ss') ,
+\]
+since $\partial f/\partial\theta' = f\,s'$. Hence $E(ss') = I(\theta)$, and since $E(s) = 0$ this is $\Var(s)$.
+\end{proof}
+
+\begin{thm}[Cram\'er--Rao lower bound]
+\label{thm:crlb}
+Under the same conditions, if $\tilde\theta$ is any unbiased estimator of $\theta$, then $\Var(\tilde\theta) - I(\theta)^{-1}$ is positive semi-definite.
+\end{thm}
+
+\begin{proof}
+Unbiasedness says $\int\tilde\theta(y)f(y; \theta)\,dy = \theta$ for every $\theta$. Differentiating with respect to $\theta'$,
+$\int\tilde\theta\,s'f\,dy = I_p$, that is $E(\tilde\theta s') = I_p$. Since $E(s) = 0$, this is $\Cov(\tilde\theta, s) = I_p$. The joint covariance matrix
+\[
+\Var\begin{pmatrix} \tilde\theta \\ s \end{pmatrix} = \begin{pmatrix} \Var(\tilde\theta) & I_p \\ I_p & I(\theta) \end{pmatrix}
+\]
+is psd. Premultiply by $(I_p\ \ -I(\theta)^{-1})$ and postmultiply by its transpose: the result,
+\[
+\Var(\tilde\theta) - 2I(\theta)^{-1} + I(\theta)^{-1}I(\theta)I(\theta)^{-1} = \Var(\tilde\theta) - I(\theta)^{-1},
+\]
+is psd, being of the form $A'\Sigma A$ with $\Sigma$ psd.
+\end{proof}
+
+No unbiased estimator can have smaller variance than $I(\theta)^{-1}$. An unbiased estimator that attains the bound is efficient in a far stronger
+sense than Gauss--Markov provides: it beats \emph{all} unbiased estimators, linear or not. Usually no estimator attains the bound exactly in finite
+samples, but maximum likelihood attains it in the limit.
+
+\begin{thm}[Asymptotic properties of the MLE]
+\label{thm:mleasym}
+Let $y_1, \dots, y_n$ be independent and identically distributed with density $f(y; \theta)$, let $I_1(\theta)$ be the information in one observation, so
+that $I(\theta) = nI_1(\theta)$, and assume regularity conditions. Then the MLE is consistent, and
+\[
+\sqrt n(\hat\theta - \theta) \xrightarrow{d} N\bigl(0, I_1(\theta)^{-1}\bigr) .
+\]
+Moreover, for any differentiable function $g$, the MLE of $g(\theta)$ is $g(\hat\theta)$ (invariance).
+\end{thm}
+
+\begin{proof}[Sketch of proof]
+Consistency rests on the fact that $\frac1n\ell(\theta)$ converges to $E[\log f(y; \theta)]$, which is maximised at the true $\theta$ (by Jensen's inequality,
+which gives the information inequality), and on conditions that make the maximiser of the limit the limit of the maximisers. For the
+distribution, expand the score about the true $\theta_0$: by the mean value theorem, $0 = s(\hat\theta) = s(\theta_0) + H(\bar\theta)(\hat\theta - \theta_0)$, with $H$
+the matrix of second derivatives and $\bar\theta$ between $\hat\theta$ and $\theta_0$. So
+\[
+\sqrt n(\hat\theta - \theta_0) = \left[-\tfrac1nH(\bar\theta)\right]^{-1}\tfrac{1}{\sqrt n}s(\theta_0) .
+\]
+$s(\theta_0)$ is a sum of $n$ independent terms with mean zero and variance $I_1$ (Theorem~\ref{thm:score}), so $n^{-1/2}s(\theta_0) \xrightarrow{d} N(0, I_1)$ by
+the CLT. By the law of large numbers and consistency, $-\frac1nH(\bar\theta) \xrightarrow{p} I_1$. Slutsky's theorem gives the limit
+$N(0, I_1^{-1}I_1I_1^{-1}) = N(0, I_1^{-1})$. Invariance holds because maximising over $\theta$ and over a one-to-one reparametrisation give
+corresponding points; for a general $g$ it is taken as the definition.
+\end{proof}
+
+So the MLE is consistent, asymptotically normal, and asymptotically efficient: its large-sample variance $I(\theta)^{-1}$ is the Cram\'er--Rao bound. The
+regularity conditions matter. They fail, for instance, when a parameter determines the range of the data, as for the uniform distribution on
+$(0, \theta)$, and the theory then breaks down. In regression, the observations are independent but not identically distributed, and the same
+conclusions hold under conditions on the regressors.
+
+\subsection{Maximum likelihood in the linear model}
+\label{ssec:mllinear}
+
+Let $Y = X\beta + U$ with $U \sim N(0, \sigma^2I_n)$ and $X$ non-stochastic of rank $k$, and let $\theta = (\beta', \sigma^2)'$.
+
+\begin{thm}
+\label{thm:mllm}
+\begin{enumerate}[label=(\roman*)]
+\item The density of $U$ is $f(u) = (2\pi\sigma^2)^{-n/2}\exp\bigl(-u'u/(2\sigma^2)\bigr)$, and the density of $Y$ is
+\[
+f(y \mid X) = (2\pi\sigma^2)^{-n/2}\exp\Bigl\{-\frac{1}{2\sigma^2}(y - X\beta)'(y - X\beta)\Bigr\} .
+\]
+\item The log-likelihood is
+\[
+\ell(\beta, \sigma^2) = -\frac n2\log(2\pi) - \frac n2\log\sigma^2 - \frac{1}{2\sigma^2}(y - X\beta)'(y - X\beta) .
+\]
+\item The MLEs are $\hat\beta = (X'X)^{-1}X'y = b$ and $\hat\sigma^2 = e'e/n$. The maximised log-likelihood is
+\[
+\ell(\hat\theta) = -\frac n2\bigl(1 + \log(2\pi)\bigr) - \frac n2\log\frac{e'e}{n} .
+\]
+\item The information matrix is
+\[
+I(\theta) = \begin{pmatrix} \dfrac{X'X}{\sigma^2} & 0 \\[8pt] 0 & \dfrac{n}{2\sigma^4} \end{pmatrix}, \qquad
+I(\theta)^{-1} = \begin{pmatrix} \sigma^2(X'X)^{-1} & 0 \\[2pt] 0 & \dfrac{2\sigma^4}{n} \end{pmatrix} .
+\]
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $U$ is $N(0, \sigma^2I)$; the multivariate normal density with $|\sigma^2I| = \sigma^{2n}$ and $(\sigma^2I)^{-1} = \sigma^{-2}I$ gives $f(u)$. The transformation
+$u = y - X\beta$ has Jacobian matrix $I$, with determinant $1$, so $f(y \mid X) = f(y - X\beta)$.
+
+(ii) is the logarithm of (i).
+
+(iii) For any fixed $\sigma^2$, $\ell$ is maximised over $\beta$ by minimising $(y - X\beta)'(y - X\beta)$, which is least squares. Then
+$\partial\ell/\partial\sigma^2 = -\frac{n}{2\sigma^2} + \frac{e'e}{2\sigma^4} = 0$ gives $\hat\sigma^2 = e'e/n$; this is a maximum since $\ell \to -\infty$ as $\sigma^2 \to 0$ or $\infty$.
+Substituting, the last term of $\ell$ is $-\frac{e'e}{2e'e/n} = -\frac n2$.
+
+(iv) The first derivatives are
+\[
+\frac{\partial\ell}{\partial\beta} = \frac{1}{\sigma^2}X'(y - X\beta), \qquad \frac{\partial\ell}{\partial\sigma^2} = -\frac{n}{2\sigma^2} + \frac{u'u}{2\sigma^4},
+\]
+and the second derivatives are
+\[
+\frac{\partial^2\ell}{\partial\beta\,\partial\beta'} = -\frac{X'X}{\sigma^2}, \quad
+\frac{\partial^2\ell}{\partial\beta\,\partial\sigma^2} = -\frac{X'u}{\sigma^4}, \quad
+\frac{\partial^2\ell}{\partial(\sigma^2)^2} = \frac{n}{2\sigma^4} - \frac{u'u}{\sigma^6} .
+\]
+Taking expectations with $E(u) = 0$ and $E(u'u) = n\sigma^2$, minus the expected Hessian has blocks $X'X/\sigma^2$, $0$ and $-\frac{n}{2\sigma^4} + \frac{n\sigma^2}{\sigma^6} = \frac{n}{2\sigma^4}$.
+The inverse of a block-diagonal matrix is block-diagonal with the inverted blocks.
+\end{proof}
+
+Several conclusions follow. The MLE of $\beta$ is least squares, and since $\Var(b) = \sigma^2(X'X)^{-1}$ equals the Cram\'er--Rao bound, \emph{least squares is efficient
+among all unbiased estimators}, linear or not, once normality is assumed. That is a much stronger statement than Gauss--Markov. The MLE of $\sigma^2$
+divides by $n$ rather than $n - k$, so it is biased downwards: $E(\hat\sigma^2) = \frac{n-k}{n}\sigma^2$. The unbiased $s^2$ has variance $2\sigma^4/(n - k)$, slightly above the
+bound $2\sigma^4/n$, which no unbiased estimator of $\sigma^2$ attains; the difference vanishes as $n \to \infty$. The information matrix is block diagonal,
+so the estimates of $\beta$ and of $\sigma^2$ are asymptotically uncorrelated: learning one tells nothing about the other.
+
+\subsection{The likelihood ratio, Wald and Lagrange multiplier tests}
+\label{ssec:trinity}
+
+Maximum likelihood supplies three general tests of a hypothesis $H_0\colon c(\theta) = 0$ with $q$ restrictions. Let $\hat\theta$ be the unrestricted MLE and
+$\tilde\theta$ the MLE under $H_0$.
+\begin{itemize}
+\item The \textbf{likelihood ratio} test compares the two maximised log-likelihoods: $\text{LR} = 2\bigl[\ell(\hat\theta) - \ell(\tilde\theta)\bigr]$. It needs both estimates.
+\item The \textbf{Wald} test asks whether the unrestricted estimate nearly satisfies the restrictions: it measures $c(\hat\theta)$ against its estimated
+variance, $W = c(\hat\theta)'\bigl[\widehat\Var\, c(\hat\theta)\bigr]^{-1}c(\hat\theta)$. It needs only the unrestricted estimate.
+\item The \textbf{Lagrange multiplier}, or score, test asks whether the restricted estimate is nearly a maximum of the unrestricted likelihood: it measures
+the score at the restricted estimate, $\text{LM} = s(\tilde\theta)'I(\tilde\theta)^{-1}s(\tilde\theta)$. It needs only the restricted estimate.
+\end{itemize}
+Under $H_0$ all three are asymptotically $\chi^2_q$, and they are asymptotically equivalent. The choice between them is usually practical. The LM test
+is attractive when the restricted model is simple and the unrestricted one is not, which is the case for most diagnostic tests (heteroscedasticity,
+autocorrelation, omitted variables), since the null model is the plain regression already estimated.
+
+\begin{thm}
+\label{thm:trinitylm}
+For $q$ linear restrictions $R\beta = r$ in the normal linear model, with restricted and unrestricted residual sums of squares $\text{RSS}_R$ and $\text{RSS}_U$,
+\[
+W = \frac{n(\text{RSS}_R - \text{RSS}_U)}{\text{RSS}_U}, \qquad
+\text{LR} = n\log\frac{\text{RSS}_R}{\text{RSS}_U}, \qquad
+\text{LM} = \frac{n(\text{RSS}_R - \text{RSS}_U)}{\text{RSS}_R} ,
+\]
+and in every sample
+\[
+W \geq \text{LR} \geq \text{LM} .
+\]
+Also $W = \frac{n}{n-k}qF$, where $F$ is the statistic of Theorem~\ref{thm:rls}, and $\text{LM} = nR^2$ from the regression of the restricted residuals on all
+the regressors $X$, when the restricted model contains an intercept.
+\end{thm}
+
+\begin{proof}
+LR: by Theorem~\ref{thm:mllm}(iii), $\ell(\hat\theta) - \ell(\tilde\theta) = \frac n2\log(\text{RSS}_R/\text{RSS}_U)$, since the constants cancel.
+
+$W$: the Wald statistic for $R\beta = r$ uses $\widehat\Var(Rb) = \hat\sigma^2R(X'X)^{-1}R'$ with the unrestricted $\hat\sigma^2 = \text{RSS}_U/n$. By Theorem~\ref{thm:rls}, the
+quadratic form $(Rb - r)'[R(X'X)^{-1}R']^{-1}(Rb - r)$ equals $\text{RSS}_R - \text{RSS}_U$, so $W = (\text{RSS}_R - \text{RSS}_U)/(\text{RSS}_U/n)$. Comparing with
+$F = \bigl((\text{RSS}_R - \text{RSS}_U)/q\bigr)/\bigl(\text{RSS}_U/(n - k)\bigr)$ gives $W = \frac{n}{n-k}qF$.
+
+LM: the LM statistic in this model is the same quadratic form evaluated with the restricted variance estimate $\tilde\sigma^2 = \text{RSS}_R/n$, giving
+$\text{LM} = (\text{RSS}_R - \text{RSS}_U)/(\text{RSS}_R/n)$. For the $nR^2$ form: let $e_*$ be the restricted residuals. Since $Y - e_* = Xb_*$ lies in the column space of
+$X$, $Me_* = MY = e$. So the regression of $e_*$ on $X$ has residual sum of squares $e'e = \text{RSS}_U$. If the restricted model has an intercept, $e_*$ has mean
+zero, its total sum of squares is $e_*'e_* = \text{RSS}_R$, and $R^2 = 1 - \text{RSS}_U/\text{RSS}_R$, so $nR^2 = \text{LM}$.
+
+Inequality: write $x = (\text{RSS}_R - \text{RSS}_U)/\text{RSS}_U \geq 0$. Then $W = nx$, $\text{LR} = n\log(1 + x)$ and $\text{LM} = nx/(1 + x)$. For $x \geq 0$,
+$x \geq \log(1 + x) \geq x/(1 + x)$: the first because $\log(1 + x)$ is concave with slope $1$ at $0$, the second because $\log(1 + x) = \int_0^x\frac{dt}{1 + t} \geq \frac{x}{1 + x}$.
+\end{proof}
+
+The inequality is a finite-sample fact with a practical consequence. Since all three have the same asymptotic $\chi^2_q$ distribution, a Wald test will
+reject more often than an LR test, and an LR test more often than an LM test. With a borderline result the conclusion can depend on which test is used,
+and the honest course is to report which one it was.
+
+\subsection{Non-spherical disturbances and generalised least squares}
+\label{ssec:gls}
+
+Suppose now that
+\[
+Y = X\beta + U, \qquad E(U) = 0, \qquad \Var(U) = \sigma^2\Omega ,
+\]
+where $\Omega$ is a known positive definite matrix, no longer the identity. Heteroscedasticity makes $\Omega$ diagonal with unequal elements;
+autocorrelation fills its off-diagonal elements. The disturbances are then called \textbf{non-spherical}.
+
+\begin{thm}
+\label{thm:olsnonsph}
+With $\Var(U) = \sigma^2\Omega$, least squares remains unbiased, but
+\[
+\Var(b) = \sigma^2(X'X)^{-1}X'\Omega X(X'X)^{-1} ,
+\]
+which in general differs from $\sigma^2(X'X)^{-1}$. The conventional standard errors are therefore wrong, and $b$ is not the best linear unbiased estimator.
+\end{thm}
+
+\begin{proof}
+$b - \beta = (X'X)^{-1}X'U$ has mean zero and variance $(X'X)^{-1}X'(\sigma^2\Omega)X(X'X)^{-1}$. That $b$ is not best follows from the next theorem, which exhibits an
+estimator with smaller variance.
+\end{proof}
+
+The remedy uses Corollary~\ref{coro:pd}(iii): there is a non-singular matrix $P$ with $P'P = \Omega^{-1}$, and then $P\Omega P' = I$.
+
+\begin{thm}[Aitken]
+\label{thm:aitken}
+Let $P$ be non-singular with $P'P = \Omega^{-1}$, and transform the model to
+\[
+Y_* = X_*\beta + U_*, \qquad Y_* = PY,\quad X_* = PX,\quad U_* = PU .
+\]
+\begin{enumerate}[label=(\roman*)]
+\item $\Cov(PU) = \sigma^2I$: the transformed model satisfies the classical assumptions.
+\item Least squares on the transformed model gives the \textbf{generalised least squares} (GLS) estimator
+\[
+b_{\text{GLS}} = (X_*'X_*)^{-1}X_*'Y_* = (X'\Omega^{-1}X)^{-1}X'\Omega^{-1}Y ,
+\]
+with $\Var(b_{\text{GLS}}) = \sigma^2(X'\Omega^{-1}X)^{-1}$.
+\item $b_{\text{GLS}}$ is the best linear unbiased estimator of $\beta$, and in particular $\Var(b) - \Var(b_{\text{GLS}})$ is psd.
+\item If $U \sim N(0, \sigma^2\Omega)$, $b_{\text{GLS}}$ is the maximum likelihood estimator of $\beta$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $\Cov(PU) = P(\sigma^2\Omega)P' = \sigma^2P\Omega P' = \sigma^2I$, by Corollary~\ref{coro:pd}(iii).
+
+(ii) $X_*'X_* = X'P'PX = X'\Omega^{-1}X$ and $X_*'Y_* = X'\Omega^{-1}Y$. $X_*$ has rank $k$ because $P$ is non-singular. The variance is $\sigma^2(X_*'X_*)^{-1}$ by
+Theorem~\ref{thm:bmoments}, applied to the transformed model.
+
+(iii) The transformed model satisfies (A1)--(A4), so by the Gauss--Markov theorem its least squares estimator is best among estimators linear in $Y_*$
+and unbiased. Every estimator linear in $Y$ is linear in $Y_* = PY$, since $AY = (AP^{-1})Y_*$, so the class is the same. Least squares on the original
+model is one such estimator.
+
+(iv) The density of $Y$ is
+\[
+(2\pi\sigma^2)^{-n/2}|\Omega|^{-1/2}\exp\Bigl\{-\frac{1}{2\sigma^2}(y - X\beta)'\Omega^{-1}(y - X\beta)\Bigr\} ,
+\]
+using $|\sigma^2\Omega| = \sigma^{2n}|\Omega|$. For fixed $\sigma^2$ it is maximised over $\beta$ by minimising $(y - X\beta)'\Omega^{-1}(y - X\beta) = (y_* - X_*\beta)'(y_* - X_*\beta)$,
+whose minimiser is $b_{\text{GLS}}$.
+\end{proof}
+
+GLS weights the observations according to how informative they are. In the commonest case, $\Omega = \operatorname{diag}(\omega_1, \dots, \omega_n)$, one can take
+$P = \operatorname{diag}(\omega_i^{-1/2})$, so each observation is divided by its own standard deviation (up to $\sigma$): observations with large variance
+are down-weighted. This is \textbf{weighted least squares}. With autocorrelated disturbances, $P$ instead takes quasi-differences of successive
+observations, as in the Prais--Winsten transformation of the section on autocorrelation.
+
+In practice $\Omega$ is never known. It is modelled as a function of a few parameters, for example $\omega_i = X_i^\gamma$ or an AR(1) structure, those parameters are
+estimated, usually from least squares residuals, and $\hat\Omega$ is used in place of $\Omega$. This \textbf{feasible} GLS estimator is no longer exactly linear or
+unbiased, but under suitable conditions it has the same asymptotic distribution as GLS with known $\Omega$. The next two sections develop it for
+heteroscedasticity and for autocorrelation.
+
+\subsection{Maximum likelihood and GLS in software}
+\label{ssec:software9}
+
+\begin{software}[Maximum likelihood by numerical optimisation]
+\label{sw:optim}
+Maximise the log-likelihood of Theorem~\ref{thm:mllm} directly, as a check on the theory. Writing $\sigma^2 = e^{\phi}$ keeps it positive during the search:
+{\small\begin{verbatim}
+> X <- model.matrix(fit); y <- LifeCycleSavings$sr; n <- length(y)
+> negll <- function(th) { b <- th[1:5]; s2 <- exp(th[6])
++   r <- y - X %*% b
++   0.5 * n * log(2 * pi * s2) + sum(r^2) / (2 * s2) }
+> o <- optim(c(coef(fit), log(10)), negll, method = "BFGS",
++            control = list(maxit = 1000, reltol = 1e-14))
+> rbind(ML = o$par[1:5], OLS = coef(fit))
+    (Intercept)      pop15     pop75           dpi      ddpi
+ML     28.56609 -0.4611932 -1.691498 -0.0003369020 0.4096951
+OLS    28.56609 -0.4611931 -1.691498 -0.0003369019 0.4096949
+> c(sigma2_ML = exp(o$par[6]), RSS_over_n = deviance(fit) / n,
++   s2 = deviance(fit) / 45)
+ sigma2_ML RSS_over_n         s2
+  13.01426   13.01426   14.46029
+> c(-o$value, logLik(fit))
+[1] -135.0981 -135.0981
+\end{verbatim}}
+\textbf{Reading the output.} The numerical maximum reproduces least squares to the seventh significant figure, the remaining differences being
+optimiser tolerance. The MLE of $\sigma^2$ is $\text{RSS}/n = 13.01$, smaller than $s^2 = \text{RSS}/(n - k) = 14.46$ by the factor $45/50$. The maximised
+log-likelihood $-135.10$ is what R's \texttt{logLik} reports; it is the quantity that AIC and BIC are built from. Here $\text{AIC} = -2\ell + 2p$ with
+$p = 6$ parameters, counting $\sigma^2$.
+
+\textbf{Stata:} \texttt{ml model lf myprog (sr = pop15 pop75 dpi ddpi) /lnsigma}, then \texttt{ml maximize}. \textbf{EViews:} a \emph{LogL}
+object with \texttt{@logl} specification.
+\end{software}
+
+\begin{software}[The Wald, likelihood ratio and LM tests]
+\label{sw:trinity}
+The joint test of Software~\ref{sw:ftest}, that \texttt{pop15} and \texttt{pop75} have no effect, in its three asymptotic forms:
+{\small\begin{verbatim}
+> fit0 <- lm(sr ~ dpi + ddpi, data = LifeCycleSavings)
+> RU <- deviance(fit); RR <- deviance(fit0)
+> c(W = n * (RR - RU) / RU, LR = n * log(RR / RU),
++   LM = n * (RR - RU) / RR, crit = qchisq(0.95, 2))
+        W        LR        LM      crit
+13.370338 11.848645 10.549366  5.991465
+> e0 <- resid(fit0); n * summary(lm(e0 ~ X - 1))$r.squared
+[1] 10.54937
+> 2 * (logLik(fit) - logLik(fit0))
+'log Lik.' 11.84864 (df=6)
+\end{verbatim}}
+\textbf{Reading the output.} All three exceed the $5\%$ point $5.99$ of $\chi^2_2$, and they are ordered $W > \text{LR} > \text{LM}$, as Theorem~\ref{thm:trinitylm} guarantees.
+$W = \frac{50}{45} \times 2 \times 6.0167 = 13.37$, linking it to the exact $F$ test. The auxiliary regression of the restricted residuals on all five regressors
+reproduces LM as $nR^2$; \texttt{X - 1} uses the columns of $X$, which already include the constant. And twice the difference of the two
+\texttt{logLik} values is LR. In a sample of $50$ the differences between the three are noticeable, $10.5$ to $13.4$. The exact $F$ test, available
+here because the model is linear and normal, is preferable to all three.
+
+\textbf{Stata:} \texttt{lrtest} after storing the two models with \texttt{estimates store}; \texttt{test} gives the Wald form. \textbf{EViews:}
+\emph{View $\to$ Coefficient Diagnostics} offers the Wald and \emph{Omitted Variables -- Likelihood Ratio} tests.
+\end{software}
+
+\begin{software}[GLS against least squares: a Monte Carlo]
+\label{sw:glsmc}
+Generate data with $\Var(u_i) = 0.09X_i^2$, so the disturbance standard deviation grows with $X$, and compare least squares with GLS, which here is
+weighted least squares with weights $1/X_i^2$. R's \texttt{weights} argument takes the reciprocals of the $\omega_i$:
+{\small\begin{verbatim}
+> set.seed(9)
+> n <- 50; x <- runif(n, 1, 10)            # fixed regressor
+> sim <- replicate(5000, {
++   y <- 2 + 0.5 * x + rnorm(n, sd = 0.3 * x)
++   c(ols = coef(lm(y ~ x))[2],
++     gls = coef(lm(y ~ x, weights = 1 / x^2))[2]) })
+> rbind(mean = rowMeans(sim), sd = apply(sim, 1, sd))
+         ols.x      gls.x
+mean 0.5007509 0.49918251
+sd   0.1029070 0.06762586
+\end{verbatim}}
+and the exact standard deviations from Theorems~\ref{thm:olsnonsph} and~\ref{thm:aitken} are $0.1036$ for least squares and $0.0680$ for GLS.
+
+\textbf{Reading the output.} Both estimators are unbiased: the means are $0.501$ and $0.499$ against the true $0.5$. But GLS has about two-thirds of the
+standard deviation of least squares, equivalent to having more than twice as many observations ($0.103^2/0.068^2 = 2.3$). The simulated standard deviations
+agree with the exact formulas to two significant figures. Least squares wastes information by giving the noisy observations at large $X$ as much
+weight as the precise ones at small $X$.
+
+\textbf{Stata:} \texttt{regress y x [aweight = 1/x\textasciicircum2]}. \textbf{EViews:} in the equation dialog, \emph{Options $\to$ Weights}, with the
+weight series $1/x$ (EViews weights by standard deviation).
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Given the linear regression model $Y = X\beta + U$ with $U \sim N(0, \sigma^2I)$ and $\beta$ a $k \times 1$ vector:
+\begin{enumerate}[label=(\roman*)]
+\item write the joint density $f(u)$ of the elements of $U$;
+\item find $f(y \mid X)$;
+\item write $\log f(y \mid X)$ in its simplest form;
+\item find the maximum likelihood estimators of $\beta$ and $\sigma^2$;
+\item with $\theta = (\beta', \sigma^2)'$, find the information matrix $I(\theta) = -E\bigl(\partial^2\ell/\partial\theta\,\partial\theta'\bigr)$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+This is Theorem~\ref{thm:mllm}. (i) $f(u) = (2\pi\sigma^2)^{-n/2}\exp(-u'u/2\sigma^2)$. (ii) The Jacobian of $u = y - X\beta$ is $1$, so
+$f(y \mid X) = (2\pi\sigma^2)^{-n/2}\exp\{-(y - X\beta)'(y - X\beta)/2\sigma^2\}$. (iii) $\ell = -\frac n2\log2\pi - \frac n2\log\sigma^2 - \frac{1}{2\sigma^2}(y - X\beta)'(y - X\beta)$.
+(iv) $\hat\beta = (X'X)^{-1}X'y$ and $\hat\sigma^2 = e'e/n$. (v)
+$I(\theta) = \begin{pmatrix} X'X/\sigma^2 & 0 \\ 0 & n/(2\sigma^4) \end{pmatrix}$, from the second derivatives $-X'X/\sigma^2$, $-X'u/\sigma^4$ (expectation zero) and
+$n/(2\sigma^4) - u'u/\sigma^6$ (expectation $-n/(2\sigma^4)$).
+\end{solution}
+
+\begin{problem}
+Consider $Y = X\beta + U$ with $U \sim N(0, \sigma^2\Omega)$, where $\Omega$ is a known positive definite matrix of order $n$, and let $P$ be a non-singular matrix with
+$P'P = \Omega^{-1}$.
+\begin{enumerate}[label=(\roman*)]
+\item Show that $\Cov(PU) = \sigma^2I$.
+\item For the transformed equation $Y_* = X_*\beta + U_*$ with $Y_* = PY$, $X_* = PX$ and $U_* = PU$, find the maximum likelihood estimator of $\beta$ in terms of
+$X$ and $\Omega$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(i) $\Cov(PU) = P\Cov(U)P' = \sigma^2P\Omega P'$. From $P'P = \Omega^{-1}$, $\Omega = P^{-1}(P')^{-1}$, so $P\Omega P' = PP^{-1}(P')^{-1}P' = I$.
+
+(ii) The transformed model satisfies the assumptions of the previous problem, so its MLE is least squares on the transformed data:
+$\hat\beta = (X_*'X_*)^{-1}X_*'Y_* = (X'P'PX)^{-1}X'P'PY = (X'\Omega^{-1}X)^{-1}X'\Omega^{-1}Y$, the GLS estimator.
+\end{solution}
+
+\begin{problem}
+In the regression through the origin $Y_i = \beta X_i + u_i$, $X_i > 0$, the disturbances are independent with $\Var(u_i) = \sigma^2X_i$.
+\begin{enumerate}[label=(\alph*)]
+\item Show that the GLS estimator is $\bar Y/\bar X$, and find its variance.
+\item Compare with the variance of the least squares estimator $\sum X_iY_i/\sum X_i^2$, and show directly that GLS is at least as precise.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\Omega = \operatorname{diag}(X_i)$, so $b_{\text{GLS}} = (X'\Omega^{-1}X)^{-1}X'\Omega^{-1}Y = \bigl(\sum X_i^2/X_i\bigr)^{-1}\sum X_iY_i/X_i = \sum Y_i/\sum X_i = \bar Y/\bar X$, with variance
+$\sigma^2(X'\Omega^{-1}X)^{-1} = \sigma^2/\sum X_i$.
+
+(b) By Theorem~\ref{thm:olsnonsph}, $\Var(b) = \sigma^2\sum X_i^2X_i/(\sum X_i^2)^2 = \sigma^2\sum X_i^3/(\sum X_i^2)^2$. GLS is at least as precise if
+$(\sum X_i^2)^2 \leq \sum X_i\sum X_i^3$, which is the Cauchy--Schwarz inequality applied to the vectors $(X_i^{1/2})$ and $(X_i^{3/2})$. Equality holds only if all
+$X_i$ are equal. The GLS estimator is the familiar \emph{ratio estimator} of survey sampling, which is optimal when the variance is proportional to the size
+of the unit.
+\end{solution}
+
+\begin{problem}
+A regression with $n = 60$ observations and $k = 5$ coefficients has $\text{RSS}_U = 120$. Imposing $q = 3$ restrictions raises the residual sum of squares to
+$\text{RSS}_R = 138$. Compute $F$, $W$, LR and LM, and test the restrictions at the $5\%$ level with each.
+\end{problem}
+
+\begin{solution}
+$F = (18/3)/(120/55) = 6/2.182 = 2.75$, against $F_{0.05,3,55} = 2.77$: \emph{not} rejected, just. With $x = 18/120 = 0.15$,
+$W = 60(0.15) = 9.00$, $\text{LR} = 60\log1.15 = 8.39$ and $\text{LM} = 60(0.15/1.15) = 7.83$. The $5\%$ point of $\chi^2_3$ is $7.81$, so all three asymptotic tests
+reject, LM only barely. The example shows the ordering $W > \text{LR} > \text{LM}$ and also why the exact $F$ test is preferred when it is available: the
+asymptotic tests ignore the degrees-of-freedom correction and reject a little too readily in small samples.
+\end{solution}
+
+\begin{problem}
+Let $y_1, \dots, y_n$ be independent Poisson observations with mean $\lambda$. Find the MLE of $\lambda$, its information, and its asymptotic variance, and verify that
+it attains the Cram\'er--Rao bound exactly.
+\end{problem}
+
+\begin{solution}
+$\ell(\lambda) = \sum y_i\log\lambda - n\lambda - \sum\log y_i!$. The score $\sum y_i/\lambda - n = 0$ gives $\hat\lambda = \bar y$. The second derivative is $-\sum y_i/\lambda^2$, with
+expectation $-n/\lambda$, so $I(\lambda) = n/\lambda$ and the bound is $\lambda/n$. $\hat\lambda = \bar y$ is unbiased with variance $\Var(y)/n = \lambda/n$, so it attains the bound
+exactly, in every sample size. Such cases, where an unbiased estimator attains the bound in finite samples, occur precisely when the score is linear in
+the estimator, here $s = (n/\lambda)(\bar y - \lambda)$.
+\end{solution}
+
+\begin{problem}
+Show that in the normal linear model the MLE $\hat\sigma^2 = e'e/n$ has bias $-k\sigma^2/n$ and mean squared error $\sigma^4(2n - 2k + k^2)/n^2$, and compare with the mean squared
+error $2\sigma^4/(n - k)$ of $s^2$. Which has the smaller mean squared error when $k$ is small relative to $n$?
+\end{problem}
+
+\begin{solution}
+$e'e/\sigma^2 \sim \chi^2_{n-k}$ with mean $n - k$ and variance $2(n - k)$. So $E(\hat\sigma^2) = \frac{n-k}{n}\sigma^2$, a bias of $-k\sigma^2/n$, and $\Var(\hat\sigma^2) = 2(n - k)\sigma^4/n^2$. The mean
+squared error is the variance plus the squared bias, $\sigma^4\bigl(2(n - k) + k^2\bigr)/n^2$. For $s^2$, unbiased, it is $2\sigma^4/(n - k)$. With $n = 50$ and $k = 5$:
+$(90 + 25)/2500 = 0.046$ against $2/45 = 0.044$. So $s^2$ is slightly better here; but with $k = 1$ the MLE wins ($0.0396$ against $0.0408$). Neither dominates, and
+the estimator $e'e/(n - k + 2)$ has the smallest mean squared error of all estimators of the form $e'e/c$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
