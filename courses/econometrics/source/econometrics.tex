@@ -6536,6 +6536,669 @@ the first two sums. Hence $\hat\gamma_0 + \hat\gamma_1 = \frac12\sum_t(g_t + g_{
 is $1 - \frac12 = \frac12$, applied to both $\hat\gamma_1$ and its transpose.
 \end{solution}
 
+\section{Unit Roots, Cointegration and Error Correction}
+\label{sec:unitroot}
+
+Most macroeconomic and financial series in levels, such as output, prices, money, exchange rates and share prices, do not return to a fixed mean
+or a fixed trend line. They behave more like the random walk of Figure~\ref{fig:arpaths} than like a stationary process. That has two large
+consequences. Regressions between such series can be entirely spurious, with high $R^2$ and large $t$ ratios between variables that are unrelated.
+And the usual large-sample theory of Section~\ref{sec:asym} fails, so the familiar $t$ and $F$ tables no longer apply. This section develops the
+theory of unit roots, the tests used to detect them, and the concept that rescues regression in levels: cointegration, with its companion, the error
+correction model.
+
+\subsection{Stationary and integrated processes}
+\label{ssec:integrated}
+
+\begin{defn}
+A series is \textbf{integrated of order $d$}, written $I(d)$, if it must be differenced $d$ times to become stationary (and invertible). A stationary
+series is $I(0)$; a random walk is $I(1)$, since $\Delta Y_t = Y_t - Y_{t-1} = u_t$ is stationary.
+\end{defn}
+
+Two models of a trending series are worth comparing. A \textbf{trend-stationary} series is
+\[
+Y_t = \alpha + \delta t + u_t, \qquad u_t \text{ stationary},
+\]
+and a \textbf{difference-stationary} series, the random walk with drift, is
+\[
+Y_t = \delta + Y_{t-1} + u_t, \qquad \text{so that} \qquad Y_t = Y_0 + \delta t + \sum_{s=1}^tu_s .
+\]
+Both grow on average by $\delta$ a period. The difference is in the disturbance: in the first it is stationary; in the second it is the accumulated sum
+$\sum u_s$, a \textbf{stochastic trend}.
+
+\begin{thm}
+\label{thm:rwmoments}
+Let $Y_t = \delta + Y_{t-1} + u_t$ with $Y_0$ fixed and $u_t$ independent with mean zero and variance $\sigma^2$. Then
+\begin{enumerate}[label=(\roman*)]
+\item $E(Y_t) = Y_0 + \delta t$ and $\Var(Y_t) = t\sigma^2$;
+\item $\Corr(Y_t, Y_{t+s}) = \sqrt{t/(t + s)}$;
+\item a shock $u_t$ raises every later value $Y_{t+s}$ by the same amount, whereas in the trend-stationary model with AR(1) disturbances
+$u_t = \phi u_{t-1} + \varepsilon_t$ its effect on $Y_{t+s}$ is $\phi^s$, which dies out;
+\item the variance of the error in forecasting $Y_{t+s}$ from time $t$ is $s\sigma^2$, which grows without bound, while for the trend-stationary model it
+tends to the finite $\Var(u_t)$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $Y_t - Y_0 - \delta t = \sum_{j=1}^tu_j$, a sum of $t$ uncorrelated terms. (ii) $\Cov(Y_t, Y_{t+s}) = \Cov\bigl(\sum_{j\leq t}u_j, \sum_{j\leq t+s}u_j\bigr) = t\sigma^2$, the variance of the common
+terms, so the correlation is $t\sigma^2/\sqrt{t\sigma^2(t + s)\sigma^2}$. (iii) $Y_{t+s}$ contains $u_t$ with coefficient one; in the other model $u_{t+s} = \phi^su_t + \dots$, as in
+Section~\ref{ssec:ar1}. (iv) The forecast error is $u_{t+1} + \dots + u_{t+s}$; for the trend-stationary model the error variance is that of
+Theorem~\ref{thm:acforecast}, bounded by $\sigma_u^2$.
+\end{proof}
+
+Part (ii) shows why a random walk looks so smooth: with $t = 100$ and $s = 10$ the correlation is $0.95$, and the sample autocorrelations of a random walk
+decline very slowly, which is the classic visual symptom of a unit root. Part (iii) is the economic content of the distinction. If real output is
+difference-stationary, recessions permanently lower its path; if it is trend-stationary, output returns to the old trend line. The debate
+started by Nelson and Plosser (1982), who could not reject a unit root in most US macroeconomic series, is about exactly this.
+
+The two models also require different treatment. Differencing a trend-stationary series gives $\Delta Y_t = \delta + \Delta u_t$, whose moving average part has a unit
+root: it is \emph{over-differenced}. Detrending a random walk, by regressing on time, leaves residuals that are still non-stationary, and the regression
+on time is itself spurious. Neither transformation is harmless, so one must first decide which model fits.
+
+\subsection{Spurious regression and the asymptotics of a unit root}
+\label{ssec:spurious}
+
+Granger and Newbold (1974) simulated pairs of \emph{independent} random walks and regressed one on the other. The $t$ test of a zero slope at the nominal
+$5\%$ level rejected about three-quarters of the time, $R^2$ was often large, and the Durbin--Watson statistic was very small.
+Software~\ref{sw:spurious} repeats their experiment, and shows that matters get worse, not better, as $n$ grows. The explanation needs a different
+limit theory, because sums of a random walk grow faster than $n$.
+
+\begin{defn}
+A \textbf{standard Brownian motion} (Wiener process) $W(r)$, $0 \leq r \leq 1$, is a random function with $W(0) = 0$, continuous paths, and independent
+normal increments $W(r) - W(q) \sim N(0, r - q)$ for $q < r$. In particular $W(1) \sim N(0, 1)$.
+\end{defn}
+
+\begin{thm}[Functional central limit theorem]
+\label{thm:fclt}
+Let $u_t$ be independent and identically distributed with mean zero and variance $\sigma^2$, and $Y_t = u_1 + \dots + u_t$. Then the step function
+$X_n(r) = Y_{\lfloor nr\rfloor}/(\sigma\sqrt n)$ converges in distribution, as a random function on $[0, 1]$, to $W(r)$. Consequently, by the continuous mapping theorem,
+$g(X_n) \xrightarrow{d} g(W)$ for every continuous functional $g$, such as $\int_0^1X_n(r)^2\,dr$.
+\end{thm}
+
+The theorem, due to Donsker, is the central limit theorem applied to the whole path rather than to its end point; at $r = 1$ it is the ordinary
+central limit theorem. We take it as given. The results that follow need only a few of its consequences.
+
+\begin{lem}
+\label{lem:urmoments}
+With $Y_t = Y_{t-1} + u_t$, $Y_0 = 0$ and $u_t$ as in Theorem~\ref{thm:fclt},
+\begin{enumerate}[label=(\roman*)]
+\item $\displaystyle\sum_{t=1}^nY_{t-1}u_t = \frac12\Bigl(Y_n^2 - \sum_{t=1}^nu_t^2\Bigr)$ exactly, and hence $\displaystyle\frac{1}{\sigma^2n}\sum_{t=1}^nY_{t-1}u_t \xrightarrow{d} \frac12\bigl(W(1)^2 - 1\bigr)$;
+\item $\displaystyle E\sum_{t=1}^nY_{t-1}^2 = \frac{\sigma^2n(n - 1)}{2}$, and $\displaystyle\frac{1}{\sigma^2n^2}\sum_{t=1}^nY_{t-1}^2 \xrightarrow{d} \int_0^1W(r)^2\,dr$;
+\end{enumerate}
+the two limits holding jointly.
+\end{lem}
+
+\begin{proof}
+(i) Squaring $Y_t = Y_{t-1} + u_t$ gives $Y_t^2 - Y_{t-1}^2 = 2Y_{t-1}u_t + u_t^2$. Summing over $t$, the left side telescopes to $Y_n^2 - Y_0^2 = Y_n^2$. Dividing by $\sigma^2n$,
+$Y_n^2/(\sigma^2n) = X_n(1)^2 \xrightarrow{d} W(1)^2$ by the central limit theorem, and $\frac1n\sum u_t^2 \xrightarrow{p} \sigma^2$ by the law of large numbers; Slutsky's theorem gives the limit.
+
+(ii) $E(Y_{t-1}^2) = (t - 1)\sigma^2$, and $\sum_{t=1}^n(t - 1) = n(n - 1)/2$. For the limit, $Y_{t-1}^2/(\sigma^2n) = X_n(r)^2$ for $r \in [(t - 1)/n, t/n)$, so
+$\frac{1}{\sigma^2n^2}\sum_tY_{t-1}^2 = \int_0^1X_n(r)^2\,dr$ exactly, and Theorem~\ref{thm:fclt} applies. Both statistics are functionals of the same path $X_n$, which gives joint
+convergence.
+\end{proof}
+
+Compare the orders of magnitude with the stationary case. There, $\sum Y_{t-1}^2$ grows like $n$ and $\sum Y_{t-1}u_t$ like $\sqrt n$. With a unit root, $\sum Y_{t-1}^2$
+grows like $n^2$ and $\sum Y_{t-1}u_t$ like $n$. The limits are not normal: $W(1)^2$ is $\chi^2_1$, and $\int W^2$ is a random variable with no textbook name.
+
+\begin{thm}[Dickey--Fuller]
+\label{thm:df}
+Let $\hat\rho$ be the least squares estimate in the regression $Y_t = \rho Y_{t-1} + u_t$, with $t$ ratio $\tau = (\hat\rho - 1)/\text{se}(\hat\rho)$ for $H_0\colon\rho = 1$. If in fact $\rho = 1$,
+\[
+n(\hat\rho - 1) \xrightarrow{d} \frac{\frac12\bigl(W(1)^2 - 1\bigr)}{\int_0^1W(r)^2\,dr}, \qquad
+\tau \xrightarrow{d} \frac{\frac12\bigl(W(1)^2 - 1\bigr)}{\bigl(\int_0^1W(r)^2\,dr\bigr)^{1/2}} .
+\]
+In particular $\hat\rho$ is \textbf{superconsistent}: $\hat\rho - 1$ is of order $1/n$, not $1/\sqrt n$. And $P(\hat\rho < 1) \to P(\chi^2_1 < 1) = 0.683$.
+\end{thm}
+
+\begin{proof}
+$\hat\rho - 1 = \sum Y_{t-1}u_t/\sum Y_{t-1}^2$, so
+\[
+n(\hat\rho - 1) = \frac{\frac{1}{\sigma^2n}\sum Y_{t-1}u_t}{\frac{1}{\sigma^2n^2}\sum Y_{t-1}^2},
+\]
+and the first result follows from the joint limits of Lemma~\ref{lem:urmoments} and the continuous mapping theorem. For $\tau$, $\text{se}(\hat\rho) = s/\sqrt{\sum Y_{t-1}^2}$ with
+$s^2 \xrightarrow{p} \sigma^2$, so
+\[
+\tau = \frac{\sum Y_{t-1}u_t}{s\sqrt{\sum Y_{t-1}^2}} = \frac{\sigma}{s}\cdot\frac{\frac{1}{\sigma^2n}\sum Y_{t-1}u_t}{\bigl(\frac{1}{\sigma^2n^2}\sum Y_{t-1}^2\bigr)^{1/2}} ,
+\]
+which converges to the stated limit. Since the denominators are positive, the sign of $\hat\rho - 1$ is the sign of $Y_n^2 - \sum u_t^2$, whose limit is the sign of $W(1)^2 - 1$.
+\end{proof}
+
+The distribution of $\tau$ is skewed to the left: about two-thirds of the time $\hat\rho < 1$ even when the truth is $\rho = 1$. Using the normal critical value
+$-1.645$ for a one-sided test would reject the unit root far too often. Figure~\ref{fig:dfdensity} compares the distributions.
+
+\begin{thm}[Spurious regression; Phillips 1986]
+\label{thm:spurious}
+Let $Y_t$ and $X_t$ be independent random walks, and let $b$, $t_b$, $R^2$ and $d$ be the slope, its $t$ ratio, the coefficient of determination and the
+Durbin--Watson statistic from the least squares regression of $Y_t$ on a constant and $X_t$. Then, as $n \to \infty$,
+\begin{enumerate}[label=(\roman*)]
+\item $b$ converges in distribution to a non-degenerate random variable, not to the true value $0$;
+\item $t_b/\sqrt n$ converges in distribution to a non-degenerate random variable, so $|t_b| \to \infty$ in probability and the $t$ test rejects with probability
+tending to one;
+\item $R^2$ converges in distribution to a non-degenerate random variable;
+\item $d \xrightarrow{p} 0$, at rate $1/n$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}[Sketch of proof]
+All the sums of squares and cross products of the levels are of order $n^2$, and after division by $n^2$ they converge, by Theorem~\ref{thm:fclt} applied to the two
+independent walks, to integrals of two independent Brownian motions $W_Y$ and $W_X$ (demeaned, because of the constant). The slope is a ratio of two
+such sums, which gives (i), and $R^2$ is a ratio of such limits, which gives (iii). The residuals $e_t = Y_t - a - bX_t$ are themselves of order $\sqrt n$, so
+$s^2 = \sum e_t^2/(n - 2)$ is of order $n$, while $\sum(X_t - \bar X)^2$ is of order $n^2$. Hence $\text{se}(b) = s/\sqrt{\sum(X_t - \bar X)^2}$ is of order $n^{-1/2}$, while $b$ is of order one, and
+$t_b$ is of order $\sqrt n$, which is (ii). Finally, $\Delta e_t = \Delta Y_t - b\Delta X_t$ is stationary-like, so $\sum(\Delta e_t)^2$ is of order $n$, while $\sum e_t^2$ is of order $n^2$:
+$d$ is of order $1/n$, which is (iv).
+\end{proof}
+
+The regression is spurious because the residuals are $I(1)$: there is no value of the slope that makes $Y_t - bX_t$ stationary, and least squares picks
+whichever value happens to track the two stochastic trends best over the sample. The Durbin--Watson statistic is the giveaway, and Granger and
+Newbold's rule of thumb, ``be suspicious when $R^2 > d$'', is a practical form of (iii) and (iv). The remedy is not to abandon regression on levels, but to
+test first whether the series have unit roots, and then whether some linear combination of them is stationary.
+
+\subsection{Unit root tests}
+\label{ssec:urtests}
+
+The Dickey--Fuller test is applied to the regression in differences,
+\[
+\Delta Y_t = \gamma Y_{t-1} + u_t, \qquad \gamma = \rho - 1,
+\]
+testing $H_0\colon\gamma = 0$ (unit root) against $H_1\colon\gamma < 0$ (stationary). The $t$ ratio of $\gamma$ is the $\tau$ of Theorem~\ref{thm:df}. Real series need
+deterministic terms, and the test is run in one of three forms:
+\begin{align*}
+\text{none:}\quad &\Delta Y_t = \gamma Y_{t-1} + u_t,\\
+\text{constant:}\quad &\Delta Y_t = \mu + \gamma Y_{t-1} + u_t,\\
+\text{trend:}\quad &\Delta Y_t = \mu + \beta t + \gamma Y_{t-1} + u_t .
+\end{align*}
+Including deterministic terms changes the limiting distribution, because the Brownian motion in Theorem~\ref{thm:df} is replaced by its demeaned or
+detrended version, and the critical values move further left. The asymptotic critical values, from Fuller (1976) and MacKinnon (1991), are:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lccc}
+\hline
+& $1\%$ & $5\%$ & $10\%$\\
+\hline
+none & $-2.58$ & $-1.95$ & $-1.62$\\
+constant & $-3.43$ & $-2.86$ & $-2.57$\\
+trend & $-3.96$ & $-3.41$ & $-3.12$\\
+\hline
+$N(0, 1)$, for comparison & $-2.33$ & $-1.64$ & $-1.28$\\
+\hline
+\end{tabular}
+\end{center}
+The choice of form follows from the alternative. For a trending series such as output or prices, the relevant alternative is trend-stationarity,
+and the trend form must be used; testing such a series without a trend compares a random walk with drift against a stationary series with no
+trend, and the test has no power. For a series with no trend, such as an interest rate or a real exchange rate, the constant form is appropriate.
+The ``none'' form is rarely appropriate for data, but it is the right one for residuals that already have mean zero.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[ttl/.style={font=\small\bfseries,anchor=west}]
+\fill[blue!5,rounded corners=4pt] (-0.4,-0.6) rectangle (12.4,3.7);
+\draw[gray] (0,0) -- (12,0);
+\foreach \v/\x in {-5/0.75, -4/2.25, -3/3.75, -2/5.25, -1/6.75, 0/8.25, 1/9.75, 2/11.25}
+  \draw (\x,0) -- (\x,-0.1) node[below,font=\scriptsize] {$\v$};
+\draw[gray!70,line width=0.8pt,dashed] plot coordinates {(0.00,0.000) (0.15,0.000) (0.30,0.000) (0.45,0.000) (0.60,0.000) (0.75,0.000) (0.90,0.000) (1.05,0.000) (1.20,0.000) (1.35,0.000) (1.50,0.000) (1.65,0.000) (1.80,0.000) (1.95,0.000) (2.10,0.001) (2.25,0.001) (2.40,0.001) (2.55,0.002) (2.70,0.003) (2.85,0.004) (3.00,0.005) (3.15,0.007) (3.30,0.010) (3.45,0.014) (3.60,0.020) (3.75,0.027) (3.90,0.036) (4.05,0.047) (4.20,0.063) (4.35,0.081) (4.50,0.105) (4.65,0.134) (4.80,0.170) (4.95,0.213) (5.10,0.264) (5.25,0.324) (5.40,0.394) (5.55,0.474) (5.70,0.564) (5.85,0.666) (6.00,0.777) (6.15,0.898) (6.30,1.028) (6.45,1.165) (6.60,1.307) (6.75,1.452) (6.90,1.597) (7.05,1.738) (7.20,1.874) (7.35,1.999) (7.50,2.112) (7.65,2.210) (7.80,2.288) (7.95,2.346) (8.10,2.382) (8.25,2.394) (8.40,2.382) (8.55,2.346) (8.70,2.288) (8.85,2.210) (9.00,2.112) (9.15,1.999) (9.30,1.874) (9.45,1.738) (9.60,1.597) (9.75,1.452) (9.90,1.307) (10.05,1.165) (10.20,1.028) (10.35,0.898) (10.50,0.777) (10.65,0.666) (10.80,0.564) (10.95,0.474) (11.10,0.394) (11.25,0.324) (11.40,0.264) (11.55,0.213) (11.70,0.170) (11.85,0.134) (12.00,0.105)};
+\draw[orange!85!black,line width=1pt] plot coordinates {(0.00,0.001) (0.15,0.001) (0.30,0.001) (0.45,0.002) (0.60,0.002) (0.75,0.002) (0.90,0.002) (1.05,0.002) (1.20,0.002) (1.35,0.005) (1.50,0.007) (1.65,0.008) (1.80,0.011) (1.95,0.017) (2.10,0.027) (2.25,0.044) (2.40,0.059) (2.55,0.068) (2.70,0.087) (2.85,0.126) (3.00,0.172) (3.15,0.217) (3.30,0.284) (3.45,0.386) (3.60,0.485) (3.75,0.572) (3.90,0.684) (4.05,0.859) (4.20,1.080) (4.35,1.296) (4.50,1.512) (4.65,1.730) (4.80,1.948) (4.95,2.173) (5.10,2.403) (5.25,2.614) (5.40,2.787) (5.55,2.899) (5.70,2.951) (5.85,2.988) (6.00,2.978) (6.15,2.926) (6.30,2.801) (6.45,2.602) (6.60,2.357) (6.75,2.090) (6.90,1.829) (7.05,1.604) (7.20,1.445) (7.35,1.319) (7.50,1.181) (7.65,1.034) (7.80,0.909) (7.95,0.803) (8.10,0.693) (8.25,0.567) (8.40,0.462) (8.55,0.388) (8.70,0.325) (8.85,0.268) (9.00,0.211) (9.15,0.162) (9.30,0.131) (9.45,0.107) (9.60,0.084) (9.75,0.066) (9.90,0.055) (10.05,0.043) (10.20,0.030) (10.35,0.019) (10.50,0.013) (10.65,0.010) (10.80,0.010) (10.95,0.008) (11.10,0.005) (11.25,0.002) (11.40,0.001) (11.55,0.001) (11.70,0.000) (11.85,0.000) (12.00,0.000)};
+\draw[red!70!black,line width=1pt] plot coordinates {(0.00,0.002) (0.15,0.001) (0.30,0.001) (0.45,0.003) (0.60,0.005) (0.75,0.008) (0.90,0.012) (1.05,0.016) (1.20,0.021) (1.35,0.031) (1.50,0.043) (1.65,0.056) (1.80,0.075) (1.95,0.105) (2.10,0.151) (2.25,0.196) (2.40,0.249) (2.55,0.321) (2.70,0.427) (2.85,0.569) (3.00,0.702) (3.15,0.845) (3.30,1.028) (3.45,1.244) (3.60,1.466) (3.75,1.683) (3.90,1.931) (4.05,2.213) (4.20,2.484) (4.35,2.759) (4.50,3.007) (4.65,3.131) (4.80,3.164) (4.95,3.216) (5.10,3.247) (5.25,3.158) (5.40,3.028) (5.55,2.871) (5.70,2.633) (5.85,2.365) (6.00,2.072) (6.15,1.756) (6.30,1.465) (6.45,1.212) (6.60,1.019) (6.75,0.842) (6.90,0.665) (7.05,0.535) (7.20,0.447) (7.35,0.373) (7.50,0.294) (7.65,0.220) (7.80,0.167) (7.95,0.124) (8.10,0.090) (8.25,0.076) (8.40,0.070) (8.55,0.058) (8.70,0.038) (8.85,0.023) (9.00,0.015) (9.15,0.008) (9.30,0.005) (9.45,0.005) (9.60,0.003) (9.75,0.003) (9.90,0.002) (10.05,0.001) (10.20,0.000) (10.35,0.000) (10.50,0.000) (10.65,0.000) (10.80,0.000) (10.95,0.000) (11.10,0.000) (11.25,0.000) (11.40,0.000) (11.55,0.000) (11.70,0.000) (11.85,0.000) (12.00,0.000)};
+\draw[orange!85!black,densely dotted,thick] (3.96,0) -- (3.96,0.75);
+\draw[red!70!black,densely dotted,thick] (3.14,0) -- (3.14,0.83);
+\draw[gray!70!black,densely dotted,thick] (5.78,0) -- (5.78,0.62);
+\node[font=\scriptsize,orange!80!black,anchor=west] at (6.9,2.9) {constant};
+\node[font=\scriptsize,red!70!black,anchor=east] at (4.3,3.1) {trend};
+\node[font=\scriptsize,gray!70!black,anchor=west] at (9.5,1.9) {$N(0, 1)$};
+\node[font=\scriptsize,align=left,anchor=west] at (-0.2,3.35) {$5\%$ points:};
+\node[font=\scriptsize,align=left,anchor=west] at (-0.2,3.0) {$-3.41$, $-2.86$, $-1.64$};
+\end{tikzpicture}
+\caption{Simulated null distributions of the Dickey--Fuller $\tau$ with a constant (orange) and with a constant and trend (red), from Software~\ref{sw:dfsim}, against the
+standard normal (dashed). The dotted lines mark the $5\%$ critical values. A test that used $-1.64$ would reject a true unit root $46\%$ of the time with a constant, and $77\%$ with a trend.}
+\label{fig:dfdensity}
+\end{figure}
+
+\subhead{The augmented test}
+If $\Delta Y_t$ is autocorrelated, the Dickey--Fuller regression has autocorrelated disturbances and its distribution changes. The remedy is to add lagged
+differences, which the next theorem justifies.
+
+\begin{thm}
+\label{thm:adfform}
+The AR($p$) model $Y_t = \mu + \phi_1Y_{t-1} + \dots + \phi_pY_{t-p} + u_t$ can be written
+\[
+\Delta Y_t = \mu + \gamma Y_{t-1} + \sum_{j=1}^{p-1}\delta_j\Delta Y_{t-j} + u_t, \qquad
+\gamma = \sum_{i=1}^p\phi_i - 1, \qquad \delta_j = -\sum_{i=j+1}^p\phi_i .
+\]
+The AR polynomial $\phi(z) = 1 - \phi_1z - \dots - \phi_pz^p$ has a unit root, $\phi(1) = 0$, if and only if $\gamma = 0$.
+\end{thm}
+
+\begin{proof}
+Substitute $Y_{t-1} = Y_{t-1}$ and, for $j \geq 2$, $Y_{t-j} = Y_{t-1} - \Delta Y_{t-1} - \dots - \Delta Y_{t-j+1}$ into the AR($p$) equation. The coefficient of $Y_{t-1}$ collects $\phi_1 + \dots + \phi_p$,
+and the coefficient of $\Delta Y_{t-j}$ collects $-\phi_i$ from every $Y_{t-i}$ with $i > j$. Subtracting $Y_{t-1}$ from both sides gives the stated form. Finally
+$\phi(1) = 1 - \sum\phi_i = -\gamma$.
+\end{proof}
+
+The \textbf{augmented Dickey--Fuller} (ADF) test uses the $t$ ratio of $\gamma$ in this regression, with the same critical values as the simple test: Said and Dickey
+(1984) showed that, with enough lags, the lagged differences absorb the short-run dynamics and leave the limit of Theorem~\ref{thm:df} unchanged. The
+number of lags is chosen by an information criterion or by testing down from a generous maximum; too few lags distort the size, too many reduce the
+power.
+
+\subhead{Low power}
+The most serious practical weakness of unit root tests is their power against stationary alternatives close to one. Simulation with $5000$
+replications of the stationary scheme $Y_t = 0.05 + 0.95Y_{t-1} + u_t$ met in Section~\ref{ssec:ar1}, using the constant form at the $5\%$ level, gives these rejection
+rates:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lcccc}
+\hline
+$n$ & $50$ & $100$ & $200$ & $400$\\
+\hline
+$\rho = 0.95$ & $0.08$ & $0.13$ & $0.33$ & $0.87$\\
+$\rho = 0.90$ & $0.14$ & $0.34$ & $0.88$ & $1.00$\\
+\hline
+\end{tabular}
+\end{center}
+With $25$ years of quarterly data ($n = 100$), a stationary series with $\rho = 0.95$ is declared to have a unit root seven times out of eight. Failure to reject
+is weak evidence. Two responses are common. The \textbf{KPSS} test of Kwiatkowski, Phillips, Schmidt and Shin (1992) reverses the null, taking stationarity
+as the hypothesis; if KPSS rejects and ADF does not, the evidence for a unit root is stronger. And Perron (1989) showed that a stationary series with a
+single break in its trend, such as the 1973 oil shock, looks like a random walk to the Dickey--Fuller test; tests allowing for breaks are then needed.
+In applied work it is common to report the evidence from several tests and to proceed on the assumption that is most consistent with it and with
+economic reasoning.
+
+\subsection{Cointegration}
+\label{ssec:coint}
+
+\begin{defn}
+Two $I(1)$ series $Y_t$ and $X_t$ are \textbf{cointegrated} if there is a $\theta$ such that $Y_t - \theta X_t$ is $I(0)$. The vector $(1, -\theta)$ is the \textbf{cointegrating
+vector}, and $Y_t = \theta X_t$ is interpreted as a long-run equilibrium from which the deviations $Y_t - \theta X_t$ are temporary.
+\end{defn}
+
+Consumption and income, prices in two markets linked by arbitrage, spot and futures prices, and money and nominal income are standard examples.
+Each series wanders, but they wander together, because the same stochastic trend drives both. If $Y_t$ and $X_t$ are cointegrated, the regression of $Y_t$ on
+$X_t$ is not spurious, and least squares estimates the cointegrating vector remarkably well.
+
+\begin{thm}[Superconsistency; Stock 1987]
+\label{thm:superc}
+Let $X_t$ be $I(1)$ and $Y_t = \alpha + \theta X_t + v_t$ with $v_t$ stationary, possibly correlated with $\Delta X_t$. The least squares estimate $\hat\theta$ satisfies
+$n(\hat\theta - \theta) = O_p(1)$: it converges to $\theta$ at rate $n$.
+\end{thm}
+
+\begin{proof}[Sketch of proof]
+$\hat\theta - \theta = \sum(X_t - \bar X)v_t/\sum(X_t - \bar X)^2$. As in Lemma~\ref{lem:urmoments}, the denominator is of order $n^2$. The numerator is a sum of products of an
+$I(1)$ and an $I(0)$ series, which is of order $n$, even when the two are correlated, because the correlation contributes a term of order $n$
+and the rest is of the same order as in Lemma~\ref{lem:urmoments}(i). The ratio is of order $1/n$.
+\end{proof}
+
+The theorem is the reason why ``endogeneity'' in the cointegrating regression does not cause inconsistency: the signal in $X_t$ grows so fast that
+correlation between $X_t$ and $v_t$ is swamped. But in small samples the bias can be substantial, and the limiting distribution of $\hat\theta$ is non-normal
+when $v_t$ and $\Delta X_t$ are correlated, so the usual $t$ ratios on $\hat\theta$ are not valid. Modified estimators (dynamic OLS, which adds leads and lags of $\Delta X_t$,
+and fully modified OLS) restore standard inference.
+
+\subhead{The Engle--Granger test}
+Engle and Granger (1987) proposed a two-step procedure. First, estimate the cointegrating regression $Y_t = \alpha + \theta X_t + v_t$ by least squares. Second, apply
+the ADF test, in the ``none'' form, to its residuals $\hat v_t$. The null hypothesis is \emph{no} cointegration, that $\hat v_t$ has a unit root.
+
+The Dickey--Fuller critical values cannot be used. Least squares chooses $\hat\theta$ to minimise $\sum\hat v_t^2$, which makes the residuals look as stationary as
+possible even when no cointegrating vector exists, and the test statistic is pushed to the left. The asymptotic critical values depend on the number
+$N$ of variables in the cointegrating regression; with a constant they are (MacKinnon 1991):
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lccc}
+\hline
+$N$ & $1\%$ & $5\%$ & $10\%$\\
+\hline
+$2$ & $-3.90$ & $-3.34$ & $-3.04$\\
+$3$ & $-4.29$ & $-3.74$ & $-3.45$\\
+$4$ & $-4.64$ & $-4.10$ & $-3.81$\\
+\hline
+\end{tabular}
+\end{center}
+A simulation of $20\,000$ regressions between independent random walks of length $500$ gives $5\%$ points of $-3.34$, $-3.77$ and $-4.13$, in close agreement.
+With more than two variables there may be more than one cointegrating vector, and the single-equation approach cannot find them all; the system
+approach of Johansen, based on vector autoregressions, is described in the section on simultaneous equations and VARs.
+
+\subsection{Error correction models}
+\label{ssec:ecm}
+
+A static cointegrating regression describes the long run. The short-run dynamics, how $Y$ moves when it is away from equilibrium, are described by
+an error correction model.
+
+\begin{thm}
+\label{thm:ecm}
+The autoregressive distributed lag model
+\[
+Y_t = \alpha + \phi Y_{t-1} + \beta_0X_t + \beta_1X_{t-1} + \varepsilon_t, \qquad |\phi| < 1,
+\]
+is identical to the \textbf{error correction model}
+\[
+\Delta Y_t = \beta_0\Delta X_t - (1 - \phi)\bigl(Y_{t-1} - \mu - \theta X_{t-1}\bigr) + \varepsilon_t, \qquad
+\mu = \frac{\alpha}{1 - \phi}, \quad \theta = \frac{\beta_0 + \beta_1}{1 - \phi} .
+\]
+In a static equilibrium with $Y_t = Y^*$ and $X_t = X^*$ for all $t$ and $\varepsilon_t = 0$, $Y^* = \mu + \theta X^*$. The common factor restriction of Theorem~\ref{thm:comfac}, $\beta_1 = -\phi\beta_0$,
+holds if and only if $\theta = \beta_0$.
+\end{thm}
+
+\begin{proof}
+Subtract $Y_{t-1}$ from both sides and add and subtract $\beta_0X_{t-1}$:
+\[
+\Delta Y_t = \alpha - (1 - \phi)Y_{t-1} + \beta_0\Delta X_t + (\beta_0 + \beta_1)X_{t-1} + \varepsilon_t ,
+\]
+and factor $-(1 - \phi)$ out of the terms in $Y_{t-1}$, $X_{t-1}$ and the constant. Setting $Y_t = Y_{t-1} = Y^*$ and $X_t = X_{t-1} = X^*$ in the original equation gives
+$(1 - \phi)Y^* = \alpha + (\beta_0 + \beta_1)X^*$. Finally $\theta = \beta_0$ means $\beta_0 + \beta_1 = \beta_0(1 - \phi)$, that is $\beta_1 = -\phi\beta_0$.
+\end{proof}
+
+The model has a clear interpretation. $\beta_0$ is the impact effect of a change in $X$; $\theta$ is the long-run effect; and $1 - \phi$ is the \textbf{speed of
+adjustment}, the fraction of last period's disequilibrium $Y_{t-1} - \mu - \theta X_{t-1}$ removed in this period. The half-life of a disequilibrium is
+$\log 0.5/\log\phi$. The last part of the theorem shows what the AR(1) error model of the previous section assumes: that the long-run effect equals the
+impact effect, so that there is no adjustment to speak of. That is rarely plausible, and it is a further reason to prefer the general dynamic
+model.
+
+When $Y$ and $X$ are $I(1)$ and cointegrated, every term of the error correction model is $I(0)$: $\Delta Y_t$, $\Delta X_t$, and the lagged disequilibrium. The regression
+is \emph{balanced}, and its coefficients have standard distributions. The converse is the \textbf{Granger representation theorem} (Engle and Granger 1987):
+if two $I(1)$ series are cointegrated, they have an error correction representation in which at least one of them responds to the lagged
+disequilibrium. Cointegration and error correction are two descriptions of the same thing.
+
+\subhead{Two-step estimation}
+Engle and Granger's second step replaces the unknown disequilibrium by the lagged residual from the cointegrating regression:
+\[
+\Delta Y_t = c + \beta_0\Delta X_t - \lambda\hat v_{t-1} + \text{lags of }\Delta Y_t, \Delta X_t + \varepsilon_t .
+\]
+Because $\hat\theta$ is superconsistent, the estimation error in $\hat v_{t-1}$ is negligible, and the coefficients of this regression have the usual asymptotic normal
+distributions. A significantly negative $\lambda$ is itself evidence of cointegration. If $\Delta Y_t$ and $\Delta X_t$ have means, the intercept $c$ is not zero: averaging the
+equation, $E(\Delta Y) = c + \beta_0E(\Delta X)$, while in the long run $E(\Delta Y) = \theta E(\Delta X)$, so $c = (\theta - \beta_0)E(\Delta X)$.
+
+\subsection{Unit roots and cointegration in software}
+\label{ssec:software12}
+
+\begin{software}[The Dickey--Fuller distributions by simulation]
+\label{sw:dfsim}
+A fast function for a single $t$ ratio, used here and in the next panels, and $20\,000$ simulated random walks of length $250$:
+{\small\begin{verbatim}
+> tstat <- function(y, X, j) {             # t ratio of coefficient j, fast
++   XtXi <- solve(crossprod(X)); b <- XtXi %*% crossprod(X, y)
++   e <- y - X %*% b; s2 <- sum(e^2) / (length(y) - ncol(X))
++   b[j] / sqrt(s2 * XtXi[j, j])
++ }
+> set.seed(1); n <- 250; R <- 20000; tt <- 1:(n - 1)
+> sims <- t(replicate(R, {
++   y <- cumsum(rnorm(n)); dy <- diff(y); yl <- y[-n]
++   c(none = tstat(dy, cbind(yl), 1), constant = tstat(dy, cbind(yl, 1), 1),
++     trend = tstat(dy, cbind(yl, 1, tt), 1))
++ }))
+> round(apply(sims, 2, quantile, c(0.01, 0.05, 0.10)), 2)
+     none constant trend
+1%  -2.57    -3.47 -4.01
+5%  -1.97    -2.88 -3.45
+10% -1.63    -2.58 -3.15
+> round(rbind(mean = colMeans(sims), sd = apply(sims, 2, sd)), 2)
+      none constant trend
+mean -0.42    -1.53 -2.19
+sd    1.00     0.85  0.76
+> round(qnorm(c(0.01, 0.05, 0.10)), 2)
+[1] -2.33 -1.64 -1.28
+\end{verbatim}}
+\textbf{Reading the output.} The simulated $5\%$ points, $-1.97$, $-2.88$ and $-3.45$, are close to the asymptotic values $-1.95$, $-2.86$ and $-3.41$ of the table in
+Section~\ref{ssec:urtests}; the small differences are the finite-sample corrections for $n = 250$. The distributions are centred well to the left of zero:
+with a constant the mean is $-1.53$, and with a trend $-2.19$, which is why the normal $5\%$ point $-1.64$ is so badly wrong. \texttt{tstat} computes
+$b_j/\bigl(s\sqrt{(X'X)^{-1}_{jj}}\bigr)$ directly, which is much faster than \texttt{summary(lm())} and matters when the regression is repeated thousands of times.
+
+\textbf{Stata:} \texttt{dfuller y, trend lags(0)} prints these critical values with MacKinnon's approximate $p$-value. \textbf{EViews:} \emph{View $\to$ Unit Root
+Test}, choosing the deterministic terms.
+\end{software}
+
+\begin{software}[Granger and Newbold's experiment]
+\label{sw:spurious}
+For each sample size, $5000$ pairs of independent random walks are generated; $Y$ is regressed on $X$ in levels and in differences:
+{\small\begin{verbatim}
+> set.seed(3)
+> gn <- function(n, R = 5000) {
++   s <- replicate(R, {
++     y <- cumsum(rnorm(n)); x <- cumsum(rnorm(n)); X <- cbind(1, x)
++     e <- y - X %*% solve(crossprod(X), crossprod(X, y))
++     c(reject = abs(tstat(y, X, 2)) > 1.96,
++       R2 = 1 - sum(e^2) / sum((y - mean(y))^2),
++       DW = sum(diff(e)^2) / sum(e^2),
++       reject.diff = abs(tstat(diff(y), cbind(1, diff(x)), 2)) > 1.96)
++   })
++   rowMeans(s)
++ }
+> tab <- sapply(c(50, 100, 200, 400), gn)
+> colnames(tab) <- paste0("n=", c(50, 100, 200, 400)); round(tab, 3)
+             n=50 n=100 n=200 n=400
+reject      0.665 0.759 0.838 0.884
+R2          0.241 0.242 0.240 0.243
+DW          0.335 0.174 0.089 0.045
+reject.diff 0.053 0.055 0.048 0.050
+\end{verbatim}}
+\textbf{Reading the output.} In levels, the nominal $5\%$ test rejects the true hypothesis of no relation $67\%$ of the time with $n = 50$, and $88\%$ with $n = 400$:
+more data make it worse, as Theorem~\ref{thm:spurious}(ii) predicts. The average $R^2$ stays near $0.24$ whatever $n$ is, part (iii), and the average Durbin--Watson
+statistic halves each time $n$ doubles, the rate $1/n$ of part (iv). In differences, the regression behaves exactly as the classical theory says: it
+rejects $5\%$ of the time.
+
+\textbf{Stata} and \textbf{EViews} have no built-in command for this; the experiment is a loop over \texttt{drawnorm} and \texttt{regress} in Stata, or a
+program with \texttt{nrnd} and \texttt{@cumsum} in EViews.
+\end{software}
+
+\begin{software}[ADF tests on sales and a leading indicator]
+\label{sw:adf}
+R's \texttt{BJsales} data are $150$ consecutive values of a company's sales, together with a leading indicator \texttt{BJsales.lead}, from Box and
+Jenkins' book on time-series analysis (their Series M). Test both in levels with a trend, and in differences with a constant, for $0$ to $3$ lagged
+differences:
+{\small\begin{verbatim}
+> adf <- function(y, p = 0, det = "trend") {   # ADF t ratio, p lags
++   dy <- diff(y); yl <- y[-length(y)]; tt <- seq_along(dy)
++   L <- if (p > 0) embed(c(rep(NA, p), dy), p + 1)[, -1, drop = FALSE]
++   X <- cbind(yl, if (det != "none") 1, if (det == "trend") tt, L)
++   ok <- complete.cases(X)
++   tstat(dy[ok], X[ok, , drop = FALSE], 1)
++ }
+> s <- as.numeric(BJsales); l <- as.numeric(BJsales.lead)
+> tab <- sapply(0:3, function(p) c(sales = adf(s, p), lead = adf(l, p),
++   d.sales = adf(diff(s), p, "const"), d.lead = adf(diff(l), p, "const")))
+> colnames(tab) <- paste0("p=", 0:3); round(tab, 2)
+           p=0    p=1   p=2   p=3
+sales    -0.99  -1.32 -1.61 -1.79
+lead     -3.28  -2.03 -1.77 -1.58
+d.sales  -8.77  -5.76 -4.64 -3.72
+d.lead  -19.53 -11.82 -9.40 -6.76
+\end{verbatim}}
+\textbf{Reading the output.} In levels, no statistic for sales comes near the $5\%$ trend critical value $-3.41$, so a unit root is not rejected. For the leading
+indicator the value with no lags, $-3.28$, is close to it, but once lagged differences are added it falls to between $-1.6$ and $-2.0$: the simple
+test was distorted by autocorrelation in the differences of the indicator, and the ADF test does not reject. In differences every statistic is far below the constant critical value
+$-2.86$. Both series are therefore treated as $I(1)$. The function \texttt{adf} builds the regressors of Theorem~\ref{thm:adfform} with \texttt{embed} and returns the $t$
+ratio of $Y_{t-1}$.
+
+\textbf{Stata:} \texttt{dfuller sales, trend lags(2)}, and \texttt{dfuller D.sales, lags(2)}. \textbf{EViews:} \emph{View $\to$ Unit Root Test}, with ``Level'' or ``1st difference''
+and the lag length chosen automatically by the Schwarz criterion.
+\end{software}
+
+\begin{software}[The Engle--Granger cointegration test]
+\label{sw:eg}
+Box and Jenkins found that sales respond to the indicator with a delay of three periods. Regress sales on the indicator three periods earlier
+and test the residuals; then, for contrast, test the four European stock indices of Software~\ref{sw:arch} for cointegration:
+{\small\begin{verbatim}
+> n <- length(s); y <- s[4:n]; x <- l[1:(n - 3)]   # sales on lead 3 back
+> cr <- lm(y ~ x); coef(cr); summary(cr)$r.squared
+(Intercept)           x 
+   25.75020    17.34257 
+[1] 0.9634752
+> e <- resid(cr)
+> round(sapply(0:3, function(p) adf(e, p, "none")), 2)
+[1] -8.10 -4.95 -4.06 -3.15
+> d <- log(EuStockMarkets)
+> e4 <- resid(lm(d[, "DAX"] ~ d[, "SMI"] + d[, "CAC"] + d[, "FTSE"]))
+> round(sapply(0:3, function(p) adf(e4, p, "none")), 2)
+[1] -2.92 -2.96 -3.10 -3.24
+\end{verbatim}}
+\textbf{Reading the output.} The cointegrating regression is $\widehat{\text{sales}}_t = 25.75 + 17.34\,\text{lead}_{t-3}$, with $R^2 = 0.963$. With $N = 2$ the $5\%$ critical value is $-3.34$,
+and the residual ADF statistics are $-8.10$, $-4.95$ and $-4.06$ for $0$, $1$ and $2$ lags, and $-3.15$ with $3$; the evidence of cointegration is strong except with the most
+generous lag length, where power is lost. The long-run gain of $17.3$ agrees with the long-run gain of Box and Jenkins' transfer-function model, approximately $4.82/(1 - 0.72) = 17.2$.
+Figure~\ref{fig:bjsales} shows the two series and the residual. The stock indices tell the opposite story: their residual statistics, $-2.9$ to $-3.2$, are
+nowhere near the $N = 4$ critical value $-4.10$. Four major stock markets, though highly correlated, do not share a common long-run equilibrium in these
+years, which is what efficient markets would lead one to expect.
+
+\textbf{Stata:} \texttt{regress sales L3.lead}, \texttt{predict v, resid}, \texttt{dfuller v, noconstant lags(1)}, comparing with the Engle--Granger critical values (the
+\texttt{egranger} package does this automatically); \texttt{vecrank} for Johansen's test. \textbf{EViews:} \emph{View $\to$ Cointegration Test $\to$ Single-Equation
+Cointegration Test}, method Engle-Granger.
+\end{software}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[ttl/.style={font=\small\bfseries,anchor=west}]
+\fill[blue!5,rounded corners=4pt] (-0.9,1.9) rectangle (13.3,4.95);
+\fill[green!6,rounded corners=4pt] (-0.9,-0.25) rectangle (13.3,1.8);
+\node[ttl,blue!60!black] at (-0.7,4.7) {Sales (black) and the long-run fit $25.75 + 17.34\,\text{lead}_{t-3}$ (orange)};
+\node[ttl,green!40!black] at (-0.7,1.55) {Residual: the deviation from equilibrium};
+\foreach \v/\y in {200/2.086, 220/2.829, 240/3.571, 260/4.314}
+  \draw (-0.08,\y) -- (0,\y) node[left,font=\scriptsize] {$\v$};
+\foreach \v/\y in {-10/0.15, 0/0.70, 10/1.25}
+  \draw (-0.08,\y) -- (0,\y) node[left,font=\scriptsize] {$\v$};
+\draw[gray] (0,0.70) -- (13,0.70);
+\draw[orange!85!black,line width=0.9pt] plot coordinates {(0.00,2.062) (0.09,2.100) (0.18,2.261) (0.27,1.894) (0.36,2.268) (0.45,2.139) (0.53,2.287) (0.62,2.261) (0.71,2.139) (0.80,2.158) (0.89,2.429) (0.98,2.454) (1.07,2.609) (1.16,2.828) (1.25,2.532) (1.34,2.416) (1.42,2.364) (1.51,2.551) (1.60,2.912) (1.69,2.673) (1.78,2.802) (1.87,3.150) (1.96,2.950) (2.05,2.970) (2.14,3.305) (2.23,2.854) (2.32,3.079) (2.40,2.673) (2.49,2.957) (2.58,2.712) (2.67,2.706) (2.76,2.847) (2.85,2.912) (2.94,2.590) (3.03,2.596) (3.12,2.789) (3.21,2.300) (3.29,2.635) (3.38,2.731) (3.47,2.770) (3.56,2.706) (3.65,2.841) (3.74,2.835) (3.83,3.285) (3.92,3.144) (4.01,2.654) (4.10,2.693) (4.18,2.706) (4.27,2.596) (4.36,2.545) (4.45,2.551) (4.54,2.622) (4.63,2.371) (4.72,2.377) (4.81,2.699) (4.90,2.686) (4.99,2.448) (5.08,2.364) (5.16,2.397) (5.25,2.744) (5.34,2.448) (5.43,2.609) (5.52,2.274) (5.61,2.558) (5.70,2.570) (5.79,2.268) (5.88,2.339) (5.97,2.377) (6.05,2.538) (6.14,2.313) (6.23,2.313) (6.32,2.274) (6.41,2.409) (6.50,2.351) (6.59,2.583) (6.68,2.641) (6.77,2.616) (6.86,2.487) (6.95,2.770) (7.03,2.622) (7.12,2.880) (7.21,2.873) (7.30,2.983) (7.39,3.034) (7.48,3.408) (7.57,3.234) (7.66,3.743) (7.75,3.608) (7.84,3.620) (7.92,3.814) (8.01,3.994) (8.10,3.820) (8.19,3.814) (8.28,3.833) (8.37,3.936) (8.46,3.756) (8.55,3.852) (8.64,4.020) (8.73,3.788) (8.82,3.994) (8.90,3.923) (8.99,4.065) (9.08,3.646) (9.17,3.646) (9.26,3.949) (9.35,4.052) (9.44,3.930) (9.53,4.239) (9.62,4.071) (9.71,4.207) (9.79,4.207) (9.88,4.078) (9.97,4.303) (10.06,4.548) (10.15,4.239) (10.24,4.368) (10.33,4.161) (10.42,4.438) (10.51,4.116) (10.60,4.194) (10.68,4.084) (10.77,4.181) (10.86,3.949) (10.95,4.174) (11.04,4.155) (11.13,4.039) (11.22,4.142) (11.31,4.187) (11.40,4.323) (11.49,4.000) (11.58,4.149) (11.66,4.065) (11.75,4.155) (11.84,4.058) (11.93,4.181) (12.02,4.026) (12.11,4.194) (12.20,4.052) (12.29,4.161) (12.38,4.400) (12.47,4.361) (12.55,4.548) (12.64,4.329) (12.73,4.252) (12.82,4.149) (12.91,4.310) (13.00,4.361)};
+\draw[black,line width=0.5pt] plot coordinates {(0.00,2.045) (0.09,2.049) (0.18,2.093) (0.27,2.034) (0.36,2.086) (0.45,2.097) (0.53,2.130) (0.62,2.145) (0.71,2.141) (0.80,2.141) (0.89,2.216) (0.98,2.268) (1.07,2.349) (1.16,2.476) (1.25,2.476) (1.34,2.450) (1.42,2.413) (1.51,2.439) (1.60,2.576) (1.69,2.595) (1.78,2.647) (1.87,2.780) (1.96,2.821) (2.05,2.847) (2.14,2.970) (2.23,2.933) (2.32,2.970) (2.40,2.892) (2.49,2.914) (2.58,2.858) (2.67,2.806) (2.76,2.832) (2.85,2.851) (2.94,2.788) (3.03,2.747) (3.12,2.743) (3.21,2.643) (3.29,2.654) (3.38,2.676) (3.47,2.706) (3.56,2.706) (3.65,2.743) (3.74,2.780) (3.83,2.936) (3.92,3.011) (4.01,2.910) (4.10,2.855) (4.18,2.829) (4.27,2.780) (4.36,2.717) (4.45,2.676) (4.54,2.673) (4.63,2.609) (4.72,2.543) (4.81,2.602) (4.90,2.628) (4.99,2.591) (5.08,2.535) (5.16,2.509) (5.25,2.572) (5.34,2.565) (5.43,2.580) (5.52,2.513) (5.61,2.543) (5.70,2.569) (5.79,2.494) (5.88,2.483) (5.97,2.461) (6.05,2.509) (6.14,2.457) (6.23,2.446) (6.32,2.413) (6.41,2.413) (6.50,2.413) (6.59,2.479) (6.68,2.528) (6.77,2.561) (6.86,2.550) (6.95,2.635) (7.03,2.654) (7.12,2.736) (7.21,2.784) (7.30,2.855) (7.39,2.910) (7.48,3.077) (7.57,3.141) (7.66,3.319) (7.75,3.412) (7.84,3.464) (7.92,3.594) (8.01,3.713) (8.10,3.768) (8.19,3.794) (8.28,3.805) (8.37,3.857) (8.46,3.854) (8.55,3.861) (8.64,3.921) (8.73,3.906) (8.82,3.939) (8.90,3.961) (8.99,3.999) (9.08,3.906) (9.17,3.854) (9.26,3.898) (9.35,3.958) (9.44,3.969) (9.53,4.054) (9.62,4.080) (9.71,4.129) (9.79,4.173) (9.88,4.166) (9.97,4.218) (10.06,4.329) (10.15,4.314) (10.24,4.363) (10.33,4.329) (10.42,4.374) (10.51,4.344) (10.60,4.307) (10.68,4.277) (10.77,4.273) (10.86,4.218) (10.95,4.229) (11.04,4.236) (11.13,4.218) (11.22,4.214) (11.31,4.225) (11.40,4.273) (11.49,4.233) (11.58,4.229) (11.66,4.210) (11.75,4.221) (11.84,4.195) (11.93,4.221) (12.02,4.203) (12.11,4.225) (12.20,4.214) (12.29,4.221) (12.38,4.299) (12.47,4.355) (12.55,4.422) (12.64,4.437) (12.73,4.418) (12.82,4.381) (12.91,4.396) (13.00,4.415)};
+\draw[green!40!black,line width=0.5pt] plot coordinates {(0.00,0.675) (0.09,0.624) (0.18,0.451) (0.27,0.907) (0.36,0.431) (0.45,0.638) (0.53,0.468) (0.62,0.528) (0.71,0.704) (0.80,0.675) (0.89,0.385) (0.98,0.423) (1.07,0.316) (1.16,0.178) (1.25,0.617) (1.34,0.750) (1.42,0.771) (1.51,0.533) (1.60,0.203) (1.69,0.583) (1.78,0.469) (1.87,0.152) (1.96,0.508) (2.05,0.518) (2.14,0.204) (2.23,0.817) (2.32,0.538) (2.40,1.023) (2.49,0.636) (2.58,0.916) (2.67,0.849) (2.76,0.678) (2.85,0.610) (2.94,0.993) (3.03,0.923) (3.12,0.631) (3.21,1.208) (3.29,0.728) (3.38,0.618) (3.47,0.605) (3.56,0.700) (3.65,0.555) (3.74,0.620) (3.83,0.183) (3.92,0.503) (4.01,1.079) (4.10,0.940) (4.18,0.882) (4.27,0.973) (4.36,0.955) (4.45,0.885) (4.54,0.775) (4.63,1.053) (4.72,0.945) (4.81,0.556) (4.90,0.614) (4.99,0.911) (5.08,0.953) (5.16,0.867) (5.25,0.445) (5.34,0.873) (5.43,0.657) (5.52,1.054) (5.61,0.678) (5.70,0.697) (5.79,1.036) (5.88,0.914) (5.97,0.824) (6.05,0.657) (6.14,0.914) (6.23,0.897) (6.32,0.905) (6.41,0.705) (6.50,0.791) (6.59,0.546) (6.68,0.532) (6.77,0.619) (6.86,0.794) (6.95,0.501) (7.03,0.747) (7.12,0.487) (7.21,0.568) (7.30,0.510) (7.39,0.516) (7.48,0.211) (7.57,0.562) (7.66,0.072) (7.75,0.410) (7.84,0.468) (7.92,0.374) (8.01,0.283) (8.10,0.623) (8.19,0.671) (8.28,0.659) (8.37,0.584) (8.46,0.845) (8.55,0.713) (8.64,0.553) (8.73,0.874) (8.82,0.619) (8.90,0.757) (8.99,0.602) (9.08,1.084) (9.17,1.007) (9.26,0.625) (9.35,0.560) (9.44,0.758) (9.53,0.427) (9.62,0.713) (9.71,0.584) (9.79,0.650) (9.88,0.830) (9.97,0.573) (10.06,0.376) (10.15,0.812) (10.24,0.693) (10.33,0.948) (10.42,0.604) (10.51,1.037) (10.60,0.868) (10.68,0.986) (10.77,0.837) (10.86,1.098) (10.95,0.781) (11.04,0.820) (11.13,0.964) (11.22,0.806) (11.31,0.756) (11.40,0.627) (11.49,1.044) (11.58,0.819) (11.66,0.915) (11.75,0.798) (11.84,0.903) (11.93,0.760) (12.02,0.962) (12.11,0.747) (12.20,0.940) (12.29,0.789) (12.38,0.551) (12.47,0.691) (12.55,0.513) (12.64,0.860) (12.73,0.947) (12.82,1.044) (12.91,0.828) (13.00,0.779)};
+\end{tikzpicture}
+\caption{Box and Jenkins' sales series and its cointegrating relation with the leading indicator. Both series wander, but the gap between them
+(bottom) keeps returning to zero: it is stationary, with a half-life of about five periods in the error correction model of Software~\ref{sw:ecm}.}
+\label{fig:bjsales}
+\end{figure}
+
+\begin{software}[The error correction model]
+\label{sw:ecm}
+The second Engle--Granger step: regress $\Delta\text{sales}_t$ on $\Delta\text{lead}_{t-3}$ and the lagged residual, then add one lag of each difference:
+{\small\begin{verbatim}
+> dy <- diff(y); dx <- diff(x); ec <- e[-length(e)]
+> ecm <- lm(dy ~ dx + ec); round(summary(ecm)$coef, 4)
+            Estimate Std. Error  t value Pr(>|t|)
+(Intercept)   0.3237     0.0309  10.4665        0
+dx            4.5341     0.1054  43.0180        0
+ec           -0.2455     0.0082 -29.9267        0
+> dyl <- c(NA, dy[-length(dy)]); dxl <- c(NA, dx[-length(dx)])
+> ecm2 <- lm(dy ~ dx + dxl + dyl + ec); round(summary(ecm2)$coef, 4)
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)   0.1734     0.0347  5.0021   0.0000
+dx            4.6647     0.0919 50.7776   0.0000
+dxl           0.3895     0.1244  3.1312   0.0021
+dyl           0.3272     0.0536  6.1094   0.0000
+ec           -0.1183     0.0186 -6.3442   0.0000
+> c(AIC(ecm), AIC(update(ecm, subset = -1)), AIC(ecm2))
+[1] 130.8384 128.2626  80.9936
+\end{verbatim}}
+\textbf{Reading the output.} In the simple model the impact effect of a unit change in the indicator is $4.53$, much smaller than the long-run effect $17.34$, and
+$26\%$ of a disequilibrium is removed each period. Adding the lagged differences lowers the AIC from $128.3$ to $81.0$ on the same $145$ observations (the
+middle value refits the simple model without its first observation, so the comparison is fair). The dynamic model has a large lagged $\Delta\text{sales}$
+coefficient, $0.33$, and the speed of adjustment falls to $\hat\lambda = 0.118$, a half-life of $\log 0.5/\log(1 - 0.118) = 5.5$ periods. The adjustment coefficient is negative
+with a $t$ ratio of $-6.3$, more evidence of cointegration. The intercept is explained at the end of Section~\ref{ssec:ecm}: with $\hat\theta = 17.34$, $\hat\beta_0 = 4.53$ and
+mean $\Delta\text{lead} = 0.0245$, $(\hat\theta - \hat\beta_0)\overline{\Delta X} = 0.313$, against the estimate $0.324$. The large gap between impact and long-run effects is the
+decisive evidence against the common factor restriction, by the last part of Theorem~\ref{thm:ecm}.
+
+\textbf{Stata:} \texttt{regress D.sales DL3.lead L.v}. \textbf{EViews:} \texttt{ls d(sales) c d(lead(-3)) v(-1)}, where \texttt{v} holds the residuals of the
+cointegrating regression.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Let $Y_t = Y_{t-1} + u_t$ with $Y_0 = 0$ and $u_t$ independent $N(0, 4)$.
+\begin{enumerate}[label=(\alph*)]
+\item Find $\Var(Y_{25})$ and $\Corr(Y_{10}, Y_{40})$.
+\item Find a $95\%$ interval for $Y_{30}$ given $Y_{20} = 7$, and compare its width with that of an interval for $Y_{21}$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) By Theorem~\ref{thm:rwmoments}, $\Var(Y_{25}) = 25 \times 4 = 100$, and $\Corr(Y_{10}, Y_{40}) = \sqrt{10/40} = 0.5$.
+
+(b) $Y_{30} = Y_{20} + u_{21} + \dots + u_{30}$, so given $Y_{20} = 7$ it is $N(7, 40)$, and the interval is $7 \pm 1.96\sqrt{40} = 7 \pm 12.4$. For $Y_{21}$ it is $7 \pm 1.96(2) = 7 \pm 3.9$. The
+width grows with the square root of the horizon: ten periods ahead the interval is $\sqrt{10} = 3.2$ times as wide.
+\end{solution}
+
+\begin{problem}
+Write each AR(2) model in the form of Theorem~\ref{thm:adfform}, and decide whether it has a unit root.
+\begin{enumerate}[label=(\alph*)]
+\item $Y_t = 1.5Y_{t-1} - 0.5Y_{t-2} + u_t$.
+\item $Y_t = 1.2Y_{t-1} - 0.3Y_{t-2} + u_t$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\gamma = 1.5 - 0.5 - 1 = 0$ and $\delta_1 = -\phi_2 = 0.5$, so $\Delta Y_t = 0.5\Delta Y_{t-1} + u_t$. There is a unit root: $Y_t$ is $I(1)$, and its difference is a stationary AR(1). The
+polynomial $1 - 1.5z + 0.5z^2 = (1 - z)(1 - 0.5z)$ confirms it.
+
+(b) $\gamma = 1.2 - 0.3 - 1 = -0.1$ and $\delta_1 = 0.3$, so $\Delta Y_t = -0.1Y_{t-1} + 0.3\Delta Y_{t-1} + u_t$. Since $\gamma \neq 0$ there is no unit root. The roots of $1 - 1.2z + 0.3z^2$ are
+$z = (1.2 \pm \sqrt{0.24})/0.6$, that is $2.82$ and $1.18$, both outside the unit circle, so the process is stationary. With $\gamma = -0.1$, however, it is close enough to a unit
+root that an ADF test in a moderate sample would probably not reject.
+\end{solution}
+
+\begin{problem}
+Quarterly log real consumption $c_t$ and log real disposable income $y_t$ are available for $n = 120$ quarters. ADF tests with a trend give $-1.92$ for $c_t$ and $-2.24$
+for $y_t$; with a constant, the tests on $\Delta c_t$ and $\Delta y_t$ give $-5.81$ and $-6.40$. The regression $c_t = 0.21 + 0.97y_t + \hat v_t$ has $R^2 = 0.996$ and Durbin--Watson
+statistic $0.61$, and the ADF test on $\hat v_t$ gives $-3.82$.
+\begin{enumerate}[label=(\alph*)]
+\item What do the four unit root tests indicate?
+\item Are consumption and income cointegrated? Explain why the critical value differs from that of part (a).
+\item Is the $R^2$ of $0.996$ evidence of a genuine relation?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The levels statistics are above the $5\%$ trend critical value $-3.41$, so a unit root is not rejected; the differences are far below $-2.86$. Both series are
+$I(1)$.
+
+(b) With $N = 2$ the Engle--Granger $5\%$ critical value is $-3.34$, and $-3.82 < -3.34$, so the null of no cointegration is rejected (though not at $1\%$, $-3.90$).
+Consumption and income share a long-run relation with an elasticity of $0.97$. The critical value is more negative than the Dickey--Fuller value because
+$\hat v_t$ are least squares residuals, chosen to look as stationary as possible.
+
+(c) Not by itself: Theorem~\ref{thm:spurious} shows that $R^2$ stays large in spurious regressions. Here the low Durbin--Watson statistic ($R^2 > d$) would
+be a warning, and only the cointegration test of (b) shows that the relation is genuine.
+\end{solution}
+
+\begin{problem}
+An estimated ADL model is $Y_t = 2 + 0.6Y_{t-1} + 0.3X_t + 0.1X_{t-1} + \hat\varepsilon_t$.
+\begin{enumerate}[label=(\alph*)]
+\item Write it as an error correction model, and find the long-run relation.
+\item What fraction of a disequilibrium is removed each period, and what is its half-life?
+\item Does the model satisfy the common factor restriction?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) By Theorem~\ref{thm:ecm}, $\mu = 2/0.4 = 5$ and $\theta = (0.3 + 0.1)/0.4 = 1$, so
+\[
+\Delta Y_t = 0.3\Delta X_t - 0.4\bigl(Y_{t-1} - 5 - X_{t-1}\bigr) + \varepsilon_t ,
+\]
+and the long run is $Y^* = 5 + X^*$, with a unit long-run effect.
+
+(b) $1 - \phi = 0.4$, so $40\%$ is removed each period; the half-life is $\log 0.5/\log 0.6 = 1.36$ periods.
+
+(c) The restriction is $\beta_1 = -\phi\beta_0 = -0.18$, but $\beta_1 = 0.1$; equivalently the impact effect $0.3$ differs from the long-run effect $1$. It is not satisfied.
+\end{solution}
+
+\begin{problem}
+\label{prob:unbalanced}
+Let $X_t$ be a random walk and $Y_t$ a stationary series independent of it, and let $b$ be the least squares slope of $Y_t$ on $X_t$ (without a constant, for
+simplicity).
+\begin{enumerate}[label=(\alph*)]
+\item Show that $\plim b = 0$, and that $b$ is of order $1/n$.
+\item Explain why a regression of an $I(0)$ variable on an $I(1)$ variable is called unbalanced, and why the result of (a) is to be expected.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $b = \sum X_tY_t/\sum X_t^2$. By Lemma~\ref{lem:urmoments}(ii), $\sum X_t^2$ is of order $n^2$. The numerator has mean zero, by independence, and variance
+$\sum_t\sum_sE(X_tX_s)E(Y_tY_s)$; with $E(X_tX_s) = \sigma^2\min(t, s)$ and $\sum_s|E(Y_tY_s)|$ bounded, this is of order $n^2$, so the numerator is of order $n$. Hence $b$ is of
+order $n/n^2 = 1/n$.
+
+(b) The left side is $I(0)$ and has bounded variance, while $X_t$ has variance growing like $t$. The only way the equation $Y_t = bX_t + u_t$ can hold with
+a stationary disturbance is $b = 0$: the stochastic trend in $X_t$ has nothing to match on the left side. In a balanced regression both sides have the
+same order of integration, or the $I(1)$ regressors are cointegrated so that their combination is $I(0)$, as in the error correction model.
+\end{solution}
+
+\begin{problem}
+Using Lemma~\ref{lem:urmoments}(i), show that for a random walk with independent normal increments, $E\bigl(\sum_{t=1}^nY_{t-1}u_t\bigr) = 0$ and
+$\Var\bigl(\sum_{t=1}^nY_{t-1}u_t\bigr) = \sigma^4n(n - 1)/2$. Compare with the stationary case.
+\end{problem}
+
+\begin{solution}
+Each term $Y_{t-1}u_t$ has mean zero, since $u_t$ is independent of $Y_{t-1}$. For the variance, terms with $s < t$ are uncorrelated:
+$E(Y_{s-1}u_sY_{t-1}u_t) = E(Y_{s-1}u_sY_{t-1})E(u_t) = 0$. So the variance is $\sum_tE(Y_{t-1}^2)E(u_t^2) = \sigma^2\sum_t(t - 1)\sigma^2 = \sigma^4n(n - 1)/2$. The standard deviation is of order $n$,
+in agreement with the scaling by $n$ in the lemma. In the stationary case $E(Y_{t-1}^2)$ is constant, the variance is of order $n$, and the scaling is $\sqrt n$, which is
+why the stationary theory gives normal limits at rate $\sqrt n$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -6566,19 +7229,25 @@ is $1 - \frac12 = \frac12$, applied to both $\hat\gamma_1$ and its transpose.
 \item Anscombe, F. J. (1973), Graphs in statistical analysis, \emph{The American Statistician}, 27, 17--21.
 \item Belsley, D. A., Kuh, E., and Welsch, R. E. (1980), \emph{Regression Diagnostics}, New York, Wiley.
 \item Bollerslev, T. (1986), Generalized autoregressive conditional heteroskedasticity, \emph{Journal of Econometrics}, 31, 307--327.
+\item Box, G. E. P., and Jenkins, G. M. (1976), \emph{Time Series Analysis: Forecasting and Control} (revised ed.), San Francisco, Holden-Day.
 \item Breusch, T. S. (1978), Testing for autocorrelation in dynamic linear models, \emph{Australian Economic Papers}, 17, 334--355.
 \item Breusch, T. S., and Pagan, A. R. (1979), A simple test for heteroscedasticity and random coefficient variation, \emph{Econometrica}, 47,
 1287--1294.
 \item Chow, G. C. (1960), Tests of equality between sets of coefficients in two linear regressions, \emph{Econometrica}, 28, 591--605.
 \item Cochrane, D., and Orcutt, G. H. (1949), Application of least squares regression to relationships containing auto-correlated error terms,
 \emph{Journal of the American Statistical Association}, 44, 32--61.
+\item Dickey, D. A., and Fuller, W. A. (1979), Distribution of the estimators for autoregressive time series with a unit root, \emph{Journal of the
+American Statistical Association}, 74, 427--431.
 \item Durbin, J. (1970), Testing for serial correlation in least-squares regression when some of the regressors are lagged dependent variables,
 \emph{Econometrica}, 38, 410--421.
 \item Durbin, J., and Watson, G. S. (1950, 1951), Testing for serial correlation in least squares regression, I and II, \emph{Biometrika}, 37,
 409--428, and 38, 159--178.
 \item Engle, R. F. (1982), Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation,
 \emph{Econometrica}, 50, 987--1007.
+\item Engle, R. F., and Granger, C. W. J. (1987), Co-integration and error correction: representation, estimation, and testing, \emph{Econometrica},
+55, 251--276.
 \item Frisch, R. (1933), Editor's note, \emph{Econometrica}, 1, 1--4.
+\item Fuller, W. A. (1976), \emph{Introduction to Statistical Time Series}, New York, Wiley.
 \item Godfrey, L. G. (1978), Testing against general autoregressive and moving average error models when the regressors include lagged
 dependent variables, \emph{Econometrica}, 46, 1293--1301.
 \item Goldfeld, S. M., and Quandt, R. E. (1965), Some tests for homoscedasticity, \emph{Journal of the American Statistical Association}, 60, 539--547.
@@ -6588,15 +7257,27 @@ dependent variables, \emph{Econometrica}, 46, 1293--1301.
 for money by the Bank of England, \emph{Economic Journal}, 88, 549--563.
 \item Hildreth, C., and Lu, J. Y. (1960), Demand relations with autocorrelated disturbances, Technical Bulletin 276, Michigan State University
 Agricultural Experiment Station.
+\item Johansen, S. (1988), Statistical analysis of cointegration vectors, \emph{Journal of Economic Dynamics and Control}, 12, 231--254.
 \item Koenker, R. (1981), A note on studentizing a test for heteroscedasticity, \emph{Journal of Econometrics}, 17, 107--112.
+\item Kwiatkowski, D., Phillips, P. C. B., Schmidt, P., and Shin, Y. (1992), Testing the null hypothesis of stationarity against the alternative of
+a unit root, \emph{Journal of Econometrics}, 54, 159--178.
 \item Ljung, G. M., and Box, G. E. P. (1978), On a measure of lack of fit in time series models, \emph{Biometrika}, 65, 297--303.
+\item MacKinnon, J. G. (1991), Critical values for cointegration tests, in R. F. Engle and C. W. J. Granger (eds.), \emph{Long-Run Economic
+Relationships}, Oxford, Oxford University Press, 267--276.
 \item Modigliani, F. (1966), The life cycle hypothesis of saving, the demand for wealth and the supply of capital, \emph{Social Research}, 33,
 160--217.
+\item Nelson, C. R., and Plosser, C. I. (1982), Trends and random walks in macroeconomic time series, \emph{Journal of Monetary Economics}, 10,
+139--162.
 \item Newey, W. K., and West, K. D. (1987), A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix,
 \emph{Econometrica}, 55, 703--708.
+\item Perron, P. (1989), The great crash, the oil price shock, and the unit root hypothesis, \emph{Econometrica}, 57, 1361--1401.
+\item Phillips, P. C. B. (1986), Understanding spurious regressions in econometrics, \emph{Journal of Econometrics}, 33, 311--340.
 \item Prais, S. J., and Winsten, C. B. (1954), Trend estimators and serial correlation, Cowles Commission Discussion Paper No.~383, Chicago.
 \item Ramsey, J. B. (1969), Tests for specification errors in classical linear least-squares regression analysis, \emph{Journal of the Royal
 Statistical Society, Series B}, 31, 350--371.
+\item Said, S. E., and Dickey, D. A. (1984), Testing for unit roots in autoregressive-moving average models of unknown order, \emph{Biometrika},
+71, 599--607.
+\item Stock, J. H. (1987), Asymptotic properties of least squares estimators of cointegrating vectors, \emph{Econometrica}, 55, 1035--1056.
 \item White, H. (1980), A heteroskedasticity-consistent covariance matrix estimator and a direct test for heteroskedasticity, \emph{Econometrica},
 48, 817--838.
 \end{enumerate}
