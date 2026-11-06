@@ -8314,6 +8314,412 @@ $A \otimes B$ is the block matrix with $(i, j)$ block $a_{ij}B$. The $(i, k)$ bl
 $AC \otimes BD$. Then $(A \otimes B)(A^{-1} \otimes B^{-1}) = AA^{-1} \otimes BB^{-1} = I \otimes I = I$, which proves the inverse formula, and with $A = \Sigma$, $B = I_n$ it gives $(\Sigma \otimes I_n)^{-1} = \Sigma^{-1} \otimes I_n$.
 \end{solution}
 
+\section{The Generalised Method of Moments}
+\label{sec:gmm}
+
+Least squares, instrumental variables and maximum likelihood can all be described in the same way: each chooses the parameters that make certain
+sample averages equal to zero. The generalised method of moments (GMM), introduced by Hansen (1982), makes that description the starting point. An
+economic model often implies only a set of moment conditions, such as an Euler equation that says a forecast error is unpredictable, without
+specifying a full probability distribution. GMM estimates the parameters from those conditions alone, gives their asymptotic distribution, uses any
+surplus conditions efficiently, and tests whether the surplus conditions hold. It unifies most of the estimators in this course, and it is the
+standard tool of empirical finance and macroeconomics.
+
+\subsection{The method of moments}
+\label{ssec:mm}
+
+\begin{defn}
+Let $w_i$ be the data for observation $i$ and $\theta$ a $k \times 1$ parameter with true value $\theta_0$. A vector of $\ell$ \textbf{moment conditions} is a function $g(w, \theta)$ with
+\[
+E\,g(w_i, \theta_0) = 0 .
+\]
+Its sample analogue is $\bar g_n(\theta) = \frac1n\sum_{i=1}^ng(w_i, \theta)$. If $\ell = k$, the \textbf{method of moments} (MM) estimator $\hat\theta$ solves $\bar g_n(\hat\theta) = 0$.
+\end{defn}
+
+\begin{exa}
+\label{ex:mmexamples}
+\begin{enumerate}[label=(\alph*)]
+\item \emph{Mean and variance.} $g = (y - \mu,\ (y - \mu)^2 - \sigma^2)'$ gives $\hat\mu = \bar y$ and $\hat\sigma^2 = \frac1n\sum(y_i - \bar y)^2$.
+\item \emph{Least squares.} In $y = x'\beta + u$ with $E(xu) = 0$, $g = x(y - x'\beta)$, and $\bar g_n(\beta) = \frac1nX'(Y - X\beta) = 0$ are the normal equations.
+\item \emph{Instrumental variables.} With $E(zu) = 0$ and $\ell = k$, $g = z(y - x'\beta)$ gives $Z'(Y - X\beta) = 0$, whose solution is $b_{\text{IV}}$.
+\item \emph{Maximum likelihood.} The score has expectation zero at the true value (Theorem~\ref{thm:score}), so $g = \partial\log f(w, \theta)/\partial\theta$ gives the likelihood
+equations, and the MLE is a method of moments estimator.
+\item \emph{The gamma distribution.} With shape $\kappa$ and rate $\lambda$, $E(y) = \kappa/\lambda$ and $\Var(y) = \kappa/\lambda^2$. Matching these to $\bar y$ and $s^2$ gives $\hat\kappa = \bar y^2/s^2$ and
+$\hat\lambda = \bar y/s^2$.
+\end{enumerate}
+\end{exa}
+
+\begin{thm}
+\label{thm:mm}
+Suppose $\ell = k$, the observations are independent and identically distributed, $\hat\theta \xrightarrow{p} \theta_0$, $g$ is continuously differentiable, and
+\[
+G = E\frac{\partial g(w_i, \theta_0)}{\partial\theta'}, \qquad S = E\bigl[g(w_i, \theta_0)g(w_i, \theta_0)'\bigr],
+\]
+with $G$ non-singular. Then
+\[
+\sqrt n(\hat\theta - \theta_0) \xrightarrow{d} N\bigl(0,\ G^{-1}S(G')^{-1}\bigr) .
+\]
+\end{thm}
+
+\begin{proof}
+By the mean value theorem, applied row by row, $0 = \bar g_n(\hat\theta) = \bar g_n(\theta_0) + \bar G_n(\tilde\theta)(\hat\theta - \theta_0)$, where $\bar G_n$ is the derivative of $\bar g_n$ and $\tilde\theta$ lies between
+$\hat\theta$ and $\theta_0$. Since $\tilde\theta \xrightarrow{p} \theta_0$, the law of large numbers gives $\bar G_n(\tilde\theta) \xrightarrow{p} G$. Hence
+\[
+\sqrt n(\hat\theta - \theta_0) = -\bar G_n(\tilde\theta)^{-1}\sqrt n\,\bar g_n(\theta_0),
+\]
+and $\sqrt n\,\bar g_n(\theta_0) \xrightarrow{d} N(0, S)$ by the central limit theorem, since the $g(w_i, \theta_0)$ are independent with mean zero and variance $S$. Slutsky's theorem
+completes the proof.
+\end{proof}
+
+The variance has the sandwich form of Section~\ref{sec:hetero}. For least squares, $G = -E(xx')$ and $S = E(u^2xx')$, and the theorem gives exactly White's
+heteroscedasticity-robust variance of Theorem~\ref{thm:white}. For maximum likelihood, $S$ is the information matrix and $G = -S$ by the information
+equality, and the variance reduces to the inverse information of Theorem~\ref{thm:mleasym}. The method of moments therefore contains both results.
+
+\subsection{The generalised method of moments}
+\label{ssec:gmmdef}
+
+When $\ell > k$ the equations $\bar g_n(\theta) = 0$ have no solution in general, because a sample will not satisfy more conditions than there are
+parameters. GMM makes $\bar g_n$ as close to zero as possible in a chosen metric.
+
+\begin{defn}
+Let $W_n$ be an $\ell \times \ell$ positive definite weighting matrix with $W_n \xrightarrow{p} W$. The \textbf{GMM estimator} minimises
+\[
+Q_n(\theta) = \bar g_n(\theta)'W_n\,\bar g_n(\theta) .
+\]
+\end{defn}
+
+The estimator is consistent under the \emph{identification} condition that $E\,g(w, \theta) = 0$ only at $\theta = \theta_0$, together with regularity conditions (a compact
+parameter space and a uniform law of large numbers for $\bar g_n$). The argument is that $Q_n(\theta)$ converges uniformly to $Q(\theta) = E\,g(\theta)'W\,E\,g(\theta)$, which is zero at $\theta_0$
+and positive elsewhere, so the minimiser of $Q_n$ converges to the minimiser of $Q$. We take consistency as given and derive the distribution.
+
+\begin{thm}
+\label{thm:gmm}
+Under the conditions of Theorem~\ref{thm:mm}, but with $\ell \geq k$ and $G$ of rank $k$, the GMM estimator satisfies
+\[
+\sqrt n(\hat\theta - \theta_0) \xrightarrow{d} N\bigl(0,\ (G'WG)^{-1}G'WSWG(G'WG)^{-1}\bigr) .
+\]
+The variance is smallest, in the sense of positive semi-definite matrices, when $W = S^{-1}$, and is then
+\[
+V_{\text{eff}} = (G'S^{-1}G)^{-1} .
+\]
+\end{thm}
+
+\begin{proof}
+The first-order condition is $\bar G_n(\hat\theta)'W_n\bar g_n(\hat\theta) = 0$. Expanding $\bar g_n(\hat\theta) = \bar g_n(\theta_0) + \bar G_n(\tilde\theta)(\hat\theta - \theta_0)$ as before and substituting,
+\[
+\sqrt n(\hat\theta - \theta_0) = -\bigl[\bar G_n(\hat\theta)'W_n\bar G_n(\tilde\theta)\bigr]^{-1}\bar G_n(\hat\theta)'W_n\sqrt n\,\bar g_n(\theta_0) \xrightarrow{d} -(G'WG)^{-1}G'W\,N(0, S),
+\]
+which has the stated variance.
+
+For optimality, write $A = (G'WG)^{-1}G'W$ and $A_0 = (G'S^{-1}G)^{-1}G'S^{-1}$. Both satisfy $AG = A_0G = I$. The variance for weight $W$ is $ASA'$, and
+\[
+ASA' - A_0SA_0' = (A - A_0)S(A - A_0)' + A_0S(A - A_0)' + (A - A_0)SA_0' .
+\]
+Now $A_0S = (G'S^{-1}G)^{-1}G'$, so $A_0S(A - A_0)' = (G'S^{-1}G)^{-1}(AG - A_0G)' = 0$, and likewise for the last term. Hence $ASA' - A_0SA_0' = (A - A_0)S(A - A_0)'$, which is
+positive semi-definite. Finally $A_0SA_0' = (G'S^{-1}G)^{-1}G'S^{-1}SS^{-1}G(G'S^{-1}G)^{-1} = (G'S^{-1}G)^{-1}$.
+\end{proof}
+
+The optimal weight gives more weight to the moments that are estimated precisely and takes account of their correlation, exactly as GLS does for
+observations. $S$ is unknown, but it can be estimated consistently from a preliminary consistent estimate, which leads to the standard procedure.
+
+\begin{enumerate}
+\item \emph{First step.} Minimise $Q_n$ with a convenient weight, such as $W_n = I$ or one that scales the moments, to obtain a consistent $\hat\theta_1$.
+\item \emph{Second step.} Estimate $\hat S = \frac1n\sum g(w_i, \hat\theta_1)g(w_i, \hat\theta_1)'$ and minimise $Q_n$ with $W_n = \hat S^{-1}$.
+\end{enumerate}
+The \textbf{two-step} estimator has the efficient asymptotic variance $V_{\text{eff}}$, estimated by $(\hat G'\hat S^{-1}\hat G)^{-1}/n$. The two steps can be repeated until convergence (\textbf{iterated}
+GMM), or $S$ can be made a function of $\theta$ inside the objective (the \textbf{continuously updated} estimator of Hansen, Heaton and Yaron 1996); all three are
+asymptotically equivalent. With time-series data the $g(w_t, \theta_0)$ are usually serially correlated, and $\hat S$ must be a HAC estimator such as Newey and West's
+of Theorem~\ref{thm:nw}, with $g_t$ in place of $e_tx_t$.
+
+\subsection{Linear GMM and its relation to 2SLS}
+\label{ssec:lingmm}
+
+For the linear model $y = x'\beta + u$ with instruments $z$, the moment conditions are $E[z(y - x'\beta)] = 0$, so $\bar g_n(\beta) = \frac1nZ'(Y - X\beta)$ is linear in $\beta$ and the GMM
+problem has a closed-form solution.
+
+\begin{thm}
+\label{thm:lingmm}
+\begin{enumerate}[label=(\roman*)]
+\item For weight $W_n$, the linear GMM estimator is
+\[
+b(W_n) = (X'ZW_nZ'X)^{-1}X'ZW_nZ'Y .
+\]
+\item With $W_n = (Z'Z/n)^{-1}$ it is 2SLS.
+\item The efficient weight is $S^{-1}$ with $S = E(u^2zz')$, estimated by $\hat S = \frac1n\sum\hat u_i^2z_iz_i'$ from 2SLS residuals. Under homoscedasticity, $S = \sigma^2E(zz')$, and 2SLS is
+the efficient GMM estimator; under heteroscedasticity, two-step GMM is more efficient than 2SLS.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $Q_n(\beta) = \frac{1}{n^2}(Y - X\beta)'ZW_nZ'(Y - X\beta)$ is a quadratic in $\beta$, and setting its derivative $-\frac{2}{n^2}X'ZW_nZ'(Y - X\beta)$ to zero gives the formula.
+
+(ii) Substituting $W_n = n(Z'Z)^{-1}$, the factor $n$ cancels, and $b = (X'P_ZX)^{-1}X'P_ZY = b_{\text{2SLS}}$ by Theorem~\ref{thm:tsls}.
+
+(iii) Here $g = z(y - x'\beta)$ and $S = E(u^2zz')$, and the efficient weight is $S^{-1}$ by Theorem~\ref{thm:gmm}. If $E(u^2 \mid z) = \sigma^2$, then $S = \sigma^2E(zz')$, and a scalar factor in the
+weight does not change the minimiser, so $W = E(zz')^{-1}$, which is the probability limit of $(Z'Z/n)^{-1}$, is efficient: 2SLS is efficient GMM. Otherwise the efficient weight
+differs, and by Theorem~\ref{thm:gmm} the efficient GMM estimator has a smaller asymptotic variance.
+\end{proof}
+
+When $\ell = k$, $Z'X$ is square and $b(W) = (Z'X)^{-1}Z'Y = b_{\text{IV}}$ for every $W$: the weighting matrix matters only when there are surplus moments. The variance of the
+efficient estimator, $\bigl(X'Z\hat S^{-1}Z'X\bigr)^{-1}n$ in the notation of (iii), is valid under heteroscedasticity of unknown form, so GMM delivers heteroscedasticity-robust
+inference automatically.
+
+\subsection{Testing overidentifying restrictions}
+\label{ssec:jtest}
+
+\begin{thm}[Hansen's $J$ test]
+\label{thm:jtest}
+Let $\hat\theta$ be the efficient two-step GMM estimator, with $\hat S \xrightarrow{p} S$. If all $\ell$ moment conditions hold,
+\[
+J = n\,\bar g_n(\hat\theta)'\hat S^{-1}\bar g_n(\hat\theta) \xrightarrow{d} \chi^2_{\ell - k} .
+\]
+\end{thm}
+
+\begin{proof}[Sketch of proof]
+Write $S^{-1} = C'C$. Expanding $\bar g_n(\hat\theta)$ about $\theta_0$ and using the expression for $\hat\theta - \theta_0$ in the proof of Theorem~\ref{thm:gmm} with $W = S^{-1}$,
+\[
+\sqrt n\,C\bar g_n(\hat\theta) = \bigl[I - CG(G'C'CG)^{-1}G'C'\bigr]\sqrt n\,C\bar g_n(\theta_0) + o_p(1) .
+\]
+The vector $\sqrt n\,C\bar g_n(\theta_0)$ tends to $N(0, I_\ell)$, since $CSC' = I$. The matrix in brackets is the projection orthogonal to the $k$ columns of $CG$, of rank $\ell - k$. So
+$J = \|\sqrt n\,C\bar g_n(\hat\theta)\|^2$ is asymptotically a quadratic form of a standard normal vector in a projection of rank $\ell - k$, which is $\chi^2_{\ell - k}$ by Theorem~\ref{thm:qf1}.
+\end{proof}
+
+Of the $\ell$ moment conditions, $k$ are used up in estimating $\theta$, and the $J$ statistic tests whether the remaining $\ell - k$ are consistent with them. In the linear IV
+model under homoscedasticity it reduces to the Sargan statistic of Theorem~\ref{thm:sargan}, and it has the same limitation: it detects disagreement among
+the moments, not a failure common to all of them. A rejection may also indicate a misspecified model rather than invalid instruments, since the moment
+conditions come from the model.
+
+\subsection{Applications and practical issues}
+\label{ssec:gmmapp}
+
+\subhead{Euler equations}
+Hansen and Singleton (1982) estimated a representative consumer's preferences from the first-order condition for saving. With utility
+$c^{1-\gamma}/(1 - \gamma)$, discount factor $\delta$ and gross asset return $R_{t+1}$, optimal saving requires
+\[
+E_t\Bigl[\delta\Bigl(\frac{c_{t+1}}{c_t}\Bigr)^{-\gamma}R_{t+1} - 1\Bigr] = 0,
+\]
+where $E_t$ is the expectation given information at time $t$. The expression in brackets is a forecast error, so it is uncorrelated with every variable
+$z_t$ known at time $t$, which gives the moment conditions
+\[
+E\Bigl\{z_t\Bigl[\delta\Bigl(\frac{c_{t+1}}{c_t}\Bigr)^{-\gamma}R_{t+1} - 1\Bigr]\Bigr\} = 0 .
+\]
+With a constant and lagged consumption growth and returns in $z_t$, there are more moments than the two parameters $(\delta, \gamma)$, the model is overidentified,
+and the $J$ test is a test of the theory itself. No assumption about the distribution of consumption or returns is needed, and no model of how
+income or returns are generated: this is the great attraction of GMM for testing economic theory. The equity premium puzzle of Mehra and
+Prescott (1985) appears in this framework as a rejection of the overidentifying restrictions, or an implausibly large $\gamma$, when stock and bond returns are
+used together.
+
+\subhead{Finite-sample problems}
+The asymptotic theory can be a poor guide. The two-step standard errors are often much too small in moderate samples, because they ignore the
+estimation error in $\hat S$; Windmeijer (2005) gives a correction. With many moment conditions, two-step GMM is biased in the direction of least squares,
+for the same reason as 2SLS with many instruments (Section~\ref{ssec:tsls}), and the $J$ test loses power, since $\hat S$ becomes a poor estimate of a large
+matrix. Practical advice is to use moderately many, well-chosen moments, report the first-step as well as the efficient estimates, and treat a large
+discrepancy between them as a warning.
+
+\subsection{GMM in software}
+\label{ssec:software15}
+
+\begin{software}[Method of moments and maximum likelihood for an income distribution]
+\label{sw:mmgamma}
+The gamma distribution is a standard model for the distribution of income (Salem and Mount 1974). Fit it to per-capita disposable income in the $50$ countries
+of \texttt{LifeCycleSavings}, first by matching the mean and variance, then by maximum likelihood. The likelihood equations for the gamma reduce to
+$\lambda = \kappa/\bar y$ and the single equation $\log\kappa - \psi(\kappa) = \log\bar y - \overline{\log y}$, where $\psi$ is the digamma function, which \texttt{uniroot} solves:
+{\small\begin{verbatim}
+> y <- LifeCycleSavings$dpi; n <- length(y)   # income per head, 50 countries
+> c(n = n, mean = mean(y), sd = sd(y))
+        n      mean        sd 
+  50.0000 1106.7584  990.8689 
+> mm <- c(k = mean(y)^2 / var(y), rate = mean(y) / var(y))   # two moments
+> f <- function(k) log(k) - digamma(k) - (log(mean(y)) - mean(log(y)))
+> k.ml <- uniroot(f, c(0.01, 100))$root          # ML equation for the shape
+> rbind(MM = mm, ML = c(k.ml, k.ml / mean(y)))
+          k        rate
+MM 1.247594 0.001127251
+ML 1.234195 0.001115144
+\end{verbatim}}
+\textbf{Reading the output.} The shape parameter is $1.25$ by the method of moments and $1.23$ by maximum likelihood. A shape near one means a distribution close to
+the exponential: many poor countries and a long tail of rich ones, the standard deviation of $991$ dollars being nearly as large as the mean of $1107$. The
+two estimators use different moments, the mean and variance for MM, the mean and the mean of $\log y$ for ML, and they agree closely, which is already
+some evidence that the gamma model fits.
+
+\textbf{Stata:} \texttt{gmm} with the two moment expressions and the options \texttt{winitial(identity)} and \texttt{onestep} gives MM, and
+\texttt{mlexp} gives ML. \textbf{EViews:} \emph{Object $\to$ New
+Object $\to$ LogL} for a user-written likelihood, or the GMM method in \emph{Quick $\to$ Estimate Equation}.
+\end{software}
+
+\begin{software}[Two-step GMM and the $J$ test]
+\label{sw:gmmgamma}
+A general two-step GMM function, using all three moments, the mean, the mean square and the mean of $\log y$, for two parameters, so that $\ell - k = 1$. The
+standard errors use the numerical derivative of $\bar g_n$ for $\hat G$. The same test is then applied to annual rainfall in $70$ US cities:
+{\small\begin{verbatim}
+> gmm <- function(g, p0) {                        # two-step efficient GMM
++   Q <- function(p, W) {
++     if (any(p <= 0)) return(1e10)
++     gb <- colMeans(g(p)); drop(t(gb) %*% W %*% gb)
++   }
++   W1 <- diag(1 / apply(g(p0), 2, var))          # step 1: scaled identity
++   p1 <- optim(p0, Q, W = W1, control = list(reltol = 1e-14))$par
++   S <- crossprod(scale(g(p1), scale = FALSE)) / nrow(g(p1))
++   o <- optim(p1, Q, W = solve(S), control = list(reltol = 1e-14))
++   G <- sapply(1:2, function(j) {                # numerical derivative
++     h <- replace(numeric(2), j, 1e-6 * o$par[j])
++     (colMeans(g(o$par + h)) - colMeans(g(o$par - h))) / (2 * h[j])
++   })
++   m <- nrow(g(p0)); V <- solve(t(G) %*% solve(S) %*% G) / m
++   list(est = o$par, se = sqrt(diag(V)), J = m * o$value)
++ }
+> gam <- function(y) function(p) cbind(y - p[1] / p[2],
++   y^2 - p[1] * (p[1] + 1) / p[2]^2, log(y) - digamma(p[1]) + log(p[2]))
+> inc <- gmm(gam(y), mm)
+> rbind(est = inc$est, se = inc$se)
+            k         rate
+est 1.2286083 0.0011359740
+se  0.1326713 0.0001592832
+> c(J = inc$J, p = pchisq(inc$J, 1, lower.tail = FALSE))
+        J         p 
+0.0564122 0.8122592 
+> r <- as.numeric(precip)                         # rainfall, 70 US cities
+> rain <- gmm(gam(r), c(mean(r)^2 / var(r), mean(r) / var(r)))
+> c(J = rain$J, p = pchisq(rain$J, 1, lower.tail = FALSE))
+          J           p 
+9.361445185 0.002215974 
+\end{verbatim}}
+\textbf{Reading the output.} For income, efficient GMM gives $\hat\kappa = 1.229$ (s.e. $0.133$), between the MM and ML values. The $J$ statistic, $0.056$ on one degree of freedom, is
+far from significant: the three moments agree, and the gamma model is not rejected. For rainfall it is $9.36$, $p = 0.002$: the gamma model is rejected. The
+reason is visible in the data: the rainfall figures are skewed to the \emph{left}, with a skewness coefficient of $-0.29$, while every gamma distribution is skewed to
+the right. The mean, mean square and mean log cannot all be matched by any gamma.
+
+\textbf{Stata:} \texttt{gmm} with three moment expressions and \texttt{wmatrix(robust)}, then \texttt{estat overid}. \textbf{EViews:} the $J$-statistic is printed with
+every GMM estimation.
+\end{software}
+
+\begin{software}[Efficient GMM versus 2SLS under heteroscedasticity]
+\label{sw:gmmiv}
+$2000$ samples of size $200$ from $y = x + u$ with three strong instruments and a disturbance whose standard deviation is proportional to $e^{z_1}$. Each sample
+is estimated by 2SLS and by two-step GMM with $\hat S = \frac1n\sum\hat u_i^2z_iz_i'$, using the closed form of Theorem~\ref{thm:lingmm}(i). A second experiment adds $0.5z_3$ to the
+disturbance, making the third instrument invalid:
+{\small\begin{verbatim}
+> set.seed(7)
+> sim <- function(n = 200, R = 2000, bad = 0) {
++   replicate(R, {
++     Z <- matrix(rnorm(n * 3), n); v <- rnorm(n)
++     x <- drop(Z %*% c(0.5, 0.5, 0.5)) + v
++     u <- (0.5 * v + rnorm(n)) * exp(Z[, 1])     # heteroscedastic in z1
++     u <- u + bad * Z[, 3]                       # bad > 0: z3 invalid
++     y <- x + u; X <- cbind(1, x); Zc <- cbind(1, Z)
++     lin <- function(W) solve(t(X) %*% Zc %*% W %*% t(Zc) %*% X,
++                              t(X) %*% Zc %*% W %*% t(Zc) %*% y)
++     b1 <- lin(solve(crossprod(Zc)))             # 2SLS
++     e <- drop(y - X %*% b1); S <- crossprod(Zc * e) / n
++     b2 <- lin(solve(S))                         # efficient GMM
++     gb <- colMeans(Zc * drop(y - X %*% b2))
++     c(tsls = b1[2], gmm = b2[2], J = n * drop(t(gb) %*% solve(S) %*% gb))
++   })
++ }
+> s0 <- sim(); s1 <- sim(bad = 0.5)
+> round(rbind(mean = rowMeans(s0[1:2, ]), sd = apply(s0[1:2, ], 1, sd)), 3)
+      tsls   gmm
+mean 1.018 1.006
+sd   0.365 0.249
+> c(size.J = mean(s0[3, ] > qchisq(0.95, 2)),
++   power.J = mean(s1[3, ] > qchisq(0.95, 2)))
+ size.J power.J 
+ 0.0420  0.4595 
+\end{verbatim}}
+\textbf{Reading the output.} Both estimators are nearly unbiased for the true value $1$, but the standard deviation of GMM, $0.249$, is a third smaller than that of
+2SLS, $0.365$: the efficient weight down-weights the moment conditions involving $z_1$, which are noisy because the variance of $u$ depends on $z_1$. Under homoscedasticity the
+two would coincide. The $J$ test, on $\ell - k = 2$ degrees of freedom, rejects $4.2\%$ of the time when all the instruments are valid, close to its nominal $5\%$, and $46\%$ of
+the time when $z_3$ is invalid: a useful test, but one that misses the invalid instrument more often than not in samples of this size.
+
+\textbf{Stata:} \texttt{ivregress gmm y (x = z1 z2 z3)}, then \texttt{estat overid}. \textbf{EViews:} \texttt{gmm y c x @ c z1 z2 z3}, with the White weighting matrix.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Let $y_1, \dots, y_n$ be independent and uniform on $(0, \theta)$.
+\begin{enumerate}[label=(\alph*)]
+\item Find the method of moments estimator of $\theta$ from $E(y) = \theta/2$, and its asymptotic variance from Theorem~\ref{thm:mm}.
+\item The sample of five values $0.8, 2.4, 1.1, 3.9, 2.3$ gives what estimate? Comment on the result.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $g = y - \theta/2$, so $\hat\theta = 2\bar y$. Here $G = -\frac12$ and $S = \Var(y) = \theta^2/12$, so the asymptotic variance of $\sqrt n(\hat\theta - \theta)$ is $G^{-2}S = 4\theta^2/12 = \theta^2/3$.
+
+(b) $\bar y = 10.5/5 = 2.1$, so $\hat\theta = 4.2$. This exceeds the largest observation $3.9$, as it must for the data to be possible, but a method of moments estimate can also fall below
+the maximum, giving an impossible value. The maximum likelihood estimator, the sample maximum, never does, and it converges at the faster rate $1/n$: the
+method of moments is not always efficient.
+\end{solution}
+
+\begin{problem}
+Show that least squares is the method of moments estimator for $g = x(y - x'\beta)$, and that Theorem~\ref{thm:mm} gives White's heteroscedasticity-robust variance.
+What does the theorem give under homoscedasticity?
+\end{problem}
+
+\begin{solution}
+$\bar g_n(\beta) = \frac1nX'(Y - X\beta) = 0$ are the normal equations, with solution $b$. The derivative is $\partial g/\partial\beta' = -xx'$, so $G = -E(xx') = -Q$, and $S = E(u^2xx')$. The
+asymptotic variance of $\sqrt n(b - \beta)$ is $Q^{-1}E(u^2xx')Q^{-1}$, estimated by $n(X'X)^{-1}\bigl(\sum e_i^2x_ix_i'\bigr)(X'X)^{-1}$, which is $n$ times White's estimator. Under homoscedasticity
+$S = \sigma^2Q$ and the variance becomes $\sigma^2Q^{-1}$, the classical result.
+\end{solution}
+
+\begin{problem}
+Two independent unbiased measurements $y_1$ and $y_2$ of the same quantity $\mu$ have known variances $\sigma_1^2$ and $\sigma_2^2$, and $n$ independent pairs are observed. Use
+the moment conditions $E(y_1 - \mu) = 0$ and $E(y_2 - \mu) = 0$.
+\begin{enumerate}[label=(\alph*)]
+\item Find the GMM estimator with weight $W = I$, and the efficient GMM estimator.
+\item Find the variance of each, and compare with $\sigma_1^2 = 1$, $\sigma_2^2 = 4$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $Q(\mu) = (\bar y_1 - \mu)^2 + (\bar y_2 - \mu)^2$ for $W = I$, minimised by $\hat\mu = \frac12(\bar y_1 + \bar y_2)$. Here $S = \operatorname{diag}(\sigma_1^2, \sigma_2^2)$, and with $W = S^{-1}$ the objective is
+$(\bar y_1 - \mu)^2/\sigma_1^2 + (\bar y_2 - \mu)^2/\sigma_2^2$, minimised by the inverse-variance weighted mean $\hat\mu = (\bar y_1/\sigma_1^2 + \bar y_2/\sigma_2^2)/(1/\sigma_1^2 + 1/\sigma_2^2)$.
+
+(b) The simple mean has variance $(\sigma_1^2 + \sigma_2^2)/(4n) = 5/(4n) = 1.25/n$. The efficient estimator has variance $1/\bigl(n(1/\sigma_1^2 + 1/\sigma_2^2)\bigr) = 1/(1.25n) = 0.8/n$, which is
+$(G'S^{-1}G)^{-1}/n$ with $G = -(1, 1)'$. It is better even than using $y_1$ alone (variance $1/n$): the noisier measurement still adds information, provided it is weighted
+correctly.
+\end{solution}
+
+\begin{problem}
+A consumption Euler equation is estimated by GMM from $n = 160$ quarterly observations, with instruments a constant and two lags each of consumption
+growth and the asset return, and parameters $(\delta, \gamma)$. The estimates are $\hat\delta = 0.993$ and $\hat\gamma = 2.4$, and $J = 13.8$.
+\begin{enumerate}[label=(\alph*)]
+\item How many moment conditions are there, and how many degrees of freedom does the $J$ statistic have?
+\item Test the overidentifying restrictions, and interpret the result.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) There are $\ell = 1 + 2 + 2 = 5$ instruments and one Euler equation, so five moment conditions; with $k = 2$ parameters, $J$ has $\ell - k = 3$ degrees of freedom.
+
+(b) The $5\%$ and $1\%$ points of $\chi^2_3$ are $7.81$ and $11.34$, so $J = 13.8$ rejects at $1\%$. The lagged variables help to predict the pricing error, which the theory says is
+impossible. Either the model of preferences is wrong (for instance, habits or non-separable utility), or the representative-agent assumption fails, or
+the consumption data, which are time-aggregated and measured with error, do not match the model's timing. The test does not say which.
+\end{solution}
+
+\begin{problem}
+In the linear IV model with $\ell = k$, show directly that the GMM estimator does not depend on the weighting matrix.
+\end{problem}
+
+\begin{solution}
+With $\ell = k$, $Z'X$ is square and non-singular, so
+\[
+b(W) = (X'ZWZ'X)^{-1}X'ZWZ'Y = (Z'X)^{-1}W^{-1}(X'Z)^{-1}X'ZWZ'Y = (Z'X)^{-1}Z'Y .
+\]
+Equivalently, the $k$ equations $Z'(Y - Xb) = 0$ can be solved exactly, so $Q_n(b) = 0$ at their solution whatever the weight, and that solution is the minimiser.
+\end{solution}
+
+\begin{problem}
+For the gamma distribution with shape $\kappa$ and rate $\lambda$, show that $E(y^2) = \kappa(\kappa + 1)/\lambda^2$ and $E(\log y) = \psi(\kappa) - \log\lambda$, the two further moments used in
+Software~\ref{sw:gmmgamma}. (Use $E(y^r) = \Gamma(\kappa + r)/(\Gamma(\kappa)\lambda^r)$, and differentiate with respect to $r$ at $r = 0$.)
+\end{problem}
+
+\begin{solution}
+$E(y^r) = \int_0^\infty y^r\frac{\lambda^\kappa}{\Gamma(\kappa)}y^{\kappa - 1}e^{-\lambda y}\,dy = \frac{\lambda^\kappa}{\Gamma(\kappa)}\cdot\frac{\Gamma(\kappa + r)}{\lambda^{\kappa + r}} = \frac{\Gamma(\kappa + r)}{\Gamma(\kappa)\lambda^r}$. With $r = 2$, $\Gamma(\kappa + 2) = (\kappa + 1)\kappa\Gamma(\kappa)$, giving
+$\kappa(\kappa + 1)/\lambda^2$. Since $E(y^r) = E(e^{r\log y})$, its derivative at $r = 0$ is $E(\log y)$; differentiating $\log E(y^r) = \log\Gamma(\kappa + r) - \log\Gamma(\kappa) - r\log\lambda$ at $r = 0$, where
+$E(y^0) = 1$, gives $E(\log y) = \psi(\kappa) - \log\lambda$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -8381,6 +8787,11 @@ dependent variables, \emph{Econometrica}, 46, 1293--1301.
 \item Granger, C. W. J., and Newbold, P. (1974), Spurious regressions in econometrics, \emph{Journal of Econometrics}, 2, 111--120.
 \item Haavelmo, T. (1943), The statistical implications of a system of simultaneous equations, \emph{Econometrica}, 11, 1--12.
 \item Haavelmo, T. (1944), The probability approach in econometrics, \emph{Econometrica}, 12 (Supplement), 1--118.
+\item Hansen, L. P. (1982), Large sample properties of generalized method of moments estimators, \emph{Econometrica}, 50, 1029--1054.
+\item Hansen, L. P., and Singleton, K. J. (1982), Generalized instrumental variables estimation of nonlinear rational expectations models,
+\emph{Econometrica}, 50, 1269--1286.
+\item Hansen, L. P., Heaton, J., and Yaron, A. (1996), Finite-sample properties of some alternative GMM estimators, \emph{Journal of Business and
+Economic Statistics}, 14, 262--280.
 \item Harvey, A. C., and Durbin, J. (1986), The effects of seat belt legislation on British road casualties: a case study in structural time series
 modelling, \emph{Journal of the Royal Statistical Society, Series A}, 149, 187--227.
 \item Hausman, J. A. (1978), Specification tests in econometrics, \emph{Econometrica}, 46, 1251--1271.
@@ -8395,6 +8806,7 @@ a unit root, \emph{Journal of Econometrics}, 54, 159--178.
 \item Ljung, G. M., and Box, G. E. P. (1978), On a measure of lack of fit in time series models, \emph{Biometrika}, 65, 297--303.
 \item MacKinnon, J. G. (1991), Critical values for cointegration tests, in R. F. Engle and C. W. J. Granger (eds.), \emph{Long-Run Economic
 Relationships}, Oxford, Oxford University Press, 267--276.
+\item Mehra, R., and Prescott, E. C. (1985), The equity premium: a puzzle, \emph{Journal of Monetary Economics}, 15, 145--161.
 \item Modigliani, F. (1966), The life cycle hypothesis of saving, the demand for wealth and the supply of capital, \emph{Social Research}, 33,
 160--217.
 \item Nelson, C. R., and Plosser, C. I. (1982), Trends and random walks in macroeconomic time series, \emph{Journal of Monetary Economics}, 10,
@@ -8410,12 +8822,16 @@ statistics, \emph{Oxford Bulletin of Economics and Statistics}, 54, 461--472.
 Statistical Society, Series B}, 31, 350--371.
 \item Said, S. E., and Dickey, D. A. (1984), Testing for unit roots in autoregressive-moving average models of unknown order, \emph{Biometrika},
 71, 599--607.
+\item Salem, A. B. Z., and Mount, T. D. (1974), A convenient descriptive model of income distribution: the gamma density, \emph{Econometrica},
+42, 1115--1127.
 \item Sargan, J. D. (1958), The estimation of economic relationships using instrumental variables, \emph{Econometrica}, 26, 393--415.
 \item Sims, C. A. (1980), Macroeconomics and reality, \emph{Econometrica}, 48, 1--48.
 \item Staiger, D., and Stock, J. H. (1997), Instrumental variables regression with weak instruments, \emph{Econometrica}, 65, 557--586.
 \item Stock, J. H. (1987), Asymptotic properties of least squares estimators of cointegrating vectors, \emph{Econometrica}, 55, 1035--1056.
 \item White, H. (1980), A heteroskedasticity-consistent covariance matrix estimator and a direct test for heteroskedasticity, \emph{Econometrica},
 48, 817--838.
+\item Windmeijer, F. (2005), A finite sample correction for the variance of linear efficient two-step GMM estimators, \emph{Journal of
+Econometrics}, 126, 25--51.
 \item Wu, D.-M. (1973), Alternative tests of independence between stochastic regressors and disturbances, \emph{Econometrica}, 41, 733--750.
 \item Zellner, A. (1962), An efficient method of estimating seemingly unrelated regressions and tests for aggregation bias, \emph{Journal of the
 American Statistical Association}, 57, 348--368.
