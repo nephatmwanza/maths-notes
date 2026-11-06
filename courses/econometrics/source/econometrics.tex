@@ -8720,6 +8720,483 @@ $\kappa(\kappa + 1)/\lambda^2$. Since $E(y^r) = E(e^{r\log y})$, its derivative 
 $E(y^0) = 1$, gives $E(\log y) = \psi(\kappa) - \log\lambda$.
 \end{solution}
 
+\section{Panel Data}
+\label{sec:panel}
+
+A panel follows the same units, such as workers, firms, regions or countries, over several periods. Its great advantage over a single cross-section is
+that it can control for characteristics of the units that are not observed but do not change over time: ability, management quality,
+geography, culture. Such characteristics are the commonest source of omitted-variable bias in cross-section work, and the panel removes them by
+comparing each unit with itself. This section develops the two main models, fixed and random effects, the tests that choose between them,
+standard errors that allow for correlation within units, and the special problems of dynamic panels.
+
+\subsection{Unobserved heterogeneity}
+\label{ssec:hetero-panel}
+
+Consider $N$ units observed for $T$ periods, with the model
+\[
+y_{it} = x_{it}'\beta + z_i'\gamma + \alpha_i + \varepsilon_{it}, \qquad i = 1, \dots, N, \quad t = 1, \dots, T,
+\]
+where $x_{it}$ varies over time, $z_i$ does not, $\alpha_i$ is an unobserved \textbf{individual effect}, and $\varepsilon_{it}$ is an idiosyncratic disturbance. We assume \textbf{strict
+exogeneity}: $E(\varepsilon_{it} \mid x_{i1}, \dots, x_{iT}, z_i, \alpha_i) = 0$ for all $t$, so that the disturbance in any period is unrelated to the regressors in every period.
+The asymptotics are for $N \to \infty$ with $T$ fixed, the usual situation in microeconomic panels.
+
+If $\alpha_i$ is uncorrelated with the regressors, \textbf{pooled} least squares on all $NT$ observations is consistent, though its standard errors must allow for the
+correlation that $\alpha_i$ induces between the disturbances of the same unit. If $\alpha_i$ is correlated with $x_{it}$, it is an omitted variable, and pooled least
+squares is inconsistent by Theorem~\ref{thm:ovb}. In an earnings equation, unobserved ability raises wages and is correlated with schooling and training;
+in a production function, management quality raises output and is correlated with the inputs. The two models of this section correspond to these
+two cases.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=0.75cm]
+\fill[blue!5,rounded corners=4pt] (-0.6,-0.6) rectangle (8.6,8.5);
+\draw[->] (0,0) -- (8,0) node[below,font=\small] {$x_{it}$};
+\draw[->] (0,0) -- (0,7.2) node[left,font=\small] {$y_{it}$};
+\foreach \cx/\cy/\col/\lab in {1.6/1.6/orange!85!black/{unit 1}, 3.9/3.5/green!45!black/{unit 2}, 6.2/5.6/red!70!black/{unit 3}} {
+  \draw[thick,\col] (\cx-1.2,\cy-0.6) -- (\cx+1.2,\cy+0.6);
+  \foreach \dx/\e in {-0.9/0.2, -0.4/-0.25, 0.1/0.15, 0.6/-0.2, 1.0/0.1}
+    \fill[\col] (\cx+\dx,\cy+0.5*\dx+\e) circle (2pt);
+  \node[font=\scriptsize,\col,anchor=west] at (\cx+1.25,\cy+0.6) {\lab};
+}
+\draw[very thick,blue!70!black,dashed] (0.3,0.4) -- (7.6,7.0);
+\node[font=\small\bfseries,anchor=west,blue!60!black] at (-0.4,8.05) {Within slopes $0.5$; pooled slope about $0.9$ (dashed)};
+\end{tikzpicture}
+\caption{Fixed effects. Each unit has its own intercept $\alpha_i$, and units with higher $\alpha_i$ also have higher $x$. Within each unit the slope is $0.5$; the pooled line
+joins the units and confuses the effect of $x$ with the effect of the unobserved $\alpha_i$. The within transformation uses only the variation around
+each unit's own mean.}
+\label{fig:within}
+\end{figure}
+
+\subsection{Fixed effects}
+\label{ssec:fe}
+
+Treat the $\alpha_i$ as parameters to be estimated, one for each unit. The time-invariant $z_i$ are then collinear with the unit intercepts and drop out, so
+write the model as $y_{it} = x_{it}'\beta + \alpha_i + \varepsilon_{it}$, or in stacked form $Y = X\beta + D\alpha + \varepsilon$, where $D$ is the $NT \times N$ matrix of unit dummies.
+
+\begin{thm}
+\label{thm:within}
+The least squares coefficient of $X$ in the regression of $Y$ on $X$ and $D$ (the \textbf{least squares dummy variable} estimator) is the \textbf{within}
+estimator
+\[
+b_{\text{FE}} = \Bigl(\sum_{i,t}\tilde x_{it}\tilde x_{it}'\Bigr)^{-1}\sum_{i,t}\tilde x_{it}\tilde y_{it}, \qquad \tilde x_{it} = x_{it} - \bar x_i, \quad \tilde y_{it} = y_{it} - \bar y_i,
+\]
+where $\bar x_i$ and $\bar y_i$ are the unit means. Under strict exogeneity it is unbiased, with $\Var(b_{\text{FE}} \mid X) = \sigma_\varepsilon^2(\tilde X'\tilde X)^{-1}$ when the $\varepsilon_{it}$ are homoscedastic and
+uncorrelated, and $\sigma_\varepsilon^2$ is estimated without bias by $\tilde e'\tilde e/(NT - N - k)$, where $\tilde e$ are the within residuals.
+\end{thm}
+
+\begin{proof}
+By the Frisch--Waugh--Lovell Theorem~\ref{thm:fwl}, the coefficient of $X$ is that of the regression of $M_DY$ on $M_DX$, where $M_D = I - D(D'D)^{-1}D'$. Since $D'D = TI_N$ and
+$D'Y$ holds the unit totals, $D(D'D)^{-1}D'Y$ replaces each $y_{it}$ by $\bar y_i$, so $M_DY = \tilde Y$, and likewise $M_DX = \tilde X$. Next, $\tilde Y = \tilde X\beta + M_D\varepsilon$, because $M_DD = 0$, so
+$b_{\text{FE}} - \beta = (\tilde X'\tilde X)^{-1}\tilde X'\varepsilon$, whose conditional mean is zero under strict exogeneity, since each $\tilde x_{it}$ depends on the regressors of all periods. Its variance
+is $\sigma_\varepsilon^2(\tilde X'\tilde X)^{-1}$, using $\tilde X'\varepsilon = \tilde X'M_D\varepsilon$ and $M_D$ idempotent. Finally the residuals of the full regression are $M\varepsilon$, where $M$ is the residual maker for
+$[X\ D]$, of rank $NT - N - k$, so $E(\tilde e'\tilde e) = \sigma_\varepsilon^2(NT - N - k)$ by Theorem~\ref{thm:residk}.
+\end{proof}
+
+The degrees-of-freedom correction matters. Software that runs the demeaned regression as an ordinary regression divides by $NT - k$, ignoring the
+$N$ means that were estimated, and understates the standard errors by the factor $\sqrt{(NT - N - k)/(NT - k)}$; with $T = 2$ that is about $0.71$. The individual
+effects themselves are estimated by $\hat\alpha_i = \bar y_i - \bar x_i'b_{\text{FE}}$, but with $T$ fixed they are not consistent, since each rests on only $T$ observations.
+
+Fixed effects estimates the effect of $x$ from changes within units: a worker's wage when trained compared with the same worker's wage when not.
+Two consequences follow. The coefficients of time-invariant variables cannot be estimated. And variables that change little over time are
+estimated imprecisely, and measurement error in them is magnified, because the within variation of the signal is small relative to that of the
+error.
+
+\subhead{First differences}
+Differencing also removes $\alpha_i$: $\Delta y_{it} = \Delta x_{it}'\beta + \Delta\varepsilon_{it}$, $t = 2, \dots, T$, and least squares on the differenced data is the \textbf{first-difference} estimator.
+
+\begin{thm}
+\label{thm:fdfe}
+When $T = 2$, the first-difference and fixed effects estimators are identical.
+\end{thm}
+
+\begin{proof}
+With $T = 2$, $x_{i1} - \bar x_i = -\frac12\Delta x_{i2}$ and $x_{i2} - \bar x_i = \frac12\Delta x_{i2}$, and the same for $y$. Hence $\sum_t\tilde x_{it}\tilde x_{it}' = \frac12\Delta x_{i2}\Delta x_{i2}'$ and $\sum_t\tilde x_{it}\tilde y_{it} = \frac12\Delta x_{i2}\Delta y_{i2}$,
+and the factors $\frac12$ cancel in $b_{\text{FE}}$, leaving $\bigl(\sum_i\Delta x_{i2}\Delta x_{i2}'\bigr)^{-1}\sum_i\Delta x_{i2}\Delta y_{i2}$.
+\end{proof}
+
+For $T > 2$ the two differ, and both are consistent under strict exogeneity. Fixed effects is efficient if the $\varepsilon_{it}$ are serially uncorrelated; first
+differences is efficient if the $\varepsilon_{it}$ follow a random walk, so that the $\Delta\varepsilon_{it}$ are uncorrelated. A marked difference between them suggests a failure of strict
+exogeneity. Time effects common to all units, such as the business cycle, are handled by adding period dummies (\textbf{two-way} fixed effects).
+
+\subsection{Random effects}
+\label{ssec:re}
+
+If $\alpha_i$ is uncorrelated with the regressors, it can be treated as part of the disturbance: $u_{it} = \alpha_i + \varepsilon_{it}$, with $\alpha_i$ independent across units with variance $\sigma_\alpha^2$.
+Least squares is then consistent but inefficient, because the disturbances of the same unit are correlated: for unit $i$,
+\[
+\Var(u_i) = \Omega_T = \sigma_\varepsilon^2I_T + \sigma_\alpha^2\iota\iota', \qquad \Corr(u_{it}, u_{is}) = \frac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_\varepsilon^2} \quad (t \neq s),
+\]
+where $\iota$ is a column of $T$ ones. The common correlation is the \textbf{intraclass correlation}.
+
+\begin{thm}
+\label{thm:re}
+Let $\bar J = \iota\iota'/T$ and
+\[
+\theta = 1 - \frac{\sigma_\varepsilon}{\sqrt{\sigma_\varepsilon^2 + T\sigma_\alpha^2}} .
+\]
+Then $\Omega_T^{-1/2} = \sigma_\varepsilon^{-1}(I_T - \theta\bar J)$, and the GLS (\textbf{random effects}) estimator is least squares on the \textbf{quasi-demeaned} data
+\[
+y_{it} - \theta\bar y_i = (1 - \theta)\mu + (x_{it} - \theta\bar x_i)'\beta + (z_i - \theta z_i)'\gamma + \text{error} .
+\]
+\end{thm}
+
+\begin{proof}
+$\bar J$ is symmetric and idempotent, and so is $I - \bar J$, with $\bar J(I - \bar J) = 0$. Then $\Omega_T = \sigma_\varepsilon^2(I - \bar J) + (\sigma_\varepsilon^2 + T\sigma_\alpha^2)\bar J$, a spectral decomposition with eigenvalues $\sigma_\varepsilon^2$ and
+$\sigma_\varepsilon^2 + T\sigma_\alpha^2$. Hence
+\[
+\Omega_T^{-1/2} = \frac{1}{\sigma_\varepsilon}(I - \bar J) + \frac{1}{\sqrt{\sigma_\varepsilon^2 + T\sigma_\alpha^2}}\bar J = \frac{1}{\sigma_\varepsilon}\bigl[I - (1 - \tfrac{\sigma_\varepsilon}{\sqrt{\sigma_\varepsilon^2 + T\sigma_\alpha^2}})\bar J\bigr] = \frac{1}{\sigma_\varepsilon}(I - \theta\bar J),
+\]
+and $(I - \theta\bar J)y_i$ has elements $y_{it} - \theta\bar y_i$. By Aitken's Theorem~\ref{thm:aitken}, least squares on the transformed data is GLS; the factor $1/\sigma_\varepsilon$ does not affect the
+estimates.
+\end{proof}
+
+The parameter $\theta$ moves between the two extremes. If $\sigma_\alpha^2 = 0$, $\theta = 0$ and random effects is pooled least squares. As $T\sigma_\alpha^2/\sigma_\varepsilon^2 \to \infty$, $\theta \to 1$ and random effects
+approaches fixed effects. Random effects keeps the time-invariant regressors and uses the between-unit variation as well as the within, so it is more
+efficient than fixed effects when its assumption holds. That assumption is the catch: if $\alpha_i$ is correlated with the regressors, random effects is
+inconsistent, for the same reason as pooled least squares, although its bias is smaller since it gives less weight to the between variation.
+
+In practice the variance components are estimated. The within residuals give $\hat\sigma_\varepsilon^2$, as in Theorem~\ref{thm:within}. The \textbf{between} regression of $\bar y_i$ on $\bar x_i$ and $z_i$ has
+disturbance $\alpha_i + \bar\varepsilon_i$, with variance $\sigma_\alpha^2 + \sigma_\varepsilon^2/T$, so its residual variance minus $\hat\sigma_\varepsilon^2/T$ estimates $\sigma_\alpha^2$ (the method of Swamy and Arora, 1972). If this is
+negative, it is set to zero.
+
+\subsection{Choosing between fixed and random effects}
+\label{ssec:fere}
+
+The choice turns on whether $\alpha_i$ is correlated with the regressors, which can be tested. Under $H_0$ of no correlation, both estimators are
+consistent and random effects is efficient; under the alternative, only fixed effects is consistent. The Hausman statistic of Theorem~\ref{thm:hausman}
+applies directly:
+\[
+H = (b_{\text{FE}} - b_{\text{RE}})'\bigl[\widehat\Var(b_{\text{FE}}) - \widehat\Var(b_{\text{RE}})\bigr]^{-1}(b_{\text{FE}} - b_{\text{RE}}) \xrightarrow{d} \chi^2_k ,
+\]
+for the coefficients of the time-varying regressors. Mundlak (1978) gave a regression version and an illuminating interpretation.
+
+\begin{thm}[Mundlak]
+\label{thm:mundlak}
+In a balanced panel, the least squares coefficient of $x_{it}$ in the pooled regression of $y_{it}$ on $x_{it}$, $z_i$ and the unit means $\bar x_i$ equals the fixed effects estimator
+$b_{\text{FE}}$.
+\end{thm}
+
+\begin{proof}
+By the Frisch--Waugh--Lovell theorem, the coefficient of $x_{it}$ is obtained by first regressing $x_{it}$ on the other regressors, a constant, $z_i$ and $\bar x_i$, all of which are
+constant within each unit. Write $x_{it} = \bar x_i + \tilde x_{it}$. The term $\bar x_i$ is one of the regressors, and $\tilde x_{it}$ sums to zero within every unit, so it is orthogonal to any
+variable that is constant within units. Hence the residual from regressing $x_{it}$ on these variables is exactly $\tilde x_{it}$. The coefficient is then
+$(\sum\tilde x_{it}\tilde x_{it}')^{-1}\sum\tilde x_{it}y_{it}$, and since $\sum_t\tilde x_{it}\bar y_i = 0$ this is $b_{\text{FE}}$.
+\end{proof}
+
+Mundlak's model writes $\alpha_i = \bar x_i'\pi + w_i$, letting the individual effect depend on the unit's average regressors. Random effects corresponds to $\pi = 0$,
+and the $t$ or Wald test of $\pi = 0$ in the augmented regression, with cluster-robust standard errors, is a robust version of the Hausman test. Its
+advantage is that it remains valid when the disturbances are heteroscedastic or serially correlated, when random effects is not efficient and the
+Hausman variance difference may not even be positive definite. The coefficients of $z_i$ in Mundlak's regression are also of interest: they are
+estimated, unlike in fixed effects, but they are consistent only if $z_i$ is uncorrelated with the part $w_i$ of the effect not explained by $\bar x_i$.
+
+\subsection{Cluster-robust standard errors}
+\label{ssec:cluster}
+
+Whatever the estimator, the disturbances of the same unit are usually correlated over time, through $\alpha_i$ if it is left in the error, or through
+serial correlation of $\varepsilon_{it}$. Treating the $NT$ observations as independent then gives standard errors that are too small. The remedy generalises White's
+estimator to \textbf{clusters}: with independence across units but arbitrary correlation within them,
+\[
+\widehat\Var_{\text{CL}}(b) = (X'X)^{-1}\Bigl(\sum_{i=1}^NX_i'\hat u_i\hat u_i'X_i\Bigr)(X'X)^{-1},
+\]
+where $X_i$ and $\hat u_i$ are the rows and residuals of unit $i$. It is consistent as $N \to \infty$ with $T$ fixed, by the argument of Theorem~\ref{thm:white} applied to the
+$N$ independent cluster sums $X_i'u_i$. It requires many clusters: with few, it is unreliable and usually too small. How much the conventional
+formula understates the variance depends on the correlation of the regressor within clusters as well as that of the disturbance. With $T$
+observations per cluster, intraclass correlation $\rho_u$ of the disturbances and $\rho_x$ of the regressor, the variance ratio is approximately the
+\textbf{Moulton factor} $1 + (T - 1)\rho_x\rho_u$ (Moulton 1990), which can be large when the regressor is constant within clusters, as for a policy that applies to a
+whole state or school.
+
+\subsection{Dynamic panels}
+\label{ssec:dynpanel}
+
+Many economic relations are dynamic: $y_{it} = \rho y_{i,t-1} + \alpha_i + \varepsilon_{it}$, with $|\rho| < 1$. Here strict exogeneity fails by construction, because $y_{i,t-1}$ depends on $\varepsilon_{i,t-1}$, and
+$\varepsilon_{i,t-1}$ enters the unit mean $\bar\varepsilon_i$ subtracted by the within transformation.
+
+\begin{thm}[Nickell]
+\label{thm:nickell}
+In the model $y_{it} = \rho y_{i,t-1} + \alpha_i + \varepsilon_{it}$, with $\varepsilon_{it}$ independent with variance $\sigma^2$, stationary initial conditions and $T$ periods in the within regression, the fixed
+effects estimator satisfies, as $N \to \infty$,
+\[
+\plim(\hat\rho_{\text{FE}} - \rho) = -\frac{1 + \rho}{T - 1}\,A\Bigl[1 - \frac{2\rho A}{(1 - \rho)(T - 1)}\Bigr]^{-1}, \qquad A = 1 - \frac{1 - \rho^T}{T(1 - \rho)} .
+\]
+For large $T$ the bias is approximately $-(1 + \rho)/(T - 1)$; it does not vanish as $N \to \infty$, only as $T \to \infty$.
+\end{thm}
+
+\begin{proof}[Sketch of proof]
+The numerator of $\hat\rho_{\text{FE}} - \rho$ is $\frac1N\sum_i\sum_t(y_{i,t-1} - \bar y_{i,-1})(\varepsilon_{it} - \bar\varepsilon_i)$. The terms $y_{i,t-1}\varepsilon_{it}$ have mean zero, but $y_{i,t-1}\bar\varepsilon_i$ does not, because $y_{i,t-1}$ contains
+$\varepsilon_{i,t-1}, \varepsilon_{i,t-2}, \dots$, each of which appears in $\bar\varepsilon_i$ with weight $1/T$. Writing $y_{i,t-1} - \alpha_i/(1 - \rho) = \sum_j\rho^j\varepsilon_{i,t-1-j}$ and summing the resulting geometric series over $t$
+gives a negative limit for the numerator, proportional to $\sigma^2/T$; the denominator's limit is computed in the same way, and Nickell (1981) gives the
+details.
+\end{proof}
+
+With $T = 5$ and $\rho = 0.5$ the bias is $-0.33$: the estimate is about a third of the truth. Short panels, the commonest kind, are the worst affected. The
+remedy, due to Anderson and Hsiao (1981), is to first-difference, $\Delta y_{it} = \rho\Delta y_{i,t-1} + \Delta\varepsilon_{it}$, which removes $\alpha_i$ but makes $\Delta y_{i,t-1}$ correlated with $\Delta\varepsilon_{it}$ through
+$\varepsilon_{i,t-1}$, and then to instrument $\Delta y_{i,t-1}$ by $y_{i,t-2}$. The level $y_{i,t-2}$ is correlated with $\Delta y_{i,t-1} = y_{i,t-1} - y_{i,t-2}$, and uncorrelated with $\Delta\varepsilon_{it} = \varepsilon_{it} - \varepsilon_{i,t-1}$ if the $\varepsilon_{it}$
+are serially uncorrelated. Arellano and Bond (1991) used all the available lags $y_{i,t-2}, y_{i,t-3}, \dots, y_{i1}$ as instruments in each period, which gives an overidentified
+GMM estimator in the sense of Section~\ref{sec:gmm}, with a $J$ test of the overidentifying restrictions and a test for second-order serial correlation in $\Delta\varepsilon_{it}$, which
+would invalidate the instruments. When $\rho$ is close to one the lagged levels are weak instruments for the differences, and the system GMM estimator of
+Blundell and Bond (1998), which adds equations in levels instrumented by lagged differences, is preferred.
+
+\subsection{Panel data in software}
+\label{ssec:software16}
+
+\begin{software}[Pooled, fixed effects and first differences]
+\label{sw:panelfe}
+A simulated panel of $300$ workers over $5$ years. Log wages depend on training hours $x$ (true effect $0.5$), on a time-invariant characteristic $z$, and on
+unobserved ability $\alpha_i$, which also raises training:
+{\small\begin{verbatim}
+> set.seed(8); N <- 300; T <- 5                 # 300 workers, 5 years
+> id <- rep(1:N, each = T)
+> a <- rnorm(N)                                  # unobserved ability
+> x <- 0.8 * a[id] + rnorm(N * T)                # training, higher for able
+> z <- rbinom(N, 1, 0.5)[id]                     # time-invariant (e.g. sex)
+> y <- 1 + 0.5 * x + 0.3 * z + a[id] + rnorm(N * T)   # log wage
+> dm <- function(v) v - ave(v, id)               # within transformation
+> pooled <- lm(y ~ x + z)
+> lsdv <- lm(y ~ x + factor(id))
+> within <- lm(dm(y) ~ dm(x) - 1)
+> fd <- lm(diff(y)[-seq(T, N * T, T)] ~ diff(x)[-seq(T, N * T, T)])
+> c(pooled = coef(pooled)[["x"]], LSDV = coef(lsdv)[["x"]],
++   within = coef(within)[[1]], FD = coef(fd)[[2]])
+   pooled      LSDV    within        FD 
+0.9663257 0.5174025 0.5174025 0.5328128 
+\end{verbatim}}
+\textbf{Reading the output.} Pooled least squares estimates the return to training as $0.97$, nearly double the truth, because training proxies for ability. The
+dummy-variable regression, with $300$ worker intercepts, and the within regression on demeaned data give the identical $0.517$, as Theorem~\ref{thm:within} says;
+first differences gives $0.533$. Both are close to $0.5$. The index \texttt{-seq(T, N * T, T)} drops the differences that would straddle two workers.
+
+\textbf{Stata:} \texttt{xtset id year}, then \texttt{xtreg y x, fe} (and \texttt{regress D.(y x)} for first differences). \textbf{EViews:} a \emph{Panel} workfile, with
+\emph{Cross-section: Fixed} in the \emph{Panel Options} tab.
+\end{software}
+
+\begin{software}[Random effects, Mundlak and Hausman]
+\label{sw:panelre}
+The variance components by the Swamy--Arora method, the random effects estimator by quasi-demeaning, and the two tests:
+{\small\begin{verbatim}
+> s2e <- sum(resid(within)^2) / (N * T - N - 1)  # sigma_eps^2 (with df fix)
+> xb <- tapply(x, id, mean); yb <- tapply(y, id, mean)
+> zb <- tapply(z, id, mean)
+> between <- lm(yb ~ xb + zb)
+> s2a <- sum(resid(between)^2) / (N - 3) - s2e / T     # sigma_alpha^2
+> theta <- 1 - sqrt(s2e / (s2e + T * s2a))
+> qd <- function(v) v - theta * ave(v, id)       # quasi-demeaning
+> re <- lm(qd(y) ~ I(rep(1 - theta, N * T)) + qd(x) + qd(z) - 1)
+> c(s2e = s2e, s2a = s2a, theta = theta, RE = coef(re)[[2]])
+      s2e       s2a     theta        RE 
+1.0204634 0.1943769 0.2843246 0.8187059 
+> mundlak <- lm(y ~ x + z + ave(x, id))          # add the unit means of x
+> coef(summary(mundlak))[c("x", "ave(x, id)"), 1:3]
+            Estimate Std. Error  t value
+x          0.5174025 0.03080082 16.79834
+ave(x, id) 0.9245214 0.04420127 20.91617
+> V.fe <- sum(resid(within)^2) / (N * T - N - 1) / sum(dm(x)^2)
+> V.re <- vcov(re)[2, 2]
+> H <- (coef(within)[[1]] - coef(re)[[2]])^2 / (V.fe - V.re)
+> c(se.FE = sqrt(V.fe), se.RE = sqrt(V.re), Hausman = H)
+       se.FE        se.RE      Hausman 
+  0.02824600   0.02574678 672.77197414 
+\end{verbatim}}
+\textbf{Reading the output.} The estimated $\theta = 0.28$ is small, so random effects is close to pooled least squares, and gives $0.82$: inconsistent, because ability is
+correlated with training. The estimated $\hat\sigma_\alpha^2 = 0.19$ is far below the true $1$: part of the ability effect has been attributed to training in the between
+regression, so the variance components are themselves contaminated. Mundlak's regression reproduces the fixed effects coefficient exactly, $0.5174$, as
+Theorem~\ref{thm:mundlak} says, and the coefficient of the worker mean of training, $0.92$ with $t = 20.9$, measures the correlation between training and ability. The
+Hausman statistic, $673$ on one degree of freedom, rejects random effects overwhelmingly.
+
+\textbf{Stata:} \texttt{xtreg y x z, re}, then \texttt{hausman fe re} after storing both. \textbf{EViews:} \emph{Cross-section: Random}, and \emph{View $\to$ Fixed/Random
+Effects Testing $\to$ Correlated Random Effects - Hausman Test}.
+\end{software}
+
+\begin{software}[Clustered standard errors]
+\label{sw:cluster}
+For the pooled regression, the conventional and cluster-robust standard errors, clustering by worker. \texttt{rowsum} adds the scores $x_{it}\hat u_{it}$ within each
+worker, giving the cluster sums $X_i'\hat u_i$:
+{\small\begin{verbatim}
+> cl <- function(fit, g) {                       # cluster-robust variance
++   X <- model.matrix(fit); e <- resid(fit); B <- solve(crossprod(X))
++   M <- crossprod(rowsum(X * e, g)); B %*% M %*% B
++ }
+> round(rbind(conventional = sqrt(diag(vcov(pooled))),
++             clustered = sqrt(diag(cl(pooled, id)))), 4)
+             (Intercept)      x      z
+conventional      0.0444 0.0251 0.0648
+clustered         0.0582 0.0316 0.0883
+\end{verbatim}}
+\textbf{Reading the output.} The clustered standard errors are $26$ to $36\%$ larger than the conventional ones. The ratio is largest for $z$, which is constant within
+workers ($\rho_x = 1$), as the Moulton factor predicts: the intraclass correlation of the pooled residuals is $0.21$, and with $T = 5$ the factor is
+$1 + 4 \times 0.21 = 1.85$, a standard error ratio of $1.36$, exactly the $0.0883/0.0648 = 1.36$ observed.
+
+\textbf{Stata:} \texttt{regress y x z, vce(cluster id)}. \textbf{EViews:} \emph{Options $\to$ Coefficient covariance $\to$ Cluster robust}.
+\end{software}
+
+\begin{software}[Worker effects in productivity data]
+\label{sw:machines}
+The \texttt{Machines} data in the recommended package \texttt{nlme} record productivity scores for six workers, each tested three times on each of three
+machines. The question is how the machines differ; the workers differ too:
+{\small\begin{verbatim}
+> options(show.signif.stars = FALSE)
+> data(Machines, package = "nlme")
+> m <- data.frame(Machines); table(m$Worker)
+
+6 2 4 1 3 5 
+9 9 9 9 9 9 
+> f0 <- lm(score ~ Machine, m)                   # ignores the workers
+> f1 <- lm(score ~ Machine + Worker, m)          # worker fixed effects
+> round(rbind(pooled = coef(summary(f0))[2:3, 2],
++             FE = coef(summary(f1))[2:3, 2],
++             clustered = sqrt(diag(cl(f0, m$Worker)))[2:3]), 3)
+          MachineB MachineC
+pooled       1.925    1.925
+FE           1.054    1.054
+clustered    2.210    1.406
+> coef(f1)[2:3]
+ MachineB  MachineC 
+ 7.966667 13.916667 
+> anova(f1)
+Analysis of Variance Table
+
+Response: score
+          Df  Sum Sq Mean Sq F value    Pr(>F)
+Machine    2 1755.26  877.63  87.798 < 2.2e-16
+Worker     5 1241.89  248.38  24.848 4.867e-12
+Residuals 46  459.82   10.00                  
+> ms <- anova(f1)[["Mean Sq"]]
+> c(s2.worker = (ms[2] - ms[3]) / 9, s2.eps = ms[3],
++   ICC = (ms[2] - ms[3]) / 9 / ((ms[2] - ms[3]) / 9 + ms[3]))
+ s2.worker     s2.eps        ICC 
+26.4869984  9.9960145  0.7260091 
+\end{verbatim}}
+\textbf{Reading the output.} The machine effects are the same whether or not the worker effects are included, $7.97$ and $13.92$ points above machine A, because the
+design is balanced and the worker dummies are orthogonal to the machine dummies. But their standard errors fall from $1.93$ to $1.05$ when worker
+effects are included, because worker differences are removed from the residual. Most of the variation not explained by the machines is between
+workers: the estimated intraclass correlation is $0.73$. In this orthogonal design random effects gives the same machine effects as fixed effects. The
+clustered standard errors are larger still, $2.21$ and $1.41$, and differ between the two machines, because they also allow for workers who are
+better on some machines than others, the worker-by-machine interaction; but with only six clusters they are themselves very imprecise.
+
+\textbf{Stata:} \texttt{xtreg score i.machine, i(worker) fe} or \texttt{mixed score i.machine || worker:}. \textbf{EViews:} a panel workfile with worker as
+the cross-section identifier.
+\end{software}
+
+\begin{software}[Nickell bias and the Anderson--Hsiao estimator]
+\label{sw:nickell}
+$500$ samples of $N = 500$ units with $y_{it} = 0.5y_{i,t-1} + \alpha_i + \varepsilon_{it}$, using five periods in the within regression; Anderson--Hsiao uses $y_{i,t-2}$ as the instrument
+for $\Delta y_{i,t-1}$:
+{\small\begin{verbatim}
+> set.seed(9)
+> dyn <- function(N = 500, T = 6, rho = 0.5) {
++   a <- rnorm(N); y <- matrix(0, N, T + 50)
++   for (t in 2:(T + 50)) y[, t] <- rho * y[, t - 1] + a + rnorm(N)
++   y <- y[, -(1:50)]                            # drop the burn-in
++   Y <- y[, 2:T]; L <- y[, 1:(T - 1)]
++   fe <- sum(dm2(L) * dm2(Y)) / sum(dm2(L)^2)
++   dY <- Y[, -1] - Y[, -(T - 1)]; dL <- L[, -1] - L[, -(T - 1)]
++   zz <- L[, -(T - 1)]                          # y(t-2) instruments dy(t-1)
++   ah <- sum(zz * dY) / sum(zz * dL)
++   c(FE = fe, AH = ah)
++ }
+> dm2 <- function(M) M - rowMeans(M)
+> r <- replicate(500, dyn())
+> round(rbind(mean = rowMeans(r), sd = apply(r, 1, sd)), 3)
+        FE    AH
+mean 0.167 0.491
+sd   0.022 0.066
+> nickell <- function(rho, T) {                # large-N bias, T periods
++   A <- 1 - (1 - rho^T) / (T * (1 - rho))
++   -(1 + rho) / (T - 1) * A / (1 - 2 * rho * A / ((1 - rho) * (T - 1)))
++ }
+> c(plim.FE = 0.5 + nickell(0.5, 5), leading.term = 0.5 - 1.5 / 4)
+     plim.FE leading.term 
+   0.1689189    0.1250000 
+\end{verbatim}}
+\textbf{Reading the output.} Fixed effects averages $0.167$ instead of $0.5$, with a small standard deviation of $0.022$: it is precisely wrong. Nickell's formula gives
+the probability limit $0.169$, almost exactly the simulated mean, while its large-$T$ approximation, $0.125$, is too crude for $T = 5$. Anderson--Hsiao averages $0.491$, close
+to the truth, at the cost of a standard deviation three times as large.
+
+\textbf{Stata:} \texttt{xtabond y} or \texttt{xtdpdsys y} for Arellano--Bond and Blundell--Bond. \textbf{EViews:} \emph{Quick $\to$ Estimate Equation}, method
+GMM/DPD, with the dynamic panel wizard.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Three firms are observed in two years:
+\begin{center}
+\begin{tabular}{lcccc}
+& $x_{i1}$ & $x_{i2}$ & $y_{i1}$ & $y_{i2}$\\
+\hline
+Firm 1 & $1$ & $2$ & $2$ & $3$\\
+Firm 2 & $2$ & $4$ & $3$ & $6$\\
+Firm 3 & $3$ & $3$ & $5$ & $5$
+\end{tabular}
+\end{center}
+Compute the first-difference estimate of $\beta$ in $y_{it} = \beta x_{it} + \alpha_i + \varepsilon_{it}$, and confirm that the within estimate is the same.
+\end{problem}
+
+\begin{solution}
+The differences are $\Delta x = (1, 2, 0)$ and $\Delta y = (1, 3, 0)$, so $b_{\text{FD}} = (1 + 6 + 0)/(1 + 4 + 0) = 7/5 = 1.4$. For the within estimator, the deviations from firm means are
+$\pm\frac12\Delta x$ and $\pm\frac12\Delta y$, so $\sum\tilde x\tilde y = 2 \times \frac14(1 + 6 + 0) = 3.5$ and $\sum\tilde x^2 = 2 \times \frac14(1 + 4 + 0) = 2.5$, and $b_{\text{FE}} = 3.5/2.5 = 1.4$. Firm 3, whose $x$ did not change,
+contributes nothing to either estimate.
+\end{solution}
+
+\begin{problem}
+In a random effects model, $\sigma_\varepsilon^2 = 1$ and $\sigma_\alpha^2 = 0.5$.
+\begin{enumerate}[label=(\alph*)]
+\item Find the intraclass correlation and $\theta$ for $T = 4$ and $T = 20$.
+\item Explain why random effects moves towards fixed effects as $T$ increases.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The intraclass correlation is $0.5/1.5 = 0.33$. For $T = 4$, $\theta = 1 - 1/\sqrt{1 + 4(0.5)} = 1 - 1/\sqrt3 = 0.423$; for $T = 20$, $\theta = 1 - 1/\sqrt{11} = 0.698$.
+
+(b) The unit mean $\bar y_i$ contains $\alpha_i$ plus an average of $T$ disturbances, whose variance $\sigma_\varepsilon^2/T$ falls with $T$. As $T$ grows the mean becomes a precise measure of
+$\alpha_i$, and GLS removes more of it, approaching complete demeaning. In the limit the between variation carries no information about $\beta$ that is not
+contaminated by $\alpha_i$, and only the within variation is used.
+\end{solution}
+
+\begin{problem}
+Explain why a fixed effects earnings regression cannot estimate the return to years of schooling for adults who have completed their education, and
+what alternatives are available.
+\end{problem}
+
+\begin{solution}
+Completed schooling is constant over time for each adult, so it is collinear with the individual intercepts and is removed by the within
+transformation; there is no within variation to identify its coefficient. Alternatives are random effects (if ability is uncorrelated with
+schooling, which is doubtful), Mundlak's regression, which estimates the coefficient of time-invariant variables under the weaker assumption that they
+are uncorrelated with the part of the effect not explained by the means of the time-varying regressors, the Hausman--Taylor estimator, which uses
+time-varying exogenous regressors as instruments, or a different design, such as twins or siblings, where differences between family members provide
+the variation.
+\end{solution}
+
+\begin{problem}
+A fixed effects estimate is $0.52$ (s.e. $0.028$) and the random effects estimate is $0.82$ (s.e. $0.026$). Carry out the Hausman test, and say which estimate you
+would report.
+\end{problem}
+
+\begin{solution}
+$H = (0.52 - 0.82)^2/(0.028^2 - 0.026^2) = 0.09/0.000108 = 833$, on one degree of freedom, far above $3.84$. Random effects is rejected; the effects are correlated with the
+regressor, and the fixed effects estimate $0.52$ should be reported, with cluster-robust standard errors. (Software~\ref{sw:panelre}, with unrounded values, gives $673$.)
+\end{solution}
+
+\begin{problem}
+Using Theorem~\ref{thm:nickell}, find the probability limit of the fixed effects estimator for $\rho = 0.8$ and $T = 10$, and compare with the large-$T$ approximation.
+\end{problem}
+
+\begin{solution}
+$A = 1 - (1 - 0.8^{10})/(10 \times 0.2) = 1 - 0.8926/2 = 0.5537$. Then $-(1.8/9)A = -0.1107$, and the correction factor is $1 - (1.6/(0.2 \times 9))(0.5537) = 1 - 0.4922 = 0.5078$. The
+bias is $-0.1107/0.5078 = -0.218$, so $\plim\hat\rho_{\text{FE}} = 0.582$. The approximation $-(1 + \rho)/(T - 1) = -0.2$ gives $0.6$. With persistent series the bias remains large even with ten
+periods.
+\end{solution}
+
+\begin{problem}
+A state-level policy dummy $d_s$ is used in a regression of student test scores on $d_s$, with $30$ students in each of $50$ states. The intraclass correlation of the
+disturbances within states is $0.05$. By what factor do conventional standard errors understate the true standard error of the coefficient of $d_s$?
+\end{problem}
+
+\begin{solution}
+The regressor is constant within states, so $\rho_x = 1$, and the Moulton factor is $1 + (30 - 1)(1)(0.05) = 2.45$. The true variance is about $2.45$ times the conventional one,
+and the standard error $\sqrt{2.45} = 1.57$ times as large. A seemingly small intraclass correlation has a large effect when clusters are big and the regressor varies
+only between clusters. Clustering by state, with $50$ clusters, is the remedy.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -8746,6 +9223,8 @@ $E(y^0) = 1$, gives $E(\log y) = \psi(\kappa) - \log\lambda$.
 \subhead{Further reading}
 \begin{enumerate}
 \item Aitken, A. C. (1935), On least squares and linear combination of observations, \emph{Proceedings of the Royal Society of Edinburgh}, 55, 42--48.
+\item Anderson, T. W., and Hsiao, C. (1981), Estimation of dynamic models with error components, \emph{Journal of the American Statistical
+Association}, 76, 598--606.
 \item Anderson, T. W., and Rubin, H. (1949), Estimation of the parameters of a single equation in a complete system of stochastic equations,
 \emph{Annals of Mathematical Statistics}, 20, 46--63.
 \item Angrist, J. D. (1990), Lifetime earnings and the Vietnam era draft lottery: evidence from Social Security administrative records,
@@ -8754,7 +9233,11 @@ $E(y^0) = 1$, gives $E(\log y) = \psi(\kappa) - \log\lambda$.
 Economics}, 106, 979--1014.
 \item Angrist, J. D., and Pischke, J.-S. (2009), \emph{Mostly Harmless Econometrics}, Princeton, Princeton University Press.
 \item Anscombe, F. J. (1973), Graphs in statistical analysis, \emph{The American Statistician}, 27, 17--21.
+\item Arellano, M., and Bond, S. (1991), Some tests of specification for panel data: Monte Carlo evidence and an application to employment equations,
+\emph{Review of Economic Studies}, 58, 277--297.
 \item Belsley, D. A., Kuh, E., and Welsch, R. E. (1980), \emph{Regression Diagnostics}, New York, Wiley.
+\item Blundell, R., and Bond, S. (1998), Initial conditions and moment restrictions in dynamic panel data models, \emph{Journal of Econometrics}, 87,
+115--143.
 \item Bollerslev, T. (1986), Generalized autoregressive conditional heteroskedasticity, \emph{Journal of Econometrics}, 31, 307--327.
 \item Bound, J., Jaeger, D. A., and Baker, R. M. (1995), Problems with instrumental variables estimation when the correlation between the
 instruments and the endogenous explanatory variable is weak, \emph{Journal of the American Statistical Association}, 90, 443--450.
@@ -8795,6 +9278,7 @@ Economic Statistics}, 14, 262--280.
 \item Harvey, A. C., and Durbin, J. (1986), The effects of seat belt legislation on British road casualties: a case study in structural time series
 modelling, \emph{Journal of the Royal Statistical Society, Series A}, 149, 187--227.
 \item Hausman, J. A. (1978), Specification tests in econometrics, \emph{Econometrica}, 46, 1251--1271.
+\item Hausman, J. A., and Taylor, W. E. (1981), Panel data and unobservable individual effects, \emph{Econometrica}, 49, 1377--1398.
 \item Hendry, D. F., and Mizon, G. E. (1978), Serial correlation as a convenient simplification, not a nuisance: a comment on a study of the demand
 for money by the Bank of England, \emph{Economic Journal}, 88, 549--563.
 \item Hildreth, C., and Lu, J. Y. (1960), Demand relations with autocorrelated disturbances, Technical Bulletin 276, Michigan State University
@@ -8809,10 +9293,14 @@ Relationships}, Oxford, Oxford University Press, 267--276.
 \item Mehra, R., and Prescott, E. C. (1985), The equity premium: a puzzle, \emph{Journal of Monetary Economics}, 15, 145--161.
 \item Modigliani, F. (1966), The life cycle hypothesis of saving, the demand for wealth and the supply of capital, \emph{Social Research}, 33,
 160--217.
+\item Moulton, B. R. (1990), An illustration of a pitfall in estimating the effects of aggregate variables on micro units, \emph{Review of
+Economics and Statistics}, 72, 334--338.
+\item Mundlak, Y. (1978), On the pooling of time series and cross section data, \emph{Econometrica}, 46, 69--85.
 \item Nelson, C. R., and Plosser, C. I. (1982), Trends and random walks in macroeconomic time series, \emph{Journal of Monetary Economics}, 10,
 139--162.
 \item Newey, W. K., and West, K. D. (1987), A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix,
 \emph{Econometrica}, 55, 703--708.
+\item Nickell, S. (1981), Biases in dynamic models with fixed effects, \emph{Econometrica}, 49, 1417--1426.
 \item Osterwald-Lenum, M. (1992), A note with quantiles of the asymptotic distribution of the maximum likelihood cointegration rank test
 statistics, \emph{Oxford Bulletin of Economics and Statistics}, 54, 461--472.
 \item Perron, P. (1989), The great crash, the oil price shock, and the unit root hypothesis, \emph{Econometrica}, 57, 1361--1401.
@@ -8828,6 +9316,8 @@ Statistical Society, Series B}, 31, 350--371.
 \item Sims, C. A. (1980), Macroeconomics and reality, \emph{Econometrica}, 48, 1--48.
 \item Staiger, D., and Stock, J. H. (1997), Instrumental variables regression with weak instruments, \emph{Econometrica}, 65, 557--586.
 \item Stock, J. H. (1987), Asymptotic properties of least squares estimators of cointegrating vectors, \emph{Econometrica}, 55, 1035--1056.
+\item Swamy, P. A. V. B., and Arora, S. S. (1972), The exact finite sample properties of the estimators of coefficients in the error components
+regression models, \emph{Econometrica}, 40, 261--275.
 \item White, H. (1980), A heteroskedasticity-consistent covariance matrix estimator and a direct test for heteroskedasticity, \emph{Econometrica},
 48, 817--838.
 \item Windmeijer, F. (2005), A finite sample correction for the variance of linear efficient two-step GMM estimators, \emph{Journal of
