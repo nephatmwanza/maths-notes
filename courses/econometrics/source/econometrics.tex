@@ -5160,6 +5160,386 @@ $(90 + 25)/2500 = 0.046$ against $2/45 = 0.044$. So $s^2$ is slightly better her
 the estimator $e'e/(n - k + 2)$ has the smallest mean squared error of all estimators of the form $e'e/c$.
 \end{solution}
 
+%======================================================================
+\section{Heteroscedasticity}
+\label{sec:hetero}
+
+In cross-section data the spread of the dependent variable usually changes with the size of the unit. Large firms' investment varies more than
+small firms'; rich households' spending on food varies more than poor households'; the total income of a populous state varies more than that of a
+small one. The disturbances then violate assumption (A2), and $\Var(u_i) = \sigma_i^2$ differs across observations. This section works out what that
+does to least squares, how to estimate standard errors that remain valid, how to detect heteroscedasticity, and how to exploit it for more
+efficient estimation.
+
+\subsection{Consequences for least squares}
+\label{ssec:hetcons}
+
+Let $Y = X\beta + U$ with $E(U \mid X) = 0$ and $\Var(U \mid X) = \Sigma = \operatorname{diag}(\sigma_1^2, \dots, \sigma_n^2)$. This is the case $\sigma^2\Omega = \Sigma$ of
+Section~\ref{ssec:gls}, so by Theorem~\ref{thm:olsnonsph} least squares is unbiased, and
+\begin{equation}
+\label{eq:sandwich}
+\Var(b) = (X'X)^{-1}X'\Sigma X(X'X)^{-1} = (X'X)^{-1}\Bigl(\sum_{i=1}^n\sigma_i^2x_ix_i'\Bigr)(X'X)^{-1},
+\end{equation}
+where $x_i'$ is the $i$th row of $X$. This is called a \textbf{sandwich}: the ``meat'' $X'\Sigma X$ between two slices of ``bread'' $(X'X)^{-1}$. The conventional
+formula $s^2(X'X)^{-1}$ is wrong, and it is worth seeing in which direction.
+
+\begin{thm}
+\label{thm:hetbias}
+In the two-variable model with deviations $x_i$,
+\[
+\Var(b) = \frac{\sum x_i^2\sigma_i^2}{\bigl(\sum x_i^2\bigr)^2}, \qquad\text{while}\qquad E\!\left(\frac{s^2}{\sum x_i^2}\right) = \frac{\sum (1 - p_{ii})\sigma_i^2}{(n - 2)\sum x_i^2} ,
+\]
+where $p_{ii}$ are the leverages of Problem~\ref{prob:leverage}. Ignoring the leverage correction, the conventional estimate is too small when the larger
+variances $\sigma_i^2$ occur at the observations with larger $x_i^2$, and too large in the opposite case.
+\end{thm}
+
+\begin{proof}
+The first formula is $\Var(\sum w_iu_i) = \sum w_i^2\sigma_i^2$ with $w_i = x_i/\sum x_j^2$. For the second, $E(e'e) = E(U'MU) = \tr(M\Sigma) = \sum_i (1 - p_{ii})\sigma_i^2$ by
+Theorem~\ref{thm:linvec}(iii), since $\Sigma$ is diagonal. Replacing $(1 - p_{ii})$ by its average $(n - 2)/n$, the conventional estimate has expectation about
+$\bar\sigma^2/\sum x_i^2$, where $\bar\sigma^2$ is the average of the $\sigma_i^2$. The ratio of the true variance to this is
+\[
+\frac{\sum x_i^2\sigma_i^2}{\bar\sigma^2\sum x_i^2} = 1 + \frac{\sum x_i^2(\sigma_i^2 - \bar\sigma^2)}{\bar\sigma^2\sum x_i^2},
+\]
+which exceeds one exactly when the $\sigma_i^2$ are above average where $x_i^2$ is large, that is when $\sigma_i^2$ and $x_i^2$ are positively associated.
+\end{proof}
+
+The common case in economics is the first: variance grows with the size of the regressor. The conventional standard errors are then too
+small, $t$ ratios too large, and confidence intervals too narrow. Inference is misleading even though the estimates themselves are unbiased. A
+second consequence is inefficiency: by Aitken's theorem, generalised least squares has a smaller variance.
+
+\subsection{Heteroscedasticity-robust standard errors}
+\label{ssec:robust}
+
+The sandwich \eqref{eq:sandwich} needs the $n$ unknown $\sigma_i^2$, which cannot be estimated individually. White's insight (1980), anticipated by Eicker
+and Huber, was that it is not necessary to estimate them: only the $k \times k$ matrix $\frac1n\sum\sigma_i^2x_ix_i'$ is needed, and that average can be
+estimated consistently by replacing each $\sigma_i^2$ with the squared residual.
+
+\begin{thm}[White]
+\label{thm:white}
+Under (A1), independent observations, $\frac1nX'X \to Q$ positive definite, and suitable moment conditions,
+\[
+\frac1n\sum_{i=1}^ne_i^2x_ix_i' - \frac1n\sum_{i=1}^n\sigma_i^2x_ix_i' \xrightarrow{p} 0 ,
+\]
+so that
+\[
+\widehat\Var_{\text{HC}}(b) = (X'X)^{-1}\Bigl(\sum_{i=1}^ne_i^2x_ix_i'\Bigr)(X'X)^{-1}
+\]
+is a consistent estimator of the variance of $b$, in the sense that $n\widehat\Var_{\text{HC}}(b) - n\Var(b) \xrightarrow{p} 0$, whatever the form of the heteroscedasticity.
+\end{thm}
+
+\begin{proof}[Sketch of proof]
+Write $e_i = u_i - x_i'(b - \beta)$, so that
+\[
+e_i^2 = u_i^2 - 2u_ix_i'(b - \beta) + \bigl(x_i'(b - \beta)\bigr)^2 .
+\]
+First, $\frac1n\sum (u_i^2 - \sigma_i^2)x_ix_i' \xrightarrow{p} 0$ by a law of large numbers for independent, non-identically distributed terms with mean zero,
+since $E(u_i^2) = \sigma_i^2$. Second, the remaining terms are of the form $\frac1n\sum u_ix_i'(b - \beta)\,x_ix_i'$ and
+$\frac1n\sum\bigl(x_i'(b - \beta)\bigr)^2x_ix_i'$. Each is a product of $b - \beta \xrightarrow{p} 0$ with an average that is bounded in probability under the moment
+conditions, so each converges to zero. Multiplying by $\bigl(\frac1nX'X\bigr)^{-1}$ on both sides and using the continuous mapping theorem gives the result.
+\end{proof}
+
+The individual $e_i^2$ are terrible estimates of the individual $\sigma_i^2$, being single observations, but their weighted average is a good estimate of
+the weighted average of the $\sigma_i^2$. The same idea underlies Theorem~\ref{thm:olsconsistent}(iii) for the two-variable model. In finite samples
+the squared residuals are too small on average, since $E(e_i^2) = (1 - p_{ii})\sigma_i^2$ under homoscedasticity, and several corrections are in use:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{ll}
+HC0 & $e_i^2$ (White's original)\\
+HC1 & $e_i^2\,n/(n - k)$ (the default in Stata)\\
+HC2 & $e_i^2/(1 - p_{ii})$\\
+HC3 & $e_i^2/(1 - p_{ii})^2$ (recommended for small samples)
+\end{tabular}
+\end{center}
+HC3 inflates the residuals at high-leverage points most, because those points pull the fitted line towards themselves and so have the most
+deflated residuals.
+
+Robust standard errors are used in robust $t$ tests and confidence intervals, and robust Wald tests replace $s^2(X'X)^{-1}$ by $\widehat\Var_{\text{HC}}$ in
+the quadratic form of Theorem~\ref{thm:wald}. These tests are justified asymptotically, so the reference distributions are $N(0, 1)$ and $\chi^2_q$. Many
+applied economists now report robust standard errors routinely in cross-section work, on the grounds that they are valid whether or not the
+disturbances are heteroscedastic, while the conventional ones are valid only if they are not.
+
+\subsection{Testing for heteroscedasticity}
+\label{ssec:hettests}
+
+All the common tests examine whether the squared residuals are related to something they should not be related to under homoscedasticity.
+
+\subhead{Goldfeld--Quandt}
+If the variance is suspected to increase with one variable $Z$, order the observations by $Z$, omit $c$ central observations, and fit the regression
+separately to the first and last $(n - c)/2$ observations. Under homoscedasticity and normality the ratio
+\[
+\text{GQ} = \frac{\text{RSS}_2/(n_2 - k)}{\text{RSS}_1/(n_1 - k)} \sim F_{n_2-k,\ n_1-k} ,
+\]
+exactly, because the two subsets have independent residual sums of squares, each $\sigma^2\chi^2$ (Theorem~\ref{thm:residqf}). Omitting the middle observations
+sharpens the contrast between the two groups. The test is exact but needs a single ordering variable and gives no information about other forms
+of heteroscedasticity.
+
+\subhead{Breusch--Pagan}
+Suppose $\sigma_i^2 = h(\alpha_1 + z_i'\alpha)$ for some smooth function $h$ and a vector $z_i$ of $p$ variables, often some or all of the regressors. Homoscedasticity
+is $\alpha = 0$. Breusch and Pagan derived the LM test of this hypothesis under normality. It is computed from the regression of $g_i = e_i^2/\hat\sigma^2$
+(with $\hat\sigma^2 = e'e/n$) on a constant and $z_i$:
+\[
+\text{LM} = \tfrac12\,\text{ESS} \xrightarrow{d} \chi^2_p .
+\]
+Remarkably, the statistic does not depend on the function $h$. Koenker showed that the factor $\frac12$ relies on the normal kurtosis, since
+$\Var(u^2) = 2\sigma^4$ for normal $u$, and that with fat-tailed disturbances the test rejects too often. His \emph{studentised} version, $nR^2$ from the regression
+of $e_i^2$ on a constant and $z_i$, is valid without normality and is the version most software now reports.
+
+\subhead{White's test}
+White's general test takes $z_i$ to be all the regressors, their squares and their cross-products, and uses $nR^2$ from the regression of $e_i^2$ on them, which
+is asymptotically $\chi^2$ with degrees of freedom equal to the number of variables in $z_i$. It tests whether the variance is related to the regressors in any
+way that would make the conventional covariance matrix inconsistent. With many regressors the number of terms grows quickly, and the power falls.
+A significant result can also signal a misspecified functional form rather than heteroscedasticity, because neglected curvature shows up in the
+squared residuals.
+
+\begin{thm}
+\label{thm:nr2}
+In the auxiliary regression of $e_i^2$ on a constant and $z_i$, $nR^2$ is the LM statistic for $H_0\colon \alpha = 0$ in the model $E(u_i^2 \mid z_i) = \alpha_1 + z_i'\alpha$, computed with
+a variance estimate for $u_i^2$ that does not assume normality.
+\end{thm}
+
+\begin{proof}[Sketch of proof]
+Treat $e_i^2$ as the dependent variable in a linear regression on $(1, z_i')$. Under $H_0$ the restricted model has only an intercept, whose residuals are
+$e_i^2 - \overline{e^2}$. By Theorem~\ref{thm:trinitylm} the LM statistic for the $p$ slope restrictions in a linear model is $n$ times the $R^2$ of regressing these
+restricted residuals on all the regressors, which is the $R^2$ of the auxiliary regression itself. Replacing $u_i^2$ by $e_i^2$ changes nothing asymptotically,
+because $b$ is consistent. The variance of $u_i^2$ is estimated from the data rather than set to $2\sigma^4$, which is why no normality is needed.
+\end{proof}
+
+\subsection{Estimation under heteroscedasticity}
+\label{ssec:hetest}
+
+When the form of the heteroscedasticity is known up to a constant, $\sigma_i^2 = \sigma^2\omega_i$ with known $\omega_i$, GLS is weighted least squares: divide each observation,
+including the constant, by $\sqrt{\omega_i}$ and apply least squares. Two cases are common.
+
+\begin{exa}
+\label{ex:grouped}
+\textbf{Grouped data.} Suppose only group averages are available: for group $j$, the means $\bar Y_j$ and $\bar x_j$ of $n_j$ individual observations each
+satisfying $Y = x'\beta + u$ with $\Var(u) = \sigma^2$. Then $\bar Y_j = \bar x_j'\beta + \bar u_j$ with $\Var(\bar u_j) = \sigma^2/n_j$. The group averages are heteroscedastic,
+with $\omega_j = 1/n_j$, and GLS weights each group by $n_j$: large groups, whose averages are precise, count for more. Least squares on the
+unweighted averages treats a group of $5$ like a group of $5\,000$.
+\end{exa}
+
+\begin{exa}
+\label{ex:percapita}
+\textbf{Aggregates and per-capita data.} If a state's total income is $\text{TI}_i = \alpha + \beta\,\text{Pop}_i + u_i$ with $\Var(u_i) = \sigma^2\text{Pop}_i^2$, dividing through by
+$\text{Pop}_i$ gives
+\[
+\frac{\text{TI}_i}{\text{Pop}_i} = \beta + \alpha\frac{1}{\text{Pop}_i} + \frac{u_i}{\text{Pop}_i}, \qquad \Var\Bigl(\frac{u_i}{\text{Pop}_i}\Bigr) = \sigma^2 ,
+\]
+a homoscedastic regression of income per head on the reciprocal of population. The slope of the original model becomes the intercept of the
+transformed one. Expressing an aggregate relation in per-capita terms is often exactly the right weighting.
+\end{exa}
+
+When the $\omega_i$ are unknown, they are modelled. A flexible and always-positive choice is the multiplicative model $\sigma_i^2 = \exp(\gamma_0 + z_i'\gamma)$.
+Regressing $\log e_i^2$ on $z_i$ estimates $\gamma$, apart from the intercept, consistently; the fitted values give $\hat\omega_i$, and weighted least squares with
+weights $1/\hat\omega_i$ is \textbf{feasible GLS}. Under correct specification of the variance function, feasible GLS is asymptotically as efficient as GLS.
+Under misspecification it remains consistent, but its conventional standard errors are wrong. A sensible compromise, increasingly common, is
+to use feasible GLS for efficiency \emph{and} report robust standard errors for it.
+
+\subsection{Heteroscedasticity in software}
+\label{ssec:software10}
+
+The examples use the \texttt{state.x77} data supplied with R: for the 50 US states in the mid-1970s, per-capita income in dollars and population in
+thousands. Total personal income, in millions of dollars, is regressed on population in millions. The slope is then the income generated per
+additional person.
+
+\begin{software}[Least squares with conventional and robust standard errors]
+\label{sw:robust}
+Base R computes the sandwich in a few lines; the \texttt{sandwich} package does the same with \texttt{vcovHC(fit, type = "HC3")}:
+{\small\begin{verbatim}
+> st <- data.frame(state.x77)
+> st$TI  <- st$Income * st$Population / 1000     # total income, $ million
+> st$Pop <- st$Population / 1000                  # population, millions
+> fit <- lm(TI ~ Pop, data = st)
+> summary(fit)$coef
+             Estimate Std. Error   t value     Pr(>|t|)
+(Intercept) -1431.807  466.14137 -3.071615 3.501713e-03
+Pop          4904.810   76.05455 64.490683 2.727591e-48
+> X <- model.matrix(fit); e <- resid(fit); n <- nrow(X); k <- ncol(X)
+> XtXi <- solve(crossprod(X))
+> h <- rowSums((X %*% XtXi) * X)                  # leverages
+> hc <- function(w) sqrt(diag(XtXi %*% crossprod(X * w) %*% XtXi))
+> round(rbind(conventional = sqrt(diag(vcov(fit))),
++             HC0 = hc(e), HC1 = hc(e) * sqrt(n / (n - k)),
++             HC3 = hc(e / (1 - h))), 2)
+             (Intercept)    Pop
+conventional      466.14  76.05
+HC0               446.63 129.69
+HC1               455.84 132.36
+HC3               566.20 172.61
+\end{verbatim}}
+\textbf{Reading the output.} Each additional million people adds about \$4\,905 million of income, about \$4\,900 a head, close to average per-capita
+income, as one would expect. \texttt{crossprod(X * w)} computes $\sum w_i^2x_ix_i'$, the meat of the sandwich, with $w_i = e_i$ for HC0 and $e_i/(1 - p_{ii})$ for HC3. The
+robust standard error of the slope is $130$ to $173$, against a conventional $76$: the conventional formula understates the uncertainty by a factor of two
+or more. That is the direction Theorem~\ref{thm:hetbias} predicts, since the large residuals occur at the populous states, where $x_i^2$ is largest. The
+robust $t$ ratio is still enormous, $4905/173 = 28$, so the conclusion survives; with a weaker relationship it might not.
+
+\textbf{Stata:} \texttt{regress TI Pop, vce(robust)} gives HC1, and \texttt{vce(hc3)} gives HC3. \textbf{EViews:} in the estimation dialog,
+\emph{Options $\to$ Coefficient covariance $\to$ Huber-White}.
+\end{software}
+
+\begin{software}[Breusch--Pagan, White and Goldfeld--Quandt tests]
+\label{sw:hettests}
+The three tests, each in a few lines:
+{\small\begin{verbatim}
+> e2 <- e^2; aux <- lm(e2 ~ Pop, data = st)
+> c(koenker = n * summary(aux)$r.squared,
++   p = pchisq(n * summary(aux)$r.squared, 1, lower.tail = FALSE))
+     koenker            p
+1.734921e+01 3.110270e-05
+> g <- e2 / mean(e2); a2 <- lm(g ~ Pop, data = st)
+> c(BP = sum((fitted(a2) - mean(g))^2) / 2)
+      BP
+25.92774
+> w <- lm(e2 ~ Pop + I(Pop^2), data = st)
+> c(white = n * summary(w)$r.squared,
++   p = pchisq(n * summary(w)$r.squared, 2, lower.tail = FALSE))
+       white            p
+1.735017e+01 1.707886e-04
+> o <- order(st$Pop); lo <- st[o[1:20], ]; hi <- st[o[31:50], ]
+> r1 <- deviance(lm(TI ~ Pop, lo)); r2 <- deviance(lm(TI ~ Pop, hi))
+> c(GQ = r2 / r1, crit = qf(0.95, 18, 18),
++   p = pf(r2 / r1, 18, 18, lower.tail = FALSE))
+          GQ         crit            p
+2.170859e+01 2.217197e+00 1.095935e-08
+\end{verbatim}}
+\textbf{Reading the output.} Every test rejects homoscedasticity decisively. Koenker's $nR^2 = 17.3$ on $1$ degree of freedom. The original Breusch--Pagan
+statistic, $\frac12\text{ESS}$ from the regression of $e_i^2/\hat\sigma^2$, is larger at $25.9$, because it assumes normal kurtosis and these residuals have much fatter tails; the
+gap illustrates Koenker's point. White's test, with $\text{Pop}$ and $\text{Pop}^2$, gives $17.4$ on $2$ degrees of freedom. The Goldfeld--Quandt test orders the states by
+population, drops the middle ten, and finds that the residual variance of the twenty largest states is $21.7$ times that of the twenty smallest. (Both
+subsets have $20 - 2 = 18$ degrees of freedom, so the ratio of sums of squares is the ratio of variances.)
+
+\textbf{Stata:} \texttt{estat hettest} (Breusch--Pagan; add \texttt{, iid} for Koenker) and \texttt{estat imtest, white}. \textbf{EViews:}
+\emph{View $\to$ Residual Diagnostics $\to$ Heteroskedasticity Tests}, choosing Breusch-Pagan-Godfrey, White or Harvey.
+\end{software}
+
+\begin{software}[Weighted and feasible generalised least squares]
+\label{sw:wls}
+Three choices of weights: variance proportional to population, to population squared (the per-capita model of Example~\ref{ex:percapita}), and estimated
+from the data:
+{\small\begin{verbatim}
+> summary(lm(TI ~ Pop, data = st, weights = 1 / Pop))$coef
+            Estimate Std. Error   t value     Pr(>|t|)
+(Intercept) -327.110  237.11681 -1.379531 1.741244e-01
+Pop         4644.662   91.94615 50.515024 2.846440e-43
+> summary(lm(TI ~ Pop, data = st, weights = 1 / Pop^2))$coef
+             Estimate Std. Error   t value     Pr(>|t|)
+(Intercept)  170.1277   129.9784  1.308892 1.968028e-01
+Pop         4327.1723   119.7114 36.146715 1.790659e-36
+> v <- lm(log(e2) ~ log(Pop), data = st); coef(v)
+(Intercept)    log(Pop)
+ 13.7423055   0.4956839
+> fg <- lm(TI ~ Pop, data = st, weights = 1 / exp(fitted(v)))
+> summary(fg)$coef
+             Estimate Std. Error   t value     Pr(>|t|)
+(Intercept) -790.1068   337.9007 -2.338281 2.358648e-02
+Pop         4784.5722    82.4403 58.036811 4.041469e-46
+\end{verbatim}}
+\textbf{Reading the output.} The slope moves from $4\,905$ (least squares) to between $4\,327$ and $4\,785$ depending on the weights. These differences are
+larger than one would like if all the estimators were consistent for the same thing. They hint that the straight line is not the whole story, and that
+the largest states have a slightly different income per head; heteroscedasticity tests can be signalling misspecification. The estimated variance
+function says $\sigma_i^2 \propto \text{Pop}^{0.50}$, much less steep than either assumed weighting, but $\log e_i^2$ is a noisy dependent variable, and its slope has a large
+standard error. In practice one would report the feasible GLS estimates with robust standard errors, and check whether the conclusions depend on the
+choice of weights.
+
+\textbf{Stata:} \texttt{regress TI Pop [aweight = 1/Pop]}; for feasible GLS, \texttt{predict} the fitted log variance from the auxiliary regression and weight by
+its exponential. \textbf{EViews:} \emph{Options $\to$ Weights} in the estimation dialog, or the ARCH/heteroskedasticity dialog for the multiplicative model.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Data are available only as averages for $J$ income groups: group $j$ contains $n_j$ households, with average food expenditure $\bar Y_j$ and average
+income $\bar X_j$. The household relation is $Y = \alpha + \beta X + u$ with independent disturbances of constant variance $\sigma^2$.
+\begin{enumerate}[label=(\alph*)]
+\item Find the variance of the disturbance in the regression of $\bar Y_j$ on $\bar X_j$.
+\item Write the GLS estimator of $\beta$ explicitly.
+\item Explain why least squares on the group averages is unbiased but inefficient, and why its conventional standard errors are wrong.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\bar u_j$ is the average of $n_j$ independent disturbances, so $\Var(\bar u_j) = \sigma^2/n_j$.
+
+(b) GLS multiplies each group's equation by $\sqrt{n_j}$, which is weighted least squares with weights $n_j$:
+\[
+b_{\text{GLS}} = \frac{\sum_jn_j(\bar X_j - \bar X_w)(\bar Y_j - \bar Y_w)}{\sum_jn_j(\bar X_j - \bar X_w)^2},
+\]
+where $\bar X_w = \sum n_j\bar X_j/\sum n_j$ and $\bar Y_w$ are the weighted means, the overall household means. This is exactly the least squares estimate on
+the individual data with each household's values replaced by its group means.
+
+(c) $E(\bar u_j) = 0$, so least squares is unbiased; but it gives every group the same weight, whatever its size, so it is not BLUE (Aitken). Its conventional
+variance assumes a common variance across groups, while the true variances differ by the factor $1/n_j$.
+\end{solution}
+
+\begin{problem}
+In the model $Y_i = \alpha + \beta X_i + u_i$, the disturbances are independent with $\Var(u_i) = \sigma^2X_i^2$, $X_i > 0$.
+\begin{enumerate}[label=(\alph*)]
+\item Find the transformation that makes the disturbances homoscedastic, and write the transformed regression.
+\item In the transformed regression, which coefficient is the intercept and which the slope?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Divide by $X_i$: $Y_i/X_i = \beta + \alpha(1/X_i) + u_i/X_i$, with $\Var(u_i/X_i) = \sigma^2$.
+
+(b) $\beta$ becomes the intercept and $\alpha$ the coefficient on $1/X_i$, as in Example~\ref{ex:percapita}. A common error is to forget this exchange of roles and report
+the transformed intercept as if it were $\alpha$.
+\end{solution}
+
+\begin{problem}
+For a sample of 60 firms ordered by size, the Goldfeld--Quandt test is applied with the middle 12 firms omitted, to a regression with $k = 3$
+coefficients. The residual sums of squares are $\text{RSS}_1 = 24.8$ for the 24 smallest firms and $\text{RSS}_2 = 61.3$ for the 24 largest. Carry out the test at the
+$5\%$ level.
+\end{problem}
+
+\begin{solution}
+Each subset has $24 - 3 = 21$ degrees of freedom, so $\text{GQ} = (61.3/21)/(24.8/21) = 2.47$. The $5\%$ point of $F_{21,21}$ is about $2.08$, so homoscedasticity is
+rejected: the larger firms have a larger disturbance variance. The test is one-sided, because the alternative specified that the variance increases with
+size.
+\end{solution}
+
+\begin{problem}
+Consider a regression of $Y$ on an intercept and a dummy variable $D$, with $n_1$ observations having $D = 0$ and $n_2$ having $D = 1$, so that the slope estimates
+the difference between the two group means, $\bar Y_2 - \bar Y_1$. Show that the HC0 standard error of the slope is
+\[
+\sqrt{\frac{\hat\sigma_1^2}{n_1} + \frac{\hat\sigma_2^2}{n_2}}, \qquad \hat\sigma_j^2 = \frac{1}{n_j}\sum_{i\in j}(Y_i - \bar Y_j)^2 ,
+\]
+while the conventional standard error uses a pooled variance. Which is appropriate if the two groups have different variances?
+\end{problem}
+
+\begin{solution}
+The fitted values are the group means, so the residuals are deviations from the group means. With the regressors $(1, D)$ the slope is $\bar Y_2 - \bar Y_1$, a
+linear function $\sum c_iY_i$ with $c_i = -1/n_1$ in group 1 and $1/n_2$ in group 2. The sandwich variance of such a function is $\sum c_i^2e_i^2$, which is
+$\sum_{i\in1}e_i^2/n_1^2 + \sum_{i\in2}e_i^2/n_2^2 = \hat\sigma_1^2/n_1 + \hat\sigma_2^2/n_2$. The conventional formula is $s^2(1/n_1 + 1/n_2)$, with $s^2$ the pooled variance. If the
+groups' variances differ, the robust version is the right one: it is the Welch form of the two-sample $t$ test, while the conventional form is the pooled $t$
+test, which assumes equal variances. This applies directly to the schools data of Section~\ref{sec:spec}, whose variances differed by a factor of more than three.
+\end{solution}
+
+\begin{problem}
+Explain why a significant White test does not necessarily indicate heteroscedasticity. Give an example in which the true disturbances are homoscedastic,
+yet White's test is likely to reject.
+\end{problem}
+
+\begin{solution}
+White's test regresses the squared residuals on the regressors, their squares and cross-products. Anything that makes the squared residuals vary
+systematically with these will be detected, including misspecification of the mean. Suppose the true model is $Y = \alpha + \beta X + \gamma X^2 + u$ with
+homoscedastic $u$, but $Y$ is regressed on $X$ alone. The residuals then contain the neglected term $\gamma(X^2 - \text{fitted part})$, whose square is a
+polynomial in $X$, so $e_i^2$ is strongly related to $X$ and $X^2$ and the test rejects, although $\Var(u)$ is constant. The test should be read as ``something is
+wrong with the conditional mean or variance'', and the functional form checked (for example with RESET) before heteroscedasticity is concluded.
+\end{solution}
+
+\begin{problem}
+Prove that under homoscedasticity $E(e_i^2) = (1 - p_{ii})\sigma^2$, where $p_{ii}$ is the $i$th leverage, and use it to justify the HC2 correction. Why does HC3 divide by
+$(1 - p_{ii})^2$ instead?
+\end{problem}
+
+\begin{solution}
+$e = MU$, so $e_i = m_i'U$, with $m_i'$ the $i$th row of $M$, and $E(e_i^2) = \sigma^2m_i'm_i = \sigma^2(M^2)_{ii} = \sigma^2m_{ii} = \sigma^2(1 - p_{ii})$. So $e_i^2/(1 - p_{ii})$ is unbiased for
+$\sigma^2$ under homoscedasticity, and HC2 uses it to remove the downward bias of the raw squared residuals. HC3 approximates a \emph{jackknife}. The
+residual of observation $i$ when it is left out of the fit is $e_i/(1 - p_{ii})$, so $e_i^2/(1 - p_{ii})^2$ is the squared leave-one-out prediction error. It overcorrects
+slightly under homoscedasticity, but it guards against high-leverage points, whose residuals understate their disturbances most, and it performs best in
+small samples in simulation studies.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
