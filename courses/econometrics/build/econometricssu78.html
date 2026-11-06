@@ -1,0 +1,418 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>11.7 Autocorrelation in software — Econometrics</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='econometrics.css' rel='stylesheet' type='text/css' /> 
+<meta content='econometrics.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"Var": "\\operatorname{Var}", "Cov": "\\operatorname{Cov}", "Corr": "\\operatorname{Corr}", "plim": "\\operatorname{plim}", "tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Econometrics</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="econometricsse1.html">The Nature of Econometrics</a></li>
+<li class="sub"><a class="" href="econometricssu1.html">Economic models and econometric models</a></li>
+<li class="sub"><a class="" href="econometricssu2.html">Types of economic data</a></li>
+<li class="sub"><a class="" href="econometricssu3.html">Describing a bivariate relationship</a></li>
+<li class="sub"><a class="" href="econometricssu4.html">The conditional expectation function</a></li>
+<li class="sub"><a class="" href="econometricssu5.html">The software workflow</a></li>
+<li class="sub"><a class="" href="econometricssu6.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse2.html">The Two-Variable Linear Model</a></li>
+<li class="sub"><a class="" href="econometricssu7.html">The model and its assumptions</a></li>
+<li class="sub"><a class="" href="econometricssu8.html">Least squares</a></li>
+<li class="sub"><a class="" href="econometricssu9.html">Properties of the least squares estimators</a></li>
+<li class="sub"><a class="" href="econometricssu10.html">Inference</a></li>
+<li class="sub"><a class="" href="econometricssu11.html">Prediction</a></li>
+<li class="sub"><a class="" href="econometricssu12.html">Regression in software</a></li>
+<li class="sub"><a class="" href="econometricssu13.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse3.html">Functional Form</a></li>
+<li class="sub"><a class="" href="econometricssu14.html">Time as a regressor</a></li>
+<li class="sub"><a class="" href="econometricssu15.html">Constant growth curves</a></li>
+<li class="sub"><a class="" href="econometricssu16.html">Transformations of the variables</a></li>
+<li class="sub"><a class="" href="econometricssu17.html">The logistic curve</a></li>
+<li class="sub"><a class="" href="econometricssu18.html">Choosing the functional form</a></li>
+<li class="sub"><a class="" href="econometricssu19.html">Functional form in software</a></li>
+<li class="sub"><a class="" href="econometricssu20.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse4.html">Large-Sample Theory and the Autoregressive Equation</a></li>
+<li class="sub"><a class="" href="econometricssu21.html">Why exact theory breaks down</a></li>
+<li class="sub"><a class="" href="econometricssu22.html">Convergence in probability</a></li>
+<li class="sub"><a class="" href="econometricssu23.html">Convergence in distribution</a></li>
+<li class="sub"><a class="" href="econometricssu24.html">Least squares in large samples</a></li>
+<li class="sub"><a class="" href="econometricssu25.html">The autoregressive scheme</a></li>
+<li class="sub"><a class="" href="econometricssu26.html">Maximum likelihood for the autoregressive equation</a></li>
+<li class="sub"><a class="" href="econometricssu27.html">Large samples in software</a></li>
+<li class="sub"><a class="" href="econometricssu28.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse5.html">Matrix Algebra and Quadratic Forms</a></li>
+<li class="sub"><a class="" href="econometricssu29.html">Matrix results</a></li>
+<li class="sub"><a class="" href="econometricssu30.html">Random vectors</a></li>
+<li class="sub"><a class="" href="econometricssu31.html">The multivariate normal distribution</a></li>
+<li class="sub"><a class="" href="econometricssu32.html">Distributions of quadratic forms</a></li>
+<li class="sub"><a class="" href="econometricssu33.html">Application: the residuals of a regression</a></li>
+<li class="sub"><a class="" href="econometricssu34.html">Matrices in software</a></li>
+<li class="sub"><a class="" href="econometricssu35.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse6.html">The \(k\)-Variable Linear Model</a></li>
+<li class="sub"><a class="" href="econometricssu36.html">The model in matrix form</a></li>
+<li class="sub"><a class="" href="econometricssu37.html">Least squares</a></li>
+<li class="sub"><a class="" href="econometricssu38.html">The decomposition of the sum of squares and \(R^2\)</a></li>
+<li class="sub"><a class="" href="econometricssu39.html">Partitioned regression: the Frisch–Waugh–Lovell theorem</a></li>
+<li class="sub"><a class="" href="econometricssu40.html">Partial correlation</a></li>
+<li class="sub"><a class="" href="econometricssu41.html">The geometry of least squares</a></li>
+<li class="sub"><a class="" href="econometricssu42.html">Multiple regression in software</a></li>
+<li class="sub"><a class="" href="econometricssu43.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse7.html">Inference in the \(k\)-Variable Model</a></li>
+<li class="sub"><a class="" href="econometricssu44.html">The sampling distribution of \(b\)</a></li>
+<li class="sub"><a class="" href="econometricssu45.html">The Gauss–Markov theorem</a></li>
+<li class="sub"><a class="" href="econometricssu46.html">Testing linear restrictions</a></li>
+<li class="sub"><a class="" href="econometricssu47.html">Restricted least squares and the \(F\) test</a></li>
+<li class="sub"><a class="" href="econometricssu48.html">Confidence intervals and regions</a></li>
+<li class="sub"><a class="" href="econometricssu49.html">Prediction</a></li>
+<li class="sub"><a class="" href="econometricssu50.html">Testing in software</a></li>
+<li class="sub"><a class="" href="econometricssu51.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse8.html">Specification Error and Structural Change</a></li>
+<li class="sub"><a class="" href="econometricssu52.html">Omitted and irrelevant variables</a></li>
+<li class="sub"><a class="" href="econometricssu53.html">The Chow forecast test</a></li>
+<li class="sub"><a class="" href="econometricssu54.html">The Chow test of structural change</a></li>
+<li class="sub"><a class="" href="econometricssu55.html">Dummy variables</a></li>
+<li class="sub"><a class="" href="econometricssu56.html">Recursive residuals and the CUSUM test</a></li>
+<li class="sub"><a class="" href="econometricssu57.html">Testing functional form: RESET</a></li>
+<li class="sub"><a class="" href="econometricssu58.html">Specification tests in software</a></li>
+<li class="sub"><a class="" href="econometricssu59.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse9.html">Maximum Likelihood and Generalised Least Squares</a></li>
+<li class="sub"><a class="" href="econometricssu60.html">The likelihood principle</a></li>
+<li class="sub"><a class="" href="econometricssu61.html">Maximum likelihood in the linear model</a></li>
+<li class="sub"><a class="" href="econometricssu62.html">The likelihood ratio, Wald and Lagrange multiplier tests</a></li>
+<li class="sub"><a class="" href="econometricssu63.html">Non-spherical disturbances and generalised least squares</a></li>
+<li class="sub"><a class="" href="econometricssu64.html">Maximum likelihood and GLS in software</a></li>
+<li class="sub"><a class="" href="econometricssu65.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse10.html">Heteroscedasticity</a></li>
+<li class="sub"><a class="" href="econometricssu66.html">Consequences for least squares</a></li>
+<li class="sub"><a class="" href="econometricssu67.html">Heteroscedasticity-robust standard errors</a></li>
+<li class="sub"><a class="" href="econometricssu68.html">Testing for heteroscedasticity</a></li>
+<li class="sub"><a class="" href="econometricssu69.html">Estimation under heteroscedasticity</a></li>
+<li class="sub"><a class="" href="econometricssu70.html">Heteroscedasticity in software</a></li>
+<li class="sub"><a class="" href="econometricssu71.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="econometricsse11.html">Autocorrelation and ARCH</a></li>
+<li class="sub"><a class="" href="econometricssu72.html">Autocorrelated disturbances</a></li>
+<li class="sub"><a class="" href="econometricssu73.html">Consequences for least squares</a></li>
+<li class="sub"><a class="" href="econometricssu74.html">Testing for autocorrelation</a></li>
+<li class="sub"><a class="" href="econometricssu75.html">Estimation with autocorrelated disturbances</a></li>
+<li class="sub"><a class="" href="econometricssu76.html">Forecasting with autocorrelated disturbances</a></li>
+<li class="sub"><a class="" href="econometricssu77.html">Autoregressive conditional heteroscedasticity</a></li>
+<li class="sub"><a class="current" href="econometricssu78.html">Autocorrelation in software</a></li>
+<li class="sub"><a class="" href="econometricssu79.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="econometricsli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 6131 --><div class='crosslinks'><p class='noindent'>[<a href='econometricssu79.html'>next</a>] [<a href='econometricssu77.html'>prev</a>] [<a href='econometricssu77.html#taileconometricssu77.html'>prev-tail</a>] [<a href='#taileconometricssu78.html'>tail</a>] [<a href='econometricsse11.html#econometricssu78.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>11.7   </span> <a id='x91-9000011.7'></a>Autocorrelation in software</h4>
+<!-- l. 6134 --><p class='noindent'>The first five panels return to the seat-belt regression of Software <a href='econometricssu58.html#x68-67001r1'>8.7.1<!-- tex4ht:ref: sw:seatbelt  --></a>, with the trend: log monthly
+car-driver deaths in Great Britain, 1969–1984, on log kilometres driven, log real petrol price, the law
+dummy, eleven monthly dummies and a linear trend, \(n = 192\) and \(k = 16\).
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 6137 --><p class='noindent'><span class='head'>
+<a id='x91-90001r1'></a>
+<span class='cmbx-10x-x-109'>Software 11.7.1 </span>(Durbin–Watson statistic and its exact distribution)<span class='cmbx-10x-x-109'>.</span>  </span> The statistic, the residual
+correlogram, and the exact null distribution of \(d\) for these regressors, simulated from part (ii) of
+Theorem <a href='econometricssu74.html#x87-86002r2'>11.3.2<!-- tex4ht:ref: thm:dw  --></a> as \(MU\) with \(U\) standard normal:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-30'>
+&gt; sb &lt;- data.frame(Seatbelts); sb$t &lt;- 1:192
+&gt; sb$month &lt;- factor(cycle(Seatbelts[, "drivers"]))
+&gt; fit &lt;- lm(log(drivers) ~ log(kms) + log(PetrolPrice) + law + month + t,
++           data = sb)
+&gt; e &lt;- resid(fit); n &lt;- length(e); X &lt;- model.matrix(fit)
+&gt; d &lt;- sum(diff(e)^2) / sum(e^2)
+&gt; c(d = d, r1 = sum(e[-1] * e[-n]) / sum(e^2))
+        d        r1
+1.3359231 0.3302132
+&gt; round(acf(e, lag.max = 6, plot = FALSE)$acf[2:7], 3)
+[1] 0.330 0.295 0.147 0.026 0.129 0.003
+&gt; M &lt;- diag(n) - X %*% solve(crossprod(X), t(X))
+&gt; A &lt;- crossprod(diff(diag(n)))                  # d = e’Ae / e’e
+&gt; c(Ed = sum(diag(M %*% A)) / (n - ncol(X)))
+      Ed
+2.028209
+&gt; set.seed(1)
+&gt; dsim &lt;- replicate(20000, {u &lt;- M %*% rnorm(n); sum(diff(u)^2) / sum(u^2)})
+&gt; c(mean = mean(dsim), quantile(dsim, c(0.01, 0.05)), min = min(dsim),
++   as.small = sum(dsim &lt;= d))
+    mean       1%       5%      min as.small
+2.027099 1.687188 1.784067 1.390448 0.000000
+</pre>
+<!-- l. 6164 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output.</span> \(d = 1.34\), close to \(2(1 - \hat r) = 2(1 - 0.330) = 1.34\), as Theorem <a href='econometricssu74.html#x87-86002r2'>11.3.2<!-- tex4ht:ref: thm:dw  --></a>(i) says it should be with \(n = 192\). The residual
+autocorrelations decline slowly from \(0.33\) and \(0.30\). The exact mean of \(d\) under \(H_0\), \(\tr (MA)/(n - k) = 2.028\) from Theorem <a href='econometricssu74.html#x87-86002r2'>11.3.2<!-- tex4ht:ref: thm:dw  --></a>(iii),
+is confirmed by the simulation, which also gives the exact \(5\%\) critical value for these regressors,
+\(1.78\).  Not  one  of  the  \(20\,000\)  simulated  values  is  as  small  as  \(1.34\),  and  the  smallest  is  \(1.39\):  the  evidence  of
+positive autocorrelation is overwhelming. The matrix <span class='cmtt-10x-x-109'>A </span>is built as \(D'D\), with <span class='cmtt-10x-x-109'>diff(diag(n)) </span>the
+first-difference matrix \(D\).
+</p><!-- l. 6171 --><p class='noindent'><span class='cmbx-10x-x-109'>Stata: </span>after <span class='cmtt-10x-x-109'>tsset</span>, <span class='cmtt-10x-x-109'>estat dwatson</span>. <span class='cmbx-10x-x-109'>EViews: </span>the Durbin–Watson statistic is printed in every
+equation output; the correlogram is <span class='cmti-10x-x-109'>View</span> \(\to \) <span class='cmti-10x-x-109'>Residual Diagnostics</span> \(\to \) <span class='cmti-10x-x-109'>Correlogram – Q-statistics</span>.
+</p>
+</div>
+<!-- l. 6173 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 6175 --><p class='noindent'><span class='head'>
+<a id='x91-90002r2'></a>
+<span class='cmbx-10x-x-109'>Software 11.7.2 </span>(Breusch–Godfrey and Ljung–Box tests)<span class='cmbx-10x-x-109'>.</span>  </span> The Breusch–Godfrey test
+at orders \(1\) and \(12\), the second because the data are monthly, and the Ljung–Box test with \(12\)
+lags:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-31'>
+&gt; bg &lt;- function(p) {
++   E &lt;- embed(c(rep(0, p), e), p + 1)[, -1, drop = FALSE]
++   LM &lt;- n * summary(lm(e ~ X[, -1] + E))$r.squared
++   c(LM = LM, df = p, p = pchisq(LM, p, lower.tail = FALSE))
++ }
+&gt; rbind(bg(1), bg(12))
+           LM df            p
+[1,] 21.45457  1 3.623109e-06
+[2,] 39.18633 12 9.804716e-05
+&gt; Box.test(e, lag = 12, type = "Ljung-Box")
+
+    Box-Ljung test
+
+data:  e
+X-squared = 53.781, df = 12, p-value = 2.99e-07
+</pre>
+<!-- l. 6194 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span><span class='cmtt-10x-x-109'>embed </span>lines up \(e_t\) with its first \(p\) lags, after padding with \(p\) zeros as in
+Theorem <a href='econometricssu74.html#x87-86007r3'>11.3.3<!-- tex4ht:ref: thm:bg  --></a>. All three tests reject independence decisively: \(\text {LM} = 21.5\) on \(1\) degree of freedom, \(39.2\) on \(12\),
+and \(Q^* = 53.8\) on \(12\). The conventional standard errors and the Chow tests of Software <a href='econometricssu58.html#x68-67002r2'>8.7.2<!-- tex4ht:ref: sw:chow  --></a> are therefore
+suspect.
+</p><!-- l. 6199 --><p class='noindent'><span class='cmbx-10x-x-109'>Stata: </span><span class='cmtt-10x-x-109'>estat bgodfrey, lags(1 12)</span>; <span class='cmtt-10x-x-109'>wntestq </span>on the saved residuals for the Ljung–Box \(Q\).
+<span class='cmbx-10x-x-109'>EViews: </span><span class='cmti-10x-x-109'>View</span> \(\to \) <span class='cmti-10x-x-109'>Residual Diagnostics</span> \(\to \) <span class='cmti-10x-x-109'>Serial Correlation LM Test</span>, entering the number of lags.
+</p>
+</div>
+<!-- l. 6201 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 6203 --><p class='noindent'><span class='head'>
+<a id='x91-90003r3'></a>
+<span class='cmbx-10x-x-109'>Software 11.7.3 </span>(Feasible GLS and maximum likelihood)<span class='cmbx-10x-x-109'>.</span>  </span> The Prais–Winsten transformation
+(<a href='econometricssu75.html#x88-87001r2'>11.2<!-- tex4ht:ref: eq:praiswinsten  --></a>) is written as a function; dropping the first row gives Cochrane–Orcutt, which is then iterated.
+Maximum likelihood with AR(1) and AR(2) disturbances uses R’s <span class='cmtt-10x-x-109'>arima</span>, which accepts regressors
+through <span class='cmtt-10x-x-109'>xreg</span>:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-32'>
+&gt; y &lt;- log(sb$drivers); r &lt;- sum(e[-1] * e[-n]) / sum(e^2)
+&gt; pw &lt;- function(rho, first = TRUE) {      # first = FALSE: Cochrane-Orcutt
++   ys &lt;- y[-1] - rho * y[-n]; Xs &lt;- X[-1, ] - rho * X[-n, ]
++   if (first) {
++     ys &lt;- c(sqrt(1 - rho^2) * y[1], ys)
++     Xs &lt;- rbind(sqrt(1 - rho^2) * X[1, ], Xs)
++   }
++   lm(ys ~ Xs - 1)
++ }
+&gt; rho &lt;- 0
+&gt; for (i in 1:50) {                         # iterated Cochrane-Orcutt
++   u &lt;- y - X %*% coef(pw(rho, FALSE))
++   new &lt;- sum(u[-1] * u[-n]) / sum(u[-n]^2)
++   if (abs(new - rho) &lt; 1e-8) break
++   rho &lt;- new
++ }
+&gt; c(r = r, rho.CO = rho, iterations = i)
+         r     rho.CO iterations
+ 0.3302132  0.3719266 10.0000000
+&gt; ml1 &lt;- arima(y, order = c(1, 0, 0), xreg = X[, -1])
+&gt; ml2 &lt;- arima(y, order = c(2, 0, 0), xreg = X[, -1])
+&gt; round(c(AR1 = ml1$coef[1], AR2 = ml2$coef[1:2]), 3)
+AR1.ar1 AR2.ar1 AR2.ar2
+  0.370   0.294   0.221
+&gt; c(AIC1 = AIC(ml1), AIC2 = AIC(ml2),
++   Q1 = Box.test(resid(ml1), 12, "Ljung-Box", fitdf = 1)$p.value,
++   Q2 = Box.test(resid(ml2), 12, "Ljung-Box", fitdf = 2)$p.value)
+         AIC1          AIC2            Q1            Q2
+-440.27190797 -447.70936705    0.04433298    0.62001488
+</pre>
+<!-- l. 6237 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The residual estimate \(\hat r = 0.330\) rises to \(\hat \rho = 0.372\) when Cochrane–Orcutt is iterated to
+convergence, and maximum likelihood gives \(0.370\). The least squares residuals understate \(\rho \), because
+they  are  forced  to  be  orthogonal  to  the  regressors,  which  are  themselves  smooth.  But  the
+AR(1) model does not remove all the autocorrelation: the Ljung–Box test on its residuals, with
+\(12 - 1 = 11\) degrees of freedom, still gives \(p = 0.044\). The AR(2) model, with coefficients \(0.294\) and \(0.221\), leaves white-noise
+residuals (\(p = 0.62\)) and has the lower AIC. This is the pattern that the slowly declining correlogram of
+Software <a href='#x91-90001r1'>11.7.1<!-- tex4ht:ref: sw:actests  --></a> suggested.
+</p><!-- l. 6244 --><p class='noindent'><span class='cmbx-10x-x-109'>Stata:  </span><span class='cmtt-10x-x-109'>prais y x1 x2 </span>(Prais–Winsten),  <span class='cmtt-10x-x-109'>prais y x1 x2, corc </span>(Cochrane–Orcutt),  and
+<span class='cmtt-10x-x-109'>arima y x1 x2, ar(1/2) </span>for maximum likelihood. <span class='cmbx-10x-x-109'>EViews: </span>add <span class='cmtt-10x-x-109'>ar(1) ar(2) </span>to the equation
+specification, <span class='cmtt-10x-x-109'>ls y c x1 x2 ar(1) ar(2)</span>.
+</p>
+</div>
+<!-- l. 6246 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 6248 --><p class='noindent'><span class='head'>
+                                                                                      
+                                                                                      
+<a id='x91-90004r4'></a>
+<span class='cmbx-10x-x-109'>Software 11.7.4 </span>(Newey–West standard errors and a comparison)<span class='cmbx-10x-x-109'>.</span>  </span> Newey–West standard errors
+with the rule-of-thumb lag, and a table of the two coefficients of most interest across all the
+methods:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-33'>
+&gt; nw &lt;- function(L) {                      # Newey-West, Bartlett weights
++   g &lt;- X * e; S &lt;- crossprod(g)
++   for (j in 1:L) {
++     G &lt;- crossprod(g[-(1:j), ], g[1:(n - j), ])
++     S &lt;- S + (1 - j / (L + 1)) * (G + t(G))
++   }
++   B &lt;- solve(crossprod(X)); sqrt(diag(B %*% S %*% B))
++ }
+&gt; floor(4 * (n / 100)^(2/9))               # rule-of-thumb lag
+[1] 4
+&gt; se &lt;- function(f) sqrt(diag(f$var.coef))
+&gt; v &lt;- c("log(kms)", "law")
+&gt; tab &lt;- rbind(
++   OLS     = c(coef(fit)[v], sqrt(diag(vcov(fit)))[v]),
++   NW4     = c(coef(fit)[v], nw(4)[v]),
++   PW      = c(summary(pw(r))$coef[c(2, 4), 1:2]),
++   CO      = c(summary(pw(rho, FALSE))$coef[c(2, 4), 1:2]),
++   ML.AR1  = c(ml1$coef[v], se(ml1)[v]),
++   ML.AR2  = c(ml2$coef[v], se(ml2)[v]))
+&gt; colnames(tab) &lt;- c("b.kms", "b.law", "se.kms", "se.law")
+&gt; round(tab, 4)
+        b.kms   b.law se.kms se.law
+OLS    0.4321 -0.1504 0.1208 0.0213
+NW4    0.4321 -0.1504 0.1180 0.0244
+PW     0.2479 -0.1521 0.1282 0.0288
+CO     0.2163 -0.1509 0.1294 0.0306
+ML.AR1 0.2226 -0.1529 0.1318 0.0291
+ML.AR2 0.2013 -0.1599 0.1272 0.0347
+</pre>
+<!-- l. 6280 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span><span class='cmtt-10x-x-109'>g </span>holds the rows \(g_t' = e_tx_t'\), and <span class='cmtt-10x-x-109'>G </span>is \(\hat \Gamma _j\), exactly as in Theorem <a href='econometricssu75.html#x88-87007r3'>11.4.3<!-- tex4ht:ref: thm:nw  --></a>. The seat-belt
+law effect is remarkably stable: every method puts it between \(-0.150\) and \(-0.160\), a fall in deaths of \(14\) to \(15\%\). Its
+standard error, however, rises from \(0.021\) (least squares) to between \(0.024\) and \(0.035\) once the autocorrelation
+is allowed for. The \(t\) ratio falls from \(-7.1\) to about \(-4.6\) in the AR(2) model, still decisive. The kilometre
+elasticity is more fragile: it falls from \(0.43\) to between \(0.20\) and \(0.25\) under GLS, with standard errors of
+about \(0.13\), so it is no longer clearly different from zero. Least squares and GLS are both consistent
+if the model is right, so a shift of about one and a half standard errors between them is a hint
+that the dynamics of the relation between traffic and deaths are not fully captured by a static
+equation with AR disturbances, in the spirit of Theorem <a href='econometricssu75.html#x88-87006r2'>11.4.2<!-- tex4ht:ref: thm:comfac  --></a>.
+</p><!-- l. 6289 --><p class='noindent'><span class='cmbx-10x-x-109'>Stata:  </span><span class='cmtt-10x-x-109'>newey y x1 x2, lag(4)</span>.  <span class='cmbx-10x-x-109'>EViews:  </span><span class='cmti-10x-x-109'>Options</span>  \(\to \)  <span class='cmti-10x-x-109'>Coefficient  covariance  matrix</span>  \(\to \)  <span class='cmti-10x-x-109'>HAC
+(Newey-West) </span>in the estimation dialog.
+</p>
+</div>
+<!-- l. 6291 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 6293 --><p class='noindent'><span class='head'>
+                                                                                      
+                                                                                      
+<a id='x91-90005r5'></a>
+<span class='cmbx-10x-x-109'>Software 11.7.5 </span>(A dynamic model: Durbin’s \(h\) fails)<span class='cmbx-10x-x-109'>.</span>  </span> Add last month’s log deaths as a regressor, so
+that the model has a lagged dependent variable, and test its residuals:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-34'>
+&gt; ylag &lt;- y[-n]; dyn &lt;- lm(y[-1] ~ ylag + X[-1, -1])
+&gt; ed &lt;- resid(dyn); m &lt;- length(ed)
+&gt; dd &lt;- sum(diff(ed)^2) / sum(ed^2); V &lt;- vcov(dyn)["ylag", "ylag"]
+&gt; c(b = coef(dyn)[["ylag"]], d = dd, r = 1 - dd/2, nV = m * V,
++   h = (1 - dd/2) * sqrt(m / (1 - m * V)))
+          b           d           r          nV           h
+ 0.35315042  2.11649667 -0.05824834  0.95891278 -3.97142918
+&gt; Z &lt;- model.matrix(dyn); e1 &lt;- c(0, ed[-m])
+&gt; LM &lt;- m * summary(lm(ed ~ Z[, -1] + e1))$r.squared
+&gt; c(LM = LM, p = pchisq(LM, 1, lower.tail = FALSE))
+        LM          p
+3.22045105 0.07272359
+</pre>
+<!-- l. 6309 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The lagged dependent variable has coefficient \(0.353\), and the Durbin–Watson
+statistic is now \(2.12\): by Theorem <a href='econometricssu73.html#x86-85002r2'>11.2.2<!-- tex4ht:ref: thm:lagdep  --></a>, \(d\) is biased towards \(2\) in a dynamic model, and it can no
+longer be used. Durbin’s \(h\) gives \(-3.97\), an apparently significant <span class='cmti-10x-x-109'>negative </span>autocorrelation. But \(n\widehat \Var (b_1) = 0.959\) is close
+to one, so the factor \(\sqrt {n/(1 - n\widehat \Var (b_1))} = 68\) magnifies a tiny \(\hat r = -0.058\) into a large statistic, and \(h\) is not to be trusted. The
+Breusch–Godfrey test, valid in this setting, gives \(\text {LM} = 3.22\) with \(p = 0.073\): no significant first-order autocorrelation
+remains once the lag is included.
+</p><!-- l. 6316 --><p class='noindent'><span class='cmbx-10x-x-109'>Stata: </span><span class='cmtt-10x-x-109'>estat durbinalt </span>(Durbin’s alternative, a form of the Breusch–Godfrey test) and <span class='cmtt-10x-x-109'>estat
+bgodfrey</span>. <span class='cmbx-10x-x-109'>EViews: </span>the Serial Correlation LM Test is valid with lagged dependent variables.
+</p>
+</div>
+<!-- l. 6318 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 6320 --><p class='noindent'><span class='head'>
+<a id='x91-90006r6'></a>
+<span class='cmbx-10x-x-109'>Software 11.7.6 </span>(ARCH test and GARCH(1,1) estimation)<span class='cmbx-10x-x-109'>.</span>  </span> R’s <span class='cmtt-10x-x-109'>EuStockMarkets </span>data give daily
+closing values of the DAX from 1991 to 1998. Percentage log returns are tested for ARCH and a
+GARCH(1,1) is fitted by maximising the likelihood with <span class='cmtt-10x-x-109'>optim</span>:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-35'>
+&gt; r &lt;- 100 * diff(log(EuStockMarkets[, "DAX"])); n &lt;- length(r)
+&gt; u &lt;- r - mean(r)
+&gt; c(n = n, sd = sd(r), kurtosis = mean(u^4) / mean(u^2)^2)
+          n          sd    kurtosis
+1859.000000    1.030084    9.279689
+&gt; Q &lt;- function(x, ...) unname(Box.test(x, 10, "Ljung-Box", ...)$statistic)
+&gt; c(Q.r = Q(r), Q.r2 = Q(r^2))
+       Q.r       Q.r2
+  6.365577 110.746179
+&gt; E &lt;- embed(u^2, 6)                      # u2[t], u2[t-1], ..., u2[t-5]
+&gt; LM &lt;- (n - 5) * summary(lm(E[, 1] ~ E[, -1]))$r.squared
+&gt; c(LM = LM, p = pchisq(LM, 5, lower.tail = FALSE))
+          LM            p
+6.971090e+01 1.177043e-13
+&gt; hfun &lt;- function(p) {                   # GARCH(1,1) conditional variances
++   u &lt;- r - p[1]; h &lt;- numeric(n); h[1] &lt;- var(r)
++   for (t in 2:n) h[t] &lt;- p[2] + p[3] * u[t - 1]^2 + p[4] * h[t - 1]
++   h
++ }
+&gt; nll &lt;- function(p) {
++   if (p[2] &lt;= 0 || p[3] &lt; 0 || p[4] &lt; 0 || p[3] + p[4] &gt;= 1) return(1e10)
++   h &lt;- hfun(p); 0.5 * sum(log(2 * pi * h) + (r - p[1])^2 / h)
++ }
+&gt; g &lt;- optim(c(mu = 0, omega = 0.05, alpha = 0.1, beta = 0.8), nll,
++            hessian = TRUE)
+&gt; round(cbind(estimate = g$par, se = sqrt(diag(solve(g$hessian)))), 4)
+      estimate     se
+mu      0.0653 0.0216
+omega   0.0476 0.0127
+alpha   0.0684 0.0148
+beta    0.8876 0.0236
+&gt; c(loglik = -g$value, persistence = sum(g$par[3:4]),
++   uncond.var = unname(g$par[2] / (1 - sum(g$par[3:4]))))
+       loglik   persistence    uncond.var
+-2594.7966981     0.9559975     1.0814973
+&gt; z &lt;- (r - g$par[1]) / sqrt(hfun(g$par))
+&gt; c(Q.z2 = Q(z^2, fitdf = 2), kurt.z = mean(z^4), min.z = min(z),
++   kurt.z.drop.min = mean(z[-which.min(z)]^4))
+           Q.z2          kurt.z           min.z kurt.z.drop.min
+       0.893289       15.944858      -12.335787        3.490465
+</pre>
+<!-- l. 6365 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The kurtosis of the returns is \(9.3\), far above the normal \(3\). The returns
+are serially uncorrelated (Ljung–Box \(Q = 6.4\) on \(10\) degrees of freedom), but their squares are strongly
+autocorrelated (\(Q = 110.7\)), and Engle’s test with five lags gives \(\text {LM} = 69.7\), \(p \approx 10^{-13}\), exactly the pattern of Theorem <a href='econometricssu77.html#x90-89002r2'>11.6.2<!-- tex4ht:ref: thm:arch1  --></a>.
+The  fitted  model  is  \[ h_t = 0.048 + 0.068\,u_{t-1}^2 + 0.888\,h_{t-1}, \]  with  persistence  \(\hat \alpha + \hat \beta = 0.956\)  and  so  a  half-life  of  \(\log 0.5/\log 0.956 = 15\)  trading  days.  The  implied
+unconditional variance, \(1.08\), matches the sample variance \(1.03^2 = 1.06\). The standardised residuals \(z_t = \hat u_t/\sqrt {h_t}\) have no
+remaining ARCH (\(Q = 0.89\)). Their kurtosis is \(15.9\) only because of a single day, the August 1991 fall shown
+in Figure <a href='econometricssu77.html#x90-89007r11'>11<!-- tex4ht:ref: fig:dax  --></a>, which came in a calm period and is \(12.3\) conditional standard deviations; without
+it the kurtosis is \(3.5\). Such outliers are why practitioners often replace the normal by a Student \(t\)
+distribution for \(\varepsilon _t\).
+                                                                                      
+                                                                                      
+</p><!-- l. 6377 --><p class='noindent'><span class='cmbx-10x-x-109'>Stata: </span><span class='cmtt-10x-x-109'>estat archlm, lags(5) </span>after <span class='cmtt-10x-x-109'>regress</span>; <span class='cmtt-10x-x-109'>arch r, arch(1) garch(1)</span>. <span class='cmbx-10x-x-109'>EViews: </span><span class='cmti-10x-x-109'>View</span> \(\to \)
+<span class='cmti-10x-x-109'>Residual Diagnostics</span> \(\to \) <span class='cmti-10x-x-109'>Heteroskedasticity Tests</span> \(\to \) <span class='cmti-10x-x-109'>ARCH</span>; estimate with <span class='cmti-10x-x-109'>Quick</span> \(\to \) <span class='cmti-10x-x-109'>Estimate Equation</span>,
+method ARCH.
+</p>
+</div>
+<!-- l. 6379 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 6381 --><div class='crosslinks'><p class='noindent'>[<a href='econometricssu79.html'>next</a>] [<a href='econometricssu77.html'>prev</a>] [<a href='econometricssu77.html#taileconometricssu77.html'>prev-tail</a>] [<a href='econometricssu78.html'>front</a>] [<a href='econometricsse11.html#econometricssu78.html'>up</a>] </p></div>
+<!-- l. 6381 --><p class='noindent'><a id='taileconometricssu78.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="econometricssu77.html">&larr; Previous</a><a class="up" href="econometricsse11.html#econometricssu78.html">Contents</a><a class="next" href="econometricssu79.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="econometrics/11-7-autocorrelation-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
