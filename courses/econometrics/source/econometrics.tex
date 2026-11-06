@@ -763,6 +763,7 @@ the mean squared prediction error of the best linear predictor is than that of t
 \end{solution}
 
 \begin{problem}
+\label{prob:uncorr}
 Let $X$ be symmetric about zero with $E(X^4) < \infty$ and $\Var(X) > 0$, and let $\varepsilon = X^2 - E(X^2)$.
 \begin{enumerate}[label=(\alph*)]
 \item Show that $E(\varepsilon) = 0$ and $\Cov(X, \varepsilon) = 0$.
@@ -2690,6 +2691,530 @@ $P(|\bar Y - \theta| \geq 0.05) \leq \theta(1 - \theta)/(n \times 0.0025) \leq 0
 $n \geq 2000$. The CLT gives $1.96\sqrt{0.25/n} \leq 0.05$, so $n \geq 385$. Chebyshev's bound holds for every distribution with that variance and every
 $n$, so it must cover the worst case and is very conservative. The CLT approximation uses the near-normal shape of $\bar Y$, which is accurate for
 $n$ in the hundreds.
+\end{solution}
+
+%======================================================================
+\section{Matrix Algebra and Quadratic Forms}
+\label{sec:quad}
+
+From here on, the model has $k$ regressors and is written in matrix form. This section collects the matrix results and the distribution
+theory that the rest of the course uses. Most of it is the theory of \emph{quadratic forms} $X'AX$ in normal random vectors, which is what lies
+behind every $\chi^2$, $t$ and $F$ statistic in regression. At the end the theory is applied to the residuals of a regression, which delivers
+the two facts that Section~\ref{ssec:inf2} had to take on trust.
+
+\subsection{Matrix results}
+\label{ssec:matrix}
+
+Vectors are columns; a prime denotes transposition; $I_n$ is the $n \times n$ identity and $\iota$ the $n$-vector of ones. All matrices are real.
+
+\begin{defn}
+The \textbf{trace} of a square matrix is the sum of its diagonal elements. A symmetric matrix $A$ is \textbf{positive definite} (pd) if $c'Ac > 0$ for
+every $c \neq 0$, and \textbf{positive semi-definite} (psd) if $c'Ac \geq 0$ for every $c$. A square matrix is \textbf{idempotent} if $AA = A$.
+\end{defn}
+
+\begin{lem}
+\label{lem:trace}
+$\tr(A + B) = \tr A + \tr B$, $\tr(cA) = c\tr A$, and $\tr(AB) = \tr(BA)$ whenever both products are defined. In particular, for a vector $x$,
+$x'Ax = \tr(x'Ax) = \tr(Axx')$.
+\end{lem}
+
+\begin{proof}
+The first two are immediate. If $A$ is $m \times n$ and $B$ is $n \times m$, then $\tr(AB) = \sum_i\sum_j a_{ij}b_{ji} = \sum_j\sum_i b_{ji}a_{ij} = \tr(BA)$.
+A scalar is its own trace, so $x'Ax = \tr(x'(Ax)) = \tr((Ax)x')$.
+\end{proof}
+
+The trace identity looks trivial. Its use is to move a random vector to the end of a product, where expectation can be applied to $xx'$ alone,
+and it is behind every expected value of a quadratic form in this course.
+
+\begin{thm}[Spectral decomposition]
+\label{thm:spectral}
+A real symmetric $n \times n$ matrix $A$ can be written $A = Q\Lambda Q'$, where $Q$ is orthogonal ($Q'Q = QQ' = I$) and
+$\Lambda = \operatorname{diag}(\lambda_1, \dots, \lambda_n)$ holds the eigenvalues of $A$, which are real. The columns of $Q$ are corresponding
+orthonormal eigenvectors. The rank of $A$ is the number of non-zero eigenvalues.
+\end{thm}
+
+This is a standard theorem of linear algebra and we use it without proof. Three consequences follow, all used repeatedly.
+
+\begin{coro}
+\label{coro:pd}
+Let $A$ be symmetric with spectral decomposition $Q\Lambda Q'$.
+\begin{enumerate}[label=(\roman*)]
+\item $A$ is pd if and only if every $\lambda_i > 0$, and psd if and only if every $\lambda_i \geq 0$.
+\item If $A$ is pd it is non-singular, and $A^{-1} = Q\Lambda^{-1}Q'$ is pd.
+\item If $A$ is pd, the matrix $A^{1/2} = Q\Lambda^{1/2}Q'$ is symmetric and pd, with $A^{1/2}A^{1/2} = A$. Its inverse $A^{-1/2} = Q\Lambda^{-1/2}Q'$
+satisfies $A^{-1/2}AA^{-1/2} = I$. More generally, any non-singular $P$ with $P'P = A^{-1}$ satisfies $PAP' = I$.
+\end{enumerate}
+\end{coro}
+
+\begin{proof}
+(i) With $d = Q'c$, which is non-zero exactly when $c$ is, $c'Ac = d'\Lambda d = \sum_i\lambda_id_i^2$. This is positive for all $d \neq 0$ if and only if
+every $\lambda_i > 0$, and non-negative for all $d$ if and only if every $\lambda_i \geq 0$.
+
+(ii) $Q\Lambda^{-1}Q'\,Q\Lambda Q' = Q\Lambda^{-1}\Lambda Q' = I$, and the eigenvalues $1/\lambda_i$ are positive.
+
+(iii) $A^{1/2}A^{1/2} = Q\Lambda^{1/2}Q'Q\Lambda^{1/2}Q' = Q\Lambda Q' = A$, and similarly for the inverse. If $P'P = A^{-1}$ with $P$ non-singular, then
+$A = (P'P)^{-1} = P^{-1}(P')^{-1}$, so $PAP' = PP^{-1}(P')^{-1}P' = I$.
+\end{proof}
+
+The last statement is the key to generalised least squares: a covariance matrix $A$ that is not a multiple of the identity can be turned into the
+identity by a linear transformation $P$, which may be the symmetric $A^{-1/2}$ or any other factor of $A^{-1}$, such as a Cholesky factor.
+
+\begin{thm}[Idempotent matrices]
+\label{thm:idem}
+Let $A$ be symmetric and idempotent. Then
+\begin{enumerate}[label=(\roman*)]
+\item every eigenvalue of $A$ is $0$ or $1$;
+\item $\rank A = \tr A$;
+\item $I - A$ is symmetric and idempotent, with $A(I - A) = 0$ and $\rank(I - A) = n - \rank A$;
+\item $A$ is psd.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) If $Av = \lambda v$ with $v \neq 0$, then $\lambda v = Av = AAv = \lambda Av = \lambda^2v$, so $\lambda^2 = \lambda$ and $\lambda \in \{0, 1\}$.
+
+(ii) By Theorem~\ref{thm:spectral} the rank is the number of non-zero eigenvalues, which by (i) is the number of eigenvalues equal to one. That is
+their sum, and the sum of the eigenvalues is $\tr(Q\Lambda Q') = \tr(\Lambda Q'Q) = \tr\Lambda$.
+
+(iii) $(I - A)' = I - A$ and $(I - A)^2 = I - 2A + A^2 = I - A$. Also $A(I - A) = A - A^2 = 0$. By (ii),
+$\rank(I - A) = \tr(I - A) = n - \tr A = n - \rank A$.
+
+(iv) By (i) all eigenvalues are non-negative; apply Corollary~\ref{coro:pd}(i).
+\end{proof}
+
+Two idempotent matrices appear constantly.
+
+\begin{exa}
+\label{ex:centring}
+The \textbf{centring matrix} $M_0 = I_n - \frac1n\iota\iota'$ subtracts the mean: $M_0x = x - \bar x\iota$, the vector of deviations. It is symmetric, and
+since $\iota'\iota = n$,
+\[
+M_0^2 = I - \tfrac2n\iota\iota' + \tfrac{1}{n^2}\iota(\iota'\iota)\iota' = I - \tfrac1n\iota\iota' = M_0 .
+\]
+Its trace is $n - \frac1n\tr(\iota'\iota) = n - 1$, so $\rank M_0 = n - 1$. The sum of squared deviations is a quadratic form in it:
+$\sum (x_i - \bar x)^2 = (M_0x)'(M_0x) = x'M_0x$.
+\end{exa}
+
+\begin{exa}
+\label{ex:hatM}
+Let $X$ be an $n \times k$ matrix of rank $k$, so that $X'X$ is non-singular. The matrices
+\[
+P = X(X'X)^{-1}X', \qquad M = I_n - P
+\]
+are symmetric and idempotent:
+\[
+P^2 = X(X'X)^{-1}(X'X)(X'X)^{-1}X' = P ,
+\]
+and $M$ is idempotent by Theorem~\ref{thm:idem}(iii). By Lemma~\ref{lem:trace},
+\[
+\tr P = \tr\bigl((X'X)^{-1}X'X\bigr) = \tr I_k = k, \qquad \tr M = n - k .
+\]
+So $\rank P = k$ and $\rank M = n - k$. Also $PX = X$ and $MX = 0$: $P$ leaves the columns of $X$ unchanged and $M$ annihilates them. In regression
+$P$ is the ``hat'' matrix that produces fitted values, $\hat Y = PY$, and $M$ the ``residual maker'', $e = MY$; both are used throughout the next section.
+\end{exa}
+
+\subhead{Differentiating linear and quadratic forms}
+Least squares and maximum likelihood are minimisation problems in a vector of parameters, so derivatives with respect to vectors are needed.
+For a scalar function $f(\beta)$ of $\beta = (\beta_1, \dots, \beta_k)'$, $\partial f/\partial\beta$ denotes the column vector of partial derivatives.
+
+\begin{lem}
+\label{lem:deriv}
+For a constant vector $a$ and constant square matrix $A$,
+\[
+\frac{\partial(a'\beta)}{\partial\beta} = a, \qquad \frac{\partial(\beta'A\beta)}{\partial\beta} = (A + A')\beta ,
+\]
+which is $2A\beta$ when $A$ is symmetric. The matrix of second derivatives of $\beta'A\beta$ is $A + A'$.
+\end{lem}
+
+\begin{proof}
+$a'\beta = \sum_j a_j\beta_j$, whose derivative with respect to $\beta_m$ is $a_m$. And $\beta'A\beta = \sum_i\sum_j a_{ij}\beta_i\beta_j$; differentiating with respect to
+$\beta_m$ picks up the terms with $i = m$ and those with $j = m$, giving $\sum_j a_{mj}\beta_j + \sum_i a_{im}\beta_i$, the $m$th element of
+$A\beta + A'\beta$. Differentiating again with respect to $\beta_l$ gives $a_{ml} + a_{lm}$.
+\end{proof}
+
+\subsection{Random vectors}
+\label{ssec:randvec}
+
+For a random vector $X = (X_1, \dots, X_n)'$, the mean is the vector $\mu = E(X)$ of means, and the \textbf{covariance matrix} is
+\[
+\Var(X) = E\bigl[(X - \mu)(X - \mu)'\bigr],
+\]
+whose $(i, j)$ element is $\Cov(X_i, X_j)$ and whose diagonal holds the variances.
+
+\begin{thm}
+\label{thm:linvec}
+Let $X$ have mean $\mu$ and covariance matrix $\Sigma$, and let $A$ be a constant $m \times n$ matrix and $b$ a constant $m$-vector.
+\begin{enumerate}[label=(\roman*)]
+\item $E(AX + b) = A\mu + b$ and $\Var(AX + b) = A\Sigma A'$.
+\item $\Sigma$ is symmetric and psd.
+\item For a constant symmetric $n \times n$ matrix $B$, $E(X'BX) = \tr(B\Sigma) + \mu'B\mu$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) Expectation is linear element by element. Then $AX + b - (A\mu + b) = A(X - \mu)$, so
+$\Var(AX + b) = E\bigl[A(X - \mu)(X - \mu)'A'\bigr] = A\Sigma A'$.
+
+(ii) Symmetry is clear. For any $c$, $c'\Sigma c = \Var(c'X) \geq 0$ by (i) with $A = c'$.
+
+(iii) By Lemma~\ref{lem:trace}, $X'BX = \tr(BXX')$, and $E(XX') = \Sigma + \mu\mu'$. Since the trace is linear,
+$E(X'BX) = \tr\bigl(B(\Sigma + \mu\mu')\bigr) = \tr(B\Sigma) + \mu'B\mu$.
+\end{proof}
+
+Part (iii) needs no distributional assumption at all. For example, if $X$ has independent elements with mean $\mu$ and variance $\sigma^2$, then with
+$B = M_0$,
+\[
+E\Bigl[\sum (X_i - \bar X)^2\Bigr] = \tr(M_0\sigma^2I) + \mu^2\iota'M_0\iota = (n - 1)\sigma^2 ,
+\]
+because $M_0\iota = 0$. That is the familiar reason for the divisor $n - 1$ in a sample variance.
+
+\subsection{The multivariate normal distribution}
+\label{ssec:mvn}
+
+\begin{defn}
+An $n$-vector $X$ has the \textbf{multivariate normal} distribution $N(\mu, \Sigma)$, with $\Sigma$ pd, if its density is
+\[
+f(x) = (2\pi)^{-n/2}|\Sigma|^{-1/2}\exp\Bigl\{-\tfrac12(x - \mu)'\Sigma^{-1}(x - \mu)\Bigr\}, \qquad x \in \mathbb R^n .
+\]
+\end{defn}
+
+When $\Sigma = \sigma^2I$ the density factorises into $n$ univariate $N(\mu_i, \sigma^2)$ densities, so $N(\mu, \sigma^2I)$ is the distribution of $n$
+independent normal variables with common variance. That is the disturbance vector of the classical normal regression model.
+
+\begin{thm}
+\label{thm:mvn}
+Let $X \sim N(\mu, \Sigma)$.
+\begin{enumerate}[label=(\roman*)]
+\item The moment generating function is $E(e^{t'X}) = \exp\bigl(t'\mu + \frac12t'\Sigma t\bigr)$.
+\item If $A$ is $m \times n$ of rank $m$, then $AX + b \sim N(A\mu + b,\ A\Sigma A')$. In particular every subvector of $X$ is normal.
+\item If $X$ is partitioned into $X_1$ and $X_2$, then $X_1$ and $X_2$ are independent if and only if $\Cov(X_1, X_2) = 0$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) Write $\Sigma = CC'$ with $C = \Sigma^{1/2}$ non-singular, and let $Z = C^{-1}(X - \mu)$. Changing variables in the density, with Jacobian $|C|$ and
+$(x - \mu)'\Sigma^{-1}(x - \mu) = z'z$, shows that $Z$ has density $(2\pi)^{-n/2}e^{-z'z/2}$: its elements are independent $N(0, 1)$. Each has moment
+generating function $e^{s^2/2}$, so $E(e^{s'Z}) = e^{s's/2}$. Then $X = \mu + CZ$ and
+\[
+E(e^{t'X}) = e^{t'\mu}E\bigl(e^{(C't)'Z}\bigr) = e^{t'\mu}e^{t'CC't/2} = \exp\bigl(t'\mu + \tfrac12t'\Sigma t\bigr) .
+\]
+
+(ii) For $s \in \mathbb R^m$, $E(e^{s'(AX + b)}) = e^{s'b}E(e^{(A's)'X}) = \exp\bigl(s'(A\mu + b) + \frac12s'A\Sigma A's\bigr)$, the moment generating function of
+$N(A\mu + b, A\Sigma A')$. $A\Sigma A'$ is pd because $A$ has full row rank, and the moment generating function determines the distribution. A
+subvector is $AX$ for a matrix $A$ that selects rows of the identity.
+
+(iii) Independence always implies zero covariance. Conversely, if $\Sigma = \operatorname{diag}(\Sigma_{11}, \Sigma_{22})$, then $\Sigma^{-1}$ is block diagonal and
+$|\Sigma| = |\Sigma_{11}||\Sigma_{22}|$, so the density factorises into a function of $x_1$ times a function of $x_2$.
+\end{proof}
+
+Part (iii) is special to the normal distribution. For other distributions zero covariance does not imply independence (Problem~\ref{prob:uncorr} gave an
+example), but for jointly normal vectors it does, and that is what makes exact inference in the normal regression
+model possible.
+
+\subsection{Distributions of quadratic forms}
+\label{ssec:qf}
+
+\begin{defn}
+If $Z_1, \dots, Z_r$ are independent $N(0, 1)$, then $\sum Z_i^2$ has the \textbf{chi-square} distribution with $r$ degrees of freedom, $\chi^2_r$. It has
+mean $r$, variance $2r$, and moment generating function $(1 - 2t)^{-r/2}$ for $t < \frac12$. If $W_1 \sim \chi^2_{r_1}$ and $W_2 \sim \chi^2_{r_2}$ are
+independent, $\dfrac{W_1/r_1}{W_2/r_2} \sim F_{r_1, r_2}$; and if $Z \sim N(0, 1)$ is independent of $W \sim \chi^2_r$, $Z/\sqrt{W/r} \sim t_r$.
+\end{defn}
+
+\begin{thm}
+\label{thm:qf1}
+\begin{enumerate}[label=(\roman*)]
+\item If $X \sim N(0, \sigma^2I_k)$, then $X'(\sigma^2I)^{-1}X = X'X/\sigma^2 \sim \chi^2_k$.
+\item If $X \sim N(0, \Sigma)$ with $\Sigma$ an $n \times n$ pd matrix, then $X'\Sigma^{-1}X \sim \chi^2_n$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) The elements $X_i/\sigma$ are independent $N(0, 1)$, and $X'X/\sigma^2 = \sum (X_i/\sigma)^2$.
+
+(ii) Let $Z = \Sigma^{-1/2}X$. By Theorem~\ref{thm:mvn}(ii) and Corollary~\ref{coro:pd}(iii), $Z \sim N(0, \Sigma^{-1/2}\Sigma\Sigma^{-1/2}) = N(0, I_n)$. Since
+$\Sigma^{-1} = \Sigma^{-1/2}\Sigma^{-1/2}$ with $\Sigma^{-1/2}$ symmetric, $X'\Sigma^{-1}X = (\Sigma^{-1/2}X)'(\Sigma^{-1/2}X) = Z'Z \sim \chi^2_n$ by (i).
+\end{proof}
+
+Part (ii) is a multivariate standardisation: subtracting the mean and dividing by the standard deviation turns a normal variable into a
+$N(0, 1)$, and premultiplying by $\Sigma^{-1/2}$ turns a normal vector into a vector of independent $N(0, 1)$'s. The quadratic form
+$(x - \mu)'\Sigma^{-1}(x - \mu)$ is the squared \emph{Mahalanobis distance} of $x$ from $\mu$, the multivariate counterpart of a squared $z$-score. Every
+Wald statistic in econometrics has this shape.
+
+\begin{thm}
+\label{thm:qf2}
+If $X \sim N(0, I_n)$ and $A$ is an $n \times n$ symmetric idempotent matrix of rank $r$, then $X'AX \sim \chi^2_r$.
+\end{thm}
+
+\begin{proof}
+By Theorems~\ref{thm:spectral} and~\ref{thm:idem}, $A = Q\Lambda Q'$ with $Q$ orthogonal and $\Lambda$ diagonal with $r$ ones and $n - r$ zeros; order
+the columns of $Q$ so the ones come first. Let $Y = Q'X$. Then $Y \sim N(0, Q'IQ) = N(0, I_n)$, and
+\[
+X'AX = X'Q\Lambda Q'X = Y'\Lambda Y = Y_1^2 + \dots + Y_r^2 \sim \chi^2_r . \qedhere
+\]
+\end{proof}
+
+The converse is also true: if $A$ is symmetric and $X'AX \sim \chi^2_r$ for $X \sim N(0, I)$, then $A$ is idempotent of rank $r$. It is proved by
+comparing the moment generating function $\prod_i(1 - 2t\lambda_i)^{-1/2}$ of $X'AX$, obtained from the same diagonalisation, with $(1 - 2t)^{-r/2}$.
+
+\subhead{Independence}
+Regression statistics are ratios, and the $t$ and $F$ distributions require the numerator and denominator to be independent. The next theorem
+gives simple sufficient conditions.
+
+\begin{thm}
+\label{thm:indep}
+Let $X \sim N(0, \sigma^2I_n)$, let $A$ and $B$ be symmetric idempotent, and let $L$ be any $m \times n$ matrix.
+\begin{enumerate}[label=(\roman*)]
+\item If $LA = 0$, the linear form $LX$ and the quadratic form $X'AX$ are independent.
+\item If $AB = 0$, the quadratic forms $X'AX$ and $X'BX$ are independent.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) Stack $LX$ and $AX$ into one vector, which is normal by Theorem~\ref{thm:mvn}(ii), applied to a suitable full-rank selection of its
+elements. Their cross-covariance is $\Cov(LX, AX) = L(\sigma^2I)A' = \sigma^2LA = 0$, so $LX$ and $AX$ are independent by Theorem~\ref{thm:mvn}(iii).
+But $X'AX = X'A'AX = (AX)'(AX)$ is a function of $AX$ alone, so it is independent of $LX$.
+
+(ii) $\Cov(AX, BX) = \sigma^2AB' = \sigma^2AB = 0$, so $AX$ and $BX$ are independent as in (i), and $X'AX = (AX)'(AX)$ and $X'BX = (BX)'(BX)$ are
+functions of them.
+\end{proof}
+
+\begin{exa}
+\label{ex:xbars2}
+For a random sample from $N(\mu, \sigma^2)$, $\bar X$ and $S^2 = \frac{1}{n-1}\sum (X_i - \bar X)^2$ are independent and $(n - 1)S^2/\sigma^2 \sim \chi^2_{n-1}$.
+
+Let $X = \mu\iota + U$ with $U \sim N(0, \sigma^2I)$. Then $\bar X = \mu + \frac1n\iota'U$ and $(n - 1)S^2 = X'M_0X = U'M_0U$, because $M_0\iota = 0$.
+With $L = \frac1n\iota'$, $LM_0 = \frac1n(M_0\iota)' = 0$, so $\bar X$ and $S^2$ are independent by Theorem~\ref{thm:indep}(i). And $U/\sigma \sim N(0, I)$
+with $M_0$ symmetric idempotent of rank $n - 1$ (Example~\ref{ex:centring}), so $U'M_0U/\sigma^2 \sim \chi^2_{n-1}$ by Theorem~\ref{thm:qf2}. Together these
+give $\sqrt n(\bar X - \mu)/S \sim t_{n-1}$, the one-sample $t$ test.
+\end{exa}
+
+\begin{thm}[Cochran]
+\label{thm:cochran}
+Let $X \sim N(0, I_n)$ and let $A_1, \dots, A_m$ be symmetric matrices with $A_1 + \dots + A_m = I_n$ and ranks $r_1, \dots, r_m$. If
+$r_1 + \dots + r_m = n$, then the quadratic forms $X'A_iX$ are independent with $X'A_iX \sim \chi^2_{r_i}$.
+\end{thm}
+
+\begin{proof}
+By Theorem~\ref{thm:spectral} each $A_i$ has $r_i$ non-zero eigenvalues $\lambda_{ij}$ with orthonormal eigenvectors $q_{ij}$, and
+$A_i = \sum_{j=1}^{r_i}\lambda_{ij}q_{ij}q_{ij}'$. Collect all the eigenvectors, $n$ of them in total, as the columns of an $n \times n$ matrix $P$, and the
+eigenvalues in the diagonal matrix $D$ in the same order. Then
+\[
+I_n = \sum_iA_i = PDP' .
+\]
+So $P$ has rank $n$ and is invertible. Multiplying on the left by $P'$ and on the right by $P$ gives $(P'P)D(P'P) = P'P$, and cancelling the invertible
+$P'P$ gives $D(P'P) = I$, that is $P'P = D^{-1}$. The left side has diagonal elements $q_{ij}'q_{ij} = 1$, so $D^{-1}$, and hence $D$, is the identity: every
+$\lambda_{ij} = 1$, and $P'P = I$, so $P$ is orthogonal. Now let $Y = P'X \sim N(0, I_n)$. Each $A_i = \sum_jq_{ij}q_{ij}'$, so
+\[
+X'A_iX = \sum_{j=1}^{r_i}(q_{ij}'X)^2
+\]
+is the sum of squares of the $r_i$ elements of $Y$ that belong to block $i$. The blocks use disjoint sets of the independent $N(0, 1)$ elements of
+$Y$, so the quadratic forms are independent $\chi^2_{r_i}$ variables.
+\end{proof}
+
+The proof shows more than the statement: when the ranks add up to $n$, every $A_i$ is automatically idempotent and the $A_i$ are mutually
+orthogonal. Cochran's theorem is the formal basis of every analysis of variance. A total sum of squares is split into components whose matrices
+add to $I$ and whose degrees of freedom add to $n$, and the theorem then guarantees that the components are independent $\chi^2$'s, so that their
+mean squares can be compared by $F$ tests.
+
+\subsection{Application: the residuals of a regression}
+\label{ssec:residqf}
+
+Let $Y = X\beta + U$, where $X$ is a non-stochastic $n \times k$ matrix of rank $k$ and $U \sim N(0, \sigma^2I_n)$. The least squares estimator,
+derived in the next section, is $b = (X'X)^{-1}X'Y$, and the residual vector is $e = Y - Xb$.
+
+\begin{thm}
+\label{thm:residqf}
+With $M = I - X(X'X)^{-1}X'$:
+\begin{enumerate}[label=(\roman*)]
+\item $e = MY$ and $e = MU$;
+\item $M$ is symmetric and idempotent with $\rank M = n - k$;
+\item $e'e = U'MU$;
+\item $E(e'e) = \sigma^2(n - k)$, so $s^2 = e'e/(n - k)$ is unbiased for $\sigma^2$;
+\item $e'e/\sigma^2 \sim \chi^2_{n-k}$;
+\item $b$ and $e$ are independent, so $b$ and $s^2$ are independent.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $e = Y - X(X'X)^{-1}X'Y = MY$. Since $MX = 0$, $MY = M(X\beta + U) = MU$.
+
+(ii) is Example~\ref{ex:hatM}.
+
+(iii) $e'e = U'M'MU = U'MU$, because $M' = M$ and $M^2 = M$.
+
+(iv) By Theorem~\ref{thm:linvec}(iii) with mean zero, $E(U'MU) = \tr(M\sigma^2I) = \sigma^2\tr M = \sigma^2(n - k)$. This needs only $E(U) = 0$ and
+$\Var(U) = \sigma^2I$, not normality.
+
+(v) $U/\sigma \sim N(0, I)$, and $e'e/\sigma^2 = (U/\sigma)'M(U/\sigma) \sim \chi^2_{n-k}$ by Theorem~\ref{thm:qf2} and (ii).
+
+(vi) $b = \beta + (X'X)^{-1}X'U = \beta + LU$ with $L = (X'X)^{-1}X'$, and $LM = (X'X)^{-1}X'M = (X'X)^{-1}(MX)' = 0$. By the argument of
+Theorem~\ref{thm:indep}(i), $LU$ and $MU = e$ are independent, so $b$ is independent of $e$, and so of $s^2 = e'e/(n - k)$.
+\end{proof}
+
+For the two-variable model $k = 2$, and (v) and (vi) are exactly the facts $(n-2)s^2/\sigma^2 \sim \chi^2_{n-2}$ and ``$s^2$ is independent of $(a, b)$'' that
+Theorem~\ref{thm:t2} assumed. The $t$ tests of Section~\ref{sec:twovar} are now fully justified, and the same argument will justify the $t$ and $F$ tests
+of the $k$-variable model.
+
+\subsection{Matrices in software}
+\label{ssec:software5}
+
+\begin{software}[The residual-maker matrix]
+\label{sw:Mmatrix}
+For the savings data with all four regressors ($n = 50$, $k = 5$ including the constant), build $X$ and $M$ directly and check
+Theorem~\ref{thm:residqf}:
+{\small\begin{verbatim}
+> y <- LifeCycleSavings$sr
+> X <- cbind(1, as.matrix(LifeCycleSavings[, c("pop15", "pop75",
++                                             "dpi", "ddpi")]))
+> M <- diag(50) - X %*% solve(t(X) %*% X) %*% t(X)
+> max(abs(M %*% M - M)); max(abs(M - t(M)))
+[1] 3.663736e-15
+[1] 7.979728e-16
+> sum(diag(M))
+[1] 45
+> table(round(eigen(M, symmetric = TRUE)$values, 10))
+
+ 0  1
+ 5 45
+> e <- M %*% y
+> fit <- lm(sr ~ pop15 + pop75 + dpi + ddpi, data = LifeCycleSavings)
+> max(abs(e - resid(fit)))
+[1] 4.831691e-13
+> c(sum(e^2), deviance(fit))
+[1] 650.713 650.713
+\end{verbatim}}
+\textbf{Reading the output.} $M^2 - M$ and $M - M'$ are zero up to rounding errors of order $10^{-15}$, the limit of double-precision arithmetic. The
+trace is $45 = n - k$, and the eigenvalues are $45$ ones and $5$ zeros, as Theorem~\ref{thm:idem} requires. $MY$ reproduces the residuals that \texttt{lm}
+computes, and $e'e = 650.71$ is the residual sum of squares that R calls the \texttt{deviance}.
+
+One caution: forming $(X'X)^{-1}$ explicitly is fine for teaching but poor numerical practice. \texttt{lm} never does it, using a QR
+decomposition of $X$ instead, which is more accurate when the regressors are nearly collinear. The $50 \times 50$ matrix $M$ is never formed in real
+computations either.
+
+\textbf{Stata:} in Mata, \texttt{M = I(50) - X*invsym(X'X)*X'} and \texttt{trace(M)}. \textbf{EViews:} \texttt{matrix M = @identity(50) -
+X*@inverse(@transpose(X)*X)*@transpose(X)}, then \texttt{=@trace(M)}.
+\end{software}
+
+\begin{software}[Simulating a quadratic form]
+\label{sw:qfsim}
+Theorem~\ref{thm:qf1}(ii) checked by simulation, with a $3 \times 3$ covariance matrix that is far from diagonal:
+{\small\begin{verbatim}
+> set.seed(5)
+> Sigma <- matrix(c(4, 2, 0, 2, 3, 1, 0, 1, 2), 3, 3)
+> C <- t(chol(Sigma))                     # Sigma = C C'
+> q <- replicate(10000, { x <- C %*% rnorm(3)
++                         drop(t(x) %*% solve(Sigma, x)) })
+> c(mean = mean(q), var = var(q))
+    mean      var
+3.064371 6.386179
+> round(quantile(q, c(0.5, 0.9, 0.95, 0.99)), 3)
+   50%    90%    95%    99%
+ 2.398  6.364  8.036 11.766
+> round(qchisq(c(0.5, 0.9, 0.95, 0.99), df = 3), 3)
+[1]  2.366  6.251  7.815 11.345
+\end{verbatim}}
+\textbf{Reading the output.} The draws $x = Cz$ with $z \sim N(0, I)$ have covariance $CC' = \Sigma$, by Theorem~\ref{thm:linvec}(i). The quadratic form has
+simulated mean $3.06$ and variance $6.39$, against $3$ and $6$ for $\chi^2_3$, and its quantiles are close to the $\chi^2_3$ quantiles. With 10\,000 draws,
+differences of this size are simulation noise. \texttt{solve(Sigma, x)} computes $\Sigma^{-1}x$ without forming the inverse, the numerically better way.
+
+\textbf{Stata:} \texttt{drawnorm x1 x2 x3, cov(Sigma)} generates the draws. \textbf{EViews:} \texttt{nrnd} with a Cholesky factor from
+\texttt{@cholesky}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+\begin{enumerate}[label=(\alph*)]
+\item Let $X$ be a $k$-dimensional random vector with $X \sim N(0, \sigma^2I)$. Find the distribution of $X'(\sigma^2I)^{-1}X$.
+\item Let $X$ be $k \times 1$ with $X \sim N(0, \Sigma)$, $\Sigma$ positive definite. Find the distribution of $X'\Sigma^{-1}X$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $(\sigma^2I)^{-1} = \sigma^{-2}I$, so $X'(\sigma^2I)^{-1}X = \sum_{i=1}^k(X_i/\sigma)^2$, a sum of squares of $k$ independent $N(0, 1)$ variables: $\chi^2_k$.
+
+(b) $\chi^2_k$. Let $Z = \Sigma^{-1/2}X$, where $\Sigma^{-1/2} = Q\Lambda^{-1/2}Q'$ from the spectral decomposition $\Sigma = Q\Lambda Q'$. Then
+$Z \sim N(0, \Sigma^{-1/2}\Sigma\Sigma^{-1/2}) = N(0, I_k)$ and $X'\Sigma^{-1}X = Z'Z \sim \chi^2_k$ (Theorem~\ref{thm:qf1}).
+\end{solution}
+
+\begin{problem}
+Let $X \sim N(0, I_n)$ and let $A$ be an $n \times n$ symmetric idempotent matrix of rank $r \leq n$. Show that $X'AX \sim \chi^2_r$. Illustrate with
+\[
+A = \begin{pmatrix} \frac12 & \frac12 \\ \frac12 & \frac12 \end{pmatrix},
+\]
+identifying $X'AX$ explicitly.
+\end{problem}
+
+\begin{solution}
+See Theorem~\ref{thm:qf2}: diagonalise $A = Q\Lambda Q'$ with $\Lambda$ having $r$ ones, and $X'AX = \sum_{i\leq r}Y_i^2$ with $Y = Q'X \sim N(0, I)$. For the
+example, $A^2 = A$ and $\tr A = 1$, so $r = 1$. Directly, $X'AX = \frac12(X_1 + X_2)^2 = \bigl((X_1 + X_2)/\sqrt2\bigr)^2$, and $(X_1 + X_2)/\sqrt2 \sim N(0, 1)$, so
+$X'AX \sim \chi^2_1$. The eigenvector for eigenvalue $1$ is $(1, 1)'/\sqrt2$, which is exactly the combination that appears.
+\end{solution}
+
+\begin{problem}
+Let $X$ have mean $\mu = (1, 2)'$ and covariance matrix $\Sigma = \begin{pmatrix} 2 & 1 \\ 1 & 3 \end{pmatrix}$, and let
+$B = \begin{pmatrix} 1 & 0 \\ 0 & 2 \end{pmatrix}$. Find $E(X'BX)$, and check the answer by writing $X'BX = X_1^2 + 2X_2^2$.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:linvec}(iii), $E(X'BX) = \tr(B\Sigma) + \mu'B\mu$. Here $B\Sigma = \begin{pmatrix} 2 & 1 \\ 2 & 6 \end{pmatrix}$ with trace $8$, and
+$\mu'B\mu = 1 + 2(4) = 9$, so $E(X'BX) = 17$. Directly, $E(X_1^2) = \Var(X_1) + \mu_1^2 = 2 + 1 = 3$ and $E(X_2^2) = 3 + 4 = 7$, so
+$E(X_1^2 + 2X_2^2) = 3 + 14 = 17$. Note that the covariance $\Sigma_{12} = 1$ does not enter, because $B$ is diagonal.
+\end{solution}
+
+\begin{problem}
+Let $\Omega = \begin{pmatrix} 1 & 0.5 \\ 0.5 & 1 \end{pmatrix}$.
+\begin{enumerate}[label=(\alph*)]
+\item Find $\Omega^{-1}$, and an upper triangular matrix $P$ with $P'P = \Omega^{-1}$.
+\item Verify that $P\Omega P' = I$, and explain the relevance to a disturbance vector $U$ with $\Var(U) = \sigma^2\Omega$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $|\Omega| = 0.75$, so $\Omega^{-1} = \frac{1}{0.75}\begin{pmatrix} 1 & -0.5 \\ -0.5 & 1 \end{pmatrix} = \begin{pmatrix} \frac43 & -\frac23 \\ -\frac23 & \frac43 \end{pmatrix}$. Write
+$P = \begin{pmatrix} p & q \\ 0 & r \end{pmatrix}$; then
+$P'P = \begin{pmatrix} p^2 & pq \\ pq & q^2 + r^2 \end{pmatrix}$. Matching, $p = 2/\sqrt3 = 1.1547$, $q = -\frac23/p = -1/\sqrt3 = -0.5774$ and
+$r^2 = \frac43 - \frac13 = 1$, so $r = 1$. (This is the Cholesky factor that R's \texttt{chol(solve(Omega))} returns.)
+
+(b) Multiplying out gives $P\Omega P' = I$, as Corollary~\ref{coro:pd}(iii) guarantees for any non-singular $P$ with $P'P = \Omega^{-1}$. If $\Var(U) = \sigma^2\Omega$,
+then $\Var(PU) = \sigma^2P\Omega P' = \sigma^2I$: the transformed disturbances are uncorrelated with constant variance. Premultiplying the whole regression
+by $P$ therefore produces a model that satisfies the classical assumptions. That is generalised least squares, developed with maximum likelihood.
+\end{solution}
+
+\begin{problem}
+Let $X_1, \dots, X_n$ be independent $N(\mu, \sigma^2)$.
+\begin{enumerate}[label=(\alph*)]
+\item Using the centring matrix, show that $\sum (X_i - \bar X)^2/\sigma^2 \sim \chi^2_{n-1}$ and that it is independent of $\bar X$.
+\item Partition the uncentred sum of squares as $X'X = X'(I - M_0)X + X'M_0X$ and use Cochran's theorem to identify the distributions of the two parts
+when $\mu = 0$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) This is Example~\ref{ex:xbars2}.
+
+(b) With $\mu = 0$, $X/\sigma \sim N(0, I)$. $I - M_0 = \frac1n\iota\iota'$ has rank $1$, $M_0$ has rank $n - 1$, they sum to $I$ and the ranks sum to $n$. By Cochran's
+theorem $X'(I - M_0)X/\sigma^2 = n\bar X^2/\sigma^2 \sim \chi^2_1$ and $X'M_0X/\sigma^2 \sim \chi^2_{n-1}$, independently. Their ratio, scaled by the degrees of freedom,
+$n\bar X^2/S^2$, is $F_{1,n-1}$: the square of the $t$ statistic for $\mu = 0$.
+\end{solution}
+
+\begin{problem}
+Let $X$ be $n \times k$ of rank $k$ and $P = X(X'X)^{-1}X'$.
+\begin{enumerate}[label=(\alph*)]
+\item Show that the diagonal elements $p_{ii}$ of $P$ lie between $0$ and $1$, and that they sum to $k$.
+\item In the two-variable model with an intercept, show that $p_{ii} = \frac1n + \frac{(X_i - \bar X)^2}{\sum (X_j - \bar X)^2}$.
+\item What is the average of the $p_{ii}$, and what does a large $p_{ii}$ signify?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $p_{ii} = \sum_jp_{ij}^2$ because $P = P^2 = PP'$, so $p_{ii} = p_{ii}^2 + \sum_{j\neq i}p_{ij}^2 \geq p_{ii}^2$, giving $0 \leq p_{ii} \leq 1$. The sum is $\tr P = k$.
+
+(b) $P$ is unchanged if $X$ is replaced by $XT$ for any non-singular $T$, since $XT(T'X'XT)^{-1}T'X' = P$. Use the columns $\iota$ and $x = X - \bar X\iota$,
+which are orthogonal. Then $X'X = \operatorname{diag}(n, \sum x_j^2)$ and $P = \frac1n\iota\iota' + xx'/\sum x_j^2$, whose $i$th diagonal element is the formula.
+
+(c) The average is $k/n$. $p_{ii}$ is the \emph{leverage} of observation $i$: by (b), it is large when $X_i$ is far from $\bar X$, and an observation with
+large leverage pulls the fitted line towards itself. Compare the prediction variance of Theorem~\ref{thm:pred2}, which at $X_0 = X_i$ is $\sigma^2p_{ii}$.
 \end{solution}
 
 \section*{References}
