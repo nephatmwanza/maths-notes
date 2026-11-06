@@ -3199,6 +3199,7 @@ $n\bar X^2/S^2$, is $F_{1,n-1}$: the square of the $t$ statistic for $\mu = 0$.
 \end{solution}
 
 \begin{problem}
+\label{prob:leverage}
 Let $X$ be $n \times k$ of rank $k$ and $P = X(X'X)^{-1}X'$.
 \begin{enumerate}[label=(\alph*)]
 \item Show that the diagonal elements $p_{ii}$ of $P$ lie between $0$ and $1$, and that they sum to $k$.
@@ -3215,6 +3216,503 @@ which are orthogonal. Then $X'X = \operatorname{diag}(n, \sum x_j^2)$ and $P = \
 
 (c) The average is $k/n$. $p_{ii}$ is the \emph{leverage} of observation $i$: by (b), it is large when $X_i$ is far from $\bar X$, and an observation with
 large leverage pulls the fitted line towards itself. Compare the prediction variance of Theorem~\ref{thm:pred2}, which at $X_0 = X_i$ is $\sigma^2p_{ii}$.
+\end{solution}
+
+%======================================================================
+\section{The $k$-Variable Linear Model}
+\label{sec:kvar}
+
+Economic relationships rarely involve a single explanatory variable. Savings depend on the age structure of the population and on income
+and its growth; demand depends on own price, the prices of substitutes and income; output depends on labour and capital. This section develops
+least squares for any number of regressors. With the matrix tools of Section~\ref{sec:quad} the algebra is no harder than for one regressor, and
+the matrix form reveals two things the scalar formulas hide: what a multiple regression coefficient \emph{means}, given by the
+Frisch--Waugh--Lovell theorem, and the geometry of least squares as an orthogonal projection.
+
+\subsection{The model in matrix form}
+\label{ssec:matmodel}
+
+With $k - 1$ regressors and an intercept, the model for observation $i$ is
+\[
+Y_i = \beta_1 + \beta_2X_{2i} + \dots + \beta_kX_{ki} + u_i, \qquad i = 1, \dots, n .
+\]
+Stacking the $n$ observations,
+\[
+Y = X\beta + U, \qquad
+Y = \begin{pmatrix} Y_1 \\ \vdots \\ Y_n \end{pmatrix}, \quad
+X = \begin{pmatrix} 1 & X_{21} & \cdots & X_{k1} \\ \vdots & \vdots & & \vdots \\ 1 & X_{2n} & \cdots & X_{kn} \end{pmatrix}, \quad
+\beta = \begin{pmatrix} \beta_1 \\ \vdots \\ \beta_k \end{pmatrix} .
+\]
+Each row of $X$ is an observation and each column a variable; the first column is $\iota$, the vector of ones. The assumptions of
+Definition~\ref{def:clrm2} become:
+\begin{enumerate}[label=(A\arabic*)]
+\item $E(U \mid X) = 0$;
+\item[(A2--3)] $\Var(U \mid X) = \sigma^2I_n$;
+\setcounter{enumi}{3}
+\item $\rank X = k$: no column of $X$ is an exact linear combination of the others;
+\item $U \mid X \sim N(0, \sigma^2I_n)$, when exact inference is needed.
+\end{enumerate}
+(A4) generalises ``the $X_i$ are not all equal''. It fails, for example, if a regression includes income, consumption and saving when saving is
+defined as income minus consumption, or dummy variables for every category together with an intercept. Its failure is \emph{perfect
+multicollinearity}, and least squares then has no unique solution.
+
+\subsection{Least squares}
+\label{ssec:lsk}
+
+\begin{thm}
+\label{thm:olsk}
+Under (A4), the residual sum of squares $S(b) = (Y - Xb)'(Y - Xb)$ has a unique minimum at
+\[
+b = (X'X)^{-1}X'Y ,
+\]
+the solution of the \textbf{normal equations} $X'Xb = X'Y$.
+\end{thm}
+
+\begin{proof}
+Expand $S(b) = Y'Y - 2b'X'Y + b'X'Xb$, using $Y'Xb = b'X'Y$, which is a scalar. By Lemma~\ref{lem:deriv},
+\[
+\frac{\partial S}{\partial b} = -2X'Y + 2X'Xb ,
+\]
+which is zero exactly when $X'Xb = X'Y$. The matrix $X'X$ is psd, since $c'X'Xc = (Xc)'(Xc) \geq 0$, and $Xc = 0$ only for $c = 0$ because the columns of $X$
+are linearly independent. So $X'X$ is pd and therefore invertible, giving the unique solution $b = (X'X)^{-1}X'Y$. The Hessian $2X'X$ is pd, so $S$ is
+strictly convex and the stationary point is the global minimum. A direct argument: for any $\tilde b$,
+\begin{align*}
+S(\tilde b) &= \bigl(e + X(b - \tilde b)\bigr)'\bigl(e + X(b - \tilde b)\bigr)\\
+&= S(b) + (b - \tilde b)'X'X(b - \tilde b) \geq S(b) ,
+\end{align*}
+where $e = Y - Xb$ and the cross terms vanish because $X'e = X'Y - X'Xb = 0$.
+\end{proof}
+
+With $P = X(X'X)^{-1}X'$ and $M = I - P$ as in Example~\ref{ex:hatM}, the fitted values and residuals are
+\[
+\hat Y = Xb = PY, \qquad e = Y - \hat Y = MY = MU .
+\]
+
+\begin{thm}
+\label{thm:residk}
+The least squares residuals satisfy $X'e = 0$: they are orthogonal to every regressor. Consequently $\hat Y'e = 0$, and if the model contains an
+intercept, $\iota'e = \sum e_i = 0$, the fitted plane passes through the point of means, and $\bar{\hat Y} = \bar Y$.
+\end{thm}
+
+\begin{proof}
+$X'e = X'MY = (MX)'Y = 0$. Then $\hat Y'e = b'X'e = 0$. If $\iota$ is the first column of $X$, the first row of $X'e = 0$ is $\iota'e = 0$. Dividing
+$\iota'Y = \iota'Xb + \iota'e = \iota'Xb$ by $n$ gives $\bar Y = b_1 + b_2\bar X_2 + \dots + b_k\bar X_k$.
+\end{proof}
+
+\begin{exa}
+\label{ex:hand3}
+Five observations on $Y$ and two regressors:
+\begin{center}
+\begin{tabular}{c|ccccc}
+$X_2$ & 1 & 2 & 3 & 4 & 5\\
+$X_3$ & 1 & 3 & 2 & 5 & 4\\
+$Y$ & 3 & 6 & 7 & 11 & 13
+\end{tabular}
+\end{center}
+The means are $\bar X_2 = \bar X_3 = 3$ and $\bar Y = 8$. In deviations, $x_2 = (-2, -1, 0, 1, 2)$, $x_3 = (-2, 0, -1, 2, 1)$ and $y = (-5, -2, -1, 3, 5)$, and
+\begin{gather*}
+\sum x_2^2 = 10, \quad \sum x_3^2 = 10, \quad \sum x_2x_3 = 8,\\
+\sum x_2y = 25, \quad \sum x_3y = 22, \quad \sum y^2 = 64 .
+\end{gather*}
+The slope coefficients solve the normal equations in deviation form (Theorem~\ref{thm:deviation} below):
+\[
+\begin{pmatrix} 10 & 8 \\ 8 & 10 \end{pmatrix}\begin{pmatrix} b_2 \\ b_3 \end{pmatrix} = \begin{pmatrix} 25 \\ 22 \end{pmatrix}
+\quad\Longrightarrow\quad
+\begin{pmatrix} b_2 \\ b_3 \end{pmatrix} = \frac{1}{36}\begin{pmatrix} 10 & -8 \\ -8 & 10 \end{pmatrix}\begin{pmatrix} 25 \\ 22 \end{pmatrix}
+= \begin{pmatrix} 74/36 \\ 20/36 \end{pmatrix} .
+\]
+So $b_2 = 2.0556$, $b_3 = 0.5556$ and $b_1 = \bar Y - b_2\bar X_2 - b_3\bar X_3 = 8 - 3(2.6111) = 0.1667$. Notice that $X_3$ alone is strongly related to $Y$
+($\sum x_3y = 22$, nearly as large as $\sum x_2y$), yet its coefficient is small once $X_2$ is in the equation, because $X_2$ and $X_3$ are themselves
+highly correlated. Multiple regression credits each variable only with what it adds beyond the others.
+\end{exa}
+
+\subsection{The decomposition of the sum of squares and $R^2$}
+\label{ssec:r2k}
+
+\begin{thm}
+\label{thm:anovak}
+If the model contains an intercept, then with $M_0$ the centring matrix,
+\[
+\underbrace{Y'M_0Y}_{\text{TSS}} = \underbrace{\hat Y'M_0\hat Y}_{\text{ESS}} + \underbrace{e'e}_{\text{RSS}}, \qquad
+\text{ESS} = b'X'Y - n\bar Y^2 .
+\]
+\end{thm}
+
+\begin{proof}
+$Y = \hat Y + e$, so $M_0Y = M_0\hat Y + M_0e = M_0\hat Y + e$, because $\sum e_i = 0$ gives $M_0e = e$. Then
+\[
+Y'M_0Y = (M_0Y)'(M_0Y) = \hat Y'M_0\hat Y + 2\hat Y'M_0e + e'e ,
+\]
+and $\hat Y'M_0e = \hat Y'e = 0$ by Theorem~\ref{thm:residk}. For the second formula,
+$\hat Y'M_0\hat Y = \hat Y'\hat Y - n\bar Y^2$ since $\bar{\hat Y} = \bar Y$, and $\hat Y'\hat Y = b'X'Xb = b'X'Y$ by the normal equations.
+\end{proof}
+
+As before, $R^2 = \text{ESS}/\text{TSS} = 1 - \text{RSS}/\text{TSS}$. Without an intercept, $M_0e \neq e$ in general, the decomposition fails, and
+$1 - \text{RSS}/\text{TSS}$ can be negative (compare Problem~\ref{prob:origin}).
+
+\begin{thm}
+\label{thm:r2mono}
+Adding a regressor to a model never reduces $R^2$: if the regressors of model 1 are a subset of those of model 2, both with an intercept and the
+same dependent variable, then $R_2^2 \geq R_1^2$.
+\end{thm}
+
+\begin{proof}
+Model 2 minimises the residual sum of squares over a set of coefficient vectors that includes every fit available to model 1, namely those with
+the extra coefficients set to zero. Its minimum can be no larger: $\text{RSS}_2 \leq \text{RSS}_1$. Both have the same TSS, so
+$R_2^2 = 1 - \text{RSS}_2/\text{TSS} \geq R_1^2$.
+\end{proof}
+
+So a reported $R^2_{1\cdot23} = 0.87$ together with $R^2_{1\cdot234} = 0.82$, for the same data, is impossible, whatever the variables. The other side of
+the coin is that $R^2$ rewards adding variables whether or not they matter: even a column of random numbers raises it (Software~\ref{sw:noise}).
+The \textbf{adjusted} $R^2$ corrects each sum of squares for its degrees of freedom,
+\[
+\bar R^2 = 1 - \frac{\text{RSS}/(n - k)}{\text{TSS}/(n - 1)} = 1 - (1 - R^2)\frac{n - 1}{n - k} ,
+\]
+and can fall when a regressor is added. It rises precisely when the added variable's $t$ ratio exceeds one in absolute value
+(Problem~\ref{prob:adjr2}). $\bar R^2$ can be negative, and it is a crude device. Its proper successors are the formal tests and information
+criteria introduced later.
+
+\subsection{Partitioned regression: the Frisch--Waugh--Lovell theorem}
+\label{ssec:fwl}
+
+Partition the regressors into two groups, $X = [X_1\ \ X_2]$, with $k_1$ and $k_2$ columns, and correspondingly $b = (b_1', b_2')'$. Let
+$M_1 = I - X_1(X_1'X_1)^{-1}X_1'$ be the residual maker for $X_1$ alone.
+
+\begin{thm}[Frisch--Waugh--Lovell]
+\label{thm:fwl}
+The subvector $b_2$ of the least squares estimates in the regression of $Y$ on $[X_1\ \ X_2]$ is
+\[
+b_2 = (X_2'M_1X_2)^{-1}X_2'M_1Y .
+\]
+Equivalently, $b_2$ is obtained by regressing the residuals $M_1Y$ (of $Y$ on $X_1$) on the residuals $M_1X_2$ (of each column of $X_2$ on $X_1$). The
+residuals of that regression are identical to the residuals $e$ of the full regression.
+\end{thm}
+
+\begin{proof}
+The full residual vector satisfies $Y = X_1b_1 + X_2b_2 + e$ with $X_1'e = 0$ and $X_2'e = 0$. Premultiply by $M_1$. Since $M_1X_1 = 0$, and
+$M_1e = e - X_1(X_1'X_1)^{-1}X_1'e = e$,
+\[
+M_1Y = M_1X_2b_2 + e .
+\]
+Premultiply by $X_2'M_1 = (M_1X_2)'$ and use $X_2'M_1e = X_2'e = 0$: $X_2'M_1Y = X_2'M_1X_2b_2$. The matrix $X_2'M_1X_2$ is non-singular because $X$ has
+full rank, which gives the formula. Finally $e = M_1Y - M_1X_2b_2$ is exactly the residual vector of the regression of $M_1Y$ on $M_1X_2$, since
+$(M_1X_2)'e = 0$ shows that $b_2$ satisfies that regression's normal equations.
+\end{proof}
+
+The theorem is the precise meaning of ``holding the other variables constant''. A multiple regression coefficient measures the relation between $Y$
+and $X_2$ \emph{after the linear influence of $X_1$ has been removed from both}. Nothing is literally held fixed; the effect of $X_1$ is
+\emph{partialled out}. Two special cases are used constantly.
+
+\begin{coro}
+\label{thm:deviation}
+\begin{enumerate}[label=(\roman*)]
+\item (Deviation form.) Take $X_1 = \iota$, so $M_1 = M_0$ and $M_0X_2$, $M_0Y$ are deviations from means. The slope coefficients are obtained by regressing
+the deviations of $Y$ on the deviations of the regressors, $b_2 = (X_2'M_0X_2)^{-1}X_2'M_0Y$, and the intercept is
+$b_1 = \bar Y - b_2\bar X_2 - \dots - b_k\bar X_k$. With two regressors in deviation form,
+\[
+b_2 = \frac{\sum x_2y\sum x_3^2 - \sum x_3y\sum x_2x_3}{\sum x_2^2\sum x_3^2 - \bigl(\sum x_2x_3\bigr)^2}, \qquad
+b_3 = \frac{\sum x_3y\sum x_2^2 - \sum x_2y\sum x_2x_3}{\sum x_2^2\sum x_3^2 - \bigl(\sum x_2x_3\bigr)^2} .
+\]
+\item (Detrending.) Including a time trend in a regression gives the same slope coefficients as first removing a linear trend from every
+variable and then regressing the detrended series on one another.
+\end{enumerate}
+\end{coro}
+
+\begin{proof}
+(i) is the theorem with $X_1 = \iota$; the explicit formulas are the inverse of the $2 \times 2$ matrix of deviation sums of squares and cross-products,
+as in Example~\ref{ex:hand3}. (ii) is the theorem with $X_1 = [\iota\ \ t]$.
+\end{proof}
+
+Part (ii) was Frisch and Waugh's original result in 1933, and it answered a debate of the time about whether economic series should be detrended
+before a regression is run. The answer is that it makes no difference to the slopes, provided the trend is in the regression.
+
+\subsection{Partial correlation}
+\label{ssec:partial}
+
+\begin{defn}
+The \textbf{partial correlation} of $Y$ and $X_2$ given $X_3$, written $r_{12\cdot3}$ with $Y$ labelled $1$, is the correlation between the residuals of
+$Y$ on $X_3$ and the residuals of $X_2$ on $X_3$ (both regressions with an intercept). More generally, $r_{12\cdot34\ldots k}$ partials out $X_3, \dots, X_k$.
+\end{defn}
+
+\begin{thm}
+\label{thm:partial}
+In terms of the simple correlations,
+\[
+r_{12\cdot3} = \frac{r_{12} - r_{13}r_{23}}{\sqrt{1 - r_{13}^2}\sqrt{1 - r_{23}^2}} ,
+\]
+and the coefficient of determination of the regression of $Y$ on $X_2$ and $X_3$ satisfies
+\[
+1 - R^2_{1\cdot23} = (1 - r_{12}^2)(1 - r_{13\cdot2}^2),
+\]
+that is,
+\[
+R^2_{1\cdot23} = r_{12}^2 + r_{13\cdot2}^2(1 - r_{12}^2) .
+\]
+\end{thm}
+
+\begin{proof}
+Work in deviations and write $S_{jk} = \sum x_jx_k$, with $x_1 = y$. The residual of $y$ on $x_3$ is $y - (S_{13}/S_{33})x_3$, and that of $x_2$ on $x_3$ is
+$x_2 - (S_{23}/S_{33})x_3$. Their cross-product and sums of squares are
+\[
+S_{12} - \frac{S_{13}S_{23}}{S_{33}}, \qquad S_{11} - \frac{S_{13}^2}{S_{33}} = S_{11}(1 - r_{13}^2), \qquad S_{22} - \frac{S_{23}^2}{S_{33}} = S_{22}(1 - r_{23}^2) .
+\]
+Dividing the cross-product by the square roots of the sums of squares, and $S_{12}$, $S_{13}S_{23}/S_{33}$ by $\sqrt{S_{11}S_{22}}$, gives the first formula.
+
+For the second, by Theorem~\ref{thm:fwl} the residuals of the full regression equal those of regressing $e_{1\cdot2}$, the residual of $y$ on $x_2$, on
+$e_{3\cdot2}$, the residual of $x_3$ on $x_2$. A simple regression of $e_{1\cdot2}$ on $e_{3\cdot2}$ leaves the fraction $1 - r^2$ of the sum of squares of
+$e_{1\cdot2}$ unexplained, where $r$ is the correlation of the two residual series, which is $r_{13\cdot2}$ by definition (Theorem~\ref{thm:anova2}). And the sum
+of squares of $e_{1\cdot2}$ is $S_{11}(1 - r_{12}^2)$. So $\text{RSS} = S_{11}(1 - r_{12}^2)(1 - r_{13\cdot2}^2)$; divide by $\text{TSS} = S_{11}$.
+\end{proof}
+
+The second identity says that the variation left unexplained by $X_2$ alone, the fraction $1 - r_{12}^2$, is reduced by the fraction $r_{13\cdot2}^2$ when
+$X_3$ is added. The partial correlation is the correlation of $Y$ with what is \emph{new} in $X_3$.
+
+\begin{exa}
+\label{ex:hand3partial}
+In Example~\ref{ex:hand3}, $r_{12} = 25/\sqrt{640} = 0.9882$, $r_{13} = 22/\sqrt{640} = 0.8696$ and $r_{23} = 8/10 = 0.8$. Then
+\[
+r_{13\cdot2} = \frac{0.8696 - 0.9882(0.8)}{\sqrt{1 - 0.9766}\sqrt{1 - 0.64}} = \frac{0.0790}{0.0919} = 0.861 ,
+\]
+and $R^2_{1\cdot23} = 0.9766 + 0.861^2(0.0234) = 0.9939$. Directly, $\text{ESS} = b_2\sum x_2y + b_3\sum x_3y = 2.0556(25) + 0.5556(22) = 63.611$ and
+$\text{TSS} = 64$, so $R^2 = 0.9939$, agreeing.
+\end{exa}
+
+\subsection{The geometry of least squares}
+\label{ssec:geometry}
+
+Think of $Y$ and the $k$ columns of $X$ as vectors in $\mathbb R^n$. Every possible fitted value $Xc$ is a linear combination of the columns of $X$, so
+the candidate fits fill out the $k$-dimensional \emph{column space} of $X$. Least squares picks the point $\hat Y$ of that space closest to $Y$, and
+Theorem~\ref{thm:residk} says that the error $e = Y - \hat Y$ is perpendicular to the whole space. $\hat Y = PY$ is the \textbf{orthogonal projection} of
+$Y$ onto the column space, $P$ is the projection matrix, and $e = MY$ is the projection onto the orthogonal complement, which has dimension $n - k$
+(Figure~\ref{fig:projection}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.15,>=Stealth]
+\fill[blue!10] (-0.5,-0.6) -- (5.2,-0.6) -- (6.6,1.6) -- (0.9,1.6) -- cycle;
+\draw[blue!50!black] (-0.5,-0.6) -- (5.2,-0.6) -- (6.6,1.6) -- (0.9,1.6) -- cycle;
+\node[blue!60!black,font=\small,anchor=north west] at (5.3,-0.6) {column space of $X$};
+\coordinate (O) at (0.6,0.1);
+\coordinate (H) at (4.4,0.9);
+\coordinate (Y) at (4.4,3.9);
+\draw[->,very thick,black] (O) -- (Y) node[above,font=\small] {$Y$};
+\draw[->,very thick,blue!70!black] (O) -- (H) node[below right,font=\small] {$\hat Y = PY = Xb$};
+\draw[->,very thick,red!70!black] (H) -- (Y) node[midway,right,font=\small] {$e = MY$};
+\draw[red!70!black] (4.4,1.2) -- (4.12,1.14) -- (4.12,0.84);
+\draw[->,thick,gray] (O) -- (2.2,-0.35) node[below,font=\scriptsize] {$x_{(1)}$};
+\draw[->,thick,gray] (O) -- (1.6,1.35) node[above,font=\scriptsize] {$x_{(2)}$};
+\fill (O) circle (1.3pt) node[left,font=\scriptsize] {$0$};
+\end{tikzpicture}
+\caption{Least squares as orthogonal projection. The fitted vector $\hat Y$ is the point of the plane spanned by the columns $x_{(1)}, x_{(2)}$ of $X$ that is
+nearest to $Y$; the residual $e$ is perpendicular to the plane. By Pythagoras, $Y'Y = \hat Y'\hat Y + e'e$.}
+\label{fig:projection}
+\end{figure}
+
+The geometry explains several earlier facts at once. Pythagoras' theorem in $\mathbb R^n$ is the decomposition of the sum of squares. When the
+vectors are measured as deviations from their means, $R^2$ is the squared cosine of the angle between $M_0Y$ and $M_0\hat Y$, which is why $R^2$
+is the squared correlation between $Y$ and $\hat Y$. Adding a regressor enlarges the subspace, so the nearest point can only get nearer, which is
+Theorem~\ref{thm:r2mono}. The Frisch--Waugh--Lovell theorem is the statement that projecting in two stages, first onto the space of $X_1$ and then
+onto what is left of $X_2$, reaches the same point as projecting onto the whole space at once. And the fitted values depend only on the column
+space, not on the particular columns chosen to span it, so rescaling or recombining the regressors (Problem~\ref{prob:leverage}) leaves
+$\hat Y$, $e$ and $R^2$ unchanged.
+
+\subsection{Multiple regression in software}
+\label{ssec:software6}
+
+\begin{software}[A multiple regression]
+\label{sw:lmk}
+The life-cycle model of savings with all four regressors:
+{\small\begin{verbatim}
+> fit <- lm(sr ~ pop15 + pop75 + dpi + ddpi, data = LifeCycleSavings)
+> summary(fit)
+
+Call:
+lm(formula = sr ~ pop15 + pop75 + dpi + ddpi, data = LifeCycleSavings)
+
+Residuals:
+    Min      1Q  Median      3Q     Max
+-8.2422 -2.6857 -0.2488  2.4280  9.7509
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)
+(Intercept) 28.5660865  7.3545161   3.884 0.000334 ***
+pop15       -0.4611931  0.1446422  -3.189 0.002603 **
+pop75       -1.6914977  1.0835989  -1.561 0.125530
+dpi         -0.0003369  0.0009311  -0.362 0.719173
+ddpi         0.4096949  0.1961971   2.088 0.042471 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 3.803 on 45 degrees of freedom
+Multiple R-squared:  0.3385,    Adjusted R-squared:  0.2797
+F-statistic: 5.756 on 4 and 45 DF,  p-value: 0.0007904
+\end{verbatim}}
+\textbf{Reading the output.} Each coefficient is a partial effect in the sense of Theorem~\ref{thm:fwl}. A country with a young-dependant share one point
+higher, and the same old-age share, income and income growth, saves $0.46$ points less: twice the effect found by the simple regression of
+Software~\ref{sw:lm}, which confounded \texttt{pop15} with the variables correlated with it. The sign of \texttt{pop75} has reversed. Its simple
+correlation with savings is $+0.317$, but holding \texttt{pop15} fixed its coefficient is $-1.69$, the negative sign the life-cycle theory predicts
+for dissaving by the elderly, though it is not significant. Faster income growth raises savings. The residual degrees of freedom are
+$n - k = 50 - 5 = 45$, and $\bar R^2 = 1 - (1 - 0.3385)(49/45) = 0.2797$. The $F$ statistic tests that all four slopes are zero; it is derived in the next
+section.
+
+\textbf{Stata:} \texttt{regress sr pop15 pop75 dpi ddpi}. \textbf{EViews:} \texttt{ls sr c pop15 pop75 dpi ddpi}.
+\end{software}
+
+\begin{software}[Frisch--Waugh--Lovell by hand]
+\label{sw:fwl}
+Partial \texttt{pop75}, \texttt{dpi} and \texttt{ddpi} out of both \texttt{sr} and \texttt{pop15}, then regress residual on residual:
+{\small\begin{verbatim}
+> ry <- resid(lm(sr ~ pop75 + dpi + ddpi, data = LifeCycleSavings))
+> rx <- resid(lm(pop15 ~ pop75 + dpi + ddpi, data = LifeCycleSavings))
+> coef(lm(ry ~ rx - 1))
+        rx
+-0.4611931
+> cor(ry, rx)
+[1] -0.4292889
+\end{verbatim}}
+\textbf{Reading the output.} The coefficient $-0.4611931$ is identical, to every digit, to the \texttt{pop15} coefficient in the full regression. The
+\texttt{- 1} omits the intercept, which is unnecessary because both residual series have mean zero. The correlation of the two residual series,
+$-0.429$, is the partial correlation of savings with \texttt{pop15} given the other three regressors. It is linked to the $t$ ratio by
+$r^2 = t^2/(t^2 + n - k) = 3.189^2/(3.189^2 + 45) = 0.184 = 0.429^2$ (Problem~\ref{prob:tpartial}).
+
+\textbf{Stata:} \texttt{regress sr pop75 dpi ddpi}, \texttt{predict ry, resid}, and similarly for \texttt{rx}; \texttt{pcorr sr pop15 pop75 dpi ddpi}
+gives partial correlations directly. \textbf{EViews:} \texttt{ls sr c pop75 dpi ddpi}, then \texttt{series ry = resid}.
+\end{software}
+
+\begin{software}[$R^2$ and a useless regressor]
+\label{sw:noise}
+Add a column of random numbers to the savings regression:
+{\small\begin{verbatim}
+> set.seed(1); LCS <- LifeCycleSavings; LCS$noise <- rnorm(50)
+> f2 <- lm(sr ~ pop15 + pop75 + dpi + ddpi + noise, data = LCS)
+> c(R2 = summary(fit)$r.squared, adjR2 = summary(fit)$adj.r.squared)
+       R2     adjR2
+0.3384564 0.2796525
+> c(R2 = summary(f2)$r.squared, adjR2 = summary(f2)$adj.r.squared)
+       R2     adjR2
+0.3439879 0.2694411
+> summary(f2)$coef["noise", ]
+  Estimate Std. Error    t value   Pr(>|t|)
+-0.4133420  0.6786050 -0.6091055  0.5455868
+\end{verbatim}}
+\textbf{Reading the output.} $R^2$ rises, from $0.3385$ to $0.3440$, although the new variable is pure noise, as Theorem~\ref{thm:r2mono} guarantees it must.
+The adjusted $R^2$ falls, from $0.2797$ to $0.2694$, consistent with the noise variable's $|t| = 0.61 < 1$. Choosing a model by maximising $R^2$ would
+always choose the biggest model.
+
+\textbf{Stata:} \texttt{generate noise = rnormal()} after \texttt{set seed 1} (the numbers will differ from R's). \textbf{EViews:} \texttt{series noise = nrnd}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Let $X_2$, $X_3$ and $X_4$ be possible regressors for $Y$; label $Y$ as $1$ and $X_i$ as $i$. Explain whether each of the following can be true:
+\begin{enumerate}[label=(\roman*)]
+\item $R^2_{1\cdot23} = 0.87$ and $R^2_{1\cdot234} = 0.82$;
+\item $\sum (X - \bar X)^2\sum (Y - \bar Y)^2 - \bigl(\sum (X - \bar X)(Y - \bar Y)\bigr)^2 = -75$;
+\item $R^2_{1\cdot23} = r_{12}^2 + r_{13\cdot2}^2(1 - r_{12}^2)$;
+\item $r_{12}^2 = 0.227$, $r_{13}^2 = 0.626$ and $R^2_{1\cdot23} = 0.71$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(i) Not true. Adding $X_4$ cannot reduce $R^2$ (Theorem~\ref{thm:r2mono}), so $R^2_{1\cdot234} \geq R^2_{1\cdot23}$.
+
+(ii) Not true. By the Cauchy--Schwarz inequality the expression equals $\sum x^2\sum y^2(1 - r^2) \geq 0$ (Corollary~\ref{coro:cs}).
+
+(iii) True; it is Theorem~\ref{thm:partial}. Adding $X_3$ explains the fraction $r_{13\cdot2}^2$ of what $X_2$ left unexplained.
+
+(iv) It can be true. By (iii) with the roles of $X_2$ and $X_3$ exchanged, $R^2_{1\cdot23} = r_{13}^2 + r_{12\cdot3}^2(1 - r_{13}^2) \geq r_{13}^2 = 0.626$, and also
+$\geq 0.227$; $0.71$ satisfies both bounds. It requires $r_{12\cdot3}^2 = (0.71 - 0.626)/0.374 = 0.225$, which is possible. For example, if $r_{12}$ and $r_{13}$
+are both positive, the identity $R^2_{1\cdot23} = (r_{12}^2 + r_{13}^2 - 2r_{12}r_{13}r_{23})/(1 - r_{23}^2)$ gives $R^2 = 0.71$ at $r_{23} = 0.247$. What would be
+impossible is $R^2_{1\cdot23}$ below $0.626$.
+\end{solution}
+
+\begin{problem}
+\label{prob:adjr2}
+A regression with $k$ coefficients is extended by one regressor, whose $t$ ratio in the larger model is $t$. Show that $\bar R^2$ rises if and only if
+$|t| > 1$. (You may use the result, proved in the next section, that $t^2 = (\text{RSS}_1 - \text{RSS}_2)/\bigl(\text{RSS}_2/(n - k - 1)\bigr)$, where $1$ and $2$
+denote the smaller and larger models.)
+\end{problem}
+
+\begin{solution}
+$\bar R^2 = 1 - \frac{\text{RSS}/(n - k)}{\text{TSS}/(n - 1)}$ rises exactly when $\text{RSS}/(\text{residual degrees of freedom})$ falls, that is when
+$\text{RSS}_2/(n - k - 1) < \text{RSS}_1/(n - k)$. Write $d = n - k - 1$. The condition is $(d + 1)\text{RSS}_2 < d\,\text{RSS}_1$, or
+$\text{RSS}_2 < d(\text{RSS}_1 - \text{RSS}_2)$, or $(\text{RSS}_1 - \text{RSS}_2)/(\text{RSS}_2/d) > 1$, which is $t^2 > 1$.
+\end{solution}
+
+\begin{problem}
+\label{prob:tpartial}
+In a regression with $n - k$ residual degrees of freedom, let $t$ be the $t$ ratio of the coefficient on $X_j$. Show that the squared partial
+correlation of $Y$ and $X_j$, given the other regressors, is $t^2/(t^2 + n - k)$.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:fwl}, $b_j$ and the residuals come from the simple regression of $\tilde y = M_1Y$ on $\tilde x = M_1X_j$, where $M_1$ removes the other
+regressors. In that regression $\text{RSS} = \sum\tilde y^2(1 - r^2)$ with $r$ the partial correlation, and $b_j^2\sum\tilde x^2 = r^2\sum\tilde y^2$. The variance of
+$b_j$ is estimated by $s^2/\sum\tilde x^2$ with $s^2 = \text{RSS}/(n - k)$; this is the same as in the full regression, which has the same residuals and the same
+degrees of freedom. Hence
+\[
+t^2 = \frac{b_j^2\sum\tilde x^2}{s^2} = \frac{r^2\sum\tilde y^2(n - k)}{\sum\tilde y^2(1 - r^2)} = \frac{(n - k)r^2}{1 - r^2},
+\]
+and solving for $r^2$ gives $r^2 = t^2/(t^2 + n - k)$.
+\end{solution}
+
+\begin{problem}
+For the data
+\begin{center}
+\begin{tabular}{c|cccccc}
+$X_2$ & 2 & 4 & 3 & 5 & 6 & 4\\
+$X_3$ & 1 & 2 & 2 & 3 & 3 & 1\\
+$Y$ & 5 & 9 & 8 & 12 & 14 & 8
+\end{tabular}
+\end{center}
+compute $b_1$, $b_2$, $b_3$ and $R^2$, using the deviation-form formulas.
+\end{problem}
+
+\begin{solution}
+The means are $\bar X_2 = 4$, $\bar X_3 = 2$ and $\bar Y = 9.3333$. In deviations,
+\begin{align*}
+x_2 &= (-2, 0, -1, 1, 2, 0), \qquad x_3 = (-1, 0, 0, 1, 1, -1),\\
+y &= (-4.333, -0.333, -1.333, 2.667, 4.667, -1.333) .
+\end{align*}
+The sums are
+\[
+\sum x_2^2 = 10, \quad \sum x_3^2 = 4, \quad \sum x_2x_3 = 5,
+\]
+\[
+\sum x_2y = 22, \quad \sum x_3y = 13, \quad \sum y^2 = 51.333 .
+\]
+The denominator is $10(4) - 25 = 15$, so
+\[
+b_2 = \frac{22(4) - 13(5)}{15} = \frac{23}{15} = 1.5333, \qquad b_3 = \frac{13(10) - 22(5)}{15} = \frac{20}{15} = 1.3333,
+\]
+and $b_1 = 9.3333 - 1.5333(4) - 1.3333(2) = 0.5333$. $\text{ESS} = 1.5333(22) + 1.3333(13) = 51.067$, so $R^2 = 51.067/51.333 = 0.9948$.
+\end{solution}
+
+\begin{problem}
+Prove that the residuals from the regression of $M_1Y$ on $M_1X_2$ are the same as the residuals from the full regression, and use this to show
+that if $X_2$ is orthogonal to $X_1$ ($X_1'X_2 = 0$), then $b_2$ in the full regression equals the coefficient from the regression of $Y$ on $X_2$ alone.
+Interpret this in terms of omitted variables.
+\end{problem}
+
+\begin{solution}
+The first part is the last step of the proof of Theorem~\ref{thm:fwl}. If $X_1'X_2 = 0$ then $M_1X_2 = X_2 - X_1(X_1'X_1)^{-1}X_1'X_2 = X_2$, so
+$b_2 = (X_2'X_2)^{-1}X_2'M_1Y = (X_2'X_2)^{-1}(X_2'Y - X_2'X_1(X_1'X_1)^{-1}X_1'Y) = (X_2'X_2)^{-1}X_2'Y$, the short regression coefficient. Leaving $X_1$
+out of the regression does not change the estimate of $\beta_2$ when $X_1$ is uncorrelated with $X_2$ in the sample. Omitting a variable biases the
+coefficients of the included ones only through its correlation with them. That is why randomised experiments, in which the treatment is
+uncorrelated with everything else by design, can estimate a causal effect without controlling for other variables.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:hand3}, verify the Frisch--Waugh--Lovell theorem for $b_3$: regress $Y$ on $X_2$ (with intercept), regress $X_3$ on $X_2$, and
+regress the first set of residuals on the second.
+\end{problem}
+
+\begin{solution}
+In deviations, the regression of $y$ on $x_2$ has slope $25/10 = 2.5$, with residuals $\tilde y = y - 2.5x_2 = (0, 0.5, -1, 0.5, 0)$. The regression of
+$x_3$ on $x_2$ has slope $8/10 = 0.8$, with residuals $\tilde x = x_3 - 0.8x_2 = (-0.4, 0.8, -1, 1.2, -0.6)$. Then
+$\sum\tilde x\tilde y = 0 + 0.4 + 1 + 0.6 + 0 = 2$ and $\sum\tilde x^2 = 0.16 + 0.64 + 1 + 1.44 + 0.36 = 3.6$, so the slope is $2/3.6 = 0.5556 = b_3$. The residuals
+$\tilde y - 0.5556\tilde x$ are $(0.222, 0.056, -0.444, -0.167, 0.333)$, with sum of squares $0.3889$, the residual sum of squares of the full regression,
+$64 - 63.611$.
 \end{solution}
 
 \section*{References}
