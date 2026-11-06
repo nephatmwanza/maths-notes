@@ -3715,6 +3715,497 @@ $\tilde y - 0.5556\tilde x$ are $(0.222, 0.056, -0.444, -0.167, 0.333)$, with su
 $64 - 63.611$.
 \end{solution}
 
+%======================================================================
+\section{Inference in the $k$-Variable Model}
+\label{sec:infk}
+
+Section~\ref{sec:kvar} computed the least squares estimates. This section asks how reliable they are, and how to test the hypotheses that economic
+theory poses. Most of those hypotheses are linear restrictions on the coefficients: an elasticity equals one, returns to scale are constant,
+a group of variables has no effect, two effects are equal. All of them are special cases of $R\beta = r$, and one theorem, with one test statistic,
+handles them all.
+
+\subsection{The sampling distribution of $b$}
+\label{ssec:bdist}
+
+\begin{thm}
+\label{thm:bmoments}
+In the model $Y = X\beta + U$ with $\rank X = k$:
+\begin{enumerate}[label=(\roman*)]
+\item $b = \beta + (X'X)^{-1}X'U$;
+\item under (A1), $E(b \mid X) = \beta$;
+\item under (A1)--(A3), $\Var(b \mid X) = \sigma^2(X'X)^{-1}$;
+\item under (A1)--(A5), $Y \sim N(X\beta, \sigma^2I_n)$ and $b \sim N\bigl(\beta, \sigma^2(X'X)^{-1}\bigr)$, conditionally on $X$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $b = (X'X)^{-1}X'(X\beta + U) = \beta + (X'X)^{-1}X'U$.
+(ii) $E(b \mid X) = \beta + (X'X)^{-1}X'E(U \mid X) = \beta$.
+(iii) By Theorem~\ref{thm:linvec}(i) with $A = (X'X)^{-1}X'$,
+\[
+\Var(b \mid X) = (X'X)^{-1}X'(\sigma^2I)X(X'X)^{-1} = \sigma^2(X'X)^{-1} .
+\]
+(iv) $Y = X\beta + U$ is a linear function of the normal vector $U$, and $b = \beta + AU$ is a linear function of it with $A$ of full row rank $k$.
+Apply Theorem~\ref{thm:mvn}(ii).
+\end{proof}
+
+The $j$th diagonal element of $\sigma^2(X'X)^{-1}$ is $\Var(b_j)$, and the off-diagonal elements are the covariances between the estimates. Those
+covariances matter whenever a hypothesis involves more than one coefficient. They are usually large when the corresponding regressors are
+correlated (Problem~\ref{prob:corrb}). Replacing $\sigma^2$ by $s^2 = e'e/(n - k)$, unbiased by Theorem~\ref{thm:residqf}, gives the estimated
+covariance matrix $s^2(X'X)^{-1}$, whose diagonal square roots are the standard errors printed by every regression program. The diagonal element of
+$(X'X)^{-1}$ for regressor $j$ can be written $1/\bigl(\sum x_j^2(1 - R_j^2)\bigr)$, where $R_j^2$ is the $R^2$ of regressing $X_j$ on the other regressors.
+That shows directly how correlation among the regressors inflates the variance; it is proved by the Frisch--Waugh--Lovell theorem in
+Problem~\ref{prob:vif}.
+
+\subsection{The Gauss--Markov theorem}
+\label{ssec:gmk}
+
+\begin{thm}
+\label{thm:gmk}
+Under (A1)--(A4), let $c$ be any constant $k$-vector, and consider estimators of $c'\beta$ of the form $a'Y$ for a constant $n$-vector $a$.
+\begin{enumerate}[label=(\roman*)]
+\item $a'Y$ is unbiased for $c'\beta$, whatever the value of $\beta$, if and only if $X'a = c$.
+\item $\Var(a'Y) = \sigma^2a'a$.
+\item The vector $a$ that minimises $a'a$ subject to $X'a = c$ is $a^* = X(X'X)^{-1}c$, and then $a^{*\prime}Y = c'b$.
+\end{enumerate}
+Hence $c'b$ is the best linear unbiased estimator of $c'\beta$ for every $c$. Equivalently, for any linear unbiased estimator $\tilde\beta$ of $\beta$,
+$\Var(\tilde\beta) - \Var(b)$ is positive semi-definite.
+\end{thm}
+
+\begin{proof}
+(i) $E(a'Y) = a'X\beta$. This equals $c'\beta$ for every $\beta$ if and only if $a'X = c'$, that is $X'a = c$.
+
+(ii) $\Var(a'Y) = a'\Var(Y)a = \sigma^2a'a$.
+
+(iii) Form the Lagrangian $\mathcal L = a'a - 2\lambda'(X'a - c)$, with a $k$-vector of multipliers $\lambda$ (the factor $2$ is for convenience). By
+Lemma~\ref{lem:deriv}, $\partial\mathcal L/\partial a = 2a - 2X\lambda = 0$, so $a = X\lambda$. The constraint gives $X'X\lambda = c$, so $\lambda = (X'X)^{-1}c$ and
+$a^* = X(X'X)^{-1}c$. It is a minimum, because for any feasible $a$, writing $a = a^* + d$ with $X'd = 0$,
+\[
+a'a = a^{*\prime}a^* + 2d'X(X'X)^{-1}c + d'd = a^{*\prime}a^* + d'd \geq a^{*\prime}a^* .
+\]
+Finally $a^{*\prime}Y = c'(X'X)^{-1}X'Y = c'b$.
+
+For the matrix statement, a linear unbiased $\tilde\beta = AY$ has $AX = I$. For any $c$, $c'\tilde\beta = (A'c)'Y$ is linear and unbiased for $c'\beta$, so by
+(ii) and (iii) $c'\Var(\tilde\beta)c = \Var(c'\tilde\beta) \geq \Var(c'b) = c'\Var(b)c$. That is the definition of $\Var(\tilde\beta) - \Var(b)$ being psd.
+\end{proof}
+
+The proof by minimising $a'a$ shows what the theorem is really saying. Every linear unbiased estimator of $c'\beta$ uses weights $a$ that satisfy the
+same $k$ linear constraints, and the variance is proportional to the length of the weight vector. Least squares uses the shortest one, the one
+lying in the column space of $X$.
+
+\subsection{Testing linear restrictions}
+\label{ssec:rbeta}
+
+A set of $q$ linear restrictions is written
+\[
+H_0\colon R\beta = r ,
+\]
+where $R$ is a known $q \times k$ matrix of rank $q$ and $r$ a known $q$-vector. With $k = 3$ and $\beta = (\beta_1, \beta_2, \beta_3)'$:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lll}
+Hypothesis & $R$ & $r$\\\hline
+$\beta_2 = 0$ & $(0\ \ 1\ \ 0)$ & $0$\\
+$\beta_2 = 1$ (unit elasticity) & $(0\ \ 1\ \ 0)$ & $1$\\
+$\beta_2 + \beta_3 = 1$ (constant returns) & $(0\ \ 1\ \ 1)$ & $1$\\
+$\beta_2 = \beta_3$ & $(0\ \ 1\ \ {-1})$ & $0$\\
+$\beta_2 = \beta_3 = 0$ & $\begin{pmatrix} 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}$ & $\begin{pmatrix} 0 \\ 0 \end{pmatrix}$
+\end{tabular}
+\end{center}
+
+\begin{thm}
+\label{thm:wald}
+Under (A1)--(A5):
+\begin{enumerate}[label=(\roman*)]
+\item $E(Rb - r) = R\beta - r$ and $\Var(Rb - r) = \sigma^2R(X'X)^{-1}R'$, so $Rb - r \sim N\bigl(R\beta - r,\ \sigma^2R(X'X)^{-1}R'\bigr)$;
+\item under $H_0\colon R\beta = r$,
+\[
+W = (Rb - r)'\bigl[\sigma^2R(X'X)^{-1}R'\bigr]^{-1}(Rb - r) \sim \chi^2_q ;
+\]
+\item under $H_0$, with $\sigma^2$ replaced by $s^2$,
+\[
+F = \frac{(Rb - r)'\bigl[R(X'X)^{-1}R'\bigr]^{-1}(Rb - r)/q}{s^2} \sim F_{q,\ n-k} .
+\]
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $Rb - r$ is a linear function of $b$; apply Theorem~\ref{thm:linvec}(i) and Theorem~\ref{thm:bmoments}(iv). $R(X'X)^{-1}R'$ is pd because $(X'X)^{-1}$
+is pd and $R$ has full row rank $q$.
+
+(ii) Under $H_0$, $Rb - r \sim N\bigl(0, \sigma^2R(X'X)^{-1}R'\bigr)$, and Theorem~\ref{thm:qf1}(ii) gives the $\chi^2_q$ distribution.
+
+(iii) $F = (W/q)\big/\bigl((n - k)s^2/\sigma^2\bigr/(n - k)\bigr)$. The numerator is a $\chi^2_q$ over $q$. The denominator is a $\chi^2_{n-k}$ over $n - k$ by
+Theorem~\ref{thm:residqf}(v). They are independent because $W$ is a function of $b$, and $b$ is independent of $s^2$ by
+Theorem~\ref{thm:residqf}(vi).
+\end{proof}
+
+$W$ is not usable directly because $\sigma^2$ is unknown, but it matters in its own right. In large samples $s^2 \xrightarrow{p} \sigma^2$, so $qF \xrightarrow{d} \chi^2_q$
+without normality, and the $\chi^2$ form is the basis of the Wald tests of the section on maximum likelihood. Reject $H_0$ at level $\alpha$ if $F$
+exceeds the upper $\alpha$ point of $F_{q, n-k}$.
+
+\begin{coro}
+\label{coro:tk}
+For a single restriction $c'\beta = r$, with $q = 1$, $F$ is the square of
+\[
+t = \frac{c'b - r}{s\sqrt{c'(X'X)^{-1}c}} \sim t_{n-k} .
+\]
+In particular the $t$ ratio for $\beta_j = 0$ is $b_j/\operatorname{se}(b_j)$, and the test of $\beta_2 + \beta_3 = 1$ uses
+$\operatorname{se}(b_2 + b_3) = \sqrt{\widehat\Var(b_2) + \widehat\Var(b_3) + 2\widehat\Cov(b_2, b_3)}$.
+\end{coro}
+
+\begin{proof}
+With $R = c'$, $R(X'X)^{-1}R' = c'(X'X)^{-1}c$ is a scalar, and
+\[
+F = \frac{(c'b - r)^2}{s^2c'(X'X)^{-1}c} = t^2 .
+\]
+ That $t \sim t_{n-k}$ follows as in
+Theorem~\ref{thm:t2}: a $N(0, 1)$ over the square root of an independent $\chi^2_{n-k}/(n - k)$.
+\end{proof}
+
+\subsection{Restricted least squares and the $F$ test}
+\label{ssec:restricted}
+
+The $F$ statistic has a second form, which is often easier to compute and explains what the test does.
+
+\begin{thm}
+\label{thm:rls}
+The vector $b_*$ that minimises $(Y - Xb_*)'(Y - Xb_*)$ subject to $Rb_* = r$ is
+\[
+b_* = b - (X'X)^{-1}R'\bigl[R(X'X)^{-1}R'\bigr]^{-1}(Rb - r) .
+\]
+Its residuals $e_* = Y - Xb_*$ satisfy
+\[
+e_*'e_* - e'e = (Rb - r)'\bigl[R(X'X)^{-1}R'\bigr]^{-1}(Rb - r) ,
+\]
+so that
+\[
+F = \frac{(\text{RSS}_R - \text{RSS}_U)/q}{\text{RSS}_U/(n - k)} ,
+\]
+where $\text{RSS}_R = e_*'e_*$ and $\text{RSS}_U = e'e$ are the restricted and unrestricted residual sums of squares.
+\end{thm}
+
+\begin{proof}
+Minimise $\mathcal L = (Y - Xb_*)'(Y - Xb_*) + 2\lambda'(Rb_* - r)$. The first-order condition $-2X'(Y - Xb_*) + 2R'\lambda = 0$ gives
+$b_* = b - (X'X)^{-1}R'\lambda$. Imposing $Rb_* = r$ gives $Rb - R(X'X)^{-1}R'\lambda = r$, so $\lambda = [R(X'X)^{-1}R']^{-1}(Rb - r)$, which is the
+stated $b_*$. The objective is convex, so this is the minimum.
+
+For the residuals, $e_* = Y - Xb_* = e + X(b - b_*)$. Since $X'e = 0$,
+\[
+e_*'e_* = e'e + (b - b_*)'X'X(b - b_*) .
+\]
+Substituting $b - b_* = (X'X)^{-1}R'[R(X'X)^{-1}R']^{-1}(Rb - r)$, the quadratic form collapses to
+$(Rb - r)'[R(X'X)^{-1}R']^{-1}(Rb - r)$, because $R(X'X)^{-1}X'X(X'X)^{-1}R' = R(X'X)^{-1}R'$. Dividing by $q$ and by $s^2 = \text{RSS}_U/(n - k)$ gives the
+$F$ formula.
+\end{proof}
+
+The test therefore asks how much worse the model fits when the restrictions are imposed, measured relative to the unrestricted residual variance.
+If the restrictions are true, imposing them costs little; if false, the restricted residual sum of squares is much larger. In practice the restricted
+model is usually estimated by substituting the restrictions into it, not from the formula for $b_*$. Under constant returns,
+$\log Q = \alpha + \beta_L\log L + (1 - \beta_L)\log K + u$ rearranges to the regression of $\log(Q/K)$ on $\log(L/K)$.
+
+\begin{thm}
+\label{thm:overallF}
+In a model with an intercept and $k - 1$ regressors, the test of
+\[
+H_0\colon \beta_2 = \beta_3 = \dots = \beta_k = 0
+\]
+against the alternative that at least one slope is non-zero uses
+\[
+F = \frac{\text{ESS}/(k - 1)}{\text{RSS}/(n - k)} = \frac{R^2/(k - 1)}{(1 - R^2)/(n - k)} \sim F_{k-1,\ n-k} \quad\text{under } H_0 .
+\]
+\end{thm}
+
+\begin{proof}
+Under $H_0$ the restricted model is $Y_i = \beta_1 + u_i$, whose least squares fit is $\bar Y$, so $\text{RSS}_R = \sum (Y_i - \bar Y)^2 = \text{TSS}$. Then
+$\text{RSS}_R - \text{RSS}_U = \text{TSS} - \text{RSS} = \text{ESS}$, with $q = k - 1$, and Theorem~\ref{thm:rls} gives the first form. Dividing numerator and
+denominator by TSS gives the second.
+\end{proof}
+
+This is the $F$ statistic printed at the foot of every regression. It tests whether the regressors together explain anything, and it can reject even
+when no single $t$ ratio is significant, if the regressors are highly correlated with one another. The reverse can also happen: a single significant $t$
+among many useless regressors may fail to make the overall $F$ significant.
+
+\subsection{Confidence intervals and regions}
+\label{ssec:confreg}
+
+A $100(1 - \alpha)\%$ confidence interval for $\beta_j$ is $b_j \pm t_{\alpha/2,\,n-k}\operatorname{se}(b_j)$. Inverting the $F$ test of
+Theorem~\ref{thm:wald} for $q$ coefficients jointly gives a confidence \emph{region}:
+\[
+\Bigl\{\beta_0 : (Rb - \beta_0)'\bigl[s^2R(X'X)^{-1}R'\bigr]^{-1}(Rb - \beta_0) \leq qF_{\alpha,\ q,\ n-k}\Bigr\},
+\]
+which for two coefficients is an ellipse centred at the estimates. Its tilt reflects the covariance of the two estimates. A pair of values can lie
+inside both individual intervals but outside the ellipse, or outside one interval but inside the ellipse. Joint hypotheses must be tested jointly,
+not by checking the individual intervals one at a time (Figure~\ref{fig:ellipse}).
+
+\begin{exa}
+\label{ex:cobbci}
+A production function $\log Q = \alpha + \beta_L\log L + \beta_K\log K + u$ is estimated from $40$ observations, with
+\[
+b_L = 0.7, \quad \operatorname{se}(b_L) = 0.102; \qquad b_K = 0.2, \quad \operatorname{se}(b_K) = 0.102 .
+\]
+Find $95\%$ confidence intervals for $\beta_L$ and $\beta_K$, and use them to test $\beta_L = 1$ and $\beta_K = 0$ separately at the $5\%$ level.
+
+\emph{Solution.} There are $n - k = 40 - 3 = 37$ degrees of freedom and $t_{0.025,37} = 2.026$, so each half-width is $2.026 \times 0.102 = 0.207$:
+\[
+\beta_L\colon\ 0.7 \pm 0.207 = (0.493,\ 0.907), \qquad \beta_K\colon\ 0.2 \pm 0.207 = (-0.007,\ 0.407) .
+\]
+A two-sided test at the $5\%$ level rejects exactly the values outside the $95\%$ interval. The value $1$ lies outside the interval for $\beta_L$, so
+$\beta_L = 1$ is rejected: the output elasticity of labour is less than one. The value $0$ lies (just) inside the interval for $\beta_K$, so
+$\beta_K = 0$ is not rejected at $5\%$: capital is not significantly productive, although the evidence is borderline ($t = 0.2/0.102 = 1.96$, against
+$2.026$).
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth]
+\fill[blue!4,rounded corners=4pt] (-1.4,-1.0) rectangle (8.9,6.9);
+\draw[->,gray] (0,0) -- (8.3,0) node[right,font=\small,black] {$\beta_{\texttt{pop15}}$};
+\draw[->,gray] (0,0) -- (0,6.4) node[above right,font=\small,black] {$\beta_{\texttt{pop75}}$};
+\foreach \x/\l in {0.8/-0.8,2.4/-0.6,4/-0.4,5.6/-0.2,7.2/0} \draw[gray] (\x,0) -- (\x,-0.12) node[below,font=\scriptsize,black] {$\l$};
+\foreach \y/\l in {0.6/-4,1.6/-3,2.6/-2,3.6/-1,4.6/0,5.6/1} \draw[gray] (0,\y) -- (-0.12,\y) node[left,font=\scriptsize,black] {$\l$};
+\draw[dashed,orange!85!black,thick] (1.180,0.726) rectangle (5.841,5.091);
+\fill[blue!20,opacity=0.8] plot coordinates {(5.769,5.652) (5.598,5.643) (5.411,5.614) (5.209,5.564) (4.995,5.494) (4.769,5.405) (4.533,5.296) (4.290,5.169) (4.041,5.025) (3.788,4.865) (3.533,4.690) (3.278,4.502) (3.024,4.301) (2.774,4.090) (2.530,3.869) (2.293,3.642) (2.065,3.408) (1.849,3.171) (1.645,2.933) (1.455,2.693) (1.281,2.456) (1.124,2.222) (0.985,1.993) (0.865,1.771) (0.766,1.558) (0.687,1.355) (0.630,1.164) (0.594,0.986) (0.581,0.823) (0.590,0.675) (0.622,0.545) (0.675,0.433) (0.750,0.339) (0.846,0.265) (0.962,0.211) (1.098,0.178) (1.252,0.165) (1.423,0.174) (1.610,0.203) (1.812,0.253) (2.026,0.323) (2.252,0.412) (2.487,0.521) (2.731,0.648) (2.980,0.792) (3.233,0.952) (3.488,1.127) (3.743,1.315) (3.997,1.516) (4.247,1.727) (4.491,1.948) (4.728,2.175) (4.956,2.409) (5.172,2.646) (5.376,2.885) (5.566,3.124) (5.740,3.361) (5.897,3.595) (6.036,3.824) (6.156,4.046) (6.255,4.259) (6.334,4.462) (6.391,4.653) (6.427,4.831) (6.440,4.994) (6.431,5.142) (6.399,5.272) (6.346,5.384) (6.271,5.478) (6.175,5.552) (6.058,5.606) (5.923,5.639) (5.769,5.652)} -- cycle;
+\draw[blue!70!black,thick] plot coordinates {(5.769,5.652) (5.598,5.643) (5.411,5.614) (5.209,5.564) (4.995,5.494) (4.769,5.405) (4.533,5.296) (4.290,5.169) (4.041,5.025) (3.788,4.865) (3.533,4.690) (3.278,4.502) (3.024,4.301) (2.774,4.090) (2.530,3.869) (2.293,3.642) (2.065,3.408) (1.849,3.171) (1.645,2.933) (1.455,2.693) (1.281,2.456) (1.124,2.222) (0.985,1.993) (0.865,1.771) (0.766,1.558) (0.687,1.355) (0.630,1.164) (0.594,0.986) (0.581,0.823) (0.590,0.675) (0.622,0.545) (0.675,0.433) (0.750,0.339) (0.846,0.265) (0.962,0.211) (1.098,0.178) (1.252,0.165) (1.423,0.174) (1.610,0.203) (1.812,0.253) (2.026,0.323) (2.252,0.412) (2.487,0.521) (2.731,0.648) (2.980,0.792) (3.233,0.952) (3.488,1.127) (3.743,1.315) (3.997,1.516) (4.247,1.727) (4.491,1.948) (4.728,2.175) (4.956,2.409) (5.172,2.646) (5.376,2.885) (5.566,3.124) (5.740,3.361) (5.897,3.595) (6.036,3.824) (6.156,4.046) (6.255,4.259) (6.334,4.462) (6.391,4.653) (6.427,4.831) (6.440,4.994) (6.431,5.142) (6.399,5.272) (6.346,5.384) (6.271,5.478) (6.175,5.552) (6.058,5.606) (5.923,5.639) (5.769,5.652)} -- cycle;
+\fill[blue!70!black] (3.510,2.909) circle (2pt) node[below right,font=\scriptsize] {$(b_{\texttt{pop15}}, b_{\texttt{pop75}})$};
+\fill[red!70!black] (7.2,4.6) circle (2.2pt) node[above,font=\scriptsize] {$(0,0)$};
+\node[font=\scriptsize,orange!85!black,anchor=west,align=left] at (5.95,1.0) {individual\\$95\%$ intervals};
+\node[font=\scriptsize,blue!70!black,anchor=west] at (0.15,6.15) {joint $95\%$ region};
+\end{tikzpicture}
+\caption{Joint $95\%$ confidence ellipse for the coefficients of \texttt{pop15} and \texttt{pop75} in the savings regression, with the rectangle formed by
+the two individual $95\%$ intervals. The estimates are strongly positively correlated (correlation $0.76$), so the ellipse is long and tilted upwards.
+Much of the rectangle lies outside the ellipse. The origin lies outside both, and the joint $F$ test rejects
+$\beta_{\texttt{pop15}} = \beta_{\texttt{pop75}} = 0$ (Software~\ref{sw:ftest}).}
+\label{fig:ellipse}
+\end{figure}
+
+\subsection{Prediction}
+\label{ssec:predk}
+
+For a new observation with regressor row vector $x_0'$, the point prediction is $\hat Y_0 = x_0'b$.
+
+\begin{thm}
+\label{thm:predk}
+If $Y_0 = x_0'\beta + u_0$, with $u_0$ uncorrelated with $U$, mean zero and variance $\sigma^2$, then under (A1)--(A3)
+\[
+\Var\bigl(x_0'b - x_0'\beta\bigr) = \sigma^2x_0'(X'X)^{-1}x_0, \qquad \Var(Y_0 - \hat Y_0) = \sigma^2\bigl(1 + x_0'(X'X)^{-1}x_0\bigr) .
+\]
+\end{thm}
+
+\begin{proof}
+$x_0'b - x_0'\beta = x_0'(b - \beta)$ has variance $x_0'\Var(b)x_0$. The prediction error is $Y_0 - \hat Y_0 = u_0 - x_0'(b - \beta)$, and $u_0$ is uncorrelated with $b$,
+which depends on $U$ only, so the variances add.
+\end{proof}
+
+For the two-variable model $x_0 = (1, X_0)'$, and $x_0'(X'X)^{-1}x_0 = \frac1n + (X_0 - \bar X)^2/\sum x_i^2$, which is Theorem~\ref{thm:pred2}. Under normality,
+$(Y_0 - \hat Y_0)\big/\bigl(s\sqrt{1 + x_0'(X'X)^{-1}x_0}\bigr) \sim t_{n-k}$, which gives prediction intervals. When many predictions are made at once, the
+prediction errors are correlated through their common dependence on $b$. Their joint distribution is the basis of the Chow forecast test of the next
+section.
+
+\subsection{Testing in software}
+\label{ssec:software7}
+
+\begin{software}[A joint $F$ test by comparing two models]
+\label{sw:ftest}
+Do the two demographic variables matter for savings? The restricted model omits both:
+{\small\begin{verbatim}
+> fit  <- lm(sr ~ pop15 + pop75 + dpi + ddpi, data = LifeCycleSavings)
+> fit0 <- lm(sr ~ dpi + ddpi, data = LifeCycleSavings)
+> anova(fit0, fit)
+Analysis of Variance Table
+
+Model 1: sr ~ dpi + ddpi
+Model 2: sr ~ pop15 + pop75 + dpi + ddpi
+  Res.Df    RSS Df Sum of Sq      F   Pr(>F)
+1     47 824.72
+2     45 650.71  2       174 6.0167 0.004835 **
+\end{verbatim}}
+\textbf{Reading the output.} This is Theorem~\ref{thm:rls}: $\text{RSS}_R = 824.72$ on $47$ degrees of freedom, $\text{RSS}_U = 650.71$ on $45$, and
+\[
+F = \frac{(824.72 - 650.71)/2}{650.71/45} = \frac{87.0}{14.46} = 6.017 ,
+\]
+with $p = 0.0048$ from $F_{2,45}$. The demographic variables are jointly highly significant, although \texttt{pop75} alone was not ($p = 0.13$ in
+Software~\ref{sw:lmk}). The two are correlated $-0.91$, so the data cannot say \emph{which} age group matters, only that age structure does.
+Passing a single model to \texttt{anova(fit0)} instead would give sequential sums of squares, a different and order-dependent decomposition.
+
+\textbf{Stata:} after \texttt{regress sr pop15 pop75 dpi ddpi}, \texttt{test pop15 pop75}. \textbf{EViews:} in the equation window,
+\emph{View $\to$ Coefficient Diagnostics $\to$ Wald Test}, entering \texttt{c(2)=0, c(3)=0}.
+\end{software}
+
+\begin{software}[The same test from the Wald formula]
+\label{sw:waldmat}
+Theorem~\ref{thm:wald}(iii) computed directly from $b$ and $s^2(X'X)^{-1}$, which R returns as \texttt{vcov(fit)}:
+{\small\begin{verbatim}
+> b <- coef(fit); V <- vcov(fit)
+> R <- rbind(c(0, 1, 0, 0, 0), c(0, 0, 1, 0, 0)); r <- c(0, 0)
+> d <- R %*% b - r
+> F <- drop(t(d) %*% solve(R %*% V %*% t(R)) %*% d) / 2
+> c(F = F, p = pf(F, 2, 45, lower.tail = FALSE))
+          F           p
+6.016652074 0.004834923
+> round(V[2:3, 2:3], 5)
+        pop15   pop75
+pop15 0.02092 0.11996
+pop75 0.11996 1.17419
+\end{verbatim}}
+\textbf{Reading the output.} The Wald form agrees exactly with the restricted-versus-unrestricted form, as Theorem~\ref{thm:rls} proves it must. Since
+\texttt{vcov} already includes $s^2$, the matrix inverted is $s^2R(X'X)^{-1}R'$ and only the division by $q = 2$ remains. The covariance of the two estimates,
+$0.120$, is large and positive: the correlation of the estimates is $0.120/\sqrt{0.0209 \times 1.174} = 0.76$, even though the variables themselves are
+correlated $-0.91$ (Problem~\ref{prob:corrb} explains the sign reversal). That correlation is what tilts the ellipse of Figure~\ref{fig:ellipse}. Any $R$
+and $r$ can be tested with these lines.
+
+\textbf{Stata:} \texttt{test} accepts any linear restriction, e.g.\ \texttt{test pop15 + pop75 = 0}. \textbf{EViews:} the Wald test dialog accepts
+expressions such as \texttt{c(2)+c(3)=0}.
+\end{software}
+
+\begin{software}[The overall $F$ statistic]
+\label{sw:overall}
+The test of Theorem~\ref{thm:overallF} as a comparison with the intercept-only model:
+{\small\begin{verbatim}
+> anova(lm(sr ~ 1, data = LifeCycleSavings), fit)
+  Res.Df    RSS Df Sum of Sq      F    Pr(>F)
+1     49 983.63
+2     45 650.71  4    332.92 5.7557 0.0007904 ***
+\end{verbatim}}
+\textbf{Reading the output.} The restricted RSS is the total sum of squares, $983.63$, and $F = (332.92/4)/(650.71/45) = 5.756$, the \texttt{F-statistic} line
+of Software~\ref{sw:lmk}. In terms of $R^2$: $(0.3385/4)/(0.6615/45) = 5.756$. (The table header lines printed by R are omitted here.)
+
+\textbf{Stata} and \textbf{EViews} print this statistic in the regression output.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Consider $Y = X\beta + U$ with $k - 1$ regressors, where the elements of $U$ are independent and identically distributed with mean $0$ and variance
+$\sigma^2$.
+\begin{enumerate}[label=(\roman*)]
+\item Let $c$ be a known $k$-vector and $a$ a known $n$-vector. Find the condition on $a$ and $c$ for $a'Y$ to be an unbiased estimator of $c'\beta$.
+\item Find $\Var(a'Y)$.
+\item Find the vector $a$ that minimises $a'a$ subject to $X'a = c$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+This is Theorem~\ref{thm:gmk}. (i) $E(a'Y) = a'X\beta = c'\beta$ for all $\beta$ requires $X'a = c$. (ii) $\sigma^2a'a$. (iii) The Lagrangian
+$a'a - 2\lambda'(X'a - c)$ gives $a = X\lambda$; then $X'X\lambda = c$, so $a = X(X'X)^{-1}c$. The resulting estimator is $a'Y = c'(X'X)^{-1}X'Y = c'b$, so the minimum
+variance linear unbiased estimator of $c'\beta$ is $c'b$, with variance $\sigma^2c'(X'X)^{-1}c$.
+\end{solution}
+
+\begin{problem}
+In the model $Y = X\beta + U$ with $U \sim N(0, \sigma^2I)$, $\beta$ a $k$-vector and $b = (X'X)^{-1}X'Y$:
+\begin{enumerate}[label=(\roman*)]
+\item find $E(b)$ and $\Cov(b)$;
+\item determine the distributions of $Y$ and of $b$;
+\item for a known $q \times k$ matrix $R$ of rank $q$ and $q$-vector $r$, find $\Var(Rb - r)$ and the distribution of $Rb - r$;
+\item show that under $H_0\colon R\beta = r$, $(Rb - r)'\bigl[\sigma^2R(X'X)^{-1}R'\bigr]^{-1}(Rb - r)$ has a $\chi^2$ distribution with $q$ degrees of freedom.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(i) $E(b) = \beta$ and $\Cov(b) = \sigma^2(X'X)^{-1}$ (Theorem~\ref{thm:bmoments}). (ii) $Y \sim N(X\beta, \sigma^2I)$ and $b \sim N(\beta, \sigma^2(X'X)^{-1})$, since both
+are linear in $U$. (iii) $\Var(Rb - r) = R\Var(b)R' = \sigma^2R(X'X)^{-1}R'$, and $Rb - r \sim N(R\beta - r, \sigma^2R(X'X)^{-1}R')$. (iv) Under $H_0$ the mean is zero,
+and a $N(0, \Sigma)$ vector $z$ with $\Sigma$ pd has $z'\Sigma^{-1}z \sim \chi^2_q$ (Theorem~\ref{thm:qf1}); here $\Sigma = \sigma^2R(X'X)^{-1}R'$ is pd because $R$ has
+full row rank.
+\end{solution}
+
+\begin{problem}
+Consider a regression with $k - 1$ regressors for which all the classical assumptions hold. We wish to test $H_0\colon \beta_2 = \dots = \beta_k = 0$ against the
+alternative that at least one slope is non-zero.
+\begin{enumerate}[label=(\roman*)]
+\item Derive the test statistic, using the restricted and unrestricted regressions.
+\item State its distribution and degrees of freedom.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+See Theorem~\ref{thm:overallF}. The unrestricted regression has $\text{RSS}_U = e'e$ on $n - k$ degrees of freedom. The restricted model is
+$Y_i = \beta_1 + u_i$, fitted by $\bar Y$, with $\text{RSS}_R = \sum (Y_i - \bar Y)^2$. There are $q = k - 1$ restrictions, so
+\[
+F = \frac{(\text{RSS}_R - \text{RSS}_U)/(k - 1)}{\text{RSS}_U/(n - k)} = \frac{R^2/(k - 1)}{(1 - R^2)/(n - k)},
+\]
+which under $H_0$ has the $F$ distribution with $k - 1$ and $n - k$ degrees of freedom. The independence of numerator and denominator comes from the
+independence of $b$ and $e'e$ (Theorem~\ref{thm:residqf}). Reject for large $F$.
+\end{solution}
+
+\begin{problem}
+In the production function of Example~\ref{ex:cobbci}, the estimated covariance of $b_L$ and $b_K$ is $-0.0061$.
+\begin{enumerate}[label=(\alph*)]
+\item Test the hypothesis of constant returns to scale at the $5\%$ level.
+\item Repeat the calculation ignoring the covariance, and explain why the two answers differ.
+\item Describe how the restricted model would be estimated, and how the test could then be carried out with residual sums of squares.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $H_0\colon \beta_L + \beta_K = 1$. $b_L + b_K = 0.9$, and
+\[
+\widehat\Var(b_L + b_K) = 0.102^2 + 0.102^2 + 2(-0.0061) = 0.0208 - 0.0122 = 0.0086 ,
+\]
+so the standard error is $0.0928$ and $t = (0.9 - 1)/0.0928 = -1.08$. Since $|t| < 2.026$, constant returns are not rejected.
+
+(b) Ignoring the covariance gives a standard error of $\sqrt{0.0208} = 0.144$ and $t = -0.69$. The conclusion is the same here, but the standard error is
+$55\%$ too large. The covariance is negative because labour and capital move together in the data. An overestimate of one elasticity tends to
+come with an underestimate of the other, so their \emph{sum} is estimated more precisely than either alone. Ignoring a negative covariance makes a
+test of the sum too conservative; ignoring a positive covariance would make it too liberal.
+
+(c) Substitute $\beta_K = 1 - \beta_L$: $\log Q - \log K = \alpha + \beta_L(\log L - \log K) + u$, so regress $\log(Q/K)$ on $\log(L/K)$. Its residual sum
+of squares is $\text{RSS}_R$, and $F = (\text{RSS}_R - \text{RSS}_U)/(\text{RSS}_U/37)$ with $(1, 37)$ degrees of freedom; this $F$ equals $t^2$ from (a).
+\end{solution}
+
+\begin{problem}
+\label{prob:corrb}
+In a regression with an intercept and two regressors, show that
+\[
+\Corr(b_2, b_3) = -r_{23},
+\]
+where $r_{23}$ is the sample correlation of $X_2$ and $X_3$. Explain why the estimates in Software~\ref{sw:waldmat} are positively correlated although
+\texttt{pop15} and \texttt{pop75} are negatively correlated, and why this result does not apply exactly there.
+\end{problem}
+
+\begin{solution}
+By Corollary~\ref{thm:deviation}, the slope estimates come from the deviation form, so their covariance matrix is $\sigma^2$ times the inverse of
+$\begin{pmatrix} S_{22} & S_{23} \\ S_{23} & S_{33} \end{pmatrix}$, which is $\frac{1}{D}\begin{pmatrix} S_{33} & -S_{23} \\ -S_{23} & S_{22} \end{pmatrix}$ with
+$D = S_{22}S_{33} - S_{23}^2$. Hence
+\[
+\Corr(b_2, b_3) = \frac{-S_{23}}{\sqrt{S_{33}S_{22}}} = -r_{23} .
+\]
+Positively correlated regressors have negatively correlated estimates, and vice versa: if the two regressors move together, the data can pin down their
+combined effect but not how to divide it, so an overestimate of one coefficient goes with an underestimate of the other. \texttt{pop15} and \texttt{pop75}
+are correlated $-0.91$, so their estimates are positively correlated. In Software~\ref{sw:waldmat} the correlation is $0.76$ rather than $0.91$ because the
+model has two further regressors. The relevant correlation is then the partial correlation of \texttt{pop15} and \texttt{pop75} given \texttt{dpi} and
+\texttt{ddpi}, with the sign reversed.
+\end{solution}
+
+\begin{problem}
+\label{prob:vif}
+Show that in a regression with an intercept,
+\[
+\Var(b_j) = \frac{\sigma^2}{\sum_i (X_{ji} - \bar X_j)^2\,(1 - R_j^2)} ,
+\]
+where $R_j^2$ is the coefficient of determination from regressing $X_j$ on all the other regressors. Interpret the factor $1/(1 - R_j^2)$.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:fwl}, $b_j = \tilde x'Y/\tilde x'\tilde x$, where $\tilde x = M_1X_j$ is the residual vector from regressing $X_j$ on the other regressors
+(including the intercept). Then $b_j = \beta_j + \tilde x'U/\tilde x'\tilde x$ and $\Var(b_j) = \sigma^2/\tilde x'\tilde x$. But $\tilde x'\tilde x$ is the residual sum of squares of that
+auxiliary regression, which is $(1 - R_j^2)$ times its total sum of squares $\sum (X_{ji} - \bar X_j)^2$. The factor $1/(1 - R_j^2)$ is the \emph{variance inflation
+factor}: it is $1$ when $X_j$ is uncorrelated with the other regressors, and it grows without bound as $X_j$ becomes nearly a linear combination of them.
+That is the multicollinearity problem, quantified.
+\end{solution}
+
+\begin{problem}
+For the savings regression of Software~\ref{sw:lmk}, a country has \texttt{pop15} $= 35$, \texttt{pop75} $= 2.5$, \texttt{dpi} $= 1000$ and
+\texttt{ddpi} $= 4$. Compute the point prediction of its savings rate. Given that $x_0'(X'X)^{-1}x_0 = 0.0249$, give a $95\%$ prediction interval.
+\end{problem}
+
+\begin{solution}
+$\hat Y_0 = 28.566 - 0.4612(35) - 1.6915(2.5) - 0.000337(1000) + 0.4097(4) = 28.566 - 16.142 - 4.229 - 0.337 + 1.639 = 9.497$. The standard error of
+prediction is $s\sqrt{1 + 0.0249} = 3.803(1.0124) = 3.850$, and with $t_{0.025,45} = 2.014$ the interval is $9.50 \pm 7.75 = (1.74,\ 17.25)$,
+which is what \texttt{predict(fit, new, interval = "prediction")} returns. Almost all of the
+width comes from the disturbance variance, the $1$ in $1 + x_0'(X'X)^{-1}x_0$: the regression line is estimated far more precisely than an individual
+country's savings rate can be predicted.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
