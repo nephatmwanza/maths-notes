@@ -1,0 +1,147 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>3.6 Maximal solutions in software — Ordinary Differential Equations</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='ode.css' rel='stylesheet' type='text/css' /> 
+<meta content='ode.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Ordinary Differential Equations</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="odese1.html">First-Order Equations and the Qualitative View</a></li>
+<li class="sub"><a class="" href="odesu1.html">Differential equations and models</a></li>
+<li class="sub"><a class="" href="odesu2.html">Linear first-order equations</a></li>
+<li class="sub"><a class="" href="odesu3.html">Separable equations</a></li>
+<li class="sub"><a class="" href="odesu4.html">Exact equations and integrating factors</a></li>
+<li class="sub"><a class="" href="odesu5.html">Equations reducible to linear form</a></li>
+<li class="sub"><a class="" href="odesu6.html">Autonomous equations and the phase line</a></li>
+<li class="sub"><a class="" href="odesu7.html">First-order equations in software</a></li>
+<li class="sub"><a class="" href="odesu8.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="odese2.html">Existence and Uniqueness</a></li>
+<li class="sub"><a class="" href="odesu9.html">The integral equation</a></li>
+<li class="sub"><a class="" href="odesu10.html">Lipschitz conditions</a></li>
+<li class="sub"><a class="" href="odesu11.html">The Picard–Lindelöf theorem</a></li>
+<li class="sub"><a class="" href="odesu12.html">Gronwall’s inequality and continuous dependence</a></li>
+<li class="sub"><a class="" href="odesu13.html">Peano’s existence theorem</a></li>
+<li class="sub"><a class="" href="odesu14.html">Existence and uniqueness in software</a></li>
+<li class="sub"><a class="" href="odesu15.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="odese3.html">Maximal Solutions, Comparison and Dependence on Data</a></li>
+<li class="sub"><a class="" href="odesu16.html">Maximal solutions</a></li>
+<li class="sub"><a class="" href="odesu17.html">Global existence</a></li>
+<li class="sub"><a class="" href="odesu18.html">Blow-up</a></li>
+<li class="sub"><a class="" href="odesu19.html">Comparison theorems</a></li>
+<li class="sub"><a class="" href="odesu20.html">The flow and dependence on initial data</a></li>
+<li class="sub"><a class="current" href="odesu21.html">Maximal solutions in software</a></li>
+<li class="sub"><a class="" href="odesu22.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="odeli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 1292 --><div class='crosslinks'><p class='noindent'>[<a href='odesu22.html'>next</a>] [<a href='odesu20.html'>prev</a>] [<a href='odesu20.html#tailodesu20.html'>prev-tail</a>] [<a href='#tailodesu21.html'>tail</a>] [<a href='odese3.html#odesu21.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>3.6   </span> <a id='x26-250003.6'></a>Maximal solutions in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 1295 --><p class='noindent'><span class='head'>
+<a id='x26-25001r1'></a>
+<span class='cmbx-10x-x-109'>Software 3.6.1 </span>(Detecting blow-up)<span class='cmbx-10x-x-109'>.</span>  </span> A terminal event stops the integration when \(x\) reaches \(10^8\), which
+approximates the blow-up time. The bounds of Example <a href='odesu19.html#x24-23002r2'>3.4.2<!-- tex4ht:ref: ex:ricblow  --></a> follow:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-7'>
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; from scipy.integrate import solve_ivp
+&gt;&gt;&gt; def blowup(f, x0, big=1e8, tmax=10):   # first time with x = big
+...     ev = lambda t, x: x[0] - big; ev.terminal = True
+...     s = solve_ivp(f, (0, tmax), [x0], events=ev, rtol=1e-12, atol=1e-12)
+...     return s.t_events[0][0]
+...
+&gt;&gt;&gt; blowup(lambda t, x: x**2, 1.0), blowup(lambda t, x: x**2, 0.25)
+(0.999999989999633, 3.999999989997211)
+&gt;&gt;&gt; T = blowup(lambda t, x: t**2 + x**2, 0.0); T
+2.003147349427506
+&gt;&gt;&gt; s1 = solve_ivp(lambda t, x: t**2 + x**2, (0, 1), [0.0],
+...                rtol=1e-12, atol=1e-14)
+&gt;&gt;&gt; x1 = s1.y[0, -1]
+&gt;&gt;&gt; np.sqrt(np.pi / 2), T, 1 + np.pi / 2 - np.arctan(x1)    # lower, T, upper
+(1.2533141373155001, 2.003147349427506, 2.2339149795198647)
+</pre>
+<!-- l. 1315 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>For \(x' = x^2\) the computed times are \(1\) and \(4\), matching \(1/x_0\) (the tiny shortfall is the
+time from \(x = 10^8\) to infinity, \(10^{-8}\)). For \(x' = t^2 + x^2\) the blow-up time is \(T = 2.0031\), inside the comparison bounds \(1.2533\) and \(2.2339\). The
+integration needs tight tolerances, because the solution grows so fast near \(T\) that the step size
+must shrink to zero.
+</p><!-- l. 1320 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave:   </span><span class='cmtt-10x-x-109'>opts = odeset(’Events’, @(t, x) deal(x - 1e8, 1, 0));  </span>then
+<span class='cmtt-10x-x-109'>[t, x, te] = ode45(@(t, x) t^2 + x^2, [0 3], 0, opts)</span>.
+</p>
+</div>
+<!-- l. 1321 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1323 --><p class='noindent'><span class='head'>
+<a id='x26-25002r2'></a>
+<span class='cmbx-10x-x-109'>Software 3.6.2 </span>(The variational equation)<span class='cmbx-10x-x-109'>.</span>  </span> For the pendulum \(\theta '' = -\sin \theta \) from \(\theta (0) = 1\), \(\theta '(0) = 0\), integrate the system and its
+variational equation \(Y' = J(t)Y\), with \(J\) the Jacobian of the right-hand side, and compare the first column of \(Y(10)\) with
+a finite-difference derivative of the flow:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-8'>
+&gt;&gt;&gt; def pend(t, z):                        # pendulum and variational system
+...     x, v = z[:2]; Y = z[2:].reshape(2, 2)
+...     J = np.array([[0.0, 1.0], [-np.cos(x), 0.0]])
+...     return np.concatenate([[v, -np.sin(x)], (J @ Y).ravel()])
+...
+&gt;&gt;&gt; z0 = np.concatenate([[1.0, 0.0], np.eye(2).ravel()])
+&gt;&gt;&gt; Y = solve_ivp(pend, (0, 10), z0, rtol=1e-11, atol=1e-12).y[2:, -1]
+&gt;&gt;&gt; Y = Y.reshape(2, 2); np.round(Y, 5)
+array([[-0.94351,  0.04995],
+       [-1.14356, -0.99933]])
+&gt;&gt;&gt; flow = lambda x0: solve_ivp(lambda t, z: [z[1], -np.sin(z[0])], (0, 10),
+...                             x0, rtol=1e-11, atol=1e-12).y[:, -1]
+&gt;&gt;&gt; h = 1e-6; fd = (flow([1.0 + h, 0.0]) - flow([1.0 - h, 0.0])) / (2 * h)
+&gt;&gt;&gt; np.round(fd, 5), round(np.linalg.det(Y), 8)
+(array([-0.94351, -1.14356]), 1.0)
+</pre>
+<!-- l. 1343 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The first column of \(Y(10)\), \((-0.94351, -1.14356)\), agrees to five decimals with the finite-difference
+derivative with respect to \(\theta (0)\), as Theorem <a href='odesu20.html#x25-24002r2'>3.5.2<!-- tex4ht:ref: thm:variational  --></a> says it must. The determinant of \(Y(10)\) is exactly \(1\): the
+trace of \(J\) is zero, and Liouville’s formula of the next section then gives \(\det Y = 1\), the statement that the
+pendulum’s flow preserves area in the phase plane. One integration of the enlarged system gives
+all the derivatives at once, which is cheaper and more accurate than finite differences.
+</p><!-- l. 1348 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span>append <span class='cmtt-10x-x-109'>reshape(J*reshape(z(3:6), 2, 2), 4, 1) </span>to the right-hand
+side and integrate with <span class='cmtt-10x-x-109'>ode45</span>.
+</p>
+</div>
+<!-- l. 1349 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1351 --><p class='noindent'><span class='head'>
+<a id='x26-25003r3'></a>
+<span class='cmbx-10x-x-109'>Software 3.6.3 </span>(The flow property)<span class='cmbx-10x-x-109'>.</span>  </span> For the logistic equation \(x' = x(1 - x)\), three time units of the flow, and one
+unit after two:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-9'>
+&gt;&gt;&gt; logi = lambda t, x: x * (1 - x)
+&gt;&gt;&gt; phi = lambda T, x0: solve_ivp(logi, (0, T), [x0], rtol=1e-12,
+...                               atol=1e-14).y[0, -1]
+&gt;&gt;&gt; phi(3.0, 0.1), phi(1.0, phi(2.0, 0.1))  # flow property
+(0.6905678577030561, 0.6905678577030469)
+</pre>
+<!-- l. 1360 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output.</span> \(\phi _3(0.1) = \phi _1(\phi _2(0.1)) = 0.690568\), to \(13\) decimals, illustrating Theorem <a href='odesu20.html#x25-24001r1'>3.5.1<!-- tex4ht:ref: thm:flow  --></a>. The exact value is \(1/(1 + 9e^{-3}) = 0.690568\), from
+the formula of Example <a href='odesu3.html#x6-5003r3'>1.3.3<!-- tex4ht:ref: ex:logistic  --></a>.
+</p><!-- l. 1363 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>deval(ode45(@(t, x) x.*(1 - x), [0 3], 0.1), 3)</span>.
+</p>
+</div>
+<!-- l. 1364 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 1366 --><div class='crosslinks'><p class='noindent'>[<a href='odesu22.html'>next</a>] [<a href='odesu20.html'>prev</a>] [<a href='odesu20.html#tailodesu20.html'>prev-tail</a>] [<a href='odesu21.html'>front</a>] [<a href='odese3.html#odesu21.html'>up</a>] </p></div>
+<!-- l. 1366 --><p class='noindent'><a id='tailodesu21.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="odesu20.html">&larr; Previous</a><a class="up" href="odese3.html#odesu21.html">Contents</a><a class="next" href="odesu22.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="ordinary-differential-equations/3-6-maximal-solutions-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

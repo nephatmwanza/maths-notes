@@ -1041,6 +1041,395 @@ Multiplying by $e^{-2L(t - t_0)}$ and taking the supremum gives the result; $t <
 Banach's theorem gives a unique fixed point on the whole interval $J$, with no restriction $L\alpha < 1$.
 \end{solution}
 
+%======================================================================
+\section{Maximal Solutions, Comparison and Dependence on Data}
+\label{sec:maximal}
+
+The Picard--Lindel\"of theorem is local: it produces a solution on a short interval whose length depends on bounds for $f$ near the initial point.
+Example~\ref{ex:tanpicard} showed how conservative that interval can be. This section asks how far solutions really extend, shows that they can fail
+to extend only by leaving every compact set, typically by blowing up, gives conditions that rule this out, develops comparison theorems that bound
+solutions without solving for them, and shows that solutions depend differentiably on their initial values.
+
+Throughout, $f$ is continuous on an open set $D \subseteq \mathbb R \times \mathbb R^n$ and locally Lipschitz in $x$, so that the Picard--Lindel\"of theorem applies near every point of $D$.
+
+\subsection{Maximal solutions}
+\label{ssec:maxsol}
+
+\begin{lem}
+\label{lem:agree}
+If $\phi$ and $\psi$ are solutions of $x' = f(t, x)$ on intervals $I$ and $J$ with $\phi(t_0) = \psi(t_0)$ for some $t_0 \in I \cap J$, then $\phi = \psi$ on $I \cap J$.
+\end{lem}
+
+\begin{proof}
+The set $S = \{t \in I \cap J : \phi(t) = \psi(t)\}$ contains $t_0$, and it is closed in $I \cap J$ by continuity. It is also open: if $t_1 \in S$, both functions solve the initial value
+problem with data $(t_1, \phi(t_1))$, and by the uniqueness part of Theorem~\ref{thm:picard} they agree on a neighbourhood of $t_1$. A non-empty subset of an interval that is
+both open and closed is the whole interval.
+\end{proof}
+
+\begin{thm}
+\label{thm:maximal}
+For every $(t_0, x_0) \in D$ there is a unique \textbf{maximal solution} $\phi$ on an open interval $(\omega_-, \omega_+) \ni t_0$: every solution of the initial value problem is a restriction of
+$\phi$. It is also called the solution that cannot be continued.
+\end{thm}
+
+\begin{proof}
+Let $(\omega_-, \omega_+)$ be the union of the domains of all solutions through $(t_0, x_0)$, which is an interval containing $t_0$. Define $\phi(t)$ as the value at $t$ of any solution
+defined there; by Lemma~\ref{lem:agree} all such values agree, so $\phi$ is well defined, and it is a solution because near each $t$ it coincides with one. Every solution is
+a restriction of it by construction. The interval is open: if it contained an endpoint, say $\omega_+$, the Picard--Lindel\"of theorem at $(\omega_+, \phi(\omega_+))$ would give a solution
+on a larger interval, contradicting the definition of $\omega_+$.
+\end{proof}
+
+\begin{thm}[Escape from compact sets]
+\label{thm:escape}
+Let $\phi$ be the maximal solution on $(\omega_-, \omega_+)$. If $\omega_+ < \infty$, then $(t, \phi(t))$ eventually leaves every compact set $K \subset D$: there is $t_K < \omega_+$ with $(t, \phi(t)) \notin K$
+for $t_K < t < \omega_+$. In particular, if $D = (\alpha, \beta) \times \mathbb R^n$ and $\omega_+ < \beta$, then $\|\phi(t)\| \to \infty$ as $t \to \omega_+$.
+\end{thm}
+
+\begin{proof}
+Suppose not: then there is a compact $K \subset D$ and times $t_k \to \omega_+$ with $(t_k, \phi(t_k)) \in K$. Since $K$ is compact and $D$ open, there are $a, b > 0$ such that the closed
+cylinders $R_{(s, y)} = \{|t - s| \leq a, \|x - y\| \leq b\}$ centred at points of $K$ all lie in a fixed compact set $K' \subset D$, on which $\|f\| \leq M$ and $f$ is Lipschitz in $x$. By
+Theorem~\ref{thm:picard}, the solution through any point of $K$ exists for a time at least $\alpha = \min(a, b/M)$, the same for every point. Choose $k$ with $t_k > \omega_+ - \alpha$. The solution through
+$(t_k, \phi(t_k))$ exists on $[t_k, t_k + \alpha]$, beyond $\omega_+$, and by Lemma~\ref{lem:agree} it continues $\phi$, which contradicts maximality.
+
+For the second statement, the sets $K_r = [t_0, \omega_+] \times \bar B(0, r)$ are compact subsets of $D$ when $\omega_+ < \beta$, so for each $r$ the solution eventually has $\|\phi(t)\| > r$.
+\end{proof}
+
+A maximal solution can therefore end in finite time only by running off to infinity, or by approaching the boundary of $D$. It cannot simply stop, and it
+cannot oscillate in a bounded region of $D$ as it approaches $\omega_+$. The theorem turns existence questions into questions about bounds: to show that a solution
+exists for all time, it is enough to show that it stays in a compact subset of $D$.
+
+\subsection{Global existence}
+\label{ssec:global}
+
+\begin{thm}
+\label{thm:global}
+Let $f$ be continuous on $I \times \mathbb R^n$, $I$ an open interval, locally Lipschitz in $x$, and of at most linear growth:
+\[
+\|f(t, x)\| \leq a(t) + b(t)\|x\|
+\]
+with $a, b \geq 0$ continuous on $I$. Then every maximal solution is defined on the whole of $I$. In particular, the solutions of the linear system $x' = A(t)x + g(t)$, with $A$ and $g$
+continuous on $I$, exist on all of $I$.
+\end{thm}
+
+\begin{proof}
+Suppose $\omega_+$ is less than the right endpoint of $I$. On $[t_0, \omega_+]$, $a \leq A$ and $b \leq B$ for constants $A, B$. From the integral equation,
+$\|\phi(t)\| \leq \|x_0\| + A(\omega_+ - t_0) + B\int_{t_0}^t\|\phi(s)\|\,ds$, and Gronwall's inequality gives $\|\phi(t)\| \leq (\|x_0\| + A(\omega_+ - t_0))e^{B(\omega_+ - t_0)}$ for $t_0 \leq t < \omega_+$. The solution is
+bounded, contradicting Theorem~\ref{thm:escape}. The same argument applies to $\omega_-$. For the linear system, $\|A(t)x + g(t)\| \leq \|g(t)\| + \|A(t)\|\|x\|$.
+\end{proof}
+
+Linear growth is sharp in a precise sense: Example~\ref{ex:tanpicard} and Problem~\ref{prob:blowup} show quadratic growth producing blow-up. Two other routes to global
+existence are common. A \textbf{conserved quantity}, such as the energy of the pendulum, $E = \frac12\theta'^2 - (g/\ell)\cos\theta$, confines a solution to a level set, and if the level set is
+bounded the solution exists for all time. A \textbf{trapping region}, a compact set that solutions cannot leave because $f$ points inward on its boundary, does the same;
+it is the idea behind Lyapunov functions in a later section.
+
+\subsection{Blow-up}
+\label{ssec:blowup}
+
+For a scalar autonomous equation the blow-up question has a complete answer.
+
+\begin{thm}
+\label{thm:blowupscalar}
+Let $g$ be continuous and positive on $[x_0, \infty)$, and $\phi$ the solution of $x' = g(x)$, $x(0) = x_0$. Then $\phi$ is increasing, and it blows up in finite time if and only if
+\[
+T = \int_{x_0}^\infty\frac{dx}{g(x)} < \infty,
+\]
+in which case $T$ is the blow-up time.
+\end{thm}
+
+\begin{proof}
+Since $\phi' = g(\phi) > 0$, $\phi$ is increasing, and by Theorem~\ref{thm:separable} the time to go from $x_0$ to any $X > x_0$ is $\int_{x_0}^Xdx/g(x)$. If the integral to infinity is finite, the solution
+reaches every value $X$ before time $T$, and so tends to infinity as $t \to T$, which must then be $\omega_+$. If the integral diverges, reaching any value $X$ takes a finite time but
+reaching infinity does not: $\phi$ is finite for every $t \geq 0$, so it exists for all $t \geq 0$.
+\end{proof}
+
+For $x' = x^p$ with $p > 1$ the integral is $x_0^{1-p}/(p - 1)$, finite; for $x' = x$ it diverges, as it does for $x' = x\log x$, which grows faster than linearly but not fast enough to
+blow up. The borderline is the same as Osgood's: blow-up requires $\int^\infty dx/g(x) < \infty$. For $x' = x^2$ from $x_0 > 0$ the solution is $x_0/(1 - x_0t)$, which blows up at $T = 1/x_0$: larger
+initial values blow up sooner (Figure~\ref{fig:blowup}). For non-autonomous equations there is no such formula, and comparison is the tool.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!5,rounded corners=4pt] (-0.8,-0.6) rectangle (9.0,4.6);
+\draw[->] (0,0) -- (8.5,0) node[below,font=\small] {$t$};
+\draw[->] (0,0) -- (0,4.3) node[left,font=\small] {$x$};
+\foreach \v/\x in {0.5/1.667, 1/3.333, 2/6.667}
+  { \draw (\x,-0.08) -- (\x,0) node[below,font=\scriptsize] {$\v$};
+    \draw[gray,dashed] (\x,0) -- (\x,4.1); }
+\foreach \v/\y in {2/1.333, 4/2.667, 6/4.0}
+  \draw (-0.08,\y) -- (0,\y) node[left,font=\scriptsize] {$\v$};
+\draw[green!40!black,very thick] plot coordinates {(0.000,0.333) (0.033,0.335) (0.067,0.337) (0.100,0.338) (0.134,0.340) (0.167,0.342) (0.201,0.344) (0.234,0.345) (0.268,0.347) (0.301,0.349) (0.335,0.351) (0.368,0.353) (0.402,0.355) (0.435,0.357) (0.469,0.359) (0.502,0.360) (0.536,0.362) (0.569,0.364) (0.603,0.366) (0.636,0.368) (0.670,0.371) (0.703,0.373) (0.737,0.375) (0.770,0.377) (0.804,0.379) (0.837,0.381) (0.871,0.383) (0.904,0.386) (0.938,0.388) (0.971,0.390) (1.005,0.392) (1.038,0.395) (1.071,0.397) (1.105,0.400) (1.138,0.402) (1.172,0.404) (1.205,0.407) (1.239,0.409) (1.272,0.412) (1.306,0.415) (1.339,0.417) (1.373,0.420) (1.406,0.422) (1.440,0.425) (1.473,0.428) (1.507,0.431) (1.540,0.433) (1.574,0.436) (1.607,0.439) (1.641,0.442) (1.674,0.445) (1.708,0.448) (1.741,0.451) (1.775,0.454) (1.808,0.457) (1.842,0.461) (1.875,0.464) (1.909,0.467) (1.942,0.470) (1.976,0.474) (2.009,0.477) (2.043,0.481) (2.076,0.484) (2.109,0.488) (2.143,0.491) (2.176,0.495) (2.210,0.499) (2.243,0.502) (2.277,0.506) (2.310,0.510) (2.344,0.514) (2.377,0.518) (2.411,0.522) (2.444,0.526) (2.478,0.531) (2.511,0.535) (2.545,0.539) (2.578,0.544) (2.612,0.548) (2.645,0.553) (2.679,0.557) (2.712,0.562) (2.746,0.567) (2.779,0.572) (2.813,0.577) (2.846,0.582) (2.880,0.587) (2.913,0.592) (2.947,0.597) (2.980,0.603) (3.014,0.608) (3.047,0.614) (3.081,0.620) (3.114,0.626) (3.148,0.631) (3.181,0.638) (3.214,0.644) (3.248,0.650) (3.281,0.656) (3.315,0.663) (3.348,0.670) (3.382,0.677) (3.415,0.683) (3.449,0.691) (3.482,0.698) (3.516,0.705) (3.549,0.713) (3.583,0.721) (3.616,0.729) (3.650,0.737) (3.683,0.745) (3.717,0.753) (3.750,0.762) (3.784,0.771) (3.817,0.780) (3.851,0.789) (3.884,0.799) (3.918,0.808) (3.951,0.818) (3.985,0.829) (4.018,0.839) (4.052,0.850) (4.085,0.861) (4.119,0.872) (4.152,0.884) (4.186,0.896) (4.219,0.908) (4.252,0.920) (4.286,0.933) (4.319,0.947) (4.353,0.960) (4.386,0.975) (4.420,0.989) (4.453,1.004) (4.487,1.019) (4.520,1.035) (4.554,1.052) (4.587,1.069) (4.621,1.086) (4.654,1.104) (4.688,1.123) (4.721,1.142) (4.755,1.162) (4.788,1.183) (4.822,1.204) (4.855,1.227) (4.889,1.250) (4.922,1.274) (4.956,1.299) (4.989,1.325) (5.023,1.352) (5.056,1.380) (5.090,1.409) (5.123,1.440) (5.157,1.472) (5.190,1.505) (5.224,1.540) (5.257,1.576) (5.290,1.615) (5.324,1.655) (5.357,1.697) (5.391,1.742) (5.424,1.789) (5.458,1.838) (5.491,1.891) (5.525,1.946) (5.558,2.005) (5.592,2.068) (5.625,2.134) (5.659,2.205) (5.692,2.281) (5.726,2.362) (5.759,2.449) (5.793,2.543) (5.826,2.644) (5.860,2.754) (5.893,2.873) (5.927,3.003) (5.960,3.145) (5.994,3.302) (6.027,3.475) (6.061,3.667) (6.094,3.881)};
+\draw[blue!70!black,very thick] plot coordinates {(0.000,0.667) (0.017,0.670) (0.033,0.673) (0.050,0.677) (0.067,0.680) (0.084,0.684) (0.100,0.687) (0.117,0.691) (0.134,0.695) (0.151,0.698) (0.167,0.702) (0.184,0.706) (0.201,0.709) (0.218,0.713) (0.234,0.717) (0.251,0.721) (0.268,0.725) (0.284,0.729) (0.301,0.733) (0.318,0.737) (0.335,0.741) (0.351,0.745) (0.368,0.749) (0.385,0.754) (0.402,0.758) (0.418,0.762) (0.435,0.767) (0.452,0.771) (0.469,0.776) (0.485,0.780) (0.502,0.785) (0.519,0.790) (0.535,0.794) (0.552,0.799) (0.569,0.804) (0.586,0.809) (0.602,0.814) (0.619,0.819) (0.636,0.824) (0.653,0.829) (0.669,0.834) (0.686,0.839) (0.703,0.845) (0.720,0.850) (0.736,0.856) (0.753,0.861) (0.770,0.867) (0.786,0.873) (0.803,0.878) (0.820,0.884) (0.837,0.890) (0.853,0.896) (0.870,0.902) (0.887,0.908) (0.904,0.915) (0.920,0.921) (0.937,0.927) (0.954,0.934) (0.971,0.941) (0.987,0.947) (1.004,0.954) (1.021,0.961) (1.037,0.968) (1.054,0.975) (1.071,0.982) (1.088,0.990) (1.104,0.997) (1.121,1.005) (1.138,1.012) (1.155,1.020) (1.171,1.028) (1.188,1.036) (1.205,1.044) (1.222,1.052) (1.238,1.061) (1.255,1.069) (1.272,1.078) (1.288,1.087) (1.305,1.096) (1.322,1.105) (1.339,1.114) (1.355,1.124) (1.372,1.133) (1.389,1.143) (1.406,1.153) (1.422,1.163) (1.439,1.173) (1.456,1.184) (1.473,1.194) (1.489,1.205) (1.506,1.216) (1.523,1.227) (1.539,1.239) (1.556,1.250) (1.573,1.262) (1.590,1.274) (1.606,1.287) (1.623,1.299) (1.640,1.312) (1.657,1.325) (1.673,1.339) (1.690,1.352) (1.707,1.366) (1.724,1.380) (1.740,1.395) (1.757,1.410) (1.774,1.425) (1.791,1.440) (1.807,1.456) (1.824,1.472) (1.841,1.489) (1.857,1.506) (1.874,1.523) (1.891,1.541) (1.908,1.559) (1.924,1.577) (1.941,1.596) (1.958,1.616) (1.975,1.635) (1.991,1.656) (2.008,1.677) (2.025,1.698) (2.042,1.720) (2.058,1.743) (2.075,1.766) (2.092,1.790) (2.108,1.814) (2.125,1.839) (2.142,1.865) (2.159,1.892) (2.175,1.919) (2.192,1.947) (2.209,1.976) (2.226,2.006) (2.242,2.037) (2.259,2.069) (2.276,2.101) (2.293,2.135) (2.309,2.170) (2.326,2.206) (2.343,2.243) (2.359,2.282) (2.376,2.322) (2.393,2.363) (2.410,2.406) (2.426,2.450) (2.443,2.496) (2.460,2.544) (2.477,2.594) (2.493,2.645) (2.510,2.699) (2.527,2.755) (2.544,2.814) (2.560,2.874) (2.577,2.938) (2.594,3.005) (2.610,3.074) (2.627,3.147) (2.644,3.223) (2.661,3.304) (2.677,3.388) (2.694,3.476) (2.711,3.570) (2.728,3.669) (2.744,3.773) (2.761,3.883)};
+\draw[red!70!black,very thick] plot coordinates {(0.000,1.333) (0.008,1.340) (0.017,1.347) (0.025,1.354) (0.033,1.361) (0.042,1.368) (0.050,1.375) (0.059,1.382) (0.067,1.389) (0.075,1.396) (0.084,1.404) (0.092,1.411) (0.100,1.419) (0.109,1.426) (0.117,1.434) (0.125,1.442) (0.134,1.450) (0.142,1.458) (0.150,1.466) (0.159,1.474) (0.167,1.482) (0.176,1.490) (0.184,1.499) (0.192,1.507) (0.201,1.516) (0.209,1.524) (0.217,1.533) (0.226,1.542) (0.234,1.551) (0.242,1.560) (0.251,1.569) (0.259,1.579) (0.267,1.588) (0.276,1.598) (0.284,1.607) (0.293,1.617) (0.301,1.627) (0.309,1.637) (0.318,1.647) (0.326,1.658) (0.334,1.668) (0.343,1.678) (0.351,1.689) (0.359,1.700) (0.368,1.711) (0.376,1.722) (0.384,1.733) (0.393,1.745) (0.401,1.756) (0.410,1.768) (0.418,1.780) (0.426,1.792) (0.435,1.804) (0.443,1.816) (0.451,1.829) (0.460,1.841) (0.468,1.854) (0.476,1.867) (0.485,1.880) (0.493,1.894) (0.502,1.907) (0.510,1.921) (0.518,1.935) (0.527,1.949) (0.535,1.964) (0.543,1.978) (0.552,1.993) (0.560,2.008) (0.568,2.023) (0.577,2.039) (0.585,2.055) (0.593,2.071) (0.602,2.087) (0.610,2.103) (0.619,2.120) (0.627,2.137) (0.635,2.155) (0.644,2.172) (0.652,2.190) (0.660,2.208) (0.669,2.227) (0.677,2.246) (0.685,2.265) (0.694,2.284) (0.702,2.304) (0.710,2.324) (0.719,2.345) (0.727,2.365) (0.736,2.387) (0.744,2.408) (0.752,2.430) (0.761,2.453) (0.769,2.475) (0.777,2.499) (0.786,2.522) (0.794,2.547) (0.802,2.571) (0.811,2.596) (0.819,2.622) (0.827,2.648) (0.836,2.675) (0.844,2.702) (0.853,2.730) (0.861,2.758) (0.869,2.787) (0.878,2.816) (0.886,2.847) (0.894,2.877) (0.903,2.909) (0.911,2.941) (0.919,2.974) (0.928,3.008) (0.936,3.042) (0.945,3.077) (0.953,3.113) (0.961,3.150) (0.970,3.188) (0.978,3.227) (0.986,3.266) (0.995,3.307) (1.003,3.348) (1.011,3.391) (1.020,3.435) (1.028,3.480) (1.036,3.526) (1.045,3.574) (1.053,3.622) (1.062,3.672) (1.070,3.724) (1.078,3.777) (1.087,3.831) (1.095,3.887) (1.103,3.945)};
+\node[font=\scriptsize,red!70!black,anchor=west] at (1.8,3.3) {$x_0 = 2$};
+\node[font=\scriptsize,blue!70!black,anchor=west] at (3.45,3.3) {$x_0 = 1$};
+\node[font=\scriptsize,green!40!black,anchor=west] at (6.8,3.3) {$x_0 = \frac12$};
+\end{tikzpicture}
+\caption{Solutions of $x' = x^2$, $x = x_0/(1 - x_0t)$, for three initial values. Each blows up at $t = 1/x_0$ (dashed), so the maximal interval of existence depends on the initial
+value, although the equation is smooth everywhere.}
+\label{fig:blowup}
+\end{figure}
+
+\subsection{Comparison theorems}
+\label{ssec:comparison}
+
+\begin{thm}[Comparison]
+\label{thm:comparison}
+Let $f$ be continuous on $[t_0, t_1] \times \mathbb R$ and Lipschitz in $x$ with constant $L$. Let $v$ be the solution of $v' = f(t, v)$ on $[t_0, t_1]$, and $u$ a differentiable function with
+\[
+u'(t) \leq f\bigl(t, u(t)\bigr) \quad (t_0 \leq t \leq t_1), \qquad u(t_0) \leq v(t_0) .
+\]
+Then $u(t) \leq v(t)$ on $[t_0, t_1]$. The same holds with all inequalities reversed: a function with $u' \geq f(t, u)$ and $u(t_0) \geq v(t_0)$ stays above $v$.
+\end{thm}
+
+\begin{proof}
+Let $w = u - v$, so $w(t_0) \leq 0$ and $w' \leq f(t, u) - f(t, v) \leq L|w|$. Suppose $w(t_2) > 0$ for some $t_2$, and let $t^* = \sup\{t \leq t_2 : w(t) \leq 0\}$, so $w(t^*) = 0$ and $w > 0$ on $(t^*, t_2]$. There
+$w' \leq Lw$, so $(e^{-Lt}w)' \leq 0$, and $e^{-Lt}w$ is non-increasing on $[t^*, t_2]$. Then $e^{-Lt_2}w(t_2) \leq e^{-Lt^*}w(t^*) = 0$, a contradiction.
+\end{proof}
+
+A function satisfying $u' \leq f(t, u)$ is a \textbf{subsolution}, and one satisfying $u' \geq f(t, u)$ a \textbf{supersolution}. The theorem says that a subsolution starting below a
+solution stays below it, and a supersolution starting above stays above. It is a genuinely one-dimensional result: in $\mathbb R^n$ there is no order to preserve, except
+for special (``cooperative'') systems.
+
+\begin{exa}
+\label{ex:ricblow}
+The Riccati equation $x' = t^2 + x^2$, $x(0) = 0$, has no elementary solution, and its blow-up time $T$ cannot be computed in closed form; comparison traps it.
+
+\emph{Lower bound.} Fix $s > 0$. On $[0, s]$, $t^2 \leq s^2$, so $x$ is a subsolution of $y' = s^2 + y^2$, whose solution from $0$ is $s\tan(st)$, finite for $st < \pi/2$. If $s^2 < \pi/2$ then $s\tan(st)$ is
+finite on $[0, s]$, so $x$ is bounded there and $T > s$. Letting $s \uparrow \sqrt{\pi/2}$ gives $T \geq \sqrt{\pi/2} = 1.2533$.
+
+\emph{Upper bound.} For $t \geq 1$, $x' \geq 1 + x^2$, so $x$ is a supersolution of $y' = 1 + y^2$ from $y(1) = x(1)$, whose solution $\tan(t - 1 + \arctan x(1))$ blows up at $t = 1 + \pi/2 - \arctan x(1)$. With
+$x(1) = 0.3502$ (computed numerically), $T \leq 2.2339$.
+
+The numerical value is $T = 2.0031$ (Software~\ref{sw:blowup}); Figure~\ref{fig:sandwich} shows the solution between its comparison functions.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[orange!7,rounded corners=4pt] (-0.8,-0.6) rectangle (9.0,4.6);
+\draw[->] (0,0) -- (8.5,0) node[below,font=\small] {$t$};
+\draw[->] (0,0) -- (0,4.3) node[left,font=\small] {$x$};
+\foreach \v/\x in {1/3.333, 2/6.667}
+  \draw (\x,-0.08) -- (\x,0) node[below,font=\scriptsize] {$\v$};
+\foreach \v/\y in {2/1.333, 4/2.667, 6/4.0}
+  \draw (-0.08,\y) -- (0,\y) node[left,font=\scriptsize] {$\v$};
+\draw[gray,dashed] (4.178,0) -- (4.178,4.1) (6.677,0) -- (6.677,4.1) (7.446,0) -- (7.446,4.1);
+\draw[blue!70!black,thick] plot coordinates {(0.000,0.000) (0.021,0.007) (0.042,0.013) (0.063,0.020) (0.084,0.026) (0.105,0.033) (0.126,0.040) (0.147,0.046) (0.168,0.053) (0.189,0.059) (0.210,0.066) (0.231,0.073) (0.252,0.079) (0.273,0.086) (0.294,0.093) (0.315,0.099) (0.336,0.106) (0.357,0.113) (0.378,0.119) (0.399,0.126) (0.420,0.133) (0.441,0.140) (0.461,0.146) (0.482,0.153) (0.503,0.160) (0.524,0.167) (0.545,0.174) (0.566,0.181) (0.587,0.188) (0.608,0.195) (0.629,0.201) (0.650,0.208) (0.671,0.215) (0.692,0.223) (0.713,0.230) (0.734,0.237) (0.755,0.244) (0.776,0.251) (0.797,0.258) (0.818,0.265) (0.839,0.273) (0.860,0.280) (0.881,0.287) (0.902,0.295) (0.923,0.302) (0.944,0.310) (0.965,0.317) (0.986,0.325) (1.007,0.332) (1.028,0.340) (1.049,0.348) (1.070,0.355) (1.091,0.363) (1.112,0.371) (1.133,0.379) (1.154,0.387) (1.175,0.395) (1.196,0.403) (1.217,0.411) (1.238,0.420) (1.259,0.428) (1.280,0.436) (1.301,0.445) (1.322,0.453) (1.343,0.462) (1.363,0.470) (1.384,0.479) (1.405,0.488) (1.426,0.497) (1.447,0.506) (1.468,0.515) (1.489,0.524) (1.510,0.533) (1.531,0.542) (1.552,0.552) (1.573,0.561) (1.594,0.571) (1.615,0.581) (1.636,0.590) (1.657,0.600) (1.678,0.610) (1.699,0.621) (1.720,0.631) (1.741,0.641) (1.762,0.652) (1.783,0.663) (1.804,0.673) (1.825,0.684) (1.846,0.695) (1.867,0.707) (1.888,0.718) (1.909,0.729) (1.930,0.741) (1.951,0.753) (1.972,0.765) (1.993,0.777) (2.014,0.790) (2.035,0.802) (2.056,0.815) (2.077,0.828) (2.098,0.841) (2.119,0.854) (2.140,0.868) (2.161,0.882) (2.182,0.896) (2.203,0.910) (2.224,0.925) (2.245,0.940) (2.265,0.955) (2.286,0.970) (2.307,0.986) (2.328,1.001) (2.349,1.018) (2.370,1.034) (2.391,1.051) (2.412,1.068) (2.433,1.086) (2.454,1.104) (2.475,1.122) (2.496,1.141) (2.517,1.160) (2.538,1.179) (2.559,1.199) (2.580,1.220) (2.601,1.240) (2.622,1.262) (2.643,1.284) (2.664,1.306) (2.685,1.329) (2.706,1.353) (2.727,1.377) (2.748,1.402) (2.769,1.427) (2.790,1.453) (2.811,1.480) (2.832,1.508) (2.853,1.536) (2.874,1.566) (2.895,1.596) (2.916,1.627) (2.937,1.659) (2.958,1.692) (2.979,1.726) (3.000,1.761) (3.021,1.798) (3.042,1.836) (3.063,1.875) (3.084,1.915) (3.105,1.957) (3.126,2.001) (3.147,2.046) (3.167,2.093) (3.188,2.142) (3.209,2.193) (3.230,2.246) (3.251,2.301) (3.272,2.359) (3.293,2.420) (3.314,2.483) (3.335,2.549) (3.356,2.619) (3.377,2.692) (3.398,2.769) (3.419,2.850) (3.440,2.935) (3.461,3.026) (3.482,3.122) (3.503,3.223) (3.524,3.331) (3.545,3.446) (3.566,3.569) (3.587,3.700) (3.608,3.841) (3.629,3.992)};
+\draw[green!40!black,thick] plot coordinates {(3.333,0.233) (3.354,0.238) (3.375,0.243) (3.395,0.247) (3.416,0.252) (3.437,0.257) (3.457,0.262) (3.478,0.266) (3.499,0.271) (3.519,0.276) (3.540,0.281) (3.561,0.286) (3.581,0.291) (3.602,0.296) (3.622,0.301) (3.643,0.306) (3.664,0.311) (3.684,0.316) (3.705,0.321) (3.726,0.326) (3.746,0.331) (3.767,0.336) (3.788,0.341) (3.808,0.347) (3.829,0.352) (3.850,0.357) (3.870,0.362) (3.891,0.368) (3.912,0.373) (3.932,0.379) (3.953,0.384) (3.974,0.390) (3.994,0.395) (4.015,0.401) (4.035,0.406) (4.056,0.412) (4.077,0.418) (4.097,0.424) (4.118,0.429) (4.139,0.435) (4.159,0.441) (4.180,0.447) (4.201,0.453) (4.221,0.459) (4.242,0.465) (4.263,0.472) (4.283,0.478) (4.304,0.484) (4.325,0.490) (4.345,0.497) (4.366,0.503) (4.387,0.510) (4.407,0.516) (4.428,0.523) (4.449,0.530) (4.469,0.537) (4.490,0.543) (4.510,0.550) (4.531,0.557) (4.552,0.564) (4.572,0.571) (4.593,0.579) (4.614,0.586) (4.634,0.593) (4.655,0.601) (4.676,0.608) (4.696,0.616) (4.717,0.624) (4.738,0.631) (4.758,0.639) (4.779,0.647) (4.800,0.655) (4.820,0.663) (4.841,0.672) (4.862,0.680) (4.882,0.689) (4.903,0.697) (4.924,0.706) (4.944,0.715) (4.965,0.724) (4.985,0.733) (5.006,0.742) (5.027,0.751) (5.047,0.761) (5.068,0.770) (5.089,0.780) (5.109,0.790) (5.130,0.800) (5.151,0.810) (5.171,0.820) (5.192,0.831) (5.213,0.841) (5.233,0.852) (5.254,0.863) (5.275,0.874) (5.295,0.885) (5.316,0.897) (5.337,0.909) (5.357,0.921) (5.378,0.933) (5.399,0.945) (5.419,0.958) (5.440,0.970) (5.460,0.983) (5.481,0.997) (5.502,1.010) (5.522,1.024) (5.543,1.038) (5.564,1.052) (5.584,1.067) (5.605,1.082) (5.626,1.097) (5.646,1.112) (5.667,1.128) (5.688,1.144) (5.708,1.161) (5.729,1.177) (5.750,1.195) (5.770,1.212) (5.791,1.230) (5.812,1.249) (5.832,1.267) (5.853,1.287) (5.874,1.306) (5.894,1.327) (5.915,1.347) (5.935,1.369) (5.956,1.390) (5.977,1.413) (5.997,1.436) (6.018,1.459) (6.039,1.484) (6.059,1.509) (6.080,1.534) (6.101,1.561) (6.121,1.588) (6.142,1.616) (6.163,1.645) (6.183,1.674) (6.204,1.705) (6.225,1.737) (6.245,1.769) (6.266,1.803) (6.287,1.838) (6.307,1.874) (6.328,1.912) (6.349,1.950) (6.369,1.991) (6.390,2.032) (6.410,2.076) (6.431,2.121) (6.452,2.168) (6.472,2.216) (6.493,2.267) (6.514,2.320) (6.534,2.376) (6.555,2.433) (6.576,2.494) (6.596,2.557) (6.617,2.624) (6.638,2.694) (6.658,2.767) (6.679,2.844) (6.700,2.926) (6.720,3.012) (6.741,3.103) (6.762,3.199) (6.782,3.301) (6.803,3.410) (6.823,3.526) (6.844,3.650) (6.865,3.782) (6.885,3.924)};
+\draw[red!70!black,very thick] plot coordinates {(0.000,0.000) (0.037,0.000) (0.137,0.000) (0.237,0.000) (0.337,0.000) (0.437,0.001) (0.537,0.001) (0.637,0.002) (0.737,0.002) (0.837,0.004) (0.937,0.005) (1.037,0.007) (1.137,0.009) (1.237,0.011) (1.337,0.014) (1.437,0.018) (1.537,0.022) (1.637,0.026) (1.737,0.032) (1.837,0.037) (1.937,0.044) (2.037,0.051) (2.137,0.059) (2.237,0.068) (2.337,0.077) (2.437,0.088) (2.537,0.100) (2.637,0.112) (2.737,0.126) (2.837,0.141) (2.937,0.157) (3.037,0.174) (3.137,0.192) (3.237,0.213) (3.337,0.234) (3.437,0.258) (3.537,0.283) (3.637,0.310) (3.737,0.339) (3.837,0.371) (3.937,0.405) (4.037,0.441) (4.137,0.481) (4.237,0.524) (4.337,0.570) (4.437,0.621) (4.537,0.676) (4.637,0.736) (4.737,0.803) (4.837,0.875) (4.937,0.956) (5.037,1.046) (5.137,1.147) (5.237,1.260) (5.337,1.389) (5.437,1.538) (5.537,1.710) (5.637,1.914) (5.737,2.158) (5.837,2.458) (5.937,2.834) (6.037,3.322) (6.137,3.986)};
+\node[font=\scriptsize,blue!70!black,align=center] at (1.5,2.4) {$\sqrt{\pi/2}\tan(\sqrt{\pi/2}\,t)$\\ (lies above)};
+\node[font=\scriptsize,red!70!black,anchor=east] at (6.55,2.4) {$x(t)$};
+\node[font=\scriptsize,green!40!black,align=left,anchor=west] at (7.55,2.0) {$\tan(t - 1$\\ $+ \arctan x(1))$\\ (lies below)};
+\node[font=\scriptsize,below] at (4.178,-0.35) {$1.25$};
+\node[font=\scriptsize,below] at (7.446,-0.35) {$2.23$};
+\end{tikzpicture}
+\caption{Comparison for $x' = t^2 + x^2$, $x(0) = 0$. On $[0, \sqrt{\pi/2})$ the solution lies below the solution of $y' = \frac\pi2 + y^2$; for $t \geq 1$ it lies above the solution of $y' = 1 + y^2$. Its
+blow-up time $2.0031$ (middle dashed line) is therefore trapped between $1.25$ and $2.23$.}
+\label{fig:sandwich}
+\end{figure}
+
+\subsection{The flow and dependence on initial data}
+\label{ssec:flow}
+
+Write $\phi(t; t_0, x_0)$ for the maximal solution with $x(t_0) = x_0$. For an autonomous system $x' = f(x)$, write $\phi_t(x_0) = \phi(t; 0, x_0)$, the \textbf{flow}: $\phi_t$ maps the state at time $0$ to
+the state at time $t$.
+
+\begin{thm}
+\label{thm:flow}
+$\phi\bigl(t; s, \phi(s; t_0, x_0)\bigr) = \phi(t; t_0, x_0)$ whenever both sides are defined. For an autonomous system, $\phi_0 = \mathrm{id}$ and $\phi_t \circ \phi_s = \phi_{t+s}$.
+\end{thm}
+
+\begin{proof}
+Both sides of the first identity are solutions of $x' = f(t, x)$, as functions of $t$, and they agree at $t = s$; by Lemma~\ref{lem:agree} they agree wherever both are defined. For an
+autonomous system, $t \mapsto \phi_{t+s}(x_0)$ is a solution (the equation does not involve $t$) with value $\phi_s(x_0)$ at $t = 0$, so it equals $\phi_t(\phi_s(x_0))$.
+\end{proof}
+
+The flow is the central object of the geometric theory: a state determines its future and its past uniquely, and $\{\phi_t\}$ is a one-parameter group of maps
+of the state space. The final question is how smooth $\phi_t$ is.
+
+\begin{thm}[Differentiability with respect to initial values]
+\label{thm:variational}
+Let $f$ and $D_xf$ be continuous on $D$, and let $\phi(t; x_0)$ denote the solution with $x(t_0) = x_0$, on a compact interval $J \ni t_0$ on which it exists. Then $\phi$ is continuously
+differentiable in $x_0$, and $Y(t) = \partial\phi(t; x_0)/\partial x_0$, an $n \times n$ matrix, is the solution of the \textbf{variational equation}
+\[
+Y' = A(t)Y, \qquad Y(t_0) = I, \qquad A(t) = D_xf\bigl(t, \phi(t; x_0)\bigr) .
+\]
+\end{thm}
+
+\begin{proof}
+By continuous dependence (Theorem~\ref{thm:contdep}), for $\|h\|$ small the solution $\phi(t; x_0 + h)$ also exists on $J$ and stays in a compact neighbourhood $K$ of the graph of
+$\phi(\cdot\,; x_0)$, on which $f$ is Lipschitz with constant $L$; and $\psi_h(t) = \phi(t; x_0 + h) - \phi(t; x_0)$ satisfies $\|\psi_h(t)\| \leq \|h\|e^{L|t - t_0|}$.
+
+Write $x(t) = \phi(t; x_0)$. By the integral form of the mean value theorem,
+\[
+\psi_h' = f(t, x + \psi_h) - f(t, x) = A(t)\psi_h + r_h(t), \qquad r_h = \int_0^1\bigl[D_xf(t, x + \theta\psi_h) - D_xf(t, x)\bigr]\psi_h\,d\theta .
+\]
+Since $D_xf$ is uniformly continuous on $K$ and $\|\psi_h\|_\infty \leq \|h\|e^{L|J|}$, we have $\|r_h(t)\| \leq \varepsilon(h)\|h\|$, with $\varepsilon(h) \to 0$ as $h \to 0$. The difference $e_h = \psi_h - Yh$ satisfies
+$e_h' = A(t)e_h + r_h$ and $e_h(t_0) = 0$, so with $\|A(t)\| \leq L$,
+\[
+\|e_h(t)\| \leq \int_{t_0}^t\bigl(L\|e_h(s)\| + \varepsilon(h)\|h\|\bigr)ds ,
+\]
+and Gronwall's inequality gives $\|e_h(t)\| \leq \varepsilon(h)\|h\|\,|J|e^{L|J|} = o(\|h\|)$. This is the statement that $\phi$ is differentiable in $x_0$ with derivative $Y$. The derivative is continuous in $x_0$
+because $Y$ solves a linear system whose coefficient matrix $A(t)$ depends continuously on $x_0$, and Theorem~\ref{thm:contdep} applies to it.
+\end{proof}
+
+The variational equation is the linearisation of the system along a solution. Its solution $Y(t)$ measures how an infinitesimal change in the initial state is
+stretched and rotated by time $t$, and it underlies sensitivity analysis, Newton's method for boundary value problems (the shooting method), the stability of
+periodic orbits through Floquet theory, and Lyapunov exponents in chaotic systems. Parameters are handled by enlarging the state: if $f = f(t, x, \lambda)$, adjoin the
+equation $\lambda' = 0$; then $Z = \partial x/\partial\lambda$ satisfies
+\[
+Z' = D_xf\,Z + D_\lambda f, \qquad Z(t_0) = 0 .
+\]
+If $f$ is $C^k$, the solution is $C^k$ in $(t, x_0, \lambda)$, by induction on $k$.
+
+\begin{exa}
+\label{ex:variational}
+For $x' = x^2$, $\phi(t; x_0) = x_0/(1 - x_0t)$, so $\partial\phi/\partial x_0 = (1 - x_0t)^{-2}$. The variational equation is $Y' = 2\phi Y$, $Y(0) = 1$, with solution
+$Y = \exp\int_0^t\frac{2x_0}{1 - x_0s}\,ds = \exp\bigl(-2\log(1 - x_0t)\bigr) = (1 - x_0t)^{-2}$, as it should be. Sensitivity to the initial value grows without bound as $t$ approaches the blow-up
+time.
+\end{exa}
+
+\subsection{Maximal solutions in software}
+\label{ssec:software3}
+
+\begin{software}[Detecting blow-up]
+\label{sw:blowup}
+A terminal event stops the integration when $x$ reaches $10^8$, which approximates the blow-up time. The bounds of Example~\ref{ex:ricblow} follow:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.integrate import solve_ivp
+>>> def blowup(f, x0, big=1e8, tmax=10):   # first time with x = big
+...     ev = lambda t, x: x[0] - big; ev.terminal = True
+...     s = solve_ivp(f, (0, tmax), [x0], events=ev, rtol=1e-12, atol=1e-12)
+...     return s.t_events[0][0]
+...
+>>> blowup(lambda t, x: x**2, 1.0), blowup(lambda t, x: x**2, 0.25)
+(0.999999989999633, 3.999999989997211)
+>>> T = blowup(lambda t, x: t**2 + x**2, 0.0); T
+2.003147349427506
+>>> s1 = solve_ivp(lambda t, x: t**2 + x**2, (0, 1), [0.0],
+...                rtol=1e-12, atol=1e-14)
+>>> x1 = s1.y[0, -1]
+>>> np.sqrt(np.pi / 2), T, 1 + np.pi / 2 - np.arctan(x1)    # lower, T, upper
+(1.2533141373155001, 2.003147349427506, 2.2339149795198647)
+\end{verbatim}}
+\textbf{Reading the output.} For $x' = x^2$ the computed times are $1$ and $4$, matching $1/x_0$ (the tiny shortfall is the time from $x = 10^8$ to infinity, $10^{-8}$). For $x' = t^2 + x^2$ the blow-up time
+is $T = 2.0031$, inside the comparison bounds $1.2533$ and $2.2339$. The integration needs tight tolerances, because the solution grows so fast near $T$ that the step size must
+shrink to zero.
+
+\textbf{MATLAB/Octave:} \texttt{opts = odeset('Events', @(t, x) deal(x - 1e8, 1, 0));} then \texttt{[t, x, te] = ode45(@(t, x) t\^{}2 + x\^{}2, [0 3], 0, opts)}.
+\end{software}
+
+\begin{software}[The variational equation]
+\label{sw:variational}
+For the pendulum $\theta'' = -\sin\theta$ from $\theta(0) = 1$, $\theta'(0) = 0$, integrate the system and its variational equation $Y' = J(t)Y$, with $J$ the Jacobian of the right-hand side, and
+compare the first column of $Y(10)$ with a finite-difference derivative of the flow:
+{\small\begin{verbatim}
+>>> def pend(t, z):                        # pendulum and variational system
+...     x, v = z[:2]; Y = z[2:].reshape(2, 2)
+...     J = np.array([[0.0, 1.0], [-np.cos(x), 0.0]])
+...     return np.concatenate([[v, -np.sin(x)], (J @ Y).ravel()])
+...
+>>> z0 = np.concatenate([[1.0, 0.0], np.eye(2).ravel()])
+>>> Y = solve_ivp(pend, (0, 10), z0, rtol=1e-11, atol=1e-12).y[2:, -1]
+>>> Y = Y.reshape(2, 2); np.round(Y, 5)
+array([[-0.94351,  0.04995],
+       [-1.14356, -0.99933]])
+>>> flow = lambda x0: solve_ivp(lambda t, z: [z[1], -np.sin(z[0])], (0, 10),
+...                             x0, rtol=1e-11, atol=1e-12).y[:, -1]
+>>> h = 1e-6; fd = (flow([1.0 + h, 0.0]) - flow([1.0 - h, 0.0])) / (2 * h)
+>>> np.round(fd, 5), round(np.linalg.det(Y), 8)
+(array([-0.94351, -1.14356]), 1.0)
+\end{verbatim}}
+\textbf{Reading the output.} The first column of $Y(10)$, $(-0.94351, -1.14356)$, agrees to five decimals with the finite-difference derivative with respect to $\theta(0)$, as Theorem~\ref{thm:variational}
+says it must. The determinant of $Y(10)$ is exactly $1$: the trace of $J$ is zero, and Liouville's formula of the next section then gives $\det Y = 1$, the statement that the pendulum's flow preserves
+area in the phase plane. One integration of the enlarged system gives all the derivatives at once, which is cheaper and more accurate than finite differences.
+
+\textbf{MATLAB/Octave:} append \texttt{reshape(J*reshape(z(3:6), 2, 2), 4, 1)} to the right-hand side and integrate with \texttt{ode45}.
+\end{software}
+
+\begin{software}[The flow property]
+\label{sw:flow}
+For the logistic equation $x' = x(1 - x)$, three time units of the flow, and one unit after two:
+{\small\begin{verbatim}
+>>> logi = lambda t, x: x * (1 - x)
+>>> phi = lambda T, x0: solve_ivp(logi, (0, T), [x0], rtol=1e-12,
+...                               atol=1e-14).y[0, -1]
+>>> phi(3.0, 0.1), phi(1.0, phi(2.0, 0.1))  # flow property
+(0.6905678577030561, 0.6905678577030469)
+\end{verbatim}}
+\textbf{Reading the output.} $\phi_3(0.1) = \phi_1(\phi_2(0.1)) = 0.690568$, to $13$ decimals, illustrating Theorem~\ref{thm:flow}. The exact value is $1/(1 + 9e^{-3}) = 0.690568$, from the formula of Example~\ref{ex:logistic}.
+
+\textbf{MATLAB/Octave:} \texttt{deval(ode45(@(t, x) x.*(1 - x), [0 3], 0.1), 3)}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+For $x' = x^p$, $p > 1$, $x(0) = x_0 > 0$, find the blow-up time and the solution. Do the same for $x' = e^x$.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:blowupscalar}, $T = \int_{x_0}^\infty x^{-p}\,dx = x_0^{1-p}/(p - 1)$. Separating, $x^{1-p}/(1 - p) = t + x_0^{1-p}/(1 - p)$, so $x(t) = \bigl(x_0^{1-p} - (p - 1)t\bigr)^{-1/(p-1)}$, which tends to infinity as $t \to T$.
+For $x' = e^x$, $T = \int_{x_0}^\infty e^{-x}\,dx = e^{-x_0}$, and $x = -\log(e^{-x_0} - t)$.
+\end{solution}
+
+\begin{problem}
+Show that every solution of $x' = x\log x$ with $x(0) = x_0 > 1$ exists for all $t \geq 0$, and find it.
+\end{problem}
+
+\begin{solution}
+$\int_{x_0}^\infty\frac{dx}{x\log x} = \bigl[\log\log x\bigr]_{x_0}^\infty = \infty$, so there is no blow-up, by Theorem~\ref{thm:blowupscalar}. Separating, $\log\log x = t + \log\log x_0$, so $x(t) = x_0^{e^t}$, a double exponential: fast
+growth, but finite for every $t$.
+\end{solution}
+
+\begin{problem}
+Show that the solution of $x' = t\sin x + \cos t$, $x(0) = 5$, exists for all $t \in \mathbb R$.
+\end{problem}
+
+\begin{solution}
+$|f(t, x)| \leq |t| + 1$, which has the form $a(t) + b(t)|x|$ with $a = |t| + 1$ and $b = 0$, and $f$ is $C^1$, so Theorem~\ref{thm:global} gives existence on $\mathbb R$. Indeed $|x(t) - 5| \leq \int_0^{|t|}(s + 1)\,ds$.
+\end{solution}
+
+\begin{problem}
+\label{prob:sqrtt}
+Let $x$ solve $x' = t - x^2$, $x(0) = 0$. Show that $0 \leq x(t) \leq \sqrt t$ for $t \geq 0$, and deduce that the solution exists for all $t \geq 0$.
+\end{problem}
+
+\begin{solution}
+$u \equiv 0$ satisfies $u' = 0 \leq t = f(t, 0)$ for $t \geq 0$, so it is a subsolution with $u(0) = x(0)$, and $x \geq 0$ by Theorem~\ref{thm:comparison}. For $v = \sqrt t$, $v' = \frac{1}{2\sqrt t} \geq 0 = t - v^2 = f(t, v)$,
+so $v$ is a supersolution with $v(0) = 0$; applying the theorem on $[\delta, t_1]$ for small $\delta > 0$, where $x(\delta) \leq \sqrt\delta$ (since $x(\delta) = \delta^2/2 + O(\delta^4)$), and letting $\delta \to 0$ gives $x \leq \sqrt t$. A
+solution trapped between $0$ and $\sqrt t$ cannot blow up, so by Theorem~\ref{thm:escape} it exists for all $t \geq 0$.
+\end{solution}
+
+\begin{problem}
+For $x' = -x + x^2$, find the variational equation along the equilibrium $x \equiv 0$ and along $x \equiv 1$, and interpret the solutions.
+\end{problem}
+
+\begin{solution}
+$D_xf = -1 + 2x$. At $x \equiv 0$, $Y' = -Y$, so $Y = e^{-t}$: perturbations of $0$ shrink, and $0$ is asymptotically stable. At $x \equiv 1$, $Y' = Y$, so $Y = e^t$: perturbations of $1$ grow, and $1$ is unstable.
+This is the stability test of Theorem~\ref{thm:phaseline}(iv) seen through the variational equation.
+\end{solution}
+
+\begin{problem}
+For $x' = \lambda x$, $x(0) = 1$, find $\partial x/\partial\lambda$ from the parameter equation $Z' = D_xf\,Z + D_\lambda f$, and check it against the explicit solution.
+\end{problem}
+
+\begin{solution}
+$D_xf = \lambda$ and $D_\lambda f = x = e^{\lambda t}$, so $Z' = \lambda Z + e^{\lambda t}$, $Z(0) = 0$. By Theorem~\ref{thm:linear1}, $Z = e^{\lambda t}\int_0^te^{-\lambda s}e^{\lambda s}\,ds = te^{\lambda t}$, which is $\frac{\partial}{\partial\lambda}e^{\lambda t}$.
+\end{solution}
+
+\begin{problem}
+Explain why the solution of $x' = x^2 - t^2$, $x(0) = 1$, cannot be bounded by comparison with $y' = x^2$ alone, and find a comparison that shows it blows up if $x(0)$ is large
+enough. (Hint: for $t \leq 1$, $x' \geq x^2 - 1$.)
+\end{problem}
+
+\begin{solution}
+$x$ is a subsolution of $y' = y^2$, which gives the upper bound $x \leq 1/(1 - t)$ on $[0, 1)$, but no lower bound. On $[0, 1]$, $x' \geq x^2 - 1$, so $x$ is a supersolution of $y' = y^2 - 1$. Its
+solution from $y(0) = c > 1$ is $y = \frac{1 + ke^{2t}}{1 - ke^{2t}}$ with $k = \frac{c - 1}{c + 1}$, which blows up when $e^{2t} = 1/k$, that is at $t = \frac12\log\frac{c + 1}{c - 1}$. This is less than $1$ when $\frac{c + 1}{c - 1} < e^2$, that
+is $c > \frac{e^2 + 1}{e^2 - 1} = 1.313$. So for $x(0) > 1.313$ the solution blows up before $t = 1$. For $x(0) = 1$ this argument is inconclusive.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
