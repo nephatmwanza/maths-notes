@@ -9197,6 +9197,719 @@ and the standard error $\sqrt{2.45} = 1.57$ times as large. A seemingly small in
 only between clusters. Clustering by state, with $50$ clusters, is the remedy.
 \end{solution}
 
+\section{Limited Dependent Variables}
+\label{sec:ldv}
+
+Many economic outcomes are not continuous and unbounded. Whether a person works, buys a car, defaults on a loan or migrates is a yes-or-no choice.
+Expenditure on a durable good is zero for most households in a given year and positive for the rest. Hours of work are observed only for those
+who work. The number of doctor visits or patents is a count. Linear regression handles such variables badly, and this section develops the models
+designed for them: probit and logit for binary choices, the Tobit model for censored outcomes, Heckman's correction for sample selection, and
+Poisson regression for counts. All are estimated by maximum likelihood, using the theory of Section~\ref{sec:ml}.
+
+\subsection{Binary choice}
+\label{ssec:binary}
+
+Let $y_i \in \{0, 1\}$ and $p_i = P(y_i = 1 \mid x_i)$. The \textbf{linear probability model} (LPM) is the regression $y_i = x_i'\beta + u_i$, so that $p_i = x_i'\beta$. It is easy to
+estimate and interpret, but it has two defects. Fitted probabilities can fall outside $[0, 1]$; and the disturbance is heteroscedastic, since
+$\Var(u_i \mid x_i) = p_i(1 - p_i)$ depends on $x_i$, so robust standard errors are needed. More fundamentally, a constant marginal effect is implausible: an extra
+year of education cannot raise the probability of employment by the same amount for someone already almost certain to work as for someone with a
+probability near one half.
+
+\begin{defn}
+In the \textbf{latent variable} formulation, $y_i^* = x_i'\beta + \varepsilon_i$, and we observe $y_i = 1$ if $y_i^* > 0$ and $y_i = 0$ otherwise. If $\varepsilon_i$ has a symmetric distribution
+function $F$, then
+\[
+p_i = P(\varepsilon_i > -x_i'\beta) = F(x_i'\beta) .
+\]
+The \textbf{probit} model takes $F = \Phi$, the standard normal distribution function; the \textbf{logit} model takes the logistic $F(c) = \Lambda(c) = e^c/(1 + e^c)$.
+\end{defn}
+
+The scale of $\varepsilon_i$ is not identified, since multiplying $y^*$ by any positive constant leaves $y$ unchanged; the variance is therefore normalised, to $1$ for
+probit and to $\pi^2/3$ (standard deviation $1.81$) for logit. Logit coefficients are accordingly about $1.6$ to $1.8$ times probit coefficients, and the two models,
+whose distribution functions are very similar after rescaling, usually give almost identical fitted probabilities.
+
+\begin{thm}
+\label{thm:binary}
+With independent observations, the log-likelihood of the binary model is
+\[
+\ell(\beta) = \sum_{i=1}^n\bigl[y_i\log F(x_i'\beta) + (1 - y_i)\log\bigl(1 - F(x_i'\beta)\bigr)\bigr] .
+\]
+For the logit,
+\[
+\frac{\partial\ell}{\partial\beta} = \sum_{i=1}^n(y_i - \Lambda_i)x_i, \qquad \frac{\partial^2\ell}{\partial\beta\partial\beta'} = -\sum_{i=1}^n\Lambda_i(1 - \Lambda_i)x_ix_i' ,
+\]
+where $\Lambda_i = \Lambda(x_i'\beta)$. The Hessian is negative definite whenever $X$ has full column rank, so $\ell$ is strictly concave and has at most one maximum, which
+Newton--Raphson iteration finds from any starting point.
+\end{thm}
+
+\begin{proof}
+$P(y_i = 1) = F_i$ and $P(y_i = 0) = 1 - F_i$, and the likelihood of an observation is $F_i^{y_i}(1 - F_i)^{1 - y_i}$. For the logit, $\Lambda'(c) = \Lambda(c)(1 - \Lambda(c))$, so
+$\partial\log\Lambda_i/\partial\beta = (1 - \Lambda_i)x_i$ and $\partial\log(1 - \Lambda_i)/\partial\beta = -\Lambda_ix_i$, which give the score $\sum[y_i(1 - \Lambda_i) - (1 - y_i)\Lambda_i]x_i = \sum(y_i - \Lambda_i)x_i$. Differentiating again gives
+the Hessian. For any $c \neq 0$, $c'\bigl(\sum\Lambda_i(1 - \Lambda_i)x_ix_i'\bigr)c = \sum\Lambda_i(1 - \Lambda_i)(x_i'c)^2 > 0$, because each weight is positive and $Xc \neq 0$. A strictly concave function has at
+most one stationary point, which is its maximum.
+\end{proof}
+
+The logit score equations say that $\sum(y_i - \hat\Lambda_i)x_i = 0$: with an intercept, the average fitted probability equals the sample proportion, just as least squares
+residuals average zero. The probit log-likelihood is also globally concave, though the proof is longer. A maximum may fail to exist if some
+combination of regressors predicts $y$ perfectly (\textbf{separation}): the likelihood then increases without bound as a coefficient goes to infinity.
+
+\subhead{Interpreting the coefficients}
+The coefficients are not marginal effects. For a continuous regressor,
+\[
+\frac{\partial p_i}{\partial x_{ij}} = f(x_i'\beta)\beta_j ,
+\]
+where $f = F'$, so the effect depends on where the individual is on the curve, and is largest near $p = \frac12$. Two summaries are common: the effect at the
+mean of the regressors, $f(\bar x'\beta)\beta_j$, and the \textbf{average marginal effect} $\frac1n\sum_if(x_i'\hat\beta)\hat\beta_j$, which is usually preferred. For a dummy regressor the
+effect is the difference in probabilities with the dummy at one and at zero. The logit has a further interpretation: $\log\bigl(p/(1 - p)\bigr) = x'\beta$, so $e^{\beta_j}$ is
+the \textbf{odds ratio}, the factor by which a unit increase in $x_j$ multiplies the odds of the outcome. Measures of fit include McFadden's pseudo-$R^2$,
+$1 - \ell(\hat\beta)/\ell_0$, where $\ell_0$ is the log-likelihood with only an intercept, and the likelihood ratio test of all the slopes, $2(\ell(\hat\beta) - \ell_0) \sim \chi^2_{k-1}$.
+
+With more than two alternatives, the multinomial logit models the choice among unordered categories (such as mode of transport), and the ordered
+probit models ordered categories (such as a credit rating) by a single latent variable and several thresholds.
+
+\subsection{Censored data: the Tobit model}
+\label{ssec:tobit}
+
+Tobin (1958) studied household expenditure on durable goods, which is zero for many households in a given year. He proposed
+\[
+y_i^* = x_i'\beta + \varepsilon_i, \qquad \varepsilon_i \sim N(0, \sigma^2), \qquad y_i = \max(0, y_i^*) .
+\]
+The variable is \textbf{censored} at zero: we observe $x_i$ for everyone, and $y_i$ exactly when it is positive. (It would be \textbf{truncated} if households with $y_i^* \leq 0$ did
+not appear in the sample at all.)
+
+\begin{thm}
+\label{thm:tobit}
+Write $c_i = x_i'\beta/\sigma$ and $\lambda(c) = \phi(c)/\Phi(c)$, the \textbf{inverse Mills ratio}.
+\begin{enumerate}[label=(\roman*)]
+\item $E(y_i \mid x_i, y_i > 0) = x_i'\beta + \sigma\lambda(c_i)$.
+\item $E(y_i \mid x_i) = \Phi(c_i)x_i'\beta + \sigma\phi(c_i)$, and $\partial E(y_i \mid x_i)/\partial x_{ij} = \Phi(c_i)\beta_j$.
+\item The log-likelihood is
+\[
+\ell(\beta, \sigma) = \sum_{y_i > 0}\Bigl[\log\phi\Bigl(\frac{y_i - x_i'\beta}{\sigma}\Bigr) - \log\sigma\Bigr] + \sum_{y_i = 0}\log\bigl(1 - \Phi(c_i)\bigr) .
+\]
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) For $\varepsilon \sim N(0, \sigma^2)$ and any $a$, $E(\varepsilon \mid \varepsilon > -a) = \sigma\phi(a/\sigma)/\Phi(a/\sigma)$. To see this, write $\varepsilon = \sigma v$ with $v$ standard normal; then
+\[
+E(v \mid v > -c) = \frac{\int_{-c}^\infty v\phi(v)\,dv}{\Phi(c)} = \frac{\bigl[-\phi(v)\bigr]_{-c}^\infty}{\Phi(c)} = \frac{\phi(c)}{\Phi(c)} ,
+\]
+using $\phi'(v) = -v\phi(v)$ and the symmetry $\phi(-c) = \phi(c)$, $P(v > -c) = \Phi(c)$. With $a = x_i'\beta$,
+$E(y_i \mid y_i > 0) = x_i'\beta + E(\varepsilon_i \mid \varepsilon_i > -x_i'\beta)$.
+
+(ii) Since $y_i = 0$ when it is not positive,
+\[
+E(y_i) = P(y_i > 0)E(y_i \mid y_i > 0) = \Phi(c_i)\bigl[x_i'\beta + \sigma\lambda(c_i)\bigr] = \Phi(c_i)x_i'\beta + \sigma\phi(c_i) .
+\]
+Differentiating with respect to $x_{ij}$, with $\partial c_i/\partial x_{ij} = \beta_j/\sigma$,
+\[
+\frac{\partial E(y_i)}{\partial x_{ij}} = \phi(c_i)\frac{\beta_j}{\sigma}x_i'\beta + \Phi(c_i)\beta_j + \sigma\phi'(c_i)\frac{\beta_j}{\sigma} = \Phi(c_i)\beta_j + \beta_j\phi(c_i)(c_i - c_i) = \Phi(c_i)\beta_j ,
+\]
+since $\phi'(c_i) = -c_i\phi(c_i)$.
+
+(iii) A positive $y_i$ contributes its normal density $\sigma^{-1}\phi\bigl((y_i - x_i'\beta)/\sigma\bigr)$; a zero contributes $P(y_i^* \leq 0) = 1 - \Phi(c_i)$.
+\end{proof}
+
+Part (i) shows why least squares on the positive observations only is inconsistent: the conditional mean contains the omitted term $\sigma\lambda(c_i)$, which
+depends on $x_i$. Least squares on all observations, zeros included, fits a straight line to the non-linear mean of (ii) and is also inconsistent;
+typically it attenuates the coefficients, roughly by the fraction of positive observations. Part (ii) gives the decomposition of McDonald and Moffitt
+(1980): the effect of $x_j$ on expected expenditure is $\beta_j$ scaled by the probability of buying. The Tobit model is fragile: it relies on normality and
+homoscedasticity of $\varepsilon_i$, and if either fails the estimates are inconsistent. It also forces the same variables, with proportional coefficients, to govern
+whether a household buys and how much it spends; the two-part and hurdle models relax this.
+
+\subsection{Sample selection}
+\label{ssec:heckman}
+
+Wages are observed only for those who work, and those who work are not a random sample of the population: they are likely to be those with
+high wage offers. Heckman (1979) modelled this with two equations:
+\[
+\text{selection: } s_i^* = z_i'\gamma + v_i, \quad s_i = 1 \text{ if } s_i^* > 0; \qquad \text{outcome: } w_i = x_i'\beta + u_i, \text{ observed if } s_i = 1,
+\]
+with $(v_i, u_i)$ bivariate normal, $\Var(v_i) = 1$, $\Var(u_i) = \sigma_u^2$ and $\Corr(u_i, v_i) = \rho$.
+
+\begin{thm}[Heckman]
+\label{thm:heckman}
+For the selected sample,
+\[
+E(w_i \mid x_i, z_i, s_i = 1) = x_i'\beta + \rho\sigma_u\lambda(z_i'\gamma) .
+\]
+Least squares of $w_i$ on $x_i$ in the selected sample is therefore inconsistent unless $\rho = 0$. The \textbf{two-step} estimator first estimates $\gamma$ by probit on the full
+sample, then regresses $w_i$ on $x_i$ and $\hat\lambda_i = \lambda(z_i'\hat\gamma)$ in the selected sample; it is consistent for $\beta$ and for $\rho\sigma_u$.
+\end{thm}
+
+\begin{proof}
+For a bivariate normal pair, $E(u_i \mid v_i) = \rho\sigma_uv_i$, since the regression coefficient of $u$ on $v$ is $\Cov(u, v)/\Var(v) = \rho\sigma_u$. Hence
+$E(u_i \mid s_i = 1) = E(u_i \mid v_i > -z_i'\gamma) = \rho\sigma_uE(v_i \mid v_i > -z_i'\gamma) = \rho\sigma_u\lambda(z_i'\gamma)$, by the calculation in the proof of Theorem~\ref{thm:tobit}(i) with $\sigma = 1$. Adding
+$x_i'\beta$ gives the conditional mean. In the second step, $\hat\lambda_i$ converges to $\lambda_i$, and the regression is a correctly specified linear regression with the extra
+regressor $\lambda_i$.
+\end{proof}
+
+The second-step standard errors must be corrected, because $\hat\lambda_i$ is estimated and the disturbance of the second step is heteroscedastic.
+Identification deserves care. If $z_i = x_i$, the model is identified only by the non-linearity of $\lambda$, which is nearly linear over much of its range, so $\hat\lambda_i$
+is highly collinear with $x_i$ and the estimates are imprecise and fragile. A credible \textbf{exclusion restriction}, a variable that affects participation but
+not wages (such as the number of young children, or non-labour income), is needed in practice. The test of $\rho\sigma_u = 0$, the $t$ test on $\hat\lambda_i$, is a test for selection
+bias.
+
+\subsection{Count data}
+\label{ssec:counts}
+
+For a count $y_i \in \{0, 1, 2, \dots\}$, the \textbf{Poisson regression} model is
+\[
+P(y_i = m \mid x_i) = \frac{e^{-\mu_i}\mu_i^m}{m!}, \qquad \mu_i = E(y_i \mid x_i) = \exp(x_i'\beta) .
+\]
+The exponential mean keeps $\mu_i$ positive, and $\beta_j$ is the proportional change in the expected count per unit change in $x_j$; for a dummy, $e^{\beta_j}$ is the ratio of
+expected counts.
+
+\begin{thm}
+\label{thm:poisson}
+The Poisson log-likelihood $\ell(\beta) = \sum_i[y_ix_i'\beta - \exp(x_i'\beta) - \log y_i!]$ has score $\sum_i(y_i - \mu_i)x_i$ and Hessian $-\sum_i\mu_ix_ix_i'$, so it is strictly concave. The
+maximiser $\hat\beta$ is consistent whenever the conditional mean $E(y_i \mid x_i) = \exp(x_i'\beta)$ is correctly specified, whether or not $y_i$ has a Poisson distribution, with
+asymptotic variance
+\[
+\Bigl(\sum\mu_ix_ix_i'\Bigr)^{-1}\Bigl(\sum\Var(y_i \mid x_i)x_ix_i'\Bigr)\Bigl(\sum\mu_ix_ix_i'\Bigr)^{-1} .
+\]
+\end{thm}
+
+\begin{proof}
+The score and Hessian follow by differentiating, and the Hessian is negative definite as in Theorem~\ref{thm:binary}. The score equations $\frac1n\sum x_i(y_i - \exp(x_i'\beta)) = 0$ are the
+sample analogue of the moment condition $E[x_i(y_i - \exp(x_i'\beta_0))] = 0$, which holds whenever the conditional mean is correct, by the law of iterated expectations.
+So $\hat\beta$ is a method of moments estimator, consistent under that condition alone, and Theorem~\ref{thm:mm} gives its variance with $G = -E(\mu xx')$ and $S = E\bigl(\Var(y \mid x)xx'\bigr)$.
+\end{proof}
+
+This \textbf{pseudo-maximum likelihood} property (Gourieroux, Monfort and Trognon, 1984) makes Poisson regression far more useful than the Poisson
+distribution itself. Real counts are usually \textbf{overdispersed}: their variance exceeds their mean, while the Poisson distribution forces them to be equal.
+The Poisson estimates remain consistent, but the usual standard errors, $(\sum\hat\mu_ix_ix_i')^{-1}$, are too small, and the sandwich form of the theorem must be used.
+Alternatively, the \textbf{negative binomial} model, with $\Var(y \mid x) = \mu + \mu^2/\theta$, models the overdispersion explicitly; it is more efficient if correct but, unlike
+Poisson, inconsistent if its variance assumption is wrong.
+
+\subsection{Limited dependent variables in software}
+\label{ssec:software17}
+
+\begin{software}[Logit by Newton--Raphson]
+\label{sw:logit}
+The \texttt{birthwt} data in \texttt{MASS} record $189$ births at a US hospital, with an indicator of low birth weight (under $2.5$ kg) and the mother's weight,
+smoking, hypertension, uterine irritability and race. Newton--Raphson iterates $\beta \leftarrow \beta + H^{-1}s$ with the score and Hessian of Theorem~\ref{thm:binary}:
+{\small\begin{verbatim}
+> library(MASS)
+> bw <- birthwt
+> bw$race <- factor(bw$race, labels = c("white", "black", "other"))
+> X <- model.matrix(~ lwt + smoke + ht + ui + race, bw); y <- bw$low
+> b <- rep(0, ncol(X))                          # Newton-Raphson for the logit
+> for (it in 1:25) {
++   p <- drop(plogis(X %*% b))
++   H <- crossprod(X * (p * (1 - p)), X)        # minus the Hessian
++   step <- solve(H, crossprod(X, y - p)); b <- b + drop(step)
++   if (max(abs(step)) < 1e-10) break
++ }
+> logit <- glm(low ~ lwt + smoke + ht + ui + race, binomial, bw)
+> round(cbind(newton = b, glm = coef(logit), se = sqrt(diag(solve(H)))), 4)
+             newton     glm     se
+(Intercept)  0.0563  0.0563 0.9379
+lwt         -0.0167 -0.0167 0.0068
+smoke        1.0358  1.0358 0.3926
+ht           1.8714  1.8714 0.6909
+ui           0.9050  0.9050 0.4476
+raceblack    1.3246  1.3246 0.5215
+raceother    0.9262  0.9262 0.4304
+> c(iterations = it)
+iterations 
+         6 
+\end{verbatim}}
+\textbf{Reading the output.} Newton--Raphson converges in six iterations to exactly the \texttt{glm} estimates, as global concavity guarantees, and the inverse
+of the final $H$ gives the standard errors. Smoking, hypertension and uterine irritability raise the risk of low birth weight; a heavier mother lowers
+it.
+
+\textbf{Stata:} \texttt{logit low lwt smoke ht ui i.race}. \textbf{EViews:} \emph{Quick $\to$ Estimate Equation}, method BINARY, with the logit option.
+\end{software}
+
+\begin{software}[Probit, marginal effects and the linear probability model]
+\label{sw:probit}
+The same model by probit and by least squares, with average marginal effects of smoking and the logit odds ratio:
+{\small\begin{verbatim}
+> probit <- glm(low ~ lwt + smoke + ht + ui + race, binomial("probit"), bw)
+> lpm <- lm(low ~ lwt + smoke + ht + ui + race, bw)
+> ame <- function(fit, dens) mean(dens(predict(fit))) * coef(fit)
+> round(rbind(logit = coef(logit), probit = coef(probit),
++             ratio = coef(logit) / coef(probit))[, 2:5], 3)
+          lwt smoke    ht    ui
+logit  -0.017 1.036 1.871 0.905
+probit -0.010 0.633 1.122 0.550
+ratio   1.693 1.636 1.668 1.646
+> round(c(AME.logit = ame(logit, dlogis)[["smoke"]],
++         AME.probit = ame(probit, dnorm)[["smoke"]],
++         LPM = coef(lpm)[["smoke"]],
++         odds.ratio = exp(coef(logit)[["smoke"]])), 3)
+ AME.logit AME.probit        LPM odds.ratio 
+     0.188      0.193      0.184      2.817 
+> c(McFadden.R2 = 1 - logLik(logit)[1] / logLik(update(logit, . ~ 1))[1],
++   LR = 2 * (logLik(logit)[1] - logLik(update(logit, . ~ 1))[1]),
++   LPM.outside = sum(fitted(lpm) < 0 | fitted(lpm) > 1))
+McFadden.R2          LR LPM.outside 
+  0.1297785  30.4553763   9.0000000 
+\end{verbatim}}
+\textbf{Reading the output.} The logit coefficients are $1.64$ to $1.69$ times the probit ones, as the scale normalisation predicts. The three models agree on the
+effect that matters: smoking raises the probability of a low-weight birth by about $19$ percentage points (logit $0.188$, probit $0.193$, LPM $0.184$). In odds
+terms, smoking multiplies the odds by $2.8$. The model explains a modest part of the variation (McFadden $R^2 = 0.13$), but the likelihood ratio test of all the
+slopes, $30.5$ on $6$ degrees of freedom, is highly significant. Nine of the $189$ LPM fitted probabilities lie outside $[0, 1]$.
+
+\textbf{Stata:} \texttt{probit ...}, then \texttt{margins, dydx(smoke)}; \texttt{logit ..., or} for odds ratios. \textbf{EViews:} the probit option of BINARY,
+then \emph{View $\to$ Expectation-Prediction Evaluation}.
+\end{software}
+
+\begin{software}[Tobin's durable goods data]
+\label{sw:tobit}
+The \texttt{tobin} data in the \texttt{survival} package are Tobin's own (1958) sample of $20$ households: expenditure on durable goods, age of the head, and a
+liquidity ratio. The Tobit likelihood of Theorem~\ref{thm:tobit}(iii) is maximised directly, and checked against \texttt{survreg}, which fits it as a left-censored
+normal regression:
+{\small\begin{verbatim}
+> library(survival)
+> d <- tobin; c(n = nrow(d), zeros = sum(d$durable == 0))
+    n zeros 
+   20    13 
+> nll <- function(p) {                          # Tobit log-likelihood, minus
++   xb <- p[1] + p[2] * d$age + p[3] * d$quant; s <- exp(p[4])
++   -sum(ifelse(d$durable > 0, dnorm(d$durable, xb, s, log = TRUE),
++               pnorm(-xb / s, log.p = TRUE)))
++ }
+> ols <- coef(lm(durable ~ age + quant, d))
+> o <- optim(c(ols, log(sd(d$durable))), nll, method = "BFGS",
++            control = list(reltol = 1e-14, maxit = 1000,
++                           parscale = c(10, 0.1, 0.01, 1)))
+> sr <- survreg(Surv(durable, durable > 0, type = "left") ~ age + quant,
++               data = d, dist = "gaussian")
+> round(rbind(tobit = c(o$par[1:3], sigma = exp(o$par[4])),
++             survreg = c(coef(sr), sr$scale),
++             OLS.all = c(ols, NA),
++             OLS.pos = c(coef(lm(durable ~ age + quant, d,
++                                 subset = durable > 0)), NA)), 4)
+        (Intercept)     age   quant  sigma
+tobit       15.1448 -0.1291 -0.0455 5.5725
+survreg     15.1449 -0.1291 -0.0455 5.5725
+OLS.all     11.0743 -0.0261 -0.0346     NA
+OLS.pos     13.7781  0.3392 -0.1045     NA
+> xb <- drop(cbind(1, d$age, d$quant) %*% o$par[1:3]); s <- exp(o$par[4])
+> round(c(P.positive = mean(pnorm(xb / s)),
++         dE.dquant = mean(pnorm(xb / s)) * o$par[[3]]), 4)
+P.positive  dE.dquant 
+    0.3604    -0.0164 
+\end{verbatim}}
+\textbf{Reading the output.} Thirteen of the twenty households bought nothing. The direct maximisation and \texttt{survreg} agree. Least squares on all the data
+attenuates both coefficients, the age coefficient by a factor of five; least squares on the seven buyers even reverses the sign of the age effect. The
+average probability of buying is $0.36$, so by the McDonald--Moffitt decomposition a unit increase in the liquidity ratio lowers expected expenditure
+by $0.36 \times 0.0455 = 0.016$, much less than the latent coefficient. With twenty observations none of the coefficients is precisely estimated, but the
+example shows clearly why the zeros cannot be ignored.
+
+\textbf{Stata:} \texttt{tobit durable age quant, ll(0)}. \textbf{EViews:} method CENSORED, with left censoring at zero.
+\end{software}
+
+\begin{software}[Heckman's two-step estimator]
+\label{sw:heckman}
+A simulated labour market with $2000$ people: participation depends on $z$ (for instance, non-labour income) and $x$, wage offers depend on $x$ only, and the
+two disturbances have correlation $0.6$:
+{\small\begin{verbatim}
+> set.seed(10); n <- 2000
+> z <- rnorm(n); x <- rnorm(n)                  # z: not in the wage equation
+> e <- MASS::mvrnorm(n, c(0, 0), matrix(c(1, 0.6, 0.6, 1), 2))
+> work <- 0.5 + 1 * z + 0.5 * x + e[, 1] > 0    # participation
+> w <- 1 + 0.5 * x + e[, 2]                     # wage offer, seen if work
+> sel <- glm(work ~ z + x, binomial("probit"))
+> zg <- predict(sel); mills <- dnorm(zg) / pnorm(zg)
+> heck <- lm(w ~ x + mills, subset = work)
+> round(rbind(OLS.workers = coef(lm(w ~ x, subset = work)),
++             Heckman = coef(heck)[1:2], truth = c(1, 0.5)), 3)
+            (Intercept)     x
+OLS.workers       1.270 0.405
+Heckman           0.977 0.487
+truth             1.000 0.500
+> round(c(rho.sigma = coef(heck)[["mills"]], share.working = mean(work)), 3)
+    rho.sigma share.working 
+        0.734         0.642 
+\end{verbatim}}
+\textbf{Reading the output.} About $64\%$ work. Least squares on the workers overstates the intercept and understates the slope: workers with low $x$ are in work only
+if their wage disturbance is high, which flattens the observed relation. The two-step estimator recovers $0.977$ and $0.487$, close to the true $1$ and $0.5$. The
+coefficient of the inverse Mills ratio, $0.73$, estimates $\rho\sigma_u = 0.6$; it is significantly positive, which is evidence of selection.
+
+\textbf{Stata:} \texttt{heckman w x, select(work = z x) twostep}. \textbf{EViews:} method HECKIT, choosing the two-step option.
+\end{software}
+
+\begin{software}[Poisson and negative binomial regression]
+\label{sw:poisson}
+The \texttt{quine} data in \texttt{MASS} give the days absent from school in a year for $146$ children in New South Wales, by ethnic background (Aboriginal or not),
+sex, age group and learner status. The robust standard errors are those of Theorem~\ref{thm:poisson}:
+{\small\begin{verbatim}
+> q <- quine; c(mean = mean(q$Days), var = var(q$Days))
+    mean      var 
+ 16.4589 264.1673 
+> pois <- glm(Days ~ Eth + Sex + Age + Lrn, poisson, q)
+> Xq <- model.matrix(pois); mu <- fitted(pois)
+> B <- solve(crossprod(Xq * mu, Xq))           # inverse information
+> robust <- sqrt(diag(B %*% crossprod(Xq * (q$Days - mu)) %*% B))
+> nb <- glm.nb(Days ~ Eth + Sex + Age + Lrn, q)
+> round(rbind(poisson = coef(pois), se.poisson = sqrt(diag(vcov(pois))),
++             se.robust = robust, negbin = coef(nb),
++             se.negbin = sqrt(diag(vcov(nb))))[, 1:3], 3)
+           (Intercept)   EthN  SexM
+poisson          2.715 -0.534 0.162
+se.poisson       0.065  0.042 0.043
+se.robust        0.235  0.153 0.155
+negbin           2.895 -0.569 0.082
+se.negbin        0.228  0.153 0.160
+> c(dispersion = sum(residuals(pois, "pearson")^2) / df.residual(pois),
++   theta.nb = nb$theta)
+dispersion   theta.nb 
+ 13.166843   1.274893 
+\end{verbatim}}
+\textbf{Reading the output.} The variance of days absent is $16$ times the mean, so the data are heavily overdispersed. The Poisson coefficient of non-Aboriginal
+background, $-0.534$, means $100(1 - e^{-0.534}) = 41\%$ fewer days absent, other things equal. Its Poisson standard error, $0.042$, is far too small: the robust standard error is
+$0.153$, $3.6$ times larger, which is close to $\sqrt{13.2}$, the square root of the estimated dispersion. With the robust errors the sex difference is no longer
+significant. The negative binomial model gives similar coefficients with standard errors close to the robust ones, and an estimated $\theta = 1.27$, implying
+substantial extra-Poisson variation.
+
+\textbf{Stata:} \texttt{poisson days i.eth i.sex i.age i.lrn, vce(robust)} and \texttt{nbreg}. \textbf{EViews:} method COUNT, with the Poisson or negative
+binomial option and Huber/White standard errors.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+A logit model of the probability of owning a car has estimated index $-2 + 0.5x$, where $x$ is income in thousands of dollars.
+\begin{enumerate}[label=(\alph*)]
+\item Find the probability of ownership and the marginal effect of income at $x = 3$.
+\item Interpret $e^{0.5}$.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The index is $-0.5$, so $p = \Lambda(-0.5) = 1/(1 + e^{0.5}) = 0.378$. The marginal effect is $p(1 - p)\beta = 0.378 \times 0.622 \times 0.5 = 0.118$: another thousand dollars raises the probability by about
+$12$ percentage points at this income.
+
+(b) $e^{0.5} = 1.65$: each thousand dollars multiplies the odds of owning a car by $1.65$, at every income level, although the change in the probability itself
+varies.
+\end{solution}
+
+\begin{problem}
+Show that in a logit model with an intercept the average fitted probability equals the proportion of ones in the sample. Does the same hold for the
+probit?
+\end{problem}
+
+\begin{solution}
+The score equation for the intercept, whose regressor is $1$, is $\sum(y_i - \hat\Lambda_i) = 0$, so $\frac1n\sum\hat\Lambda_i = \bar y$. For the probit the score is
+$\sum\frac{(y_i - \Phi_i)\phi_i}{\Phi_i(1 - \Phi_i)}x_i$, a weighted sum with weights $\phi_i/(\Phi_i(1 - \Phi_i))$ that are not constant, so the average fitted probability is close to $\bar y$ but not
+in general equal to it.
+\end{solution}
+
+\begin{problem}
+In a Tobit model, $x_i'\beta = 1$ and $\sigma = 2$ for a particular household.
+\begin{enumerate}[label=(\alph*)]
+\item Find the probability that it spends a positive amount, its expected spending given that it spends, and its unconditional expected spending.
+\item By how much does a unit increase in a regressor with coefficient $\beta_j = 0.3$ raise its expected spending?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $c = 1/2$, $\Phi(0.5) = 0.691$ and $\phi(0.5) = 0.352$. Then $P(y > 0) = 0.691$, $E(y \mid y > 0) = 1 + 2(0.352/0.691) = 2.02$, and $E(y) = 0.691 \times 1 + 2 \times 0.352 = 1.40$, which also equals
+$0.691 \times 2.02$.
+
+(b) By Theorem~\ref{thm:tobit}(ii), $\Phi(0.5)\beta_j = 0.691 \times 0.3 = 0.207$.
+\end{solution}
+
+\begin{problem}
+Explain why least squares on the positive observations of a censored variable is biased, and in which direction for a regressor with a positive
+coefficient.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:tobit}(i), the mean of $y$ among positive observations is $x'\beta + \sigma\lambda(x'\beta/\sigma)$. The inverse Mills ratio $\lambda(c)$ is decreasing in $c$: units with a low index
+are observed only if their disturbance is large. So the omitted term $\sigma\lambda$ is negatively correlated with $x'\beta$, and for a regressor with a positive
+coefficient the bias is downward, towards zero. The observed relation is flatter than the latent one.
+\end{solution}
+
+\begin{problem}
+In the Heckman model, suppose there is no exclusion restriction, so that $z_i = x_i$. Explain why the two-step estimator is still identified in principle,
+and why it is unreliable in practice.
+\end{problem}
+
+\begin{solution}
+The second step regresses $w$ on $x$ and $\lambda(x'\hat\gamma)$. Since $\lambda$ is a non-linear function, $\lambda(x'\hat\gamma)$ is not an exact linear combination of the columns of $x$, so the
+coefficients are identified. But over the range of $x'\gamma$ found in most samples, $\lambda$ is close to linear, so $\hat\lambda$ is nearly collinear with $x$, the variance of the
+estimates is very large, and the results depend heavily on the normality assumption that gives $\lambda$ its exact shape. A variable that shifts
+participation but not wages breaks the collinearity.
+\end{solution}
+
+\begin{problem}
+Show that in a Poisson regression with an intercept the fitted counts have the same mean as the observed counts, and interpret the coefficient
+of a dummy variable whose estimate is $0.162$.
+\end{problem}
+
+\begin{solution}
+The score equation for the intercept is $\sum(y_i - \hat\mu_i) = 0$, so $\bar{\hat\mu} = \bar y$. A dummy coefficient of $0.162$ means that the expected count is $e^{0.162} = 1.18$ times as large
+when the dummy is one, $18\%$ higher, other things equal; in Software~\ref{sw:poisson} this is the effect of being male on days absent, which the robust standard error shows to be
+insignificant.
+\end{solution}
+
+\section{Review and Synthesis}
+\label{sec:review}
+
+The course has developed one model, $Y = X\beta + U$, and then relaxed its assumptions one at a time. This final section draws the threads
+together: a map from the kind of data and the kind of problem to the method that handles it, a table of what goes wrong when each assumption
+fails, and a set of review problems that, like real applied work, require several sections at once.
+
+\subsection{A map of the methods}
+\label{ssec:map}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[box/.style={rounded corners=3pt,draw,thick,align=left,font=\scriptsize,inner sep=4pt,text width=4.2cm},
+  hd/.style={font=\small\bfseries,anchor=west}]
+\fill[blue!6,rounded corners=4pt] (-0.2,1.5) rectangle (4.85,6.6);
+\node[hd,blue!60!black] at (0,6.3) {Cross-section};
+\node[box,draw=blue!50,fill=white,anchor=north west] at (0.1,5.95) {Classical assumptions: \textbf{OLS}, $t$ and $F$ (\ref{sec:infk})\\[2pt]
+Heteroscedasticity: \textbf{robust s.e.}, WLS, FGLS (\ref{sec:hetero})\\[2pt]
+Endogenous regressor: \textbf{IV, 2SLS} (\ref{sec:iv})\\[2pt]
+Surplus moments, heteroscedasticity: \textbf{efficient GMM} (\ref{sec:gmm})\\[2pt]
+Several equations: \textbf{SUR}, 3SLS (\ref{sec:systems})};
+\fill[orange!8,rounded corners=4pt] (5.05,1.5) rectangle (10.1,6.6);
+\node[hd,orange!80!black] at (5.25,6.3) {Time series};
+\node[box,draw=orange!60,fill=white,anchor=north west] at (5.35,5.95) {Stationary, autocorrelated $u$: \textbf{HAC s.e.}, FGLS, dynamic model (\ref{sec:autocorr})\\[2pt]
+Volatility clustering: \textbf{ARCH, GARCH} (\ref{ssec:arch})\\[2pt]
+Unit roots: \textbf{ADF test} (\ref{sec:unitroot})\\[2pt]
+$I(1)$ and cointegrated: \textbf{ECM}, Johansen VECM (\ref{ssec:ecm}, \ref{ssec:vecm})\\[2pt]
+$I(1)$, not cointegrated: model the \textbf{differences}, VAR (\ref{ssec:var})};
+\fill[green!7,rounded corners=4pt] (10.3,1.5) rectangle (15.35,6.6);
+\node[hd,green!40!black] at (10.5,6.3) {Panels and limited $y$};
+\node[box,draw=green!50!black,fill=white,anchor=north west] at (10.6,5.95) {Effects correlated with $x$: \textbf{fixed effects}, FD (\ref{ssec:fe})\\[2pt]
+Effects uncorrelated: \textbf{random effects}; test by Hausman or Mundlak (\ref{ssec:fere})\\[2pt]
+Lagged $y$ in a short panel: \textbf{Arellano--Bond} (\ref{ssec:dynpanel})\\[2pt]
+Binary $y$: \textbf{probit, logit} (\ref{ssec:binary})\\[2pt]
+Censored, selected, counts: \textbf{Tobit, Heckman, Poisson} (\ref{ssec:tobit}--\ref{ssec:counts})};
+\end{tikzpicture}
+\caption{From the data and the problem to the method. In every column the first question is what the regressors and the disturbance are assumed to
+satisfy, and the second is what is lost (bias, inconsistency, or only wrong standard errors) if the assumption fails.}
+\label{fig:map}
+\end{figure}
+
+\subsection{When the assumptions fail}
+\label{ssec:failures}
+
+The classical assumptions of Section~\ref{sec:kvar} are linearity (A1), $E(U \mid X) = 0$, a spherical disturbance $\Var(U \mid X) = \sigma^2I$, full rank, and, for exact inference,
+normality. Their failures fall into two classes, and the distinction is the single most useful idea in applied econometrics. If $E(U \mid X) \neq 0$, least
+squares is biased and inconsistent, and no correction of the standard errors helps: a different estimator or a different specification is needed. If
+only the variance assumption fails, least squares remains unbiased and consistent, and the problem is efficiency and the validity of the standard
+errors, which robust methods repair.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{p{3.5cm}p{3.6cm}p{4.2cm}l}
+\hline
+Failure & Consequence for OLS & Remedy & Section\\
+\hline
+Omitted variable & Biased, inconsistent & Include it; proxy; panel FE; IV & \ref{sec:spec}, \ref{sec:panel}\\
+Measurement error in $x$ & Attenuated, inconsistent & IV with a second measure & \ref{sec:iv}\\
+Simultaneity & Inconsistent & IV, 2SLS, 3SLS & \ref{sec:iv}, \ref{sec:systems}\\
+Lagged $y$ with AR errors & Inconsistent & IV; dynamic specification & \ref{sec:autocorr}\\
+Heteroscedasticity & Unbiased; wrong s.e. & Robust s.e.; WLS & \ref{sec:hetero}\\
+Autocorrelation & Unbiased; wrong s.e. & HAC s.e.; FGLS; dynamics & \ref{sec:autocorr}\\
+Clustered errors & Unbiased; wrong s.e. & Cluster-robust s.e. & \ref{sec:panel}\\
+Unit roots, no cointegration & Spurious & Differences; test first & \ref{sec:unitroot}\\
+Non-linear mean (binary, censored, counts) & Misspecified & Probit, Tobit, Poisson & \ref{sec:ldv}\\
+Structural break & Misleading averages & Chow test; dummies & \ref{sec:spec}\\
+Non-normality & Exact tests invalid & Large-sample theory & \ref{sec:asym}\\
+\hline
+\end{tabular}
+\end{center}
+
+Two further lessons recur. First, a diagnostic test that rejects says that something is wrong, not what: a significant Durbin--Watson statistic may
+mean omitted dynamics rather than AR(1) disturbances (Theorem~\ref{thm:comfac}), a significant White test may mean a wrong functional form, and a significant
+Sargan or $J$ statistic may mean a wrong model rather than a wrong instrument. Second, every remedy has a price: IV trades bias for variance, GLS and SUR
+trade robustness for efficiency, and fixed effects trades the between variation for consistency. The applied econometrician's job is to know which
+trade is being made.
+
+\subsection{Review problems}
+\label{ssec:review}
+
+\begin{problem}
+A regression with $k = 4$ coefficients is fitted to $n = 60$ observations, with $\text{RSS}_U = 120$. Imposing two linear restrictions raises the residual sum of squares
+to $\text{RSS}_R = 150$.
+\begin{enumerate}[label=(\alph*)]
+\item Carry out the $F$ test at the $5\%$ level.
+\item Compute the Wald, likelihood ratio and Lagrange multiplier statistics, and verify the inequality between them.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $F = \bigl((150 - 120)/2\bigr)/\bigl(120/56\bigr) = 15/2.143 = 7.0$, against the $5\%$ point $F_{2,56} = 3.16$: the restrictions are rejected.
+
+(b) By Theorem~\ref{thm:trinitylm}, $W = 60(30)/120 = 15.0$, $\text{LR} = 60\log(150/120) = 13.39$ and $\text{LM} = 60(30)/150 = 12.0$, so $W \geq \text{LR} \geq \text{LM}$. All exceed the $\chi^2_2$ point $5.99$. Also
+$W = \frac{n}{n-k}qF = \frac{60}{56}(2)(7.0) = 15.0$.
+\end{solution}
+
+\begin{problem}
+A student regresses the log of a country's real GDP on the log of its money supply, using $40$ annual observations, and reports $R^2 = 0.97$, a slope of $1.8$ with
+$t = 34$, and a Durbin--Watson statistic of $0.42$. ADF tests do not reject a unit root in either series, and the ADF statistic of the regression residuals is
+$-1.8$.
+\begin{enumerate}[label=(\alph*)]
+\item What do you conclude about the regression?
+\item What should the student do instead?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $R^2 > d$, the classic sign of a spurious regression (Theorem~\ref{thm:spurious}). The residual ADF statistic $-1.8$ is far above the Engle--Granger $5\%$ critical value $-3.34$, so
+the null of no cointegration is not rejected: the residuals are $I(1)$, the $t$ ratio of $34$ is meaningless, and the regression says nothing about the relation
+between money and output.
+
+(b) Since the series are $I(1)$ but not cointegrated, model the relation in differences (growth rates), for instance in a VAR in differences, with
+tests of Granger causality; or look for omitted variables (prices, interest rates) with which the two might be cointegrated, and test with Johansen's
+method.
+\end{solution}
+
+\begin{problem}
+In a cross-section of $500$ firms, investment is regressed on cash flow and Tobin's $q$. The White test gives $nR^2 = 41.2$ on $5$ degrees of freedom. The
+conventional standard error of the cash flow coefficient is $0.012$ and its robust (HC3) standard error is $0.021$; the estimate is $0.045$.
+\begin{enumerate}[label=(\alph*)]
+\item Is there heteroscedasticity? Does it bias the estimate?
+\item Is cash flow significant?
+\item A critic argues that $q$ is measured with error. What does this imply, and how could it be addressed?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $41.2$ far exceeds the $\chi^2_5$ point $11.07$, so homoscedasticity is rejected. Heteroscedasticity does not bias least squares (Theorem~\ref{thm:olsnonsph}); it invalidates the
+conventional standard errors.
+
+(b) With the robust standard error, $t = 0.045/0.021 = 2.14$, significant at $5\%$ but much less so than the conventional $t = 3.75$ suggests.
+
+(c) Measurement error in $q$ attenuates its coefficient (Theorem~\ref{thm:atten}) and, because cash flow is correlated with true $q$, biases the cash flow coefficient
+too, typically upwards, since cash flow picks up the part of investment opportunities that mismeasured $q$ misses. The remedy is IV: instrument $q$
+with lagged values or an alternative measure, and test with Hausman's statistic.
+\end{solution}
+
+\begin{problem}
+For the market model of Example~\ref{ex:market}, suppose weather also shifts demand (people buy less in bad weather), so that both equations contain
+$w$ and only the demand equation contains income.
+\begin{enumerate}[label=(\alph*)]
+\item Which equation is identified?
+\item What is the 2SLS estimator of the identified equation, and what are its instruments?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Demand now excludes no exogenous variable, so it fails the order condition and is underidentified. Supply excludes income, which appears in
+demand, so it is exactly identified (Theorem~\ref{thm:rank}).
+
+(b) Regress $q$ on $p$ and $w$ in the supply equation, with instruments the constant, $w$ and income. Exactly identified, it equals the IV estimator and ILS:
+income shifts demand along the supply curve.
+\end{solution}
+
+\begin{problem}
+In a panel of $1000$ workers over $4$ years, the effect of union membership on log wages is estimated as $0.081$ (s.e. $0.012$) by fixed effects and $0.064$ (s.e. $0.007$) by
+random effects.
+\begin{enumerate}[label=(\alph*)]
+\item Carry out the Hausman test.
+\item Interpret the direction of the difference.
+\item Most workers never change union status. What does this imply for the fixed effects estimate?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $H = (0.081 - 0.064)^2/(0.012^2 - 0.007^2) = 0.000289/0.000095 = 3.04$, below the $\chi^2_1$ point $3.84$: random effects is not rejected at $5\%$, though the evidence is borderline (at $10\%$,
+$2.71$, it would be).
+
+(b) Random effects is lower, which suggests that union members have, if anything, lower unobserved earning power; unions may organise workers who
+would otherwise earn less, so the between comparison understates the union effect.
+
+(c) The fixed effects estimate is identified only by switchers, whose changes may be few and partly due to misclassification, which attenuates it
+strongly in first differences or within data (Section~\ref{ssec:fe}). Its large standard error reflects the small within variation.
+\end{solution}
+
+\begin{problem}
+A probit model of labour force participation has, for a typical woman, index $x'\hat\beta = 0.4$, and the coefficient of years of education is $0.6$ per decade.
+\begin{enumerate}[label=(\alph*)]
+\item Find her predicted probability of participation and the marginal effect of education.
+\item A Heckman wage equation is to be estimated for the participants. Suggest an exclusion restriction, and explain why one is needed.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) $\Phi(0.4) = 0.655$, and the marginal effect is $\phi(0.4)(0.6) = 0.368 \times 0.6 = 0.221$ per decade: another ten years of education would raise the probability by $22$ points, or
+about $2.2$ points per year at this point on the curve.
+
+(b) The number of young children, or non-labour income such as a spouse's earnings, affects the decision to work but plausibly not the wage offered.
+Without such a variable the selection term $\lambda(z'\gamma)$ is nearly collinear with the wage regressors, and the correction is identified only by the
+functional form (Section~\ref{ssec:heckman}).
+\end{solution}
+
+\begin{problem}
+An error correction model for consumption is estimated as
+\[
+\Delta c_t = 0.4\Delta y_t - 0.25(c_{t-1} - 0.9y_{t-1}) + \hat\varepsilon_t ,
+\]
+with $c$ and $y$ the logs of consumption and income.
+\begin{enumerate}[label=(\alph*)]
+\item What are the impact and long-run elasticities of consumption with respect to income?
+\item What is the half-life of a disequilibrium?
+\item Write the equivalent ADL model, and check whether it satisfies the common factor restriction.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The impact elasticity is $0.4$ and the long-run elasticity $0.9$.
+
+(b) A quarter of the gap closes each period, so $\phi = 0.75$, and the half-life is $\log 0.5/\log 0.75 = 2.4$ periods.
+
+(c) From Theorem~\ref{thm:ecm}, $1 - \phi = 0.25$, $\beta_0 = 0.4$ and $\theta = (\beta_0 + \beta_1)/(1 - \phi) = 0.9$, so $\beta_1 = 0.225 - 0.4 = -0.175$:
+$c_t = 0.75c_{t-1} + 0.4y_t - 0.175y_{t-1} + \varepsilon_t$. The common factor restriction requires $\beta_1 = -\phi\beta_0 = -0.3$; it fails, consistently with the impact and long-run
+elasticities being different.
+\end{solution}
+
+\begin{problem}
+Classify each of the following as a problem of bias or of standard errors only, and name the method you would use.
+\begin{enumerate}[label=(\alph*)]
+\item Monthly sales regressed on advertising, with residual autocorrelation $0.6$ and strictly exogenous advertising.
+\item Hours of work regressed on the wage for a sample of workers only.
+\item Crop yield regressed on fertiliser use across farms, where better farmers use more fertiliser.
+\item Test scores regressed on a school-level policy, with pupils as observations.
+\item Expenditure on cigarettes, zero for most households.
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) Standard errors only, since advertising is exogenous: HAC standard errors or FGLS (Section~\ref{sec:autocorr}); also consider a dynamic model. (b) Bias from
+sample selection: Heckman's model with an exclusion restriction (Section~\ref{ssec:heckman}); the wage is also endogenous, which calls for IV. (c) Bias from an
+omitted variable correlated with the regressor: farm fixed effects with panel data, or an instrument for fertiliser such as its price (Sections~\ref{sec:panel}
+and \ref{sec:iv}). (d) Standard errors only: cluster by school, and note the Moulton factor (Section~\ref{ssec:cluster}). (e) A censored outcome: Tobit or a
+two-part model (Section~\ref{ssec:tobit}).
+\end{solution}
+
+\begin{problem}
+In the model $y = \beta x^* + \varepsilon$, both $y$ and $x$ are measured with error: $x = x^* + m$ and $y_{\text{obs}} = y + n$, with $m$ and $n$ independent of each other and of $x^*$ and $\varepsilon$.
+With $\beta = 0.8$, $\Var(x^*) = 36$ and $\Var(m) = 9$, find the probability limit of the least squares slope. Does the error in $y$ matter?
+\end{problem}
+
+\begin{solution}
+The reliability of $x$ is $36/45 = 0.8$, so $\plim b = 0.8 \times 0.8 = 0.64$ by Theorem~\ref{thm:atten}. The error $n$ in $y$ only adds to the disturbance: it is uncorrelated with $x$, so it
+does not affect the probability limit, but it increases the variance of $b$.
+\end{solution}
+
+\begin{problem}
+A study estimates the Euler equation of Section~\ref{ssec:gmmapp} by two-step GMM with $6$ instruments and $2$ parameters, obtaining $J = 9.1$. A second
+specification adds $4$ more lags as instruments, and obtains $J = 11.0$ with the same estimates of the parameters.
+\begin{enumerate}[label=(\alph*)]
+\item Test the overidentifying restrictions in each case.
+\item Why might the second test be less reliable than the first?
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+(a) The first has $6 - 2 = 4$ degrees of freedom, with $5\%$ point $9.49$: $J = 9.1$ does not quite reject. The second has $8$, with $5\%$ point $15.51$: $11.0$ does not reject.
+
+(b) With $10$ instruments the weighting matrix $\hat S$ is a $10 \times 10$ matrix estimated from the data, and with many moments its inverse is poorly estimated, which
+weakens the $J$ test and biases two-step GMM (Section~\ref{ssec:gmmapp}). A $J$ statistic that grows less than its degrees of freedom when instruments are added is a
+common sign of this loss of power, not evidence that the model fits better.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -9247,6 +9960,7 @@ instruments and the endogenous explanatory variable is weak, \emph{Journal of th
 1287--1294.
 \item Breusch, T. S., and Pagan, A. R. (1980), The Lagrange multiplier test and its applications to model specification in econometrics,
 \emph{Review of Economic Studies}, 47, 239--253.
+\item Cameron, A. C., and Trivedi, P. K. (2013), \emph{Regression Analysis of Count Data} (2nd ed.), Cambridge, Cambridge University Press.
 \item Chow, G. C. (1960), Tests of equality between sets of coefficients in two linear regressions, \emph{Econometrica}, 28, 591--605.
 \item Cochrane, D., and Orcutt, G. H. (1949), Application of least squares regression to relationships containing auto-correlated error terms,
 \emph{Journal of the American Statistical Association}, 44, 32--61.
@@ -9266,6 +9980,8 @@ American Statistical Association}, 74, 427--431.
 \item Godfrey, L. G. (1978), Testing against general autoregressive and moving average error models when the regressors include lagged
 dependent variables, \emph{Econometrica}, 46, 1293--1301.
 \item Goldfeld, S. M., and Quandt, R. E. (1965), Some tests for homoscedasticity, \emph{Journal of the American Statistical Association}, 60, 539--547.
+\item Gourieroux, C., Monfort, A., and Trognon, A. (1984), Pseudo maximum likelihood methods: applications to Poisson models, \emph{Econometrica}, 52,
+701--720.
 \item Granger, C. W. J. (1969), Investigating causal relations by econometric models and cross-spectral methods, \emph{Econometrica}, 37, 424--438.
 \item Granger, C. W. J., and Newbold, P. (1974), Spurious regressions in econometrics, \emph{Journal of Econometrics}, 2, 111--120.
 \item Haavelmo, T. (1943), The statistical implications of a system of simultaneous equations, \emph{Econometrica}, 11, 1--12.
@@ -9279,6 +9995,7 @@ Economic Statistics}, 14, 262--280.
 modelling, \emph{Journal of the Royal Statistical Society, Series A}, 149, 187--227.
 \item Hausman, J. A. (1978), Specification tests in econometrics, \emph{Econometrica}, 46, 1251--1271.
 \item Hausman, J. A., and Taylor, W. E. (1981), Panel data and unobservable individual effects, \emph{Econometrica}, 49, 1377--1398.
+\item Heckman, J. J. (1979), Sample selection bias as a specification error, \emph{Econometrica}, 47, 153--161.
 \item Hendry, D. F., and Mizon, G. E. (1978), Serial correlation as a convenient simplification, not a nuisance: a comment on a study of the demand
 for money by the Bank of England, \emph{Economic Journal}, 88, 549--563.
 \item Hildreth, C., and Lu, J. Y. (1960), Demand relations with autocorrelated disturbances, Technical Bulletin 276, Michigan State University
@@ -9290,6 +10007,9 @@ a unit root, \emph{Journal of Econometrics}, 54, 159--178.
 \item Ljung, G. M., and Box, G. E. P. (1978), On a measure of lack of fit in time series models, \emph{Biometrika}, 65, 297--303.
 \item MacKinnon, J. G. (1991), Critical values for cointegration tests, in R. F. Engle and C. W. J. Granger (eds.), \emph{Long-Run Economic
 Relationships}, Oxford, Oxford University Press, 267--276.
+\item McDonald, J. F., and Moffitt, R. A. (1980), The uses of Tobit analysis, \emph{Review of Economics and Statistics}, 62, 318--321.
+\item McFadden, D. (1974), Conditional logit analysis of qualitative choice behavior, in P. Zarembka (ed.), \emph{Frontiers in Econometrics}, New
+York, Academic Press, 105--142.
 \item Mehra, R., and Prescott, E. C. (1985), The equity premium: a puzzle, \emph{Journal of Monetary Economics}, 15, 145--161.
 \item Modigliani, F. (1966), The life cycle hypothesis of saving, the demand for wealth and the supply of capital, \emph{Social Research}, 33,
 160--217.
@@ -9318,6 +10038,7 @@ Statistical Society, Series B}, 31, 350--371.
 \item Stock, J. H. (1987), Asymptotic properties of least squares estimators of cointegrating vectors, \emph{Econometrica}, 55, 1035--1056.
 \item Swamy, P. A. V. B., and Arora, S. S. (1972), The exact finite sample properties of the estimators of coefficients in the error components
 regression models, \emph{Econometrica}, 40, 261--275.
+\item Tobin, J. (1958), Estimation of relationships for limited dependent variables, \emph{Econometrica}, 26, 24--36.
 \item White, H. (1980), A heteroskedasticity-consistent covariance matrix estimator and a direct test for heteroskedasticity, \emph{Econometrica},
 48, 817--838.
 \item Windmeijer, F. (2005), A finite sample correction for the variance of linear efficient two-step GMM estimators, \emph{Journal of
