@@ -531,6 +531,7 @@ smoothly beyond, but the equation itself is undefined at $\pm\pi/2$, so the theo
 \end{solution}
 
 \begin{problem}
+\label{prob:blowup}
 Solve $y' = t y^2$, $y(0) = y_0$, and find the interval of existence. Compare $y_0 = 1$ and $y_0 = -1$.
 \end{problem}
 
@@ -593,6 +594,453 @@ because the catch falls automatically when the stock falls. Here the equilibria 
 bifurcation), and a fixed quota $h$ near $\frac14$ is dangerous because a small error or shock pushes the stock below the unstable $y_-$.
 \end{solution}
 
+%======================================================================
+\section{Existence and Uniqueness}
+\label{sec:exist}
+
+Example~\ref{ex:nonunique} showed that an initial value problem with a perfectly continuous right-hand side can have infinitely many solutions, and
+Problem~\ref{prob:blowup} that a solution of a smooth equation can cease to exist after a finite time. Before solutions can be studied, it must be known when they
+exist, when they are unique, and how they depend on the data. This section answers these questions for the general system
+\[
+x' = f(t, x), \qquad x(t_0) = x_0, \qquad x \in \mathbb R^n .
+\]
+The answers are the foundation of everything that follows: they justify the numerical methods, the phase-plane pictures and the stability theory,
+all of which assume that a state determines its future.
+
+Throughout, $\|\cdot\|$ is a norm on $\mathbb R^n$ (any norm will do, since all are equivalent), and for a continuous function $\phi$ on an interval $J$, $\|\phi\|_\infty = \sup_{t \in J}\|\phi(t)\|$.
+
+\subsection{The integral equation}
+\label{ssec:integral}
+
+\begin{lem}
+\label{lem:integral}
+Let $f$ be continuous on an open set $D \subseteq \mathbb R \times \mathbb R^n$ containing $(t_0, x_0)$, and let $J$ be an interval containing $t_0$. A continuous function $\phi\colon J \to \mathbb R^n$
+with graph in $D$ solves the initial value problem on $J$ if and only if
+\[
+\phi(t) = x_0 + \int_{t_0}^tf\bigl(s, \phi(s)\bigr)\,ds \qquad\text{for all } t \in J .
+\]
+\end{lem}
+
+\begin{proof}
+If $\phi$ solves the problem, then $\phi'(s) = f(s, \phi(s))$ is continuous, and integrating from $t_0$ to $t$ gives the equation, by the fundamental theorem of calculus. Conversely,
+if $\phi$ is continuous and satisfies the equation, the integrand $s \mapsto f(s, \phi(s))$ is continuous, so the right-hand side is differentiable with derivative $f(t, \phi(t))$, and
+$\phi(t_0) = x_0$.
+\end{proof}
+
+The lemma converts a differential equation into a fixed-point problem: $\phi$ is a solution if and only if $\phi = T\phi$, where
+\[
+(T\phi)(t) = x_0 + \int_{t_0}^tf\bigl(s, \phi(s)\bigr)\,ds .
+\]
+The integral equation needs only continuity of $\phi$, not differentiability, which is what makes it the natural setting for limits.
+
+\subsection{Lipschitz conditions}
+\label{ssec:lipschitz}
+
+\begin{defn}
+$f$ is \textbf{Lipschitz in $x$} on a set $R$ with constant $L$ if
+\[
+\|f(t, x) - f(t, y)\| \leq L\|x - y\| \qquad\text{for all } (t, x), (t, y) \in R ,
+\]
+and \textbf{locally Lipschitz} on $D$ if every point of $D$ has a neighbourhood on which $f$ is Lipschitz in $x$.
+\end{defn}
+
+\begin{lem}
+\label{lem:c1lip}
+If $f$ and its partial derivatives $\partial f_i/\partial x_j$ are continuous on $D$, then $f$ is locally Lipschitz. On a set $R = [t_0 - a, t_0 + a] \times \bar B(x_0, b)$ contained in $D$, one may
+take $L = \max_R\|D_xf(t, x)\|$, the largest operator norm of the Jacobian matrix.
+\end{lem}
+
+\begin{proof}
+The ball $\bar B(x_0, b)$ is convex, so for $x, y$ in it the segment $x + \theta(y - x)$, $0 \leq \theta \leq 1$, stays in $R$. By the fundamental theorem of calculus applied to $\theta \mapsto f(t, x + \theta(y - x))$,
+\[
+f(t, y) - f(t, x) = \int_0^1D_xf\bigl(t, x + \theta(y - x)\bigr)(y - x)\,d\theta ,
+\]
+whose norm is at most $\max_R\|D_xf\|\,\|y - x\|$. The maximum exists because $D_xf$ is continuous on the compact set $R$. Every point of $D$ has such a compact neighbourhood.
+\end{proof}
+
+\begin{exa}
+\label{ex:lipschitz}
+\begin{enumerate}[label=(\alph*)]
+\item $f(x) = 1 + x^2$ is Lipschitz on $|x| \leq b$ with $L = 2b$, since $|x^2 - y^2| = |x + y||x - y|$; it is locally but not globally Lipschitz on $\mathbb R$.
+\item $f(x) = \sin x$ is globally Lipschitz with $L = 1$, and a linear $f(t, x) = A(t)x$ is Lipschitz on $[\alpha, \beta] \times \mathbb R^n$ with $L = \max\|A(t)\|$.
+\item $f(x) = 3x^{2/3}$ is not Lipschitz near $0$: $|f(x) - f(0)|/|x - 0| = 3|x|^{-1/3} \to \infty$. Nor is $\sqrt{|x|}$. Both are continuous, and both have non-unique solutions from $0$.
+\end{enumerate}
+\end{exa}
+
+\subsection{The Picard--Lindel\"of theorem}
+\label{ssec:picard}
+
+Fix the rectangle (in $\mathbb R^{n+1}$, a cylinder)
+\[
+R = \bigl\{(t, x) : |t - t_0| \leq a,\ \|x - x_0\| \leq b\bigr\}, \qquad M = \max_R\|f\|, \qquad \alpha = \min\Bigl(a, \frac bM\Bigr).
+\]
+A solution starting at $x_0$ moves with speed at most $M$, so in time $|t - t_0| \leq b/M$ it cannot leave the ball of radius $b$; this is why the interval of existence is
+$\alpha$ rather than $a$ (Figure~\ref{fig:cone}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!5,rounded corners=4pt] (-0.6,-0.7) rectangle (10.6,5.3);
+\draw[thick,blue!60!black] (0.5,0.3) rectangle (9.5,4.3);
+\node[font=\scriptsize,blue!60!black,anchor=south west] at (0.5,4.3) {$R$: $|t - t_0| \leq a$, $\|x - x_0\| \leq b$};
+\fill[orange!25] (5,2.3) -- (7.4,4.3) -- (7.4,0.3) -- cycle;
+\fill[orange!25] (5,2.3) -- (2.6,4.3) -- (2.6,0.3) -- cycle;
+\draw[orange!80!black,thick] (2.6,4.3) -- (7.4,0.3) (2.6,0.3) -- (7.4,4.3);
+\draw[dashed] (2.6,0.3) -- (2.6,-0.15) (7.4,0.3) -- (7.4,-0.15) (5,0.3) -- (5,-0.15);
+\node[font=\scriptsize,below] at (5,-0.15) {$t_0$};
+\node[font=\scriptsize,below] at (7.4,-0.15) {$t_0 + \alpha$};
+\node[font=\scriptsize,below] at (2.6,-0.15) {$t_0 - \alpha$};
+\node[font=\scriptsize,below] at (9.5,0.3) {$t_0 + a$};
+\fill (5,2.3) circle (2pt) node[left,font=\scriptsize] {$(t_0, x_0)$\,};
+\draw[red!70!black,very thick] plot[smooth] coordinates {(2.9,3.2) (3.8,2.9) (4.5,2.5) (5,2.3) (5.6,2.15) (6.3,1.7) (7.1,0.9)};
+\node[font=\scriptsize,orange!80!black,align=left,anchor=west] at (7.6,2.3) {slopes $\pm M$:\\ solutions\\ stay in\\ the cone};
+\draw[<->] (10.0,0.3) -- node[right,font=\scriptsize] {$2b$} (10.0,4.3);
+\end{tikzpicture}
+\caption{The interval of existence in the Picard--Lindel\"of theorem. A solution through $(t_0, x_0)$ has $\|x'\| \leq M$ while it stays in $R$, so its graph lies in the double cone
+of slopes $\pm M$. If $b/M < a$, as here, the cone reaches the top and bottom of $R$ at $t_0 \pm b/M$, and the theorem can promise only $|t - t_0| \leq \alpha = b/M$.}
+\label{fig:cone}
+\end{figure}
+
+\begin{thm}[Picard--Lindel\"of]
+\label{thm:picard}
+Let $f$ be continuous on $R$ and Lipschitz in $x$ on $R$ with constant $L$. Then the initial value problem has exactly one solution $\phi$ on $J = [t_0 - \alpha, t_0 + \alpha]$. It is the
+uniform limit on $J$ of the \textbf{Picard iterates}
+\[
+\phi_0(t) = x_0, \qquad \phi_{k+1}(t) = x_0 + \int_{t_0}^tf\bigl(s, \phi_k(s)\bigr)\,ds ,
+\]
+and the error after $k$ steps satisfies
+\[
+\|\phi(t) - \phi_k(t)\| \leq \frac ML\,\frac{(L|t - t_0|)^{k+1}}{(k + 1)!}\,e^{L|t - t_0|} .
+\]
+\end{thm}
+
+\begin{proof}
+We take $t \geq t_0$; the other side is the same.
+
+\emph{The iterates are defined and stay in $R$.} By induction: if $\phi_k$ is continuous on $J$ with $\|\phi_k(s) - x_0\| \leq b$, then $f(s, \phi_k(s))$ is defined and continuous, $\phi_{k+1}$ is
+continuous, and $\|\phi_{k+1}(t) - x_0\| \leq \int_{t_0}^t\|f\|\,ds \leq M(t - t_0) \leq M\alpha \leq b$.
+
+\emph{Successive differences.} We claim that
+\[
+\|\phi_{k+1}(t) - \phi_k(t)\| \leq \frac{ML^k(t - t_0)^{k+1}}{(k + 1)!} .
+\]
+For $k = 0$, $\|\phi_1(t) - x_0\| \leq M(t - t_0)$. If it holds for $k - 1$, then by the Lipschitz condition
+\begin{align*}
+\|\phi_{k+1}(t) - \phi_k(t)\| &\leq \int_{t_0}^tL\|\phi_k(s) - \phi_{k-1}(s)\|\,ds\\
+&\leq L\int_{t_0}^t\frac{ML^{k-1}(s - t_0)^k}{k!}\,ds = \frac{ML^k(t - t_0)^{k+1}}{(k + 1)!} .
+\end{align*}
+
+\emph{Uniform convergence.} The series $\phi_0 + \sum_k(\phi_{k+1} - \phi_k)$ is dominated on $J$ by $\sum_kM L^k\alpha^{k+1}/(k + 1)! = (M/L)(e^{L\alpha} - 1) < \infty$, so by the Weierstrass $M$-test the
+iterates converge uniformly on $J$ to a continuous $\phi$, with $\|\phi(t) - x_0\| \leq b$. Since $\|f(s, \phi_k(s)) - f(s, \phi(s))\| \leq L\|\phi_k - \phi\|_\infty \to 0$ uniformly, we may pass to the limit
+under the integral in the definition of $\phi_{k+1}$, and $\phi$ satisfies the integral equation. By Lemma~\ref{lem:integral} it is a solution.
+
+\emph{Error bound.} Using $\frac{1}{(k + 1 + i)!} \leq \frac{1}{(k + 1)!\,i!}$,
+\[
+\|\phi(t) - \phi_k(t)\| \leq \sum_{j \geq k}\|\phi_{j+1}(t) - \phi_j(t)\| \leq \frac ML\sum_{j \geq k+1}\frac{(L(t - t_0))^j}{j!} \leq \frac ML\frac{(L(t - t_0))^{k+1}}{(k + 1)!}e^{L(t - t_0)} .
+\]
+
+\emph{Uniqueness.} If $\psi$ is another solution on $J$, its graph stays in $R$ by the cone argument, and $u(t) = \|\phi(t) - \psi(t)\|$ satisfies $u(t) \leq \int_{t_0}^tLu(s)\,ds$. By Gronwall's
+inequality (Theorem~\ref{thm:gronwall} below, with $C = 0$), $u \equiv 0$.
+\end{proof}
+
+\begin{exa}
+\label{ex:tanpicard}
+For $x' = 1 + x^2$, $x(0) = 0$, whose solution is $\tan t$, the iterates are
+\[
+\phi_1 = t, \qquad \phi_2 = t + \frac{t^3}{3}, \qquad \phi_3 = t + \frac{t^3}{3} + \frac{2t^5}{15} + \frac{t^7}{63}, \quad \dots
+\]
+Each iterate gets one more Taylor coefficient of $\tan t$ right. On $R$ with $a = 1$ and $|x| \leq b$, $M = 1 + b^2$ and $\alpha = \min(1, b/(1 + b^2))$, which is largest, $\frac12$, at $b = 1$. So the
+theorem guarantees a solution on $[-\frac12, \frac12]$, while $\tan t$ exists on $(-\pi/2, \pi/2)$: the theorem is local and conservative. How far a solution really extends is the
+subject of the next section. Figure~\ref{fig:picard} shows the iterates.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[orange!7,rounded corners=4pt] (-0.8,-0.6) rectangle (10.0,4.6);
+\draw[->] (0,0) -- (9.4,0) node[below,font=\small] {$t$};
+\draw[->] (0,0) -- (0,4.3) node[left,font=\small] {$x$};
+\foreach \v/\x in {0.5/2.963, 1/5.926}
+  \draw (\x,-0.08) -- (\x,0) node[below,font=\scriptsize] {$\v$};
+\draw[dashed,gray] (8,0) -- (8,4.1);
+\node[font=\scriptsize,below] at (8,0) {$\pi/2$};
+\foreach \v/\y in {1/0.889, 2/1.778, 3/2.667, 4/3.556}
+  \draw (-0.08,\y) -- (0,\y) node[left,font=\scriptsize] {$\v$};
+\fill[green!12] (0,0) rectangle (2.963,4.0);
+\node[font=\scriptsize,green!40!black,align=center] at (1.48,3.6) {guaranteed\\ by the theorem};
+\draw[gray!70,thick] plot coordinates {(0.000,0.000) (0.136,0.020) (0.271,0.041) (0.407,0.061) (0.542,0.081) (0.678,0.102) (0.814,0.122) (0.949,0.142) (1.085,0.163) (1.220,0.183) (1.356,0.203) (1.492,0.224) (1.627,0.244) (1.763,0.264) (1.898,0.285) (2.034,0.305) (2.169,0.325) (2.305,0.346) (2.441,0.366) (2.576,0.386) (2.712,0.407) (2.847,0.427) (2.983,0.447) (3.119,0.468) (3.254,0.488) (3.390,0.508) (3.525,0.529) (3.661,0.549) (3.797,0.569) (3.932,0.590) (4.068,0.610) (4.203,0.631) (4.339,0.651) (4.475,0.671) (4.610,0.692) (4.746,0.712) (4.881,0.732) (5.017,0.753) (5.153,0.773) (5.288,0.793) (5.424,0.814) (5.559,0.834) (5.695,0.854) (5.831,0.875) (5.966,0.895) (6.102,0.915) (6.237,0.936) (6.373,0.956) (6.508,0.976) (6.644,0.997) (6.780,1.017) (6.915,1.037) (7.051,1.058) (7.186,1.078) (7.322,1.098) (7.458,1.119) (7.593,1.139) (7.729,1.159) (7.864,1.180) (8.000,1.200)};
+\draw[blue!50,thick] plot coordinates {(0.000,0.000) (0.136,0.020) (0.271,0.041) (0.407,0.061) (0.542,0.082) (0.678,0.102) (0.814,0.123) (0.949,0.144) (1.085,0.165) (1.220,0.186) (1.356,0.207) (1.492,0.228) (1.627,0.250) (1.763,0.272) (1.898,0.294) (2.034,0.317) (2.169,0.340) (2.305,0.363) (2.441,0.387) (2.576,0.411) (2.712,0.435) (2.847,0.460) (2.983,0.485) (3.119,0.511) (3.254,0.537) (3.390,0.564) (3.525,0.591) (3.661,0.619) (3.797,0.647) (3.932,0.676) (4.068,0.706) (4.203,0.736) (4.339,0.767) (4.475,0.799) (4.610,0.831) (4.746,0.864) (4.881,0.898) (5.017,0.932) (5.153,0.968) (5.288,1.004) (5.424,1.041) (5.559,1.079) (5.695,1.117) (5.831,1.157) (5.966,1.197) (6.102,1.239) (6.237,1.281) (6.373,1.324) (6.508,1.369) (6.644,1.414) (6.780,1.461) (6.915,1.508) (7.051,1.557) (7.186,1.606) (7.322,1.657) (7.458,1.709) (7.593,1.762) (7.729,1.817) (7.864,1.872) (8.000,1.929)};
+\draw[blue!70!black,thick] plot coordinates {(0.000,0.000) (0.136,0.020) (0.271,0.041) (0.407,0.061) (0.542,0.082) (0.678,0.102) (0.814,0.123) (0.949,0.144) (1.085,0.165) (1.220,0.186) (1.356,0.207) (1.492,0.229) (1.627,0.250) (1.763,0.272) (1.898,0.295) (2.034,0.318) (2.169,0.341) (2.305,0.364) (2.441,0.388) (2.576,0.413) (2.712,0.438) (2.847,0.463) (2.983,0.489) (3.119,0.516) (3.254,0.543) (3.390,0.571) (3.525,0.600) (3.661,0.630) (3.797,0.661) (3.932,0.692) (4.068,0.725) (4.203,0.759) (4.339,0.794) (4.475,0.830) (4.610,0.867) (4.746,0.906) (4.881,0.946) (5.017,0.988) (5.153,1.032) (5.288,1.077) (5.424,1.124) (5.559,1.174) (5.695,1.225) (5.831,1.279) (5.966,1.335) (6.102,1.393) (6.237,1.454) (6.373,1.518) (6.508,1.585) (6.644,1.656) (6.780,1.729) (6.915,1.806) (7.051,1.887) (7.186,1.972) (7.322,2.061) (7.458,2.154) (7.593,2.252) (7.729,2.355) (7.864,2.462) (8.000,2.576)};
+\draw[violet,thick] plot coordinates {(0.000,0.000) (0.136,0.020) (0.271,0.041) (0.407,0.061) (0.542,0.082) (0.678,0.102) (0.814,0.123) (0.949,0.144) (1.085,0.165) (1.220,0.186) (1.356,0.207) (1.492,0.229) (1.627,0.250) (1.763,0.272) (1.898,0.295) (2.034,0.318) (2.169,0.341) (2.305,0.364) (2.441,0.388) (2.576,0.413) (2.712,0.438) (2.847,0.463) (2.983,0.490) (3.119,0.516) (3.254,0.544) (3.390,0.572) (3.525,0.601) (3.661,0.632) (3.797,0.663) (3.932,0.695) (4.068,0.728) (4.203,0.762) (4.339,0.798) (4.475,0.836) (4.610,0.874) (4.746,0.915) (4.881,0.957) (5.017,1.002) (5.153,1.049) (5.288,1.097) (5.424,1.149) (5.559,1.203) (5.695,1.261) (5.831,1.321) (5.966,1.386) (6.102,1.454) (6.237,1.526) (6.373,1.604) (6.508,1.686) (6.644,1.774) (6.780,1.868) (6.915,1.969) (7.051,2.077) (7.186,2.193) (7.322,2.318) (7.458,2.452) (7.593,2.598) (7.729,2.755) (7.864,2.924) (8.000,3.108)};
+\draw[red!70!black,very thick,dashed] plot coordinates {(0.000,0.000) (0.136,0.020) (0.271,0.041) (0.407,0.061) (0.542,0.082) (0.678,0.102) (0.814,0.123) (0.949,0.144) (1.085,0.165) (1.220,0.186) (1.356,0.207) (1.492,0.229) (1.627,0.250) (1.763,0.272) (1.898,0.295) (2.034,0.318) (2.169,0.341) (2.305,0.364) (2.441,0.388) (2.576,0.413) (2.712,0.438) (2.847,0.463) (2.983,0.490) (3.119,0.516) (3.254,0.544) (3.390,0.572) (3.525,0.602) (3.661,0.632) (3.797,0.663) (3.932,0.695) (4.068,0.728) (4.203,0.763) (4.339,0.799) (4.475,0.837) (4.610,0.876) (4.746,0.917) (4.881,0.960) (5.017,1.005) (5.153,1.053) (5.288,1.103) (5.424,1.156) (5.559,1.212) (5.695,1.272) (5.831,1.337) (5.966,1.405) (6.102,1.479) (6.237,1.559) (6.373,1.645) (6.508,1.739) (6.644,1.842) (6.780,1.955) (6.915,2.080) (7.051,2.219) (7.186,2.375) (7.322,2.552) (7.458,2.753) (7.593,2.985) (7.729,3.255) (7.864,3.575) (8.000,3.960)};
+\node[font=\scriptsize,red!70!black] at (7.2,3.9) {$\tan t$};
+\node[font=\scriptsize,gray!70!black] at (8.6,1.35) {$\phi_1$};
+\node[font=\scriptsize,violet,anchor=west] at (8.05,2.75) {$\phi_4$};
+\end{tikzpicture}
+\caption{Picard iterates $\phi_1, \dots, \phi_4$ for $x' = 1 + x^2$, $x(0) = 0$, against the solution $\tan t$. The iterates converge rapidly near $t = 0$ and ever more slowly towards $\pi/2$, where the
+solution blows up. The shaded strip is the interval $[0, \frac12]$ that Theorem~\ref{thm:picard} guarantees.}
+\label{fig:picard}
+\end{figure}
+
+\subhead{The contraction mapping view}
+The proof is an instance of a general principle.
+
+\begin{thm}[Banach]
+\label{thm:banach}
+Let $(X, d)$ be a complete metric space and $T\colon X \to X$ a contraction, $d(Tx, Ty) \leq q\,d(x, y)$ with $0 \leq q < 1$. Then $T$ has exactly one fixed point $x^*$, and for every $x_0 \in X$ the iterates
+$x_{k+1} = Tx_k$ converge to it, with $d(x_k, x^*) \leq \frac{q^k}{1 - q}d(x_1, x_0)$.
+\end{thm}
+
+\begin{proof}
+$d(x_{k+1}, x_k) \leq q^kd(x_1, x_0)$ by induction, so for $m > k$, $d(x_m, x_k) \leq \sum_{j=k}^{m-1}q^jd(x_1, x_0) \leq \frac{q^k}{1 - q}d(x_1, x_0)$: the sequence is Cauchy, and converges to some $x^*$ by
+completeness. $T$ is continuous, so $Tx^* = \lim Tx_k = \lim x_{k+1} = x^*$. If $y^*$ is another fixed point, $d(x^*, y^*) = d(Tx^*, Ty^*) \leq q\,d(x^*, y^*)$, which forces $d(x^*, y^*) = 0$. Letting $m \to \infty$ in the
+Cauchy estimate gives the error bound.
+\end{proof}
+
+To apply it, let $X$ be the set of continuous $\phi\colon J \to \bar B(x_0, b)$, which is complete under the uniform metric, and $T$ the integral operator. The cone argument shows $T(X) \subseteq X$.
+With the ordinary sup norm, $\|T\phi - T\psi\|_\infty \leq L\alpha\|\phi - \psi\|_\infty$, a contraction only if $L\alpha < 1$. Bielecki (1956) removed this restriction with the weighted norm
+$\|\phi\|_\ast = \sup_{t \in J}e^{-2L|t - t_0|}\|\phi(t)\|$, equivalent to the sup norm, in which $\|T\phi - T\psi\|_\ast \leq \frac12\|\phi - \psi\|_\ast$; this gives existence and uniqueness on all of $J$ in one
+step (Problem~\ref{prob:bielecki}).
+
+\subsection{Gronwall's inequality and continuous dependence}
+\label{ssec:gronwall}
+
+\begin{thm}[Gronwall]
+\label{thm:gronwall}
+Let $u$ be continuous and non-negative on $[t_0, t_1]$, and suppose that for constants $C \geq 0$ and $K \geq 0$,
+\[
+u(t) \leq C + K\int_{t_0}^tu(s)\,ds \qquad (t_0 \leq t \leq t_1) .
+\]
+Then $u(t) \leq Ce^{K(t - t_0)}$. More generally, if $u(t) \leq c(t) + \int_{t_0}^tk(s)u(s)\,ds$ with $k \geq 0$ continuous and $c$ continuous and non-decreasing, then
+$u(t) \leq c(t)\exp\int_{t_0}^tk(s)\,ds$.
+\end{thm}
+
+\begin{proof}
+We prove the general form. Let $v(t) = \int_{t_0}^tk(s)u(s)\,ds$, so $v' = ku \leq k(c + v)$. Fix $\tau \in [t_0, t_1]$; for $t \leq \tau$, $c(t) \leq c(\tau)$, so $v' - kv \leq kc(\tau)$. Multiplying by the integrating factor
+$e^{-\int_{t_0}^tk}$ gives $\bigl(v e^{-\int_{t_0}^tk}\bigr)' \leq kc(\tau)e^{-\int_{t_0}^tk}$, and integrating from $t_0$ to $\tau$, with $v(t_0) = 0$,
+\[
+v(\tau)e^{-\int_{t_0}^\tau k} \leq c(\tau)\bigl(1 - e^{-\int_{t_0}^\tau k}\bigr), \qquad\text{that is}\qquad v(\tau) \leq c(\tau)\bigl(e^{\int_{t_0}^\tau k} - 1\bigr) .
+\]
+Then $u(\tau) \leq c(\tau) + v(\tau) \leq c(\tau)e^{\int_{t_0}^\tau k}$. The first statement is the case $c \equiv C$, $k \equiv K$.
+\end{proof}
+
+The inequality converts an integral inequality into an exponential bound, and it is the main tool for comparing solutions.
+
+\begin{thm}[Continuous dependence]
+\label{thm:contdep}
+Let $f$ and $g$ be continuous on a region containing the graphs of $x(t)$ and $y(t)$, solutions of $x' = f(t, x)$, $x(t_0) = x_0$ and $y' = g(t, y)$, $y(t_0) = y_0$ on an interval $J \ni t_0$. If $f$ is
+Lipschitz in $x$ with constant $L$ and $\|f(t, z) - g(t, z)\| \leq \varepsilon$ there, then for $t \in J$
+\[
+\|x(t) - y(t)\| \leq \|x_0 - y_0\|e^{L|t - t_0|} + \frac\varepsilon L\bigl(e^{L|t - t_0|} - 1\bigr) .
+\]
+\end{thm}
+
+\begin{proof}
+Take $t \geq t_0$. Subtracting the integral equations,
+\[
+x(t) - y(t) = x_0 - y_0 + \int_{t_0}^t\bigl[f(s, x) - f(s, y)\bigr]ds + \int_{t_0}^t\bigl[f(s, y) - g(s, y)\bigr]ds ,
+\]
+so $u = \|x - y\|$ satisfies $u(t) \leq \|x_0 - y_0\| + \varepsilon(t - t_0) + L\int_{t_0}^tu$. Put $w = u + \varepsilon/L$: then $w(t) \leq \|x_0 - y_0\| + \varepsilon/L + L\int_{t_0}^tw$, because $L\int_{t_0}^t\varepsilon/L = \varepsilon(t - t_0)$.
+Gronwall gives $w(t) \leq (\|x_0 - y_0\| + \varepsilon/L)e^{L(t - t_0)}$, which rearranges to the claim.
+\end{proof}
+
+With $f = g$ the theorem says that solutions depend continuously, indeed Lipschitz-continuously, on their initial values, with a constant that may grow
+like $e^{L|t - t_0|}$. With $x_0 = y_0$ it says that a small error $\varepsilon$ in the equation itself, a modelling error or a rounding error in a computation, produces an error at
+time $t$ of at most $\varepsilon(e^{Lt} - 1)/L$. Together these make the initial value problem \textbf{well posed} in the sense of Hadamard: a solution exists, is unique, and
+depends continuously on the data. The exponential factor is not an artefact: for $x' = Lx$ the bound is attained, and it is the root of the sensitivity of chaotic
+systems studied at the end of the course.
+
+\subsection{Peano's existence theorem}
+\label{ssec:peano}
+
+Continuity alone guarantees existence, though not uniqueness. The proof needs compactness in place of contraction.
+
+\begin{thm}[Arzel\`a--Ascoli]
+\label{thm:arzela}
+A sequence of functions on a compact interval $J$ that is uniformly bounded and equicontinuous (for every $\varepsilon > 0$ there is $\delta > 0$ with $\|\phi_n(t) - \phi_n(s)\| < \varepsilon$ whenever
+$|t - s| < \delta$, for all $n$) has a uniformly convergent subsequence.
+\end{thm}
+
+We take this standard result of analysis as known.
+
+\begin{thm}[Peano]
+\label{thm:peano}
+If $f$ is continuous on $R$, the initial value problem has at least one solution on $J = [t_0 - \alpha, t_0 + \alpha]$.
+\end{thm}
+
+\begin{proof}
+Take $t \geq t_0$. For each $n$, divide $[t_0, t_0 + \alpha]$ into $n$ steps of length $h = \alpha/n$ at $t_j = t_0 + jh$, and define the \textbf{Euler polygon} $\phi_n$ by $\phi_n(t_0) = x_0$ and
+\[
+\phi_n(t) = \phi_n(t_j) + (t - t_j)f\bigl(t_j, \phi_n(t_j)\bigr), \qquad t_j \leq t \leq t_{j+1} .
+\]
+By induction, as in the cone argument, each $\phi_n$ stays in $\bar B(x_0, b)$, and it is piecewise linear with slopes of norm at most $M$, so $\|\phi_n(t) - \phi_n(s)\| \leq M|t - s|$: the
+sequence is uniformly bounded and equicontinuous. Writing $t_{[s]}$ for the grid point at or just below $s$,
+\[
+\phi_n(t) = x_0 + \int_{t_0}^tf\bigl(t_{[s]}, \phi_n(t_{[s]})\bigr)\,ds = x_0 + \int_{t_0}^tf\bigl(s, \phi_n(s)\bigr)\,ds + \int_{t_0}^t\delta_n(s)\,ds ,
+\]
+where $\delta_n(s) = f(t_{[s]}, \phi_n(t_{[s]})) - f(s, \phi_n(s))$. The two points at which $f$ is evaluated are within $h$ in $t$ and $Mh$ in $x$, and $f$ is uniformly continuous on the compact set $R$,
+so $\|\delta_n\|_\infty \to 0$. By Theorem~\ref{thm:arzela} a subsequence $\phi_{n_k}$ converges uniformly to a continuous $\phi$; then $f(s, \phi_{n_k}(s)) \to f(s, \phi(s))$ uniformly, again by uniform
+continuity, and passing to the limit gives $\phi(t) = x_0 + \int_{t_0}^tf(s, \phi(s))\,ds$. By Lemma~\ref{lem:integral}, $\phi$ is a solution.
+\end{proof}
+
+The proof constructs Euler's method and shows that a subsequence of its approximations converges. Without uniqueness, different subsequences may converge to
+different solutions; with uniqueness, the whole sequence converges, and Euler's method is a convergent numerical scheme. Between Peano and Picard lie
+weaker conditions for uniqueness. Osgood's (1898) criterion, $\|f(t, x) - f(t, y)\| \leq \omega(\|x - y\|)$ with $\int_0\frac{dr}{\omega(r)} = \infty$, covers $\omega(r) = r\log(1/r)$, which is not Lipschitz; the failing
+example $3x^{2/3}$ has $\omega(r) = 3r^{2/3}$, for which the integral converges.
+
+\subsection{Existence and uniqueness in software}
+\label{ssec:software2}
+
+\begin{software}[Picard iteration in SymPy]
+\label{sw:picard}
+The iterates of Example~\ref{ex:tanpicard}, computed by exact integration, compared with the Taylor series of $\tan t$:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> t, s = sp.symbols('t s')
+>>> f = lambda t, x: 1 + x**2              # x' = 1 + x^2, x(0) = 0
+>>> phi = [sp.Integer(0)]
+>>> for k in range(4):                     # the Picard iteration
+...     p = phi[-1].subs(t, s)
+...     phi.append(sp.expand(sp.integrate(f(s, p), (s, 0, t))))
+...
+>>> phi[3]
+t**7/63 + 2*t**5/15 + t**3/3 + t
+>>> sp.series(sp.tan(t), t, 0, 9)
+t + t**3/3 + 2*t**5/15 + 17*t**7/315 + O(t**9)
+>>> [sp.degree(p, t) for p in phi[1:]]
+[1, 3, 7, 15]
+\end{verbatim}}
+\textbf{Reading the output.} $\phi_3$ agrees with $\tan t = t + \frac{t^3}{3} + \frac{2t^5}{15} + \frac{17t^7}{315} + \cdots$ up to $t^5$; its $t^7$ coefficient $\frac{1}{63} = \frac{5}{315}$ is still wrong. The degrees $1, 3, 7, 15$ double
+(plus one) at each step, because squaring a polynomial doubles its degree, so the iterates contain many wrong high-order terms that later steps correct.
+
+\textbf{MATLAB/Octave:} \texttt{syms t s; p = sym(0); for k = 1:3, p = int(1 + subs(p, t, s)\^{}2, s, 0, t); end}.
+\end{software}
+
+\begin{software}[Convergence and the guaranteed interval]
+\label{sw:picardconv}
+The errors $\phi_k - \tan t$ at three times, and the best interval that Theorem~\ref{thm:picard} can promise over the choice of $b$:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> xs = (0.25, 0.5, 1.0)
+>>> for k in range(1, 5):
+...     g = sp.lambdify(t, phi[k])
+...     print(k, [round(float(g(x) - np.tan(x)), 5) for x in xs])
+...
+1 [-0.00534, -0.0463, -0.55741]
+2 [-0.00013, -0.00464, -0.22407]
+3 [-0.0, -0.00035, -0.07487]
+4 [-0.0, -2e-05, -0.02045]
+>>> b = np.linspace(0.01, 5, 2000); alpha = np.minimum(1.0, b / (1 + b**2))
+>>> b[np.argmax(alpha)], alpha.max()
+(1.0010105052526264, 0.49999974497761523)
+\end{verbatim}}
+\textbf{Reading the output.} At $t = 0.25$ and $t = 0.5$, inside the guaranteed interval, the error falls by an order of magnitude or more at each step; at $t = 1$, outside it,
+convergence is slower but still visible ($-0.557$, $-0.224$, $-0.075$, $-0.020$). The iterates in fact converge on the whole of $(-\pi/2, \pi/2)$; the theorem is a sufficient condition,
+not a description. The search over $b$ confirms that $\alpha = b/(1 + b^2)$ is maximised at $b = 1$, with $\alpha = \frac12$.
+
+\textbf{MATLAB/Octave:} \texttt{b = linspace(0.01, 5, 2000); [amax, i] = max(min(1, b./(1 + b.\^{}2)))}.
+\end{software}
+
+\begin{software}[Continuous dependence and its failure]
+\label{sw:dependence}
+Two solutions of $x' = 2\sin x$ from initial values $0.001$ apart, against the bound of Theorem~\ref{thm:contdep}; then the equation $y' = 3y^{2/3}$ of Example~\ref{ex:nonunique} from $0$ and from $10^{-12}$:
+{\small\begin{verbatim}
+>>> from scipy.integrate import solve_ivp
+>>> L, T = 2.0, 1.0                        # 2 sin x has Lipschitz L = 2
+>>> rhs = lambda t, x: 2 * np.sin(x)
+>>> x1 = solve_ivp(rhs, (0, T), [1.0], rtol=1e-11, atol=1e-12)
+>>> x2 = solve_ivp(rhs, (0, T), [1.001], rtol=1e-11, atol=1e-12)
+>>> gap = abs(x2.y[0, -1] - x1.y[0, -1]); gap, 0.001 * np.exp(L * T)
+(0.0005542867025911669, 0.007389056098930651)
+>>> nu = lambda t, y: 3 * np.cbrt(y)**2    # y' = 3 y^(2/3): uniqueness fails
+>>> [solve_ivp(nu, (0, 1), [y0], rtol=1e-10, atol=1e-14).y[0, -1]
+...  for y0 in (0.0, 1e-12)]
+[0.0, 1.0003001102501183]
+\end{verbatim}}
+\textbf{Reading the output.} After one unit of time the two solutions are $0.00055$ apart, well within the Gronwall bound $0.001e^2 = 0.0074$; the bound allows for the worst case, in
+which every direction is expanding at the maximal rate $L$, while near $x = 1$ the solutions are being drawn towards the stable equilibrium $\pi$. For the non-Lipschitz
+equation, continuous dependence fails completely: starting at $0$ the solver returns $0$, but starting at $10^{-12}$ it follows $y \approx t^3$ to $y(1) = 1.0003$. An initial difference of
+$10^{-12}$ has become a difference of $1$, because the two starting points lie on different members of the infinite family of solutions through the origin.
+
+\textbf{MATLAB/Octave:} \texttt{[t, x] = ode45(@(t, x) 2*sin(x), [0 1], 1.001)}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Compute the Picard iterates for $x' = x$, $x(0) = 1$, and show that $\phi_k(t) = \sum_{j=0}^kt^j/j!$. What does Theorem~\ref{thm:picard} give as the interval of existence for $R$ with $a$ and $b$
+arbitrary, and how does this compare with the truth?
+\end{problem}
+
+\begin{solution}
+By induction, if $\phi_k = \sum_{j \leq k}t^j/j!$ then $\phi_{k+1} = 1 + \int_0^t\phi_k = 1 + \sum_{j \leq k}t^{j+1}/(j + 1)!$, the next partial sum. On $R$, $M = 1 + b$ (the maximum of $|x|$ for $|x - 1| \leq b$), so
+$\alpha = \min(a, b/(1 + b))$, which is less than $1$ for every $b$. The theorem guarantees existence only on $|t| < 1$, although the solution $e^t$ exists for all $t$; global existence for linear
+equations is proved in the next section.
+\end{solution}
+
+\begin{problem}
+For $x' = t^2 + x^2$, $x(0) = 0$, on $R = \{|t| \leq 1, |x| \leq 1\}$, find $M$, $L$ and the interval of existence given by Theorem~\ref{thm:picard}. How many Picard iterates guarantee an error below
+$10^{-6}$ on that interval?
+\end{problem}
+
+\begin{solution}
+$M = \max(t^2 + x^2) = 2$, and $L = \max|\partial f/\partial x| = \max|2x| = 2$. Then $\alpha = \min(1, 1/2) = \frac12$. On $|t| \leq \frac12$, $L|t| \leq 1$, and the error bound is $\frac ML\frac{1}{(k + 1)!}e = \frac{e}{(k + 1)!}$. Since
+$9! = 362\,880$ gives $7.5 \times 10^{-6}$ and $10! = 3\,628\,800$ gives $7.5 \times 10^{-7}$, $k + 1 = 10$, that is $k = 9$ iterates, suffice.
+\end{solution}
+
+\begin{problem}
+Show that $x' = \sqrt{|x|}$, $x(0) = 0$, has infinitely many solutions, and that $x(0) = 1$ has a unique solution near $t = 0$. Reconcile the two with Theorem~\ref{thm:picard}.
+\end{problem}
+
+\begin{solution}
+$x \equiv 0$ is a solution, and so is $x(t) = 0$ for $t \leq c$, $(t - c)^2/4$ for $t > c$, for every $c \geq 0$: on $t > c$, $x' = (t - c)/2 = \sqrt{x}$. Near $x = 1$, $\sqrt{|x|}$ is continuously differentiable,
+so it is Lipschitz on a rectangle around $(0, 1)$ (Lemma~\ref{lem:c1lip}) and the theorem applies. The failure at $x = 0$ comes from $\frac{d}{dx}\sqrt x = \frac{1}{2\sqrt x}$ being unbounded there.
+\end{solution}
+
+\begin{problem}
+Let $A(t)$ be a continuous $n \times n$ matrix function on $[t_0, t_1]$ and $x$ a solution of $x' = A(t)x$. Use Gronwall's inequality to show that
+$\|x(t)\| \leq \|x(t_0)\|\exp\int_{t_0}^t\|A(s)\|\,ds$.
+\end{problem}
+
+\begin{solution}
+$x(t) = x(t_0) + \int_{t_0}^tA(s)x(s)\,ds$, so $u = \|x\|$ satisfies $u(t) \leq \|x(t_0)\| + \int_{t_0}^t\|A(s)\|u(s)\,ds$. The general form of Theorem~\ref{thm:gronwall}, with $c \equiv \|x(t_0)\|$ and $k = \|A\|$, gives the bound. In
+particular a solution of a linear system cannot blow up on a bounded interval, which is the key to global existence in the next section.
+\end{solution}
+
+\begin{problem}
+The equation $x' = \sin x$ is solved twice from initial values $1$ and $1.01$. Bound the difference of the solutions on $[0, 2]$. A computer solves the equation with an error
+of at most $10^{-8}$ in the right-hand side at every step; bound the resulting error at $t = 2$.
+\end{problem}
+
+\begin{solution}
+$L = 1$. By Theorem~\ref{thm:contdep} with $\varepsilon = 0$, $|x(t) - y(t)| \leq 0.01e^t \leq 0.01e^2 = 0.074$ on $[0, 2]$. With equal initial values and $\varepsilon = 10^{-8}$, the error at $t = 2$ is at most
+$10^{-8}(e^2 - 1) = 6.4 \times 10^{-8}$.
+\end{solution}
+
+\begin{problem}
+For $y' = 3y^{2/3}$, $y(0) = 0$, compute the Picard iterates starting from $\phi_0 = 0$ and from $\phi_0 = t^3$. Explain why Banach's theorem does not apply.
+\end{problem}
+
+\begin{solution}
+From $\phi_0 = 0$, every iterate is $0$. From $\phi_0 = t^3$, $\phi_1 = \int_0^t3(s^3)^{2/3}\,ds = \int_0^t3s^2\,ds = t^3$, so $t^3$ is also a fixed point. A contraction has only one fixed point, so the integral
+operator is not a contraction in any metric of the kind used; the reason is the failure of the Lipschitz condition at $y = 0$ (Example~\ref{ex:lipschitz}(c)).
+\end{solution}
+
+\begin{problem}
+\label{prob:bielecki}
+With $\|\phi\|_\ast = \sup_{t \in J}e^{-2L|t - t_0|}\|\phi(t)\|$, show that the integral operator $T$ of Section~\ref{ssec:integral} satisfies $\|T\phi - T\psi\|_\ast \leq \frac12\|\phi - \psi\|_\ast$ under the Lipschitz condition.
+\end{problem}
+
+\begin{solution}
+For $t \geq t_0$,
+\begin{align*}
+\|T\phi(t) - T\psi(t)\| &\leq L\int_{t_0}^te^{2L(s - t_0)}e^{-2L(s - t_0)}\|\phi(s) - \psi(s)\|\,ds\\
+&\leq L\|\phi - \psi\|_\ast\int_{t_0}^te^{2L(s - t_0)}\,ds \leq \frac12\|\phi - \psi\|_\ast e^{2L(t - t_0)} .
+\end{align*}
+Multiplying by $e^{-2L(t - t_0)}$ and taking the supremum gives the result; $t < t_0$ is the same. Since $\|\cdot\|_\ast$ lies between $e^{-2L\alpha}\|\cdot\|_\infty$ and $\|\cdot\|_\infty$, the space is still complete, and
+Banach's theorem gives a unique fixed point on the whole interval $J$, with no restriction $L\alpha < 1$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -621,9 +1069,23 @@ Amsterdam, Academic Press.
 
 \subhead{Further reading}
 \begin{enumerate}
+\item Banach, S. (1922), Sur les op\'erations dans les ensembles abstraits et leur application aux \'equations int\'egrales, \emph{Fundamenta
+Mathematicae}, 3, 133--181.
+\item Bielecki, A. (1956), Une remarque sur la m\'ethode de Banach--Cacciopoli--Tikhonov dans la th\'eorie des \'equations diff\'erentielles
+ordinaires, \emph{Bulletin de l'Acad\'emie Polonaise des Sciences}, 4, 261--264.
+\item Gronwall, T. H. (1919), Note on the derivatives with respect to a parameter of the solutions of a system of differential equations,
+\emph{Annals of Mathematics}, 20, 292--296.
 \item Kermack, W. O., and McKendrick, A. G. (1927), A contribution to the mathematical theory of epidemics, \emph{Proceedings of the Royal Society of
 London, Series A}, 115, 700--721.
+\item Lindel\"of, E. (1894), Sur l'application de la m\'ethode des approximations successives aux \'equations diff\'erentielles ordinaires du
+premier ordre, \emph{Comptes Rendus de l'Acad\'emie des Sciences}, 118, 454--457.
 \item Lotka, A. J. (1925), \emph{Elements of Physical Biology}, Baltimore, Williams and Wilkins.
+\item Osgood, W. F. (1898), Beweis der Existenz einer L\"osung der Differentialgleichung $dy/dx = f(x, y)$ ohne Hinzunahme der Cauchy-Lipschitz'schen
+Bedingung, \emph{Monatshefte f\"ur Mathematik und Physik}, 9, 331--345.
+\item Peano, G. (1890), D\'emonstration de l'int\'egrabilit\'e des \'equations diff\'erentielles ordinaires, \emph{Mathematische Annalen}, 37,
+182--228.
+\item Picard, \'E. (1890), M\'emoire sur la th\'eorie des \'equations aux d\'eriv\'ees partielles et la m\'ethode des approximations successives,
+\emph{Journal de Math\'ematiques Pures et Appliqu\'ees}, 6, 145--210.
 \item Verhulst, P.-F. (1838), Notice sur la loi que la population suit dans son accroissement, \emph{Correspondance Math\'ematique et Physique}, 10,
 113--121.
 \item Volterra, V. (1926), Fluctuations in the abundance of a species considered mathematically, \emph{Nature}, 118, 558--560.

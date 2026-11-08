@@ -1,0 +1,144 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>2.6 Existence and uniqueness in software — Ordinary Differential Equations</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='ode.css' rel='stylesheet' type='text/css' /> 
+<meta content='ode.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Ordinary Differential Equations</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="odese1.html">First-Order Equations and the Qualitative View</a></li>
+<li class="sub"><a class="" href="odesu1.html">Differential equations and models</a></li>
+<li class="sub"><a class="" href="odesu2.html">Linear first-order equations</a></li>
+<li class="sub"><a class="" href="odesu3.html">Separable equations</a></li>
+<li class="sub"><a class="" href="odesu4.html">Exact equations and integrating factors</a></li>
+<li class="sub"><a class="" href="odesu5.html">Equations reducible to linear form</a></li>
+<li class="sub"><a class="" href="odesu6.html">Autonomous equations and the phase line</a></li>
+<li class="sub"><a class="" href="odesu7.html">First-order equations in software</a></li>
+<li class="sub"><a class="" href="odesu8.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="odese2.html">Existence and Uniqueness</a></li>
+<li class="sub"><a class="" href="odesu9.html">The integral equation</a></li>
+<li class="sub"><a class="" href="odesu10.html">Lipschitz conditions</a></li>
+<li class="sub"><a class="" href="odesu11.html">The Picard–Lindelöf theorem</a></li>
+<li class="sub"><a class="" href="odesu12.html">Gronwall’s inequality and continuous dependence</a></li>
+<li class="sub"><a class="" href="odesu13.html">Peano’s existence theorem</a></li>
+<li class="sub"><a class="current" href="odesu14.html">Existence and uniqueness in software</a></li>
+<li class="sub"><a class="" href="odesu15.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="odeli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 891 --><div class='crosslinks'><p class='noindent'>[<a href='odesu15.html'>next</a>] [<a href='odesu13.html'>prev</a>] [<a href='odesu13.html#tailodesu13.html'>prev-tail</a>] [<a href='#tailodesu14.html'>tail</a>] [<a href='odese2.html#odesu14.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>2.6   </span> <a id='x18-170002.6'></a>Existence and uniqueness in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 894 --><p class='noindent'><span class='head'>
+<a id='x18-17001r1'></a>
+<span class='cmbx-10x-x-109'>Software 2.6.1 </span>(Picard iteration in SymPy)<span class='cmbx-10x-x-109'>.</span>  </span> The iterates of Example <a href='odesu11.html#x15-14003r2'>2.3.2<!-- tex4ht:ref: ex:tanpicard  --></a>, computed by exact
+integration, compared with the Taylor series of \(\tan t\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-4'>
+&gt;&gt;&gt; import sympy as sp
+&gt;&gt;&gt; t, s = sp.symbols('t s')
+&gt;&gt;&gt; f = lambda t, x: 1 + x**2              # x' = 1 + x^2, x(0) = 0
+&gt;&gt;&gt; phi = [sp.Integer(0)]
+&gt;&gt;&gt; for k in range(4):                     # the Picard iteration
+...     p = phi[-1].subs(t, s)
+...     phi.append(sp.expand(sp.integrate(f(s, p), (s, 0, t))))
+...
+&gt;&gt;&gt; phi[3]
+t**7/63 + 2*t**5/15 + t**3/3 + t
+&gt;&gt;&gt; sp.series(sp.tan(t), t, 0, 9)
+t + t**3/3 + 2*t**5/15 + 17*t**7/315 + O(t**9)
+&gt;&gt;&gt; [sp.degree(p, t) for p in phi[1:]]
+[1, 3, 7, 15]
+</pre>
+<!-- l. 912 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output.</span> \(\phi _3\) agrees with \(\tan t = t + \frac {t^3}{3} + \frac {2t^5}{15} + \frac {17t^7}{315} + \cdots \) up to \(t^5\); its \(t^7\) coefficient \(\frac {1}{63} = \frac {5}{315}\) is still wrong. The degrees \(1, 3, 7, 15\) double
+(plus one) at each step, because squaring a polynomial doubles its degree, so the iterates contain
+many wrong high-order terms that later steps correct.
+</p><!-- l. 916 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave:     </span><span class='cmtt-10x-x-109'>syms t s; p = sym(0); for k = 1:3, p = int(1 + subs(p, t,
+s)^2, s, 0, t); end</span>.
+</p>
+</div>
+<!-- l. 917 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 919 --><p class='noindent'><span class='head'>
+<a id='x18-17002r2'></a>
+<span class='cmbx-10x-x-109'>Software 2.6.2 </span>(Convergence and the guaranteed interval)<span class='cmbx-10x-x-109'>.</span>  </span> The errors \(\phi _k - \tan t\) at three times, and the best
+interval that Theorem <a href='odesu11.html#x15-14002r1'>2.3.1<!-- tex4ht:ref: thm:picard  --></a> can promise over the choice of \(b\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-5'>
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; xs = (0.25, 0.5, 1.0)
+&gt;&gt;&gt; for k in range(1, 5):
+...     g = sp.lambdify(t, phi[k])
+...     print(k, [round(float(g(x) - np.tan(x)), 5) for x in xs])
+...
+1 [-0.00534, -0.0463, -0.55741]
+2 [-0.00013, -0.00464, -0.22407]
+3 [-0.0, -0.00035, -0.07487]
+4 [-0.0, -2e-05, -0.02045]
+&gt;&gt;&gt; b = np.linspace(0.01, 5, 2000); alpha = np.minimum(1.0, b / (1 + b**2))
+&gt;&gt;&gt; b[np.argmax(alpha)], alpha.max()
+(1.0010105052526264, 0.49999974497761523)
+</pre>
+<!-- l. 936 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>At \(t = 0.25\) and \(t = 0.5\), inside the guaranteed interval, the error falls by an order
+of magnitude or more at each step; at \(t = 1\), outside it, convergence is slower but still visible (\(-0.557\), \(-0.224\), \(-0.075\),
+\(-0.020\)). The iterates in fact converge on the whole of \((-\pi /2, \pi /2)\); the theorem is a sufficient condition, not a
+description. The search over \(b\) confirms that \(\alpha = b/(1 + b^2)\) is maximised at \(b = 1\), with \(\alpha = \frac 12\).
+</p><!-- l. 941 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave:   </span><span class='cmtt-10x-x-109'>b = linspace(0.01, 5, 2000); [amax, i] = max(min(1, b./(1 +
+b.^2)))</span>.
+</p>
+</div>
+<!-- l. 942 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 944 --><p class='noindent'><span class='head'>
+<a id='x18-17003r3'></a>
+<span class='cmbx-10x-x-109'>Software 2.6.3 </span>(Continuous dependence and its failure)<span class='cmbx-10x-x-109'>.</span>  </span> Two solutions of \(x' = 2\sin x\) from initial values \(0.001\)
+apart, against the bound of Theorem <a href='odesu12.html#x16-15002r2'>2.4.2<!-- tex4ht:ref: thm:contdep  --></a>; then the equation \(y' = 3y^{2/3}\) of Example <a href='odesu3.html#x6-5002r2'>1.3.2<!-- tex4ht:ref: ex:nonunique  --></a> from \(0\) and from
+\(10^{-12}\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-6'>
+&gt;&gt;&gt; from scipy.integrate import solve_ivp
+&gt;&gt;&gt; L, T = 2.0, 1.0                        # 2 sin x has Lipschitz L = 2
+&gt;&gt;&gt; rhs = lambda t, x: 2 * np.sin(x)
+&gt;&gt;&gt; x1 = solve_ivp(rhs, (0, T), [1.0], rtol=1e-11, atol=1e-12)
+&gt;&gt;&gt; x2 = solve_ivp(rhs, (0, T), [1.001], rtol=1e-11, atol=1e-12)
+&gt;&gt;&gt; gap = abs(x2.y[0, -1] - x1.y[0, -1]); gap, 0.001 * np.exp(L * T)
+(0.0005542867025911669, 0.007389056098930651)
+&gt;&gt;&gt; nu = lambda t, y: 3 * np.cbrt(y)**2    # y' = 3 y^(2/3): uniqueness fails
+&gt;&gt;&gt; [solve_ivp(nu, (0, 1), [y0], rtol=1e-10, atol=1e-14).y[0, -1]
+...  for y0 in (0.0, 1e-12)]
+[0.0, 1.0003001102501183]
+</pre>
+<!-- l. 959 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>After one unit of time the two solutions are \(0.00055\) apart, well within the
+Gronwall bound \(0.001e^2 = 0.0074\); the bound allows for the worst case, in which every direction is expanding at
+the maximal rate \(L\), while near \(x = 1\) the solutions are being drawn towards the stable equilibrium \(\pi \).
+For the non-Lipschitz equation, continuous dependence fails completely: starting at \(0\) the solver
+returns \(0\), but starting at \(10^{-12}\) it follows \(y \approx t^3\) to \(y(1) = 1.0003\). An initial difference of \(10^{-12}\) has become a difference of
+\(1\), because the two starting points lie on different members of the infinite family of solutions
+through the origin.
+</p><!-- l. 965 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>[t, x] = ode45(@(t, x) 2*sin(x), [0 1], 1.001)</span>.
+</p>
+</div>
+<!-- l. 966 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 968 --><div class='crosslinks'><p class='noindent'>[<a href='odesu15.html'>next</a>] [<a href='odesu13.html'>prev</a>] [<a href='odesu13.html#tailodesu13.html'>prev-tail</a>] [<a href='odesu14.html'>front</a>] [<a href='odese2.html#odesu14.html'>up</a>] </p></div>
+<!-- l. 968 --><p class='noindent'><a id='tailodesu14.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="odesu13.html">&larr; Previous</a><a class="up" href="odese2.html#odesu14.html">Contents</a><a class="next" href="odesu15.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="ordinary-differential-equations/2-6-existence-and-uniqueness-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
