@@ -1,0 +1,203 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>4.4 Revised methods in software — Operations Research</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='or.css' rel='stylesheet' type='text/css' /> 
+<meta content='or.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Operations Research</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="orse1.html">Operations Research and Linear Programming Models</a></li>
+<li class="sub"><a class="" href="orsu1.html">The linear programming model</a></li>
+<li class="sub"><a class="" href="orsu2.html">Formulating models</a></li>
+<li class="sub"><a class="" href="orsu3.html">Linearising non-linear features</a></li>
+<li class="sub"><a class="" href="orsu4.html">Linear programming in software</a></li>
+<li class="sub"><a class="" href="orsu5.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse2.html">The Geometry of Linear Programming</a></li>
+<li class="sub"><a class="" href="orsu6.html">Convex sets and polyhedra</a></li>
+<li class="sub"><a class="" href="orsu7.html">Basic feasible solutions</a></li>
+<li class="sub"><a class="" href="orsu8.html">The graphical method</a></li>
+<li class="sub"><a class="" href="orsu9.html">Geometry in software</a></li>
+<li class="sub"><a class="" href="orsu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse3.html">The Simplex Method</a></li>
+<li class="sub"><a class="" href="orsu11.html">Reduced costs and the optimality test</a></li>
+<li class="sub"><a class="" href="orsu12.html">The tableau</a></li>
+<li class="sub"><a class="" href="orsu13.html">Starting the method: artificial variables</a></li>
+<li class="sub"><a class="" href="orsu14.html">Degeneracy, cycling and Bland’s rule</a></li>
+<li class="sub"><a class="" href="orsu15.html">How fast is the simplex method?</a></li>
+<li class="sub"><a class="" href="orsu16.html">The simplex method in software</a></li>
+<li class="sub"><a class="" href="orsu17.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse4.html">The Revised Simplex Method and Bounded Variables</a></li>
+<li class="sub"><a class="" href="orsu18.html">The revised simplex method</a></li>
+<li class="sub"><a class="" href="orsu19.html">Bounded variables</a></li>
+<li class="sub"><a class="" href="orsu20.html">Numerical practice</a></li>
+<li class="sub"><a class="current" href="orsu21.html">Revised methods in software</a></li>
+<li class="sub"><a class="" href="orsu22.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="orli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 1027 --><div class='crosslinks'><p class='noindent'>[<a href='orsu22.html'>next</a>] [<a href='orsu20.html'>prev</a>] [<a href='orsu20.html#tailorsu20.html'>prev-tail</a>] [<a href='#tailorsu21.html'>tail</a>] [<a href='orse4.html#orsu21.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>4.4   </span> <a id='x27-260004.4'></a>Revised methods in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 1030 --><p class='noindent'><span class='head'>
+<a id='x27-26001r1'></a>
+<span class='cmbx-10x-x-109'>Software 4.4.1 </span>(The revised simplex method)<span class='cmbx-10x-x-109'>.</span>  </span> A revised simplex method with an explicit \(B^{-1}\) updated
+by eta matrices (Proposition <a href='orsu18.html#x24-23005r1'>4.1.1<!-- tex4ht:ref: prop:eta  --></a>), printing the basis, \(x_B\) and the multipliers \(y\) at each iteration, on
+Example <a href='orsu18.html#x24-23006r2'>4.1.2<!-- tex4ht:ref: ex:revised  --></a>:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-10'>
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; def revised(A, b, c, basis, tol=1e-9):
+...     """Minimise c x, A x = b, x &gt;= 0, from the feasible basis given.
+...     Keeps B^{-1} explicitly and updates it by an eta matrix each pivot."""
+...     m, n = A.shape
+...     Binv = np.linalg.inv(A[:, basis])
+...     while True:
+...         xB = Binv @ b
+...         y = c[basis] @ Binv                        # simplex multipliers
+...         rc = c - y @ A                             # reduced costs
+...         rc[basis] = 0
+...         j = int(np.argmin(rc))
+...         print(basis, np.round(xB, 3), 'y =', np.round(y, 3))
+...         if rc[j] &gt; -tol: return basis, xB, c[basis] @ xB
+...         u = Binv @ A[:, j]                         # the entering column
+...         ok = u &gt; tol
+...         if not ok.any(): raise ValueError('unbounded')
+...         r = np.where(ok)[0][np.argmin(xB[ok] / u[ok])]
+...         E = np.eye(m); E[:, r] = -u / u[r]; E[r, r] = 1 / u[r]   # eta
+...         Binv = E @ Binv; basis[r] = j
+...
+&gt;&gt;&gt; A = np.array([[2., 1, 1, 0, 0], [2, 4, 0, 1, 0], [-1, 1, 0, 0, 1]])
+&gt;&gt;&gt; b = np.array([26., 56, 5]); c = np.array([-10., -15, 0, 0, 0])
+&gt;&gt;&gt; basis, xB, z = revised(A, b, c, [2, 3, 4])
+[2, 3, 4] [26. 56.  5.] y = [0. 0. 0.]
+[2, 3, 1] [21. 36.  5.] y = [  0.   0. -15.]
+[2, 0, 1] [ 3.  6. 11.] y = [ 0.    -4.167  1.667]
+[4, 0, 1] [ 3.  8. 10.] y = [-1.667 -3.333  0.   ]
+&gt;&gt;&gt; -z
+230.0
+</pre>
+<!-- l. 1064 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The bases \(\{s_1, s_2, s_3\}\), \(\{s_1, s_2, x_2\}\), \(\{s_1, x_1, x_2\}\) and \(\{s_3, x_1, x_2\}\) (columns \(2, 3, 4\) are the slacks) are those of the tableau,
+visiting \(O\), \(D\), \(C\), \(B\). The final multipliers \(y = (-1.667, -3.333, 0)\) are minus the shadow prices, and the optimal value is \(230\).
+</p><!-- l. 1067 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>y = c(basis)/B </span>solves \(y^{\mathsf T}B = c_B^{\mathsf T}\); <span class='cmtt-10x-x-109'>u = B</span><span class='cmsy-10x-x-109'>∖</span><span class='cmtt-10x-x-109'>A(:,j) </span>gives the entering column.
+</p>
+</div>
+<!-- l. 1068 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1070 --><p class='noindent'><span class='head'>
+<a id='x27-26002r2'></a>
+<span class='cmbx-10x-x-109'>Software 4.4.2 </span>(Bounded variables and flips)<span class='cmbx-10x-x-109'>.</span>  </span> Maximise \(3x_1 + 5x_2 + 2x_3\) subject to \(x_1 + x_2 + x_3 \leq 10\), \(2x_1 + x_2 \leq 12\), \(x_2 + 2x_3 \leq 14\), with \(0 \leq x_1 \leq 4\), \(0 \leq x_2 \leq 3\), \(0 \leq x_3 \leq 8\): the
+bounded-variable method, printing each step’s entering variable and which limit stopped it; then
+HiGHS with the bounds:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-11'>
+&gt;&gt;&gt; from scipy.optimize import linprog
+&gt;&gt;&gt; def bounded(A, b, c, up, tol=1e-9):
+...     """Minimise c x, A x + s = b, 0 &lt;= x &lt;= up, s &gt;= 0 (b &gt;= 0): the
+...     simplex method with non-basic variables at either bound."""
+...     m, n = A.shape
+...     A = np.hstack([A, np.eye(m)]); c = np.r_[c, np.zeros(m)]
+...     up = np.r_[up, np.full(m, np.inf)]
+...     x = np.r_[np.zeros(n), b]; basis = list(range(n, n + m))
+...     while True:
+...         Binv = np.linalg.inv(A[:, basis])
+...         rc = c - (c[basis] @ Binv) @ A
+...         free = [j for j in range(n + m) if j not in basis and
+...                 ((x[j] &lt; tol and rc[j] &lt; -tol) or
+...                  (x[j] &gt; up[j] - tol and rc[j] &gt; tol))]
+...         if not free: return x[:n], c @ x
+...         j = min(free, key=lambda k: -abs(rc[k]))
+...         d = 1.0 if x[j] &lt; tol else -1.0          # raise or lower x_j
+...         u = d * (Binv @ A[:, j])                 # basics move by -theta u
+...         steps = [(up[j], 'flip', None)]    # x_j reaches its other bound
+...         for i, k in enumerate(basis):
+...             if u[i] &gt; tol: steps.append((x[k] / u[i], 'to 0', i))
+...             if u[i] &lt; -tol:
+...                 steps.append(((up[k] - x[k]) / -u[i], 'to up', i))
+...         th, kind, i = min(steps, key=lambda t: t[0])
+...         x[basis] -= th * u; x[j] += d * th
+...         name = f"x{j + 1}" if j &lt; n else f"s{j - n + 1}"
+...         if kind != 'flip':
+...             out = basis[i]; basis[i] = j
+...             who = f"x{out + 1}" if out &lt; n else f"s{out - n + 1}"
+...             kind += f", {who} leaves"
+...         print(f"{name:3s} {kind:18s} x = {np.round(x[:n], 3)}")
+...
+&gt;&gt;&gt; c = np.array([-3., -5, -2])            # maximise 3 x1 + 5 x2 + 2 x3
+&gt;&gt;&gt; A = np.array([[1., 1, 1], [2, 1, 0], [0, 1, 2]])
+&gt;&gt;&gt; b = np.array([10., 12, 14]); up = np.array([4., 3, 8])
+&gt;&gt;&gt; x, z = bounded(A, b, c, up)
+x2  flip               x = [0. 3. 0.]
+x1  flip               x = [4. 3. 0.]
+x3  to 0, s1 leaves    x = [4. 3. 3.]
+&gt;&gt;&gt; x, -z
+(array([4., 3., 3.]), 33.0)
+&gt;&gt;&gt; r = linprog(c, A_ub=A, b_ub=b, bounds=[(0, u) for u in up],
+...             method='highs')
+&gt;&gt;&gt; r.x, -r.fun                            # the same answer from HiGHS
+(array([4., 3., 3.]), 33.0)
+</pre>
+<!-- l. 1119 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The first two iterations are bound flips: \(x_2\) rises to its bound \(3\) and \(x_1\) to \(4\),
+with no change of basis. Only in the third does a constraint stop the step: \(x_3\) rises until the first
+constraint is tight (\(4 + 3 + 3 = 10\)), and its slack leaves the basis. The optimum is \((4, 3, 3)\), \(Z = 33\). Treating the bounds as
+rows would have doubled the number of constraints, from \(3\) to \(6\).
+</p><!-- l. 1123 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>linprog(c, A, b, [], [], [0;0;0], [4;3;8])</span>.
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 1124 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1126 --><p class='noindent'><span class='head'>
+<a id='x27-26003r3'></a>
+<span class='cmbx-10x-x-109'>Software 4.4.3 </span>(Simplex against interior points)<span class='cmbx-10x-x-109'>.</span>  </span> A random sparse LP with \(400\) constraints and \(1000\)
+variables bounded in \([0, 1]\), solved by HiGHS’s dual simplex and interior-point methods: status, optimal
+value, iterations and time:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-12'>
+&gt;&gt;&gt; import time
+&gt;&gt;&gt; rng = np.random.default_rng(3)
+&gt;&gt;&gt; m, n = 400, 1000                       # a random feasible, bounded LP
+&gt;&gt;&gt; A = rng.uniform(0, 1, (m, n)) * (rng.uniform(size=(m, n)) &lt; 0.05)
+&gt;&gt;&gt; b = A @ rng.uniform(0, 1, n) + 1
+&gt;&gt;&gt; c = -rng.uniform(0, 1, n)
+&gt;&gt;&gt; for method in ('highs-ds', 'highs-ipm'):
+...     t0 = time.perf_counter()
+...     r = linprog(c, A_ub=A, b_ub=b, bounds=(0, 1), method=method)
+...     print(method, r.status, round(r.fun, 6), r.nit,
+...           f"{time.perf_counter() - t0:.3f}s")
+...
+highs-ds 0 -366.485484 1043 0.297s
+highs-ipm 0 -366.485484 19 0.146s
+</pre>
+<!-- l. 1144 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>Both methods reach the same optimum, \(-366.485484\). The simplex method takes
+about a thousand cheap iterations, roughly \(2.5\) per constraint; the interior-point method takes \(19\)
+expensive ones. On this small problem both take a fraction of a second, and the times depend
+on the machine.
+</p><!-- l. 1147 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave:      </span><span class='cmtt-10x-x-109'>optimoptions(’linprog’,’Algorithm’,’dual-simplex’)     </span>or
+<span class='cmtt-10x-x-109'>’interior-point’</span>.
+</p>
+</div>
+<!-- l. 1148 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 1150 --><div class='crosslinks'><p class='noindent'>[<a href='orsu22.html'>next</a>] [<a href='orsu20.html'>prev</a>] [<a href='orsu20.html#tailorsu20.html'>prev-tail</a>] [<a href='orsu21.html'>front</a>] [<a href='orse4.html#orsu21.html'>up</a>] </p></div>
+<!-- l. 1150 --><p class='noindent'><a id='tailorsu21.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="orsu20.html">&larr; Previous</a><a class="up" href="orse4.html#orsu21.html">Contents</a><a class="next" href="orsu22.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="operations-research/4-4-revised-methods-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

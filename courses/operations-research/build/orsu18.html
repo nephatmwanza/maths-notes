@@ -1,0 +1,108 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>4.1 The revised simplex method — Operations Research</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='or.css' rel='stylesheet' type='text/css' /> 
+<meta content='or.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Operations Research</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="orse1.html">Operations Research and Linear Programming Models</a></li>
+<li class="sub"><a class="" href="orsu1.html">The linear programming model</a></li>
+<li class="sub"><a class="" href="orsu2.html">Formulating models</a></li>
+<li class="sub"><a class="" href="orsu3.html">Linearising non-linear features</a></li>
+<li class="sub"><a class="" href="orsu4.html">Linear programming in software</a></li>
+<li class="sub"><a class="" href="orsu5.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse2.html">The Geometry of Linear Programming</a></li>
+<li class="sub"><a class="" href="orsu6.html">Convex sets and polyhedra</a></li>
+<li class="sub"><a class="" href="orsu7.html">Basic feasible solutions</a></li>
+<li class="sub"><a class="" href="orsu8.html">The graphical method</a></li>
+<li class="sub"><a class="" href="orsu9.html">Geometry in software</a></li>
+<li class="sub"><a class="" href="orsu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse3.html">The Simplex Method</a></li>
+<li class="sub"><a class="" href="orsu11.html">Reduced costs and the optimality test</a></li>
+<li class="sub"><a class="" href="orsu12.html">The tableau</a></li>
+<li class="sub"><a class="" href="orsu13.html">Starting the method: artificial variables</a></li>
+<li class="sub"><a class="" href="orsu14.html">Degeneracy, cycling and Bland’s rule</a></li>
+<li class="sub"><a class="" href="orsu15.html">How fast is the simplex method?</a></li>
+<li class="sub"><a class="" href="orsu16.html">The simplex method in software</a></li>
+<li class="sub"><a class="" href="orsu17.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse4.html">The Revised Simplex Method and Bounded Variables</a></li>
+<li class="sub"><a class="current" href="orsu18.html">The revised simplex method</a></li>
+<li class="sub"><a class="" href="orsu19.html">Bounded variables</a></li>
+<li class="sub"><a class="" href="orsu20.html">Numerical practice</a></li>
+<li class="sub"><a class="" href="orsu21.html">Revised methods in software</a></li>
+<li class="sub"><a class="" href="orsu22.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="orli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 955 --><div class='crosslinks'><p class='noindent'>[<a href='orsu19.html'>next</a>] [<a href='#tailorsu18.html'>tail</a>] [<a href='orse4.html#orsu18.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>4.1   </span> <a id='x24-230004.1'></a>The revised simplex method</h4>
+<!-- l. 958 --><p class='noindent'>Each iteration of the simplex method needs only four computations with the current basis matrix
+\(B\):
+     </p><dl class='enumerate-enumitem'><dt class='enumerate-enumitem'>
+  (1) </dt><dd class='enumerate-enumitem'>the basic solution \(x_B = B^{-1}b\);
+     </dd><dt class='enumerate-enumitem'>
+  (2) </dt><dd class='enumerate-enumitem'>the <span class='cmbx-10x-x-109'>simplex multipliers</span> \(y^{\mathsf T} = c_B^{\mathsf T}B^{-1}\), by solving \(B^{\mathsf T}y = c_B\);
+     </dd><dt class='enumerate-enumitem'>
+  (3) </dt><dd class='enumerate-enumitem'>the reduced costs \(\bar c_j = c_j - y^{\mathsf T}A_j\) of the non-basic columns (<span class='cmbx-10x-x-109'>pricing</span>), to choose the entering column \(j\);
+                                                                                      
+                                                                                      
+     </dd><dt class='enumerate-enumitem'>
+  (4) </dt><dd class='enumerate-enumitem'>the entering column \(u = B^{-1}A_j\), by solving \(Bu = A_j\), for the ratio test.</dd></dl>
+<!-- l. 965 --><p class='noindent'>The rest of \(B^{-1}A\) is never formed. Solving with \(B\) is done from a factorisation, updated after each pivot
+instead of recomputed. The simplest update is the <span class='cmbx-10x-x-109'>product form of the inverse</span>.
+</p>
+<div class='newtheorem nt-proposition'>
+<!-- l. 967 --><p class='noindent'><span class='head'>
+<a id='x24-23005r1'></a>
+<span class='cmbx-10x-x-109'>Proposition 4.1.1 </span>(Eta update)<span class='cmbx-10x-x-109'>.</span>  </span> If column \(j\) enters at row \(r\), with \(u = B^{-1}A_j\) and \(u_r \neq 0\), the new basis matrix
+\(\bar B\) satisfies \(\bar B^{-1} = EB^{-1}\), where \(E\) is the identity except in column \(r\), which is \[ \eta = \Bigl (-\frac {u_1}{u_r}, \ldots , -\frac {u_{r - 1}}{u_r}, \frac 1{u_r}, -\frac {u_{r + 1}}{u_r}, \ldots , -\frac {u_m}{u_r}\Bigr )^{\mathsf T} . \]
+</p>
+</div>
+<!-- l. 973 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 976 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>\(B^{-1}\bar B\) is the identity with column \(r\) replaced by \(B^{-1}A_j = u\). The matrix \(E\) is the inverse of that: \(E\) times the
+identity-with-column-\(u\) has column \(r\) equal to \(Eu = u_r\eta + \sum _{i \neq r}u_ie_i = e_r\), and its other columns unchanged. So \(EB^{-1}\bar B = I\).             □
+</p>
+</div>
+<!-- l. 979 --><p class='noindent'>After \(k\) pivots \(B^{-1} = E_k\cdots E_1B_0^{-1}\), and each \(E_i\) is stored as one column. Since the product grows and rounding errors
+accumulate, the basis is <span class='cmbx-10x-x-109'>refactorised </span>from scratch every few dozen pivots. Modern codes use a sparse \(LU\)
+factorisation of \(B\) with updates of Forrest–Tomlin type, and choose the entering column by more refined
+rules than Dantzig’s (<span class='cmti-10x-x-109'>steepest edge</span>, which picks the edge that improves the objective most
+per unit of distance, and <span class='cmti-10x-x-109'>partial pricing</span>, which prices only part of the columns at each
+iteration).
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 982 --><p class='noindent'><span class='head'>
+<a id='x24-23006r2'></a>
+<span class='cmbx-10x-x-109'>Example 4.1.2.</span>  </span> For Example <a href='orsu12.html#x17-16001r1'>3.2.1<!-- tex4ht:ref: ex:tableau  --></a> as a minimisation of \(-Z = -10x_1 - 15x_2\), the revised method visits the same
+bases as the tableau (Software <a href='orsu21.html#x27-26001r1'>4.4.1<!-- tex4ht:ref: sw:revised  --></a>). At the final basis \(\{s_3, x_1, x_2\}\) the multipliers are \(y = (-\frac 53, -\frac {10}3, 0)\), the shadow prices
+of the tableau with the sign of the minimisation: an extra hour of the first resource is worth \(\frac 53\),
+of the second \(\frac {10}3\), and of the third, which has slack, nothing.
+                                                                                      
+                                                                                      
+</p>
+</div>
+<!-- l. 986 --><p class='noindent'>
+</p><!-- l. 988 --><p class='noindent'><span class='cmbx-10x-x-109'>Work per iteration. </span>For an \(m \times n\) problem, a tableau pivot costs about \(mn\) operations. The revised method
+costs two solves with \(B\) (about \(m^2\) each for dense factors, much less if sparse) and pricing, \(O(\text {nonzeros of } A)\).
+When \(n\) is much larger than \(m\), as in most applications, and \(A\) is sparse, the saving is large; and
+the revised method works with the original sparse \(A\) throughout, where the tableau fills
+in.
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 991 --><div class='crosslinks'><p class='noindent'>[<a href='orsu19.html'>next</a>] [<a href='orsu18.html'>front</a>] [<a href='orse4.html#orsu18.html'>up</a>] </p></div>
+<!-- l. 991 --><p class='noindent'><a id='tailorsu18.html'></a> </p> 
+<nav class="pagenav"><a class="up" href="orse4.html#orsu18.html">Contents</a><a class="next" href="orsu19.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="operations-research/4-1-the-revised-simplex-method" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

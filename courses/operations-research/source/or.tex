@@ -945,6 +945,254 @@ How many bases does a problem with $m = 20$ equality constraints and $n = 60$ va
 At most $\binom{60}{20} = 4.19 \times 10^{15}$. The simplex method typically needs between $m$ and $3m$ pivots, that is $20$ to $60$; each pivot costs $O(mn)$ operations, so the whole solve takes well under a million operations, against more than $10^{15}$ linear systems for enumeration.
 \end{solution}
 
+%======================================================================
+\section{The Revised Simplex Method and Bounded Variables}
+\label{sec:revised}
+
+The tableau updates every entry of $B^{-1}A$ at every pivot, although a pivot needs only one column of it, the entering one, and one row of reduced costs. For a problem with thousands of constraints and a sparse matrix $A$, recomputing only what is needed from a factorisation of $B$ is faster by orders of
+magnitude, and numerically safer. This is the \textbf{revised simplex method}, the form in which the simplex method is actually implemented. This section derives it, and then extends the method to variables with upper bounds, which are handled implicitly instead of as extra constraints.
+
+\subsection{The revised simplex method}
+\label{ssec:revisedmethod}
+
+Each iteration of the simplex method needs only four computations with the current basis matrix $B$:
+\begin{enumerate}[label=(\arabic*)]
+\item the basic solution $x_B = B^{-1}b$;
+\item the \textbf{simplex multipliers} $y^{\mathsf T} = c_B^{\mathsf T}B^{-1}$, by solving $B^{\mathsf T}y = c_B$;
+\item the reduced costs $\bar c_j = c_j - y^{\mathsf T}A_j$ of the non-basic columns (\textbf{pricing}), to choose the entering column $j$;
+\item the entering column $u = B^{-1}A_j$, by solving $Bu = A_j$, for the ratio test.
+\end{enumerate}
+The rest of $B^{-1}A$ is never formed. Solving with $B$ is done from a factorisation, updated after each pivot instead of recomputed. The simplest update is the \textbf{product form of the inverse}.
+
+\begin{prop}[Eta update]
+\label{prop:eta}
+If column $j$ enters at row $r$, with $u = B^{-1}A_j$ and $u_r \neq 0$, the new basis matrix $\bar B$ satisfies $\bar B^{-1} = EB^{-1}$, where $E$ is the identity except in column $r$, which is
+\[
+\eta = \Bigl(-\frac{u_1}{u_r}, \ldots, -\frac{u_{r - 1}}{u_r}, \frac1{u_r}, -\frac{u_{r + 1}}{u_r}, \ldots, -\frac{u_m}{u_r}\Bigr)^{\mathsf T} .
+\]
+\end{prop}
+
+\begin{proof}
+$B^{-1}\bar B$ is the identity with column $r$ replaced by $B^{-1}A_j = u$. The matrix $E$ is the inverse of that: $E$ times the identity-with-column-$u$ has column $r$ equal to $Eu = u_r\eta + \sum_{i \neq r}u_ie_i = e_r$, and its other columns unchanged. So $EB^{-1}\bar B = I$.
+\end{proof}
+
+After $k$ pivots $B^{-1} = E_k\cdots E_1B_0^{-1}$, and each $E_i$ is stored as one column. Since the product grows and rounding errors accumulate, the basis is \textbf{refactorised} from scratch every few dozen pivots. Modern codes use a sparse $LU$ factorisation of $B$ with updates of Forrest--Tomlin type, and
+choose the entering column by more refined rules than Dantzig's (\emph{steepest edge}, which picks the edge that improves the objective most per unit of distance, and \emph{partial pricing}, which prices only part of the columns at each iteration).
+
+\begin{exa}
+\label{ex:revised}
+For Example~\ref{ex:tableau} as a minimisation of $-Z = -10x_1 - 15x_2$, the revised method visits the same bases as the tableau (Software~\ref{sw:revised}). At the final basis $\{s_3, x_1, x_2\}$ the multipliers are $y = (-\frac53, -\frac{10}3, 0)$, the shadow prices of the tableau with the sign of the
+minimisation: an extra hour of the first resource is worth $\frac53$, of the second $\frac{10}3$, and of the third, which has slack, nothing.
+\end{exa}
+
+\textbf{Work per iteration.} For an $m \times n$ problem, a tableau pivot costs about $mn$ operations. The revised method costs two solves with $B$ (about $m^2$ each for dense factors, much less if sparse) and pricing, $O(\text{nonzeros of } A)$. When $n$ is much larger than $m$, as in most applications, and $A$ is
+sparse, the saving is large; and the revised method works with the original sparse $A$ throughout, where the tableau fills in.
+
+\subsection{Bounded variables}
+\label{ssec:bounded}
+
+Many variables have natural upper bounds: a capacity, a demand, a binary choice relaxed to $[0, 1]$. Writing each $x_j \leq u_j$ as a constraint adds a row per variable. The \textbf{bounded-variable simplex method} keeps the constraints $\ell_j \leq x_j \leq u_j$ implicit, by allowing a non-basic variable to sit at
+either of its bounds.
+
+Consider: minimise $c^{\mathsf T}x$ subject to $Ax = b$, $\ell \leq x \leq u$. A basic solution now fixes each non-basic variable at $\ell_j$ or $u_j$ and solves for the basic ones; it is feasible if they lie within their bounds.
+
+\begin{thm}
+\label{thm:boundedopt}
+A basic feasible solution is optimal if every non-basic variable at its lower bound has $\bar c_j \geq 0$ and every non-basic variable at its upper bound has $\bar c_j \leq 0$.
+\end{thm}
+
+\begin{proof}
+For any feasible $z$, as in Theorem~\ref{thm:optimality}, $c^{\mathsf T}z - c^{\mathsf T}x = \sum_{j \in N}\bar c_j(z_j - x_j)$. If $x_j = \ell_j$ then $z_j - x_j \geq 0$ and $\bar c_j \geq 0$; if $x_j = u_j$ then $z_j - x_j \leq 0$ and $\bar c_j \leq 0$. Every term is non-negative.
+\end{proof}
+
+If a non-basic variable violates the condition, it is moved away from its bound: increased if it is at $\ell_j$ with $\bar c_j < 0$, decreased if at $u_j$ with $\bar c_j > 0$. The ratio test now has three kinds of limit on the step $\theta$:
+\begin{enumerate}[label=(\roman*)]
+\item a basic variable falls to its lower bound;
+\item a basic variable rises to its upper bound;
+\item the entering variable itself reaches its other bound, after a step of $u_j - \ell_j$.
+\end{enumerate}
+In cases (i) and (ii) the basis changes as usual, and the leaving variable becomes non-basic at the bound it reached. In case (iii) there is a \textbf{bound flip}: the variable moves from one bound to the other, the basis does not change, and no refactorisation is needed. Flips are cheap, and in problems with many bounded
+variables most iterations are flips (Software~\ref{sw:bounded}). Free variables, with no bounds at all, are kept basic once they enter; the dual simplex method of the section on duality uses the same idea on the dual side.
+
+\subsection{Numerical practice}
+\label{ssec:numerical}
+
+In floating point the tests $\bar c_j < 0$ and $u_i > 0$ are made with tolerances, typically $10^{-7}$ to $10^{-9}$ relative to the data. A tiny pivot element $u_r$ is dangerous, since the eta column contains $1/u_r$; the \textbf{Harris ratio test} relaxes the bounds by the tolerance and then chooses, among the rows
+nearly tied for the minimum, the one with the largest $|u_r|$. Problems are \textbf{scaled} so that the entries of $A$ are of comparable size, and \textbf{presolve} removes redundant rows, fixed variables and singleton constraints before the simplex method starts. These details are invisible to the user of a modern
+solver, but they are why the method is reliable on problems with millions of variables.
+
+For very large problems, \textbf{interior-point methods} are the main alternative. They follow a path through the interior of the feasible region, solving one large sparse linear system per iteration, and need a few dozen iterations almost regardless of size (Software~\ref{sw:highs}); the simplex method needs
+more, cheaper iterations, but ends at a vertex and can be restarted quickly when the data change slightly, which matters for the sensitivity analysis and integer programming to come.
+
+\subsection{Revised methods in software}
+\label{ssec:software4}
+
+\begin{software}[The revised simplex method]
+\label{sw:revised}
+A revised simplex method with an explicit $B^{-1}$ updated by eta matrices (Proposition~\ref{prop:eta}), printing the basis, $x_B$ and the multipliers $y$ at each iteration, on Example~\ref{ex:revised}:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> def revised(A, b, c, basis, tol=1e-9):
+...     """Minimise c x, A x = b, x >= 0, from the feasible basis given.
+...     Keeps B^{-1} explicitly and updates it by an eta matrix each pivot."""
+...     m, n = A.shape
+...     Binv = np.linalg.inv(A[:, basis])
+...     while True:
+...         xB = Binv @ b
+...         y = c[basis] @ Binv                        # simplex multipliers
+...         rc = c - y @ A                             # reduced costs
+...         rc[basis] = 0
+...         j = int(np.argmin(rc))
+...         print(basis, np.round(xB, 3), 'y =', np.round(y, 3))
+...         if rc[j] > -tol: return basis, xB, c[basis] @ xB
+...         u = Binv @ A[:, j]                         # the entering column
+...         ok = u > tol
+...         if not ok.any(): raise ValueError('unbounded')
+...         r = np.where(ok)[0][np.argmin(xB[ok] / u[ok])]
+...         E = np.eye(m); E[:, r] = -u / u[r]; E[r, r] = 1 / u[r]   # eta
+...         Binv = E @ Binv; basis[r] = j
+...
+>>> A = np.array([[2., 1, 1, 0, 0], [2, 4, 0, 1, 0], [-1, 1, 0, 0, 1]])
+>>> b = np.array([26., 56, 5]); c = np.array([-10., -15, 0, 0, 0])
+>>> basis, xB, z = revised(A, b, c, [2, 3, 4])
+[2, 3, 4] [26. 56.  5.] y = [0. 0. 0.]
+[2, 3, 1] [21. 36.  5.] y = [  0.   0. -15.]
+[2, 0, 1] [ 3.  6. 11.] y = [ 0.    -4.167  1.667]
+[4, 0, 1] [ 3.  8. 10.] y = [-1.667 -3.333  0.   ]
+>>> -z
+230.0
+\end{verbatim}}
+\textbf{Reading the output.} The bases $\{s_1, s_2, s_3\}$, $\{s_1, s_2, x_2\}$, $\{s_1, x_1, x_2\}$ and $\{s_3, x_1, x_2\}$ (columns $2, 3, 4$ are the slacks) are those of the tableau, visiting $O$, $D$, $C$, $B$. The final multipliers $y = (-1.667, -3.333, 0)$ are minus the shadow prices, and the optimal value is $230$.
+
+\textbf{MATLAB/Octave:} \texttt{y = c(basis)/B} solves $y^{\mathsf T}B = c_B^{\mathsf T}$; \texttt{u = B\textbackslash A(:,j)} gives the entering column.
+\end{software}
+
+\begin{software}[Bounded variables and flips]
+\label{sw:bounded}
+Maximise $3x_1 + 5x_2 + 2x_3$ subject to $x_1 + x_2 + x_3 \leq 10$, $2x_1 + x_2 \leq 12$, $x_2 + 2x_3 \leq 14$, with $0 \leq x_1 \leq 4$, $0 \leq x_2 \leq 3$, $0 \leq x_3 \leq 8$: the bounded-variable method, printing each step's entering variable and which limit stopped it; then HiGHS with the bounds:
+{\small\begin{verbatim}
+>>> from scipy.optimize import linprog
+>>> def bounded(A, b, c, up, tol=1e-9):
+...     """Minimise c x, A x + s = b, 0 <= x <= up, s >= 0 (b >= 0): the
+...     simplex method with non-basic variables at either bound."""
+...     m, n = A.shape
+...     A = np.hstack([A, np.eye(m)]); c = np.r_[c, np.zeros(m)]
+...     up = np.r_[up, np.full(m, np.inf)]
+...     x = np.r_[np.zeros(n), b]; basis = list(range(n, n + m))
+...     while True:
+...         Binv = np.linalg.inv(A[:, basis])
+...         rc = c - (c[basis] @ Binv) @ A
+...         free = [j for j in range(n + m) if j not in basis and
+...                 ((x[j] < tol and rc[j] < -tol) or
+...                  (x[j] > up[j] - tol and rc[j] > tol))]
+...         if not free: return x[:n], c @ x
+...         j = min(free, key=lambda k: -abs(rc[k]))
+...         d = 1.0 if x[j] < tol else -1.0          # raise or lower x_j
+...         u = d * (Binv @ A[:, j])                 # basics move by -theta u
+...         steps = [(up[j], 'flip', None)]    # x_j reaches its other bound
+...         for i, k in enumerate(basis):
+...             if u[i] > tol: steps.append((x[k] / u[i], 'to 0', i))
+...             if u[i] < -tol:
+...                 steps.append(((up[k] - x[k]) / -u[i], 'to up', i))
+...         th, kind, i = min(steps, key=lambda t: t[0])
+...         x[basis] -= th * u; x[j] += d * th
+...         name = f"x{j + 1}" if j < n else f"s{j - n + 1}"
+...         if kind != 'flip':
+...             out = basis[i]; basis[i] = j
+...             who = f"x{out + 1}" if out < n else f"s{out - n + 1}"
+...             kind += f", {who} leaves"
+...         print(f"{name:3s} {kind:18s} x = {np.round(x[:n], 3)}")
+...
+>>> c = np.array([-3., -5, -2])            # maximise 3 x1 + 5 x2 + 2 x3
+>>> A = np.array([[1., 1, 1], [2, 1, 0], [0, 1, 2]])
+>>> b = np.array([10., 12, 14]); up = np.array([4., 3, 8])
+>>> x, z = bounded(A, b, c, up)
+x2  flip               x = [0. 3. 0.]
+x1  flip               x = [4. 3. 0.]
+x3  to 0, s1 leaves    x = [4. 3. 3.]
+>>> x, -z
+(array([4., 3., 3.]), 33.0)
+>>> r = linprog(c, A_ub=A, b_ub=b, bounds=[(0, u) for u in up],
+...             method='highs')
+>>> r.x, -r.fun                            # the same answer from HiGHS
+(array([4., 3., 3.]), 33.0)
+\end{verbatim}}
+\textbf{Reading the output.} The first two iterations are bound flips: $x_2$ rises to its bound $3$ and $x_1$ to $4$, with no change of basis. Only in the third does a constraint stop the step: $x_3$ rises until the first constraint is tight ($4 + 3 + 3 = 10$), and its slack leaves the basis. The optimum is $(4, 3, 3)$,
+$Z = 33$. Treating the bounds as rows would have doubled the number of constraints, from $3$ to $6$.
+
+\textbf{MATLAB/Octave:} \texttt{linprog(c, A, b, [], [], [0;0;0], [4;3;8])}.
+\end{software}
+
+\begin{software}[Simplex against interior points]
+\label{sw:highs}
+A random sparse LP with $400$ constraints and $1000$ variables bounded in $[0, 1]$, solved by HiGHS's dual simplex and interior-point methods: status, optimal value, iterations and time:
+{\small\begin{verbatim}
+>>> import time
+>>> rng = np.random.default_rng(3)
+>>> m, n = 400, 1000                       # a random feasible, bounded LP
+>>> A = rng.uniform(0, 1, (m, n)) * (rng.uniform(size=(m, n)) < 0.05)
+>>> b = A @ rng.uniform(0, 1, n) + 1
+>>> c = -rng.uniform(0, 1, n)
+>>> for method in ('highs-ds', 'highs-ipm'):
+...     t0 = time.perf_counter()
+...     r = linprog(c, A_ub=A, b_ub=b, bounds=(0, 1), method=method)
+...     print(method, r.status, round(r.fun, 6), r.nit,
+...           f"{time.perf_counter() - t0:.3f}s")
+...
+highs-ds 0 -366.485484 1043 0.297s
+highs-ipm 0 -366.485484 19 0.146s
+\end{verbatim}}
+\textbf{Reading the output.} Both methods reach the same optimum, $-366.485484$. The simplex method takes about a thousand cheap iterations, roughly $2.5$ per constraint; the interior-point method takes $19$ expensive ones. On this small problem both take a fraction of a second, and the times depend on the machine.
+
+\textbf{MATLAB/Octave:} \texttt{optimoptions('linprog','Algorithm','dual-simplex')} or \texttt{'interior-point'}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Verify Proposition~\ref{prop:eta} for $m = 2$ with $B = I$, entering column $A_j = (2, 4)^{\mathsf T}$ and $r = 2$.
+\end{problem}
+
+\begin{solution}
+$u = (2, 4)$, $\eta = (-\frac24, \frac14) = (-\frac12, \frac14)$, so $E = \begin{pmatrix} 1 & -\frac12 \\ 0 & \frac14 \end{pmatrix}$. The new basis is $\bar B = \begin{pmatrix} 1 & 2 \\ 0 & 4 \end{pmatrix}$, and $E\bar B = \begin{pmatrix} 1 & 2 - 2 \\ 0 & 1 \end{pmatrix} = I$.
+\end{solution}
+
+\begin{problem}
+For the final basis $\{s_3, x_1, x_2\}$ of Example~\ref{ex:revised}, compute $y$ from $B^{\mathsf T}y = c_B$ directly and confirm the reduced costs of $s_1$ and $s_2$.
+\end{problem}
+
+\begin{solution}
+The basic columns are $s_3 = (0, 0, 1)$, $x_1 = (2, 2, -1)$, $x_2 = (1, 4, 1)$, with costs $0, -10, -15$. The equations are $y_3 = 0$, $2y_1 + 2y_2 - y_3 = -10$, $y_1 + 4y_2 + y_3 = -15$, so $y_1 + y_2 = -5$ and $y_1 + 4y_2 = -15$, giving $y_2 = -\frac{10}3$, $y_1 = -\frac53$. The reduced cost of $s_1$
+is $0 - y_1 = \frac53 > 0$ and of $s_2$ is $\frac{10}3 > 0$: optimal.
+\end{solution}
+
+\begin{problem}
+Solve by the bounded-variable method: maximise $2x_1 + x_2$ subject to $x_1 + x_2 \leq 5$, $0 \leq x_1 \leq 3$, $0 \leq x_2 \leq 4$. How many basis changes occur?
+\end{problem}
+
+\begin{solution}
+From $x = 0$ with the slack $s$ basic, $x_1$ enters (largest coefficient). The limits are its own bound, $3$, and the slack reaching $0$ at $x_1 = 5$; the flip comes first, so $x_1 = 3$, $s = 2$, with no basis change. Then $x_2$ enters; its bound allows $4$, the slack allows $2$, so $x_2 = 2$ and $s$ leaves: one basis
+change. Now $x_1$ is non-basic at its upper bound with reduced cost $2 - 1 = 1$ in the maximisation (rising $x_1$ forces $x_2$ down one for one), which is the right sign for a variable at its upper bound, so $(3, 2)$ is optimal with $Z = 8$.
+\end{solution}
+
+\begin{problem}
+A problem has $m = 1000$ constraints and $n = 20\,000$ variables, with about $10$ non-zeros per column. Estimate the operations per iteration of the tableau method and of the revised method with sparse factors.
+\end{problem}
+
+\begin{solution}
+The tableau updates $m(n + 1) \approx 2 \times 10^7$ entries per pivot. The revised method prices $n$ columns at about $10$ operations each, $2 \times 10^5$, and performs two sparse solves whose cost depends on the fill of the factors, typically a small multiple of the non-zeros of $B$, say $10^4$ to $10^5$. So it is about
+$100$ times cheaper per iteration, and it stores $2 \times 10^5$ non-zeros instead of a dense $2 \times 10^7$ tableau.
+\end{solution}
+
+\begin{problem}
+Show that a bound flip does not change $B$ but does change $x_B$, and give the new $x_B$ after a flip of $x_j$ from $\ell_j$ to $u_j$.
+\end{problem}
+
+\begin{solution}
+The basic variables satisfy $Bx_B = b - \sum_{k \in N}A_kx_k$. Changing the non-basic value $x_j$ by $u_j - \ell_j$ changes the right side by $-A_j(u_j - \ell_j)$, so $x_B$ becomes $x_B - (u_j - \ell_j)B^{-1}A_j$. The basis is the same, so $B^{-1}$ and the factorisation are unchanged; the step is
+allowed only if this new $x_B$ is within its bounds, which is what the ratio test checked.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -980,6 +1228,11 @@ At most $\binom{60}{20} = 4.19 \times 10^{15}$. The simplex method typically nee
 \item Charnes, A. (1952), Optimality and degeneracy in linear programming, \emph{Econometrica}, 20, 160--170.
 \item Charnes, A., Cooper, W. W., and Ferguson, R. O. (1955), Optimal estimation of executive compensation by linear programming, \emph{Management Science}, 1, 138--151.
 \item Dantzig, G. B. (1951), Maximization of a linear function of variables subject to linear inequalities, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 339--347.
+\item Dantzig, G. B. (1955), Upper bounds, secondary constraints, and block triangularity in linear programming, \emph{Econometrica}, 23, 174--183.
+\item Dantzig, G. B., and Orchard-Hays, W. (1954), The product form for the inverse in the simplex method, \emph{Mathematical Tables and Other Aids to Computation}, 8, 64--67.
+\item Forrest, J. J. H., and Tomlin, J. A. (1972), Updated triangular factors of the basis to maintain sparsity in the product form simplex method, \emph{Mathematical Programming}, 2, 263--278.
+\item Goldfarb, D., and Reid, J. K. (1977), A practicable steepest-edge simplex algorithm, \emph{Mathematical Programming}, 12, 361--371.
+\item Harris, P. M. J. (1973), Pivot selection methods of the Devex LP code, \emph{Mathematical Programming}, 5, 1--28.
 \item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.
 \item Karmarkar, N. (1984), A new polynomial-time algorithm for linear programming, \emph{Combinatorica}, 4, 373--395.
 \item Khachiyan, L. G. (1979), A polynomial algorithm in linear programming, \emph{Soviet Mathematics Doklady}, 20, 191--194.
