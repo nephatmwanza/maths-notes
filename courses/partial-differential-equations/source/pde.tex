@@ -3090,6 +3090,288 @@ Show by the Fourier transform that the problem $u_t = -\kappa u_{xx}$, $u(x, 0) 
 $\hat u = \hat ge^{\kappa\xi^2t}$. Take $g_n$ with $\hat g_n$ equal to $\varepsilon$ on $n \leq \xi \leq n + 1$ and $0$ elsewhere; then $\|g_n\|^2 = \varepsilon^2/2\pi$ by Plancherel, while $\|u_n(\cdot, t)\|^2 \geq \frac1{2\pi}\varepsilon^2e^{2\kappa n^2t} \to \infty$. Data of fixed small size produce arbitrarily large solutions at any $t > 0$.
 \end{solution}
 
+%======================================================================
+\section{Separation in Polar, Cylindrical and Spherical Coordinates}
+\label{sec:curvilinear}
+
+Drums are round, pipes are cylinders, and planets are spheres. In such regions the boundary is a coordinate surface of polar, cylindrical or spherical coordinates, and separation of variables in those coordinates produces new ordinary differential equations in the radial and angular variables, whose solutions
+are the \textbf{special functions} of mathematical physics: Bessel functions for circles and cylinders, Legendre functions and spherical harmonics for spheres. Their series solutions and basic identities belong to the theory of ordinary differential equations; this section uses them to solve the equations of the
+previous sections in round regions.
+
+\subsection{The Laplacian in curvilinear coordinates}
+\label{ssec:curvilaplacian}
+
+In polar coordinates $(r, \theta)$ and cylindrical coordinates $(r, \theta, z)$,
+\[
+\Delta u = u_{rr} + \frac1ru_r + \frac1{r^2}u_{\theta\theta} \;(+\,u_{zz}) ,
+\]
+and in spherical coordinates $(r, \theta, \varphi)$, with $\theta$ the angle from the north pole,
+\[
+\Delta u = u_{rr} + \frac2ru_r + \frac1{r^2}\Delta_Su, \qquad \Delta_Su = \frac1{\sin\theta}\frac{\partial}{\partial\theta}\Bigl(\sin\theta\,\frac{\partial u}{\partial\theta}\Bigr) + \frac1{\sin^2\theta}\frac{\partial^2u}{\partial\varphi^2} ,
+\]
+where $\Delta_S$ is the Laplacian on the unit sphere. These follow from the chain rule, or more quickly from the divergence theorem applied to a small coordinate box. The term $\frac{n - 1}ru_r$ in the radial part is the one met for radial solutions in Section~\ref{sec:laplace}.
+
+\subsection{The vibrating drum}
+\label{ssec:drum}
+
+A circular membrane of radius $a$, fixed at its rim, obeys $u_{tt} = c^2\Delta u$ in $r < a$ with $u = 0$ at $r = a$. Separating $u = R(r)\Theta(\theta)T(t)$ gives $T'' = -c^2k^2T$, $\Theta'' = -m^2\Theta$ with $\Theta$ $2\pi$-periodic, so $m = 0, 1, 2, \ldots$ and $\Theta = \cos m\theta$ or $\sin m\theta$, and
+\[
+r^2R'' + rR' + (k^2r^2 - m^2)R = 0 ,
+\]
+\textbf{Bessel's equation} in the variable $kr$. Its solution bounded at the origin is $J_m(kr)$; the other, $Y_m$, is singular there. The rim condition $J_m(ka) = 0$ makes $ka$ a zero of $J_m$. Writing $j_{mn}$ for the $n$th positive zero, the normal modes and their angular frequencies are
+\[
+u_{mn} = J_m\Bigl(\frac{j_{mn}r}a\Bigr)\cos m\theta\,\cos\omega_{mn}t, \qquad \omega_{mn} = \frac{c\,j_{mn}}a ,
+\]
+together with the $\sin m\theta$ and $\sin\omega_{mn}t$ variants. Mode $(m, n)$ has $m$ nodal diameters and $n - 1$ nodal circles (Figure~\ref{fig:drum}). Unlike those of a string, the frequencies are \emph{not} integer multiples of the fundamental: $\omega_{11}/\omega_{01} = 1.593$, $\omega_{21}/\omega_{01} = 2.136$
+(Software~\ref{sw:besselzeros}), which is why a drum has a less definite pitch than a string.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[yellow!7,rounded corners=4pt] (-1.15,-1.85) rectangle (12.65,1.25);
+\fill[red!55] (0.0,0) circle (0.900);
+\draw[black!70,thick] (0.0,0) circle (0.9);
+\node[font=\scriptsize] at (0.0,-1.2) {$(0, 1)$};
+\node[font=\scriptsize,black!70] at (0.0,-1.55) {$1.000$};
+\fill[red!55] (2.3,0) -- (2.300,0.900) arc[start angle=90.0,end angle=270.0,radius=0.900] -- cycle;
+\fill[blue!45] (2.3,0) -- (2.300,-0.900) arc[start angle=270.0,end angle=450.0,radius=0.900] -- cycle;
+\draw[black!70,thick] (2.3,0) circle (0.9);
+\node[font=\scriptsize] at (2.3,-1.2) {$(1, 1)$};
+\node[font=\scriptsize,black!70] at (2.3,-1.55) {$1.593$};
+\fill[red!55] (4.6,0) -- (4.600,0.900) arc[start angle=90.0,end angle=180.0,radius=0.900] -- cycle;
+\fill[blue!45] (4.6,0) -- (3.700,0.000) arc[start angle=180.0,end angle=270.0,radius=0.900] -- cycle;
+\fill[red!55] (4.6,0) -- (4.600,-0.900) arc[start angle=270.0,end angle=360.0,radius=0.900] -- cycle;
+\fill[blue!45] (4.6,0) -- (5.500,-0.000) arc[start angle=360.0,end angle=450.0,radius=0.900] -- cycle;
+\draw[black!70,thick] (4.6,0) circle (0.9);
+\node[font=\scriptsize] at (4.6,-1.2) {$(2, 1)$};
+\node[font=\scriptsize,black!70] at (4.6,-1.55) {$2.136$};
+\fill[red!55] (6.8999999999999995,0) circle (0.392);
+\fill[blue!45,even odd rule] (6.8999999999999995,0) circle (0.900) (6.8999999999999995,0) circle (0.392);
+\draw[black!70,thick] (6.8999999999999995,0) circle (0.9);
+\node[font=\scriptsize] at (6.8999999999999995,-1.2) {$(0, 2)$};
+\node[font=\scriptsize,black!70] at (6.8999999999999995,-1.55) {$2.295$};
+\fill[red!55] (9.2,0) -- (9.200,0.900) arc[start angle=90.0,end angle=150.0,radius=0.900] -- cycle;
+\fill[blue!45] (9.2,0) -- (8.421,0.450) arc[start angle=150.0,end angle=210.0,radius=0.900] -- cycle;
+\fill[red!55] (9.2,0) -- (8.421,-0.450) arc[start angle=210.0,end angle=270.0,radius=0.900] -- cycle;
+\fill[blue!45] (9.2,0) -- (9.200,-0.900) arc[start angle=270.0,end angle=330.0,radius=0.900] -- cycle;
+\fill[red!55] (9.2,0) -- (9.979,-0.450) arc[start angle=330.0,end angle=390.0,radius=0.900] -- cycle;
+\fill[blue!45] (9.2,0) -- (9.979,0.450) arc[start angle=390.0,end angle=450.0,radius=0.900] -- cycle;
+\draw[black!70,thick] (9.2,0) circle (0.9);
+\node[font=\scriptsize] at (9.2,-1.2) {$(3, 1)$};
+\node[font=\scriptsize,black!70] at (9.2,-1.55) {$2.653$};
+\fill[red!55] (11.5,0) -- (11.500,0.492) arc[start angle=90.0,end angle=270.0,radius=0.492] -- cycle;
+\fill[blue!45] (11.5,0) -- (11.500,-0.492) arc[start angle=270.0,end angle=450.0,radius=0.492] -- cycle;
+\fill[blue!45] (11.500,0.492) -- (11.500,0.900) arc[start angle=90.0,end angle=270.0,radius=0.900] -- (11.500,-0.492) arc[start angle=270.0,end angle=90.0,radius=0.492] -- cycle;
+\fill[red!55] (11.500,-0.492) -- (11.500,-0.900) arc[start angle=270.0,end angle=450.0,radius=0.900] -- (11.500,0.492) arc[start angle=450.0,end angle=270.0,radius=0.492] -- cycle;
+\draw[black!70,thick] (11.5,0) circle (0.9);
+\node[font=\scriptsize] at (11.5,-1.2) {$(1, 2)$};
+\node[font=\scriptsize,black!70] at (11.5,-1.55) {$2.917$};
+\end{tikzpicture}
+\caption{The first six normal modes of a circular drum, labelled $(m, n)$, with their frequencies relative to the fundamental. Red and blue regions move in opposite directions; the boundaries between them are the nodal lines, $m$ diameters and $n - 1$ circles at the radii $j_{mk}/j_{mn}$, $k < n$. The frequency
+ratios are irregularly spaced, not whole numbers.}
+\label{fig:drum}
+\end{figure}
+
+To expand initial data in these modes one needs orthogonality.
+
+\begin{thm}
+\label{thm:besselorth}
+If $\alpha$ and $\beta$ are distinct positive zeros of $J_m$, then
+\[
+\int_0^1J_m(\alpha r)J_m(\beta r)\,r\,dr = 0, \qquad \int_0^1J_m(\alpha r)^2\,r\,dr = \tfrac12J_m'(\alpha)^2 = \tfrac12J_{m + 1}(\alpha)^2 .
+\]
+Moreover, the functions $J_m(j_{mn}r)$, $n = 1, 2, \ldots$, are complete: every $f$ with $\int_0^1f^2r\,dr < \infty$ is the mean-square limit of its expansion $\sum c_nJ_m(j_{mn}r)$, with $c_n = \int_0^1fJ_m(j_{mn}r)\,r\,dr\big/\frac12J_{m + 1}(j_{mn})^2$.
+\end{thm}
+
+\begin{proof}
+$U = J_m(\alpha r)$ and $V = J_m(\beta r)$ satisfy $(rU')' + (\alpha^2r - m^2/r)U = 0$ and the same with $\beta$. Multiplying crosswise and subtracting, $\bigl(r(U'V - UV')\bigr)' = (\beta^2 - \alpha^2)rUV$. Integrating from $0$ to $1$, for any $\beta$ and a zero $\alpha$,
+\[
+(\beta^2 - \alpha^2)\int_0^1UV\,r\,dr = \alpha J_m'(\alpha)J_m(\beta) ,
+\]
+which vanishes when $\beta$ is also a zero. Letting $\beta \to \alpha$, $J_m(\beta) \approx J_m'(\alpha)(\beta - \alpha)$ and $\beta^2 - \alpha^2 \approx 2\alpha(\beta - \alpha)$, giving the norm; at a zero, the recurrence $J_m' = \frac mxJ_m - J_{m + 1}$ gives $J_m'(\alpha) = -J_{m + 1}(\alpha)$. Completeness is the Sturm--Liouville expansion theorem for
+this singular problem, which we quote.
+\end{proof}
+
+\subsection{Heat in a cylinder}
+\label{ssec:cylinder}
+
+A long cylinder of radius $a$ at uniform temperature $u_0$ has its surface held at $0$ from $t = 0$. The temperature depends on $r$ and $t$ only, and separation gives
+\[
+u(r, t) = u_0\sum_{n = 1}^\infty c_n\,J_0\Bigl(\frac{j_{0n}r}a\Bigr)e^{-\kappa j_{0n}^2t/a^2}, \qquad c_n = \frac{2}{j_{0n}J_1(j_{0n})} ,
+\]
+the coefficients of $1$ from Theorem~\ref{thm:besselorth}, using $\int_0^1J_0(jr)\,r\,dr = J_1(j)/j$, which follows from $(rJ_1(r))' = rJ_0(r)$. For large times one term dominates, decaying at the rate $\kappa j_{01}^2/a^2 = 5.78\kappa/a^2$; its coefficient $c_1 = 1.602$ exceeds $1$, so the one-term approximation overestimates at early
+times (Software~\ref{sw:cylinder}).
+
+\subsection{Spherical harmonics and Legendre polynomials}
+\label{ssec:spherical}
+
+For Laplace's equation in spherical coordinates, separate $u = R(r)Y(\theta, \varphi)$: $r^2R'' + 2rR' = \lambda R$ and $\Delta_SY = -\lambda Y$. The angular problem has solutions regular on the whole sphere only for $\lambda = l(l + 1)$, $l = 0, 1, 2, \ldots$, and then has $2l + 1$ independent
+solutions, the \textbf{spherical harmonics} $Y_l^m(\theta, \varphi) = P_l^{|m|}(\cos\theta)e^{im\varphi}$, $|m| \leq l$, with $P_l^m$ the associated Legendre functions. The radial equation has the solutions $r^l$ and $r^{-l - 1}$. So the harmonic functions in a ball are sums of $r^lY_l^m$, and those outside, decaying at infinity, are sums of
+$r^{-l - 1}Y_l^m$: the multipole expansion. The spherical harmonics are orthogonal on the sphere and complete, and they describe the gravitational field of the Earth, the angular part of atomic orbitals, and the fluctuations of the cosmic microwave background.
+
+When the data do not depend on $\varphi$, only $m = 0$ occurs, and $P_l^0 = P_l$ is the \textbf{Legendre polynomial} of degree $l$, with $\int_{-1}^1P_kP_l\,d\mu = \frac{2}{2l + 1}\delta_{kl}$. The solution of the Dirichlet problem in the unit ball with $u = f(\theta)$ on the sphere is
+\[
+u(r, \theta) = \sum_{l = 0}^\infty A_lr^lP_l(\cos\theta), \qquad A_l = \frac{2l + 1}2\int_{-1}^1f\,P_l(\mu)\,d\mu \quad (\mu = \cos\theta) .
+\]
+
+\begin{exa}
+\label{ex:hemispheres}
+Let the upper hemisphere be held at potential $1$ and the lower at $-1$. Then $f$ is odd in $\mu$, so only odd $l$ occur, and $A_l = (2l + 1)\int_0^1P_l\,d\mu$:
+\[
+u = \tfrac32rP_1(\cos\theta) - \tfrac78r^3P_3(\cos\theta) + \tfrac{11}{16}r^5P_5(\cos\theta) - \cdots .
+\]
+On the axis, $\theta = 0$, the Poisson kernel of the ball (Section~\ref{sec:green}) gives the closed form $u = \bigl(1 - (1 - z^2)/\sqrt{1 + z^2}\bigr)/z$ at height $z$, against which the series can be checked (Software~\ref{sw:legendre}).
+\end{exa}
+
+\subsection{The age of the Earth}
+\label{ssec:kelvin}
+
+In 1862 William Thomson (Lord Kelvin) used the heat equation to estimate the age of the Earth. Model the crust as a half-space $x > 0$ (depth), initially at the temperature $T_0$ of molten rock, with the surface held at $0$ from $t = 0$. The solution, by the image method of Section~\ref{sec:green}, is
+$u = T_0\operatorname{erf}\bigl(x/\sqrt{4\kappa t}\bigr)$, and the temperature gradient at the surface is
+\[
+u_x(0, t) = \frac{T_0}{\sqrt{\pi\kappa t}} .
+\]
+Measuring the gradient $G$ in mines and solving for $t$ gives $t = T_0^2/\pi\kappa G^2$. With Kelvin's values, $T_0 \approx 3900$\,K, $G \approx 0.0365$\,K/m (one degree Fahrenheit per fifty feet) and $\kappa \approx 1.2 \times 10^{-6}$\,m$^2$/s, this is about $96$ million years (Software~\ref{sw:legendre}), and Kelvin
+quoted $98$ million, with a range of $20$ to $400$ million. Geologists and Darwin needed far longer. The mathematics was right; the model was not. Perry (1895) pointed out that convection in a fluid interior keeps the deep temperature high and greatly lengthens the estimate, and the discovery of radioactive heating
+in the rocks removed the premise altogether. The modern age is $4.5$ billion years.
+
+The half-space is the right model because the diffusion length $\sqrt{4\kappa t}$ for $100$ million years is about $120$\,km, small beside the Earth's radius of $6400$\,km; for a whole sphere one separates in spherical coordinates, and the radial modes are $\sin(n\pi r/a)/r$ (Problem~\ref{prob:ball}).
+
+\subsection{Special functions in software}
+\label{ssec:software11}
+
+\begin{software}[The drum's frequencies]
+\label{sw:besselzeros}
+The zeros $j_{mn}$ of the Bessel functions for $m \leq 5$, $n \leq 3$, sorted, and the frequencies of the first eight modes relative to the fundamental:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.special import jn_zeros, jv
+>>> modes = [(m, n, jn_zeros(m, n)[-1])
+...          for m in range(6) for n in range(1, 4)]
+>>> modes.sort(key=lambda t: t[2])
+>>> base = modes[0][2]                     # j_01 = 2.4048: the fundamental
+>>> for m, n, j in modes[:8]:  # frequency ratios of a circular drum
+...     print((m, n), round(j, 4), round(j / base, 3))
+...
+(0, 1) 2.4048 1.0
+(1, 1) 3.8317 1.593
+(2, 1) 5.1356 2.136
+(0, 2) 5.5201 2.295
+(3, 1) 6.3802 2.653
+(1, 2) 7.0156 2.917
+(4, 1) 7.5883 3.155
+(2, 2) 8.4172 3.5
+\end{verbatim}}
+\textbf{Reading the output.} The overtones of a drum are at $1.593$, $2.136$, $2.295$, $2.653$, $2.917$, $3.155$ and $3.5$ times the fundamental, irregularly spaced. A string's are at $2, 3, 4, \ldots$.
+
+\textbf{MATLAB/Octave:} \texttt{fzero(@(x) besselj(m,x), guess)}; there is no built-in for the zeros.
+\end{software}
+
+\begin{software}[Cooling a cylinder]
+\label{sw:cylinder}
+The Bessel series for a cylinder of unit radius with $\kappa = 1$ and $u_0 = 1$, summed to $60$ terms: first a check of orthogonality, then the centre temperature at three times against the first term alone:
+{\small\begin{verbatim}
+>>> from scipy.integrate import quad
+>>> j0 = jn_zeros(0, 60)        # cooling cylinder: a = kappa = 1, u0 = 1
+>>> c = 2 / (j0 * jv(1, j0))               # coefficients of 1 in J_0(j_n r)
+>>> quad(lambda r: r * jv(0, j0[0]*r) * jv(0, j0[1]*r), 0, 1)[0]  # orthogonal
+5.204170427930421e-18
+>>> def centre(t, N=60):
+...     return np.sum(c[:N] * np.exp(-j0[:N]**2 * t))
+...
+>>> for t in (0.01, 0.1, 0.5):
+...     print(t, round(centre(t), 8), round(c[0] * np.exp(-j0[0]**2 * t), 8))
+...
+0.01 1.0 1.51195754
+0.1 0.84835511 0.89845241
+0.5 0.08888972 0.08888997
+\end{verbatim}}
+\textbf{Reading the output.} The integral of $J_0(j_{01}r)J_0(j_{02}r)r$ is zero to rounding. At $t = 0.01$ the centre is still at $1$, while the one-term value is $1.51$; at $t = 0.1$ the two differ by $6\%$; by $t = 0.5$ they agree to seven digits, the temperature having fallen to $0.089$.
+
+\textbf{MATLAB/Octave:} \texttt{sum(c.*exp(-j0.\^{}2*t))} with \texttt{c = 2./(j0.*besselj(1,j0))}.
+\end{software}
+
+\begin{software}[Legendre series and Kelvin's estimate]
+\label{sw:legendre}
+The coefficients $A_l$ of Example~\ref{ex:hemispheres} for $l = 1, 3, \ldots, 11$, the six-term series on the axis at $z = \frac12$ against the closed form, and Kelvin's age of the Earth:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> mu = sp.symbols('mu')
+>>> A = [(2*l + 1) * sp.integrate(sp.legendre(l, mu), (mu, 0, 1))
+...      for l in range(1, 12, 2)]  # hemispheres at +1 and -1, odd l only
+>>> A
+[3/2, -7/8, 11/16, -75/128, 133/256, -483/1024]
+>>> z = 0.5  # on the axis, from the Poisson kernel
+>>> series = sum(float(a) * z**l for a, l in zip(A, range(1, 12, 2)))
+>>> exact = (1 - (1 - z**2) / np.sqrt(1 + z**2)) / z
+>>> round(series, 6), round(exact, 6)
+(0.658316, 0.658359)
+>>> T0, G, kappa = 3900.0, 0.0365, 1.2e-6  # Kelvin: K, K/m, m^2/s
+>>> t = T0**2 / (np.pi * kappa * G**2)  # gradient T0 / sqrt(pi kappa t) = G
+>>> round(t / 3.156e7 / 1e6, 1)            # in millions of years
+96.0
+\end{verbatim}}
+\textbf{Reading the output.} The coefficients $\frac32, -\frac78, \frac{11}{16}, -\frac{75}{128}, \ldots$ decay slowly, like $l^{-1/2}$, because the boundary data jump at the equator; but at $r = \frac12$ the factor $r^l$ makes six terms accurate to $4 \times 10^{-5}$. Kelvin's numbers give $96.0$ million years.
+
+\textbf{MATLAB/Octave:} \texttt{legendre(l, mu)} returns the associated functions; the first row is $P_l$.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Solve Laplace's equation in the annulus $1 < r < 2$ with $u = 0$ on $r = 1$ and $u = \cos\theta$ on $r = 2$.
+\end{problem}
+
+\begin{solution}
+Try $u = (Ar + B/r)\cos\theta$, harmonic since $r^{\pm1}\cos\theta$ are. Then $A + B = 0$ and $2A + B/2 = 1$, so $A = \frac23$, $B = -\frac23$, and $u = \frac23\bigl(r - \frac1r\bigr)\cos\theta$.
+\end{solution}
+
+\begin{problem}
+Show that $\int_0^1J_0(jr)\,r\,dr = J_1(j)/j$, and derive the coefficients $c_n$ for the cooling cylinder.
+\end{problem}
+
+\begin{solution}
+The recurrence $(x^mJ_m)' = x^mJ_{m - 1}$ with $m = 1$ gives $(xJ_1(x))' = xJ_0(x)$, so $\int_0^1J_0(jr)\,r\,dr = j^{-2}\int_0^jxJ_0(x)\,dx = j^{-2}\cdot jJ_1(j)$. Dividing by the norm $\frac12J_1(j)^2$ gives $c_n = 2/(j_{0n}J_1(j_{0n}))$.
+\end{solution}
+
+\begin{problem}
+The surface of the unit sphere is held at potential $\cos\theta$. Find the potential inside and outside, the latter decaying at infinity.
+\end{problem}
+
+\begin{solution}
+$\cos\theta = P_1(\cos\theta)$. Inside, $u = rP_1 = r\cos\theta = z$, a uniform field. Outside, $u = r^{-2}\cos\theta$, the field of a dipole. Both equal $\cos\theta$ at $r = 1$.
+\end{solution}
+
+\begin{problem}
+\label{prob:ball}
+A ball of unit radius with $\kappa = 1$, initially at temperature $1$, has its surface held at $0$. Find the temperature at the centre.
+\end{problem}
+
+\begin{solution}
+For radial $u$, $\Delta u = \frac1r(ru)_{rr}$, so $v = ru$ satisfies $v_t = v_{rr}$ with $v(0, t) = v(1, t) = 0$ and $v(r, 0) = r$. The sine coefficients of $r$ are $2\int_0^1r\sin n\pi r\,dr = 2(-1)^{n + 1}/n\pi$, so
+\[
+u = \sum_{n \geq 1}\frac{2(-1)^{n + 1}}{n\pi}e^{-n^2\pi^2t}\,\frac{\sin n\pi r}r ,
+\]
+and since $\sin(n\pi r)/r \to n\pi$, the centre temperature is $u(0, t) = 2\sum_{n \geq 1}(-1)^{n + 1}e^{-n^2\pi^2t}$.
+\end{solution}
+
+\begin{problem}
+Which modes of a circular drum are excited by striking it exactly at the centre, and why does a drummer strike off centre?
+\end{problem}
+
+\begin{solution}
+A blow at the centre is symmetric about it, so it excites only the radially symmetric modes $(0, n)$, whose frequency ratios $1, 2.295, 3.598, \ldots$ are far from harmonic and give a dull thud. Striking off centre excites the modes with $m \geq 1$ as well; the $(1, 1)$, $(2, 1)$, $(3, 1)$ modes have ratios
+close to $2 : 3 : 4$ once the air loading of a kettledrum shifts them, a harmonic series on a missing fundamental, which gives the timpani its pitch.
+\end{solution}
+
+\begin{problem}
+In Kelvin's calculation, how does the estimated age change if the diffusivity is doubled, or if the measured gradient is halved?
+\end{problem}
+
+\begin{solution}
+$t = T_0^2/\pi\kappa G^2$ is inversely proportional to $\kappa$ and to $G^2$: doubling $\kappa$ halves the age to $48$ million years, and halving $G$ multiplies it by $4$, to $384$ million years. The estimate is very sensitive to the gradient, which is one reason for Kelvin's wide range.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 \sloppy
@@ -3119,6 +3401,7 @@ $\hat u = \hat ge^{\kappa\xi^2t}$. Take $g_n$ with $\hat g_n$ equal to $\varepsi
 \begin{enumerate}
 \item Airy, G. B. (1838), On the intensity of light in the neighbourhood of a caustic, \emph{Transactions of the Cambridge Philosophical Society}, 6, 379--402.
 \item d'Alembert, J. le R. (1747), Recherches sur la courbe que forme une corde tendu\"e mise en vibration, \emph{Histoire de l'Acad\'emie Royale des Sciences et Belles Lettres de Berlin}, 3, 214--219.
+\item Bessel, F. W. (1826), Untersuchung des Theils der planetarischen St\"orungen, welcher aus der Bewegung der Sonne entsteht, \emph{Abhandlungen der K\"oniglichen Akademie der Wissenschaften zu Berlin} (1824), 1--52.
 \item du Bois-Reymond, P. (1873), Ueber die Fourierschen Reihen, \emph{Nachrichten von der K\"oniglichen Gesellschaft der Wissenschaften zu G\"ottingen}, 21, 571--582.
 \item Burgers, J. M. (1948), A mathematical model illustrating the theory of turbulence, \emph{Advances in Applied Mechanics}, 1, 171--199.
 \item Carleson, L. (1966), On convergence and growth of partial sums of Fourier series, \emph{Acta Mathematica}, 116, 135--157.
@@ -3136,6 +3419,7 @@ Grune and Stratton, 382--407.
 \item Gauss, C. F. (1840), Allgemeine Lehrs\"atze in Beziehung auf die im verkehrten Verh\"altnisse des Quadrats der Entfernung wirkenden Anziehungs- und Abstossungs-Kr\"afte, \emph{Resultate aus den Beobachtungen des magnetischen Vereins im Jahre 1839}, Leipzig, 1--51.
 \item Gibbs, J. W. (1899), Fourier's series, \emph{Nature}, 59, 606.
 \item Godunov, S. K. (1959), A difference method for numerical calculation of discontinuous solutions of the equations of hydrodynamics, \emph{Matematicheskii Sbornik}, 47(89), 271--306.
+\item Gordon, C., Webb, D. L., and Wolpert, S. (1992), One cannot hear the shape of a drum, \emph{Bulletin of the American Mathematical Society}, 27, 134--138.
 \item Green, G. (1828), \emph{An Essay on the Application of Mathematical Analysis to the Theories of Electricity and Magnetism}, Nottingham, printed for the author by T. Wheelhouse.
 \item Hadamard, J. (1902), Sur les probl\`emes aux d\'eriv\'ees partielles et leur signification physique, \emph{Princeton University Bulletin}, 13,
 49--52.
@@ -3145,6 +3429,7 @@ Grune and Stratton, 382--407.
 \item Hopf, E. (1950), The partial differential equation $u_t + uu_x = \mu u_{xx}$, \emph{Communications on Pure and Applied Mathematics}, 3, 201--230.
 \item Hugoniot, H. (1887), M\'emoire sur la propagation du mouvement dans les corps et sp\'ecialement dans les gaz parfaits, \emph{Journal de l'\'Ecole Polytechnique}, 57, 3--97.
 \item Huygens, C. (1690), \emph{Trait\'e de la lumi\`ere}, Leiden, Pierre van der Aa.
+\item Kac, M. (1966), Can one hear the shape of a drum?, \emph{American Mathematical Monthly}, 73, 1--23.
 \item Kirchhoff, G. (1883), Zur Theorie der Lichtstrahlen, \emph{Annalen der Physik}, 254, 663--695.
 \item Korteweg, D. J., and de Vries, G. (1895), On the change of form of long waves advancing in a rectangular canal, and on a new type of long stationary waves, \emph{Philosophical Magazine}, 39, 422--443.
 \item Kowalevsky, S. von (1875), Zur Theorie der partiellen Differentialgleichungen, \emph{Journal f\"ur die reine und angewandte Mathematik}, 80, 1--32.
@@ -3152,6 +3437,7 @@ Grune and Stratton, 382--407.
 \item Laplace, P.-S. (1785), Th\'eorie des attractions des sph\'ero\"ides et de la figure des plan\`etes, \emph{M\'emoires de l'Acad\'emie Royale des Sciences de Paris} (ann\'ee 1782), 113--196.
 \item Lax, P. D. (1957), Hyperbolic systems of conservation laws II, \emph{Communications on Pure and Applied Mathematics}, 10, 537--566.
 \item Lax, P. D., and Wendroff, B. (1960), Systems of conservation laws, \emph{Communications on Pure and Applied Mathematics}, 13, 217--237.
+\item Legendre, A.-M. (1785), Recherches sur l'attraction des sph\'ero\"ides homog\`enes, \emph{M\'emoires de Math\'ematique et de Physique pr\'esent\'es \`a l'Acad\'emie Royale des Sciences par divers savans}, 10, 411--434.
 \item Lewy, H. (1957), An example of a smooth linear partial differential equation without solution, \emph{Annals of Mathematics}, 66, 155--158.
 \item Lighthill, M. J., and Whitham, G. B. (1955), On kinematic waves II: a theory of traffic flow on long crowded roads, \emph{Proceedings of the Royal Society of London A}, 229, 317--345.
 \item Maxwell, J. C. (1873), \emph{A Treatise on Electricity and Magnetism}, Oxford, Clarendon Press.
@@ -3159,13 +3445,16 @@ Grune and Stratton, 382--407.
 \item Mersenne, M. (1636), \emph{Harmonie universelle}, Paris, Cramoisy.
 \item Nirenberg, L. (1953), A strong maximum principle for parabolic equations, \emph{Communications on Pure and Applied Mathematics}, 6, 167--177.
 \item Parseval, M.-A. (1806), M\'emoire sur les s\'eries et sur l'int\'egration compl\`ete d'une \'equation aux diff\'erences partielles lin\'eaires du second ordre, \`a coefficients constants, \emph{M\'emoires pr\'esent\'es \`a l'Institut des Sciences, Lettres et Arts, par divers savans}, 1, 638--648.
+\item Perry, J. (1895), On the age of the Earth, \emph{Nature}, 51, 224--227.
 \item Plancherel, M. (1910), Contribution \`a l'\'etude de la repr\'esentation d'une fonction arbitraire par des int\'egrales d\'efinies, \emph{Rendiconti del Circolo Matematico di Palermo}, 30, 289--335.
 \item Poisson, S. D. (1819), M\'emoire sur l'int\'egration de quelques \'equations lin\'eaires aux diff\'erences partielles, et particuli\`erement de l'\'equation g\'en\'erale du mouvement des fluides \'elastiques, \emph{M\'emoires de l'Acad\'emie Royale des Sciences de l'Institut de France}, 3, 121--176.
 \item Poisson, S. D. (1820), M\'emoire sur la mani\`ere d'exprimer les fonctions par des s\'eries de quantit\'es p\'eriodiques, \emph{Journal de l'\'Ecole Polytechnique}, 11 (cahier 18), 417--489.
 \item Rankine, W. J. M. (1870), On the thermodynamic theory of waves of finite longitudinal disturbance, \emph{Philosophical Transactions of the Royal Society of London}, 160, 277--288.
+\item Rayleigh, Lord (J. W. Strutt) (1877), \emph{The Theory of Sound}, London, Macmillan.
 \item Richards, P. I. (1956), Shock waves on the highway, \emph{Operations Research}, 4, 42--51.
 \item Talbot, A. (1979), The accurate numerical inversion of Laplace transforms, \emph{IMA Journal of Applied Mathematics}, 23, 97--120.
 \item Thomson, W. (1848), Extrait d'une lettre de M. William Thomson \`a M. Liouville, \emph{Journal de Math\'ematiques Pures et Appliqu\'ees}, 10, 364--367.
+\item Thomson, W. (1864), On the secular cooling of the Earth, \emph{Transactions of the Royal Society of Edinburgh}, 23, 157--169.
 \item Tricomi, F. (1923), Sulle equazioni lineari alle derivate parziali di 2$^\circ$ ordine, di tipo misto, \emph{Memorie della Reale Accademia dei Lincei}, serie 5, 14, 133--247.
 \item Tychonoff, A. (1935), Th\'eor\`emes d'unicit\'e pour l'\'equation de la chaleur, \emph{Matematicheskii Sbornik}, 42, 199--216.
 \item Widder, D. V. (1944), Positive temperatures on an infinite rod, \emph{Transactions of the American Mathematical Society}, 55, 85--95.
