@@ -1699,6 +1699,336 @@ In the running example the third resource has slack $3$ and price $0$. A consult
 No. Its shadow price is $0$ for all $b_3 \geq 2$, so extra units add no profit: the firm would pay Rs.~10 for nothing. The third resource is not a bottleneck; the first two are, worth $\frac53$ and $\frac{10}3$ per unit within their ranges.
 \end{solution}
 
+%======================================================================
+\section{Transportation and Assignment Problems}
+\label{sec:transportation}
+
+Some linear programmes have so much structure that the simplex method can be carried out on a table of numbers by hand, and their optimal solutions are automatically whole numbers. The \textbf{transportation problem}, shipping a commodity from sources to destinations at least cost, was posed by Hitchcock in 1941 and by
+Kantorovich, and the \textbf{assignment problem}, matching workers to jobs, is its special case. This section develops the special methods and explains the integrality through \textbf{total unimodularity}, which will reappear for network flows and is the link between linear and integer programming.
+
+\subsection{The transportation problem}
+\label{ssec:transport}
+
+There are $m$ sources with supplies $s_i$, $n$ destinations with demands $d_j$, and a cost $c_{ij}$ per unit shipped from $i$ to $j$. With $x_{ij}$ the amount shipped,
+\begin{gather*}
+\text{minimise } \sum_{i,j}c_{ij}x_{ij} \\
+\text{subject to}\quad \sum_jx_{ij} = s_i \ (i = 1, \ldots, m), \quad \sum_ix_{ij} = d_j \ (j = 1, \ldots, n), \quad x \geq 0 .
+\end{gather*}
+The problem is \textbf{balanced} if $\sum s_i = \sum d_j$, which is necessary for feasibility with equalities and also sufficient (ship $x_{ij} = s_id_j/\sum d$). An unbalanced problem is balanced by a \textbf{dummy} destination (or source) absorbing the excess at zero cost, or at the cost of unmet demand.
+
+\begin{prop}
+\label{prop:transportrank}
+The $m + n$ equality constraints of a balanced transportation problem have rank $m + n - 1$. Hence every BFS has at most $m + n - 1$ positive entries, and a set of $m + n - 1$ cells is a basis if and only if it contains no cycle, that is, it forms a spanning tree of the bipartite graph of sources and destinations.
+\end{prop}
+
+\begin{proof}
+The sum of the row constraints minus the sum of the column constraints is $0 = \sum s_i - \sum d_j$, so the rows are dependent and the rank is at most $m + n - 1$. Deleting the last column constraint leaves rows that are independent: the columns for cells $(i, n)$, $i \leq m$, and $(1, j)$, $j < n$, form an identity-like
+triangular submatrix. A cycle of cells $(i_1, j_1), (i_1, j_2), (i_2, j_2), \ldots$ gives a dependence among their columns, with alternating signs; conversely $m + n - 1$ cells without a cycle form a tree, which can be solved leaf by leaf, so its columns are independent.
+\end{proof}
+
+\begin{exa}
+\label{ex:transport}
+Three sources with supplies $7$, $9$, $18$ serve four destinations with demands $5$, $8$, $7$, $14$; the costs are
+\begin{center}
+\small
+\begin{tabular}{c|cccc|c}
+ & $D_1$ & $D_2$ & $D_3$ & $D_4$ & supply \\
+\hline
+$S_1$ & $19$ & $30$ & $50$ & $10$ & $7$ \\
+$S_2$ & $70$ & $30$ & $40$ & $60$ & $9$ \\
+$S_3$ & $40$ & $8$ & $70$ & $20$ & $18$ \\
+\hline
+demand & $5$ & $8$ & $7$ & $14$ & $34$
+\end{tabular}
+\end{center}
+It is balanced, and a BFS has at most $3 + 4 - 1 = 6$ positive cells. The optimal plan (Software~\ref{sw:transport}, Figure~\ref{fig:transport}) costs $743$.
+\end{exa}
+
+\subsection{Finding a first solution}
+\label{ssec:initial}
+
+Three rules give a starting BFS, each allocating as much as possible to one cell at a time and crossing out the row or column that is exhausted:
+\begin{itemize}
+\item the \textbf{north-west corner rule} starts at cell $(1, 1)$ and moves right or down, ignoring costs;
+\item the \textbf{least-cost rule} takes the cheapest remaining cell;
+\item \textbf{Vogel's approximation method} (VAM) computes, for each row and column, the \emph{penalty}, the difference between its two smallest remaining costs, and allocates to the cheapest cell of the row or column with the largest penalty: the line where a wrong choice would cost most.
+\end{itemize}
+For Example~\ref{ex:transport} they cost $1015$, $814$ and $779$ against the optimum $743$ (Software~\ref{sw:transport}). VAM usually starts close to the optimum, which is why hand methods use it.
+
+\subsection{The MODI method}
+\label{ssec:modi}
+
+The simplex method needs the reduced costs of the non-basic cells. By duality they come from numbers $u_i$ for the rows and $v_j$ for the columns, the dual variables of the supply and demand constraints: solve $u_i + v_j = c_{ij}$ on the $m + n - 1$ basic cells (with one of them, say $u_1$, set to $0$, because of the
+redundant constraint), and compute
+\[
+d_{ij} = c_{ij} - u_i - v_j
+\]
+for the others. If all $d_{ij} \geq 0$ the solution is optimal. Otherwise the cell with the most negative $d_{ij}$ enters: adding it to the basic tree creates exactly one cycle, along which the shipments are alternately increased and decreased by $\theta$; the largest $\theta$ is the smallest amount on a decreasing cell, which
+leaves the basis. This is the \textbf{modified distribution} (MODI, or $u$--$v$) method, the simplex method in the language of the table, with the cycle (the \emph{stepping-stone} path) playing the role of the ratio test.
+
+For the VAM solution of Example~\ref{ex:transport} the cell $(S_2, D_2)$ has $d_{22} = -18$; its cycle allows $\theta = 2$, and the cost falls by $2 \times 18 = 36$ to $743$. At that plan the multipliers are $u = (0, 32, 10)$ and $v = (19, -2, 8, 10)$, and every $d_{ij}$ is non-negative (Software~\ref{sw:modi}), so it is optimal.
+\textbf{Degeneracy}, a BFS with fewer than $m + n - 1$ positive cells, is handled by treating some zero cells as basic, often marked with a small $\varepsilon$, so that the tree is complete and the $u$, $v$ can be found.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-1.8,-0.7) rectangle (9.0,4.6);
+\foreach \i/\s/\y in {1/7/3.6, 3/18/2.0, 2/9/0.4} \node[draw,circle,fill=orange!20,minimum size=0.75cm,font=\scriptsize] (S\i) at (0,\y) {$S_\i$};
+\foreach \i/\s/\y in {1/7/3.6, 3/18/2.0, 2/9/0.4} \node[font=\scriptsize,anchor=east] at (-0.45,\y) {$\s$};
+\foreach \j/\d/\y in {1/5/4.0, 4/14/2.8, 2/8/1.6, 3/7/0.4} \node[draw,circle,fill=green!20,minimum size=0.75cm,font=\scriptsize] (D\j) at (6,\y) {$D_\j$};
+\foreach \j/\d/\y in {1/5/4.0, 4/14/2.8, 2/8/1.6, 3/7/0.4} \node[font=\scriptsize,anchor=west] at (6.45,\y) {$\d$};
+\foreach \i/\j/\q/\c/\p in {1/1/5/19/0.5, 1/4/2/10/0.5, 2/2/2/30/0.5, 2/3/7/40/0.5, 3/2/6/8/0.5, 3/4/12/20/0.5}
+  \draw[->,very thick,blue!60!black] (S\i) -- (D\j) node[pos=\p,fill=blue!4,inner sep=1pt,font=\tiny] {$\q$ @ $\c$};
+\node[font=\scriptsize\bfseries,black!70] at (0,-0.35) {supply};
+\node[font=\scriptsize\bfseries,black!70] at (6,-0.35) {demand};
+\node[font=\scriptsize,black!70,align=left,anchor=west] at (7.1,2.2) {cost\\$743$};
+\end{tikzpicture}
+\caption{The optimal plan for Example~\ref{ex:transport}: each arrow is a shipment, labelled with its amount and unit cost. Six of the twelve routes are used, $m + n - 1$, and they form a tree joining all seven nodes (here a single path, drawn without crossings), as Proposition~\ref{prop:transportrank} requires of a non-degenerate basic solution.}
+\label{fig:transport}
+\end{figure}
+
+\subsection{Total unimodularity}
+\label{ssec:tu}
+
+Every vertex in Example~\ref{ex:transport} has integer coordinates, although nothing in the LP asks for this. The reason is a property of the constraint matrix.
+
+\begin{defn}
+A matrix is \textbf{totally unimodular} (TU) if every square submatrix has determinant $0$, $1$ or $-1$.
+\end{defn}
+
+\begin{thm}
+\label{thm:tuintegral}
+If $A$ is TU and $b$ is integral, every vertex of $\{x : Ax = b, x \geq 0\}$ (and of $\{x : Ax \leq b, x \geq 0\}$) is integral.
+\end{thm}
+
+\begin{proof}
+A vertex is a BFS, $x_B = B^{-1}b$ with $B$ a square non-singular submatrix of $A$. By Cramer's rule $(B^{-1}b)_i = \det B_i/\det B$, where $B_i$ is $B$ with column $i$ replaced by $b$; $\det B = \pm1$ and $\det B_i$ is an integer. For the inequality form, $[A \mid I]$ is TU when $A$ is.
+\end{proof}
+
+\begin{thm}
+\label{thm:bipartitetu}
+Let $A$ have entries in $\{0, 1, -1\}$, at most two non-zero entries in each column, and rows that can be split into two groups so that a column with two non-zeros of the same sign has them in different groups, and one with opposite signs in the same group. Then $A$ is TU. In particular the constraint matrix of
+every transportation and assignment problem, the incidence matrix of a bipartite graph, is TU.
+\end{thm}
+
+\begin{proof}
+By induction on the size $k$ of a square submatrix $M$; for $k = 1$ it is clear. If $M$ has a zero column, $\det M = 0$. If some column has exactly one non-zero, expand along it: $\det M = \pm\det M'$ with $M'$ of size $k - 1$, and use the induction hypothesis. Otherwise every column of $M$ has two non-zeros, and adding
+the rows of the first group and subtracting those of the second gives $0$ in every column, so the rows are dependent and $\det M = 0$. For the transportation matrix, put the supply rows in one group and the demand rows in the other: each column $x_{ij}$ has a $1$ in each.
+\end{proof}
+
+So the transportation problem with integer supplies and demands has an integer optimal solution, found by the simplex method without any integer programming. The condition fails for the incidence matrix of an odd cycle, which has determinant $2$ (Software~\ref{sw:assignment}): integrality is special to bipartite structure,
+and to the network matrices of the next section.
+
+\subsection{The assignment problem}
+\label{ssec:assignment}
+
+Assigning $n$ workers to $n$ jobs, one each, with cost $c_{ij}$ for worker $i$ on job $j$, is the transportation problem with all $s_i = d_j = 1$:
+\[
+\text{minimise } \sum_{i,j}c_{ij}x_{ij} \quad\text{subject to}\quad \sum_jx_{ij} = 1, \quad \sum_ix_{ij} = 1, \quad x_{ij} \geq 0 .
+\]
+By total unimodularity its vertices are $0$--$1$ matrices with one $1$ in each row and column, \textbf{permutation matrices}; this is the Birkhoff--von Neumann theorem, that the doubly stochastic matrices are the convex hull of the permutation matrices. The LP solves the combinatorial problem, but every BFS has $2n - 1$ basic
+cells of which only $n$ are positive: the assignment problem is highly degenerate, and the simplex method crawls on it. The \textbf{Hungarian method} of Kuhn (1955), based on theorems of K\"onig and Egerv\'ary, works directly with the costs.
+
+\begin{enumerate}[label=(\arabic*)]
+\item Subtract the smallest entry of each row from that row, then the smallest entry of each column from that column. This changes every assignment's cost by the same constant, so the optimal assignments are unchanged, and leaves a non-negative matrix with a zero in every row and column.
+\item Cover all the zeros with the fewest possible horizontal and vertical lines. By K\"onig's theorem, the fewest lines equals the largest number of zeros no two in the same row or column. If it is $n$, those $n$ independent zeros give an assignment of reduced cost $0$, which is optimal since all reduced costs are non-negative.
+\item Otherwise, let $\delta$ be the smallest uncovered entry; subtract it from every uncovered entry and add it to every entry covered twice. This is again the subtraction of constants from rows and the addition to columns, it keeps the matrix non-negative, and it creates a new zero. Return to (2).
+\end{enumerate}
+
+\begin{exa}
+\label{ex:hungarian}
+For the cost matrix with rows $(9, 11, 14, 11)$, $(6, 15, 13, 13)$, $(12, 13, 6, 8)$, $(11, 9, 10, 9)$, subtracting the row minima $9, 6, 6, 9$ gives rows $(0, 2, 5, 2)$, $(0, 9, 7, 7)$, $(6, 7, 0, 2)$, $(2, 0, 1, 0)$, whose column minima are all $0$. The zeros can be covered by three lines (column $1$, rows $3$
+and $4$), so only three independent zeros exist: workers $1$ and $2$ both have their only zero in column $1$. The smallest uncovered entry is $\delta = 2$; the step gives rows $(0, 0, 3, 0)$, $(0, 7, 5, 5)$, $(8, 7, 0, 2)$, $(4, 0, 1, 0)$, which have four independent zeros, for example $(1, 2)$, $(2, 1)$, $(3, 3)$,
+$(4, 4)$. The optimal cost is $11 + 6 + 6 + 9 = 32$; the assignment $(1, 4)$, $(2, 1)$, $(3, 3)$, $(4, 2)$ is equally good.
+\end{exa}
+
+A maximisation problem is converted by subtracting every entry from the largest; impossible assignments get a very large cost; and a rectangular problem is made square with dummy rows or columns of zeros. The Hungarian method runs in $O(n^3)$ time.
+
+\subsection{Transportation and assignment in software}
+\label{ssec:software7}
+
+\begin{software}[Three starts and the optimum]
+\label{sw:transport}
+The north-west corner, least-cost and Vogel rules for Example~\ref{ex:transport}, and the LP with one equation per row and column, built with Kronecker products:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.optimize import linprog
+>>> C = np.array([[19, 30, 50, 10], [70, 30, 40, 60], [40, 8, 70, 20]])
+>>> s = np.array([7, 9, 18]); d = np.array([5, 8, 7, 14])  # balanced: 34 = 34
+>>> def northwest(s, d):
+...     s, d, X = s.copy(), d.copy(), np.zeros((len(s), len(d)), int)
+...     i = j = 0
+...     while i < len(s) and j < len(d):
+...         q = min(s[i], d[j]); X[i, j] = q; s[i] -= q; d[j] -= q
+...         if s[i] == 0: i += 1
+...         else: j += 1
+...     return X
+...
+>>> def least_cost(C, s, d):
+...     s, d, X = s.copy(), d.copy(), np.zeros(C.shape, int)
+...     for k in np.argsort(C, axis=None, kind='stable'):
+...         i, j = divmod(k, C.shape[1]); q = min(s[i], d[j])
+...         X[i, j] += q; s[i] -= q; d[j] -= q
+...     return X
+...
+>>> def vogel(C, s, d):
+...     s, d, X = s.copy(), d.copy(), np.zeros(C.shape, int)
+...     rows, cols = set(range(len(s))), set(range(len(d)))
+...     while rows and cols:
+...         def pen(costs):                # difference of the two smallest
+...             c = sorted(costs); return c[1] - c[0] if len(c) > 1 else c[0]
+...         cand = [(pen([C[i, j] for j in cols]), 'r', i) for i in rows]
+...         cand += [(pen([C[i, j] for i in rows]), 'c', j) for j in cols]
+...         p, kind, k = max(cand, key=lambda t: t[0])
+...         if kind == 'r': i = k; j = min(cols, key=lambda j: C[i, j])
+...         else: j = k; i = min(rows, key=lambda i: C[i, j])
+...         q = min(s[i], d[j]); X[i, j] = q; s[i] -= q; d[j] -= q
+...         if s[i] == 0: rows.discard(i)
+...         elif d[j] == 0: cols.discard(j)
+...     return X
+...
+>>> starts = {'northwest': northwest(s, d), 'least cost': least_cost(C, s, d),
+...           'Vogel': vogel(C, s, d)}
+>>> for name, X in starts.items():
+...     cost = int((C * X).sum())
+...     print(f"{name:10s} cost {cost:4d}, cells {(X > 0).sum()}")
+...
+northwest  cost 1015, cells 6
+least cost cost  814, cells 6
+Vogel      cost  779, cells 6
+>>> m, n = C.shape                   # the LP: one equation per row and column
+>>> rowsum = np.kron(np.eye(m), np.ones(n))
+>>> colsum = np.kron(np.ones(m), np.eye(n))
+>>> Aeq = np.vstack([rowsum, colsum])
+>>> r = linprog(C.ravel(), A_eq=Aeq, b_eq=np.r_[s, d], method='highs')
+>>> X = r.x.reshape(m, n) + 0.0; X, r.fun
+(array([[ 5.,  0.,  0.,  2.],
+       [ 0.,  2.,  7.,  0.],
+       [ 0.,  6.,  0., 12.]]), 743.0)
+\end{verbatim}}
+\textbf{Reading the output.} The three starts cost $1015$, $814$ and $779$, each using $6 = m + n - 1$ cells. The optimum is $743$: ship $5$ and $2$ from $S_1$ to $D_1$ and $D_4$, $2$ and $7$ from $S_2$ to $D_2$ and $D_3$, $6$ and $12$ from $S_3$ to $D_2$ and $D_4$. The LP solution is integral, as total
+unimodularity guarantees.
+
+\textbf{MATLAB/Octave:} \texttt{Aeq = [kron(eye(m), ones(1,n)); kron(ones(1,m), eye(n))]}.
+\end{software}
+
+\begin{software}[MODI multipliers]
+\label{sw:modi}
+The dual values of the supply and demand equations from HiGHS, shifted so that $u_1 = 0$, the reduced costs $c_{ij} - u_i - v_j$, and the rank of the constraint matrix:
+{\small\begin{verbatim}
+>>> u = r.eqlin.marginals[:m]; v = r.eqlin.marginals[m:]
+>>> u, v = u - u[0], v + u[0]        # normalise u1 = 0; u + v is unchanged
+>>> red = C - u[:, None] - v[None, :]      # c_ij - u_i - v_j
+>>> u, v
+(array([ 0., 32., 10.]), array([19., -2.,  8., 10.]))
+>>> np.round(red, 6) + 0.0
+array([[ 0., 32., 42.,  0.],
+       [19.,  0.,  0., 18.],
+       [11.,  0., 52.,  0.]])
+>>> np.linalg.matrix_rank(Aeq), m + n - 1  # one equation is redundant
+(6, 6)
+\end{verbatim}}
+\textbf{Reading the output.} $u = (0, 32, 10)$ and $v = (19, -2, 8, 10)$. The reduced costs are $0$ on the six basic cells and positive elsewhere, so the plan is optimal and, since no non-basic cell has $d_{ij} = 0$, it is the unique optimum. The rank is $6 = m + n - 1$: one of the seven equations is redundant, which is why one
+multiplier can be set freely.
+
+\textbf{MATLAB/Octave:} \texttt{lambda.eqlin} from \texttt{linprog}.
+\end{software}
+
+\begin{software}[Total unimodularity and assignment]
+\label{sw:assignment}
+A brute-force check of total unimodularity on the $2 \times 3$ transportation matrix and on the incidence matrix of a triangle; then Example~\ref{ex:hungarian} by SciPy's assignment solver and by its LP relaxation:
+{\small\begin{verbatim}
+>>> from itertools import combinations
+>>> from scipy.optimize import linear_sum_assignment
+>>> def totally_unimodular(M):             # every square minor in {-1, 0, 1}
+...     r, c = M.shape
+...     for k in range(1, min(r, c) + 1):
+...         for R in combinations(range(r), k):
+...             for K in combinations(range(c), k):
+...                 if round(abs(np.linalg.det(M[np.ix_(R, K)]))) > 1:
+...                     return False
+...     return True
+...
+>>> small = np.vstack([np.kron(np.eye(2), np.ones(3)),   # a 2 x 3 transport
+...                    np.kron(np.ones(2), np.eye(3))])
+>>> triangle = np.array([[1, 1, 0], [0, 1, 1], [1, 0, 1]])  # an odd cycle
+>>> totally_unimodular(small), totally_unimodular(triangle)
+(True, False)
+>>> W = np.array([[9, 11, 14, 11], [6, 15, 13, 13],
+...               [12, 13, 6, 8], [11, 9, 10, 9]])
+>>> rows, cols = linear_sum_assignment(W)  # Hungarian-type algorithm
+>>> cols, W[rows, cols].sum()
+(array([1, 0, 2, 3]), 32)
+>>> I4, e4 = np.eye(4), np.ones(4)
+>>> A2 = np.vstack([np.kron(I4, e4), np.kron(e4, I4)])
+>>> r = linprog(W.ravel(), A_eq=A2, b_eq=np.ones(8), method='highs')
+>>> r.x.reshape(4, 4) + 0.0, r.fun   # the LP relaxation is already 0-1
+(array([[0., 1., 0., 0.],
+       [1., 0., 0., 0.],
+       [0., 0., 1., 0.],
+       [0., 0., 0., 1.]]), 32.0)
+\end{verbatim}}
+\textbf{Reading the output.} The transportation matrix is TU; the triangle's is not (its determinant is $2$). The assignment solver sends workers $1, 2, 3, 4$ to jobs $2, 1, 3, 4$ (Python counts from $0$) at cost $32$, as the Hungarian method found, and the LP relaxation returns a permutation matrix with the same cost: the LP
+needs no integrality constraints.
+
+\textbf{MATLAB/Octave:} \texttt{matchpairs(W, 1e6)} solves the assignment problem.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Find the north-west corner solution of Example~\ref{ex:transport} by hand and its cost.
+\end{problem}
+
+\begin{solution}
+$(1, 1) = 5$, exhausting $D_1$; $(1, 2) = 2$, exhausting $S_1$; $(2, 2) = 6$, exhausting $D_2$; $(2, 3) = 3$, exhausting $S_2$; $(3, 3) = 4$, exhausting $D_3$; $(3, 4) = 14$. The cost is
+\[
+5\cdot 19 + 2\cdot 30 + 6\cdot 30 + 3\cdot 40 + 4\cdot 70 + 14\cdot 20 = 95 + 60 + 180 + 120 + 280 + 280 = 1015 .
+\]
+\end{solution}
+
+\begin{problem}
+Starting from the VAM solution $(1, 1) = 5$, $(1, 4) = 2$, $(2, 3) = 7$, $(2, 4) = 2$, $(3, 2) = 8$, $(3, 4) = 10$ of Example~\ref{ex:transport}, find $u$, $v$ and the reduced cost of $(2, 2)$, and carry out one MODI iteration.
+\end{problem}
+
+\begin{solution}
+With $u_1 = 10$ (any normalisation works): $v_1 = 9$, $v_4 = 0$, then $u_2 = 60$, $u_3 = 20$, $v_3 = -20$, $v_2 = -12$. So $d_{22} = 30 - 60 + 12 = -18 < 0$. The cycle is $(2, 2)^+ \to (3, 2)^- \to (3, 4)^+ \to (2, 4)^-$; the decreasing cells hold $8$ and $2$, so $\theta = 2$. The new plan has
+$(2, 2) = 2$, $(3, 2) = 6$, $(3, 4) = 12$, $(2, 4) = 0$, and cost $779 - 2 \times 18 = 743$, the optimum.
+\end{solution}
+
+\begin{problem}
+Supplies are $40$, $30$ and demands $25$, $20$, $15$. Balance the problem and say what the dummy shipments mean.
+\end{problem}
+
+\begin{solution}
+Supply is $70$ and demand $60$, so add a dummy destination $D_4$ with demand $10$ and zero cost. Shipments to $D_4$ are supply left unused at its source; if storage or disposal has a cost, that cost goes in the dummy column.
+\end{solution}
+
+\begin{problem}
+Five operators are to be assigned to five machines, and the payoff (not cost) of operator $i$ on machine $j$ is $p_{ij}$. How is the problem converted for the Hungarian method, and why does the conversion not change the optimal assignment?
+\end{problem}
+
+\begin{solution}
+Use costs $c_{ij} = P - p_{ij}$ with $P = \max p_{ij}$. Every assignment has exactly one entry in each row, so its cost is $5P$ minus its payoff, and minimising cost is the same as maximising payoff. The costs are non-negative, as the method requires.
+\end{solution}
+
+\begin{problem}
+Show that the incidence matrix of a triangle (rows for the three vertices, columns for the three edges) is not totally unimodular, and explain the consequence for the LP relaxation of matching in a triangle.
+\end{problem}
+
+\begin{solution}
+$\det\begin{pmatrix} 1 & 1 & 0 \\ 0 & 1 & 1 \\ 1 & 0 & 1 \end{pmatrix} = 1(1 - 0) - 1(0 - 1) + 0 = 2$. The LP ``maximise $x_{12} + x_{23} + x_{13}$ with each vertex covered at most once'' has the fractional vertex $x = (\frac12, \frac12, \frac12)$ with value $\frac32$, while the best matching has value $1$: for non-bipartite graphs the LP
+needs extra constraints (Edmonds' odd-set constraints) to be integral.
+\end{solution}
+
+\begin{problem}
+Show that in the assignment problem every BFS is degenerate when $n \geq 2$.
+\end{problem}
+
+\begin{solution}
+A basis has $2n - 1$ cells, by Proposition~\ref{prop:transportrank}. A BFS is a vertex, hence by total unimodularity a permutation matrix, with exactly $n$ positive entries. So $n - 1 \geq 1$ basic variables are zero.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -1729,6 +2059,7 @@ No. Its shadow price is $0$ for all $b_3 \geq 2$, so extra units add no profit: 
 \subhead{Further reading}
 \begin{enumerate}
 \item Beale, E. M. L. (1955), Cycling in the dual simplex algorithm, \emph{Naval Research Logistics Quarterly}, 2, 269--275.
+\item Birkhoff, G. (1946), Tres observaciones sobre el \'algebra lineal, \emph{Universidad Nacional de Tucum\'an, Revista, Serie A}, 5, 147--151.
 \item Blackett, P. M. S. (1962), \emph{Studies of War: Nuclear and Conventional}, Edinburgh, Oliver and Boyd.
 \item Bland, R. G. (1977), New finite pivoting rules for the simplex method, \emph{Mathematics of Operations Research}, 2, 103--107.
 \item Bradley, S. P., Hax, A. C., and Magnanti, T. L. (1977), \emph{Applied Mathematical Programming}, Reading, Addison-Wesley.
@@ -1737,6 +2068,8 @@ No. Its shadow price is $0$ for all $b_3 \geq 2$, so extra units add no profit: 
 \item Dantzig, G. B. (1951), Maximization of a linear function of variables subject to linear inequalities, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 339--347.
 \item Dantzig, G. B. (1955), Upper bounds, secondary constraints, and block triangularity in linear programming, \emph{Econometrica}, 23, 174--183.
 \item Dantzig, G. B., and Orchard-Hays, W. (1954), The product form for the inverse in the simplex method, \emph{Mathematical Tables and Other Aids to Computation}, 8, 64--67.
+\item Edmonds, J. (1965), Maximum matching and a polyhedron with 0,1-vertices, \emph{Journal of Research of the National Bureau of Standards}, 69B, 125--130.
+\item Egerv\'ary, J. (1931), M\'atrixok kombinatorius tulajdons\'agair\'ol, \emph{Matematikai \'es Fizikai Lapok}, 38, 16--28.
 \item Farkas, J. (1902), Theorie der einfachen Ungleichungen, \emph{Journal f\"ur die reine und angewandte Mathematik}, 124, 1--27.
 \item Forrest, J. J. H., and Tomlin, J. A. (1972), Updated triangular factors of the basis to maintain sparsity in the product form simplex method, \emph{Mathematical Programming}, 2, 263--278.
 \item Gal, T., and Greenberg, H. J. (eds.) (1997), \emph{Advances in Sensitivity Analysis and Parametric Programming}, Boston, Kluwer.
@@ -1744,16 +2077,21 @@ No. Its shadow price is $0$ for all $b_3 \geq 2$, so extra units add no profit: 
 \item Gass, S. I., and Saaty, T. L. (1955), The computational algorithm for the parametric objective function, \emph{Naval Research Logistics Quarterly}, 2, 39--45.
 \item Goldfarb, D., and Reid, J. K. (1977), A practicable steepest-edge simplex algorithm, \emph{Mathematical Programming}, 12, 361--371.
 \item Harris, P. M. J. (1973), Pivot selection methods of the Devex LP code, \emph{Mathematical Programming}, 5, 1--28.
+\item Hitchcock, F. L. (1941), The distribution of a product from several sources to numerous localities, \emph{Journal of Mathematics and Physics}, 20, 224--230.
+\item Hoffman, A. J., and Kruskal, J. B. (1956), Integral boundary points of convex polyhedra, in H. W. Kuhn and A. W. Tucker (eds.), \emph{Linear Inequalities and Related Systems}, Annals of Mathematics Studies 38, Princeton University Press, 223--246.
 \item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.
 \item Karmarkar, N. (1984), A new polynomial-time algorithm for linear programming, \emph{Combinatorica}, 4, 373--395.
 \item Khachiyan, L. G. (1979), A polynomial algorithm in linear programming, \emph{Soviet Mathematics Doklady}, 20, 191--194.
 \item Klee, V., and Minty, G. J. (1972), How good is the simplex algorithm?, in O. Shisha (ed.), \emph{Inequalities III}, New York, Academic Press, 159--175.
+\item K\"onig, D. (1931), Gr\'afok \'es m\'atrixok, \emph{Matematikai \'es Fizikai Lapok}, 38, 116--119.
 \item Koopmans, T. C. (ed.) (1951), \emph{Activity Analysis of Production and Allocation}, New York, Wiley.
+\item Kuhn, H. W. (1955), The Hungarian method for the assignment problem, \emph{Naval Research Logistics Quarterly}, 2, 83--97.
 \item Lemke, C. E. (1954), The dual method of solving the linear programming problem, \emph{Naval Research Logistics Quarterly}, 1, 36--47.
 \item Minkowski, H. (1896), \emph{Geometrie der Zahlen}, Leipzig, Teubner.
 \item von Neumann, J. (1947), Discussion of a maximum problem, unpublished manuscript, in A. H. Taub (ed.), \emph{John von Neumann: Collected Works}, Vol.~VI (1963), Oxford, Pergamon, 89--95.
 \item Spielman, D. A., and Teng, S.-H. (2004), Smoothed analysis of algorithms: why the simplex algorithm usually takes polynomial time, \emph{Journal of the ACM}, 51, 385--463.
 \item Stigler, G. J. (1945), The cost of subsistence, \emph{Journal of Farm Economics}, 27, 303--314.
+\item Vogel, W. R. (1958), A short-cut solution to the transportation problem, cited in N. V. Reinfeld and W. R. Vogel, \emph{Mathematical Programming}, Englewood Cliffs, Prentice-Hall.
 \item Weyl, H. (1935), Elementare Theorie der konvexen Polyeder, \emph{Commentarii Mathematici Helvetici}, 7, 290--306.
 \end{enumerate}
 
