@@ -2185,6 +2185,316 @@ The envelope $5.128|\sin0.05t|$ has period $\pi/0.05 = 62.8$, and the maximum am
 At $\omega = 2$, $y = \frac t4\sin2t$, which grows without bound.
 \end{solution}
 
+%======================================================================
+\section{Higher-Order Linear Equations and the Laplace Transform}
+\label{sec:higher}
+
+Many models are stated directly as a single equation of order $n$, such as Newton's law for a mass on a spring, the current in a circuit, or the
+deflection of a beam. By Theorem~\ref{thm:reduction} they are systems, and the theory of the previous two sections applies, but working with the scalar
+equation directly is often clearer and leads to the methods engineers use: characteristic polynomials, undetermined coefficients, impulse responses
+and the Laplace transform. This section develops them for the equation
+\[
+L[y] = y^{(n)} + a_{n-1}y^{(n-1)} + \dots + a_1y' + a_0y = g(t)
+\]
+with constant real coefficients. Write $D = d/dt$ and $p(\lambda) = \lambda^n + a_{n-1}\lambda^{n-1} + \dots + a_0$, the \textbf{characteristic polynomial}, so that $L = p(D)$.
+
+\subsection{The homogeneous equation}
+\label{ssec:charpoly}
+
+\begin{lem}[Exponential shift]
+\label{lem:shift}
+For any polynomial $q$ and smooth $u$, $q(D)\bigl(e^{\lambda t}u\bigr) = e^{\lambda t}q(D + \lambda)u$. In particular $p(D)e^{\lambda t} = p(\lambda)e^{\lambda t}$.
+\end{lem}
+
+\begin{proof}
+$D(e^{\lambda t}u) = e^{\lambda t}(Du + \lambda u) = e^{\lambda t}(D + \lambda)u$; apply this repeatedly for powers of $D$ and use linearity.
+\end{proof}
+
+\begin{thm}
+\label{thm:charbasis}
+Let $p(\lambda) = \prod_j(\lambda - \lambda_j)^{m_j}$ with distinct roots $\lambda_j$. The $n$ functions $t^ke^{\lambda_jt}$, $0 \leq k < m_j$, form a basis of the solutions of $p(D)y = 0$. For a complex pair
+$\lambda = a \pm ib$ of multiplicity $m$, the functions $t^ke^{\lambda t}$ and $t^ke^{\bar\lambda t}$ may be replaced by the real functions $t^ke^{at}\cos bt$ and $t^ke^{at}\sin bt$.
+\end{thm}
+
+\begin{proof}
+Write $p(D) = q(D)(D - \lambda_j)^{m_j}$. By Lemma~\ref{lem:shift}, $(D - \lambda_j)^{m_j}(t^ke^{\lambda_jt}) = e^{\lambda_jt}D^{m_j}t^k = 0$ for $k < m_j$, and the factors of $p(D)$ commute, so each $t^ke^{\lambda_jt}$ is a solution. There
+are $\sum_jm_j = n$ of them, and by Theorem~\ref{thm:solspace} it suffices to show they are linearly independent. Suppose $\sum_jq_j(t)e^{\lambda_jt} = 0$ with polynomials $q_j$ of degree
+less than $m_j$, not all zero. Multiply by $e^{-\lambda_1t}$ and differentiate $m_1$ times: the term $q_1$ disappears, and each other term becomes $r_j(t)e^{(\lambda_j - \lambda_1)t}$ with $r_j = (D + \lambda_j - \lambda_1)^{m_1}q_j$, a
+polynomial of the same degree as $q_j$, since $\lambda_j \neq \lambda_1$. This gives a relation with one fewer exponential, and induction on the number of distinct roots reduces to a single
+term $r(t)e^{\mu t} = 0$ with $r \neq 0$, which is impossible. Finally, if $p$ has real coefficients, the real and imaginary parts of a complex solution are real solutions, and they span the
+same space as the conjugate pair.
+\end{proof}
+
+The theorem is Theorem~\ref{thm:jordanexp}(iii) for the companion matrix, whose eigenvalues are the roots of $p$ and whose Jordan blocks have sizes equal to the multiplicities.
+
+\subhead{Euler equations}
+The equidimensional equation $t^ny^{(n)} + b_{n-1}t^{n-1}y^{(n-1)} + \dots + b_0y = 0$ on $t > 0$ becomes a constant-coefficient equation under $t = e^s$, because $t\frac{d}{dt} = \frac{d}{ds}$. In practice one tries
+$y = t^r$: for $n = 2$, $t^2y'' + bty' + cy = 0$ gives $r(r - 1) + br + c = 0$, a double root $r$ gives the second solution $t^r\log t$, and a complex pair $\alpha \pm i\beta$ gives $t^\alpha\cos(\beta\log t)$
+and $t^\alpha\sin(\beta\log t)$. Euler equations are the model for the regular singular points of the section on series solutions.
+
+\subsection{Undetermined coefficients}
+\label{ssec:undet}
+
+\begin{thm}
+\label{thm:undet}
+Let $g(t) = e^{\mu t}q(t)$ with $q$ a polynomial of degree $d$, and let $m \geq 0$ be the multiplicity of $\mu$ as a root of $p$ ($m = 0$ if $p(\mu) \neq 0$). Then $p(D)y = g$ has a particular solution
+\[
+y_p = t^me^{\mu t}r(t), \qquad \deg r \leq d .
+\]
+The same holds for $g = e^{at}q(t)\cos bt$ or $e^{at}q(t)\sin bt$, with $\mu = a + ib$ and $y_p = t^me^{at}\bigl(r_1(t)\cos bt + r_2(t)\sin bt\bigr)$.
+\end{thm}
+
+\begin{proof}
+Write $p(\lambda) = (\lambda - \mu)^mp_1(\lambda)$ with $p_1(\mu) \neq 0$. By Lemma~\ref{lem:shift}, $p(D)(e^{\mu t}w) = e^{\mu t}p_1(D + \mu)D^mw$, so it suffices to solve $p_1(D + \mu)D^mw = q$ with $w = t^mr$. The operator
+$p_1(D + \mu)$ maps polynomials of degree at most $d$ into themselves and has constant term $p_1(\mu) \neq 0$, so on that finite-dimensional space it is triangular with non-zero diagonal, hence
+invertible: there is a polynomial $v$ of degree at most $d$ with $p_1(D + \mu)v = q$. Then $w$, an $m$-fold antiderivative of $v$, can be chosen as $t^mr$ with $\deg r \leq d$, dropping the lower
+powers, which are killed by $D^m$. For the trigonometric case take real or imaginary parts.
+\end{proof}
+
+The factor $t^m$ is the algebraic form of resonance: when the forcing has the form of a free solution, the response grows by an extra power of $t$, as in Example~\ref{ex:resonance}.
+Undetermined coefficients is limited to forcing of exponential-polynomial type; for other forcing, variation of parameters or the Green's function is needed.
+
+\subsection{The impulse response and Green's function}
+\label{ssec:impulse}
+
+\begin{thm}
+\label{thm:impulse}
+Let $G$ be the solution of $p(D)G = 0$ with $G(0) = G'(0) = \dots = G^{(n-2)}(0) = 0$ and $G^{(n-1)}(0) = 1$. For continuous $g$, the solution of $p(D)y = g$ with zero initial data at $t = 0$ is
+\[
+y(t) = \int_0^tG(t - s)g(s)\,ds = (G * g)(t) .
+\]
+\end{thm}
+
+\begin{proof}
+Differentiating under the integral sign once, $y'(t) = G(0)g(t) + \int_0^tG'(t - s)g(s)\,ds$, and the first term vanishes if $n \geq 2$. Repeating, for $k \leq n - 1$
+\[
+y^{(k)}(t) = \int_0^tG^{(k)}(t - s)g(s)\,ds ,
+\]
+because each differentiation produces a boundary term $G^{(j)}(0)g(t)$ with $j \leq n - 2$, which is zero; in particular $y^{(k)}(0) = 0$. One more differentiation gives the boundary term
+$G^{(n-1)}(0)g(t) = g(t)$:
+\[
+y^{(n)}(t) = g(t) + \int_0^tG^{(n)}(t - s)g(s)\,ds .
+\]
+Then $p(D)y = g(t) + \int_0^t\bigl(p(D)G\bigr)(t - s)g(s)\,ds = g(t)$.
+\end{proof}
+
+$G$ is the \textbf{impulse response}: the response of the system at rest to a unit blow at time $0$, which leaves the position and lower derivatives unchanged and gives the
+$(n - 1)$st derivative a unit jump. The convolution formula superposes the responses to the impulses $g(s)\,ds$ delivered at the earlier times $s$, and $G(t - s)$ is the Green's function of
+the initial value problem. For the oscillator $y'' + 2\zeta\omega_0y' + \omega_0^2y = g$ with $0 < \zeta < 1$,
+\[
+G(t) = \frac{e^{-\zeta\omega_0t}\sin\omega_dt}{\omega_d}, \qquad \omega_d = \omega_0\sqrt{1 - \zeta^2},
+\]
+a damped oscillation at the damped frequency $\omega_d$. Figure~\ref{fig:pulse} shows $G$ and the response to a rectangular pulse.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!5,rounded corners=4pt] (-0.7,0.4) rectangle (12.7,4.4);
+\draw[->] (0,2) -- (12.4,2) node[below,font=\small] {$t$};
+\draw[->] (0,0.8) -- (0,4.2);
+\foreach \v/\x in {2/2.4, 4/4.8, 6/7.2, 8/9.6, 10/12}
+  \draw (\x,1.92) -- (\x,2.08) node[below,font=\scriptsize] at (\x,1.92) {$\v$};
+\fill[gray!25] plot coordinates {(0,2.000) (1.200,2.000) (1.200,2.800) (3.600,2.800) (3.600,2.000) (12.000,2.000)} -- cycle;
+\draw[blue!60!black,thick,dashed] plot coordinates {(0.000,2.000) (0.040,2.106) (0.080,2.210) (0.120,2.312) (0.160,2.411) (0.200,2.506) (0.240,2.599) (0.280,2.687) (0.320,2.772) (0.360,2.851) (0.400,2.926) (0.440,2.996) (0.480,3.061) (0.520,3.120) (0.560,3.173) (0.600,3.220) (0.640,3.262) (0.680,3.297) (0.720,3.326) (0.760,3.349) (0.800,3.366) (0.840,3.376) (0.880,3.380) (0.920,3.378) (0.960,3.370) (1.000,3.356) (1.040,3.336) (1.080,3.311) (1.120,3.280) (1.160,3.244) (1.200,3.203) (1.240,3.157) (1.280,3.106) (1.320,3.052) (1.360,2.993) (1.400,2.931) (1.440,2.866) (1.480,2.797) (1.520,2.726) (1.560,2.653) (1.600,2.578) (1.640,2.501) (1.680,2.423) (1.720,2.344) (1.760,2.265) (1.800,2.186) (1.840,2.107) (1.880,2.028) (1.920,1.951) (1.960,1.874) (2.000,1.799) (2.040,1.726) (2.080,1.656) (2.120,1.587) (2.160,1.522) (2.200,1.459) (2.240,1.400) (2.280,1.344) (2.320,1.292) (2.360,1.243) (2.400,1.199) (2.440,1.158) (2.480,1.122) (2.520,1.090) (2.560,1.063) (2.600,1.040) (2.640,1.022) (2.680,1.008) (2.720,0.999) (2.760,0.994) (2.800,0.994) (2.840,0.998) (2.880,1.007) (2.920,1.020) (2.960,1.037) (3.000,1.058) (3.040,1.083) (3.080,1.112) (3.120,1.144) (3.160,1.180) (3.200,1.218) (3.240,1.260) (3.280,1.304) (3.320,1.351) (3.360,1.400) (3.400,1.452) (3.440,1.504) (3.480,1.559) (3.520,1.614) (3.560,1.671) (3.600,1.728) (3.640,1.786) (3.680,1.844) (3.720,1.901) (3.760,1.959) (3.800,2.016) (3.840,2.072) (3.880,2.127) (3.920,2.180) (3.960,2.233) (4.000,2.283) (4.040,2.332) (4.080,2.378) (4.120,2.422) (4.160,2.464) (4.200,2.503) (4.240,2.540) (4.280,2.573) (4.320,2.604) (4.360,2.631) (4.400,2.655) (4.440,2.677) (4.480,2.694) (4.520,2.709) (4.560,2.720) (4.600,2.728) (4.640,2.733) (4.680,2.734) (4.720,2.732) (4.760,2.727) (4.800,2.718) (4.840,2.707) (4.880,2.693) (4.920,2.676) (4.960,2.656) (5.000,2.633) (5.040,2.608) (5.080,2.580) (5.120,2.551) (5.160,2.519) (5.200,2.486) (5.240,2.450) (5.280,2.414) (5.320,2.376) (5.360,2.336) (5.400,2.296) (5.440,2.255) (5.480,2.213) (5.520,2.171) (5.560,2.129) (5.600,2.087) (5.640,2.045) (5.680,2.003) (5.720,1.962) (5.760,1.922) (5.800,1.882) (5.840,1.844) (5.880,1.807) (5.920,1.771) (5.960,1.736) (6.000,1.703) (6.040,1.672) (6.080,1.643) (6.120,1.616) (6.160,1.591) (6.200,1.568) (6.240,1.547) (6.280,1.528) (6.320,1.512) (6.360,1.498) (6.400,1.487) (6.440,1.477) (6.480,1.471) (6.520,1.467) (6.560,1.465) (6.600,1.465) (6.640,1.468) (6.680,1.474) (6.720,1.481) (6.760,1.491) (6.800,1.503) (6.840,1.516) (6.880,1.532) (6.920,1.550) (6.960,1.569) (7.000,1.590) (7.040,1.613) (7.080,1.637) (7.120,1.662) (7.160,1.689) (7.200,1.716) (7.240,1.744) (7.280,1.773) (7.320,1.803) (7.360,1.833) (7.400,1.864) (7.440,1.895) (7.480,1.925) (7.520,1.956) (7.560,1.987) (7.600,2.017) (7.640,2.046) (7.680,2.075) (7.720,2.104) (7.760,2.131) (7.800,2.158) (7.840,2.183) (7.880,2.208) (7.920,2.231) (7.960,2.253) (8.000,2.273) (8.040,2.292) (8.080,2.309) (8.120,2.325) (8.160,2.339) (8.200,2.352) (8.240,2.363) (8.280,2.372) (8.320,2.379) (8.360,2.384) (8.400,2.388) (8.440,2.390) (8.480,2.390) (8.520,2.389) (8.560,2.385) (8.600,2.381) (8.640,2.374) (8.680,2.366) (8.720,2.356) (8.760,2.345) (8.800,2.333) (8.840,2.319) (8.880,2.304) (8.920,2.288) (8.960,2.271) (9.000,2.253) (9.040,2.234) (9.080,2.214) (9.120,2.194) (9.160,2.173) (9.200,2.151) (9.240,2.130) (9.280,2.107) (9.320,2.085) (9.360,2.063) (9.400,2.040) (9.440,2.018) (9.480,1.996) (9.520,1.974) (9.560,1.953) (9.600,1.932) (9.640,1.911) (9.680,1.892) (9.720,1.873) (9.760,1.855) (9.800,1.838) (9.840,1.821) (9.880,1.806) (9.920,1.792) (9.960,1.779) (10.000,1.767) (10.040,1.756) (10.080,1.747) (10.120,1.738) (10.160,1.731) (10.200,1.725) (10.240,1.721) (10.280,1.718) (10.320,1.716) (10.360,1.715) (10.400,1.716) (10.440,1.718) (10.480,1.721) (10.520,1.725) (10.560,1.731) (10.600,1.737) (10.640,1.745) (10.680,1.754) (10.720,1.763) (10.760,1.774) (10.800,1.785) (10.840,1.798) (10.880,1.811) (10.920,1.824) (10.960,1.838) (11.000,1.853) (11.040,1.868) (11.080,1.884) (11.120,1.900) (11.160,1.916) (11.200,1.932) (11.240,1.948) (11.280,1.965) (11.320,1.981) (11.360,1.997) (11.400,2.013) (11.440,2.029) (11.480,2.044) (11.520,2.059) (11.560,2.074) (11.600,2.088) (11.640,2.101) (11.680,2.114) (11.720,2.126) (11.760,2.137) (11.800,2.148) (11.840,2.158) (11.880,2.167) (11.920,2.175) (11.960,2.182) (12.000,2.189)};
+\draw[red!70!black,very thick] plot coordinates {(0.000,2.000) (0.040,2.000) (0.080,2.000) (0.120,2.000) (0.160,2.000) (0.200,2.000) (0.240,2.000) (0.280,2.000) (0.320,2.000) (0.360,2.000) (0.400,2.000) (0.440,2.000) (0.480,2.000) (0.520,2.000) (0.560,2.000) (0.600,2.000) (0.640,2.000) (0.680,2.000) (0.720,2.000) (0.760,2.000) (0.800,2.000) (0.840,2.000) (0.880,2.000) (0.920,2.000) (0.960,2.000) (1.000,2.000) (1.040,2.000) (1.080,2.000) (1.120,2.000) (1.160,2.000) (1.200,2.000) (1.240,2.002) (1.280,2.007) (1.320,2.016) (1.360,2.028) (1.400,2.043) (1.440,2.061) (1.480,2.083) (1.520,2.107) (1.560,2.134) (1.600,2.164) (1.640,2.196) (1.680,2.230) (1.720,2.267) (1.760,2.305) (1.800,2.345) (1.840,2.386) (1.880,2.429) (1.920,2.473) (1.960,2.517) (2.000,2.562) (2.040,2.608) (2.080,2.654) (2.120,2.700) (2.160,2.746) (2.200,2.791) (2.240,2.836) (2.280,2.880) (2.320,2.924) (2.360,2.966) (2.400,3.006) (2.440,3.046) (2.480,3.083) (2.520,3.119) (2.560,3.154) (2.600,3.186) (2.640,3.216) (2.680,3.243) (2.720,3.269) (2.760,3.292) (2.800,3.312) (2.840,3.330) (2.880,3.346) (2.920,3.358) (2.960,3.369) (3.000,3.376) (3.040,3.381) (3.080,3.383) (3.120,3.383) (3.160,3.380) (3.200,3.375) (3.240,3.367) (3.280,3.356) (3.320,3.344) (3.360,3.329) (3.400,3.312) (3.440,3.293) (3.480,3.272) (3.520,3.249) (3.560,3.225) (3.600,3.199) (3.640,3.170) (3.680,3.136) (3.720,3.097) (3.760,3.054) (3.800,3.007) (3.840,2.957) (3.880,2.902) (3.920,2.845) (3.960,2.784) (4.000,2.721) (4.040,2.655) (4.080,2.588) (4.120,2.519) (4.160,2.448) (4.200,2.376) (4.240,2.304) (4.280,2.231) (4.320,2.158) (4.360,2.086) (4.400,2.014) (4.440,1.943) (4.480,1.873) (4.520,1.805) (4.560,1.738) (4.600,1.673) (4.640,1.611) (4.680,1.551) (4.720,1.494) (4.760,1.440) (4.800,1.389) (4.840,1.342) (4.880,1.298) (4.920,1.258) (4.960,1.221) (5.000,1.189) (5.040,1.160) (5.080,1.136) (5.120,1.116) (5.160,1.100) (5.200,1.088) (5.240,1.080) (5.280,1.076) (5.320,1.077) (5.360,1.082) (5.400,1.090) (5.440,1.103) (5.480,1.119) (5.520,1.139) (5.560,1.163) (5.600,1.189) (5.640,1.220) (5.680,1.253) (5.720,1.289) (5.760,1.327) (5.800,1.369) (5.840,1.412) (5.880,1.457) (5.920,1.505) (5.960,1.553) (6.000,1.603) (6.040,1.655) (6.080,1.707) (6.120,1.759) (6.160,1.812) (6.200,1.865) (6.240,1.918) (6.280,1.971) (6.320,2.023) (6.360,2.074) (6.400,2.125) (6.440,2.174) (6.480,2.221) (6.520,2.267) (6.560,2.312) (6.600,2.354) (6.640,2.394) (6.680,2.432) (6.720,2.468) (6.760,2.501) (6.800,2.531) (6.840,2.558) (6.880,2.583) (6.920,2.605) (6.960,2.624) (7.000,2.640) (7.040,2.653) (7.080,2.662) (7.120,2.669) (7.160,2.673) (7.200,2.674) (7.240,2.671) (7.280,2.666) (7.320,2.658) (7.360,2.647) (7.400,2.633) (7.440,2.617) (7.480,2.598) (7.520,2.577) (7.560,2.554) (7.600,2.528) (7.640,2.501) (7.680,2.472) (7.720,2.440) (7.760,2.408) (7.800,2.374) (7.840,2.339) (7.880,2.303) (7.920,2.265) (7.960,2.228) (8.000,2.190) (8.040,2.151) (8.080,2.112) (8.120,2.074) (8.160,2.035) (8.200,1.997) (8.240,1.959) (8.280,1.922) (8.320,1.886) (8.360,1.851) (8.400,1.817) (8.440,1.784) (8.480,1.753) (8.520,1.723) (8.560,1.695) (8.600,1.668) (8.640,1.643) (8.680,1.621) (8.720,1.600) (8.760,1.581) (8.800,1.564) (8.840,1.550) (8.880,1.537) (8.920,1.527) (8.960,1.519) (9.000,1.513) (9.040,1.510) (9.080,1.509) (9.120,1.510) (9.160,1.513) (9.200,1.518) (9.240,1.525) (9.280,1.534) (9.320,1.545) (9.360,1.558) (9.400,1.573) (9.440,1.590) (9.480,1.608) (9.520,1.627) (9.560,1.648) (9.600,1.670) (9.640,1.694) (9.680,1.718) (9.720,1.744) (9.760,1.770) (9.800,1.797) (9.840,1.824) (9.880,1.852) (9.920,1.880) (9.960,1.908) (10.000,1.936) (10.040,1.964) (10.080,1.992) (10.120,2.020) (10.160,2.047) (10.200,2.074) (10.240,2.100) (10.280,2.125) (10.320,2.149) (10.360,2.172) (10.400,2.194) (10.440,2.215) (10.480,2.235) (10.520,2.254) (10.560,2.271) (10.600,2.287) (10.640,2.301) (10.680,2.314) (10.720,2.325) (10.760,2.334) (10.800,2.342) (10.840,2.349) (10.880,2.353) (10.920,2.357) (10.960,2.358) (11.000,2.358) (11.040,2.356) (11.080,2.353) (11.120,2.348) (11.160,2.342) (11.200,2.335) (11.240,2.326) (11.280,2.315) (11.320,2.304) (11.360,2.291) (11.400,2.277) (11.440,2.262) (11.480,2.246) (11.520,2.229) (11.560,2.212) (11.600,2.194) (11.640,2.175) (11.680,2.155) (11.720,2.136) (11.760,2.115) (11.800,2.095) (11.840,2.075) (11.880,2.054) (11.920,2.033) (11.960,2.013) (12.000,1.993)};
+\node[font=\scriptsize,gray!60!black] at (2.4,1.25) {forcing $g$ (shaded)};
+\node[font=\scriptsize,blue!60!black,anchor=west] at (0.15,3.85) {impulse response $G(t)$};
+\node[font=\scriptsize,red!70!black,anchor=west] at (5.0,3.6) {response $y = G * g$};
+\end{tikzpicture}
+\caption{The oscillator $y'' + 0.4y' + 4y = g(t)$ ($\omega_0 = 2$, $\zeta = 0.1$) at rest. Dashed: the impulse response $G$. Shaded: a unit pulse of force on $1 \leq t \leq 3$, drawn at a quarter of its height. Solid: the
+response, the convolution $G * g$. While the force acts, the oscillator rings about the new equilibrium $\frac14$; after it is removed, it rings about $0$, with an amplitude that depends on the phase at
+which the pulse ended.}
+\label{fig:pulse}
+\end{figure}
+
+\subsection{The Laplace transform}
+\label{ssec:laplace}
+
+\begin{defn}
+A function $f$ on $[0, \infty)$ is of \textbf{exponential order} $c$ if it is piecewise continuous and $|f(t)| \leq Ke^{ct}$ for large $t$. Its \textbf{Laplace transform} is
+\[
+F(s) = \mathcal L[f](s) = \int_0^\infty e^{-st}f(t)\,dt, \qquad \Real s > c .
+\]
+\end{defn}
+
+The integral converges absolutely for $\Real s > c$, by comparison with $\int Ke^{-(\Real s - c)t}\,dt$.
+
+\begin{thm}
+\label{thm:laplace}
+For functions of exponential order, and $\Real s$ large enough:
+\begin{enumerate}[label=(\roman*)]
+\item $\mathcal L[e^{at}f](s) = F(s - a)$ (shift in $s$);
+\item $\mathcal L[f(t - a)H(t - a)](s) = e^{-as}F(s)$ for $a \geq 0$, where $H$ is the Heaviside step function (shift in $t$);
+\item $\mathcal L[f'](s) = sF(s) - f(0)$, and $\mathcal L[f^{(n)}] = s^nF - s^{n-1}f(0) - \dots - f^{(n-1)}(0)$, if $f, \dots, f^{(n-1)}$ are continuous and $f^{(n)}$ piecewise continuous;
+\item $\mathcal L[f * g] = FG$, where $(f * g)(t) = \int_0^tf(t - s)g(s)\,ds$ (convolution theorem);
+\item $\mathcal L[t^n] = n!/s^{n+1}$, $\mathcal L[e^{at}] = 1/(s - a)$, $\mathcal L[\cos bt] = s/(s^2 + b^2)$, $\mathcal L[\sin bt] = b/(s^2 + b^2)$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) $\int e^{-st}e^{at}f\,dt = \int e^{-(s - a)t}f\,dt$. (ii) Substitute $u = t - a$ in $\int_a^\infty e^{-st}f(t - a)\,dt$. (iii) Integrate by parts: $\int_0^\infty e^{-st}f'\,dt = \bigl[e^{-st}f\bigr]_0^\infty + s\int_0^\infty e^{-st}f\,dt$, and
+the boundary term at infinity vanishes for $\Real s > c$; repeat for higher derivatives. (iv) By Fubini's theorem, justified by absolute convergence,
+\[
+\int_0^\infty e^{-st}\int_0^tf(t - u)g(u)\,du\,dt = \int_0^\infty g(u)e^{-su}\int_u^\infty e^{-s(t - u)}f(t - u)\,dt\,du = G(s)F(s) .
+\]
+(v) $\mathcal L[1] = 1/s$; then (i) gives $e^{at}$; $\cos bt$ and $\sin bt$ are the real and imaginary parts of $e^{ibt}$, with transform $1/(s - ib) = (s + ib)/(s^2 + b^2)$; and $\mathcal L[t^n]$ follows from (iii) by
+induction, or from the Gamma integral.
+\end{proof}
+
+A function of exponential order is determined by its transform, up to its values at points of discontinuity (Lerch's theorem), so a transform can be inverted by recognising it,
+usually after a partial fraction decomposition. Applied to $p(D)y = g$ with initial data, rule (iii) turns the differential equation into an algebraic one:
+\begin{gather*}
+p(s)Y(s) - \bigl(\text{polynomial in } s \text{ built from the initial values}\bigr) = G_g(s),\\
+Y(s) = \frac{G_g(s) + \text{initial terms}}{p(s)} ,
+\end{gather*}
+where $G_g = \mathcal L[g]$. With zero initial data, $Y = H(s)G_g(s)$ with the \textbf{transfer function} $H(s) = 1/p(s)$. By the convolution theorem, $H$ is the transform of the impulse response
+of Theorem~\ref{thm:impulse}: $\mathcal L[G] = 1/p(s)$, since $G$ has zero initial data except $G^{(n-1)}(0) = 1$. The poles of $H$ are the roots of $p$, so the system is asymptotically stable if and only
+if every pole of the transfer function lies in the left half-plane $\Real s < 0$, the criterion that control engineers use.
+
+\subhead{Discontinuous and impulsive forcing}
+The transform handles switched forcing without piecewise solving: a force that is switched on at $t = a$ and off at $t = b$ is $H(t - a) - H(t - b)$, with transform $(e^{-as} - e^{-bs})/s$. An
+idealised blow at time $a$, a force of unit total impulse concentrated at one instant, is represented by the \textbf{Dirac delta} $\delta(t - a)$, with $\mathcal L[\delta(t - a)] = e^{-as}$; the
+response of a system at rest to $\delta(t)$ is the impulse response $G$, which is why it has that name. A rigorous treatment of $\delta$ requires distributions, but the transform rule can
+be justified as the limit of rectangular pulses of width $\varepsilon$ and height $1/\varepsilon$ as $\varepsilon \to 0$ (Problem~\ref{prob:deltalimit}).
+
+\begin{exa}
+\label{ex:laplaceivp}
+Solve $y'' + 3y' + 2y = 1$, $y(0) = y'(0) = 0$. Transforming, $(s^2 + 3s + 2)Y = 1/s$, so
+\[
+Y = \frac{1}{s(s + 1)(s + 2)} = \frac{1}{2s} - \frac{1}{s + 1} + \frac{1}{2(s + 2)}, \qquad y = \tfrac12 - e^{-t} + \tfrac12e^{-2t} .
+\]
+The constant $\frac12$ is the new equilibrium, and the exponentials are the transient, decaying at the rates given by the poles $-1$ and $-2$.
+\end{exa}
+
+\subsection{Higher-order equations in software}
+\label{ssec:software6}
+
+\begin{software}[Laplace transforms in SymPy]
+\label{sw:laplace}
+Transforms of standard functions, a shifted step, and the solution of Example~\ref{ex:laplaceivp} by partial fractions and inversion:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> t, s = sp.symbols('t s', positive=True)
+>>> a, b = sp.symbols('a b', positive=True)
+>>> sp.laplace_transform(t**3, t, s, noconds=True)
+6/s**4
+>>> sp.laplace_transform(sp.exp(-a*t) * sp.cos(b*t), t, s, noconds=True)
+(a + s)/(b**2 + (a + s)**2)
+>>> sp.laplace_transform(sp.Heaviside(t - 2), t, s, noconds=True)
+exp(-2*s)/s
+>>> Y = 1 / (s * (s**2 + 3*s + 2))         # y'' + 3y' + 2y = 1 from rest
+>>> sp.apart(Y, s)
+1/(2*(s + 2)) - 1/(s + 1) + 1/(2*s)
+>>> sp.inverse_laplace_transform(Y, s, t)
+1/2 - exp(-t) + exp(-2*t)/2
+\end{verbatim}}
+\textbf{Reading the output.} The transforms agree with Theorem~\ref{thm:laplace}: $3!/s^4$, the shifted cosine $(s + a)/((s + a)^2 + b^2)$, and the delayed step $e^{-2s}/s$. \texttt{apart} gives the partial fractions
+of Example~\ref{ex:laplaceivp}, and the inverse transform returns $\frac12 - e^{-t} + \frac12e^{-2t}$. Declaring \texttt{t} and \texttt{s} positive avoids the conditions on $\Real s$ that SymPy would otherwise carry.
+
+\textbf{MATLAB/Octave:} \texttt{syms t s; laplace(t\^{}3)} and \texttt{ilaplace(1/(s*(s\^{}2 + 3*s + 2)))}.
+\end{software}
+
+\begin{software}[Characteristic roots and undetermined coefficients]
+\label{sw:undet}
+A resonant case of Theorem~\ref{thm:undet}, and an equation with a complex pair of characteristic roots:
+{\small\begin{verbatim}
+>>> y = sp.Function('y'); u = sp.symbols('u', real=True)
+>>> sp.dsolve(y(u).diff(u, 2) - 2*y(u).diff(u) + y(u) - sp.exp(u), y(u))
+Eq(y(u), (C1 + u*(C2 + u/2))*exp(u))
+>>> sp.dsolve(y(u).diff(u, 3) - y(u), y(u))
+Eq(y(u), C3*exp(u) + (C1*sin(sqrt(3)*u/2) + C2*cos(sqrt(3)*u/2))*exp(-u/2))
+\end{verbatim}}
+\textbf{Reading the output.} For $y'' - 2y' + y = e^u$, the forcing exponent $1$ is a double root of $p(\lambda) = (\lambda - 1)^2$, so $m = 2$ and the particular solution is $\frac12u^2e^u$, the term $u^2/2$
+inside the bracket. For $y''' = y$, the roots of $\lambda^3 = 1$ are $1$ and $-\frac12 \pm \frac{\sqrt3}{2}i$, giving $e^u$ and $e^{-u/2}$ times $\cos$ and $\sin$ of $\frac{\sqrt3}{2}u$, as Theorem~\ref{thm:charbasis} predicts.
+
+\textbf{MATLAB/Octave:} \texttt{roots([1 0 0 -1])} for the characteristic roots.
+\end{software}
+
+\begin{software}[The convolution formula]
+\label{sw:convolution}
+The oscillator of Figure~\ref{fig:pulse} forced by a unit pulse on $[1, 3]$, solved by the convolution integral of Theorem~\ref{thm:impulse} and by direct numerical integration:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.integrate import solve_ivp, quad
+>>> w0, z = 2.0, 0.1                       # y'' + 2 z w0 y' + w0^2 y = g(t)
+>>> wd = w0 * np.sqrt(1 - z**2)
+>>> G = lambda t: np.exp(-z * w0 * t) * np.sin(wd * t) / wd * (t >= 0)
+>>> g = lambda t: 1.0 * (1 <= t <= 3)     # a rectangular pulse
+>>> conv = lambda t: quad(lambda s: G(t - s) * g(s), 1, min(t, 3))[0]
+>>> rhs = lambda t, x: [x[1], g(t) - 2*z*w0*x[1] - w0**2*x[0]]
+>>> num = solve_ivp(rhs, (0, 8), [0, 0], max_step=0.01, rtol=1e-10,
+...                 atol=1e-12, dense_output=True)
+>>> for T in (2.0, 3.0, 5.0, 8.0):
+...     print(T, round(conv(T), 5), round(num.sol(T)[0], 5))
+...
+2.0 0.31452 0.31452
+3.0 0.37458 0.37458
+5.0 -0.12393 -0.12393
+8.0 -0.10297 -0.10297
+\end{verbatim}}
+\textbf{Reading the output.} The two methods agree to five decimals at every time. The convolution needs only the impulse response and a quadrature, and it gives the response to
+any forcing once $G$ is known; this is how linear systems are characterised experimentally, by measuring their impulse or step response. Note the response after the pulse ends
+at $t = 3$: the oscillator keeps ringing, with amplitude about $0.12$ at $t = 5$, decaying like $e^{-0.2t}$.
+
+\textbf{MATLAB/Octave:} \texttt{impulse(tf(1, [1 0.4 4]))} and \texttt{lsim} with the Control System Toolbox.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Find the general solution of $y^{(4)} - 2y'' + y = 0$ and of $y'' - 4y' + 13y = 0$.
+\end{problem}
+
+\begin{solution}
+$p(\lambda) = \lambda^4 - 2\lambda^2 + 1 = (\lambda^2 - 1)^2$, with double roots $\pm1$: $y = (c_1 + c_2t)e^t + (c_3 + c_4t)e^{-t}$. For the second, $\lambda = 2 \pm 3i$: $y = e^{2t}(c_1\cos3t + c_2\sin3t)$.
+\end{solution}
+
+\begin{problem}
+Solve $t^2y'' - 3ty' + 4y = 0$ on $t > 0$.
+\end{problem}
+
+\begin{solution}
+$y = t^r$ gives $r(r - 1) - 3r + 4 = r^2 - 4r + 4 = (r - 2)^2$, a double root $r = 2$. So $y = c_1t^2 + c_2t^2\log t$.
+\end{solution}
+
+\begin{problem}
+Find the form of a particular solution, without computing the coefficients, for $y'' + 4y = t\sin2t$ and for $y''' - y' = 3 + e^t$.
+\end{problem}
+
+\begin{solution}
+For the first, $\mu = 2i$ is a simple root of $\lambda^2 + 4$ and $q = t$ has degree $1$, so $y_p = t\bigl((A_1t + A_0)\cos2t + (B_1t + B_0)\sin2t\bigr)$. For the second, $p(\lambda) = \lambda(\lambda - 1)(\lambda + 1)$; the constant $3$
+corresponds to $\mu = 0$, a simple root, giving $At$, and $e^t$ to $\mu = 1$, a simple root, giving $Bte^t$; so $y_p = At + Bte^t$.
+\end{solution}
+
+\begin{problem}
+Use the Laplace transform to solve $y'' + y = H(t - \pi)$, $y(0) = 1$, $y'(0) = 0$.
+\end{problem}
+
+\begin{solution}
+$(s^2 + 1)Y - s = e^{-\pi s}/s$, so $Y = \frac{s}{s^2 + 1} + e^{-\pi s}\Bigl(\frac1s - \frac{s}{s^2 + 1}\Bigr)$. Inverting with Theorem~\ref{thm:laplace}(ii), $y = \cos t + H(t - \pi)\bigl(1 - \cos(t - \pi)\bigr) = \cos t + H(t - \pi)(1 + \cos t)$. So
+$y = \cos t$ for $t < \pi$ and $y = 1 + 2\cos t$ for $t > \pi$: switching on a constant force at the moment of maximum displacement in the negative direction ($y(\pi) = -1$) triples the amplitude of
+the oscillation about the new equilibrium $1$.
+\end{solution}
+
+\begin{problem}
+\label{prob:deltalimit}
+Let $y_\varepsilon$ solve $y'' + \omega^2y = \frac1\varepsilon\bigl(H(t) - H(t - \varepsilon)\bigr)$ from rest. Show that as $\varepsilon \to 0$, $y_\varepsilon(t) \to \sin(\omega t)/\omega$ for each $t > 0$, the impulse response.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:impulse} with $G(t) = \sin(\omega t)/\omega$, for $t > \varepsilon$, $y_\varepsilon(t) = \frac1\varepsilon\int_0^\varepsilon\frac{\sin\omega(t - s)}{\omega}\,ds$, the average of $G(t - s)$ over $s \in [0, \varepsilon]$. By continuity of $G$ this tends to $G(t)$.
+In transform terms, $\frac{1 - e^{-\varepsilon s}}{\varepsilon s} \to 1 = \mathcal L[\delta]$.
+\end{solution}
+
+\begin{problem}
+For $y'' + 2\zeta\omega_0y' + \omega_0^2y = g$, find the transfer function and its poles, and show that the impulse response is $e^{-\zeta\omega_0t}\sin(\omega_dt)/\omega_d$ for $0 < \zeta < 1$. Where are the poles when $\zeta \geq 1$?
+\end{problem}
+
+\begin{solution}
+$H(s) = 1/(s^2 + 2\zeta\omega_0s + \omega_0^2)$, with poles $s = -\zeta\omega_0 \pm i\omega_d$ for $\zeta < 1$. Completing the square, $H = \frac{1}{\omega_d}\cdot\frac{\omega_d}{(s + \zeta\omega_0)^2 + \omega_d^2}$, which by Theorem~\ref{thm:laplace}(i) and (v) is the
+transform of $e^{-\zeta\omega_0t}\sin(\omega_dt)/\omega_d$. For $\zeta \geq 1$ the poles are real and negative, $-\omega_0(\zeta \pm \sqrt{\zeta^2 - 1})$: the response is non-oscillatory, a double pole at $-\omega_0$ when $\zeta = 1$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -2220,8 +2530,10 @@ Mathematicae}, 3, 133--181.
 ordinaires, \emph{Bulletin de l'Acad\'emie Polonaise des Sciences}, 4, 261--264.
 \item Gronwall, T. H. (1919), Note on the derivatives with respect to a parameter of the solutions of a system of differential equations,
 \emph{Annals of Mathematics}, 20, 292--296.
+\item Heaviside, O. (1893), \emph{Electromagnetic Theory}, Vol.~1, London, The Electrician Printing and Publishing Company.
 \item Kermack, W. O., and McKendrick, A. G. (1927), A contribution to the mathematical theory of epidemics, \emph{Proceedings of the Royal Society of
 London, Series A}, 115, 700--721.
+\item Lerch, M. (1903), Sur un point de la th\'eorie des fonctions g\'en\'eratrices d'Abel, \emph{Acta Mathematica}, 27, 339--351.
 \item Lindel\"of, E. (1894), Sur l'application de la m\'ethode des approximations successives aux \'equations diff\'erentielles ordinaires du
 premier ordre, \emph{Comptes Rendus de l'Acad\'emie des Sciences}, 118, 454--457.
 \item Liouville, J. (1838), Note sur la th\'eorie de la variation des constantes arbitraires, \emph{Journal de Math\'ematiques Pures et Appliqu\'ees}, 3,
