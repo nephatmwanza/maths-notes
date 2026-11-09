@@ -3943,6 +3943,300 @@ Show that the FTCS scheme satisfies a discrete maximum principle when $r \leq \f
 For $r \leq \frac12$, $u_j^{n + 1} = ru_{j - 1}^n + (1 - 2r)u_j^n + ru_{j + 1}^n$ is a convex combination, so $\min_ku_k^n \leq u_j^{n + 1} \leq \max_ku_k^n$. For $r > \frac12$ take $u^n = (\ldots, 0, 1, 0, \ldots)$: then $u_j^{n + 1} = 1 - 2r < 0$, a new minimum below the old one.
 \end{solution}
 
+%======================================================================
+\section{Reaction--Diffusion, Travelling Waves and Review}
+\label{sec:reaction}
+
+Diffusion alone spreads and flattens. Combined with local reactions, growth, chemical kinetics, the firing of a nerve, it produces fronts that advance at a definite speed and patterns that arise from a uniform state. Fisher (1937) used such an equation for the spread of an advantageous gene, Kolmogorov,
+Petrovsky and Piskunov analysed it in the same year, and Turing (1952) showed how two diffusing chemicals could create the spots and stripes of animal coats. This last section treats the scalar and the two-species problems, and then reviews the course.
+
+\subsection{Reaction--diffusion equations}
+\label{ssec:rd}
+
+A \textbf{reaction--diffusion equation} is
+\[
+u_t = D\Delta u + f(u) .
+\]
+Without diffusion it is the ordinary differential equation $u' = f(u)$, whose equilibria are the zeros of $f$; without reaction it is the heat equation. The two standard choices of $f$ in one dimension, after scaling $D$ and the rate to $1$, are
+\begin{itemize}
+\item the \textbf{Fisher--KPP} equation $u_t = u_{xx} + u(1 - u)$: logistic growth, with $u = 0$ unstable and $u = 1$ stable;
+\item the \textbf{bistable} (Nagumo, or Allen--Cahn) equation $u_t = u_{xx} + u(1 - u)(u - a)$ with $0 < a < 1$: both $0$ and $1$ are stable, and $a$ is a threshold.
+\end{itemize}
+The scaling $x \mapsto x\sqrt{r/D}$, $t \mapsto rt$ removes $D$ and the growth rate $r$, so a speed $c$ in scaled units is $c\sqrt{rD}$ in physical units.
+
+\subsection{Travelling waves}
+\label{ssec:travelling}
+
+A \textbf{travelling wave} is a solution $u = U(x - ct)$ of fixed shape moving at speed $c$. Substituting, $U(z)$ satisfies the ordinary differential equation
+\[
+U'' + cU' + f(U) = 0, \qquad U(-\infty) = 1, \quad U(+\infty) = 0 ,
+\]
+a front in which the state $1$ invades the state $0$. As a first-order system for $(U, U')$, a front is a \textbf{heteroclinic orbit} from the equilibrium $(1, 0)$ to $(0, 0)$, and the question is for which $c$ it exists.
+
+\begin{thm}[Fisher--KPP fronts]
+\label{thm:kpp}
+For $f(u) = u(1 - u)$ there is a monotone travelling front with $0 \leq U \leq 1$ for every $c \geq 2$, and for no $c < 2$. Solutions starting from data equal to $1$ on a half-line and $0$ beyond converge in shape to the front of the \textbf{minimal speed} $c^* = 2$; in physical units $c^* = 2\sqrt{rD}$.
+\end{thm}
+
+\begin{proof}[Proof of the speed bound, and sketch of the rest]
+Near $(0, 0)$ the linearisation is $U'' + cU' + U = 0$, with characteristic roots $\lambda = \frac12\bigl(-c \pm \sqrt{c^2 - 4}\bigr)$. If $c < 2$ they are complex, the orbit spirals into the origin, and $U$ changes sign infinitely often, which is impossible for a front with $U \geq 0$. If $c \geq 2$ the origin is a stable node. The point
+$(1, 0)$ is a saddle, since there the linearisation is $V'' + cV' - V = 0$; for $c \geq 2$ one shows that the branch of its unstable manifold entering the strip $0 < U < 1$, $U' < 0$ stays in the triangle bounded by $U' = 0$, $U = 1$ and the line $U' = -\frac c2U$, which the flow cannot leave, and so must
+reach the node. The convergence statement is the theorem of Kolmogorov, Petrovsky and Piskunov; Bramson (1983) showed that the front's position is $2t - \frac32\log t + O(1)$, so its speed approaches $2$ from below like $2 - \frac3{2t}$.
+\end{proof}
+
+The minimal speed is set by the leading edge, where $u$ is small and the equation is nearly the linear $u_t = u_{xx} + u$. Trying $u = e^{-\lambda(x - ct)}$ gives $c = \lambda + 1/\lambda$, whose least value over $\lambda > 0$ is $2$, at $\lambda = 1$. Such fronts are \textbf{pulled}: the growth of a few individuals far ahead
+of the bulk sets the pace. Skellam (1951) used this to explain the steady radial spread of muskrats in central Europe after a few escaped in 1905: the occupied radius grew linearly in time, as the theorem predicts, and not like $\sqrt t$, as pure diffusion would.
+
+For the bistable equation the speed is unique, and there is an exact solution (Software~\ref{sw:waves}):
+\[
+U(z) = \frac1{1 + e^{z/\sqrt2}}, \qquad c = \sqrt2\Bigl(\frac12 - a\Bigr) .
+\]
+If $a < \frac12$ the state $1$ invades; if $a > \frac12$ it retreats; at $a = \frac12$ the front stands still. Such fronts are \textbf{pushed}: the speed is set by the whole profile, not the leading edge. The Nagumo equation is a simplified model of the electrical pulse along a nerve fibre, whose full description is the
+Hodgkin--Huxley system.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\begin{scope}
+\fill[orange!7,rounded corners=4pt] (-0.4,-0.55) rectangle (8.8,2.35);
+\draw[->] (0,0) -- (8.6,0) node[below,font=\scriptsize] {$x$};
+\draw[->] (0,0) -- (0,2.2) node[left,font=\scriptsize] {$u$};
+\draw (0.06,1.8) -- (-0.06,1.8) node[left,font=\tiny] {$1$};
+\draw[red!70!black,thick] (0.000,1.800) -- (0.028,1.800) -- (0.056,1.800) -- (0.084,1.800) -- (0.112,1.800) -- (0.140,1.800) -- (0.168,1.800) -- (0.196,1.799) -- (0.224,1.799) -- (0.252,1.799) -- (0.280,1.799) -- (0.308,1.799) -- (0.336,1.798) -- (0.364,1.798) -- (0.392,1.798) -- (0.420,1.797) -- (0.448,1.797) -- (0.476,1.796) -- (0.504,1.795) -- (0.532,1.794) -- (0.560,1.792) -- (0.588,1.791) -- (0.616,1.789) -- (0.644,1.787) -- (0.672,1.784) -- (0.700,1.780) -- (0.728,1.776) -- (0.756,1.772) -- (0.784,1.766) -- (0.812,1.759) -- (0.840,1.751) -- (0.868,1.741) -- (0.896,1.730) -- (0.924,1.716) -- (0.952,1.700) -- (0.980,1.681) -- (1.008,1.659) -- (1.036,1.632) -- (1.064,1.602) -- (1.092,1.566) -- (1.120,1.525) -- (1.148,1.478) -- (1.176,1.425) -- (1.204,1.364) -- (1.232,1.297) -- (1.260,1.222) -- (1.288,1.141) -- (1.316,1.054) -- (1.344,0.962) -- (1.372,0.867) -- (1.400,0.770) -- (1.428,0.673) -- (1.456,0.579) -- (1.484,0.490) -- (1.512,0.407) -- (1.540,0.332) -- (1.568,0.266) -- (1.596,0.209) -- (1.624,0.161) -- (1.652,0.122) -- (1.680,0.091) -- (1.708,0.067) -- (1.736,0.048) -- (1.764,0.034) -- (1.792,0.024) -- (1.820,0.016) -- (1.848,0.011) -- (1.876,0.008) -- (1.904,0.005) -- (1.932,0.003) -- (1.960,0.002) -- (1.988,0.001) -- (2.016,0.001) -- (2.044,0.001) -- (2.072,0.000) -- (2.100,0.000) -- (2.128,0.000) -- (2.156,0.000) -- (2.184,0.000) -- (2.212,0.000) -- (2.240,0.000) -- (2.268,0.000) -- (2.296,0.000) -- (2.324,0.000) -- (2.352,0.000) -- (2.380,0.000) -- (2.408,0.000) -- (2.436,0.000) -- (2.464,0.000) -- (2.492,0.000) -- (2.520,0.000) -- (2.548,0.000) -- (2.576,0.000) -- (2.604,0.000) -- (2.632,0.000) -- (2.660,0.000) -- (2.688,0.000) -- (2.716,0.000) -- (2.744,0.000) -- (2.772,0.000) -- (2.800,0.000) -- (2.828,0.000) -- (2.856,0.000) -- (2.884,0.000) -- (2.912,0.000) -- (2.940,0.000) -- (2.968,0.000) -- (2.996,0.000) -- (3.024,0.000) -- (3.052,0.000) -- (3.080,0.000) -- (3.108,0.000) -- (3.136,0.000) -- (3.164,0.000) -- (3.192,0.000) -- (3.220,0.000) -- (3.248,0.000) -- (3.276,0.000) -- (3.304,0.000) -- (3.332,0.000) -- (3.360,0.000) -- (3.388,0.000) -- (3.416,0.000) -- (3.444,0.000) -- (3.472,0.000) -- (3.500,0.000) -- (3.528,0.000) -- (3.556,0.000) -- (3.584,0.000) -- (3.612,0.000) -- (3.640,0.000) -- (3.668,0.000) -- (3.696,0.000) -- (3.724,0.000) -- (3.752,0.000) -- (3.780,0.000) -- (3.808,0.000) -- (3.836,0.000) -- (3.864,0.000) -- (3.892,0.000) -- (3.920,0.000) -- (3.948,0.000) -- (3.976,0.000) -- (4.004,0.000) -- (4.032,0.000) -- (4.060,0.000) -- (4.088,0.000) -- (4.116,0.000) -- (4.144,0.000) -- (4.172,0.000) -- (4.200,0.000) -- (4.228,0.000) -- (4.256,0.000) -- (4.284,0.000) -- (4.312,0.000) -- (4.340,0.000) -- (4.368,0.000) -- (4.396,0.000) -- (4.424,0.000) -- (4.452,0.000) -- (4.480,0.000) -- (4.508,0.000) -- (4.536,0.000) -- (4.564,0.000) -- (4.592,0.000) -- (4.620,0.000) -- (4.648,0.000) -- (4.676,0.000) -- (4.704,0.000) -- (4.732,0.000) -- (4.760,0.000) -- (4.788,0.000) -- (4.816,0.000) -- (4.844,0.000) -- (4.872,0.000) -- (4.900,0.000) -- (4.928,0.000) -- (4.956,0.000) -- (4.984,0.000) -- (5.012,0.000) -- (5.040,0.000) -- (5.068,0.000) -- (5.096,0.000) -- (5.124,0.000) -- (5.152,0.000) -- (5.180,0.000) -- (5.208,0.000) -- (5.236,0.000) -- (5.264,0.000) -- (5.292,0.000) -- (5.320,0.000) -- (5.348,0.000) -- (5.376,0.000) -- (5.404,0.000) -- (5.432,0.000) -- (5.460,0.000) -- (5.488,0.000) -- (5.516,0.000) -- (5.544,0.000) -- (5.572,0.000) -- (5.600,0.000);
+\draw[orange!80!black,thick] (0.000,1.800) -- (0.028,1.800) -- (0.056,1.800) -- (0.084,1.800) -- (0.112,1.800) -- (0.140,1.800) -- (0.168,1.800) -- (0.196,1.800) -- (0.224,1.800) -- (0.252,1.800) -- (0.280,1.800) -- (0.308,1.800) -- (0.336,1.800) -- (0.364,1.800) -- (0.392,1.800) -- (0.420,1.800) -- (0.448,1.800) -- (0.476,1.800) -- (0.504,1.800) -- (0.532,1.800) -- (0.560,1.800) -- (0.588,1.800) -- (0.616,1.800) -- (0.644,1.800) -- (0.672,1.800) -- (0.700,1.800) -- (0.728,1.800) -- (0.756,1.800) -- (0.784,1.800) -- (0.812,1.800) -- (0.840,1.800) -- (0.868,1.800) -- (0.896,1.800) -- (0.924,1.800) -- (0.952,1.800) -- (0.980,1.800) -- (1.008,1.800) -- (1.036,1.800) -- (1.064,1.800) -- (1.092,1.800) -- (1.120,1.800) -- (1.148,1.800) -- (1.176,1.800) -- (1.204,1.800) -- (1.232,1.800) -- (1.260,1.800) -- (1.288,1.800) -- (1.316,1.800) -- (1.344,1.800) -- (1.372,1.800) -- (1.400,1.799) -- (1.428,1.799) -- (1.456,1.799) -- (1.484,1.799) -- (1.512,1.799) -- (1.540,1.799) -- (1.568,1.798) -- (1.596,1.798) -- (1.624,1.798) -- (1.652,1.797) -- (1.680,1.797) -- (1.708,1.796) -- (1.736,1.795) -- (1.764,1.795) -- (1.792,1.794) -- (1.820,1.792) -- (1.848,1.791) -- (1.876,1.789) -- (1.904,1.787) -- (1.932,1.785) -- (1.960,1.782) -- (1.988,1.779) -- (2.016,1.775) -- (2.044,1.770) -- (2.072,1.765) -- (2.100,1.758) -- (2.128,1.750) -- (2.156,1.741) -- (2.184,1.731) -- (2.212,1.718) -- (2.240,1.703) -- (2.268,1.686) -- (2.296,1.666) -- (2.324,1.643) -- (2.352,1.616) -- (2.380,1.584) -- (2.408,1.548) -- (2.436,1.507) -- (2.464,1.460) -- (2.492,1.407) -- (2.520,1.348) -- (2.548,1.282) -- (2.576,1.210) -- (2.604,1.133) -- (2.632,1.049) -- (2.660,0.962) -- (2.688,0.871) -- (2.716,0.779) -- (2.744,0.687) -- (2.772,0.597) -- (2.800,0.511) -- (2.828,0.431) -- (2.856,0.357) -- (2.884,0.292) -- (2.912,0.234) -- (2.940,0.185) -- (2.968,0.144) -- (2.996,0.111) -- (3.024,0.084) -- (3.052,0.063) -- (3.080,0.046) -- (3.108,0.034) -- (3.136,0.024) -- (3.164,0.017) -- (3.192,0.012) -- (3.220,0.009) -- (3.248,0.006) -- (3.276,0.004) -- (3.304,0.003) -- (3.332,0.002) -- (3.360,0.001) -- (3.388,0.001) -- (3.416,0.001) -- (3.444,0.000) -- (3.472,0.000) -- (3.500,0.000) -- (3.528,0.000) -- (3.556,0.000) -- (3.584,0.000) -- (3.612,0.000) -- (3.640,0.000) -- (3.668,0.000) -- (3.696,0.000) -- (3.724,0.000) -- (3.752,0.000) -- (3.780,0.000) -- (3.808,0.000) -- (3.836,0.000) -- (3.864,0.000) -- (3.892,0.000) -- (3.920,0.000) -- (3.948,0.000) -- (3.976,0.000) -- (4.004,0.000) -- (4.032,0.000) -- (4.060,0.000) -- (4.088,0.000) -- (4.116,0.000) -- (4.144,0.000) -- (4.172,0.000) -- (4.200,0.000) -- (4.228,0.000) -- (4.256,0.000) -- (4.284,0.000) -- (4.312,0.000) -- (4.340,0.000) -- (4.368,0.000) -- (4.396,0.000) -- (4.424,0.000) -- (4.452,0.000) -- (4.480,0.000) -- (4.508,0.000) -- (4.536,0.000) -- (4.564,0.000) -- (4.592,0.000) -- (4.620,0.000) -- (4.648,0.000) -- (4.676,0.000) -- (4.704,0.000) -- (4.732,0.000) -- (4.760,0.000) -- (4.788,0.000) -- (4.816,0.000) -- (4.844,0.000) -- (4.872,0.000) -- (4.900,0.000) -- (4.928,0.000) -- (4.956,0.000) -- (4.984,0.000) -- (5.012,0.000) -- (5.040,0.000) -- (5.068,0.000) -- (5.096,0.000) -- (5.124,0.000) -- (5.152,0.000) -- (5.180,0.000) -- (5.208,0.000) -- (5.236,0.000) -- (5.264,0.000) -- (5.292,0.000) -- (5.320,0.000) -- (5.348,0.000) -- (5.376,0.000) -- (5.404,0.000) -- (5.432,0.000) -- (5.460,0.000) -- (5.488,0.000) -- (5.516,0.000) -- (5.544,0.000) -- (5.572,0.000) -- (5.600,0.000);
+\draw[blue!60!black,thick] (0.000,1.800) -- (0.028,1.800) -- (0.056,1.800) -- (0.084,1.800) -- (0.112,1.800) -- (0.140,1.800) -- (0.168,1.800) -- (0.196,1.800) -- (0.224,1.800) -- (0.252,1.800) -- (0.280,1.800) -- (0.308,1.800) -- (0.336,1.800) -- (0.364,1.800) -- (0.392,1.800) -- (0.420,1.800) -- (0.448,1.800) -- (0.476,1.800) -- (0.504,1.800) -- (0.532,1.800) -- (0.560,1.800) -- (0.588,1.800) -- (0.616,1.800) -- (0.644,1.800) -- (0.672,1.800) -- (0.700,1.800) -- (0.728,1.800) -- (0.756,1.800) -- (0.784,1.800) -- (0.812,1.800) -- (0.840,1.800) -- (0.868,1.800) -- (0.896,1.800) -- (0.924,1.800) -- (0.952,1.800) -- (0.980,1.800) -- (1.008,1.800) -- (1.036,1.800) -- (1.064,1.800) -- (1.092,1.800) -- (1.120,1.800) -- (1.148,1.800) -- (1.176,1.800) -- (1.204,1.800) -- (1.232,1.800) -- (1.260,1.800) -- (1.288,1.800) -- (1.316,1.800) -- (1.344,1.800) -- (1.372,1.800) -- (1.400,1.800) -- (1.428,1.800) -- (1.456,1.800) -- (1.484,1.800) -- (1.512,1.800) -- (1.540,1.800) -- (1.568,1.800) -- (1.596,1.800) -- (1.624,1.800) -- (1.652,1.800) -- (1.680,1.800) -- (1.708,1.800) -- (1.736,1.800) -- (1.764,1.800) -- (1.792,1.800) -- (1.820,1.800) -- (1.848,1.800) -- (1.876,1.800) -- (1.904,1.800) -- (1.932,1.800) -- (1.960,1.800) -- (1.988,1.800) -- (2.016,1.800) -- (2.044,1.800) -- (2.072,1.800) -- (2.100,1.800) -- (2.128,1.800) -- (2.156,1.800) -- (2.184,1.800) -- (2.212,1.800) -- (2.240,1.800) -- (2.268,1.800) -- (2.296,1.800) -- (2.324,1.800) -- (2.352,1.800) -- (2.380,1.800) -- (2.408,1.800) -- (2.436,1.800) -- (2.464,1.800) -- (2.492,1.800) -- (2.520,1.800) -- (2.548,1.800) -- (2.576,1.800) -- (2.604,1.800) -- (2.632,1.800) -- (2.660,1.800) -- (2.688,1.800) -- (2.716,1.799) -- (2.744,1.799) -- (2.772,1.799) -- (2.800,1.799) -- (2.828,1.799) -- (2.856,1.799) -- (2.884,1.799) -- (2.912,1.798) -- (2.940,1.798) -- (2.968,1.798) -- (2.996,1.797) -- (3.024,1.797) -- (3.052,1.796) -- (3.080,1.795) -- (3.108,1.795) -- (3.136,1.794) -- (3.164,1.792) -- (3.192,1.791) -- (3.220,1.789) -- (3.248,1.787) -- (3.276,1.785) -- (3.304,1.782) -- (3.332,1.779) -- (3.360,1.775) -- (3.388,1.771) -- (3.416,1.765) -- (3.444,1.759) -- (3.472,1.751) -- (3.500,1.743) -- (3.528,1.732) -- (3.556,1.720) -- (3.584,1.706) -- (3.612,1.690) -- (3.640,1.671) -- (3.668,1.648) -- (3.696,1.622) -- (3.724,1.592) -- (3.752,1.558) -- (3.780,1.519) -- (3.808,1.474) -- (3.836,1.424) -- (3.864,1.367) -- (3.892,1.305) -- (3.920,1.236) -- (3.948,1.161) -- (3.976,1.081) -- (4.004,0.996) -- (4.032,0.908) -- (4.060,0.817) -- (4.088,0.726) -- (4.116,0.637) -- (4.144,0.550) -- (4.172,0.468) -- (4.200,0.393) -- (4.228,0.324) -- (4.256,0.263) -- (4.284,0.211) -- (4.312,0.167) -- (4.340,0.130) -- (4.368,0.099) -- (4.396,0.075) -- (4.424,0.056) -- (4.452,0.042) -- (4.480,0.031) -- (4.508,0.022) -- (4.536,0.016) -- (4.564,0.011) -- (4.592,0.008) -- (4.620,0.006) -- (4.648,0.004) -- (4.676,0.003) -- (4.704,0.002) -- (4.732,0.001) -- (4.760,0.001) -- (4.788,0.001) -- (4.816,0.000) -- (4.844,0.000) -- (4.872,0.000) -- (4.900,0.000) -- (4.928,0.000) -- (4.956,0.000) -- (4.984,0.000) -- (5.012,0.000) -- (5.040,0.000) -- (5.068,0.000) -- (5.096,0.000) -- (5.124,0.000) -- (5.152,0.000) -- (5.180,0.000) -- (5.208,0.000) -- (5.236,0.000) -- (5.264,0.000) -- (5.292,0.000) -- (5.320,0.000) -- (5.348,0.000) -- (5.376,0.000) -- (5.404,0.000) -- (5.432,0.000) -- (5.460,0.000) -- (5.488,0.000) -- (5.516,0.000) -- (5.544,0.000) -- (5.572,0.000) -- (5.600,0.000);
+\node[font=\scriptsize,red!70!black] at (1.25,2.05) {$t = 10$};
+\node[font=\scriptsize,orange!80!black] at (2.65,2.05) {$t = 20$};
+\node[font=\scriptsize,blue!60!black] at (4.05,2.05) {$t = 30$};
+\draw[->,black!60] (5.4,0.9) -- (6.6,0.9) node[right,font=\scriptsize,align=left] {speed\\$\to 2$};
+\node[font=\scriptsize\bfseries,orange!50!black,anchor=west] at (6.0,1.75) {Fisher--KPP front};
+\end{scope}
+\begin{scope}[shift={(0,-3.4)}]
+\fill[green!7,rounded corners=4pt] (-0.4,-0.55) rectangle (8.8,2.35);
+\draw[->] (0,0) -- (8.6,0) node[below,font=\scriptsize] {$x$};
+\draw[->] (0,0) -- (0,2.2) node[left,font=\scriptsize] {$u$};
+\draw[black!50,dashed] (0,0.7) -- (8.4,0.7) node[right,font=\tiny] {$u^* = 1$};
+\draw[green!45!black,thick] (0.000,0.106) -- (0.033,0.105) -- (0.066,0.109) -- (0.098,0.119) -- (0.131,0.135) -- (0.164,0.162) -- (0.197,0.201) -- (0.230,0.260) -- (0.263,0.345) -- (0.295,0.463) -- (0.328,0.621) -- (0.361,0.820) -- (0.394,1.055) -- (0.427,1.306) -- (0.459,1.546) -- (0.492,1.740) -- (0.525,1.856) -- (0.558,1.876) -- (0.591,1.796) -- (0.623,1.630) -- (0.656,1.404) -- (0.689,1.153) -- (0.722,0.909) -- (0.755,0.695) -- (0.788,0.521) -- (0.820,0.388) -- (0.853,0.291) -- (0.886,0.222) -- (0.919,0.176) -- (0.952,0.145) -- (0.984,0.125) -- (1.017,0.113) -- (1.050,0.107) -- (1.083,0.106) -- (1.116,0.110) -- (1.148,0.120) -- (1.181,0.137) -- (1.214,0.164) -- (1.247,0.205) -- (1.280,0.265) -- (1.313,0.352) -- (1.345,0.473) -- (1.378,0.634) -- (1.411,0.836) -- (1.444,1.072) -- (1.477,1.324) -- (1.509,1.562) -- (1.542,1.750) -- (1.575,1.858) -- (1.608,1.868) -- (1.641,1.779) -- (1.673,1.605) -- (1.706,1.375) -- (1.739,1.124) -- (1.772,0.882) -- (1.805,0.672) -- (1.838,0.503) -- (1.870,0.374) -- (1.903,0.281) -- (1.936,0.216) -- (1.969,0.171) -- (2.002,0.142) -- (2.034,0.123) -- (2.067,0.112) -- (2.100,0.107) -- (2.133,0.107) -- (2.166,0.112) -- (2.198,0.123) -- (2.231,0.141) -- (2.264,0.171) -- (2.297,0.215) -- (2.330,0.280) -- (2.363,0.373) -- (2.395,0.501) -- (2.428,0.670) -- (2.461,0.880) -- (2.494,1.121) -- (2.527,1.373) -- (2.559,1.603) -- (2.592,1.777) -- (2.625,1.867) -- (2.658,1.857) -- (2.691,1.748) -- (2.723,1.560) -- (2.756,1.323) -- (2.789,1.071) -- (2.822,0.835) -- (2.855,0.633) -- (2.888,0.472) -- (2.920,0.352) -- (2.953,0.265) -- (2.986,0.205) -- (3.019,0.164) -- (3.052,0.137) -- (3.084,0.120) -- (3.117,0.110) -- (3.150,0.106) -- (3.183,0.107) -- (3.216,0.113) -- (3.248,0.126) -- (3.281,0.146) -- (3.314,0.178) -- (3.347,0.226) -- (3.380,0.297) -- (3.413,0.396) -- (3.445,0.532) -- (3.478,0.709) -- (3.511,0.926) -- (3.544,1.172) -- (3.577,1.422) -- (3.609,1.644) -- (3.642,1.804) -- (3.675,1.875) -- (3.708,1.846) -- (3.741,1.721) -- (3.773,1.521) -- (3.806,1.278) -- (3.839,1.027) -- (3.872,0.796) -- (3.905,0.601) -- (3.938,0.448) -- (3.970,0.334) -- (4.003,0.253) -- (4.036,0.196) -- (4.069,0.158) -- (4.102,0.133) -- (4.134,0.117) -- (4.167,0.109) -- (4.200,0.106) -- (4.233,0.107) -- (4.266,0.114) -- (4.298,0.127) -- (4.331,0.149) -- (4.364,0.182) -- (4.397,0.232) -- (4.430,0.304) -- (4.463,0.407) -- (4.495,0.546) -- (4.528,0.727) -- (4.561,0.947) -- (4.594,1.194) -- (4.627,1.443) -- (4.659,1.662) -- (4.692,1.816) -- (4.725,1.881) -- (4.758,1.845) -- (4.791,1.715) -- (4.823,1.512) -- (4.856,1.268) -- (4.889,1.017) -- (4.922,0.787) -- (4.955,0.594) -- (4.988,0.443) -- (5.020,0.330) -- (5.053,0.250) -- (5.086,0.194) -- (5.119,0.157) -- (5.152,0.132) -- (5.184,0.117) -- (5.217,0.108) -- (5.250,0.105) -- (5.283,0.106) -- (5.316,0.113) -- (5.348,0.126) -- (5.381,0.147) -- (5.414,0.179) -- (5.447,0.227) -- (5.480,0.298) -- (5.513,0.398) -- (5.545,0.534) -- (5.578,0.712) -- (5.611,0.930) -- (5.644,1.175) -- (5.677,1.425) -- (5.709,1.648) -- (5.742,1.809) -- (5.775,1.883) -- (5.808,1.857) -- (5.841,1.736) -- (5.873,1.539) -- (5.906,1.298) -- (5.939,1.046) -- (5.972,0.812) -- (6.005,0.615) -- (6.038,0.458) -- (6.070,0.342) -- (6.103,0.258) -- (6.136,0.200) -- (6.169,0.160) -- (6.202,0.134) -- (6.234,0.118) -- (6.267,0.109) -- (6.300,0.105) -- (6.333,0.105) -- (6.366,0.111) -- (6.398,0.123) -- (6.431,0.142) -- (6.464,0.172) -- (6.497,0.216) -- (6.530,0.282) -- (6.563,0.376) -- (6.595,0.505) -- (6.628,0.674) -- (6.661,0.885) -- (6.694,1.127) -- (6.727,1.379) -- (6.759,1.609) -- (6.792,1.785) -- (6.825,1.877) -- (6.858,1.871) -- (6.891,1.768) -- (6.923,1.584) -- (6.956,1.349) -- (6.989,1.097) -- (7.022,0.858) -- (7.055,0.652) -- (7.088,0.488) -- (7.120,0.363) -- (7.153,0.273) -- (7.186,0.210) -- (7.219,0.167) -- (7.252,0.139) -- (7.284,0.121) -- (7.317,0.110) -- (7.350,0.105) -- (7.383,0.105) -- (7.416,0.110) -- (7.448,0.120) -- (7.481,0.137) -- (7.514,0.165) -- (7.547,0.206) -- (7.580,0.267) -- (7.613,0.354) -- (7.645,0.476) -- (7.678,0.637) -- (7.711,0.840) -- (7.744,1.077) -- (7.777,1.329) -- (7.809,1.567) -- (7.842,1.755) -- (7.875,1.865) -- (7.908,1.878) -- (7.941,1.792) -- (7.973,1.621) -- (8.006,1.393) -- (8.039,1.142) -- (8.072,0.899) -- (8.105,0.686) -- (8.138,0.514) -- (8.170,0.383) -- (8.203,0.287) -- (8.236,0.220) -- (8.269,0.174) -- (8.302,0.143) -- (8.334,0.124) -- (8.367,0.112);
+\node[font=\scriptsize\bfseries,green!40!black,anchor=west] at (0.2,2.15) {Turing pattern, $d = 40$: wavelength $15$};
+\end{scope}
+\end{tikzpicture}
+\caption{Top: a Fisher--KPP population released on the left ($u = 1$ for $x < 5$) at $t = 10$, $20$, $30$. After a transient the front keeps its shape and advances at a speed approaching $c^* = 2$. Bottom: the activator $u$ in the Schnakenberg model on a periodic line of length $120$ at $t = 400$, grown from random perturbations of
+size $0.01$ about the uniform state $u^* = 1$; eight peaks, wavelength $15$, as the linear analysis predicts.}
+\label{fig:rd}
+\end{figure}
+
+\subsection{Turing instability}
+\label{ssec:turing}
+
+Turing's insight was that diffusion, which smooths a single substance, can destabilise a uniform state of two. Consider
+\[
+u_t = \Delta u + f(u, v), \qquad v_t = d\,\Delta v + g(u, v) ,
+\]
+with a uniform steady state $(u^*, v^*)$, $f = g = 0$ there, which is stable without diffusion: the Jacobian $J = \begin{pmatrix} f_u & f_v \\ g_u & g_v \end{pmatrix}$ at $(u^*, v^*)$ has $\operatorname{tr}J < 0$ and $\det J > 0$. Perturbations $e^{\sigma t + ik\cdot x}$ grow at the rates $\sigma$ that are eigenvalues of
+$J_k = J - |k|^2\operatorname{diag}(1, d)$.
+
+\begin{thm}[Turing]
+\label{thm:turing}
+The uniform state is unstable to some wavenumber $k$ if and only if
+\[
+df_u + g_v > 2\sqrt{d\det J} .
+\]
+It requires $f_u$ and $g_v$ of opposite signs; if $u$ is the species that activates itself ($f_u > 0$), it requires $d > 1$: the inhibitor must diffuse faster. The most unstable wavenumber is near $|k|^2 = (df_u + g_v)/2d$.
+\end{thm}
+
+\begin{proof}
+$\operatorname{tr}J_k = \operatorname{tr}J - (1 + d)|k|^2 < 0$ for all $k$, so instability needs a real positive eigenvalue, that is $\det J_k < 0$. Now $h(q) = \det J_k = dq^2 - (df_u + g_v)q + \det J$ with $q = |k|^2 \geq 0$ is a quadratic with $h(0) = \det J > 0$; it is negative somewhere on $q > 0$ exactly when its minimum, at
+$q = (df_u + g_v)/2d$, is negative and that point is positive, which is the stated inequality. Subtracting $f_u + g_v < 0$ from $df_u + g_v > 0$ gives $(d - 1)f_u > 0$, so $f_u > 0$ forces $d > 1$, and then $g_v < -f_u < 0$.
+\end{proof}
+
+For the \textbf{Schnakenberg} kinetics $f = a - u + u^2v$, $g = b - u^2v$ with $a = 0.1$, $b = 0.9$, the steady state is $u^* = 1$, $v^* = 0.9$, and $f_u = 0.8$, $f_v = 1$, $g_u = -1.8$, $g_v = -1$, so $\operatorname{tr}J = -0.2$, $\det J = 1$: stable without diffusion. The condition becomes
+$0.8d - 1 > 2\sqrt d$, that is $d > 8.57$ (Problem~\ref{prob:turingthreshold}). Above the threshold a band of wavenumbers grows and the nonlinearity saturates it into a steady periodic pattern (Figure~\ref{fig:rd}). In two dimensions the same mechanism gives spots or stripes, and patterns of this kind have been found in
+chemical reactors and in the development of digits, hair follicles and the stripes of fish.
+
+\subsection{Reaction--diffusion in software}
+\label{ssec:software14}
+
+\begin{software}[Exact and linear waves]
+\label{sw:waves}
+A symbolic check that $1/(1 + e^{z/\sqrt2})$ is a bistable front, solving the residual for the speed; then the roots of the linearisation at $u = 0$ for the Fisher equation at speeds $1$, $2$, $3$:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> x, t, a, c = sp.symbols('x t a c', real=True)
+>>> lam = sp.symbols('lambda')
+>>> z = x - c*t  # bistable: u_t = u_xx + u(1-u)(u-a)
+>>> U = 1 / (1 + sp.exp(z / sp.sqrt(2)))
+>>> res = U.diff(t) - U.diff(x, 2) - U * (1 - U) * (U - a)
+>>> sp.solve(sp.simplify(res * (1 + sp.exp(z/sp.sqrt(2)))**3
+...                      / sp.exp(z/sp.sqrt(2))), c)        # the wave speed
+[sqrt(2)*(1/2 - a)]
+>>> for cc in (1, 2, 3):                   # Fisher: linearised at u = 0
+...     print(cc, sp.solve(lam**2 + cc*lam + 1, lam))
+...
+1 [-1/2 - sqrt(3)*I/2, -1/2 + sqrt(3)*I/2]
+2 [-1]
+3 [-3/2 - sqrt(5)/2, -3/2 + sqrt(5)/2]
+\end{verbatim}}
+\textbf{Reading the output.} The residual vanishes exactly when $c = \sqrt2(\frac12 - a)$. For the Fisher front, $c = 1$ gives complex roots, so a profile with that speed would oscillate about $0$; $c = 2$ gives the double root $-1$, the boundary case; $c = 3$ gives two negative roots, a node.
+
+\textbf{MATLAB/Octave:} \texttt{roots([1 c 1])} for each \texttt{c}.
+\end{software}
+
+\begin{software}[The Fisher front]
+\label{sw:fisher}
+The Fisher--KPP equation solved by explicit differences on $[0, 200]$ with $\Delta x = 0.05$ and $r = 0.2$, from $u = 1$ on $x < 5$; the position where $u = \frac12$ at four times, the average speeds over the intervals between them, and Bramson's prediction $2 - 3/2t$ at the mid-times:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> L, N = 200.0, 4000                     # Fisher-KPP: u_t = u_xx + u(1 - u)
+>>> x = np.linspace(0, L, N + 1); dx = x[1]; dt = 0.2 * dx**2
+>>> u = np.where(x < 5, 1.0, 0.0)          # a population released on the left
+>>> def front(u): return x[np.argmax(u < 0.5)]          # where u crosses 1/2
+>>> pos = {}; T = 0.0
+>>> for target in (20, 40, 60, 80):
+...     while T < target - 1e-12:
+...         lap = np.r_[0, u[2:] - 2*u[1:-1] + u[:-2], 0] / dx**2
+...         u = u + dt * (lap + u * (1 - u)); u[0] = 1.0; u[-1] = 0.0
+...         T += dt
+...     pos[target] = round(front(u), 2)
+...
+>>> pos
+{20: 38.3, 40: 77.2, 60: 116.6, 80: 156.2}
+>>> [round((pos[b] - pos[a]) / 20, 4)
+...  for a, b in ((20, 40), (40, 60), (60, 80))]   # front speeds
+[1.945, 1.97, 1.98]
+>>> [round(2 - 3 / (2*tm), 4) for tm in (30, 50, 70)]   # Bramson
+[1.95, 1.97, 1.9786]
+\end{verbatim}}
+\textbf{Reading the output.} The front advances $38.9$, $39.4$ and $39.6$ in successive intervals of $20$, speeds $1.945$, $1.970$, $1.980$, approaching $2$ from below; Bramson's formula gives $1.950$, $1.970$, $1.979$, in agreement to about $0.005$. The slow logarithmic approach to the minimal speed is a hallmark of
+pulled fronts.
+
+\textbf{MATLAB/Octave:} the same explicit loop; \texttt{find(u < 0.5, 1)} for the front.
+\end{software}
+
+\begin{software}[A Turing pattern]
+\label{sw:turing}
+For the Schnakenberg model, the largest growth rate over $0 \leq k \leq 2$ and the wavenumber attaining it for $d = 1$, $10$, $40$; then a simulation with $d = 40$ on a periodic line of length $120$, by the Fourier method with diffusion treated implicitly, and the dominant wavenumber of the final state, its wavelength, and the range of $u$:
+{\small\begin{verbatim}
+>>> A, B = 0.1, 0.9  # Schnakenberg kinetics, steady state
+>>> us, vs = A + B, B / (A + B)**2
+>>> J = np.array([[-1 + 2*us*vs, us**2], [-2*us*vs, -us**2]])
+>>> def growth(k, d):  # largest Re eigenvalue of J - k^2 D
+...     return np.linalg.eigvals(J - k**2 * np.diag([1.0, d])).real.max()
+...
+>>> ks = np.linspace(0, 2, 2001)
+>>> for d in (1.0, 10.0, 40.0):
+...     g = np.array([growth(k, d) for k in ks])
+...     print(d, round(g.max(), 4), round(ks[g.argmax()], 3))
+...
+1.0 -0.1 0.0
+10.0 0.0572 0.564
+40.0 0.411 0.421
+>>> Lp, M, d = 120.0, 1024, 40.0  # simulate d = 40 on a periodic line
+>>> xp = np.arange(M) * Lp / M; kk = 2 * np.pi * np.fft.fftfreq(M, d=Lp/M)
+>>> rng = np.random.default_rng(0)
+>>> U = us + 0.01 * rng.standard_normal(M)
+>>> V = vs + 0.01 * rng.standard_normal(M)
+>>> h = 0.05  # diffusion implicit, reactions explicit
+>>> for _ in range(int(400 / h)):
+...     f = A - U + U**2 * V; g = B - U**2 * V
+...     U = np.fft.ifft(np.fft.fft(U + h*f) / (1 + h*kk**2)).real
+...     V = np.fft.ifft(np.fft.fft(V + h*g) / (1 + h*d*kk**2)).real
+...
+>>> spec = np.abs(np.fft.fft(U - U.mean()))[:M//2]
+>>> kdom = kk[np.argmax(spec)]
+>>> kdom, round(2*np.pi / kdom, 2), round(U.min(), 3), round(U.max(), 3)
+(0.41887902047863906, 15.0, 0.149, 2.696)
+\end{verbatim}}
+\textbf{Reading the output.} With equal diffusivities every mode decays (the largest rate is $-0.1$, at $k = 0$). At $d = 10$, just above the threshold $8.57$, a narrow band grows slowly, at rate $0.057$; at $d = 40$ the fastest mode has $k = 0.421$. The simulation settles on $k = 0.419$, the allowed wavenumber $2\pi\cdot 8/120$
+nearest to it: eight peaks of wavelength $15$, with $u$ between $0.15$ and $2.70$.
+
+\textbf{MATLAB/Octave:} \texttt{max(real(eig(J - k\^{}2*diag([1 d]))))} over a grid of \texttt{k}.
+\end{software}
+
+\subsection{Review of the course}
+\label{ssec:review}
+
+The course has followed a small number of ideas through many equations.
+
+\textbf{Type decides behaviour.} First-order equations and hyperbolic second-order equations carry information along characteristics at finite speed (Sections~\ref{sec:characteristics}, \ref{sec:shocks}, \ref{sec:wave1d}, \ref{sec:waveshigher}): they conserve energy, keep singularities, and may form shocks if non-linear. Parabolic equations smooth instantly and
+propagate at infinite speed, and run only forwards in time (Section~\ref{sec:heat}). Elliptic equations describe equilibria, have no characteristics, and are determined by their boundary values (Sections~\ref{sec:laplace}, \ref{sec:green}). Section~\ref{sec:classification} showed why: the sign of a discriminant.
+
+\textbf{The right data make a problem well posed.} Cauchy data for hyperbolic equations, initial and boundary data for parabolic, boundary data alone for elliptic; Hadamard's examples show what goes wrong otherwise.
+
+\textbf{Explicit solutions.} Characteristics and d'Alembert's formula; spherical means, Kirchhoff and Poisson; the heat kernel; the Poisson kernel and Green's functions with images; separation of variables with Fourier, Bessel and Legendre expansions (Sections~\ref{sec:fourier}, \ref{sec:curvilinear}); Fourier and Laplace transforms
+(Section~\ref{sec:transforms}).
+
+\textbf{Estimates without solutions.} The maximum principle and energy identities give uniqueness, stability, comparison and decay in any region (Sections~\ref{sec:heat}, \ref{sec:laplace}, \ref{sec:weak}); the Dirichlet principle and Hilbert-space methods give existence of weak solutions; and the discrete versions of the same estimates
+decide whether a numerical scheme converges (Section~\ref{sec:fd}).
+
+\textbf{Non-linearity.} Shocks and entropy conditions for conservation laws, fronts and patterns for reaction--diffusion: phenomena with no linear counterpart, studied with the linear tools of the rest of the course.
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Type} & \textbf{Prototype} & \textbf{Properly posed with} \\
+\hline
+hyperbolic & $u_{tt} = c^2\Delta u$ & $u$, $u_t$ at $t = 0$; boundary values \\
+parabolic & $u_t = \kappa\Delta u$ & $u$ at $t = 0$; boundary values; $t > 0$ \\
+elliptic & $-\Delta u = f$ & $u$ or $\partial_\nu u$ on all of $\partial\Omega$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Show that $c = \lambda + 1/\lambda$ has minimum $2$ over $\lambda > 0$, and find the minimal front speed of a population with diffusivity $D = 10$\,km$^2$/year and growth rate $r = 0.5$ per year.
+\end{problem}
+
+\begin{solution}
+$c'(\lambda) = 1 - \lambda^{-2} = 0$ at $\lambda = 1$, where $c = 2$; $c \to \infty$ at both ends. In physical units $c^* = 2\sqrt{rD} = 2\sqrt{5} = 4.47$\,km per year.
+\end{solution}
+
+\begin{problem}
+For the bistable equation with $a = 0.25$, find the front speed and the width of the front, measured as the distance over which $U$ falls from $0.9$ to $0.1$.
+\end{problem}
+
+\begin{solution}
+$c = \sqrt2(0.5 - 0.25) = 0.354$, with the state $1$ invading. $U = 0.9$ at $e^{z/\sqrt2} = \frac19$, $z = -\sqrt2\ln 9$, and $U = 0.1$ at $z = \sqrt2\ln 9$, so the width is $2\sqrt2\ln 9 = 6.21$ in scaled units.
+\end{solution}
+
+\begin{problem}
+\label{prob:turingthreshold}
+Find the critical diffusion ratio $d$ for the Schnakenberg model with $a = 0.1$, $b = 0.9$, and the critical wavenumber.
+\end{problem}
+
+\begin{solution}
+With $f_u = 0.8$, $g_v = -1$, $\det J = 1$, the condition is $0.8d - 1 > 2\sqrt d$. Put $s = \sqrt d$: $0.8s^2 - 2s - 1 > 0$ for $s > (2 + \sqrt{4 + 3.2})/1.6 = 2.927$, so $d_c = 8.57$. At threshold the minimum of $h(q)$ is at $q = (0.8d_c - 1)/2d_c = 0.342$, so $k_c = 0.585$, consistent with the narrow band near $k = 0.56$ found at
+$d = 10$.
+\end{solution}
+
+\begin{problem}
+Show that no Turing instability is possible when the two diffusivities are equal.
+\end{problem}
+
+\begin{solution}
+If $d = 1$ then $J_k = J - |k|^2I$, whose eigenvalues are those of $J$ shifted by $-|k|^2$. Since those of $J$ have negative real parts, so do all those of $J_k$. Equivalently, the condition of Theorem~\ref{thm:turing} would need $f_u + g_v > 0$, contradicting $\operatorname{tr}J < 0$.
+\end{solution}
+
+\begin{problem}
+Solve $u_t = u_{xx} + e^{-t}\sin x$ on $(0, \pi)$ with $u = 0$ at both ends and $u(x, 0) = 0$.
+\end{problem}
+
+\begin{solution}
+The source is a single eigenfunction, so try $u = T(t)\sin x$: $T' = -T + e^{-t}$, $T(0) = 0$, giving $T = te^{-t}$. The forcing decays at exactly the rate of the mode it drives, a resonance, which produces the factor $t$. So $u = te^{-t}\sin x$.
+\end{solution}
+
+\begin{problem}
+Decide which of these problems are well posed, giving a reason for each: (a) $u_{xx} + u_{yy} = 0$ for $y > 0$ with $u$ and $u_y$ given on $y = 0$; (b) $u_t = u_{xx}$ for $t > 0$ on $(0, 1)$, with $u$ given at $t = 0$ and at both ends; (c) $u_{tt} = u_{xx}$ on the square $0 < x, t < 1$ with $u$ given on all four
+sides.
+\end{problem}
+
+\begin{solution}
+(a) Not well posed: Hadamard's example (Section~\ref{sec:classification}) has data tending to zero and solutions blowing up. (b) Well posed: existence by Fourier series, uniqueness and stability by the maximum principle. (c) Not well posed: $u = \sin\pi x\sin\pi t$ vanishes on all four sides but is not zero, so solutions are not unique;
+boundary data on a closed curve are the wrong data for a hyperbolic equation.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 \sloppy
@@ -3974,6 +4268,7 @@ For $r \leq \frac12$, $u_j^{n + 1} = ru_{j - 1}^n + (1 - 2r)u_j^n + ru_{j + 1}^n
 \item d'Alembert, J. le R. (1747), Recherches sur la courbe que forme une corde tendu\"e mise en vibration, \emph{Histoire de l'Acad\'emie Royale des Sciences et Belles Lettres de Berlin}, 3, 214--219.
 \item Bessel, F. W. (1826), Untersuchung des Theils der planetarischen St\"orungen, welcher aus der Bewegung der Sonne entsteht, \emph{Abhandlungen der K\"oniglichen Akademie der Wissenschaften zu Berlin} (1824), 1--52.
 \item du Bois-Reymond, P. (1873), Ueber die Fourierschen Reihen, \emph{Nachrichten von der K\"oniglichen Gesellschaft der Wissenschaften zu G\"ottingen}, 21, 571--582.
+\item Bramson, M. (1983), Convergence of solutions of the Kolmogorov equation to travelling waves, \emph{Memoirs of the American Mathematical Society}, 44, no.~285.
 \item Burgers, J. M. (1948), A mathematical model illustrating the theory of turbulence, \emph{Advances in Applied Mechanics}, 1, 171--199.
 \item Carleson, L. (1966), On convergence and growth of partial sums of Fourier series, \emph{Acta Mathematica}, 116, 135--157.
 \item C\'ea, J. (1964), Approximation variationnelle des probl\`emes aux limites, \emph{Annales de l'Institut Fourier}, 14, 345--444.
@@ -3989,6 +4284,7 @@ For $r \leq \frac12$, $u_j^{n + 1} = ru_{j - 1}^n + (1 - 2r)u_j^n + ru_{j + 1}^n
 \item Einstein, A. (1905), \"Uber die von der molekularkinetischen Theorie der W\"arme geforderte Bewegung von in ruhenden Fl\"ussigkeiten suspendierten Teilchen, \emph{Annalen der Physik}, 322, 549--560.
 \item Fej\'er, L. (1904), Untersuchungen \"uber Fouriersche Reihen, \emph{Mathematische Annalen}, 58, 51--69.
 \item Fick, A. (1855), \"Uber Diffusion, \emph{Annalen der Physik}, 170, 59--86.
+\item Fisher, R. A. (1937), The wave of advance of advantageous genes, \emph{Annals of Eugenics}, 7, 355--369.
 \item von Foerster, H. (1959), Some remarks on changing populations, in F. Stohlman (ed.), \emph{The Kinetics of Cellular Proliferation}, New York,
 Grune and Stratton, 382--407.
 \item Fourier, J. (1822), \emph{Th\'eorie analytique de la chaleur}, Paris, Firmin Didot.
@@ -4003,12 +4299,14 @@ Grune and Stratton, 382--407.
 \item Hadamard, J. (1923), \emph{Lectures on Cauchy's Problem in Linear Partial Differential Equations}, New Haven, Yale University Press.
 \item Harnack, A. (1887), \emph{Die Grundlagen der Theorie des logarithmischen Potentiales und der eindeutigen Potentialfunktion in der Ebene}, Leipzig, Teubner.
 \item Hilbert, D. (1900), \"Uber das Dirichletsche Prinzip, \emph{Jahresbericht der Deutschen Mathematiker-Vereinigung}, 8, 184--188.
+\item Hodgkin, A. L., and Huxley, A. F. (1952), A quantitative description of membrane current and its application to conduction and excitation in nerve, \emph{Journal of Physiology}, 117, 500--544.
 \item Holmgren, E. (1901), \"Uber Systeme von linearen partiellen Differentialgleichungen, \emph{\"Ofversigt af Kongl.\ Vetenskaps-Akademiens F\"orhandlingar}, 58, 91--103.
 \item Hopf, E. (1950), The partial differential equation $u_t + uu_x = \mu u_{xx}$, \emph{Communications on Pure and Applied Mathematics}, 3, 201--230.
 \item Hugoniot, H. (1887), M\'emoire sur la propagation du mouvement dans les corps et sp\'ecialement dans les gaz parfaits, \emph{Journal de l'\'Ecole Polytechnique}, 57, 3--97.
 \item Huygens, C. (1690), \emph{Trait\'e de la lumi\`ere}, Leiden, Pierre van der Aa.
 \item Kac, M. (1966), Can one hear the shape of a drum?, \emph{American Mathematical Monthly}, 73, 1--23.
 \item Kirchhoff, G. (1883), Zur Theorie der Lichtstrahlen, \emph{Annalen der Physik}, 254, 663--695.
+\item Kolmogorov, A. N., Petrovsky, I. G., and Piskunov, N. S. (1937), \'Etude de l'\'equation de la diffusion avec croissance de la quantit\'e de mati\`ere et son application \`a un probl\`eme biologique, \emph{Bulletin de l'Universit\'e d'\'Etat \`a Moscou, S\'erie internationale, Section A}, 1(6), 1--26.
 \item Korteweg, D. J., and de Vries, G. (1895), On the change of form of long waves advancing in a rectangular canal, and on a new type of long stationary waves, \emph{Philosophical Magazine}, 39, 422--443.
 \item Kowalevsky, S. von (1875), Zur Theorie der partiellen Differentialgleichungen, \emph{Journal f\"ur die reine und angewandte Mathematik}, 80, 1--32.
 \item Kru\v{z}kov, S. N. (1970), First order quasilinear equations in several independent variables, \emph{Mathematics of the USSR-Sbornik}, 10, 217--243.
@@ -4023,6 +4321,7 @@ Grune and Stratton, 382--407.
 \item Maxwell, J. C. (1873), \emph{A Treatise on Electricity and Magnetism}, Oxford, Clarendon Press.
 \item McKendrick, A. G. (1926), Applications of mathematics to medical problems, \emph{Proceedings of the Edinburgh Mathematical Society}, 44, 98--130.
 \item Mersenne, M. (1636), \emph{Harmonie universelle}, Paris, Cramoisy.
+\item Nagumo, J., Arimoto, S., and Yoshizawa, S. (1962), An active pulse transmission line simulating nerve axon, \emph{Proceedings of the IRE}, 50, 2061--2070.
 \item Nirenberg, L. (1953), A strong maximum principle for parabolic equations, \emph{Communications on Pure and Applied Mathematics}, 6, 167--177.
 \item O'Brien, G. G., Hyman, M. A., and Kaplan, S. (1951), A study of the numerical solution of partial differential equations, \emph{Journal of Mathematics and Physics}, 29, 223--251.
 \item Parseval, M.-A. (1806), M\'emoire sur les s\'eries et sur l'int\'egration compl\`ete d'une \'equation aux diff\'erences partielles lin\'eaires du second ordre, \`a coefficients constants, \emph{M\'emoires pr\'esent\'es \`a l'Institut des Sciences, Lettres et Arts, par divers savans}, 1, 638--648.
@@ -4036,11 +4335,14 @@ Grune and Stratton, 382--407.
 \item Richardson, L. F. (1922), \emph{Weather Prediction by Numerical Process}, Cambridge University Press.
 \item Riemann, B. (1851), \emph{Grundlagen f\"ur eine allgemeine Theorie der Functionen einer ver\"anderlichen complexen Gr\"osse}, Inauguraldissertation, G\"ottingen.
 \item Ritz, W. (1909), \"Uber eine neue Methode zur L\"osung gewisser Variationsprobleme der mathematischen Physik, \emph{Journal f\"ur die reine und angewandte Mathematik}, 135, 1--61.
+\item Schnakenberg, J. (1979), Simple chemical reaction systems with limit cycle behaviour, \emph{Journal of Theoretical Biology}, 81, 389--400.
+\item Skellam, J. G. (1951), Random dispersal in theoretical populations, \emph{Biometrika}, 38, 196--218.
 \item Sobolev, S. L. (1938), Sur un th\'eor\`eme d'analyse fonctionnelle, \emph{Matematicheskii Sbornik}, 4(46), 471--497.
 \item Talbot, A. (1979), The accurate numerical inversion of Laplace transforms, \emph{IMA Journal of Applied Mathematics}, 23, 97--120.
 \item Thomson, W. (1848), Extrait d'une lettre de M. William Thomson \`a M. Liouville, \emph{Journal de Math\'ematiques Pures et Appliqu\'ees}, 10, 364--367.
 \item Thomson, W. (1864), On the secular cooling of the Earth, \emph{Transactions of the Royal Society of Edinburgh}, 23, 157--169.
 \item Tricomi, F. (1923), Sulle equazioni lineari alle derivate parziali di 2$^\circ$ ordine, di tipo misto, \emph{Memorie della Reale Accademia dei Lincei}, serie 5, 14, 133--247.
+\item Turing, A. M. (1952), The chemical basis of morphogenesis, \emph{Philosophical Transactions of the Royal Society of London B}, 237, 37--72.
 \item Tychonoff, A. (1935), Th\'eor\`emes d'unicit\'e pour l'\'equation de la chaleur, \emph{Matematicheskii Sbornik}, 42, 199--216.
 \item Weierstrass, K. (1870), \"Uber das sogenannte Dirichlet'sche Princip, in \emph{Mathematische Werke}, Vol.~2 (1895), Berlin, Mayer \& M\"uller, 49--54.
 \item Widder, D. V. (1944), Positive temperatures on an infinite rod, \emph{Transactions of the American Mathematical Society}, 55, 85--95.
