@@ -3372,6 +3372,312 @@ In Kelvin's calculation, how does the estimated age change if the diffusivity is
 $t = T_0^2/\pi\kappa G^2$ is inversely proportional to $\kappa$ and to $G^2$: doubling $\kappa$ halves the age to $48$ million years, and halving $G$ multiplies it by $4$, to $384$ million years. The estimate is very sensitive to the gradient, which is one reason for Kelvin's wide range.
 \end{solution}
 
+%======================================================================
+\section{Energy Methods, Weak Solutions and the Dirichlet Principle}
+\label{sec:weak}
+
+The explicit formulas of the previous sections need special geometry: lines, half-spaces, balls, rectangles. For a general region, and for variable coefficients, existence must be proved by other means, and the most powerful are variational. A steady state minimises energy; so look for the minimiser of the
+energy, and show that it solves the equation. This is the \textbf{Dirichlet principle}. Riemann used it freely in complex analysis; Weierstrass showed in 1870 that the minimum need not exist; and Hilbert rescued it in 1900. The rescue required a new notion of solution, the \textbf{weak solution}, and new function
+spaces, and it led directly to the finite element method used in engineering today.
+
+\subsection{The Dirichlet principle}
+\label{ssec:dirichletprinciple}
+
+Let $\Omega$ be a bounded region with smooth boundary, $f$ continuous on $\overline\Omega$, $g$ given on $\partial\Omega$, and define the \textbf{energy}
+\[
+E[w] = \int_\Omega\Bigl(\frac12|\nabla w|^2 - fw\Bigr)dx
+\]
+on the admissible class $\mathcal A$ of functions $w \in C^1(\overline\Omega)$ with $w = g$ on $\partial\Omega$. For an elastic membrane under load $f$, $\frac12|\nabla w|^2$ is the stretching energy and $-fw$ the potential energy of the load.
+
+\begin{thm}[Dirichlet principle]
+\label{thm:dirichletprinciple}
+A function $u \in \mathcal A \cap C^2(\Omega)$ solves $-\Delta u = f$ in $\Omega$ if and only if $E[u] = \min_{w \in \mathcal A}E[w]$.
+\end{thm}
+
+\begin{proof}
+For any $w \in \mathcal A$, $v = w - u$ vanishes on $\partial\Omega$, and
+\[
+E[u + v] = E[u] + \int_\Omega(\nabla u\cdot\nabla v - fv)\,dx + \frac12\int_\Omega|\nabla v|^2\,dx .
+\]
+If $-\Delta u = f$, integration by parts gives $\int\nabla u\cdot\nabla v = \int(-\Delta u)v = \int fv$, the middle term vanishes, and $E[w] = E[u] + \frac12\int|\nabla v|^2 \geq E[u]$. Conversely, if $u$ minimises, then $\varepsilon \mapsto E[u + \varepsilon v]$ has a minimum at $\varepsilon = 0$ for every $v \in C^1(\overline\Omega)$
+vanishing on the boundary, so its derivative there, $\int(\nabla u\cdot\nabla v - fv) = \int(-\Delta u - f)v$, is zero for all such $v$; hence $-\Delta u = f$.
+\end{proof}
+
+The equation $\int(\nabla u\cdot\nabla v - fv) = 0$ for all $v$ is the \textbf{Euler--Lagrange equation} of $E$ in integrated form. It makes sense when $u$ has only first derivatives, which is the key to what follows.
+
+Dirichlet's principle assumes that a minimiser exists, and that is the gap. The energy is bounded below on $\mathcal A$ (Problem~\ref{prob:bounded}), so it has an infimum, but a minimising sequence need not converge to anything in $\mathcal A$. Weierstrass's counterexample was a one-dimensional problem:
+minimise $\int_{-1}^1x^2y'(x)^2\,dx$ over $C^1$ functions with $y(-1) = -1$, $y(1) = 1$. The functions $y_\varepsilon = \arctan(x/\varepsilon)/\arctan(1/\varepsilon)$ are admissible and their values tend to $0$ (Software~\ref{sw:weierstrass}), so the infimum is $0$; but a function with value $0$ would have $xy' = 0$, so $y$ would be
+constant on each side of $0$, and no continuous function can be $-1$ at one end, $1$ at the other, and constant on both halves. The minimising sequence tends to a step function, outside the admissible class.
+
+\subsection{The Poincar\'e inequality}
+\label{ssec:poincare}
+
+The cure is to enlarge the class until minimising sequences converge in it. The size of a function is to be measured by its energy, $\int|\nabla w|^2$, and the first step is to show that this controls the function itself.
+
+\begin{thm}[Poincar\'e inequality]
+\label{thm:poincare}
+If $u \in C^1[0, L]$ with $u(0) = u(L) = 0$, then $\int_0^Lu^2\,dx \leq (L/\pi)^2\int_0^Lu'^2\,dx$, with equality for $u = \sin(\pi x/L)$. If $\Omega$ lies in a slab $0 < x_1 < d$ and $u \in C^1(\overline\Omega)$ vanishes on $\partial\Omega$, then $\int_\Omega u^2 \leq (d/\pi)^2\int_\Omega|\nabla u|^2$.
+\end{thm}
+
+\begin{proof}
+Expand $u = \sum b_k\sin(k\pi x/L)$; then $u' = \sum b_k(k\pi/L)\cos(k\pi x/L)$, and by Parseval for the sine and cosine systems, $\int u^2 = \frac L2\sum b_k^2 \leq \frac L2\sum b_k^2(k/1)^2 = (L/\pi)^2\int u'^2$, with equality only if $b_k = 0$ for $k \geq 2$. For $\Omega$, extend $u$ by $0$ to the slab and
+apply the one-dimensional inequality on each line parallel to the $x_1$-axis, then integrate over the other variables; $|\partial_1u| \leq |\nabla u|$.
+\end{proof}
+
+So on functions vanishing on the boundary, $\|w\|_E = (\int|\nabla w|^2)^{1/2}$ is a norm, the \textbf{energy norm}, and it comes from the inner product $(v, w)_E = \int\nabla v\cdot\nabla w$. The space $C^1_0(\overline\Omega)$ is not complete in this norm (Weierstrass's sequence is Cauchy, with no limit in it), and its
+completion is the \textbf{Sobolev space} $H^1_0(\Omega)$: functions which, with their first derivatives in a generalised sense, are square-integrable, and which vanish on the boundary in a generalised sense. By the Poincar\'e inequality, every element of $H^1_0$ is a genuine square-integrable function.
+
+\subsection{Weak solutions}
+\label{ssec:weaksolutions}
+
+\begin{defn}
+Let $f$ be square-integrable. A \textbf{weak solution} of $-\Delta u = f$ in $\Omega$, $u = 0$ on $\partial\Omega$, is a $u \in H^1_0(\Omega)$ with
+\[
+\int_\Omega\nabla u\cdot\nabla v\,dx = \int_\Omega fv\,dx \qquad\text{for all } v \in H^1_0(\Omega) .
+\]
+\end{defn}
+
+A classical solution is a weak solution, by integration by parts. Non-zero boundary values $g$ are handled by writing $u = u_g + w$ with $u_g$ any extension of $g$ and $w$ solving a problem with zero boundary values.
+
+\begin{thm}[Existence of weak solutions]
+\label{thm:weakexist}
+For every square-integrable $f$ there is exactly one weak solution $u$, it minimises $\frac12\|w\|_E^2 - \int fw$ over $H^1_0(\Omega)$, and $\|u\|_E \leq (d/\pi)\|f\|_{L^2}$.
+\end{thm}
+
+\begin{proof}
+The functional $\ell(v) = \int fv$ is linear, and by Cauchy--Schwarz and Poincar\'e, $|\ell(v)| \leq \|f\|_{L^2}\|v\|_{L^2} \leq (d/\pi)\|f\|_{L^2}\|v\|_E$, so it is bounded on the Hilbert space $H^1_0$. By the Riesz representation theorem there is exactly one $u \in H^1_0$ with $(u, v)_E = \ell(v)$ for all $v$, which is
+the definition of a weak solution, and $\|u\|_E = \|\ell\| \leq (d/\pi)\|f\|_{L^2}$. The minimising property is the computation in the proof of Theorem~\ref{thm:dirichletprinciple}, which used only the weak form.
+\end{proof}
+
+For an equation $-\operatorname{div}(A(x)\nabla u) + b\cdot\nabla u + cu = f$ the bilinear form $a(u, v) = \int(A\nabla u\cdot\nabla v + (b\cdot\nabla u)v + cuv)$ need not be symmetric, and the Riesz theorem is replaced by the \textbf{Lax--Milgram theorem}: if $a$ is bounded and \emph{coercive},
+$a(v, v) \geq \alpha\|v\|_E^2$ with $\alpha > 0$, then $a(u, v) = \ell(v)$ for all $v$ has exactly one solution, with $\|u\|_E \leq \|\ell\|/\alpha$. Coercivity holds, for example, when $A$ is uniformly positive definite, $b = 0$ and $c \geq 0$.
+
+A weak solution is a solution in a generalised sense only, but the \textbf{regularity theory} of elliptic equations shows that it is as smooth as the data allow: if $f$, the coefficients and the boundary are smooth, the weak solution is smooth and is a classical solution. Existence is thus proved in two steps, a soft
+one (Hilbert space) and a hard one (regularity), and this is the pattern of the modern theory of partial differential equations.
+
+\subsection{Galerkin's method and finite elements}
+\label{ssec:galerkin}
+
+The weak form suggests a numerical method. Choose a finite-dimensional subspace $V_h \subset H^1_0$ and find $u_h \in V_h$ with
+\[
+(u_h, v)_E = \ell(v) \qquad\text{for all } v \in V_h .
+\]
+With a basis $\phi_1, \ldots, \phi_N$ of $V_h$ and $u_h = \sum U_j\phi_j$, this is the linear system $KU = b$ with \textbf{stiffness matrix} $K_{ij} = (\phi_i, \phi_j)_E$ and \textbf{load vector} $b_i = \ell(\phi_i)$. $K$ is symmetric and positive definite, so the system has exactly one solution.
+
+\begin{thm}[C\'ea]
+\label{thm:cea}
+The Galerkin solution is the best approximation to $u$ from $V_h$ in the energy norm: $\|u - u_h\|_E = \min_{v \in V_h}\|u - v\|_E$.
+\end{thm}
+
+\begin{proof}
+Subtracting the equations for $u$ and $u_h$ gives \textbf{Galerkin orthogonality}, $(u - u_h, v)_E = 0$ for all $v \in V_h$. So $u_h$ is the orthogonal projection of $u$ onto $V_h$ in the energy inner product, and orthogonal projection gives the nearest point.
+\end{proof}
+
+In the \textbf{finite element method}, $V_h$ consists of continuous piecewise polynomials on a mesh. In one dimension with nodes $x_i = ih$, the piecewise linear \textbf{hat functions} $\phi_i$, equal to $1$ at $x_i$ and $0$ at the other nodes, give $K = \frac1h\operatorname{tridiag}(-1, 2, -1)$ (Figure~\ref{fig:fem}). Since the
+interpolant of a smooth $u$ is within $O(h)$ of it in the energy norm, C\'ea's theorem gives $\|u - u_h\|_E = O(h)$, and a duality argument (Aubin and Nitsche) gives $\|u - u_h\|_{L^2} = O(h^2)$. In two and three dimensions the mesh is of triangles or tetrahedra fitted to the region, which is what makes the method
+so flexible.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-0.5,-2.25) rectangle (9.5,2.7);
+\draw[black!45,dashed] (0.000,0.000) -- (0.045,0.035) -- (0.090,0.069) -- (0.135,0.104) -- (0.180,0.138) -- (0.225,0.173) -- (0.270,0.207) -- (0.315,0.241) -- (0.360,0.276) -- (0.405,0.310) -- (0.450,0.344) -- (0.495,0.378) -- (0.540,0.412) -- (0.585,0.446) -- (0.630,0.480) -- (0.675,0.514) -- (0.720,0.547) -- (0.765,0.581) -- (0.810,0.614) -- (0.855,0.647) -- (0.900,0.680) -- (0.945,0.713) -- (0.990,0.745) -- (1.035,0.778) -- (1.080,0.810) -- (1.125,0.842) -- (1.170,0.874) -- (1.215,0.905) -- (1.260,0.937) -- (1.305,0.968) -- (1.350,0.999) -- (1.395,1.029) -- (1.440,1.060) -- (1.485,1.090) -- (1.530,1.120) -- (1.575,1.149) -- (1.620,1.179) -- (1.665,1.208) -- (1.710,1.237) -- (1.755,1.265) -- (1.800,1.293) -- (1.845,1.321) -- (1.890,1.348) -- (1.935,1.376) -- (1.980,1.402) -- (2.025,1.429) -- (2.070,1.455) -- (2.115,1.481) -- (2.160,1.506) -- (2.205,1.531) -- (2.250,1.556) -- (2.295,1.580) -- (2.340,1.604) -- (2.385,1.627) -- (2.430,1.650) -- (2.475,1.673) -- (2.520,1.695) -- (2.565,1.717) -- (2.610,1.738) -- (2.655,1.759) -- (2.700,1.780) -- (2.745,1.800) -- (2.790,1.820) -- (2.835,1.839) -- (2.880,1.858) -- (2.925,1.876) -- (2.970,1.894) -- (3.015,1.911) -- (3.060,1.928) -- (3.105,1.944) -- (3.150,1.960) -- (3.195,1.976) -- (3.240,1.991) -- (3.285,2.005) -- (3.330,2.019) -- (3.375,2.033) -- (3.420,2.046) -- (3.465,2.058) -- (3.510,2.070) -- (3.555,2.081) -- (3.600,2.092) -- (3.645,2.103) -- (3.690,2.113) -- (3.735,2.122) -- (3.780,2.131) -- (3.825,2.139) -- (3.870,2.147) -- (3.915,2.154) -- (3.960,2.161) -- (4.005,2.167) -- (4.050,2.173) -- (4.095,2.178) -- (4.140,2.183) -- (4.185,2.187) -- (4.230,2.190) -- (4.275,2.193) -- (4.320,2.196) -- (4.365,2.198) -- (4.410,2.199) -- (4.455,2.200) -- (4.500,2.200) -- (4.545,2.200) -- (4.590,2.199) -- (4.635,2.198) -- (4.680,2.196) -- (4.725,2.193) -- (4.770,2.190) -- (4.815,2.187) -- (4.860,2.183) -- (4.905,2.178) -- (4.950,2.173) -- (4.995,2.167) -- (5.040,2.161) -- (5.085,2.154) -- (5.130,2.147) -- (5.175,2.139) -- (5.220,2.131) -- (5.265,2.122) -- (5.310,2.113) -- (5.355,2.103) -- (5.400,2.092) -- (5.445,2.081) -- (5.490,2.070) -- (5.535,2.058) -- (5.580,2.046) -- (5.625,2.033) -- (5.670,2.019) -- (5.715,2.005) -- (5.760,1.991) -- (5.805,1.976) -- (5.850,1.960) -- (5.895,1.944) -- (5.940,1.928) -- (5.985,1.911) -- (6.030,1.894) -- (6.075,1.876) -- (6.120,1.858) -- (6.165,1.839) -- (6.210,1.820) -- (6.255,1.800) -- (6.300,1.780) -- (6.345,1.759) -- (6.390,1.738) -- (6.435,1.717) -- (6.480,1.695) -- (6.525,1.673) -- (6.570,1.650) -- (6.615,1.627) -- (6.660,1.604) -- (6.705,1.580) -- (6.750,1.556) -- (6.795,1.531) -- (6.840,1.506) -- (6.885,1.481) -- (6.930,1.455) -- (6.975,1.429) -- (7.020,1.402) -- (7.065,1.376) -- (7.110,1.348) -- (7.155,1.321) -- (7.200,1.293) -- (7.245,1.265) -- (7.290,1.237) -- (7.335,1.208) -- (7.380,1.179) -- (7.425,1.149) -- (7.470,1.120) -- (7.515,1.090) -- (7.560,1.060) -- (7.605,1.029) -- (7.650,0.999) -- (7.695,0.968) -- (7.740,0.937) -- (7.785,0.905) -- (7.830,0.874) -- (7.875,0.842) -- (7.920,0.810) -- (7.965,0.778) -- (8.010,0.745) -- (8.055,0.713) -- (8.100,0.680) -- (8.145,0.647) -- (8.190,0.614) -- (8.235,0.581) -- (8.280,0.547) -- (8.325,0.514) -- (8.370,0.480) -- (8.415,0.446) -- (8.460,0.412) -- (8.505,0.378) -- (8.550,0.344) -- (8.595,0.310) -- (8.640,0.276) -- (8.685,0.241) -- (8.730,0.207) -- (8.775,0.173) -- (8.820,0.138) -- (8.865,0.104) -- (8.910,0.069) -- (8.955,0.035) -- (9.000,0.000);
+\draw[blue!60!black,thick] (0.000,0.000) -- (1.500,1.100) -- (3.000,1.905) -- (4.500,2.200) -- (6.000,1.905) -- (7.500,1.100) -- (9.000,0.000);
+\fill[blue!60!black] (1.500,1.100) circle (1.6pt);
+\fill[blue!60!black] (3.000,1.905) circle (1.6pt);
+\fill[blue!60!black] (4.500,2.200) circle (1.6pt);
+\fill[blue!60!black] (6.000,1.905) circle (1.6pt);
+\fill[blue!60!black] (7.500,1.100) circle (1.6pt);
+\draw[red!70!black,thick] (1.500,-1.6) -- (3.000,-0.6) -- (4.500,-1.6);
+\node[font=\scriptsize,red!70!black] at (3.000,-0.35) {$\phi_2$};
+\draw[orange!80!black,thick] (3.000,-1.6) -- (4.500,-0.6) -- (6.000,-1.6);
+\node[font=\scriptsize,orange!80!black] at (4.500,-0.35) {$\phi_3$};
+\draw[black!60] (0,-1.6) -- (9,-1.6);
+\draw (0.000,-1.65) -- (0.000,-1.55) node[below,font=\tiny] at (0.000,-1.65) {$x_0$};
+\draw (1.500,-1.65) -- (1.500,-1.55) node[below,font=\tiny] at (1.500,-1.65) {$x_1$};
+\draw (3.000,-1.65) -- (3.000,-1.55) node[below,font=\tiny] at (3.000,-1.65) {$x_2$};
+\draw (4.500,-1.65) -- (4.500,-1.55) node[below,font=\tiny] at (4.500,-1.65) {$x_3$};
+\draw (6.000,-1.65) -- (6.000,-1.55) node[below,font=\tiny] at (6.000,-1.65) {$x_4$};
+\draw (7.500,-1.65) -- (7.500,-1.55) node[below,font=\tiny] at (7.500,-1.65) {$x_5$};
+\draw (9.000,-1.65) -- (9.000,-1.55) node[below,font=\tiny] at (9.000,-1.65) {$x_6$};
+\node[font=\scriptsize,blue!60!black,anchor=west] at (6.9,2.2) {$u_h$ (piecewise linear)};
+\node[font=\scriptsize,black!55,anchor=west] at (6.9,1.85) {$u = \sin\pi x$ (dashed)};
+\end{tikzpicture}
+\caption{Linear finite elements on six intervals for $-u'' = \pi^2\sin\pi x$, $u(0) = u(1) = 0$. Below, two of the hat functions that span $V_h$; above, the Galerkin solution, a combination of the hats, against the exact solution. In one dimension for this equation the nodal values are exact (Software~\ref{sw:fem}).}
+\label{fig:fem}
+\end{figure}
+
+\subsection{Rayleigh quotients and energy decay}
+\label{ssec:rayleigh}
+
+The same variational ideas give eigenvalues. For $-\Delta\phi = \lambda\phi$ in $\Omega$ with $\phi = 0$ on $\partial\Omega$, the lowest eigenvalue is
+\[
+\lambda_1 = \min_{w \in H^1_0,\ w \neq 0}R[w], \qquad R[w] = \frac{\int_\Omega|\nabla w|^2}{\int_\Omega w^2} ,
+\]
+the \textbf{Rayleigh quotient}: expanding $w$ in eigenfunctions, $R[w] = \sum\lambda_kc_k^2/\sum c_k^2 \geq \lambda_1$, with equality for the first eigenfunction. Any trial function gives an upper bound: $w = x(1 - x)$ on $(0, 1)$ gives $R = 10$ against $\lambda_1 = \pi^2 = 9.8696$, an error of $1.3\%$ from a
+crude guess, because errors in $w$ enter $R$ only to second order. The \textbf{Ritz method} minimises $R$ over a subspace, which leads to the generalised eigenvalue problem $Kc = \lambda Mc$ with $M_{ij} = \int\phi_i\phi_j$. The Poincar\'e inequality is the statement $\lambda_1 \geq (\pi/d)^2$.
+
+For evolution equations, energy gives decay and uniqueness without formulas. If $u_t = \kappa u_{xx}$ on $(0, L)$ with $u = 0$ at the ends, then $\frac{d}{dt}\int u^2 = -2\kappa\int u_x^2 \leq -\frac{2\kappa\pi^2}{L^2}\int u^2$ by Poincar\'e, so
+\[
+\int_0^Lu(x, t)^2\,dx \leq e^{-2\kappa\pi^2t/L^2}\int_0^Lu(x, 0)^2\,dx ,
+\]
+the exact rate of the slowest mode; and the same argument works for variable coefficients and any shape of region, where no series is available.
+
+\subsection{Variational methods in software}
+\label{ssec:software12}
+
+\begin{software}[Rayleigh and Ritz]
+\label{sw:ritz}
+The Rayleigh quotient of $x(1 - x)$ on $(0, 1)$, and the Ritz method with the two trial functions $x(1 - x)$ and $x^2(1 - x)^2$:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> x = sp.symbols('x')
+>>> def R(u):                              # Rayleigh quotient on (0, 1)
+...     top = sp.integrate(u.diff(x)**2, (x, 0, 1))
+...     return top / sp.integrate(u**2, (x, 0, 1))
+...
+>>> R(x * (1 - x)), sp.N(sp.pi**2, 8)      # one trial function
+(10, 9.8696044)
+>>> phi = [x * (1 - x), x**2 * (1 - x)**2]   # Ritz: best combination of two
+>>> I = lambda g: sp.integrate(g, (x, 0, 1))
+>>> K = sp.Matrix(2, 2, lambda i, j: I(phi[i].diff(x) * phi[j].diff(x)))
+>>> M = sp.Matrix(2, 2, lambda i, j: I(phi[i] * phi[j]))
+>>> lam = sp.symbols('lam')
+>>> roots = sp.solve((K - lam * M).det(), lam)
+>>> sorted(sp.N(r, 10) for r in roots)     # against pi^2 and 9 pi^2
+[9.869749621, 102.1302504]
+\end{verbatim}}
+\textbf{Reading the output.} One trial function gives $10$; two give $9.869750$, within $1.5 \times 10^{-5}$ of $\pi^2 = 9.869604$, and always above it. Both trial functions are symmetric about $\frac12$, so the second Ritz value, $102.13$, is an upper bound for the next symmetric eigenvalue, $9\pi^2 = 88.83$, not for $4\pi^2$.
+
+\textbf{MATLAB/Octave:} \texttt{eig(K, M)} for the generalised eigenvalue problem.
+\end{software}
+
+\begin{software}[Linear finite elements]
+\label{sw:fem}
+The finite element method for $-u'' = \pi^2\sin\pi x$, whose solution is $\sin\pi x$, assembled element by element with five-point Gauss quadrature; the $L^2$ error, the energy-norm error, and the largest error at the nodes, for $N$ elements:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> gx, gw = np.polynomial.legendre.leggauss(5)  # Gauss points on [-1, 1]
+>>> def fem(N, f):  # -u'' = f on (0, 1), linear elements
+...     h = 1 / N; nodes = np.linspace(0, 1, N + 1)
+...     K = (np.diag(2*np.ones(N - 1)) - np.diag(np.ones(N - 2), 1)
+...          - np.diag(np.ones(N - 2), -1)) / h
+...     b = np.zeros(N - 1)
+...     for e in range(N):                 # load vector, element by element
+...         xq = nodes[e] + h * (gx + 1) / 2; wq = gw * h / 2
+...         for loc, node in ((1 - (xq - nodes[e]) / h, e - 1),
+...                           ((xq - nodes[e]) / h, e)):
+...             if 0 <= node < N - 1:
+...                 b[node] += np.sum(wq * f(xq) * loc)
+...     return nodes, np.r_[0, np.linalg.solve(K, b), 0]
+...
+>>> def errors(nodes, U, u, du):  # L2 and energy-norm errors, by Gauss
+...     eL2 = eH1 = 0.0
+...     for e in range(len(nodes) - 1):
+...         a, h = nodes[e], nodes[e + 1] - nodes[e]
+...         xq = a + h * (gx + 1) / 2; wq = gw * h / 2
+...         Uq = U[e] + (U[e + 1] - U[e]) * (xq - a) / h
+...         eL2 += np.sum(wq * (u(xq) - Uq)**2)
+...         eH1 += np.sum(wq * (du(xq) - (U[e + 1] - U[e]) / h)**2)
+...     return np.sqrt(eL2), np.sqrt(eH1)
+...
+>>> f = lambda s: np.pi**2 * np.sin(np.pi * s)        # exact u = sin(pi x)
+>>> for N in (8, 16, 32, 64):
+...     nodes, U = fem(N, f)
+...     e0, e1 = errors(nodes, U, lambda s: np.sin(np.pi*s),
+...                     lambda s: np.pi * np.cos(np.pi*s))
+...     print(N, f"{e0:.3e}", f"{e1:.3e}",
+...           f"{np.abs(U - np.sin(np.pi*nodes)).max():.1e}")
+...
+8 9.921e-03 2.512e-01 2.2e-16
+16 2.487e-03 1.258e-01 2.8e-16
+32 6.220e-04 6.295e-02 2.8e-15
+64 1.555e-04 3.148e-02 9.1e-15
+\end{verbatim}}
+\textbf{Reading the output.} Each doubling of $N$ divides the $L^2$ error by $4$ and the energy error by $2$: orders $2$ and $1$, as predicted. The nodal errors are at rounding level. This is special to one dimension: the Green's function $G(x_i, \cdot)$ of Section~\ref{sec:green} is piecewise linear with a corner at $x_i$, so it lies in
+$V_h$, and Galerkin orthogonality then gives $u_h(x_i) = u(x_i)$ exactly.
+
+\textbf{MATLAB/Octave:} the same assembly loop; \texttt{K = (2*eye(N-1) - diag(ones(N-2,1),1) - diag(ones(N-2,1),-1))/h}.
+\end{software}
+
+\begin{software}[Weierstrass's example]
+\label{sw:weierstrass}
+The value of $\int_{-1}^1x^2y'^2\,dx$ for
+\[
+y_\varepsilon(x) = \frac{\arctan(x/\varepsilon)}{\arctan(1/\varepsilon)} ,
+\]
+which satisfies $y(\pm1) = \pm1$:
+{\small\begin{verbatim}
+>>> from scipy.integrate import quad
+>>> def weierstrass(eps):                  # E[y] = int_{-1}^{1} x^2 y'^2 dx
+...     a = np.arctan(1 / eps)             # y = arctan(x/eps)/arctan(1/eps)
+...     dy = lambda s: eps / (eps**2 + s**2) / a
+...     g = lambda s: s**2 * dy(s)**2
+...     return quad(g, -1, 1, points=[0], limit=200)[0]
+...
+>>> [f"{weierstrass(e):.3e}" for e in (0.1, 0.01, 0.001, 0.0001)]
+['6.340e-02', '6.366e-03', '6.366e-04', '6.366e-05']
+\end{verbatim}}
+\textbf{Reading the output.} The values fall like $2\varepsilon/\pi$, so the infimum is $0$, but it is not attained: the minimising sequence steepens into a step at the origin.
+
+\textbf{MATLAB/Octave:} \texttt{integral(@(x) x.\^{}2.*dy(x).\^{}2, -1, 1)}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+\label{prob:bounded}
+Show that $E[w] = \int_\Omega(\frac12|\nabla w|^2 - fw)$ is bounded below on functions vanishing on $\partial\Omega$.
+\end{problem}
+
+\begin{solution}
+By Cauchy--Schwarz and Poincar\'e with $C = d/\pi$, $\int fw \leq \|f\|\,\|w\| \leq C\|f\|\,\|w\|_E$, so $E[w] \geq \frac12\|w\|_E^2 - C\|f\|\,\|w\|_E \geq -\frac12C^2\|f\|^2$, the minimum of the quadratic $\frac12s^2 - C\|f\|s$.
+\end{solution}
+
+\begin{problem}
+Find the solution of $-u'' = 1$ on $(0, 1)$ with zero boundary values, its energy, and the energy of the trial function $w = \frac12\sin\pi x$.
+\end{problem}
+
+\begin{solution}
+$u = \frac12x(1 - x)$, with $\int u'^2 = \int(\frac12 - x)^2 = \frac1{12}$ and $\int u = \frac1{12}$, so $E[u] = \frac1{24} - \frac1{12} = -\frac1{24} = -0.04167$. For $w$: $\int w'^2 = \frac{\pi^2}4\cdot\frac12 = \frac{\pi^2}8$ and $\int w = \frac1\pi$, so $E[w] = \frac{\pi^2}{16} - \frac1\pi = 0.6169 - 0.3183 = 0.2986$, far above, because the amplitude is wrong. The best
+multiple $c\sin\pi x$ minimises $\frac{\pi^2}4c^2 - \frac{2c}\pi$, at $c = 4/\pi^3$, with energy $-4/\pi^4 = -0.04106$, just above $-\frac1{24}$.
+\end{solution}
+
+\begin{problem}
+Write the weak form of $-(a(x)u')' = f$ on $(0, 1)$, $u(0) = u(1) = 0$, where $a_0 \leq a(x) \leq a_1$ with $a_0 > 0$, and show that the bilinear form is coercive.
+\end{problem}
+
+\begin{solution}
+Multiply by $v$ vanishing at the ends and integrate by parts: $\int_0^1au'v'\,dx = \int_0^1fv\,dx$ for all $v \in H^1_0(0, 1)$. The form $a(u, v) = \int au'v'$ is symmetric with $a(v, v) \geq a_0\int v'^2 = a_0\|v\|_E^2$, so it is coercive with $\alpha = a_0$, and bounded by $a_1$. Lax--Milgram (or Riesz with this
+inner product) gives a unique weak solution, even when $a$ is discontinuous, as for a rod made of two materials.
+\end{solution}
+
+\begin{problem}
+Use the trial function $1 - r^2$ to bound the lowest frequency of a circular drum of unit radius, and compare with the exact $\lambda_1 = j_{01}^2$.
+\end{problem}
+
+\begin{solution}
+$\int|\nabla w|^2 = \int_0^14r^2\cdot 2\pi r\,dr = 2\pi$ and $\int w^2 = 2\pi\int_0^1(1 - r^2)^2r\,dr = \frac\pi3$, so $R = 6$, against $j_{01}^2 = 5.783$: an upper bound $3.7\%$ high, and for the frequency $\sqrt R$, only $1.9\%$.
+\end{solution}
+
+\begin{problem}
+Show that for the Neumann problem $-\Delta u = f$, $\partial_\nu u = 0$, the weak form forces $\int_\Omega f = 0$, and explain why uniqueness holds only up to a constant.
+\end{problem}
+
+\begin{solution}
+The weak form is $\int\nabla u\cdot\nabla v = \int fv$ for all $v \in H^1(\Omega)$, with no boundary condition on $v$ (the Neumann condition is \emph{natural}: it comes out of the integration by parts). Taking $v = 1$ gives $0 = \int f$. If $u$ is a solution so is $u + c$, since $\nabla c = 0$; on the subspace of functions with mean zero the
+form is coercive by the Poincar\'e--Wirtinger inequality, and the solution is unique there.
+\end{solution}
+
+\begin{problem}
+Using the energy method, show that the solution of $u_t = \kappa u_{xx}$ on $(0, L)$ with $u = 0$ at the ends satisfies $\int u_x^2$ non-increasing, and deduce a bound on $\int u_x(x, t)^2$ in terms of the initial data.
+\end{problem}
+
+\begin{solution}
+$\frac{d}{dt}\int u_x^2 = 2\int u_xu_{xt} = -2\int u_{xx}u_t = -2\kappa\int u_{xx}^2 \leq 0$, integrating by parts with $u_t = 0$ at the ends. Hence $\int u_x(x, t)^2 \leq \int g'^2$. Integrating the identity $\frac{d}{dt}\int u^2 = -2\kappa\int u_x^2$ from $0$ to $t$ and using the monotonicity gives the smoothing estimate
+$2\kappa t\int u_x(x, t)^2 \leq \int g^2$: the gradient becomes finite at once, even for rough data.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 \sloppy
@@ -3405,8 +3711,10 @@ $t = T_0^2/\pi\kappa G^2$ is inversely proportional to $\kappa$ and to $G^2$: do
 \item du Bois-Reymond, P. (1873), Ueber die Fourierschen Reihen, \emph{Nachrichten von der K\"oniglichen Gesellschaft der Wissenschaften zu G\"ottingen}, 21, 571--582.
 \item Burgers, J. M. (1948), A mathematical model illustrating the theory of turbulence, \emph{Advances in Applied Mechanics}, 1, 171--199.
 \item Carleson, L. (1966), On convergence and growth of partial sums of Fourier series, \emph{Acta Mathematica}, 116, 135--157.
+\item C\'ea, J. (1964), Approximation variationnelle des probl\`emes aux limites, \emph{Annales de l'Institut Fourier}, 14, 345--444.
 \item Cole, J. D. (1951), On a quasi-linear parabolic equation occurring in aerodynamics, \emph{Quarterly of Applied Mathematics}, 9, 225--236.
 \item Cooley, J. W., and Tukey, J. W. (1965), An algorithm for the machine calculation of complex Fourier series, \emph{Mathematics of Computation}, 19, 297--301.
+\item Courant, R. (1943), Variational methods for the solution of problems of equilibrium and vibrations, \emph{Bulletin of the American Mathematical Society}, 49, 1--23.
 \item Dirichlet, P. G. L. (1829), Sur la convergence des s\'eries trigonom\'etriques qui servent \`a repr\'esenter une fonction arbitraire entre des limites donn\'ees, \emph{Journal f\"ur die reine und angewandte Mathematik}, 4, 157--169.
 \item Duhamel, J. M. C. (1833), M\'emoire sur la m\'ethode g\'en\'erale relative au mouvement de la chaleur dans les corps solides plong\'es dans des milieux dont la temp\'erature varie avec le temps, \emph{Journal de l'\'Ecole Polytechnique}, 14 (cahier 22), 20--77.
 \item Earnshaw, S. (1842), On the nature of the molecular forces which regulate the constitution of the luminiferous ether, \emph{Transactions of the Cambridge Philosophical Society}, 7, 97--112.
@@ -3416,6 +3724,7 @@ $t = T_0^2/\pi\kappa G^2$ is inversely proportional to $\kappa$ and to $G^2$: do
 \item von Foerster, H. (1959), Some remarks on changing populations, in F. Stohlman (ed.), \emph{The Kinetics of Cellular Proliferation}, New York,
 Grune and Stratton, 382--407.
 \item Fourier, J. (1822), \emph{Th\'eorie analytique de la chaleur}, Paris, Firmin Didot.
+\item Galerkin, B. G. (1915), Rods and plates: series in some questions of elastic equilibrium of rods and plates (in Russian), \emph{Vestnik Inzhenerov}, 1, 897--908.
 \item Gauss, C. F. (1840), Allgemeine Lehrs\"atze in Beziehung auf die im verkehrten Verh\"altnisse des Quadrats der Entfernung wirkenden Anziehungs- und Abstossungs-Kr\"afte, \emph{Resultate aus den Beobachtungen des magnetischen Vereins im Jahre 1839}, Leipzig, 1--51.
 \item Gibbs, J. W. (1899), Fourier's series, \emph{Nature}, 59, 606.
 \item Godunov, S. K. (1959), A difference method for numerical calculation of discontinuous solutions of the equations of hydrodynamics, \emph{Matematicheskii Sbornik}, 47(89), 271--306.
@@ -3425,6 +3734,7 @@ Grune and Stratton, 382--407.
 49--52.
 \item Hadamard, J. (1923), \emph{Lectures on Cauchy's Problem in Linear Partial Differential Equations}, New Haven, Yale University Press.
 \item Harnack, A. (1887), \emph{Die Grundlagen der Theorie des logarithmischen Potentiales und der eindeutigen Potentialfunktion in der Ebene}, Leipzig, Teubner.
+\item Hilbert, D. (1900), \"Uber das Dirichletsche Prinzip, \emph{Jahresbericht der Deutschen Mathematiker-Vereinigung}, 8, 184--188.
 \item Holmgren, E. (1901), \"Uber Systeme von linearen partiellen Differentialgleichungen, \emph{\"Ofversigt af Kongl.\ Vetenskaps-Akademiens F\"orhandlingar}, 58, 91--103.
 \item Hopf, E. (1950), The partial differential equation $u_t + uu_x = \mu u_{xx}$, \emph{Communications on Pure and Applied Mathematics}, 3, 201--230.
 \item Hugoniot, H. (1887), M\'emoire sur la propagation du mouvement dans les corps et sp\'ecialement dans les gaz parfaits, \emph{Journal de l'\'Ecole Polytechnique}, 57, 3--97.
@@ -3436,6 +3746,7 @@ Grune and Stratton, 382--407.
 \item Kru\v{z}kov, S. N. (1970), First order quasilinear equations in several independent variables, \emph{Mathematics of the USSR-Sbornik}, 10, 217--243.
 \item Laplace, P.-S. (1785), Th\'eorie des attractions des sph\'ero\"ides et de la figure des plan\`etes, \emph{M\'emoires de l'Acad\'emie Royale des Sciences de Paris} (ann\'ee 1782), 113--196.
 \item Lax, P. D. (1957), Hyperbolic systems of conservation laws II, \emph{Communications on Pure and Applied Mathematics}, 10, 537--566.
+\item Lax, P. D., and Milgram, A. N. (1954), Parabolic equations, in \emph{Contributions to the Theory of Partial Differential Equations}, Annals of Mathematics Studies 33, Princeton University Press, 167--190.
 \item Lax, P. D., and Wendroff, B. (1960), Systems of conservation laws, \emph{Communications on Pure and Applied Mathematics}, 13, 217--237.
 \item Legendre, A.-M. (1785), Recherches sur l'attraction des sph\'ero\"ides homog\`enes, \emph{M\'emoires de Math\'ematique et de Physique pr\'esent\'es \`a l'Acad\'emie Royale des Sciences par divers savans}, 10, 411--434.
 \item Lewy, H. (1957), An example of a smooth linear partial differential equation without solution, \emph{Annals of Mathematics}, 66, 155--158.
@@ -3452,11 +3763,15 @@ Grune and Stratton, 382--407.
 \item Rankine, W. J. M. (1870), On the thermodynamic theory of waves of finite longitudinal disturbance, \emph{Philosophical Transactions of the Royal Society of London}, 160, 277--288.
 \item Rayleigh, Lord (J. W. Strutt) (1877), \emph{The Theory of Sound}, London, Macmillan.
 \item Richards, P. I. (1956), Shock waves on the highway, \emph{Operations Research}, 4, 42--51.
+\item Riemann, B. (1851), \emph{Grundlagen f\"ur eine allgemeine Theorie der Functionen einer ver\"anderlichen complexen Gr\"osse}, Inauguraldissertation, G\"ottingen.
+\item Ritz, W. (1909), \"Uber eine neue Methode zur L\"osung gewisser Variationsprobleme der mathematischen Physik, \emph{Journal f\"ur die reine und angewandte Mathematik}, 135, 1--61.
+\item Sobolev, S. L. (1938), Sur un th\'eor\`eme d'analyse fonctionnelle, \emph{Matematicheskii Sbornik}, 4(46), 471--497.
 \item Talbot, A. (1979), The accurate numerical inversion of Laplace transforms, \emph{IMA Journal of Applied Mathematics}, 23, 97--120.
 \item Thomson, W. (1848), Extrait d'une lettre de M. William Thomson \`a M. Liouville, \emph{Journal de Math\'ematiques Pures et Appliqu\'ees}, 10, 364--367.
 \item Thomson, W. (1864), On the secular cooling of the Earth, \emph{Transactions of the Royal Society of Edinburgh}, 23, 157--169.
 \item Tricomi, F. (1923), Sulle equazioni lineari alle derivate parziali di 2$^\circ$ ordine, di tipo misto, \emph{Memorie della Reale Accademia dei Lincei}, serie 5, 14, 133--247.
 \item Tychonoff, A. (1935), Th\'eor\`emes d'unicit\'e pour l'\'equation de la chaleur, \emph{Matematicheskii Sbornik}, 42, 199--216.
+\item Weierstrass, K. (1870), \"Uber das sogenannte Dirichlet'sche Princip, in \emph{Mathematische Werke}, Vol.~2 (1895), Berlin, Mayer \& M\"uller, 49--54.
 \item Widder, D. V. (1944), Positive temperatures on an infinite rod, \emph{Transactions of the American Mathematical Society}, 55, 85--95.
 \item Wilbraham, H. (1848), On a certain periodic function, \emph{Cambridge and Dublin Mathematical Journal}, 3, 198--201.
 \end{enumerate}
