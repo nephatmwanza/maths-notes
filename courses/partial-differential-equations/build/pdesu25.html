@@ -1,0 +1,161 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>4.6 The wave equation in software — Partial Differential Equations</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='pde.css' rel='stylesheet' type='text/css' /> 
+<meta content='pde.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Partial Differential Equations</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="pdese1.html">First-Order Equations and Characteristics</a></li>
+<li class="sub"><a class="" href="pdesu1.html">Partial differential equations</a></li>
+<li class="sub"><a class="" href="pdesu2.html">The transport equation</a></li>
+<li class="sub"><a class="" href="pdesu3.html">Linear equations in two variables</a></li>
+<li class="sub"><a class="" href="pdesu4.html">The Cauchy problem</a></li>
+<li class="sub"><a class="" href="pdesu5.html">Variable speed and conservation laws</a></li>
+<li class="sub"><a class="" href="pdesu6.html">An application: age-structured populations</a></li>
+<li class="sub"><a class="" href="pdesu7.html">Characteristics in software</a></li>
+<li class="sub"><a class="" href="pdesu8.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="pdese2.html">Non-linear Conservation Laws and Shocks</a></li>
+<li class="sub"><a class="" href="pdesu9.html">Quasilinear equations and breaking</a></li>
+<li class="sub"><a class="" href="pdesu10.html">Weak solutions and the Rankine–Hugoniot condition</a></li>
+<li class="sub"><a class="" href="pdesu11.html">The Riemann problem and the entropy condition</a></li>
+<li class="sub"><a class="" href="pdesu12.html">Traffic flow</a></li>
+<li class="sub"><a class="" href="pdesu13.html">Conservation laws in software</a></li>
+<li class="sub"><a class="" href="pdesu14.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="pdese3.html">Classification of Second-order Equations</a></li>
+<li class="sub"><a class="" href="pdesu15.html">The discriminant and its invariance</a></li>
+<li class="sub"><a class="" href="pdesu16.html">Characteristics and canonical forms</a></li>
+<li class="sub"><a class="" href="pdesu17.html">Well-posed problems</a></li>
+<li class="sub"><a class="" href="pdesu18.html">Classification in software</a></li>
+<li class="sub"><a class="" href="pdesu19.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="pdese4.html">The Wave Equation in One Dimension</a></li>
+<li class="sub"><a class="" href="pdesu20.html">D’Alembert’s formula</a></li>
+<li class="sub"><a class="" href="pdesu21.html">Causality: domains of dependence and influence</a></li>
+<li class="sub"><a class="" href="pdesu22.html">Energy</a></li>
+<li class="sub"><a class="" href="pdesu23.html">Sources: Duhamel’s principle</a></li>
+<li class="sub"><a class="" href="pdesu24.html">Boundaries and reflection</a></li>
+<li class="sub"><a class="current" href="pdesu25.html">The wave equation in software</a></li>
+<li class="sub"><a class="" href="pdesu26.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="pdeli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 1222 --><div class='crosslinks'><p class='noindent'>[<a href='pdesu26.html'>next</a>] [<a href='pdesu24.html'>prev</a>] [<a href='pdesu24.html#tailpdesu24.html'>prev-tail</a>] [<a href='#tailpdesu25.html'>tail</a>] [<a href='pdese4.html#pdesu25.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>4.6   </span> <a id='x31-300004.6'></a>The wave equation in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 1225 --><p class='noindent'><span class='head'>
+<a id='x31-30001r1'></a>
+<span class='cmbx-10x-x-109'>Software 4.6.1 </span>(D’Alembert and Duhamel)<span class='cmbx-10x-x-109'>.</span>  </span> A symbolic check of (<a href='pdesu20.html#x26-25002r2'>4.2<!-- tex4ht:ref: eq:dalembert  --></a>) for arbitrary \(f\) and \(g\), and the
+Duhamel integral of Theorem <a href='pdesu23.html#x29-28001r1'>4.4.1<!-- tex4ht:ref: thm:duhamel1d  --></a> for the source \(F = xt\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-10'>
+&gt;&gt;&gt; import sympy as sp
+&gt;&gt;&gt; x, t, s, y, c = sp.symbols('x t s y c', positive=True)
+&gt;&gt;&gt; f, g = sp.Function('f'), sp.Function('g')
+&gt;&gt;&gt; u = ((f(x + c*t) + f(x - c*t)) / 2
+...      + sp.Integral(g(y), (y, x - c*t, x + c*t)) / (2*c))
+&gt;&gt;&gt; sp.simplify(u.diff(t, 2) - c**2 * u.diff(x, 2))          # d'Alembert
+0
+&gt;&gt;&gt; u.subs(t, 0).doit(), sp.simplify(u.diff(t).subs(t, 0).doit())
+(f(x), g(x))
+&gt;&gt;&gt; F = lambda y, s: y * s                 # forcing in u_tt = c^2 u_xx + F
+&gt;&gt;&gt; inner = sp.integrate(F(y, s), (y, x - c*(t - s), x + c*(t - s)))
+&gt;&gt;&gt; w = sp.integrate(inner, (s, 0, t)) / (2*c)   # Duhamel: over the triangle
+&gt;&gt;&gt; sp.factor(w), sp.simplify(w.diff(t, 2) - c**2 * w.diff(x, 2))
+(t**3*x/6, t*x)
+</pre>
+<!-- l. 1243 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>D’Alembert’s formula satisfies the equation identically and takes the
+right initial values. The Duhamel integral over the triangle gives \(u = xt^3/6\), and \(u_{tt} - c^2u_{xx} = xt\) returns the source.
+</p><!-- l. 1246 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave:  </span>with  the  Symbolic  Math  Toolbox,  <span class='cmtt-10x-x-109'>int(int(y*s, y, x-c*(t-s),
+x+c*(t-s)), s, 0, t)/(2*c)</span>.
+</p>
+</div>
+<!-- l. 1247 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1249 --><p class='noindent'><span class='head'>
+<a id='x31-30002r2'></a>
+<span class='cmbx-10x-x-109'>Software 4.6.2 </span>(Energy of a plucked string)<span class='cmbx-10x-x-109'>.</span>  </span> A string of length \(1\), with \(c = 1\) and fixed ends, plucked at \(x = 0.3\)
+to a height of \(0.01\) and released, is solved by the leapfrog scheme \(u_j^{n+1} = 2u_j^n - u_j^{n-1} + r^2(u_{j+1}^n - 2u_j^n + u_{j-1}^n)\) with \(r = c\,\Delta t/\Delta x = \frac 12\). The energy is computed in the
+form that the scheme conserves exactly, \(\frac 12\sum \bigl ((u_j^{n+1} - u_j^n)/\Delta t\bigr )^2\Delta x + \frac 12\sum (u_{j+1}^{n+1} - u_j^{n+1})(u_{j+1}^n - u_j^n)/\Delta x\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-11'>
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; def leapfrog(u0, r, steps, ends='fixed'):   # u_tt = u_xx, r = c dt / dx
+...     uo = u0.copy(); un = u0.copy()
+...     un[1:-1] += 0.5 * r**2 * (u0[2:] - 2*u0[1:-1] + u0[:-2])
+...     for _ in range(steps - 1):
+...         nxt = np.empty_like(un)
+...         nxt[1:-1] = (2*un[1:-1] - uo[1:-1]
+...                      + r**2 * (un[2:] - 2*un[1:-1] + un[:-2]))
+...         nxt[0] = 0 if ends == 'fixed' else nxt[1]      # u = 0 or u_x = 0
+...         nxt[-1] = 0
+...         uo, un = un, nxt
+...     return uo, un
+...
+&gt;&gt;&gt; x = np.linspace(0, 1, 401); dx = x[1]                  # string, L = c = 1
+&gt;&gt;&gt; u0 = 0.01 * np.where(x &lt; 0.3, x / 0.3, (1 - x) / 0.7)  # plucked at 0.3
+&gt;&gt;&gt; 0.5 * np.sum(np.diff(u0)**2) / dx      # energy = (1/2) int u_x^2 at rest
+0.00023809523809523812
+&gt;&gt;&gt; for steps in (400, 800, 1600):         # t = 0.5, 1, 2 with r = 1/2
+...     uo, un = leapfrog(u0, 0.5, steps); dt = 0.5 * dx
+...     E = 0.5 * np.sum(((un - uo) / dt)**2) * dx \
+...         + 0.5 * np.sum(np.diff(un) * np.diff(uo)) / dx
+...     print(steps * dt, f"{E:.6e}", round(float(np.abs(un - u0).max()), 6))
+...
+0.5 2.379181e-04 0.011906
+1.0 2.379181e-04 0.014325
+2.0 2.379181e-04 0.000128
+</pre>
+<!-- l. 1280 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The exact energy is \(\frac 12\int f'^2 = \frac 12(0.01)^2(\frac 1{0.3} + \frac 1{0.7}) = 2.381 \times 10^{-4}\). The computed energy, \(2.379181 \times 10^{-4}\), is the same to all seven
+digits at \(t = 0.5\), \(1\) and \(2\); it differs from the exact value by \(0.07\%\), an error made by the starting step. The
+last column is the largest distance from the initial shape: large at \(t = 0.5\) and \(t = 1\), and \(1.3 \times 10^{-4}\), about \(1\%\) of the
+amplitude, at \(t = 2 = 2L/c\), when the string has returned to where it started.
+</p><!-- l. 1284 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span>the same loop with <span class='cmtt-10x-x-109'>u(2:end-1) </span>indexing.
+</p>
+</div>
+<!-- l. 1285 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1287 --><p class='noindent'><span class='head'>
+<a id='x31-30003r3'></a>
+<span class='cmbx-10x-x-109'>Software 4.6.3 </span>(Reflection at fixed and free ends)<span class='cmbx-10x-x-109'>.</span>  </span> A pulse \(e^{-50(x - 2)^2}\), released from rest on the half-line, with
+a fixed end (\(u = 0\)) and with a free end (\(u_x = 0\)) at \(x = 0\); the solution at \(t = 3\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-12'>
+&gt;&gt;&gt; x = np.linspace(0, 6, 1201); dx = x[1]  # half-line, cut at 6
+&gt;&gt;&gt; pulse = lambda z: np.exp(-50 * (z - 2)**2)  # starts at rest at 2
+&gt;&gt;&gt; for ends in ('fixed', 'free'):
+...     _, u = leapfrog(pulse(x), 0.5, 1200, ends)  # t = 1200 dx / 2 = 3
+...     print(ends, np.round(np.interp([0.5, 1.0, 1.5, 5.0], x, u), 4))
+...
+fixed [-0.  -0.5 -0.   0.5]
+free [0.     0.4995 0.     0.5   ]
+</pre>
+<!-- l. 1299 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The pulse splits into two halves of height \(\frac 12\). The right-moving half is at
+\(x = 2 + 3 = 5\). The left-moving half reached the end at \(t = 2\) and has come back to \(x = 1\), upside down (\(-0.5\)) at the fixed
+end and the right way up (\(0.4995\)) at the free end, as the odd and even extensions predict.
+</p><!-- l. 1303 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span>the same scheme, with <span class='cmtt-10x-x-109'>u(1) = u(2) </span>for the free end.
+</p>
+</div>
+<!-- l. 1304 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 1306 --><div class='crosslinks'><p class='noindent'>[<a href='pdesu26.html'>next</a>] [<a href='pdesu24.html'>prev</a>] [<a href='pdesu24.html#tailpdesu24.html'>prev-tail</a>] [<a href='pdesu25.html'>front</a>] [<a href='pdese4.html#pdesu25.html'>up</a>] </p></div>
+<!-- l. 1306 --><p class='noindent'><a id='tailpdesu25.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="pdesu24.html">&larr; Previous</a><a class="up" href="pdese4.html#pdesu25.html">Contents</a><a class="next" href="pdesu26.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="partial-differential-equations/4-6-the-wave-equation-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
