@@ -2276,6 +2276,286 @@ The partial sums are continuous and $2\pi$-periodic, so a uniform limit would be
 and $f(\pi+) = f(-\pi+) = -\pi$, as Theorem~\ref{thm:dirichlet} says.
 \end{solution}
 
+%======================================================================
+\section{Laplace's Equation}
+\label{sec:laplace}
+
+When the temperature in a body stops changing, $u_t = 0$ and the heat equation becomes \textbf{Laplace's equation}
+\[
+\Delta u = 0 .
+\]
+Its solutions, \textbf{harmonic functions}, are also the electrostatic potential in a region free of charge, the gravitational potential in empty space, the velocity potential of an incompressible irrotational flow, and the real and imaginary parts of analytic functions of a complex variable. With a source,
+$-\Delta u = f$ is \textbf{Poisson's equation}. Harmonic functions are extraordinarily rigid: their value at a point is the average of their values around it, they have no interior maxima, and their boundary values determine them completely. This section proves these facts and solves the problem in a disc.
+
+\subsection{Harmonic functions and the fundamental solution}
+\label{ssec:harmonic}
+
+Examples in the plane are $x^2 - y^2$, $e^x\cos y$, $r^k\cos k\theta$ and $r^k\sin k\theta$, the real and imaginary parts of $z^2$, $e^z$ and $z^k$. A harmonic function that depends only on $r = |x|$ satisfies $u'' + \frac{n - 1}ru' = 0$, so $u' = Cr^{1 - n}$, giving $a + b\log r$ in the plane and
+$a + b/r$ in space. Normalised so that $-\Delta\Phi = \delta$, the point source, these are the \textbf{fundamental solutions}
+\[
+\Phi(x) = -\frac1{2\pi}\log|x| \quad (n = 2), \qquad \Phi(x) = \frac1{4\pi|x|} \quad (n = 3) ,
+\]
+the potentials of a line charge and of a point charge. They are harmonic except at the origin, and the normalisation means that the flux of $-\nabla\Phi$ through any sphere about the origin is $1$: in three dimensions, $-\partial_r\Phi = 1/4\pi r^2$ times the area $4\pi r^2$. The solution of Poisson's equation in all of space is
+the superposition $u = \Phi * f$, as the next section, on Green's functions, will show.
+
+\subsection{The mean value property}
+\label{ssec:meanvalue}
+
+\begin{thm}[Mean value property]
+\label{thm:mvp}
+If $u$ is harmonic in an open set $\Omega$ and the closed ball $\overline{B_r(x)} \subset \Omega$, then $u(x)$ equals the average of $u$ over the sphere $\partial B_r(x)$ and over the ball $B_r(x)$.
+\end{thm}
+
+\begin{proof}
+Let $\varphi(\rho) = M_u(x, \rho)$, the spherical mean of Section~\ref{sec:waveshigher}. The calculation in the proof of Darboux's lemma gives $\varphi'(\rho) = \frac{1}{\omega_n\rho^{n - 1}}\int_{B_\rho(x)}\Delta u\,dy = 0$, so $\varphi$ is constant on $(0, r]$, and $\varphi(\rho) \to u(x)$ as $\rho \to 0$ by continuity. The ball average is
+an average of sphere averages, each equal to $u(x)$.
+\end{proof}
+
+The converse holds too: a continuous function with the mean value property on every small sphere is harmonic, and in particular $C^\infty$. The property is the analogue of the five-point rule $u_{i,j} = \frac14(u_{i+1,j} + u_{i-1,j} + u_{i,j+1} + u_{i,j-1})$ for the discrete Laplace equation, and it is the
+reason Laplace's equation describes equilibria: each point is in balance with its neighbours.
+
+\begin{thm}[Maximum principle]
+\label{thm:maxlaplace}
+Let $u$ be harmonic in a connected open set $\Omega$.
+\begin{enumerate}[label=(\roman*)]
+\item \textbf{Strong form.} If $u$ attains its maximum over $\Omega$ at a point of $\Omega$, then $u$ is constant.
+\item \textbf{Weak form.} If $\Omega$ is bounded and $u$ is continuous on $\overline\Omega$, then $\max_{\overline\Omega}u = \max_{\partial\Omega}u$ and $\min_{\overline\Omega}u = \min_{\partial\Omega}u$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(i) Let $M = \max u$ and $S = \{x \in \Omega : u(x) = M\}$, non-empty by hypothesis and closed in $\Omega$ by continuity. If $x \in S$ and $B_r(x) \subset \Omega$, then $M = u(x)$ is the average of $u \leq M$ over the ball, so $u = M$ on the ball: $S$ is open. Since $\Omega$ is connected, $S = \Omega$.
+(ii) $u$ attains its maximum over the compact set $\overline\Omega$. If it does so only at interior points, (i) applied to the component containing one of them makes $u$ constant there, and by continuity the same value is attained on the boundary of that component, which is part of $\partial\Omega$. For the minimum apply this to $-u$.
+\end{proof}
+
+The consequences are those for the heat equation. The \textbf{Dirichlet problem}
+\[
+-\Delta u = f \text{ in } \Omega, \qquad u = g \text{ on } \partial\Omega ,
+\]
+has at most one solution continuous on $\overline\Omega$, and solutions depend continuously on the boundary data: $\max|u_1 - u_2| \leq \max_{\partial\Omega}|g_1 - g_2|$. If $g \geq 0$ then $u \geq 0$, and if $g$ is not identically $0$, then $u > 0$ throughout. For the \textbf{Neumann problem}, $\partial_\nu u = g$ on the boundary, Green's
+identity shows that solutions differ by constants (the difference $w$ has $\int|\nabla w|^2 = \int_{\partial\Omega}w\,\partial_\nu w = 0$) and that a solution can exist only if $\int_{\partial\Omega}g\,dS = -\int_\Omega f\,dx$: in a steady state the heat flowing in through the boundary must balance the heat produced inside.
+
+A physical consequence is \textbf{Earnshaw's theorem} (1842). In a region free of charge the electrostatic potential is harmonic, so by the strong maximum principle it has no strict local minimum; a charged particle in such a field has no point of stable equilibrium. Charges cannot be held in place by static
+electric fields alone, which is why ion traps use oscillating fields.
+
+\subsection{The disc and Poisson's formula}
+\label{ssec:poissonformula}
+
+In polar coordinates $\Delta u = u_{rr} + \frac1ru_r + \frac1{r^2}u_{\theta\theta}$. Separating $u = R(r)\Theta(\theta)$ in the disc $r < a$ gives $\Theta'' + k^2\Theta = 0$ with $\Theta$ $2\pi$-periodic, so $k = 0, 1, 2, \ldots$, and $r^2R'' + rR' - k^2R = 0$, an Euler equation with solutions $r^{\pm k}$ ($1$ and
+$\log r$ when $k = 0$). Boundedness at the origin keeps $r^k$, so
+\[
+u(r, \theta) = \frac{a_0}2 + \sum_{k = 1}^\infty\Bigl(\frac ra\Bigr)^k(a_k\cos k\theta + b_k\sin k\theta) ,
+\]
+with $a_k$, $b_k$ the Fourier coefficients of the boundary values $g(\theta) = u(a, \theta)$. Inserting the coefficients and summing the geometric series
+\[
+\frac12 + \sum_{k \geq 1}\Bigl(\frac ra\Bigr)^k\cos k(\theta - \varphi) = \operatorname{Re}\Bigl(\frac12 + \frac{\zeta}{1 - \zeta}\Bigr) = \frac12\cdot\frac{a^2 - r^2}{a^2 - 2ar\cos(\theta - \varphi) + r^2}, \qquad \zeta = \frac rae^{i(\theta - \varphi)} ,
+\]
+gives the following.
+
+\begin{thm}[Poisson's formula]
+\label{thm:poissondisc}
+Let $g$ be continuous on the circle $r = a$. Then
+\[
+u(r, \theta) = \frac1{2\pi}\int_0^{2\pi}\frac{a^2 - r^2}{a^2 - 2ar\cos(\theta - \varphi) + r^2}\,g(\varphi)\,d\varphi \qquad (r < a),
+\]
+with $u = g$ on $r = a$, is harmonic in the disc and continuous on the closed disc. It is the unique solution of the Dirichlet problem.
+\end{thm}
+
+\begin{proof}
+The \textbf{Poisson kernel} $P(r, \theta) = \frac{a^2 - r^2}{2\pi(a^2 - 2ar\cos\theta + r^2)} = \frac1{2\pi}\operatorname{Re}\frac{a + z}{a - z}$, $z = re^{i\theta}$, is the real part of an analytic function, hence harmonic, and $u$ is harmonic by differentiation under the integral. Taking $g = 1$, for which $u = 1$, shows
+$\int_0^{2\pi}P(r, \theta - \varphi)\,d\varphi = 1$; and $P > 0$. If $\delta \leq |\theta - \varphi| \leq \pi$, the denominator is at least $a^2 - 2ar\cos\delta + r^2 \geq a^2\sin^2\delta$, so $P \to 0$ uniformly there as $r \to a$. Hence, exactly as for the heat kernel in Theorem~\ref{thm:heatcauchy},
+$u(r, \theta) \to g(\theta_0)$ as $(r, \theta) \to (a, \theta_0)$. Uniqueness is the maximum principle.
+\end{proof}
+
+At the centre the kernel is $1/2\pi$ and the formula is the mean value property. Since $\frac{a - r}{a + r} \leq 2\pi P \leq \frac{a + r}{a - r}$, a non-negative harmonic function satisfies \textbf{Harnack's inequality}
+\[
+\frac{a - r}{a + r}\,u(0) \leq u(r, \theta) \leq \frac{a + r}{a - r}\,u(0) ,
+\]
+which bounds how much a positive harmonic function can vary. Applied to discs inside any domain, Poisson's formula shows that harmonic functions are infinitely differentiable, indeed real analytic, whatever their boundary values. And the mean value property over large balls gives \textbf{Liouville's theorem}: a bounded harmonic function on all of
+$\mathbb R^n$ is constant (Problem~\ref{prob:liouville}).
+
+\begin{exa}
+\label{ex:halfdisc}
+Let the upper half of the unit circle be held at $u = 1$ and the lower half at $u = 0$. The solution is
+\[
+u = \frac12 + \frac1\pi\arctan\frac{2r\sin\theta}{1 - r^2} ,
+\]
+because $\arctan\frac{2y}{1 - x^2 - y^2}$ is the argument of $(1 + z)/(1 - z)$, a harmonic function, and the formula has the right limits: $u \to 1$ on the upper arc and $u \to 0$ on the lower. Its level curves $2y/(1 - x^2 - y^2) = \text{const}$ are circular arcs through the two points $\pm1$ where the data jump
+(Figure~\ref{fig:halfdisc}); at the centre $u = \frac12$, the average of the boundary values.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-3.4,-2.6) rectangle (3.4,2.6);
+\fill[white] (0,0) circle (2);
+\draw[blue!60!black] (-2.000,0.000) -- (-1.955,-0.124) -- (-1.903,-0.246) -- (-1.843,-0.363) -- (-1.776,-0.477) -- (-1.701,-0.586) -- (-1.620,-0.691) -- (-1.533,-0.790) -- (-1.440,-0.883) -- (-1.340,-0.970) -- (-1.236,-1.051) -- (-1.127,-1.126) -- (-1.013,-1.193) -- (-0.895,-1.253) -- (-0.774,-1.305) -- (-0.650,-1.350) -- (-0.523,-1.387) -- (-0.394,-1.416) -- (-0.264,-1.437) -- (-0.132,-1.449) -- (-0.000,-1.453) -- (0.132,-1.449) -- (0.264,-1.437) -- (0.394,-1.416) -- (0.523,-1.387) -- (0.650,-1.350) -- (0.774,-1.305) -- (0.895,-1.253) -- (1.013,-1.193) -- (1.127,-1.126) -- (1.236,-1.051) -- (1.340,-0.970) -- (1.440,-0.883) -- (1.533,-0.790) -- (1.620,-0.691) -- (1.701,-0.586) -- (1.776,-0.477) -- (1.843,-0.363) -- (1.903,-0.246) -- (1.955,-0.124) -- (2.000,-0.000) -- (2.000,-0.000);
+\draw[blue!60!black] (-2.000,-0.000) -- (-1.905,-0.123) -- (-1.802,-0.239) -- (-1.692,-0.349) -- (-1.576,-0.452) -- (-1.453,-0.547) -- (-1.325,-0.634) -- (-1.191,-0.713) -- (-1.053,-0.784) -- (-0.910,-0.845) -- (-0.764,-0.898) -- (-0.615,-0.941) -- (-0.463,-0.975) -- (-0.310,-1.000) -- (-0.155,-1.014) -- (-0.000,-1.019) -- (0.155,-1.014) -- (0.310,-1.000) -- (0.463,-0.975) -- (0.615,-0.941) -- (0.764,-0.898) -- (0.910,-0.845) -- (1.053,-0.784) -- (1.191,-0.713) -- (1.325,-0.634) -- (1.453,-0.547) -- (1.576,-0.452) -- (1.692,-0.349) -- (1.802,-0.239) -- (1.905,-0.123) -- (2.000,-0.000) -- (2.000,-0.000);
+\draw[blue!60!black] (-2.000,0.000) -- (-1.823,-0.120) -- (-1.639,-0.229) -- (-1.449,-0.326) -- (-1.253,-0.411) -- (-1.051,-0.483) -- (-0.846,-0.543) -- (-0.638,-0.590) -- (-0.426,-0.623) -- (-0.214,-0.643) -- (-0.000,-0.650) -- (0.214,-0.643) -- (0.426,-0.623) -- (0.638,-0.590) -- (0.846,-0.543) -- (1.051,-0.483) -- (1.253,-0.411) -- (1.449,-0.326) -- (1.639,-0.229) -- (1.823,-0.120) -- (2.000,0.000) -- (2.000,0.000);
+\draw[blue!60!black] (-2.000,0.000) -- (-1.610,-0.113) -- (-1.213,-0.202) -- (-0.811,-0.266) -- (-0.406,-0.304) -- (-0.000,-0.317) -- (0.406,-0.304) -- (0.811,-0.266) -- (1.213,-0.202) -- (1.610,-0.113) -- (2.000,0.000) -- (2.000,0.000);
+\draw[red!70!black] (-2.000,-0.000) -- (-1.610,0.113) -- (-1.213,0.202) -- (-0.811,0.266) -- (-0.406,0.304) -- (0.000,0.317) -- (0.406,0.304) -- (0.811,0.266) -- (1.213,0.202) -- (1.610,0.113) -- (2.000,-0.000) -- (2.000,-0.000);
+\draw[red!70!black] (-2.000,-0.000) -- (-1.823,0.120) -- (-1.639,0.229) -- (-1.449,0.326) -- (-1.253,0.411) -- (-1.051,0.483) -- (-0.846,0.543) -- (-0.638,0.590) -- (-0.426,0.623) -- (-0.214,0.643) -- (0.000,0.650) -- (0.214,0.643) -- (0.426,0.623) -- (0.638,0.590) -- (0.846,0.543) -- (1.051,0.483) -- (1.253,0.411) -- (1.449,0.326) -- (1.639,0.229) -- (1.823,0.120) -- (2.000,-0.000) -- (2.000,-0.000);
+\draw[red!70!black] (-2.000,0.000) -- (-1.905,0.123) -- (-1.802,0.239) -- (-1.692,0.349) -- (-1.576,0.452) -- (-1.453,0.547) -- (-1.325,0.634) -- (-1.191,0.713) -- (-1.053,0.784) -- (-0.910,0.845) -- (-0.764,0.898) -- (-0.615,0.941) -- (-0.463,0.975) -- (-0.310,1.000) -- (-0.155,1.014) -- (0.000,1.019) -- (0.155,1.014) -- (0.310,1.000) -- (0.463,0.975) -- (0.615,0.941) -- (0.764,0.898) -- (0.910,0.845) -- (1.053,0.784) -- (1.191,0.713) -- (1.325,0.634) -- (1.453,0.547) -- (1.576,0.452) -- (1.692,0.349) -- (1.802,0.239) -- (1.905,0.123) -- (2.000,0.000) -- (2.000,0.000);
+\draw[red!70!black] (-2.000,0.000) -- (-1.955,0.124) -- (-1.903,0.246) -- (-1.843,0.363) -- (-1.776,0.477) -- (-1.701,0.586) -- (-1.620,0.691) -- (-1.533,0.790) -- (-1.440,0.883) -- (-1.340,0.970) -- (-1.236,1.051) -- (-1.127,1.126) -- (-1.013,1.193) -- (-0.895,1.253) -- (-0.774,1.305) -- (-0.650,1.350) -- (-0.523,1.387) -- (-0.394,1.416) -- (-0.264,1.437) -- (-0.132,1.449) -- (0.000,1.453) -- (0.132,1.449) -- (0.264,1.437) -- (0.394,1.416) -- (0.523,1.387) -- (0.650,1.350) -- (0.774,1.305) -- (0.895,1.253) -- (1.013,1.193) -- (1.127,1.126) -- (1.236,1.051) -- (1.340,0.970) -- (1.440,0.883) -- (1.533,0.790) -- (1.620,0.691) -- (1.701,0.586) -- (1.776,0.477) -- (1.843,0.363) -- (1.903,0.246) -- (1.955,0.124) -- (2.000,-0.000) -- (2.000,-0.000);
+\draw[black!60] (-2,0) -- (2,0);
+\draw[red!70!black,line width=2.2pt] (2,0) arc (0:180:2);
+\draw[blue!60!black,line width=2.2pt] (-2,0) arc (180:360:2);
+\fill (2,0) circle (1.8pt); \fill (-2,0) circle (1.8pt);
+\foreach \c/\y in {0.9/1.453, 0.7/0.650, 0.3/-0.650, 0.1/-1.453}
+  \node[font=\tiny,fill=white,inner sep=1pt] at (0.0,\y) {$\c$};
+\node[font=\tiny,fill=white,inner sep=1pt] at (0.0,0.0) {$0.5$};
+\node[font=\scriptsize\bfseries,red!70!black] at (0,2.3) {$u = 1$};
+\node[font=\scriptsize\bfseries,blue!60!black] at (0,-2.3) {$u = 0$};
+\end{tikzpicture}
+\caption{The steady temperature in a disc whose upper boundary is held at $1$ and lower boundary at $0$ (Example~\ref{ex:halfdisc}). The isotherms $u = 0.1, 0.2, \ldots, 0.9$ are arcs of circles through the two points where the boundary data jump. The centre is at the mean boundary temperature, $0.5$.}
+\label{fig:halfdisc}
+\end{figure}
+
+Separation also works in a rectangle. On $0 < x < 1$, $0 < y < 1$ with $u = 1$ on the top side and $u = 0$ on the other three, $u = \sum_k b_k\sin(k\pi x)\sinh(k\pi y)/\sinh k\pi$ with $b_k = 4/k\pi$ for odd $k$. By symmetry the value at the centre is exactly $\frac14$: the four problems with one hot side add up to
+the problem with $u = 1$ on the whole boundary, whose solution is $1$, and they have equal values at the centre.
+
+\subsection{Laplace's equation in software}
+\label{ssec:software8}
+
+\begin{software}[Harmonic functions]
+\label{sw:harmonic}
+The fundamental solutions in two and three dimensions, the Poisson kernel in polar coordinates, and the total mass of the kernel at $r = \frac12$:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> x, y, z = sp.symbols('x y z', real=True)
+>>> r, th, ph = sp.symbols('r theta phi', positive=True)
+>>> lap2 = lambda u: u.diff(x, 2) + u.diff(y, 2)
+>>> lap3 = lambda u: u.diff(x, 2) + u.diff(y, 2) + u.diff(z, 2)
+>>> sp.simplify(lap2(sp.log(x**2 + y**2)))
+0
+>>> sp.simplify(lap3(1 / sp.sqrt(x**2 + y**2 + z**2)))
+0
+>>> P = (1 - r**2) / (1 - 2*r*sp.cos(th - ph) + r**2) / (2*sp.pi)  # Poisson
+>>> lap_polar = lambda u: u.diff(r, 2) + u.diff(r) / r + u.diff(th, 2) / r**2
+>>> sp.simplify(lap_polar(P))
+0
+>>> sp.integrate(P.subs({r: sp.Rational(1, 2), ph: 0}), (th, 0, 2*sp.pi))
+1
+\end{verbatim}}
+\textbf{Reading the output.} $\log(x^2 + y^2)$ and $1/|x|$ are harmonic away from the origin, the Poisson kernel is harmonic in $(r, \theta)$, and it integrates to $1$, as the proof of Theorem~\ref{thm:poissondisc} requires.
+
+\textbf{MATLAB/Octave:} with the Symbolic Math Toolbox, \texttt{simplify(laplacian(log(x\^{}2+y\^{}2), [x y]))}.
+\end{software}
+
+\begin{software}[Poisson's integral]
+\label{sw:poissondisc}
+The solution of Example~\ref{ex:halfdisc} from Poisson's formula by quadrature, against the closed form, at the centre and three other points (radius, angle):
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.integrate import quad
+>>> def disc(g, rr, t):                    # unit disc, boundary values g(phi)
+...     k = lambda p: ((1 - rr**2) / (2*np.pi)
+...                    / (1 - 2*rr*np.cos(t - p) + rr**2))
+...     return quad(lambda p: k(p) * g(p), 0, 2*np.pi, limit=200,
+...                 points=[np.pi])[0]
+...
+>>> g = lambda p: 1.0 if p < np.pi else 0.0  # hot upper half, cold lower
+>>> exact = lambda rr, t: 0.5 + np.arctan(2*rr*np.sin(t) / (1-rr*rr)) / np.pi
+>>> for rr, t in ((0, 0), (0.5, np.pi/2), (0.9, np.pi/2), (0.5, -np.pi/4)):
+...     print(rr, round(t, 4), round(disc(g, rr, t), 8),
+...           round(exact(rr, t), 8))
+...
+0 0 0.5 0.5
+0.5 1.5708 0.79516724 0.79516724
+0.9 1.5708 0.96652458 0.96652458
+0.5 -0.7854 0.25936746 0.25936746
+\end{verbatim}}
+\textbf{Reading the output.} The two agree to eight digits. The centre value is $\frac12$, the mean of the boundary values. At $(0.9, \frac\pi2)$, close to the hot arc, $u = 0.967$, and at $(0.5, -\frac\pi4)$, in the cold half, $u = 0.259$.
+
+\textbf{MATLAB/Octave:} \texttt{integral(@(p) (1-r\^{}2)./(1-2*r*cos(t-p)+r\^{}2)/(2*pi), 0, pi)}.
+\end{software}
+
+\begin{software}[The five-point scheme]
+\label{sw:fivepoint}
+The square with one hot side, discretised with $h = 1/200$: the five-point Laplacian on $199^2 = 39\,601$ unknowns, assembled from Kronecker products and solved by sparse elimination. The centre value, then the series against the grid at $(0.5, 0.9)$, then the extreme values:
+{\small\begin{verbatim}
+>>> import scipy.sparse as sps, scipy.sparse.linalg as spl
+>>> n = 199  # interior points per side, h = 1/200
+>>> h = 1 / (n + 1)
+>>> T = sps.diags([-1, 2, -1], [-1, 0, 1], shape=(n, n))
+>>> A = (sps.kron(sps.eye(n), T) + sps.kron(T, sps.eye(n))) / h**2   # -Delta
+>>> b = np.zeros((n, n)); b[-1, :] = 1 / h**2      # u = 1 on top, 0 elsewhere
+>>> U = spl.spsolve(A.tocsc(), b.ravel()).reshape(n, n)  # U[j, i]: (x_i, y_j)
+>>> c = n // 2; U[c, c]                    # centre: exactly 1/4 by symmetry
+0.24999999999992328
+>>> k = np.arange(1, 4000, 2)  # series in sin(k pi x) sinh(k pi y)
+>>> def series(X, Y):  # sinh ratio written to avoid overflow
+...     ratio = (np.exp(k*np.pi*(Y - 1)) * (1 - np.exp(-2*k*np.pi*Y))
+...              / (1 - np.exp(-2*k*np.pi)))
+...     return np.sum(4 / (k*np.pi) * np.sin(k*np.pi*X) * ratio)
+...
+>>> series(0.5, 0.5), series(0.5, 0.9), U[179, c]  # y = 0.9 is row 179
+(0.25000000000000006, 0.8016894653419548, 0.8016823459709765)
+>>> U.max(), U.min()                       # maximum principle: inside (0, 1)
+(0.9899251532058908, 2.735635261044178e-05)
+\end{verbatim}}
+\textbf{Reading the output.} The grid gives $\frac14$ at the centre to $13$ digits, because the symmetry argument holds exactly for the discrete problem too. Near the hot side the grid value $0.801682$ differs from the series value $0.801689$ by $7 \times 10^{-6}$, the $O(h^2)$ error of the scheme. Inside the square the
+discrete solution lies strictly between $0$ and $1$: the discrete maximum principle, which follows from the five-point mean value rule just as Theorem~\ref{thm:maxlaplace} follows from Theorem~\ref{thm:mvp}.
+
+\textbf{MATLAB/Octave:} \texttt{A = kron(speye(n),T) + kron(T,speye(n)); U = A\textbackslash b}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Show that $r^k\cos k\theta$ is harmonic, and write $r^3\cos 3\theta$ as a polynomial in $x$ and $y$.
+\end{problem}
+
+\begin{solution}
+$(r^k)'' + \frac1r(r^k)' - \frac{k^2}{r^2}r^k = (k(k - 1) + k - k^2)r^{k - 2} = 0$. As the real part of $z^3 = (x + iy)^3$, $r^3\cos 3\theta = x^3 - 3xy^2$; check: $\Delta(x^3 - 3xy^2) = 6x - 6x = 0$.
+\end{solution}
+
+\begin{problem}
+Solve $\Delta u = 0$ in the unit disc with $u = \cos^2\theta$ on the boundary, and find the maximum of $u$ on the circle $r = \frac12$.
+\end{problem}
+
+\begin{solution}
+$\cos^2\theta = \frac12 + \frac12\cos 2\theta$, so $u = \frac12 + \frac12r^2\cos 2\theta = \frac12 + \frac12(x^2 - y^2)$. On $r = \frac12$, $u = \frac12 + \frac18\cos 2\theta$, with maximum $\frac58$, less than the boundary maximum $1$, as the maximum principle requires.
+\end{solution}
+
+\begin{problem}
+Solve $\Delta u = 0$ in the rectangle $0 < x < \pi$, $0 < y < 1$, with $u(x, 1) = \sin x$ and $u = 0$ on the other three sides.
+\end{problem}
+
+\begin{solution}
+Separating, $u = \sum b_k\sin kx\,\sinh ky$, and matching at $y = 1$ gives only $k = 1$: $u = \sin x\,\sinh y/\sinh 1$.
+\end{solution}
+
+\begin{problem}
+\label{prob:liouville}
+Prove Liouville's theorem: a bounded harmonic function on $\mathbb R^n$ is constant.
+\end{problem}
+
+\begin{solution}
+Let $|u| \leq M$ and take points $x$, $y$. By the mean value property over balls of radius $R$,
+\[
+|u(x) - u(y)| = \frac1{|B_R|}\Bigl|\int_{B_R(x)}u - \int_{B_R(y)}u\Bigr| \leq \frac{M\,|B_R(x)\,\triangle\,B_R(y)|}{|B_R|} ,
+\]
+where $\triangle$ is the symmetric difference. That set lies in the shell $R - |x - y| \leq |z - x| \leq R + |x - y|$, whose volume divided by $|B_R|$ is $O(|x - y|/R)$. Letting $R \to \infty$ gives $u(x) = u(y)$.
+\end{solution}
+
+\begin{problem}
+A non-negative harmonic function in the unit disc has $u(0) = 1$. Bound $u$ on the circle $r = \frac12$, and show by an example that the bounds are attained in the limit.
+\end{problem}
+
+\begin{solution}
+By Harnack, $\frac{1 - 1/2}{1 + 1/2} = \frac13 \leq u \leq 3$. The Poisson kernel itself, $u = 2\pi P(r, \theta - \varphi_0)$, the solution with all the boundary heat concentrated at the point $\varphi_0$, is non-negative with $u(0) = 1$, and at $r = \frac12$ equals $3$ at $\theta = \varphi_0$ and $\frac13$ opposite.
+Smooth non-negative boundary data concentrating at $\varphi_0$ approach these values.
+\end{solution}
+
+\begin{problem}
+Show that the Neumann problem $\Delta u = 0$ in the unit disc, $u_r = g(\theta)$ on $r = 1$, is solvable only if $\int_0^{2\pi}g\,d\theta = 0$, and then solve it for $g = \cos\theta + \sin 2\theta$.
+\end{problem}
+
+\begin{solution}
+From the series, $u_r(1, \theta) = \sum k(a_k\cos k\theta + b_k\sin k\theta)$ has no constant term, so $g$ must have mean $0$ (this is the compatibility condition $\int_{\partial\Omega}\partial_\nu u = \int_\Omega\Delta u = 0$). For $g = \cos\theta + \sin 2\theta$: $a_1 = 1$, $2b_2 = 1$, so $u = C + r\cos\theta + \frac12r^2\sin 2\theta = C + x + xy$, with $C$ arbitrary.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 \sloppy
@@ -2310,17 +2590,20 @@ and $f(\pi+) = f(-\pi+) = -\pi$, as Theorem~\ref{thm:dirichlet} says.
 \item Cole, J. D. (1951), On a quasi-linear parabolic equation occurring in aerodynamics, \emph{Quarterly of Applied Mathematics}, 9, 225--236.
 \item Dirichlet, P. G. L. (1829), Sur la convergence des s\'eries trigonom\'etriques qui servent \`a repr\'esenter une fonction arbitraire entre des limites donn\'ees, \emph{Journal f\"ur die reine und angewandte Mathematik}, 4, 157--169.
 \item Duhamel, J. M. C. (1833), M\'emoire sur la m\'ethode g\'en\'erale relative au mouvement de la chaleur dans les corps solides plong\'es dans des milieux dont la temp\'erature varie avec le temps, \emph{Journal de l'\'Ecole Polytechnique}, 14 (cahier 22), 20--77.
+\item Earnshaw, S. (1842), On the nature of the molecular forces which regulate the constitution of the luminiferous ether, \emph{Transactions of the Cambridge Philosophical Society}, 7, 97--112.
 \item Einstein, A. (1905), \"Uber die von der molekularkinetischen Theorie der W\"arme geforderte Bewegung von in ruhenden Fl\"ussigkeiten suspendierten Teilchen, \emph{Annalen der Physik}, 322, 549--560.
 \item Fej\'er, L. (1904), Untersuchungen \"uber Fouriersche Reihen, \emph{Mathematische Annalen}, 58, 51--69.
 \item Fick, A. (1855), \"Uber Diffusion, \emph{Annalen der Physik}, 170, 59--86.
 \item von Foerster, H. (1959), Some remarks on changing populations, in F. Stohlman (ed.), \emph{The Kinetics of Cellular Proliferation}, New York,
 Grune and Stratton, 382--407.
 \item Fourier, J. (1822), \emph{Th\'eorie analytique de la chaleur}, Paris, Firmin Didot.
+\item Gauss, C. F. (1840), Allgemeine Lehrs\"atze in Beziehung auf die im verkehrten Verh\"altnisse des Quadrats der Entfernung wirkenden Anziehungs- und Abstossungs-Kr\"afte, \emph{Resultate aus den Beobachtungen des magnetischen Vereins im Jahre 1839}, Leipzig, 1--51.
 \item Gibbs, J. W. (1899), Fourier's series, \emph{Nature}, 59, 606.
 \item Godunov, S. K. (1959), A difference method for numerical calculation of discontinuous solutions of the equations of hydrodynamics, \emph{Matematicheskii Sbornik}, 47(89), 271--306.
 \item Hadamard, J. (1902), Sur les probl\`emes aux d\'eriv\'ees partielles et leur signification physique, \emph{Princeton University Bulletin}, 13,
 49--52.
 \item Hadamard, J. (1923), \emph{Lectures on Cauchy's Problem in Linear Partial Differential Equations}, New Haven, Yale University Press.
+\item Harnack, A. (1887), \emph{Die Grundlagen der Theorie des logarithmischen Potentiales und der eindeutigen Potentialfunktion in der Ebene}, Leipzig, Teubner.
 \item Holmgren, E. (1901), \"Uber Systeme von linearen partiellen Differentialgleichungen, \emph{\"Ofversigt af Kongl.\ Vetenskaps-Akademiens F\"orhandlingar}, 58, 91--103.
 \item Hopf, E. (1950), The partial differential equation $u_t + uu_x = \mu u_{xx}$, \emph{Communications on Pure and Applied Mathematics}, 3, 201--230.
 \item Hugoniot, H. (1887), M\'emoire sur la propagation du mouvement dans les corps et sp\'ecialement dans les gaz parfaits, \emph{Journal de l'\'Ecole Polytechnique}, 57, 3--97.
@@ -2328,6 +2611,7 @@ Grune and Stratton, 382--407.
 \item Kirchhoff, G. (1883), Zur Theorie der Lichtstrahlen, \emph{Annalen der Physik}, 254, 663--695.
 \item Kowalevsky, S. von (1875), Zur Theorie der partiellen Differentialgleichungen, \emph{Journal f\"ur die reine und angewandte Mathematik}, 80, 1--32.
 \item Kru\v{z}kov, S. N. (1970), First order quasilinear equations in several independent variables, \emph{Mathematics of the USSR-Sbornik}, 10, 217--243.
+\item Laplace, P.-S. (1785), Th\'eorie des attractions des sph\'ero\"ides et de la figure des plan\`etes, \emph{M\'emoires de l'Acad\'emie Royale des Sciences de Paris} (ann\'ee 1782), 113--196.
 \item Lax, P. D. (1957), Hyperbolic systems of conservation laws II, \emph{Communications on Pure and Applied Mathematics}, 10, 537--566.
 \item Lax, P. D., and Wendroff, B. (1960), Systems of conservation laws, \emph{Communications on Pure and Applied Mathematics}, 13, 217--237.
 \item Lewy, H. (1957), An example of a smooth linear partial differential equation without solution, \emph{Annals of Mathematics}, 66, 155--158.
@@ -2337,6 +2621,7 @@ Grune and Stratton, 382--407.
 \item Nirenberg, L. (1953), A strong maximum principle for parabolic equations, \emph{Communications on Pure and Applied Mathematics}, 6, 167--177.
 \item Parseval, M.-A. (1806), M\'emoire sur les s\'eries et sur l'int\'egration compl\`ete d'une \'equation aux diff\'erences partielles lin\'eaires du second ordre, \`a coefficients constants, \emph{M\'emoires pr\'esent\'es \`a l'Institut des Sciences, Lettres et Arts, par divers savans}, 1, 638--648.
 \item Poisson, S. D. (1819), M\'emoire sur l'int\'egration de quelques \'equations lin\'eaires aux diff\'erences partielles, et particuli\`erement de l'\'equation g\'en\'erale du mouvement des fluides \'elastiques, \emph{M\'emoires de l'Acad\'emie Royale des Sciences de l'Institut de France}, 3, 121--176.
+\item Poisson, S. D. (1820), M\'emoire sur la mani\`ere d'exprimer les fonctions par des s\'eries de quantit\'es p\'eriodiques, \emph{Journal de l'\'Ecole Polytechnique}, 11 (cahier 18), 417--489.
 \item Rankine, W. J. M. (1870), On the thermodynamic theory of waves of finite longitudinal disturbance, \emph{Philosophical Transactions of the Royal Society of London}, 160, 277--288.
 \item Richards, P. I. (1956), Shock waves on the highway, \emph{Operations Research}, 4, 42--51.
 \item Tricomi, F. (1923), Sulle equazioni lineari alle derivate parziali di 2$^\circ$ ordine, di tipo misto, \emph{Memorie della Reale Accademia dei Lincei}, serie 5, 14, 133--247.
