@@ -2556,6 +2556,284 @@ Show that the Neumann problem $\Delta u = 0$ in the unit disc, $u_r = g(\theta)$
 From the series, $u_r(1, \theta) = \sum k(a_k\cos k\theta + b_k\sin k\theta)$ has no constant term, so $g$ must have mean $0$ (this is the compatibility condition $\int_{\partial\Omega}\partial_\nu u = \int_\Omega\Delta u = 0$). For $g = \cos\theta + \sin 2\theta$: $a_1 = 1$, $2b_2 = 1$, so $u = C + r\cos\theta + \frac12r^2\sin 2\theta = C + x + xy$, with $C$ arbitrary.
 \end{solution}
 
+%======================================================================
+\section{Green's Functions and Images}
+\label{sec:green}
+
+The fundamental solution solves Poisson's equation in all of space. In a bounded region, the boundary must be taken into account, and the tool is the \textbf{Green's function}: the response at $y$ to a unit point source at $x$, with the boundary condition built in. Once it is known, every Dirichlet
+problem in the region is solved by one integral. George Green introduced it in 1828, in a self-published essay on electricity that went almost unread until William Thomson found it seventeen years later; Thomson then found the Green's functions of the half-space and the ball by the
+\textbf{method of images}, which this section develops.
+
+\subsection{Green's representation formula}
+\label{ssec:representation}
+
+Throughout, $\Omega$ is a bounded open set in $\mathbb R^n$ with smooth boundary, $\nu$ the outward unit normal, and $\Phi$ the fundamental solution of Section~\ref{sec:laplace}, normalised by $-\Delta\Phi = \delta$. Green's second identity is
+\[
+\int_\Omega(u\Delta v - v\Delta u)\,dy = \int_{\partial\Omega}(u\,\partial_\nu v - v\,\partial_\nu u)\,dS ,
+\]
+from the divergence theorem applied to $u\nabla v - v\nabla u$.
+
+\begin{thm}[Representation formula]
+\label{thm:representation}
+If $u \in C^2(\overline\Omega)$ and $x \in \Omega$, then
+\[
+u(x) = \int_\Omega\Phi(y - x)\bigl(-\Delta u(y)\bigr)\,dy + \int_{\partial\Omega}\bigl(\Phi(y - x)\,\partial_\nu u(y) - u(y)\,\partial_\nu\Phi(y - x)\bigr)\,dS(y) .
+\]
+\end{thm}
+
+\begin{proof}
+Apply Green's identity with $v = \Phi(\cdot - x)$ on $\Omega_\varepsilon = \Omega \setminus \overline{B_\varepsilon(x)}$, where $\Delta v = 0$:
+\[
+-\int_{\Omega_\varepsilon}\Phi\,\Delta u\,dy = \int_{\partial\Omega}(u\,\partial_\nu\Phi - \Phi\,\partial_\nu u)\,dS + \int_{\partial B_\varepsilon(x)}(u\,\partial_\nu\Phi - \Phi\,\partial_\nu u)\,dS .
+\]
+On the small sphere the outward normal of $\Omega_\varepsilon$ points towards $x$, so $\partial_\nu\Phi = 1/(\omega_n\varepsilon^{n - 1})$ (the flux normalisation), and $\int_{\partial B_\varepsilon}u\,\partial_\nu\Phi$ is the spherical mean of $u$, which tends to $u(x)$. The other term is at most $\max|\nabla u|$ times
+$|\Phi(\varepsilon)|\,\omega_n\varepsilon^{n - 1}$, which is $O(\varepsilon\log\varepsilon)$ in the plane and $O(\varepsilon)$ in space. Since $\Phi$ is integrable, letting $\varepsilon \to 0$ and rearranging gives the formula.
+\end{proof}
+
+The formula expresses $u$ through $\Delta u$ in $\Omega$ and \emph{both} $u$ and $\partial_\nu u$ on the boundary. But a Dirichlet problem prescribes only $u$ on the boundary, and the two cannot be prescribed independently (that would be a Cauchy problem for an elliptic equation, ill posed by Hadamard's example). The
+Green's function removes the unknown $\partial_\nu u$.
+
+\subsection{The Green's function}
+\label{ssec:greenfunction}
+
+\begin{defn}
+The \textbf{Green's function} of $\Omega$ for the Dirichlet problem is $G(x, y) = \Phi(y - x) - \varphi^x(y)$, where for each $x \in \Omega$ the \textbf{corrector} $\varphi^x$ is harmonic in $\Omega$ with $\varphi^x(y) = \Phi(y - x)$ on $\partial\Omega$. Thus $-\Delta_yG = \delta_x$ in $\Omega$ and $G = 0$ on $\partial\Omega$.
+\end{defn}
+
+\begin{thm}
+\label{thm:greensol}
+If $u \in C^2(\overline\Omega)$ solves $-\Delta u = f$ in $\Omega$ with $u = g$ on $\partial\Omega$, then
+\[
+u(x) = \int_\Omega G(x, y)f(y)\,dy - \int_{\partial\Omega}g(y)\,\partial_{\nu_y}G(x, y)\,dS(y) .
+\]
+Moreover $G(x, y) = G(y, x)$, and $G(x, y) > 0$ for $x \neq y$ in $\Omega$.
+\end{thm}
+
+\begin{proof}
+Green's identity for $u$ and the harmonic $\varphi^x$ gives $\int_\Omega\varphi^x(-\Delta u) = \int_{\partial\Omega}(u\,\partial_\nu\varphi^x - \varphi^x\partial_\nu u)$. Subtract this from the representation formula; on $\partial\Omega$, $\varphi^x = \Phi$, so the terms in $\partial_\nu u$ cancel, leaving the stated formula. For symmetry, apply
+Green's identity to $G(x, \cdot)$ and $G(z, \cdot)$ on $\Omega$ with small balls about $x$ and $z$ removed; both vanish on $\partial\Omega$, and the small spheres contribute $G(z, x)$ and $-G(x, z)$ in the limit. For positivity, $G(x, \cdot)$ is harmonic in $\Omega \setminus \{x\}$, zero on $\partial\Omega$, and tends to
+$+\infty$ at $x$, so by the minimum principle on $\Omega$ minus a small ball it is positive.
+\end{proof}
+
+The function $-\partial_{\nu_y}G(x, y)$ is the \textbf{Poisson kernel} of $\Omega$; it is positive and integrates to $1$ over the boundary (take $g = 1$, $f = 0$). Symmetry is a form of \emph{reciprocity}: the potential at $y$ due to a unit charge at $x$ equals the potential at $x$ due to a unit charge at $y$, in any
+grounded enclosure.
+
+In one dimension everything is explicit. For $-u'' = f$ on $(0, 1)$ with $u(0) = u(1) = 0$, the Green's function is
+\[
+G(x, y) = \begin{cases} x(1 - y), & x \leq y, \\ y(1 - x), & x \geq y , \end{cases}
+\]
+continuous, linear on each side of $y$, with a jump of $-1$ in slope at $y$: it is the shape of a taut string under a unit point load at $y$, and $u = \int_0^1G(x, y)f(y)\,dy$ is the shape under the distributed load $f$.
+
+\subsection{The method of images}
+\label{ssec:images}
+
+Finding $\varphi^x$ means solving a Dirichlet problem, so in general $G$ is no easier to find than $u$. For regions with symmetry, though, the corrector is the potential of a fictitious \textbf{image charge} placed outside $\Omega$ so that its field cancels that of the real charge on the boundary.
+
+\textbf{The half-space.} For $\Omega = \{y_n > 0\}$, reflect $x$ to $x^* = (x_1, \ldots, x_{n - 1}, -x_n)$. Then $|y - x| = |y - x^*|$ on the plane $y_n = 0$, so
+\[
+G(x, y) = \Phi(y - x) - \Phi(y - x^*)
+\]
+vanishes there, and $\Phi(\cdot - x^*)$ is harmonic in $\Omega$. The Poisson kernel is $-\partial_{\nu}G = \partial_{y_n}G$ at $y_n = 0$, which gives
+\[
+u(x) = \frac{x_n}{\pi}\int_{-\infty}^\infty\frac{g(t)\,dt}{(x_1 - t)^2 + x_n^2} \quad (n = 2), \qquad u(x) = \frac{x_3}{2\pi}\int_{\mathbb R^2}\frac{g(y)\,dy}{|x - y|^3} \quad (n = 3)
+\]
+for the bounded solution of the Dirichlet problem in the half-plane and half-space. Physically, a point charge $q$ at height $h$ above a grounded conducting plane induces on the plane a surface charge whose field, above the plane, is exactly that of a charge $-q$ at depth $h$ below it (Figure~\ref{fig:images}).
+Its density in three dimensions is $\sigma = -qh/2\pi(r^2 + h^2)^{3/2}$, and its total is $-q$ (Software~\ref{sw:halfplane}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\begin{scope}
+\clip[rounded corners=4pt] (-3.8,-2.75) rectangle (3.8,2.85);
+\fill[yellow!8] (-3.8,0) rectangle (3.8,2.85);
+\fill[black!6] (-3.8,-2.75) rectangle (3.8,0);
+\draw[orange!80!black] (0,1.192) circle (0.458);
+\draw[orange!80!black,dashed,opacity=0.45] (0,-1.192) circle (0.458);
+\draw[orange!80!black] (0,1.407) circle (0.877);
+\draw[orange!80!black,dashed,opacity=0.45] (0,-1.407) circle (0.877);
+\draw[orange!80!black] (0,1.833) circle (1.467);
+\draw[orange!80!black,dashed,opacity=0.45] (0,-1.833) circle (1.467);
+\draw[orange!80!black] (0,2.710) circle (2.476);
+\draw[orange!80!black,dashed,opacity=0.45] (0,-2.710) circle (2.476);
+\draw[orange!80!black] (0,5.011) circle (4.889);
+\draw[orange!80!black,dashed,opacity=0.45] (0,-5.011) circle (4.889);
+\end{scope}
+\draw[very thick,black!70] (-3.8,0) -- (3.8,0) node[pos=0.86,above,font=\scriptsize] {$G = 0$};
+\fill[red!70!black] (0,1.1) circle (3pt); \node[font=\scriptsize,fill=yellow!8,inner sep=1.5pt,anchor=west] at (2.35,1.1) {charge $+1$ at $x$}; \draw[red!70!black,->] (2.3,1.1) -- (0.15,1.1);
+\fill[blue!60!black] (0,-1.1) circle (3pt); \node[font=\scriptsize,fill=black!6,inner sep=1.5pt,anchor=west] at (2.35,-1.1) {image $-1$ at $x^*$}; \draw[blue!60!black,->] (2.3,-1.1) -- (0.15,-1.1);
+\node[font=\scriptsize\bfseries,black!70,anchor=west,fill=yellow!8,inner sep=1.5pt] at (-3.65,2.55) {region $\Omega$: $y_2 > 0$};
+\node[font=\scriptsize\bfseries,black!50,anchor=west,fill=black!6,inner sep=1.5pt] at (-3.65,-2.5) {outside $\Omega$};
+\end{tikzpicture}
+\caption{The method of images for the half-plane. The level curves of $G(x, \cdot) = -\frac1{2\pi}\log\bigl(|y - x|/|y - x^*|\bigr)$ are the circles of Apollonius on which the distances to the charge and to its image have a fixed ratio. The image charge makes the boundary line one of the level curves, $G = 0$.}
+\label{fig:images}
+\end{figure}
+
+\textbf{The ball.} For the ball $|y| < a$, use \textbf{inversion}: the image of $x \neq 0$ is $x^* = a^2x/|x|^2$, outside the ball on the same ray. For $|y| = a$ a short computation gives $|y - x^*| = (a/|x|)\,|y - x|$, so the corrector is the potential of an image of suitable strength at $x^*$:
+\[
+G(x, y) = \Phi(y - x) - \Phi\Bigl(\frac{|x|}a\,(y - x^*)\Bigr) .
+\]
+In three dimensions this is $\frac1{4\pi}\bigl(|y - x|^{-1} - \frac a{|x|}|y - x^*|^{-1}\bigr)$: an image of strength $a/|x|$. In the plane it is $-\frac1{2\pi}\bigl(\log|y - x| - \log(|x||y - x^*|/a)\bigr)$. Differentiating along the radius on $|y| = a$ gives the Poisson kernels
+\[
+-\partial_\nu G = \frac{a^2 - |x|^2}{2\pi a|x - y|^2} \quad (n = 2), \qquad -\partial_\nu G = \frac{a^2 - |x|^2}{4\pi a|x - y|^3} \quad (n = 3) ,
+\]
+the first of which is Poisson's formula of Section~\ref{sec:laplace}, found there by Fourier series. At $x = 0$ the image recedes to infinity and $G(0, y) = \Phi(y) - \Phi(a)$.
+
+Images work for the heat equation too. On the half-line $x > 0$ with $u(0, t) = 0$, the Green's function is $\Phi(x - y, t) - \Phi(x + y, t)$, an odd reflection exactly as for the wave equation in Section~\ref{sec:wave1d}; with an insulated end, $u_x(0, t) = 0$, the image has the same sign. Wedges whose angle is $\pi/m$
+need $2m - 1$ images; other regions need other methods, and in the plane, conformal mapping carries the Green's function of the disc to any simply connected region (Riemann's mapping theorem).
+
+\subsection{Green's functions in software}
+\label{ssec:software9}
+
+\begin{software}[The string under load]
+\label{sw:green1d}
+The one-dimensional Green's function applied to the loads $f = 1$ and $f = \sin\pi x$, with checks of the equation and the boundary values:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> x, y = sp.symbols('x y', positive=True)
+>>> def solve(f):          # -u'' = f on (0, 1), u = 0 at the ends: int G f dy
+...     return sp.simplify(sp.integrate(y * (1 - x) * f(y), (y, 0, x))
+...                        + sp.integrate(x * (1 - y) * f(y), (y, x, 1)))
+...
+>>> u1 = solve(lambda s: 1); u2 = solve(lambda s: sp.sin(sp.pi * s))
+>>> sp.factor(u1), u2
+(-x*(x - 1)/2, sin(pi*x)/pi**2)
+>>> sp.simplify(-u2.diff(x, 2)), u2.subs(x, 0), u2.subs(x, 1)
+(sin(pi*x), 0, 0)
+\end{verbatim}}
+\textbf{Reading the output.} A uniform load gives the parabola $x(1 - x)/2$, and the load $\sin\pi x$ gives $\sin(\pi x)/\pi^2$, since $\sin\pi x$ is an eigenfunction with eigenvalue $\pi^2$; then $-u'' = \sin\pi x$ and $u$ vanishes at both ends.
+
+\textbf{MATLAB/Octave:} \texttt{integral(@(y) G(x,y).*f(y), 0, 1)} with \texttt{G} as a function handle.
+\end{software}
+
+\begin{software}[The half-plane and the induced charge]
+\label{sw:halfplane}
+The half-plane Poisson integral with $g = 1$ on $[-1, 1]$ and $0$ elsewhere, against the closed form $\frac1\pi(\arctan\frac{x + 1}y - \arctan\frac{x - 1}y)$, the angle subtended by the segment divided by $\pi$; then the total charge induced on a grounded plane by a unit charge at height $1$:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.integrate import quad
+>>> def halfplane(g, X, Y, lo, hi):  # (1/pi) int Y g(t) / ((X - t)^2 + Y^2)
+...     k = lambda s: Y / ((X - s)**2 + Y**2) / np.pi
+...     return quad(lambda s: k(s) * g(s), lo, hi)[0]
+...
+>>> exact = lambda X, Y: (np.arctan((X+1) / Y) - np.arctan((X-1) / Y)) / np.pi
+>>> for X, Y in ((0, 0.1), (0, 1), (2, 1), (0, 10)):   # g = 1 on [-1, 1]
+...     print(X, Y, round(halfplane(lambda s: 1.0, X, Y, -1, 1), 10),
+...           round(exact(X, Y), 10))
+...
+0 0.1 0.9365489651 0.9365489651
+0 1 0.5 0.5
+2 1 0.1475836177 0.1475836177
+0 10 0.0634510349 0.0634510349
+>>> h = 1.0                  # unit charge at height h over a grounded plane
+>>> sigma = lambda r: -h / (2 * np.pi * (r**2 + h**2)**1.5)   # induced
+>>> quad(lambda r: 2 * np.pi * r * sigma(r), 0, np.inf)[0]   # total charge
+-1.0
+\end{verbatim}}
+\textbf{Reading the output.} The quadrature and the closed form agree to ten digits. Close to the segment, at $(0, 0.1)$, $u = 0.937$; directly above it at height $1$ the segment subtends a right angle and $u = \frac12$; far away, at height $10$, $u = 0.0635 \approx 2/10\pi$. The induced charge totals exactly $-1$: every
+field line leaving the charge ends on the plane.
+
+\textbf{MATLAB/Octave:} \texttt{integral(@(r) -r./(r.\^{}2+1).\^{}1.5, 0, Inf)}.
+\end{software}
+
+\begin{software}[The disc]
+\label{sw:greendisc}
+The Green's function of the unit disc with source at $x = (0.5, 0)$: its values on the boundary, the solution of $-\Delta u = 1$ at $x$ from $\int G(x, y)\,dy$, and the normal derivative of $G$ on the boundary against the Poisson kernel:
+{\small\begin{verbatim}
+>>> def G_disc(x, y):                      # unit disc, -Delta_y G = delta_x
+...     xs = x / np.dot(x, x)              # image point x* = x / |x|^2
+...     d1 = np.linalg.norm(y - x)
+...     d2 = np.linalg.norm(x) * np.linalg.norm(y - xs)
+...     return -np.log(d1 / d2) / (2 * np.pi)
+...
+>>> x0 = np.array([0.5, 0.0])
+>>> [round(G_disc(x0, np.array([np.cos(a), np.sin(a)])), 12) + 0.0
+...  for a in (0, 1, 2, 3)]           # G = 0 on the boundary circle
+[0.0, 0.0, 0.0, 0.0]
+>>> from scipy.integrate import dblquad    # -Delta u = 1: u = (1 - r^2) / 4
+>>> point = lambda rho, a: rho * np.array([np.cos(a), np.sin(a)])
+>>> val = dblquad(lambda rho, a: G_disc(x0, point(rho, a)) * rho,
+...               0, 2 * np.pi, 0, 1, epsabs=1e-10)[0]   # u = int G dy
+>>> round(val, 8), (1 - 0.25) / 4
+(0.1875, 0.1875)
+>>> eps = 1e-6                    # -dG/dnu on the boundary: Poisson kernel
+>>> for a in (0.0, np.pi / 2, np.pi):
+...     b = np.array([np.cos(a), np.sin(a)])
+...     dn = -(G_disc(x0, b) - G_disc(x0, (1 - eps) * b)) / eps
+...     P = (1 - 0.25) / (1 - 2 * 0.5 * np.cos(a) + 0.25) / (2 * np.pi)
+...     print(round(a, 4), round(dn, 6), round(P, 6))
+...
+0.0 0.477465 0.477465
+1.5708 0.095493 0.095493
+3.1416 0.053052 0.053052
+\end{verbatim}}
+\textbf{Reading the output.} $G$ vanishes on the circle, as the image construction guarantees. The integral of $G$ gives $0.1875$, which is $(1 - |x|^2)/4$, the solution of $-\Delta u = 1$ with $u = 0$ on the circle. The numerical normal derivative reproduces the Poisson kernel to six digits: $3/2\pi = 0.477$ at the
+nearest boundary point, $0.053$ at the farthest.
+
+\textbf{MATLAB/Octave:} \texttt{integral2} in polar coordinates with the same \texttt{G}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Use the one-dimensional Green's function to solve $-u'' = x$ on $(0, 1)$ with $u(0) = u(1) = 0$.
+\end{problem}
+
+\begin{solution}
+\begin{align*}
+u(x) &= (1 - x)\int_0^xy^2\,dy + x\int_x^1(1 - y)y\,dy \\
+&= \frac{(1 - x)x^3}3 + x\Bigl(\frac{1 - x^2}2 - \frac{1 - x^3}3\Bigr) = \frac{x(1 - x^2)}6 .
+\end{align*}
+Check: $-u'' = -\frac16(-6x) = x$, and $u(0) = u(1) = 0$.
+\end{solution}
+
+\begin{problem}
+Solve the Dirichlet problem in the upper half-plane with $u = 1$ on the negative real axis and $u = 0$ on the positive real axis.
+\end{problem}
+
+\begin{solution}
+By the Poisson integral, $u = \frac y\pi\int_{-\infty}^0\frac{dt}{(x - t)^2 + y^2} = \frac1\pi\bigl(\frac\pi2 - \arctan\frac xy\bigr) = \frac\theta\pi$, where $\theta \in (0, \pi)$ is the polar angle. It is harmonic, being the imaginary part of $\frac1\pi\log z$, and tends to $0$ on $\theta = 0$ and $1$ on $\theta = \pi$.
+\end{solution}
+
+\begin{problem}
+Find the Green's function of the quarter-plane $\{y_1 > 0, y_2 > 0\}$ by images.
+\end{problem}
+
+\begin{solution}
+For $x = (x_1, x_2)$ put images $-1$ at $(-x_1, x_2)$ and $(x_1, -x_2)$ and $+1$ at $(-x_1, -x_2)$:
+\[
+G(x, y) = \Phi(y - x) - \Phi\bigl(y - (-x_1, x_2)\bigr) - \Phi\bigl(y - (x_1, -x_2)\bigr) + \Phi(y + x) .
+\]
+On $y_1 = 0$ the first two terms cancel and the last two cancel, by reflection in that axis; likewise on $y_2 = 0$. All images lie outside the quarter-plane.
+\end{solution}
+
+\begin{problem}
+A unit point charge is at height $h$ above a grounded conducting plane. Find the induced surface charge density and its total, and the force on the charge.
+\end{problem}
+
+\begin{solution}
+The potential above the plane is $\Phi(y - x) - \Phi(y - x^*)$ with $\Phi = 1/4\pi|y|$. The charge density is minus the normal derivative of the potential at the plane (the normal field there), and $\partial_{y_3}$ of the potential at $y_3 = 0$ is $2\cdot\frac{h}{4\pi(r^2 + h^2)^{3/2}}$, so $\sigma = -h/2\pi(r^2 + h^2)^{3/2}$. Its total is $-\int_0^\infty\frac{hr\,dr}{(r^2 + h^2)^{3/2}} = -1$. The force on the
+charge is the attraction of its image at distance $2h$, $1/4\pi(2h)^2 = 1/16\pi h^2$ in these units, towards the plane.
+\end{solution}
+
+\begin{problem}
+Solve the heat equation on the half-line with $u(0, t) = 0$ and $u(x, 0) = 1$ by images.
+\end{problem}
+
+\begin{solution}
+\begin{align*}
+u &= \int_0^\infty\bigl(\Phi(x - y, t) - \Phi(x + y, t)\bigr)\,dy \\
+&= \frac12\Bigl(1 + \operatorname{erf}\frac x{\sqrt{4\kappa t}}\Bigr) - \frac12\Bigl(1 - \operatorname{erf}\frac x{\sqrt{4\kappa t}}\Bigr) = \operatorname{erf}\frac x{\sqrt{4\kappa t}} .
+\end{align*} The cold end penetrates to the diffusion length $\sqrt{4\kappa t}$.
+\end{solution}
+
+\begin{problem}
+Using $G(0, y) = -\frac1{2\pi}\log|y|$ for the unit disc, find the value at the centre of the solution of $-\Delta u = 1$ with $u = 0$ on the circle, and check it against $u = (1 - r^2)/4$.
+\end{problem}
+
+\begin{solution}
+$u(0) = \int G(0, y)\,dy = -\frac1{2\pi}\int_0^1\log r\cdot 2\pi r\,dr = -\int_0^1r\log r\,dr = \frac14$, and $(1 - 0)/4 = \frac14$; also $-\Delta\frac{1 - r^2}4 = -\frac14\bigl(-2 - 2\bigr) = 1$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 \sloppy
@@ -2600,6 +2878,7 @@ Grune and Stratton, 382--407.
 \item Gauss, C. F. (1840), Allgemeine Lehrs\"atze in Beziehung auf die im verkehrten Verh\"altnisse des Quadrats der Entfernung wirkenden Anziehungs- und Abstossungs-Kr\"afte, \emph{Resultate aus den Beobachtungen des magnetischen Vereins im Jahre 1839}, Leipzig, 1--51.
 \item Gibbs, J. W. (1899), Fourier's series, \emph{Nature}, 59, 606.
 \item Godunov, S. K. (1959), A difference method for numerical calculation of discontinuous solutions of the equations of hydrodynamics, \emph{Matematicheskii Sbornik}, 47(89), 271--306.
+\item Green, G. (1828), \emph{An Essay on the Application of Mathematical Analysis to the Theories of Electricity and Magnetism}, Nottingham, printed for the author by T. Wheelhouse.
 \item Hadamard, J. (1902), Sur les probl\`emes aux d\'eriv\'ees partielles et leur signification physique, \emph{Princeton University Bulletin}, 13,
 49--52.
 \item Hadamard, J. (1923), \emph{Lectures on Cauchy's Problem in Linear Partial Differential Equations}, New Haven, Yale University Press.
@@ -2616,6 +2895,7 @@ Grune and Stratton, 382--407.
 \item Lax, P. D., and Wendroff, B. (1960), Systems of conservation laws, \emph{Communications on Pure and Applied Mathematics}, 13, 217--237.
 \item Lewy, H. (1957), An example of a smooth linear partial differential equation without solution, \emph{Annals of Mathematics}, 66, 155--158.
 \item Lighthill, M. J., and Whitham, G. B. (1955), On kinematic waves II: a theory of traffic flow on long crowded roads, \emph{Proceedings of the Royal Society of London A}, 229, 317--345.
+\item Maxwell, J. C. (1873), \emph{A Treatise on Electricity and Magnetism}, Oxford, Clarendon Press.
 \item McKendrick, A. G. (1926), Applications of mathematics to medical problems, \emph{Proceedings of the Edinburgh Mathematical Society}, 44, 98--130.
 \item Mersenne, M. (1636), \emph{Harmonie universelle}, Paris, Cramoisy.
 \item Nirenberg, L. (1953), A strong maximum principle for parabolic equations, \emph{Communications on Pure and Applied Mathematics}, 6, 167--177.
@@ -2624,6 +2904,7 @@ Grune and Stratton, 382--407.
 \item Poisson, S. D. (1820), M\'emoire sur la mani\`ere d'exprimer les fonctions par des s\'eries de quantit\'es p\'eriodiques, \emph{Journal de l'\'Ecole Polytechnique}, 11 (cahier 18), 417--489.
 \item Rankine, W. J. M. (1870), On the thermodynamic theory of waves of finite longitudinal disturbance, \emph{Philosophical Transactions of the Royal Society of London}, 160, 277--288.
 \item Richards, P. I. (1956), Shock waves on the highway, \emph{Operations Research}, 4, 42--51.
+\item Thomson, W. (1848), Extrait d'une lettre de M. William Thomson \`a M. Liouville, \emph{Journal de Math\'ematiques Pures et Appliqu\'ees}, 10, 364--367.
 \item Tricomi, F. (1923), Sulle equazioni lineari alle derivate parziali di 2$^\circ$ ordine, di tipo misto, \emph{Memorie della Reale Accademia dei Lincei}, serie 5, 14, 133--247.
 \item Tychonoff, A. (1935), Th\'eor\`emes d'unicit\'e pour l'\'equation de la chaleur, \emph{Matematicheskii Sbornik}, 42, 199--216.
 \item Widder, D. V. (1944), Positive temperatures on an infinite rod, \emph{Transactions of the American Mathematical Society}, 55, 85--95.
