@@ -365,6 +365,266 @@ Explain which of the four assumptions of linear programming fails in each case, 
 non-linear programming. (c) Certainty: the coefficient is random; use expected values with sensitivity analysis, or a stochastic model with scenarios.
 \end{solution}
 
+%======================================================================
+\section{The Geometry of Linear Programming}
+\label{sec:geometry}
+
+The feasible region of a linear programme is an intersection of half-spaces, a convex polyhedron, and a linear objective is maximised over it at a corner. This one geometric fact is the reason linear programming can be solved exactly: it reduces a search over infinitely many points to a search over finitely many
+vertices, and the simplex method of the next section is a systematic way of walking from vertex to vertex. This section makes the fact precise, with the algebraic description of vertices as basic feasible solutions, and uses it to solve small problems graphically.
+
+\subsection{Convex sets and polyhedra}
+\label{ssec:convex}
+
+\begin{defn}
+A set $S \subseteq \mathbb R^n$ is \textbf{convex} if it contains the segment between any two of its points: $x, y \in S$ and $0 \leq \lambda \leq 1$ imply $\lambda x + (1 - \lambda)y \in S$. A \textbf{convex combination} of $x^1, \ldots, x^k$ is $\sum\lambda_ix^i$ with $\lambda_i \geq 0$ and $\sum\lambda_i = 1$. A
+\textbf{polyhedron} is a set $\{x : Gx \leq h\}$, the intersection of finitely many closed half-spaces.
+\end{defn}
+
+A half-space $\{x : g^{\mathsf T}x \leq \eta\}$ is convex, since $g^{\mathsf T}(\lambda x + (1 - \lambda)y) = \lambda g^{\mathsf T}x + (1 - \lambda)g^{\mathsf T}y \leq \eta$, and an intersection of convex sets is convex. So every polyhedron, in particular the feasible region of every LP, is convex. The standard-form region
+$P = \{x : Ax = b, x \geq 0\}$ is a polyhedron, since an equation is two inequalities.
+
+\begin{defn}
+A point $x$ of a convex set $S$ is an \textbf{extreme point} if it is not a convex combination of two other points of $S$: $x = \lambda y + (1 - \lambda)z$ with $y, z \in S$ and $0 < \lambda < 1$ implies $y = z = x$. For a polyhedron, the extreme points are its \textbf{vertices}.
+\end{defn}
+
+\subsection{Basic feasible solutions}
+\label{ssec:bfs}
+
+For computation we need an algebraic description of the vertices of $P = \{x : Ax = b, x \geq 0\}$, where $A$ is $m \times n$ of rank $m$.
+
+\begin{defn}
+Choose $m$ linearly independent columns of $A$, forming the \textbf{basis matrix} $B$; the corresponding variables are \textbf{basic}, the others \textbf{non-basic}. Setting the non-basic variables to $0$ and solving $Bx_B = b$ gives a \textbf{basic solution}. If also $x_B = B^{-1}b \geq 0$, it is a
+\textbf{basic feasible solution} (BFS). It is \textbf{degenerate} if some basic variable is $0$.
+\end{defn}
+
+\begin{thm}
+\label{thm:bfs}
+A point $x \in P$ is an extreme point of $P$ if and only if the columns $A_j$ with $x_j > 0$ are linearly independent; and this holds if and only if $x$ is a basic feasible solution.
+\end{thm}
+
+\begin{proof}
+Let $J = \{j : x_j > 0\}$. Suppose the columns $A_j$, $j \in J$, are dependent: $\sum_{j \in J}d_jA_j = 0$ with $d \neq 0$, $d_j = 0$ for $j \notin J$. Then $Ad = 0$, and for small $\varepsilon > 0$ both $x \pm \varepsilon d$ are in $P$, since their components outside $J$ are $0$ and those in $J$ stay positive. As
+$x = \frac12(x + \varepsilon d) + \frac12(x - \varepsilon d)$, $x$ is not extreme.
+
+Conversely, suppose the columns in $J$ are independent and $x = \lambda y + (1 - \lambda)z$ with $y, z \in P$, $0 < \lambda < 1$. For $j \notin J$, $0 = \lambda y_j + (1 - \lambda)z_j$ with $y_j, z_j \geq 0$ forces $y_j = z_j = 0$. Then $A(y - x) = 0$ with $y - x$ supported in $J$, and independence gives $y = x$, and
+likewise $z = x$. So $x$ is extreme.
+
+Finally, independent columns in $J$ can be extended to a basis of $m$ columns (since $A$ has rank $m$), and $x$ is the basic solution for that basis, feasible since $x \geq 0$; and a BFS has its positive components among independent basic columns.
+\end{proof}
+
+At a degenerate BFS, $J$ has fewer than $m$ columns and can be extended to a basis in several ways, so one vertex corresponds to several bases. This harmless-looking fact is the source of the difficulties with cycling in the simplex method.
+
+\begin{thm}[Fundamental theorem of linear programming]
+\label{thm:fundamental}
+Consider the LP: minimise $c^{\mathsf T}x$ over $P = \{x : Ax = b, x \geq 0\}$.
+\begin{enumerate}[label=(\roman*)]
+\item If $P$ is non-empty, it has a basic feasible solution.
+\item If the LP has an optimal solution, it has an optimal basic feasible solution.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+(ii) Among the optimal solutions choose one, $x$, with the fewest positive components, and let $J$ be its support. If the columns in $J$ were dependent, take $d \neq 0$ supported in $J$ with $Ad = 0$. Then $x + \varepsilon d$ is feasible for all small $|\varepsilon|$, so by optimality $c^{\mathsf T}d = 0$,
+since otherwise one sign of $\varepsilon$ would decrease the objective. Replacing $d$ by $-d$ if necessary, some $d_j < 0$; increase $\varepsilon$ from $0$ until the first component $x_j + \varepsilon d_j$ reaches $0$. The new point is feasible and optimal, since $c^{\mathsf T}d = 0$, with fewer positive components,
+a contradiction. So the columns in $J$ are independent, and $x$ is a BFS by Theorem~\ref{thm:bfs}. (i) is the same argument with any feasible point of minimal support, without the objective.
+\end{proof}
+
+There are at most $\binom nm$ bases, so an LP could in principle be solved by computing every basic solution and comparing (Software~\ref{sw:bases}). For $n = 50$ and $m = 25$ that is $\binom{50}{25} = 1.26 \times 10^{14}$ systems: enumeration is hopeless, and the simplex method visits only a few of them. The full structure is given by
+the \textbf{representation theorem} of Minkowski and Weyl: a polyhedron with at least one vertex is the set of points $\sum\lambda_iv^i + \sum\mu_jw^j$, with $\lambda_i \geq 0$, $\sum\lambda_i = 1$, $\mu_j \geq 0$, where $v^i$ are its vertices and $w^j$ the directions of its unbounded edges (extreme rays). A bounded polyhedron is the convex hull of
+its vertices.
+
+\subsection{The graphical method}
+\label{ssec:graphical}
+
+With two variables the feasible region can be drawn. Plot each constraint as a line, shade the side that satisfies it, and identify the polygon common to all. Draw the \textbf{iso-profit lines} $c^{\mathsf T}x = Z$; they are parallel, and $Z$ increases in the direction of the gradient $c$. Slide the line in that
+direction as far as it still meets the region; the last point of contact is optimal, and by Theorem~\ref{thm:fundamental} it may be taken to be a vertex, so it suffices to evaluate $Z$ at the vertices.
+
+\begin{exa}
+\label{ex:graphical}
+Maximise $Z = 10x_1 + 15x_2$ subject to $2x_1 + x_2 \leq 26$, $2x_1 + 4x_2 \leq 56$, $-x_1 + x_2 \leq 5$, $x_1, x_2 \geq 0$. The region is the pentagon with vertices $O(0, 0)$, $A(13, 0)$, $B(8, 10)$, $C(6, 11)$, $D(0, 5)$ (Figure~\ref{fig:graphical}), where $Z = 0$, $130$, $230$, $225$ and $75$. The maximum is
+$Z = 230$ at $B$, where the first two constraints are tight and the third has slack $3$.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.3cm,y=0.3cm]
+\fill[blue!4,rounded corners=4pt] (-3,-3) rectangle (31,28.5);
+\fill[green!25] (0,0) -- (13,0) -- (8,10) -- (6,11) -- (0,5) -- cycle;
+\draw[->] (0,0) -- (30,0) node[below,font=\small] {$x_1$};
+\draw[->] (0,0) -- (0,27.5) node[left,font=\small] {$x_2$};
+\foreach \v in {5,10,15,20,25} {\draw (\v,0.3) -- (\v,-0.3) node[below,font=\tiny] {$\v$}; \draw (0.3,\v) -- (-0.3,\v) node[left,font=\tiny] {$\v$};}
+\draw[black!70] (0,26) -- (13.5,-1) node[below,font=\scriptsize] {$2x_1 + x_2 = 26$};
+\draw[black!70] (0,14) -- (29,-0.5);
+\node[font=\scriptsize,black!70,anchor=west] at (19,5.4) {$2x_1 + 4x_2 = 56$};
+\draw[black!70] (0,5) -- (14,19) node[above right,font=\scriptsize] {$-x_1 + x_2 = 5$};
+\draw[red!70!black,dashed] (0,6.667) -- (10,0) node[pos=0.55,above right,font=\scriptsize] {$Z = 100$};
+\draw[red!70!black,thick,dashed] (2,14) -- (17,4) node[right,font=\scriptsize] {$Z = 230$};
+\draw[->,red!70!black,thick] (17,15) -- (19,18) node[above,font=\scriptsize] {$c = (10, 15)$};
+\foreach \p/\q/\l/\a in {0/0/O/below left, 13/0/A/above right, 8/10/B/right, 6/11/C/above left, 0/5/D/above right}
+  \fill (\p,\q) circle (2.5pt) node[\a=2pt,font=\scriptsize] {$\l$};
+\node[font=\scriptsize\bfseries,green!40!black] at (5.5,4.5) {feasible};
+\end{tikzpicture}
+\caption{The graphical method for Example~\ref{ex:graphical}. The feasible region is the shaded pentagon. The iso-profit lines $10x_1 + 15x_2 = Z$ move in the direction $c$ as $Z$ increases; the last contact with the region is the vertex $B(8, 10)$, where $Z = 230$.}
+\label{fig:graphical}
+\end{figure}
+
+The method also shows the four things that can happen in an LP.
+\begin{itemize}
+\item \textbf{A unique optimum} at a vertex, as above.
+\item \textbf{Multiple optima}, when the objective is parallel to an edge of the region at which it is optimal. With $Z = x_1 + 2x_2$ in Example~\ref{ex:graphical}, parallel to $2x_1 + 4x_2 = 56$, every point of the edge $BC$ gives $Z = 28$. The optimal set is always convex: it is a face of the polyhedron.
+\item \textbf{Unboundedness}, when the region is unbounded in a direction along which the objective improves without limit.
+\item \textbf{Infeasibility}, when the constraints are inconsistent, as with $x_1 + x_2 \leq 2$ and $x_1 + x_2 \geq 3$.
+\end{itemize}
+A constraint that can be deleted without changing the region is \textbf{redundant}. When three or more constraint lines pass through one vertex in the plane, the vertex is degenerate in the sense of the last subsection.
+
+\subsection{Geometry in software}
+\label{ssec:software2}
+
+\begin{software}[Enumerating vertices]
+\label{sw:vertices}
+For Example~\ref{ex:graphical}, the intersection of every pair of the five constraint lines (the last two being $x_1 = 0$ and $x_2 = 0$), whether it is feasible, and the objective at the feasible ones; then the LP solution for comparison:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from itertools import combinations
+>>> from scipy.optimize import linprog
+>>> G = np.array([[2, 1], [2, 4], [-1, 1], [-1, 0], [0, -1]])   # G x <= h,
+>>> h = np.array([26, 56, 5, 0, 0])        # the last two rows are x1, x2 >= 0
+>>> c = np.array([10, 15])
+>>> for i, j in combinations(range(5), 2): # every pair of constraint lines
+...     M = G[[i, j]]
+...     if abs(np.linalg.det(M)) < 1e-12: continue        # parallel lines
+...     v = np.linalg.solve(M, h[[i, j]]) + 0.0
+...     ok = np.all(G @ v <= h + 1e-9)
+...     print((i + 1, j + 1), np.round(v, 3), 'vertex' if ok else '-',
+...           round(c @ v, 2) if ok else '')
+...
+(1, 2) [ 8. 10.] vertex 230.0
+(1, 3) [ 7. 12.] - 
+(1, 4) [ 0. 26.] - 
+(1, 5) [13.  0.] vertex 130.0
+(2, 3) [ 6. 11.] vertex 225.0
+(2, 4) [ 0. 14.] - 
+(2, 5) [28.  0.] - 
+(3, 4) [0. 5.] vertex 75.0
+(3, 5) [-5.  0.] - 
+(4, 5) [0. 0.] vertex 0.0
+>>> r = linprog(-c, A_ub=G[:3], b_ub=h[:3], method='highs'); r.x, -r.fun
+(array([ 8., 10.]), 230.0)
+\end{verbatim}}
+\textbf{Reading the output.} Of the ten intersections, five satisfy all the constraints; they are the vertices $B$, $A$, $C$, $D$, $O$ of Figure~\ref{fig:graphical}. The other five lie outside the region: $(7, 12)$ violates the second constraint, $(28, 0)$ the first. The largest objective value, $230$ at $(8, 10)$, is
+what \texttt{linprog} returns.
+
+\textbf{MATLAB/Octave:} \texttt{nchoosek(1:5, 2)} lists the pairs.
+\end{software}
+
+\begin{software}[What can go wrong]
+\label{sw:cases}
+\texttt{linprog} on an unbounded problem (with $x_1$ free), an infeasible one, and Example~\ref{ex:graphical} with the objective $x_1 + 2x_2$, which has a tie:
+{\small\begin{verbatim}
+>>> cases = {     # linprog status: 0 optimal, 2 infeasible, 3 unbounded
+...   'unbounded':  dict(c=[-1, 4], A_ub=[[-3, 1], [1, 2], [0, 1]],
+...                      b_ub=[6, 4, -3], bounds=[(None, None)]*2),
+...   'infeasible': dict(c=[1, 1], A_ub=[[1, 1], [-1, -1]], b_ub=[2, -3]),
+...   'tied':       dict(c=[-1, -2], A_ub=G[:3], b_ub=h[:3])}
+>>> for name, kw in cases.items():
+...     r = linprog(method='highs', **kw)
+...     print(f"{name:10s} status {r.status}", r.x if r.status == 0 else '',
+...           -r.fun if r.status == 0 else '')
+...
+unbounded  status 3  
+infeasible status 2  
+tied       status 0 [ 6. 11.] 28.0
+\end{verbatim}}
+\textbf{Reading the output.} The solver reports status $3$ (unbounded) and $2$ (infeasible) instead of a solution. For the tied objective it returns one optimal vertex, $C(6, 11)$, with $Z = 28$; the vertex $B(8, 10)$ and every point between are equally good, and a solver gives no warning of this, which
+sensitivity analysis will detect.
+
+\textbf{MATLAB/Octave:} the \texttt{exitflag} output, $-2$ for infeasible and $-3$ for unbounded.
+\end{software}
+
+\begin{software}[Bases and vertices]
+\label{sw:bases}
+Minimise $20x_1 + 10x_2$ subject to $x_1 + 2x_2 \leq 40$, $3x_1 + x_2 \geq 30$, $4x_1 + 3x_2 \geq 60$, $x \geq 0$, in standard form with one slack and two surplus variables: all $\binom53 = 10$ choices of three basic columns, keeping the feasible ones:
+{\small\begin{verbatim}
+>>> A = np.array([[1, 2, 1, 0, 0],         # min 20 x1 + 10 x2, standard form:
+...               [3, 1, 0, -1, 0],        # x1 + 2 x2 + s1 = 40
+...               [4, 3, 0, 0, -1]])       # 3 x1 + x2 - s2 = 30, and so on
+>>> b = np.array([40, 30, 60]); cost = np.array([20, 10, 0, 0, 0])
+>>> count = feasible = 0
+>>> for B in combinations(range(5), 3):  # every choice of three basic columns
+...     AB = A[:, B]
+...     if abs(np.linalg.det(AB)) < 1e-12: continue
+...     count += 1; xB = np.linalg.solve(AB, b)
+...     if np.all(xB >= -1e-9):
+...         feasible += 1; x = np.zeros(5); x[list(B)] = xB
+...         print(B, np.round(x[:2], 3), round(cost @ x, 2))
+...
+(0, 1, 2) [ 6. 12.] 240.0
+(0, 1, 4) [ 4. 18.] 260.0
+(0, 2, 3) [15.  0.] 300.0
+(0, 3, 4) [40.  0.] 800.0
+>>> count, feasible
+(10, 4)
+\end{verbatim}}
+\textbf{Reading the output.} All ten column triples are bases, and four give basic \emph{feasible} solutions: the vertices $(6, 12)$, $(4, 18)$, $(15, 0)$ and $(40, 0)$, with costs $240$, $260$, $300$ and $800$. The minimum is $240$ at $(6, 12)$, where the two $\geq$ constraints are tight.
+
+\textbf{MATLAB/Octave:} \texttt{nchoosek(1:5, 3)} and \texttt{A(:, B) \textbackslash\ b}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Solve graphically: maximise $Z = 7x_1 + 3x_2$ subject to $x_1 + 2x_2 \geq 3$, $x_1 + x_2 \leq 4$, $x_1 \leq \frac52$, $x_2 \leq \frac32$, $x \geq 0$. Show that the optimal vertex is degenerate.
+\end{problem}
+
+\begin{solution}
+The vertices are $A(\frac52, \frac14)$, $B(\frac52, \frac32)$ and $C(0, \frac32)$, with $Z = \frac{73}4$, $22$ and $\frac92$. The maximum is $22$ at $B$. Three constraint lines pass through $B$: $x_1 = \frac52$, $x_2 = \frac32$ and $x_1 + x_2 = 4$. In standard form, with four slack or surplus variables and $m = 4$, the BFS at
+$B$ has $x_1, x_2$ and the surplus of the first constraint positive and the slacks of the other three zero, so one basic variable is zero: degenerate, and $B$ is given by three different bases.
+\end{solution}
+
+\begin{problem}
+Show that the problem: minimise $-x_1 + 4x_2$ subject to $-3x_1 + x_2 \leq 6$, $x_1 + 2x_2 \leq 4$, $x_2 \leq -3$, with $x_1$ free in sign, is unbounded.
+\end{problem}
+
+\begin{solution}
+Take $x_2 = -t$ with $t \geq 3$ and $x_1 = 4 + 2t$. Then $-3x_1 + x_2 = -12 - 7t \leq 6$ and $x_1 + 2x_2 = 4$, so the point is feasible, and the objective is $-4 - 2t - 4t = -4 - 6t \to -\infty$. The region contains the ray $(4, 0) + t(2, -1)$, $t \geq 3$, along which the objective
+decreases; Software~\ref{sw:cases} reports status $3$.
+\end{solution}
+
+\begin{problem}
+Prove that the set of optimal solutions of an LP is convex.
+\end{problem}
+
+\begin{solution}
+If $x$ and $y$ are optimal with value $z^*$, then $\lambda x + (1 - \lambda)y$ is feasible, since the feasible region is convex, and its objective value is $\lambda z^* + (1 - \lambda)z^* = z^*$ by linearity, so it is optimal.
+\end{solution}
+
+\begin{problem}
+Find all basic solutions of $x_1 + x_2 + x_3 = 4$, $x_1 - x_2 + 2x_4 = 2$, decide which are feasible, and identify any degenerate ones.
+\end{problem}
+
+\begin{solution}
+There are $\binom42 = 6$ choices of basis. $\{x_1, x_2\}$: $x = (3, 1, 0, 0)$, feasible. $\{x_1, x_3\}$: $x_1 = 2$, $x_3 = 2$, feasible. $\{x_1, x_4\}$: $x_1 = 4$, $x_4 = -1$, infeasible. $\{x_2, x_3\}$: $x_2 = -2$, infeasible. $\{x_2, x_4\}$: $x_2 = 4$, $x_4 = 3$, feasible. $\{x_3, x_4\}$: $x_3 = 4$, $x_4 = 1$,
+feasible. None is degenerate, since every basic variable in the feasible ones is positive.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:graphical}, for which values of $c_2$ does the vertex $B(8, 10)$ remain optimal for the objective $10x_1 + c_2x_2$?
+\end{problem}
+
+\begin{solution}
+$B$ is optimal while the slope of the iso-profit lines, $-10/c_2$, lies between the slopes of the two constraints tight at $B$: $-2$ for $2x_1 + x_2 = 26$ and $-\frac12$ for $2x_1 + 4x_2 = 56$. So $-2 \leq -10/c_2 \leq -\frac12$, that is $5 \leq c_2 \leq 20$. At $c_2 = 20$ the edge $BC$ is also optimal, and above it $C$ takes over;
+at $c_2 = 5$ the edge $AB$ is optimal.
+\end{solution}
+
+\begin{problem}
+Show that the polyhedron $\{x \in \mathbb R^2 : x_1 + x_2 \geq 1,\ x \geq 0\}$ has two vertices and two extreme rays, and write the point $(3, 2)$ in the form given by the representation theorem.
+\end{problem}
+
+\begin{solution}
+The vertices are $(1, 0)$ and $(0, 1)$, and the unbounded edges point in the directions $(1, 0)$ and $(0, 1)$. Then $(3, 2) = 1\cdot(1, 0) + 2\cdot(1, 0) + 2\cdot(0, 1)$, a convex combination of vertices (here just one, with $\lambda = 1$) plus $\mu_1 = 2$, $\mu_2 = 2$ times the rays. The representation is not
+unique: $\frac12(1, 0) + \frac12(0, 1) + \frac52(1, 0) + \frac32(0, 1)$ also works.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -398,8 +658,11 @@ non-linear programming. (c) Certainty: the coefficient is random; use expected v
 \item Charnes, A., Cooper, W. W., and Ferguson, R. O. (1955), Optimal estimation of executive compensation by linear programming, \emph{Management Science}, 1, 138--151.
 \item Dantzig, G. B. (1951), Maximization of a linear function of variables subject to linear inequalities, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 339--347.
 \item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.
+\item Klee, V., and Minty, G. J. (1972), How good is the simplex algorithm?, in O. Shisha (ed.), \emph{Inequalities III}, New York, Academic Press, 159--175.
 \item Koopmans, T. C. (ed.) (1951), \emph{Activity Analysis of Production and Allocation}, New York, Wiley.
+\item Minkowski, H. (1896), \emph{Geometrie der Zahlen}, Leipzig, Teubner.
 \item Stigler, G. J. (1945), The cost of subsistence, \emph{Journal of Farm Economics}, 27, 303--314.
+\item Weyl, H. (1935), Elementare Theorie der konvexen Polyeder, \emph{Commentarii Mathematici Helvetici}, 7, 290--306.
 \end{enumerate}
 
 \end{document}

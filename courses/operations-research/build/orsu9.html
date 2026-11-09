@@ -1,0 +1,154 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>2.4 Geometry in software — Operations Research</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='or.css' rel='stylesheet' type='text/css' /> 
+<meta content='or.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Operations Research</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="orse1.html">Operations Research and Linear Programming Models</a></li>
+<li class="sub"><a class="" href="orsu1.html">The linear programming model</a></li>
+<li class="sub"><a class="" href="orsu2.html">Formulating models</a></li>
+<li class="sub"><a class="" href="orsu3.html">Linearising non-linear features</a></li>
+<li class="sub"><a class="" href="orsu4.html">Linear programming in software</a></li>
+<li class="sub"><a class="" href="orsu5.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse2.html">The Geometry of Linear Programming</a></li>
+<li class="sub"><a class="" href="orsu6.html">Convex sets and polyhedra</a></li>
+<li class="sub"><a class="" href="orsu7.html">Basic feasible solutions</a></li>
+<li class="sub"><a class="" href="orsu8.html">The graphical method</a></li>
+<li class="sub"><a class="current" href="orsu9.html">Geometry in software</a></li>
+<li class="sub"><a class="" href="orsu10.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="orli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 480 --><div class='crosslinks'><p class='noindent'>[<a href='orsu10.html'>next</a>] [<a href='orsu8.html'>prev</a>] [<a href='orsu8.html#tailorsu8.html'>prev-tail</a>] [<a href='#tailorsu9.html'>tail</a>] [<a href='orse2.html#orsu9.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>2.4   </span> <a id='x13-120002.4'></a>Geometry in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 483 --><p class='noindent'><span class='head'>
+<a id='x13-12001r1'></a>
+<span class='cmbx-10x-x-109'>Software 2.4.1 </span>(Enumerating vertices)<span class='cmbx-10x-x-109'>.</span>  </span> For Example <a href='orsu8.html#x12-11001r1'>2.3.1<!-- tex4ht:ref: ex:graphical  --></a>, the intersection of every pair of the five
+constraint lines (the last two being \(x_1 = 0\) and \(x_2 = 0\)), whether it is feasible, and the objective at the feasible ones;
+then the LP solution for comparison:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-4'>
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; from itertools import combinations
+&gt;&gt;&gt; from scipy.optimize import linprog
+&gt;&gt;&gt; G = np.array([[2, 1], [2, 4], [-1, 1], [-1, 0], [0, -1]])   # G x &lt;= h,
+&gt;&gt;&gt; h = np.array([26, 56, 5, 0, 0])        # the last two rows are x1, x2 &gt;= 0
+&gt;&gt;&gt; c = np.array([10, 15])
+&gt;&gt;&gt; for i, j in combinations(range(5), 2): # every pair of constraint lines
+...     M = G[[i, j]]
+...     if abs(np.linalg.det(M)) &lt; 1e-12: continue        # parallel lines
+...     v = np.linalg.solve(M, h[[i, j]]) + 0.0
+...     ok = np.all(G @ v &lt;= h + 1e-9)
+...     print((i + 1, j + 1), np.round(v, 3), 'vertex' if ok else '-',
+...           round(c @ v, 2) if ok else '')
+...
+(1, 2) [ 8. 10.] vertex 230.0
+(1, 3) [ 7. 12.] -
+(1, 4) [ 0. 26.] -
+(1, 5) [13.  0.] vertex 130.0
+(2, 3) [ 6. 11.] vertex 225.0
+(2, 4) [ 0. 14.] -
+(2, 5) [28.  0.] -
+(3, 4) [0. 5.] vertex 75.0
+(3, 5) [-5.  0.] -
+(4, 5) [0. 0.] vertex 0.0
+&gt;&gt;&gt; r = linprog(-c, A_ub=G[:3], b_ub=h[:3], method='highs'); r.x, -r.fun
+(array([ 8., 10.]), 230.0)
+</pre>
+<!-- l. 513 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>Of the ten intersections, five satisfy all the constraints; they are the
+vertices \(B\), \(A\), \(C\), \(D\), \(O\) of Figure <a href='orsu8.html#x12-11002r2'>2<!-- tex4ht:ref: fig:graphical  --></a>. The other five lie outside the region: \((7, 12)\) violates the second constraint,
+\((28, 0)\) the first. The largest objective value, \(230\) at \((8, 10)\), is what <span class='cmtt-10x-x-109'>linprog </span>returns.
+</p><!-- l. 517 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>nchoosek(1:5, 2) </span>lists the pairs.
+</p>
+</div>
+<!-- l. 518 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 520 --><p class='noindent'><span class='head'>
+<a id='x13-12002r2'></a>
+<span class='cmbx-10x-x-109'>Software 2.4.2 </span>(What can go wrong)<span class='cmbx-10x-x-109'>.</span>  </span> <span class='cmtt-10x-x-109'>linprog </span>on an unbounded problem (with \(x_1\) free), an infeasible
+one, and Example <a href='orsu8.html#x12-11001r1'>2.3.1<!-- tex4ht:ref: ex:graphical  --></a> with the objective \(x_1 + 2x_2\), which has a tie:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-5'>
+&gt;&gt;&gt; cases = {     # linprog status: 0 optimal, 2 infeasible, 3 unbounded
+...   'unbounded':  dict(c=[-1, 4], A_ub=[[-3, 1], [1, 2], [0, 1]],
+...                      b_ub=[6, 4, -3], bounds=[(None, None)]*2),
+...   'infeasible': dict(c=[1, 1], A_ub=[[1, 1], [-1, -1]], b_ub=[2, -3]),
+...   'tied':       dict(c=[-1, -2], A_ub=G[:3], b_ub=h[:3])}
+&gt;&gt;&gt; for name, kw in cases.items():
+...     r = linprog(method='highs', **kw)
+...     print(f"{name:10s} status {r.status}", r.x if r.status == 0 else '',
+...           -r.fun if r.status == 0 else '')
+...
+unbounded  status 3
+infeasible status 2
+tied       status 0 [ 6. 11.] 28.0
+</pre>
+<!-- l. 537 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The solver reports status \(3\) (unbounded) and \(2\) (infeasible) instead of a
+solution. For the tied objective it returns one optimal vertex, \(C(6, 11)\), with \(Z = 28\); the vertex \(B(8, 10)\) and every
+point between are equally good, and a solver gives no warning of this, which sensitivity analysis
+will detect.
+</p><!-- l. 541 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span>the <span class='cmtt-10x-x-109'>exitflag </span>output, \(-2\) for infeasible and \(-3\) for unbounded.
+</p>
+</div>
+<!-- l. 542 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 544 --><p class='noindent'><span class='head'>
+<a id='x13-12003r3'></a>
+<span class='cmbx-10x-x-109'>Software 2.4.3 </span>(Bases and vertices)<span class='cmbx-10x-x-109'>.</span>  </span> Minimise \(20x_1 + 10x_2\) subject to \(x_1 + 2x_2 \leq 40\), \(3x_1 + x_2 \geq 30\), \(4x_1 + 3x_2 \geq 60\), \(x \geq 0\), in standard form with one
+slack and two surplus variables: all \(\binom 53 = 10\) choices of three basic columns, keeping the feasible
+ones:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-6'>
+&gt;&gt;&gt; A = np.array([[1, 2, 1, 0, 0],         # min 20 x1 + 10 x2, standard form:
+...               [3, 1, 0, -1, 0],        # x1 + 2 x2 + s1 = 40
+...               [4, 3, 0, 0, -1]])       # 3 x1 + x2 - s2 = 30, and so on
+&gt;&gt;&gt; b = np.array([40, 30, 60]); cost = np.array([20, 10, 0, 0, 0])
+&gt;&gt;&gt; count = feasible = 0
+&gt;&gt;&gt; for B in combinations(range(5), 3):  # every choice of three basic columns
+...     AB = A[:, B]
+...     if abs(np.linalg.det(AB)) &lt; 1e-12: continue
+...     count += 1; xB = np.linalg.solve(AB, b)
+...     if np.all(xB &gt;= -1e-9):
+...         feasible += 1; x = np.zeros(5); x[list(B)] = xB
+...         print(B, np.round(x[:2], 3), round(cost @ x, 2))
+...
+(0, 1, 2) [ 6. 12.] 240.0
+(0, 1, 4) [ 4. 18.] 260.0
+(0, 2, 3) [15.  0.] 300.0
+(0, 3, 4) [40.  0.] 800.0
+&gt;&gt;&gt; count, feasible
+(10, 4)
+</pre>
+<!-- l. 567 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>All ten column triples are bases, and four give basic <span class='cmti-10x-x-109'>feasible </span>solutions:
+the vertices \((6, 12)\), \((4, 18)\), \((15, 0)\) and \((40, 0)\), with costs \(240\), \(260\), \(300\) and \(800\). The minimum is \(240\) at \((6, 12)\), where the two \(\geq \) constraints are
+tight.
+</p><!-- l. 570 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>nchoosek(1:5, 3) </span>and <span class='cmtt-10x-x-109'>A(:, B) </span><span class='cmsy-10x-x-109'>∖</span><span class='cmtt-10x-x-109'> b</span>.
+</p>
+</div>
+<!-- l. 571 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 573 --><div class='crosslinks'><p class='noindent'>[<a href='orsu10.html'>next</a>] [<a href='orsu8.html'>prev</a>] [<a href='orsu8.html#tailorsu8.html'>prev-tail</a>] [<a href='orsu9.html'>front</a>] [<a href='orse2.html#orsu9.html'>up</a>] </p></div>
+<!-- l. 573 --><p class='noindent'><a id='tailorsu9.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="orsu8.html">&larr; Previous</a><a class="up" href="orse2.html#orsu9.html">Contents</a><a class="next" href="orsu10.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="operations-research/2-4-geometry-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
