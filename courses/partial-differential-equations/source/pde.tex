@@ -2834,6 +2834,262 @@ Using $G(0, y) = -\frac1{2\pi}\log|y|$ for the unit disc, find the value at the 
 $u(0) = \int G(0, y)\,dy = -\frac1{2\pi}\int_0^1\log r\cdot 2\pi r\,dr = -\int_0^1r\log r\,dr = \frac14$, and $(1 - 0)/4 = \frac14$; also $-\Delta\frac{1 - r^2}4 = -\frac14\bigl(-2 - 2\bigr) = 1$.
 \end{solution}
 
+%======================================================================
+\section{Fourier and Laplace Transform Methods}
+\label{sec:transforms}
+
+On a bounded interval, separation of variables expands the solution in a Fourier series. On the whole line the discrete frequencies $k\pi/L$ fill out a continuum, and the series becomes the \textbf{Fourier transform}. Its power for linear equations with constant coefficients is that it turns
+differentiation into multiplication: a partial differential equation in $(x, t)$ becomes an ordinary differential equation in $t$ for each frequency, which can be solved explicitly. The \textbf{Laplace transform} does the same in time, and is the tool for problems driven by boundary data.
+
+\subsection{The Fourier transform}
+\label{ssec:fouriertransform}
+
+For an integrable function $f$ on $\mathbb R$, define
+\[
+\hat f(\xi) = \int_{-\infty}^\infty f(x)e^{-ix\xi}\,dx, \qquad \check g(x) = \frac1{2\pi}\int_{-\infty}^\infty g(\xi)e^{ix\xi}\,d\xi .
+\]
+The basic rules follow from integration by parts and changes of variable: for suitable $f$ and $g$,
+\begin{itemize}
+\item $\widehat{f'}(\xi) = i\xi\hat f(\xi)$ and $\widehat{xf}(\xi) = i\hat f'(\xi)$: smoothness of $f$ is decay of $\hat f$, and decay of $f$ is smoothness of $\hat f$;
+\item $\widehat{f(\cdot - a)}(\xi) = e^{-ia\xi}\hat f(\xi)$ and $\widehat{f(\lambda\,\cdot)}(\xi) = |\lambda|^{-1}\hat f(\xi/\lambda)$;
+\item $\widehat{f * g} = \hat f\,\hat g$, where $(f * g)(x) = \int f(x - y)g(y)\,dy$;
+\item $\widehat{e^{-ax^2}} = \sqrt{\pi/a}\,e^{-\xi^2/4a}$ and $\widehat{e^{-a|x|}} = 2a/(a^2 + \xi^2)$ (Software~\ref{sw:transforms}).
+\end{itemize}
+By the scaling rule, a narrow function has a wide transform and conversely; for the Gaussian the product of the widths is fixed, which is the uncertainty principle of quantum mechanics in its simplest form.
+
+\begin{thm}[Inversion and Plancherel]
+\label{thm:inversion}
+If $f$ and $\hat f$ are both integrable, then $f = (\hat f)\check{}$ at every point where $f$ is continuous. If moreover $f$ is square-integrable, then
+\[
+\int_{-\infty}^\infty|\hat f(\xi)|^2\,d\xi = 2\pi\int_{-\infty}^\infty|f(x)|^2\,dx .
+\]
+\end{thm}
+
+\begin{proof}
+Insert a Gaussian damping factor. By Fubini and the Gaussian transform,
+\[
+\frac1{2\pi}\int\hat f(\xi)e^{ix\xi}e^{-\varepsilon\xi^2}\,d\xi = \int f(y)\,\frac1{2\pi}\int e^{i(x - y)\xi - \varepsilon\xi^2}\,d\xi\,dy = \int f(y)\,\Phi(x - y, \varepsilon)\,dy ,
+\]
+where $\Phi(\cdot, \varepsilon) = e^{-x^2/4\varepsilon}/\sqrt{4\pi\varepsilon}$ is the heat kernel with $\kappa = 1$. As $\varepsilon \to 0$ the left side tends to $(\hat f)\check{}(x)$ by dominated convergence, since $\hat f$ is integrable, and the right side tends to $f(x)$ at points of continuity, by the
+proof of Theorem~\ref{thm:heatcauchy}. For Plancherel, apply inversion to $f * \tilde f$ with $\tilde f(x) = \overline{f(-x)}$, whose transform is $|\hat f|^2$, and evaluate at $x = 0$: $\int|f|^2 = (f * \tilde f)(0) = \frac1{2\pi}\int|\hat f|^2$.
+\end{proof}
+
+Plancherel's theorem is the continuous form of Parseval's identity, and it allows the transform to be extended by continuity to every square-integrable function. In $\mathbb R^n$ the same definitions hold with $x\cdot\xi$ in the exponent and $(2\pi)^{-n}$ in the inverse, and $\widehat{\partial_jf} = i\xi_j\hat f$, so $\widehat{\Delta f} = -|\xi|^2\hat f$.
+
+\subsection{Solving equations on the line}
+\label{ssec:transformsolve}
+
+\textbf{Heat.} Transforming $u_t = \kappa u_{xx}$ in $x$ gives $\hat u_t = -\kappa\xi^2\hat u$ for each $\xi$, so $\hat u(\xi, t) = \hat g(\xi)e^{-\kappa\xi^2t}$. The factor $e^{-\kappa\xi^2t}$ is the transform of the heat kernel $\Phi(\cdot, t)$, so by the convolution rule $u = \Phi(\cdot, t) * g$, which is Theorem~\ref{thm:heatcauchy} found
+without guessing. High frequencies are damped fastest, which is the smoothing effect in Fourier language.
+
+\textbf{Waves.} For $u_{tt} = c^2u_{xx}$, $\hat u_{tt} = -c^2\xi^2\hat u$, so $\hat u = \hat f\cos c\xi t + \hat g\,\frac{\sin c\xi t}{c\xi}$. Since $\cos c\xi t = \frac12(e^{ic\xi t} + e^{-ic\xi t})$, the shift rule turns the first term into $\frac12(f(x + ct) + f(x - ct))$, and $\frac{\sin c\xi t}{c\xi}$ is the transform of
+$\frac1{2c}$ times the indicator of $[-ct, ct]$, which gives the integral term of d'Alembert's formula. No frequency is damped: the transform simply multiplies by a phase.
+
+\textbf{Laplace's equation in the half-plane.} For $u_{xx} + u_{yy} = 0$ in $y > 0$ with $u(x, 0) = g(x)$, $\hat u_{yy} = \xi^2\hat u$, and the bounded solution is $\hat u = \hat g(\xi)e^{-|\xi|y}$. By the transform of $e^{-a|x|}$ and the symmetry between $f$ and $\hat f$, $e^{-|\xi|y}$ is the transform of $\frac{y}{\pi(x^2 + y^2)}$, so
+$u$ is the convolution of $g$ with the half-plane Poisson kernel of Section~\ref{sec:green}.
+
+\textbf{Dispersion.} The equation $u_t + u_{xxx} = 0$, the linear part of the Korteweg--de Vries equation for shallow-water waves, transforms to $\hat u_t = i\xi^3\hat u$, so $\hat u = \hat g(\xi)e^{i\xi^3t}$: again only a phase. But now a plane wave $e^{i(kx - \omega t)}$ is a solution only if $\omega = -k^3$, the
+\textbf{dispersion relation}. Its phase velocity $\omega/k = -k^2$ and its \textbf{group velocity} $d\omega/dk = -3k^2$, the speed of a packet of waves near wavenumber $k$, depend on $k$: different frequencies travel at different speeds, and an initial hump breaks up into a wave train (Figure~\ref{fig:dispersion}). The
+solution is the convolution of $g$ with $(3t)^{-1/3}\operatorname{Ai}\bigl(x/(3t)^{1/3}\bigr)$, where $\operatorname{Ai}$ is the Airy function, and its amplitude decays like $t^{-1/3}$ although no energy is lost: $\int u^2\,dx$ is constant by Plancherel, since $|\hat u| = |\hat g|$.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!5,rounded corners=4pt] (-6.0,-5.3) rectangle (6.0,1.55);
+\draw[blue!60!black,thick] (-5.695,-0.000) -- (-5.640,0.000) -- (-5.585,-0.000) -- (-5.530,0.000) -- (-5.475,-0.000) -- (-5.420,0.000) -- (-5.365,-0.000) -- (-5.310,-0.000) -- (-5.255,-0.000) -- (-5.200,-0.000) -- (-5.145,0.000) -- (-5.090,-0.000) -- (-5.036,-0.000) -- (-4.981,-0.000) -- (-4.926,-0.000) -- (-4.871,0.000) -- (-4.816,0.000) -- (-4.761,0.000) -- (-4.706,0.000) -- (-4.651,0.000) -- (-4.596,-0.000) -- (-4.541,0.000) -- (-4.486,0.000) -- (-4.431,-0.000) -- (-4.376,0.000) -- (-4.321,0.000) -- (-4.267,-0.000) -- (-4.212,0.000) -- (-4.157,-0.000) -- (-4.102,0.000) -- (-4.047,0.000) -- (-3.992,-0.000) -- (-3.937,0.000) -- (-3.882,0.000) -- (-3.827,-0.000) -- (-3.772,-0.000) -- (-3.717,0.000) -- (-3.662,-0.000) -- (-3.607,-0.000) -- (-3.552,-0.000) -- (-3.497,-0.000) -- (-3.443,-0.000) -- (-3.388,0.000) -- (-3.333,-0.000) -- (-3.278,0.000) -- (-3.223,-0.000) -- (-3.168,-0.000) -- (-3.113,-0.000) -- (-3.058,0.000) -- (-3.003,0.000) -- (-2.948,0.000) -- (-2.893,-0.000) -- (-2.838,-0.000) -- (-2.783,0.000) -- (-2.728,0.000) -- (-2.673,-0.000) -- (-2.619,0.000) -- (-2.564,0.000) -- (-2.509,-0.000) -- (-2.454,0.000) -- (-2.399,-0.000) -- (-2.344,0.000) -- (-2.289,-0.000) -- (-2.234,0.000) -- (-2.179,0.000) -- (-2.124,0.000) -- (-2.069,-0.000) -- (-2.014,0.000) -- (-1.959,0.000) -- (-1.904,-0.000) -- (-1.850,-0.000) -- (-1.795,0.000) -- (-1.740,0.000) -- (-1.685,-0.000) -- (-1.630,0.000) -- (-1.575,-0.000) -- (-1.520,-0.000) -- (-1.465,0.000) -- (-1.410,-0.000) -- (-1.355,0.000) -- (-1.300,-0.000) -- (-1.245,-0.000) -- (-1.190,0.000) -- (-1.135,0.000) -- (-1.080,0.000) -- (-1.026,0.000) -- (-0.971,0.000) -- (-0.916,0.000) -- (-0.861,-0.000) -- (-0.806,0.000) -- (-0.751,0.000) -- (-0.696,0.000) -- (-0.641,0.000) -- (-0.586,0.000) -- (-0.531,0.000) -- (-0.476,0.000) -- (-0.421,0.000) -- (-0.366,0.000) -- (-0.311,0.000) -- (-0.256,-0.000) -- (-0.202,-0.000) -- (-0.147,0.000) -- (-0.092,0.000) -- (-0.037,0.000) -- (0.018,0.000) -- (0.073,-0.000) -- (0.128,0.000) -- (0.183,-0.000) -- (0.238,-0.000) -- (0.293,-0.000) -- (0.348,-0.000) -- (0.403,0.000) -- (0.458,0.000) -- (0.513,-0.000) -- (0.567,-0.000) -- (0.622,-0.000) -- (0.677,-0.000) -- (0.732,0.000) -- (0.787,-0.000) -- (0.842,-0.000) -- (0.897,0.000) -- (0.952,-0.000) -- (1.007,0.000) -- (1.062,-0.000) -- (1.117,-0.000) -- (1.172,0.000) -- (1.227,-0.000) -- (1.282,-0.000) -- (1.337,0.000) -- (1.391,0.000) -- (1.446,0.000) -- (1.501,0.000) -- (1.556,-0.000) -- (1.611,0.000) -- (1.666,-0.000) -- (1.721,-0.000) -- (1.776,0.000) -- (1.831,0.000) -- (1.886,-0.000) -- (1.941,0.000) -- (1.996,0.000) -- (2.051,0.000) -- (2.106,0.000) -- (2.160,0.000) -- (2.215,0.000) -- (2.270,0.000) -- (2.325,0.000) -- (2.380,0.000) -- (2.435,0.000) -- (2.490,0.000) -- (2.545,0.000) -- (2.600,0.000) -- (2.655,0.000) -- (2.710,0.000) -- (2.765,0.000) -- (2.820,0.000) -- (2.875,0.000) -- (2.930,0.000) -- (2.984,0.000) -- (3.039,0.000) -- (3.094,0.001) -- (3.149,0.002) -- (3.204,0.005) -- (3.259,0.011) -- (3.314,0.024) -- (3.369,0.048) -- (3.424,0.089) -- (3.479,0.153) -- (3.534,0.248) -- (3.589,0.375) -- (3.644,0.530) -- (3.699,0.701) -- (3.754,0.867) -- (3.808,1.002) -- (3.863,1.084) -- (3.918,1.096) -- (3.973,1.036) -- (4.028,0.916) -- (4.083,0.758) -- (4.138,0.586) -- (4.193,0.424) -- (4.248,0.287) -- (4.303,0.181) -- (4.358,0.107) -- (4.413,0.059) -- (4.468,0.031) -- (4.523,0.015) -- (4.577,0.007) -- (4.632,0.003) -- (4.687,0.001) -- (4.742,0.000) -- (4.797,0.000) -- (4.852,0.000) -- (4.907,0.000) -- (4.962,0.000) -- (5.017,0.000) -- (5.072,0.000) -- (5.127,0.000) -- (5.182,0.000) -- (5.237,0.000) -- (5.292,0.000) -- (5.347,0.000) -- (5.401,0.000) -- (5.456,0.000) -- (5.511,0.000) -- (5.566,0.000) -- (5.621,0.000) -- (5.676,0.000);
+\draw[black!40] (-5.7,-0.0) -- (5.7,-0.0);
+\node[font=\scriptsize,anchor=west] at (-5.9,0.55) {$t = 0$};
+\draw[blue!60!black,thick] (-5.695,-1.477) -- (-5.640,-1.486) -- (-5.585,-1.499) -- (-5.530,-1.514) -- (-5.475,-1.524) -- (-5.420,-1.526) -- (-5.365,-1.520) -- (-5.310,-1.506) -- (-5.255,-1.490) -- (-5.200,-1.477) -- (-5.145,-1.471) -- (-5.090,-1.475) -- (-5.036,-1.487) -- (-4.981,-1.504) -- (-4.926,-1.520) -- (-4.871,-1.530) -- (-4.816,-1.531) -- (-4.761,-1.522) -- (-4.706,-1.506) -- (-4.651,-1.487) -- (-4.596,-1.472) -- (-4.541,-1.465) -- (-4.486,-1.469) -- (-4.431,-1.483) -- (-4.376,-1.502) -- (-4.321,-1.521) -- (-4.267,-1.535) -- (-4.212,-1.538) -- (-4.157,-1.530) -- (-4.102,-1.513) -- (-4.047,-1.492) -- (-3.992,-1.472) -- (-3.937,-1.460) -- (-3.882,-1.459) -- (-3.827,-1.470) -- (-3.772,-1.490) -- (-3.717,-1.513) -- (-3.662,-1.534) -- (-3.607,-1.545) -- (-3.552,-1.545) -- (-3.497,-1.532) -- (-3.443,-1.510) -- (-3.388,-1.485) -- (-3.333,-1.462) -- (-3.278,-1.450) -- (-3.223,-1.450) -- (-3.168,-1.463) -- (-3.113,-1.487) -- (-3.058,-1.514) -- (-3.003,-1.539) -- (-2.948,-1.555) -- (-2.893,-1.557) -- (-2.838,-1.545) -- (-2.783,-1.521) -- (-2.728,-1.492) -- (-2.673,-1.463) -- (-2.619,-1.443) -- (-2.564,-1.436) -- (-2.509,-1.444) -- (-2.454,-1.465) -- (-2.399,-1.496) -- (-2.344,-1.528) -- (-2.289,-1.555) -- (-2.234,-1.570) -- (-2.179,-1.570) -- (-2.124,-1.554) -- (-2.069,-1.525) -- (-2.014,-1.490) -- (-1.959,-1.456) -- (-1.904,-1.430) -- (-1.850,-1.419) -- (-1.795,-1.425) -- (-1.740,-1.447) -- (-1.685,-1.481) -- (-1.630,-1.519) -- (-1.575,-1.555) -- (-1.520,-1.581) -- (-1.465,-1.592) -- (-1.410,-1.584) -- (-1.355,-1.560) -- (-1.300,-1.523) -- (-1.245,-1.480) -- (-1.190,-1.440) -- (-1.135,-1.410) -- (-1.080,-1.396) -- (-1.026,-1.401) -- (-0.971,-1.424) -- (-0.916,-1.462) -- (-0.861,-1.507) -- (-0.806,-1.553) -- (-0.751,-1.591) -- (-0.696,-1.614) -- (-0.641,-1.619) -- (-0.586,-1.603) -- (-0.531,-1.570) -- (-0.476,-1.524) -- (-0.421,-1.473) -- (-0.366,-1.424) -- (-0.311,-1.386) -- (-0.256,-1.365) -- (-0.202,-1.364) -- (-0.147,-1.384) -- (-0.092,-1.422) -- (-0.037,-1.473) -- (0.018,-1.529) -- (0.073,-1.583) -- (0.128,-1.627) -- (0.183,-1.654) -- (0.238,-1.661) -- (0.293,-1.645) -- (0.348,-1.610) -- (0.403,-1.559) -- (0.458,-1.499) -- (0.513,-1.437) -- (0.567,-1.381) -- (0.622,-1.338) -- (0.677,-1.313) -- (0.732,-1.311) -- (0.787,-1.331) -- (0.842,-1.371) -- (0.897,-1.427) -- (0.952,-1.493) -- (1.007,-1.562) -- (1.062,-1.627) -- (1.117,-1.680) -- (1.172,-1.716) -- (1.227,-1.731) -- (1.282,-1.723) -- (1.337,-1.693) -- (1.391,-1.644) -- (1.446,-1.579) -- (1.501,-1.505) -- (1.556,-1.429) -- (1.611,-1.356) -- (1.666,-1.294) -- (1.721,-1.246) -- (1.776,-1.218) -- (1.831,-1.212) -- (1.886,-1.228) -- (1.941,-1.265) -- (1.996,-1.320) -- (2.051,-1.391) -- (2.106,-1.470) -- (2.160,-1.555) -- (2.215,-1.638) -- (2.270,-1.715) -- (2.325,-1.782) -- (2.380,-1.834) -- (2.435,-1.868) -- (2.490,-1.883) -- (2.545,-1.879) -- (2.600,-1.854) -- (2.655,-1.812) -- (2.710,-1.754) -- (2.765,-1.682) -- (2.820,-1.601) -- (2.875,-1.512) -- (2.930,-1.421) -- (2.984,-1.329) -- (3.039,-1.241) -- (3.094,-1.158) -- (3.149,-1.083) -- (3.204,-1.018) -- (3.259,-0.963) -- (3.314,-0.919) -- (3.369,-0.887) -- (3.424,-0.866) -- (3.479,-0.856) -- (3.534,-0.856) -- (3.589,-0.865) -- (3.644,-0.881) -- (3.699,-0.904) -- (3.754,-0.933) -- (3.808,-0.965) -- (3.863,-1.000) -- (3.918,-1.037) -- (3.973,-1.075) -- (4.028,-1.113) -- (4.083,-1.150) -- (4.138,-1.186) -- (4.193,-1.220) -- (4.248,-1.252) -- (4.303,-1.282) -- (4.358,-1.309) -- (4.413,-1.334) -- (4.468,-1.357) -- (4.523,-1.377) -- (4.577,-1.395) -- (4.632,-1.411) -- (4.687,-1.425) -- (4.742,-1.437) -- (4.797,-1.447) -- (4.852,-1.456) -- (4.907,-1.463) -- (4.962,-1.470) -- (5.017,-1.475) -- (5.072,-1.480) -- (5.127,-1.484) -- (5.182,-1.487) -- (5.237,-1.489) -- (5.292,-1.491) -- (5.347,-1.493) -- (5.401,-1.495) -- (5.456,-1.496) -- (5.511,-1.497) -- (5.566,-1.497) -- (5.621,-1.498) -- (5.676,-1.498);
+\draw[black!40] (-5.7,-1.5) -- (5.7,-1.5);
+\node[font=\scriptsize,anchor=west] at (-5.9,-0.95) {$t = 1$};
+\draw[blue!60!black,thick] (-5.695,-2.961) -- (-5.640,-2.993) -- (-5.585,-3.024) -- (-5.530,-3.055) -- (-5.475,-3.083) -- (-5.420,-3.108) -- (-5.365,-3.128) -- (-5.310,-3.143) -- (-5.255,-3.152) -- (-5.200,-3.154) -- (-5.145,-3.150) -- (-5.090,-3.139) -- (-5.036,-3.123) -- (-4.981,-3.101) -- (-4.926,-3.076) -- (-4.871,-3.047) -- (-4.816,-3.015) -- (-4.761,-2.984) -- (-4.706,-2.952) -- (-4.651,-2.923) -- (-4.596,-2.896) -- (-4.541,-2.874) -- (-4.486,-2.856) -- (-4.431,-2.844) -- (-4.376,-2.838) -- (-4.321,-2.838) -- (-4.267,-2.844) -- (-4.212,-2.856) -- (-4.157,-2.874) -- (-4.102,-2.897) -- (-4.047,-2.923) -- (-3.992,-2.952) -- (-3.937,-2.984) -- (-3.882,-3.015) -- (-3.827,-3.047) -- (-3.772,-3.077) -- (-3.717,-3.104) -- (-3.662,-3.128) -- (-3.607,-3.147) -- (-3.552,-3.162) -- (-3.497,-3.170) -- (-3.443,-3.173) -- (-3.388,-3.170) -- (-3.333,-3.161) -- (-3.278,-3.147) -- (-3.223,-3.128) -- (-3.168,-3.104) -- (-3.113,-3.077) -- (-3.058,-3.048) -- (-3.003,-3.016) -- (-2.948,-2.984) -- (-2.893,-2.953) -- (-2.838,-2.922) -- (-2.783,-2.895) -- (-2.728,-2.870) -- (-2.673,-2.849) -- (-2.619,-2.833) -- (-2.564,-2.821) -- (-2.509,-2.816) -- (-2.454,-2.815) -- (-2.399,-2.820) -- (-2.344,-2.830) -- (-2.289,-2.846) -- (-2.234,-2.865) -- (-2.179,-2.889) -- (-2.124,-2.916) -- (-2.069,-2.945) -- (-2.014,-2.977) -- (-1.959,-3.008) -- (-1.904,-3.040) -- (-1.850,-3.071) -- (-1.795,-3.100) -- (-1.740,-3.126) -- (-1.685,-3.149) -- (-1.630,-3.169) -- (-1.575,-3.184) -- (-1.520,-3.194) -- (-1.465,-3.200) -- (-1.410,-3.201) -- (-1.355,-3.196) -- (-1.300,-3.187) -- (-1.245,-3.174) -- (-1.190,-3.156) -- (-1.135,-3.134) -- (-1.080,-3.109) -- (-1.026,-3.082) -- (-0.971,-3.052) -- (-0.916,-3.022) -- (-0.861,-2.990) -- (-0.806,-2.959) -- (-0.751,-2.928) -- (-0.696,-2.899) -- (-0.641,-2.872) -- (-0.586,-2.848) -- (-0.531,-2.826) -- (-0.476,-2.809) -- (-0.421,-2.795) -- (-0.366,-2.785) -- (-0.311,-2.779) -- (-0.256,-2.778) -- (-0.202,-2.781) -- (-0.147,-2.788) -- (-0.092,-2.799) -- (-0.037,-2.814) -- (0.018,-2.832) -- (0.073,-2.854) -- (0.128,-2.878) -- (0.183,-2.904) -- (0.238,-2.933) -- (0.293,-2.962) -- (0.348,-2.992) -- (0.403,-3.023) -- (0.458,-3.053) -- (0.513,-3.082) -- (0.567,-3.111) -- (0.622,-3.137) -- (0.677,-3.162) -- (0.732,-3.184) -- (0.787,-3.204) -- (0.842,-3.221) -- (0.897,-3.235) -- (0.952,-3.245) -- (1.007,-3.252) -- (1.062,-3.256) -- (1.117,-3.257) -- (1.172,-3.254) -- (1.227,-3.248) -- (1.282,-3.238) -- (1.337,-3.226) -- (1.391,-3.211) -- (1.446,-3.194) -- (1.501,-3.174) -- (1.556,-3.152) -- (1.611,-3.129) -- (1.666,-3.104) -- (1.721,-3.078) -- (1.776,-3.051) -- (1.831,-3.023) -- (1.886,-2.995) -- (1.941,-2.967) -- (1.996,-2.939) -- (2.051,-2.912) -- (2.106,-2.885) -- (2.160,-2.859) -- (2.215,-2.834) -- (2.270,-2.810) -- (2.325,-2.788) -- (2.380,-2.767) -- (2.435,-2.748) -- (2.490,-2.730) -- (2.545,-2.715) -- (2.600,-2.700) -- (2.655,-2.688) -- (2.710,-2.677) -- (2.765,-2.668) -- (2.820,-2.661) -- (2.875,-2.656) -- (2.930,-2.652) -- (2.984,-2.650) -- (3.039,-2.649) -- (3.094,-2.649) -- (3.149,-2.651) -- (3.204,-2.654) -- (3.259,-2.659) -- (3.314,-2.664) -- (3.369,-2.670) -- (3.424,-2.677) -- (3.479,-2.685) -- (3.534,-2.694) -- (3.589,-2.703) -- (3.644,-2.712) -- (3.699,-2.722) -- (3.754,-2.732) -- (3.808,-2.743) -- (3.863,-2.753) -- (3.918,-2.764) -- (3.973,-2.774) -- (4.028,-2.785) -- (4.083,-2.796) -- (4.138,-2.806) -- (4.193,-2.816) -- (4.248,-2.826) -- (4.303,-2.836) -- (4.358,-2.845) -- (4.413,-2.855) -- (4.468,-2.864) -- (4.523,-2.872) -- (4.577,-2.880) -- (4.632,-2.888) -- (4.687,-2.896) -- (4.742,-2.903) -- (4.797,-2.910) -- (4.852,-2.916) -- (4.907,-2.922) -- (4.962,-2.928) -- (5.017,-2.934) -- (5.072,-2.939) -- (5.127,-2.944) -- (5.182,-2.948) -- (5.237,-2.952) -- (5.292,-2.956) -- (5.347,-2.960) -- (5.401,-2.963) -- (5.456,-2.966) -- (5.511,-2.969) -- (5.566,-2.972) -- (5.621,-2.975) -- (5.676,-2.977);
+\draw[black!40] (-5.7,-3.0) -- (5.7,-3.0);
+\node[font=\scriptsize,anchor=west] at (-5.9,-2.45) {$t = 8$};
+\draw[blue!60!black,thick] (-5.695,-4.360) -- (-5.640,-4.360) -- (-5.585,-4.362) -- (-5.530,-4.366) -- (-5.475,-4.371) -- (-5.420,-4.378) -- (-5.365,-4.387) -- (-5.310,-4.397) -- (-5.255,-4.408) -- (-5.200,-4.421) -- (-5.145,-4.435) -- (-5.090,-4.449) -- (-5.036,-4.464) -- (-4.981,-4.480) -- (-4.926,-4.495) -- (-4.871,-4.511) -- (-4.816,-4.527) -- (-4.761,-4.542) -- (-4.706,-4.557) -- (-4.651,-4.572) -- (-4.596,-4.585) -- (-4.541,-4.598) -- (-4.486,-4.609) -- (-4.431,-4.619) -- (-4.376,-4.628) -- (-4.321,-4.635) -- (-4.267,-4.641) -- (-4.212,-4.645) -- (-4.157,-4.648) -- (-4.102,-4.649) -- (-4.047,-4.648) -- (-3.992,-4.646) -- (-3.937,-4.642) -- (-3.882,-4.636) -- (-3.827,-4.629) -- (-3.772,-4.621) -- (-3.717,-4.611) -- (-3.662,-4.601) -- (-3.607,-4.589) -- (-3.552,-4.576) -- (-3.497,-4.563) -- (-3.443,-4.548) -- (-3.388,-4.534) -- (-3.333,-4.519) -- (-3.278,-4.503) -- (-3.223,-4.488) -- (-3.168,-4.473) -- (-3.113,-4.458) -- (-3.058,-4.443) -- (-3.003,-4.429) -- (-2.948,-4.416) -- (-2.893,-4.403) -- (-2.838,-4.391) -- (-2.783,-4.381) -- (-2.728,-4.371) -- (-2.673,-4.363) -- (-2.619,-4.355) -- (-2.564,-4.349) -- (-2.509,-4.345) -- (-2.454,-4.342) -- (-2.399,-4.340) -- (-2.344,-4.339) -- (-2.289,-4.340) -- (-2.234,-4.343) -- (-2.179,-4.346) -- (-2.124,-4.351) -- (-2.069,-4.357) -- (-2.014,-4.365) -- (-1.959,-4.373) -- (-1.904,-4.383) -- (-1.850,-4.393) -- (-1.795,-4.404) -- (-1.740,-4.416) -- (-1.685,-4.429) -- (-1.630,-4.442) -- (-1.575,-4.456) -- (-1.520,-4.470) -- (-1.465,-4.485) -- (-1.410,-4.499) -- (-1.355,-4.514) -- (-1.300,-4.528) -- (-1.245,-4.542) -- (-1.190,-4.556) -- (-1.135,-4.570) -- (-1.080,-4.583) -- (-1.026,-4.595) -- (-0.971,-4.607) -- (-0.916,-4.618) -- (-0.861,-4.629) -- (-0.806,-4.638) -- (-0.751,-4.647) -- (-0.696,-4.655) -- (-0.641,-4.662) -- (-0.586,-4.668) -- (-0.531,-4.672) -- (-0.476,-4.676) -- (-0.421,-4.679) -- (-0.366,-4.680) -- (-0.311,-4.681) -- (-0.256,-4.680) -- (-0.202,-4.679) -- (-0.147,-4.676) -- (-0.092,-4.673) -- (-0.037,-4.668) -- (0.018,-4.663) -- (0.073,-4.656) -- (0.128,-4.649) -- (0.183,-4.641) -- (0.238,-4.633) -- (0.293,-4.623) -- (0.348,-4.613) -- (0.403,-4.603) -- (0.458,-4.592) -- (0.513,-4.580) -- (0.567,-4.568) -- (0.622,-4.556) -- (0.677,-4.544) -- (0.732,-4.531) -- (0.787,-4.518) -- (0.842,-4.505) -- (0.897,-4.492) -- (0.952,-4.479) -- (1.007,-4.467) -- (1.062,-4.454) -- (1.117,-4.441) -- (1.172,-4.429) -- (1.227,-4.417) -- (1.282,-4.405) -- (1.337,-4.393) -- (1.391,-4.382) -- (1.446,-4.372) -- (1.501,-4.361) -- (1.556,-4.351) -- (1.611,-4.342) -- (1.666,-4.333) -- (1.721,-4.325) -- (1.776,-4.317) -- (1.831,-4.309) -- (1.886,-4.303) -- (1.941,-4.296) -- (1.996,-4.291) -- (2.051,-4.285) -- (2.106,-4.281) -- (2.160,-4.277) -- (2.215,-4.273) -- (2.270,-4.270) -- (2.325,-4.267) -- (2.380,-4.265) -- (2.435,-4.264) -- (2.490,-4.263) -- (2.545,-4.262) -- (2.600,-4.262) -- (2.655,-4.262) -- (2.710,-4.263) -- (2.765,-4.264) -- (2.820,-4.265) -- (2.875,-4.267) -- (2.930,-4.269) -- (2.984,-4.272) -- (3.039,-4.274) -- (3.094,-4.277) -- (3.149,-4.280) -- (3.204,-4.284) -- (3.259,-4.288) -- (3.314,-4.291) -- (3.369,-4.296) -- (3.424,-4.300) -- (3.479,-4.304) -- (3.534,-4.309) -- (3.589,-4.313) -- (3.644,-4.318) -- (3.699,-4.322) -- (3.754,-4.327) -- (3.808,-4.332) -- (3.863,-4.337) -- (3.918,-4.342) -- (3.973,-4.346) -- (4.028,-4.351) -- (4.083,-4.356) -- (4.138,-4.361) -- (4.193,-4.366) -- (4.248,-4.370) -- (4.303,-4.375) -- (4.358,-4.380) -- (4.413,-4.384) -- (4.468,-4.389) -- (4.523,-4.393) -- (4.577,-4.397) -- (4.632,-4.401) -- (4.687,-4.405) -- (4.742,-4.409) -- (4.797,-4.413) -- (4.852,-4.417) -- (4.907,-4.421) -- (4.962,-4.424) -- (5.017,-4.428) -- (5.072,-4.431) -- (5.127,-4.434) -- (5.182,-4.437) -- (5.237,-4.440) -- (5.292,-4.443) -- (5.347,-4.446) -- (5.401,-4.449) -- (5.456,-4.451) -- (5.511,-4.454) -- (5.566,-4.456) -- (5.621,-4.459) -- (5.676,-4.461);
+\draw[black!40] (-5.7,-4.5) -- (5.7,-4.5);
+\node[font=\scriptsize,anchor=west] at (-5.9,-3.95) {$t = 27$};
+\draw[<-,red!70!black] (-5.6,-5.0) -- (-3.0,-5.0) node[right,font=\scriptsize] {waves travel left, short waves fastest};
+\node[font=\scriptsize,black!60] at (3.9,-5.0) {$x = 0$};
+\draw[black!30,dashed] (3.9,-4.85) -- (3.9,1.3);
+\end{tikzpicture}
+\caption{Dispersion in $u_t + u_{xxx} = 0$, computed by the fast Fourier transform from $u(x, 0) = e^{-x^2}$, on $-32 \leq x \leq 6$. The hump moves left and spreads into an oscillating wave train: short waves have the largest group velocity $3k^2$ and lead. The peak decays like $t^{-1/3}$ while $\int u^2$ stays at
+$\sqrt{\pi/2}$.}
+\label{fig:dispersion}
+\end{figure}
+
+The same method solves any linear equation with constant coefficients on $\mathbb R^n$: the equation $P(\partial_t, \nabla)u = 0$ becomes the ordinary differential equation $P(\partial_t, i\xi)\hat u = 0$. Whether the problem is well posed depends on the roots $\tau(\xi)$ of $P(\tau, i\xi) = 0$: if
+$\operatorname{Re}\tau(\xi)$ is bounded above, perturbations are amplified by at most a fixed factor; if it is unbounded above, as for the backward heat equation, where $\tau = \kappa\xi^2$, high frequencies grow without bound, which is Hadamard's instability of Section~\ref{sec:classification} seen in frequency.
+
+\subsection{The Laplace transform}
+\label{ssec:laplacetransform}
+
+For a function on $t \geq 0$ of at most exponential growth, the \textbf{Laplace transform} is
+\[
+\bar f(s) = \int_0^\infty f(t)e^{-st}\,dt \quad (\operatorname{Re}s \text{ large}) ,
+\]
+with $\overline{f'}(s) = s\bar f(s) - f(0)$ and $\overline{f * g} = \bar f\,\bar g$ for the one-sided convolution $\int_0^tf(t - \tau)g(\tau)\,d\tau$. It is the natural tool in time because it absorbs the initial value, and it handles boundary data that switch on at $t = 0$.
+
+\begin{exa}
+\label{ex:laplaceheat}
+Let the end $x = 0$ of a half-infinite rod, initially at temperature $0$, be held at temperature $h(t)$ from $t = 0$: $u_t = \kappa u_{xx}$ for $x > 0$, $u(x, 0) = 0$, $u(0, t) = h(t)$. Transforming in $t$, $s\bar u = \kappa\bar u_{xx}$, so $\bar u = A(s)e^{-x\sqrt{s/\kappa}}$ for a solution bounded in $x$,
+and the boundary condition gives
+\[
+\bar u(x, s) = \bar h(s)\,e^{-x\sqrt{s/\kappa}} .
+\]
+For $h = 1$, $\bar h = 1/s$, and the inverse transform of $e^{-x\sqrt{s/\kappa}}/s$ is $\operatorname{erfc}\bigl(x/\sqrt{4\kappa t}\bigr)$ (Software~\ref{sw:laplace}); this is $1$ minus the image solution $\operatorname{erf}(x/\sqrt{4\kappa t})$ of a problem in Section~\ref{sec:green}, as it must be, since $1 - u$ starts at $1$ and is held at $0$ at the end. For general $h$, the convolution rule gives \textbf{Duhamel's formula}
+\[
+u(x, t) = \int_0^th(\tau)\,\frac{\partial}{\partial t}\operatorname{erfc}\frac{x}{\sqrt{4\kappa(t - \tau)}}\,d\tau ,
+\]
+a superposition of responses to the switching on of the boundary temperature at each earlier time.
+\end{exa}
+
+The inverse Laplace transform is the contour integral $f(t) = \frac1{2\pi i}\int_{\gamma - i\infty}^{\gamma + i\infty}\bar f(s)e^{st}\,ds$, the Fourier inversion formula along a vertical line. In practice it is found from tables, from the residues of $\bar f$, or numerically by deforming the contour into the left half-plane so that $e^{st}$ decays
+rapidly (Talbot's method).
+
+\subsection{Transforms in software}
+\label{ssec:software10}
+
+\begin{software}[Transform pairs]
+\label{sw:transforms}
+Fourier transforms computed symbolically from the definition, with the convention $\hat f(\xi) = \int f(x)e^{-ix\xi}\,dx$:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> x, xi = sp.symbols('x xi', real=True)
+>>> a, t, k, s = sp.symbols('a t kappa s', positive=True)
+>>> def FT(f):                     # f-hat(xi) = int f(x) e^{-i x xi} dx
+...     return sp.simplify(sp.integrate(f * sp.exp(-sp.I*x*xi),
+...                                     (x, -sp.oo, sp.oo)))
+...
+>>> FT(sp.exp(-a*x**2))                    # a Gaussian goes to a Gaussian
+sqrt(pi)*exp(-xi**2/(4*a))/sqrt(a)
+>>> sp.simplify(2 * sp.integrate(sp.exp(-a*x) * sp.cos(x*xi), (x, 0, sp.oo),
+...                              conds='none'))   # e^{-a|x|}, even
+2*a/(a**2 + xi**2)
+>>> heat = sp.exp(-x**2 / (4*k*t)) / sp.sqrt(4*sp.pi*k*t)
+>>> FT(heat)                       # the heat kernel -> e^{-kappa xi^2 t}
+exp(-kappa*t*xi**2)
+\end{verbatim}}
+\textbf{Reading the output.} The Gaussian $e^{-ax^2}$ goes to $\sqrt{\pi/a}\,e^{-\xi^2/4a}$, the two-sided exponential to $2a/(a^2 + \xi^2)$, and the heat kernel to $e^{-\kappa\xi^2t}$, the multiplier that solves the heat equation in frequency.
+
+\textbf{MATLAB/Octave:} with the Symbolic Math Toolbox, \texttt{fourier(exp(-a*x\^{}2))}, which uses the same sign convention.
+\end{software}
+
+\begin{software}[Spectral solution by the FFT]
+\label{sw:spectral}
+On a large periodic box the fast Fourier transform computes $\hat g$ at the wavenumbers of the box, and each mode is advanced exactly by its multiplier. First the heat equation from $e^{-x^2}$ to $t = 2$, against the exact solution $e^{-x^2/9}/3$; then $u_t + u_{xxx} = 0$, where the box is $4000$ long so that no part of the wave train
+wraps around in the time computed; the columns are $t$, $\int u^2$, the position and value of the maximum, and the exact value there from the Airy-kernel convolution:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> def grid(L, N):                        # periodic box and its wavenumbers
+...     xs = (np.arange(N) - N//2) * L / N
+...     return xs, 2 * np.pi * np.fft.fftfreq(N, d=L/N)
+...
+>>> def evolve(g, q, symbol, t):   # multiply g-hat by exp(symbol(xi) t)
+...     return np.fft.ifft(np.fft.fft(g) * np.exp(symbol(q) * t)).real
+...
+>>> xs, q = grid(80.0, 4096)
+>>> u = evolve(np.exp(-xs**2), q, lambda q: -q**2, 2.0)    # heat, kappa = 1
+>>> float(np.abs(u - np.exp(-xs**2 / 9) / 3).max())        # exact at t = 2
+8.326672684688674e-17
+>>> from scipy.special import airy
+>>> from scipy.integrate import quad
+>>> def airy_exact(X, T):          # kernel (3T)^(-1/3) Ai(x / (3T)^(1/3))
+...     c = (3 * T)**(1/3)
+...     K = lambda y: airy((X - y) / c)[0] / c * np.exp(-y**2)
+...     return quad(K, -8, 8, limit=200)[0]
+...
+>>> xs, q = grid(4000.0, 2**16)            # u_t + u_xxx = 0: symbol i xi^3
+>>> for T in (1.0, 8.0, 27.0):
+...     v = evolve(np.exp(-xs**2), q, lambda q: 1j * q**3, T)
+...     i = np.argmax(v); norm = np.sum(v**2) * (xs[1] - xs[0])
+...     print(T, round(norm, 6), round(xs[i], 3), round(v[i], 6),
+...           round(airy_exact(xs[i], T), 6))
+...
+1.0 1.253314 -1.282 0.586298 0.586298
+8.0 1.253314 -2.869 0.319361 0.319361
+27.0 1.253314 -4.333 0.216484 0.216484
+>>> np.sqrt(np.pi) * airy(-1.0188)[0] / 3**(1/3)   # limit of max(u) T^(1/3)
+0.6582957084826466
+\end{verbatim}}
+\textbf{Reading the output.} For the heat equation the spectral solution is exact to rounding ($8 \times 10^{-17}$), because the multiplier is exact for every mode and the Gaussian is negligible at the edges of the box. For the dispersive equation, $\int u^2 = 1.253314 = \sqrt{\pi/2}$ at every time, the maximum moves left, and its
+value agrees with the quadrature of the Airy convolution to six digits. Times $t^{1/3}$, the maxima are $0.586$, $0.639$ and $0.649$, increasing towards the limit $\sqrt\pi\,\max\operatorname{Ai}/3^{1/3} = 0.658$, which they cannot exceed since $g \geq 0$.
+
+\textbf{MATLAB/Octave:} \texttt{real(ifft(fft(g).*exp(1i*q.\^{}3*T)))} with \texttt{q} the wavenumbers.
+\end{software}
+
+\begin{software}[Inverting a Laplace transform]
+\label{sw:laplace}
+The transform $e^{-x\sqrt s}/s$ of Example~\ref{ex:laplaceheat} (with $\kappa = 1$) inverted symbolically, and then numerically by Talbot's contour at $x = 1$ and three times, against $\operatorname{erfc}(1/2\sqrt t)$:
+{\small\begin{verbatim}
+>>> x0 = sp.symbols('x', positive=True)
+>>> sp.inverse_laplace_transform(sp.exp(-x0*sp.sqrt(s)) / s, s, t)
+1 - erf(x/(2*sqrt(t)))
+>>> import mpmath as mp
+>>> f = lambda S: mp.exp(-mp.sqrt(S)) / S  # u(1, t) for kappa = 1
+>>> for T in (0.1, 1, 10):
+...     print(T, mp.nstr(mp.invertlaplace(f, T, method='talbot'), 10),
+...           mp.nstr(mp.erfc(1 / (2*mp.sqrt(T))), 10))
+...
+0.1 0.02534731868 0.02534731868
+1 0.4795001222 0.4795001222
+10 0.8230632738 0.8230632738
+\end{verbatim}}
+\textbf{Reading the output.} SymPy returns $1 - \operatorname{erf}(x/2\sqrt t) = \operatorname{erfc}(x/2\sqrt t)$. The numerical inversion agrees with it to all ten digits shown: at $x = 1$ the temperature is $0.025$ after $0.1$ time units, $0.48$ after $1$, and $0.82$ after $10$.
+
+\textbf{MATLAB/Octave:} \texttt{ilaplace(exp(-x*sqrt(s))/s)} with the Symbolic Math Toolbox.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Show that the transform of $e^{-a|x|}$ is $2a/(a^2 + \xi^2)$, and deduce that the transform of $\frac{y}{\pi(x^2 + y^2)}$ (as a function of $x$) is $e^{-y|\xi|}$.
+\end{problem}
+
+\begin{solution}
+$\int_{-\infty}^\infty e^{-a|x| - ix\xi}\,dx = \frac1{a + i\xi} + \frac1{a - i\xi} = \frac{2a}{a^2 + \xi^2}$. By inversion, $e^{-a|x|} = \frac1{2\pi}\int\frac{2a}{a^2 + \xi^2}e^{ix\xi}\,d\xi$; exchanging the names of $x$ and $\xi$ and replacing $x$ by $-x$, $\int\frac{a}{\pi(a^2 + x^2)}e^{-ix\xi}\,dx = e^{-a|\xi|}$. Put $a = y$.
+\end{solution}
+
+\begin{problem}
+Solve $u_t = \kappa u_{xx} + cu_x$ on the line with $u(x, 0) = g(x)$ by the Fourier transform, and interpret.
+\end{problem}
+
+\begin{solution}
+$\hat u_t = (-\kappa\xi^2 + ic\xi)\hat u$, so $\hat u = \hat ge^{-\kappa\xi^2t}e^{ic\xi t}$. The factor $e^{ic\xi t}$ is a shift by $-ct$, so $u(x, t) = (\Phi(\cdot, t) * g)(x + ct)$: diffusion as before, carried to the left at speed $c$.
+\end{solution}
+
+\begin{problem}
+Use Plancherel's theorem with $f$ the indicator of $[-1, 1]$ to evaluate $\int_{-\infty}^\infty\frac{\sin^2\xi}{\xi^2}\,d\xi$.
+\end{problem}
+
+\begin{solution}
+$\hat f(\xi) = \int_{-1}^1e^{-ix\xi}\,dx = \frac{2\sin\xi}\xi$, and $\int|f|^2 = 2$. Plancherel gives $\int\frac{4\sin^2\xi}{\xi^2}\,d\xi = 2\pi\cdot 2$, so the integral is $\pi$.
+\end{solution}
+
+\begin{problem}
+For $u_t + u_{xxx} = 0$, find the dispersion relation and the phase and group velocities, and decide which way a packet of wavenumber $2$ moves and how fast.
+\end{problem}
+
+\begin{solution}
+Substituting $e^{i(kx - \omega t)}$: $-i\omega + (ik)^3 = -i\omega - ik^3 = 0$, so $\omega = -k^3$. The phase velocity is $\omega/k = -k^2$ and the group velocity $d\omega/dk = -3k^2$. A packet with $k = 2$ moves to the left at speed $12$, three times as fast as its crests, which move at speed $4$.
+\end{solution}
+
+\begin{problem}
+Solve the half-line problem $u_t = \kappa u_{xx}$, $u(x, 0) = 0$, $u_x(0, t) = -q$ (a constant heat flux $\kappa q$ into the rod) by the Laplace transform, and find the surface temperature.
+\end{problem}
+
+\begin{solution}
+$\bar u = A(s)e^{-x\sqrt{s/\kappa}}$ and $\bar u_x(0, s) = -A\sqrt{s/\kappa} = -q/s$, so $A = q\sqrt\kappa\,s^{-3/2}$ and $\bar u(0, s) = q\sqrt\kappa\,s^{-3/2}$. Since $\overline{t^{1/2}} = \Gamma(\frac32)s^{-3/2} = \frac{\sqrt\pi}2s^{-3/2}$, the surface temperature is
+$u(0, t) = \frac{2q\sqrt{\kappa t}}{\sqrt\pi}$: it rises like $\sqrt t$, not linearly, because the heat spreads into a layer of growing thickness.
+\end{solution}
+
+\begin{problem}
+Show by the Fourier transform that the problem $u_t = -\kappa u_{xx}$, $u(x, 0) = g$, is not well posed in the sense of Hadamard, for data measured in the square-integral norm.
+\end{problem}
+
+\begin{solution}
+$\hat u = \hat ge^{\kappa\xi^2t}$. Take $g_n$ with $\hat g_n$ equal to $\varepsilon$ on $n \leq \xi \leq n + 1$ and $0$ elsewhere; then $\|g_n\|^2 = \varepsilon^2/2\pi$ by Plancherel, while $\|u_n(\cdot, t)\|^2 \geq \frac1{2\pi}\varepsilon^2e^{2\kappa n^2t} \to \infty$. Data of fixed small size produce arbitrarily large solutions at any $t > 0$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 \sloppy
@@ -2861,11 +3117,13 @@ $u(0) = \int G(0, y)\,dy = -\frac1{2\pi}\int_0^1\log r\cdot 2\pi r\,dr = -\int_0
 
 \subhead{Further reading}
 \begin{enumerate}
+\item Airy, G. B. (1838), On the intensity of light in the neighbourhood of a caustic, \emph{Transactions of the Cambridge Philosophical Society}, 6, 379--402.
 \item d'Alembert, J. le R. (1747), Recherches sur la courbe que forme une corde tendu\"e mise en vibration, \emph{Histoire de l'Acad\'emie Royale des Sciences et Belles Lettres de Berlin}, 3, 214--219.
 \item du Bois-Reymond, P. (1873), Ueber die Fourierschen Reihen, \emph{Nachrichten von der K\"oniglichen Gesellschaft der Wissenschaften zu G\"ottingen}, 21, 571--582.
 \item Burgers, J. M. (1948), A mathematical model illustrating the theory of turbulence, \emph{Advances in Applied Mechanics}, 1, 171--199.
 \item Carleson, L. (1966), On convergence and growth of partial sums of Fourier series, \emph{Acta Mathematica}, 116, 135--157.
 \item Cole, J. D. (1951), On a quasi-linear parabolic equation occurring in aerodynamics, \emph{Quarterly of Applied Mathematics}, 9, 225--236.
+\item Cooley, J. W., and Tukey, J. W. (1965), An algorithm for the machine calculation of complex Fourier series, \emph{Mathematics of Computation}, 19, 297--301.
 \item Dirichlet, P. G. L. (1829), Sur la convergence des s\'eries trigonom\'etriques qui servent \`a repr\'esenter une fonction arbitraire entre des limites donn\'ees, \emph{Journal f\"ur die reine und angewandte Mathematik}, 4, 157--169.
 \item Duhamel, J. M. C. (1833), M\'emoire sur la m\'ethode g\'en\'erale relative au mouvement de la chaleur dans les corps solides plong\'es dans des milieux dont la temp\'erature varie avec le temps, \emph{Journal de l'\'Ecole Polytechnique}, 14 (cahier 22), 20--77.
 \item Earnshaw, S. (1842), On the nature of the molecular forces which regulate the constitution of the luminiferous ether, \emph{Transactions of the Cambridge Philosophical Society}, 7, 97--112.
@@ -2888,6 +3146,7 @@ Grune and Stratton, 382--407.
 \item Hugoniot, H. (1887), M\'emoire sur la propagation du mouvement dans les corps et sp\'ecialement dans les gaz parfaits, \emph{Journal de l'\'Ecole Polytechnique}, 57, 3--97.
 \item Huygens, C. (1690), \emph{Trait\'e de la lumi\`ere}, Leiden, Pierre van der Aa.
 \item Kirchhoff, G. (1883), Zur Theorie der Lichtstrahlen, \emph{Annalen der Physik}, 254, 663--695.
+\item Korteweg, D. J., and de Vries, G. (1895), On the change of form of long waves advancing in a rectangular canal, and on a new type of long stationary waves, \emph{Philosophical Magazine}, 39, 422--443.
 \item Kowalevsky, S. von (1875), Zur Theorie der partiellen Differentialgleichungen, \emph{Journal f\"ur die reine und angewandte Mathematik}, 80, 1--32.
 \item Kru\v{z}kov, S. N. (1970), First order quasilinear equations in several independent variables, \emph{Mathematics of the USSR-Sbornik}, 10, 217--243.
 \item Laplace, P.-S. (1785), Th\'eorie des attractions des sph\'ero\"ides et de la figure des plan\`etes, \emph{M\'emoires de l'Acad\'emie Royale des Sciences de Paris} (ann\'ee 1782), 113--196.
@@ -2900,10 +3159,12 @@ Grune and Stratton, 382--407.
 \item Mersenne, M. (1636), \emph{Harmonie universelle}, Paris, Cramoisy.
 \item Nirenberg, L. (1953), A strong maximum principle for parabolic equations, \emph{Communications on Pure and Applied Mathematics}, 6, 167--177.
 \item Parseval, M.-A. (1806), M\'emoire sur les s\'eries et sur l'int\'egration compl\`ete d'une \'equation aux diff\'erences partielles lin\'eaires du second ordre, \`a coefficients constants, \emph{M\'emoires pr\'esent\'es \`a l'Institut des Sciences, Lettres et Arts, par divers savans}, 1, 638--648.
+\item Plancherel, M. (1910), Contribution \`a l'\'etude de la repr\'esentation d'une fonction arbitraire par des int\'egrales d\'efinies, \emph{Rendiconti del Circolo Matematico di Palermo}, 30, 289--335.
 \item Poisson, S. D. (1819), M\'emoire sur l'int\'egration de quelques \'equations lin\'eaires aux diff\'erences partielles, et particuli\`erement de l'\'equation g\'en\'erale du mouvement des fluides \'elastiques, \emph{M\'emoires de l'Acad\'emie Royale des Sciences de l'Institut de France}, 3, 121--176.
 \item Poisson, S. D. (1820), M\'emoire sur la mani\`ere d'exprimer les fonctions par des s\'eries de quantit\'es p\'eriodiques, \emph{Journal de l'\'Ecole Polytechnique}, 11 (cahier 18), 417--489.
 \item Rankine, W. J. M. (1870), On the thermodynamic theory of waves of finite longitudinal disturbance, \emph{Philosophical Transactions of the Royal Society of London}, 160, 277--288.
 \item Richards, P. I. (1956), Shock waves on the highway, \emph{Operations Research}, 4, 42--51.
+\item Talbot, A. (1979), The accurate numerical inversion of Laplace transforms, \emph{IMA Journal of Applied Mathematics}, 23, 97--120.
 \item Thomson, W. (1848), Extrait d'une lettre de M. William Thomson \`a M. Liouville, \emph{Journal de Math\'ematiques Pures et Appliqu\'ees}, 10, 364--367.
 \item Tricomi, F. (1923), Sulle equazioni lineari alle derivate parziali di 2$^\circ$ ordine, di tipo misto, \emph{Memorie della Reale Accademia dei Lincei}, serie 5, 14, 133--247.
 \item Tychonoff, A. (1935), Th\'eor\`emes d'unicit\'e pour l'\'equation de la chaleur, \emph{Matematicheskii Sbornik}, 42, 199--216.
