@@ -1364,6 +1364,289 @@ For $t \leq \frac12$, $u = \frac12\int_{1/2 - t}^{1/2 + t}g = 0$, since the inte
 first reached by the left-moving disturbance at $t = \frac12$, and once the wave reflected from the fixed end has passed, it returns to rest: the reflected wave, from the odd extension, cancels the permanent displacement of Problem~\ref{prob:hammer}.
 \end{solution}
 
+%======================================================================
+\section{Waves in Higher Dimensions}
+\label{sec:waveshigher}
+
+In two and three dimensions the wave equation
+\[
+u_{tt} = c^2\Delta u
+\]
+still propagates disturbances at speed $c$ and conserves energy, but a new phenomenon appears: the dimension decides whether a signal passes cleanly. In three dimensions a flash of light or a clap is seen or heard for exactly as long as it lasted, and then there is silence; in two
+dimensions a disturbance leaves a wake that dies away only slowly, as the ripples on a pond show. This is \textbf{Huygens' principle} in its sharp form. It follows from the explicit solution formulas of Kirchhoff and Poisson, which this section derives.
+
+\subsection{Spherical means and Kirchhoff's formula}
+\label{ssec:sphericalmeans}
+
+For a continuous function $h$ on $\mathbb R^n$, the \textbf{spherical mean} of $h$ over the sphere of radius $r$ about $x$ is
+\[
+M_h(x, r) = \frac{1}{\omega_n}\int_{|\omega| = 1}h(x + r\omega)\,dS(\omega) ,
+\]
+where $\omega_n$ is the area of the unit sphere ($4\pi$ in $\mathbb R^3$). As $r \to 0$, $M_h(x, r) \to h(x)$.
+
+\begin{lem}[Darboux]
+\label{lem:darboux}
+If $h$ is $C^2$, then $\partial_r^2M_h + \frac{n - 1}{r}\partial_rM_h = \Delta_xM_h$.
+\end{lem}
+
+\begin{proof}
+Differentiating under the integral and applying the divergence theorem on the ball $B_r(x)$,
+\[
+\partial_rM_h = \frac1{\omega_n}\int_{|\omega| = 1}\nabla h(x + r\omega)\cdot\omega\,dS = \frac{1}{\omega_nr^{n - 1}}\int_{B_r(x)}\Delta h\,dy .
+\]
+So $r^{n - 1}\partial_rM_h = \frac1{\omega_n}\int_{B_r(x)}\Delta h$, and differentiating in $r$ gives $\partial_r(r^{n - 1}\partial_rM_h) = \frac1{\omega_n}\int_{\partial B_r(x)}\Delta h\,dS = r^{n - 1}M_{\Delta h}(x, r) = r^{n - 1}\Delta_xM_h$, which is the identity.
+\end{proof}
+
+If $u$ solves the wave equation, apply the lemma to $h = u(\cdot, t)$: the mean $U(x; r, t) = M_{u(\cdot, t)}(x, r)$ satisfies the \textbf{Euler--Poisson--Darboux equation}
+\[
+U_{tt} = c^2\Bigl(U_{rr} + \frac{n - 1}{r}U_r\Bigr) .
+\]
+In three dimensions the substitution $V = rU$ turns this into $V_{tt} = c^2V_{rr}$, the one-dimensional wave equation, on the half-line $r > 0$ with $V(x; 0, t) = 0$. The same calculation shows that the radial solutions in $\mathbb R^3$ are the \textbf{spherical waves}
+\[
+u = \frac{F(r - ct) + G(r + ct)}{r} ,
+\]
+outgoing and incoming, whose amplitude decays like $1/r$ so that the energy crossing each sphere, proportional to $r^2\cdot r^{-2}$, is the same.
+
+\begin{thm}[Kirchhoff]
+\label{thm:kirchhoff}
+Let $f \in C^3(\mathbb R^3)$ and $g \in C^2(\mathbb R^3)$. The solution of $u_{tt} = c^2\Delta u$ in $\mathbb R^3$ with $u(x, 0) = f$, $u_t(x, 0) = g$ is
+\[
+u(x, t) = \frac{\partial}{\partial t}\bigl(tM_f(x, ct)\bigr) + tM_g(x, ct) ,
+\]
+that is,
+\[
+u(x, t) = \frac{\partial}{\partial t}\biggl(\frac{1}{4\pi c^2t}\int_{|y - x| = ct}f\,dS\biggr) + \frac{1}{4\pi c^2t}\int_{|y - x| = ct}g\,dS .
+\]
+\end{thm}
+
+\begin{proof}
+With $V = rU$ as above, $V(x; r, 0) = rM_f(x, r) =: \Phi(r)$ and $V_t(x; r, 0) = rM_g(x, r) =: \Psi(r)$, both odd in $r$ when extended to $r < 0$. By the reflection formula of Section~\ref{sec:wave1d}, for $0 < r < ct$,
+\[
+V(x; r, t) = \frac12\bigl(\Phi(ct + r) - \Phi(ct - r)\bigr) + \frac1{2c}\int_{ct - r}^{ct + r}\Psi(s)\,ds .
+\]
+Since $u(x, t) = \lim_{r \to 0}U = \lim_{r \to 0}V/r$, dividing by $r$ and letting $r \to 0$ gives $u = \Phi'(ct) + \frac1c\Psi(ct)$. Now $\Phi'(ct) = \frac{d}{d\rho}\bigl(\rho M_f(x, \rho)\bigr)\big|_{\rho = ct} = \frac{\partial}{\partial t}\bigl(tM_f(x, ct)\bigr)$ and $\frac1c\Psi(ct) = tM_g(x, ct)$. The
+hypotheses make $u$ a $C^2$ solution; the loss of one derivative from $f$ to $u$ is a feature of waves in three dimensions, where focusing can amplify singularities.
+\end{proof}
+
+\subsection{Poisson's formula by descent}
+\label{ssec:descent}
+
+A solution in two dimensions is a solution in three that does not depend on $x_3$. Hadamard's \textbf{method of descent} applies Kirchhoff's formula to such data. The sphere $|y - x| = ct$ in $\mathbb R^3$, with $x$ in the plane $x_3 = 0$, projects twice onto the disc $|y - x| < ct$ in the plane, with area element
+$dS = ct\,dy/\sqrt{c^2t^2 - |y - x|^2}$, so $\frac1{4\pi c^2t}\int_{\text{sphere}}g\,dS = \frac{1}{2\pi c}\int_{\text{disc}}g(y)/\sqrt{c^2t^2 - |y - x|^2}\,dy$.
+
+\begin{thm}[Poisson]
+\label{thm:poisson2d}
+In $\mathbb R^2$ the solution of $u_{tt} = c^2\Delta u$, $u(x, 0) = f$, $u_t(x, 0) = g$, is
+\[
+u(x, t) = \frac{\partial}{\partial t}\biggl(\frac{1}{2\pi c}\int_{|y - x| < ct}\frac{f(y)\,dy}{\sqrt{c^2t^2 - |y - x|^2}}\biggr) + \frac{1}{2\pi c}\int_{|y - x| < ct}\frac{g(y)\,dy}{\sqrt{c^2t^2 - |y - x|^2}} .
+\]
+\end{thm}
+
+Descending once more, to data depending on $x_1$ only, and using $\int_{-h}^h dy_2/\sqrt{h^2 - y_2^2} = \pi$, recovers d'Alembert's term $\frac1{2c}\int_{x - ct}^{x + ct}g$ (Problem~\ref{prob:descent}).
+
+\subsection{Huygens' principle}
+\label{ssec:huygens}
+
+Compare the two formulas. In three dimensions $u(x, t)$ depends only on the data on the \emph{sphere} $|y - x| = ct$; in two dimensions it depends on the data in the whole \emph{disc} $|y - x| \leq ct$. So if the data vanish outside a ball of radius $a$, then in three dimensions $u(x, t) = 0$ except when
+$|x| - a \leq ct \leq |x| + a$: the signal arrives, lasts for time $2a/c$, and is gone. This is the \textbf{sharp Huygens principle}. In two dimensions, once the signal has arrived, every later disc contains the support of the data and $u$ is never again identically zero there: the disturbance leaves a wake.
+
+\begin{exa}
+\label{ex:huygens}
+Take $f = 0$ and $g = 1$ in the ball $|y| < a$ (a sudden blow to a small region), and $c = 1$. In three dimensions, at a point with $|x| = R > a$, the fraction of the sphere of radius $t$ about $x$ inside the ball is $\bigl(a^2 - (R - t)^2\bigr)/4Rt$ for $|R - t| < a$, so
+\[
+u(x, t) = \frac{a^2 - (R - t)^2}{4R} \quad (|R - t| < a), \qquad u = 0 \text{ otherwise}:
+\]
+a single pulse of height $a^2/4R$. In two dimensions, at the centre, Poisson's formula gives $u = t$ for $t \leq a$ and $u = t - \sqrt{t^2 - a^2}$ for $t > a$, which decays only like $a^2/2t$ (Figure~\ref{fig:huygens}).
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!5,rounded corners=4pt] (-0.7,-0.65) rectangle (9.5,3.6);
+\draw[->] (0,0) -- (9.3,0) node[below,font=\small] {$t$};
+\draw[->] (0,0) -- (0,3.4) node[left,font=\small] {$u$};
+\foreach \t in {5,10,15,20} \draw ({0.45*\t},0.06) -- ({0.45*\t},-0.06) node[below,font=\scriptsize] {$\t$};
+\foreach \u in {0.1,0.2} \draw (0.06,{14*\u}) -- (-0.06,{14*\u}) node[left,font=\scriptsize] {$\u$};
+\draw[red!70!black,thick] (0.01,0.000) -- (0.04,0.000) -- (0.07,0.000) -- (0.10,0.000) -- (0.13,0.000) -- (0.16,0.000) -- (0.19,0.000) -- (0.22,0.000) -- (0.25,0.000) -- (0.28,0.000) -- (0.31,0.000) -- (0.34,0.000) -- (0.37,0.000) -- (0.40,0.000) -- (0.43,0.000) -- (0.46,0.000) -- (0.49,0.000) -- (0.52,0.000) -- (0.55,0.000) -- (0.58,0.000) -- (0.61,0.000) -- (0.64,0.000) -- (0.67,0.000) -- (0.70,0.000) -- (0.73,0.000) -- (0.76,0.000) -- (0.79,0.000) -- (0.82,0.000) -- (0.85,0.000) -- (0.88,0.000) -- (0.91,0.000) -- (0.94,0.000) -- (0.97,0.000) -- (1.00,0.000) -- (1.03,0.000) -- (1.06,0.000) -- (1.09,0.000) -- (1.12,0.000) -- (1.15,0.000) -- (1.18,0.000) -- (1.21,0.000) -- (1.24,0.000) -- (1.27,0.000) -- (1.30,0.000) -- (1.33,0.000) -- (1.36,0.000) -- (1.39,0.000) -- (1.42,0.000) -- (1.45,0.000) -- (1.48,0.000) -- (1.51,0.000) -- (1.54,0.000) -- (1.57,0.000) -- (1.60,0.000) -- (1.63,0.000) -- (1.66,0.000) -- (1.69,0.000) -- (1.72,0.000) -- (1.75,0.000) -- (1.78,0.000) -- (1.81,0.041) -- (1.84,0.128) -- (1.87,0.210) -- (1.90,0.285) -- (1.93,0.354) -- (1.96,0.416) -- (1.99,0.473) -- (2.02,0.523) -- (2.05,0.567) -- (2.08,0.605) -- (2.11,0.636) -- (2.14,0.661) -- (2.17,0.680) -- (2.20,0.693) -- (2.23,0.699) -- (2.26,0.699) -- (2.29,0.693) -- (2.32,0.681) -- (2.35,0.662) -- (2.38,0.637) -- (2.41,0.606) -- (2.44,0.569) -- (2.47,0.525) -- (2.50,0.476) -- (2.53,0.419) -- (2.56,0.357) -- (2.60,0.288) -- (2.63,0.214) -- (2.66,0.132) -- (2.69,0.045) -- (2.72,0.000) -- (2.75,0.000) -- (2.78,0.000) -- (2.81,0.000) -- (2.84,0.000) -- (2.87,0.000) -- (2.90,0.000) -- (2.93,0.000) -- (2.96,0.000) -- (2.99,0.000) -- (3.02,0.000) -- (3.05,0.000) -- (3.08,0.000) -- (3.11,0.000) -- (3.14,0.000) -- (3.17,0.000) -- (3.20,0.000) -- (3.23,0.000) -- (3.26,0.000) -- (3.29,0.000) -- (3.32,0.000) -- (3.35,0.000) -- (3.38,0.000) -- (3.41,0.000) -- (3.44,0.000) -- (3.47,0.000) -- (3.50,0.000) -- (3.53,0.000) -- (3.56,0.000) -- (3.59,0.000) -- (3.62,0.000) -- (3.65,0.000) -- (3.68,0.000) -- (3.71,0.000) -- (3.74,0.000) -- (3.77,0.000) -- (3.80,0.000) -- (3.83,0.000) -- (3.86,0.000) -- (3.89,0.000) -- (3.92,0.000) -- (3.95,0.000) -- (3.98,0.000) -- (4.01,0.000) -- (4.04,0.000) -- (4.07,0.000) -- (4.10,0.000) -- (4.13,0.000) -- (4.16,0.000) -- (4.19,0.000) -- (4.22,0.000) -- (4.25,0.000) -- (4.28,0.000) -- (4.31,0.000) -- (4.34,0.000) -- (4.37,0.000) -- (4.40,0.000) -- (4.43,0.000) -- (4.46,0.000) -- (4.49,0.000) -- (4.52,0.000) -- (4.55,0.000) -- (4.58,0.000) -- (4.61,0.000) -- (4.64,0.000) -- (4.67,0.000) -- (4.70,0.000) -- (4.73,0.000) -- (4.76,0.000) -- (4.79,0.000) -- (4.82,0.000) -- (4.85,0.000) -- (4.88,0.000) -- (4.91,0.000) -- (4.94,0.000) -- (4.97,0.000) -- (5.00,0.000) -- (5.03,0.000) -- (5.06,0.000) -- (5.09,0.000) -- (5.12,0.000) -- (5.15,0.000) -- (5.18,0.000) -- (5.21,0.000) -- (5.24,0.000) -- (5.27,0.000) -- (5.30,0.000) -- (5.33,0.000) -- (5.36,0.000) -- (5.39,0.000) -- (5.42,0.000) -- (5.45,0.000) -- (5.48,0.000) -- (5.51,0.000) -- (5.54,0.000) -- (5.57,0.000) -- (5.60,0.000) -- (5.63,0.000) -- (5.66,0.000) -- (5.69,0.000) -- (5.72,0.000) -- (5.75,0.000) -- (5.78,0.000) -- (5.81,0.000) -- (5.84,0.000) -- (5.87,0.000) -- (5.90,0.000) -- (5.93,0.000) -- (5.96,0.000) -- (5.99,0.000) -- (6.02,0.000) -- (6.05,0.000) -- (6.08,0.000) -- (6.11,0.000) -- (6.14,0.000) -- (6.17,0.000) -- (6.20,0.000) -- (6.23,0.000) -- (6.26,0.000) -- (6.29,0.000) -- (6.32,0.000) -- (6.35,0.000) -- (6.38,0.000) -- (6.41,0.000) -- (6.44,0.000) -- (6.47,0.000) -- (6.50,0.000) -- (6.53,0.000) -- (6.56,0.000) -- (6.59,0.000) -- (6.62,0.000) -- (6.65,0.000) -- (6.68,0.000) -- (6.71,0.000) -- (6.74,0.000) -- (6.77,0.000) -- (6.80,0.000) -- (6.83,0.000) -- (6.87,0.000) -- (6.90,0.000) -- (6.93,0.000) -- (6.96,0.000) -- (6.99,0.000) -- (7.02,0.000) -- (7.05,0.000) -- (7.08,0.000) -- (7.11,0.000) -- (7.14,0.000) -- (7.17,0.000) -- (7.20,0.000) -- (7.23,0.000) -- (7.26,0.000) -- (7.29,0.000) -- (7.32,0.000) -- (7.35,0.000) -- (7.38,0.000) -- (7.41,0.000) -- (7.44,0.000) -- (7.47,0.000) -- (7.50,0.000) -- (7.53,0.000) -- (7.56,0.000) -- (7.59,0.000) -- (7.62,0.000) -- (7.65,0.000) -- (7.68,0.000) -- (7.71,0.000) -- (7.74,0.000) -- (7.77,0.000) -- (7.80,0.000) -- (7.83,0.000) -- (7.86,0.000) -- (7.89,0.000) -- (7.92,0.000) -- (7.95,0.000) -- (7.98,0.000) -- (8.01,0.000) -- (8.04,0.000) -- (8.07,0.000) -- (8.10,0.000) -- (8.13,0.000) -- (8.16,0.000) -- (8.19,0.000) -- (8.22,0.000) -- (8.25,0.000) -- (8.28,0.000) -- (8.31,0.000) -- (8.34,0.000) -- (8.37,0.000) -- (8.40,0.000) -- (8.43,0.000) -- (8.46,0.000) -- (8.49,0.000) -- (8.52,0.000) -- (8.55,0.000) -- (8.58,0.000) -- (8.61,0.000) -- (8.64,0.000) -- (8.67,0.000) -- (8.70,0.000) -- (8.73,0.000) -- (8.76,0.000) -- (8.79,0.000) -- (8.82,0.000) -- (8.85,0.000) -- (8.88,0.000) -- (8.91,0.000) -- (8.94,0.000) -- (8.97,0.000) -- (9.00,0.000);
+\draw[blue!60!black,thick] (0.01,0.000) -- (0.04,0.000) -- (0.07,0.000) -- (0.10,0.000) -- (0.13,0.000) -- (0.16,0.000) -- (0.19,0.000) -- (0.22,0.000) -- (0.25,0.000) -- (0.28,0.000) -- (0.31,0.000) -- (0.34,0.000) -- (0.37,0.000) -- (0.40,0.000) -- (0.43,0.000) -- (0.46,0.000) -- (0.49,0.000) -- (0.52,0.000) -- (0.55,0.000) -- (0.58,0.000) -- (0.61,0.000) -- (0.64,0.000) -- (0.67,0.000) -- (0.70,0.000) -- (0.73,0.000) -- (0.76,0.000) -- (0.79,0.000) -- (0.82,0.000) -- (0.85,0.000) -- (0.88,0.000) -- (0.91,0.000) -- (0.94,0.000) -- (0.97,0.000) -- (1.00,0.000) -- (1.03,0.000) -- (1.06,0.000) -- (1.09,0.000) -- (1.12,0.000) -- (1.15,0.000) -- (1.18,0.000) -- (1.21,0.000) -- (1.24,0.000) -- (1.27,0.000) -- (1.30,0.000) -- (1.33,0.000) -- (1.36,0.000) -- (1.39,0.000) -- (1.42,0.000) -- (1.45,0.000) -- (1.48,0.000) -- (1.51,0.000) -- (1.54,0.000) -- (1.57,0.000) -- (1.60,0.000) -- (1.63,0.000) -- (1.66,0.000) -- (1.69,0.000) -- (1.72,0.000) -- (1.75,0.000) -- (1.78,0.000) -- (1.81,0.091) -- (1.84,0.295) -- (1.87,0.493) -- (1.90,0.686) -- (1.93,0.872) -- (1.96,1.052) -- (1.99,1.226) -- (2.02,1.394) -- (2.05,1.555) -- (2.08,1.709) -- (2.11,1.857) -- (2.14,1.997) -- (2.17,2.130) -- (2.20,2.255) -- (2.23,2.372) -- (2.26,2.482) -- (2.29,2.582) -- (2.32,2.674) -- (2.35,2.756) -- (2.38,2.828) -- (2.41,2.889) -- (2.44,2.939) -- (2.47,2.976) -- (2.50,3.000) -- (2.53,3.009) -- (2.56,3.000) -- (2.60,2.971) -- (2.63,2.917) -- (2.66,2.830) -- (2.69,2.687) -- (2.72,2.425) -- (2.75,2.266) -- (2.78,2.148) -- (2.81,2.052) -- (2.84,1.970) -- (2.87,1.899) -- (2.90,1.835) -- (2.93,1.778) -- (2.96,1.726) -- (2.99,1.678) -- (3.02,1.634) -- (3.05,1.593) -- (3.08,1.555) -- (3.11,1.519) -- (3.14,1.486) -- (3.17,1.454) -- (3.20,1.424) -- (3.23,1.396) -- (3.26,1.369) -- (3.29,1.344) -- (3.32,1.320) -- (3.35,1.296) -- (3.38,1.274) -- (3.41,1.253) -- (3.44,1.233) -- (3.47,1.213) -- (3.50,1.195) -- (3.53,1.177) -- (3.56,1.159) -- (3.59,1.142) -- (3.62,1.126) -- (3.65,1.111) -- (3.68,1.096) -- (3.71,1.081) -- (3.74,1.067) -- (3.77,1.053) -- (3.80,1.040) -- (3.83,1.027) -- (3.86,1.015) -- (3.89,1.002) -- (3.92,0.991) -- (3.95,0.979) -- (3.98,0.968) -- (4.01,0.957) -- (4.04,0.947) -- (4.07,0.936) -- (4.10,0.926) -- (4.13,0.916) -- (4.16,0.907) -- (4.19,0.897) -- (4.22,0.888) -- (4.25,0.879) -- (4.28,0.871) -- (4.31,0.862) -- (4.34,0.854) -- (4.37,0.846) -- (4.40,0.838) -- (4.43,0.830) -- (4.46,0.822) -- (4.49,0.815) -- (4.52,0.808) -- (4.55,0.800) -- (4.58,0.793) -- (4.61,0.787) -- (4.64,0.780) -- (4.67,0.773) -- (4.70,0.767) -- (4.73,0.760) -- (4.76,0.754) -- (4.79,0.748) -- (4.82,0.742) -- (4.85,0.736) -- (4.88,0.730) -- (4.91,0.724) -- (4.94,0.719) -- (4.97,0.713) -- (5.00,0.708) -- (5.03,0.703) -- (5.06,0.697) -- (5.09,0.692) -- (5.12,0.687) -- (5.15,0.682) -- (5.18,0.677) -- (5.21,0.672) -- (5.24,0.667) -- (5.27,0.663) -- (5.30,0.658) -- (5.33,0.654) -- (5.36,0.649) -- (5.39,0.645) -- (5.42,0.640) -- (5.45,0.636) -- (5.48,0.632) -- (5.51,0.628) -- (5.54,0.624) -- (5.57,0.620) -- (5.60,0.616) -- (5.63,0.612) -- (5.66,0.608) -- (5.69,0.604) -- (5.72,0.600) -- (5.75,0.596) -- (5.78,0.593) -- (5.81,0.589) -- (5.84,0.585) -- (5.87,0.582) -- (5.90,0.578) -- (5.93,0.575) -- (5.96,0.572) -- (5.99,0.568) -- (6.02,0.565) -- (6.05,0.562) -- (6.08,0.558) -- (6.11,0.555) -- (6.14,0.552) -- (6.17,0.549) -- (6.20,0.546) -- (6.23,0.543) -- (6.26,0.540) -- (6.29,0.537) -- (6.32,0.534) -- (6.35,0.531) -- (6.38,0.528) -- (6.41,0.525) -- (6.44,0.523) -- (6.47,0.520) -- (6.50,0.517) -- (6.53,0.514) -- (6.56,0.512) -- (6.59,0.509) -- (6.62,0.506) -- (6.65,0.504) -- (6.68,0.501) -- (6.71,0.499) -- (6.74,0.496) -- (6.77,0.494) -- (6.80,0.491) -- (6.83,0.489) -- (6.87,0.486) -- (6.90,0.484) -- (6.93,0.482) -- (6.96,0.479) -- (6.99,0.477) -- (7.02,0.475) -- (7.05,0.472) -- (7.08,0.470) -- (7.11,0.468) -- (7.14,0.466) -- (7.17,0.464) -- (7.20,0.461) -- (7.23,0.459) -- (7.26,0.457) -- (7.29,0.455) -- (7.32,0.453) -- (7.35,0.451) -- (7.38,0.449) -- (7.41,0.447) -- (7.44,0.445) -- (7.47,0.443) -- (7.50,0.441) -- (7.53,0.439) -- (7.56,0.437) -- (7.59,0.435) -- (7.62,0.433) -- (7.65,0.431) -- (7.68,0.430) -- (7.71,0.428) -- (7.74,0.426) -- (7.77,0.424) -- (7.80,0.422) -- (7.83,0.421) -- (7.86,0.419) -- (7.89,0.417) -- (7.92,0.415) -- (7.95,0.414) -- (7.98,0.412) -- (8.01,0.410) -- (8.04,0.409) -- (8.07,0.407) -- (8.10,0.405) -- (8.13,0.404) -- (8.16,0.402) -- (8.19,0.400) -- (8.22,0.399) -- (8.25,0.397) -- (8.28,0.396) -- (8.31,0.394) -- (8.34,0.393) -- (8.37,0.391) -- (8.40,0.390) -- (8.43,0.388) -- (8.46,0.387) -- (8.49,0.385) -- (8.52,0.384) -- (8.55,0.382) -- (8.58,0.381) -- (8.61,0.379) -- (8.64,0.378) -- (8.67,0.377) -- (8.70,0.375) -- (8.73,0.374) -- (8.76,0.372) -- (8.79,0.371) -- (8.82,0.370) -- (8.85,0.368) -- (8.88,0.367) -- (8.91,0.366) -- (8.94,0.364) -- (8.97,0.363) -- (9.00,0.362);
+\node[font=\scriptsize\bfseries,red!70!black,anchor=west] at (3.3,0.22) {3D: a clean pulse};
+\draw[red!70!black,->] (3.25,0.24) -- (2.6,0.45);
+\node[font=\scriptsize\bfseries,blue!60!black,anchor=west] at (4.3,1.75) {2D: a wake that decays like $1/2t$};
+\end{tikzpicture}
+\caption{Huygens' principle. The solution at distance $R = 5$ from a unit region struck at $t = 0$ ($g = 1$ for $|y| < 1$, $c = 1$). In three dimensions (red, Kirchhoff) the signal lasts from $t = 4$ to $t = 6$ and then $u = 0$ exactly. In two dimensions (blue, Poisson, computed by quadrature) it arrives at $t = 4$ and never
+leaves.}
+\label{fig:huygens}
+\end{figure}
+
+The general result, due to Hadamard, is that the sharp principle holds for the wave equation in odd dimensions $n \geq 3$ and fails in even dimensions and in $n = 1$ (for the velocity data, as in Section~\ref{sec:wave1d}). We live in a world where speech is intelligible because $n = 3$.
+
+\subsection{Energy and sources}
+\label{ssec:energynd}
+
+\begin{thm}
+\label{thm:energynd}
+For a $C^2$ solution of $u_{tt} = c^2\Delta u$ in $\mathbb R^n$ vanishing for large $|x|$, the energy $E = \frac12\int(u_t^2 + c^2|\nabla u|^2)\,dx$ is constant, and the energy in the shrinking ball $|x - x_0| \leq R - ct$ is non-increasing. Hence the solution is unique, and $u(x_0, t_0)$ depends only on the data in $|y - x_0| \leq ct_0$.
+\end{thm}
+
+\begin{proof}
+With $e = \frac12(u_t^2 + c^2|\nabla u|^2)$, $e_t = u_tu_{tt} + c^2\nabla u\cdot\nabla u_t = c^2\operatorname{div}(u_t\nabla u)$. Integrating over the ball $B(t)$ of radius $R - ct$, whose boundary moves inward at speed $c$,
+\[
+\frac{d}{dt}\int_{B(t)}e\,dx = \int_{\partial B(t)}\bigl(c^2u_t\,\partial_\nu u - c\,e\bigr)dS \leq 0 ,
+\]
+since $|c^2u_t\partial_\nu u| \leq c\cdot\frac12(u_t^2 + c^2|\nabla u|^2)$. Uniqueness follows as in one dimension.
+\end{proof}
+
+For a source, Duhamel's principle applied to Kirchhoff's formula gives the solution of $u_{tt} = c^2\Delta u + F$ in $\mathbb R^3$ with zero data. The impulse at time $s$ contributes $(t - s)M_{F(\cdot, s)}(x, c(t - s))$; integrating in $s$ and substituting $r = c(t - s)$ gives the \textbf{retarded potential}
+\begin{equation}
+\label{eq:retarded}
+u(x, t) = \frac{1}{4\pi c^2}\int_{|y - x| \leq ct}\frac{F\bigl(y, t - |x - y|/c\bigr)}{|x - y|}\,dy .
+\end{equation}
+The source at $y$ is felt at $x$ as it was at the earlier time $t - |x - y|/c$, the time a signal needs to cover the distance. This is the formula for the potentials of electromagnetism produced by moving charges.
+
+\subsection{Waves in software}
+\label{ssec:software5}
+
+\begin{software}[Spherical waves]
+\label{sw:radial}
+The residual of the radial wave equation $u_{tt} = c^2(u_{rr} + \frac{n - 1}ru_r)$ for an outgoing wave in three and in two dimensions:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> r, t, c = sp.symbols('r t c', positive=True)
+>>> F = sp.Function('F')
+>>> def radial(u, n):      # u_tt - c^2 (u_rr + (n - 1) u_r / r)
+...     return u.diff(t, 2) - c**2 * (u.diff(r, 2) + (n - 1) / r * u.diff(r))
+...
+>>> sp.simplify(radial(F(r - c*t) / r, 3))         # spherical wave in 3D
+0
+>>> sp.simplify(radial(F(r - c*t) / sp.sqrt(r), 2))   # none in 2D
+-c**2*F(-c*t + r)/(4*r**(5/2))
+\end{verbatim}}
+\textbf{Reading the output.} $F(r - ct)/r$ is an exact solution in three dimensions for every profile $F$. Its two-dimensional analogue $F(r - ct)/\sqrt r$ leaves a residual of order $r^{-5/2}$: in two dimensions an outgoing wave cannot keep its shape, and is a travelling profile only far from the source. This is the
+same fact as the wake.
+
+\textbf{MATLAB/Octave:} with the Symbolic Math Toolbox, the same \texttt{diff} expressions.
+\end{software}
+
+\begin{software}[Kirchhoff's formula]
+\label{sw:kirchhoff}
+Example~\ref{ex:huygens} in three dimensions, with $a = 1$, $R = 5$: the spherical mean in Kirchhoff's formula estimated from a million random directions, against the exact pulse:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> rng = np.random.default_rng(1)
+>>> w = rng.normal(size=(10**6, 3)); w /= np.linalg.norm(w, axis=1)[:, None]
+>>> a, R = 1.0, 5.0              # g = 1 in the unit ball, f = 0, c = 1
+>>> x = np.array([R, 0, 0])
+>>> def kirchhoff(t):            # u = t * (mean of g over |y - x| = t)
+...     return t * np.mean(np.linalg.norm(x + t * w, axis=1) < a)
+...
+>>> for t in (3.5, 4.5, 5.0, 5.5, 6.5):
+...     exact = max(a**2 - (R - t)**2, 0) / (4 * R)
+...     print(t, round(kirchhoff(t), 4), round(exact, 4))
+...
+3.5 0.0 0.0
+4.5 0.0371 0.0375
+5.0 0.0498 0.05
+5.5 0.037 0.0375
+6.5 0.0 0.0
+\end{verbatim}}
+\textbf{Reading the output.} The solution is $0$ before $t = 4$ and after $t = 6$, and in between follows $(1 - (5 - t)^2)/20$, with peak $0.05$ at $t = 5$, to within the Monte Carlo error, which is $t\sqrt{p(1 - p)/10^6} \approx 0.0005$ near the peak, where $p = u/t \approx 0.01$ is the fraction of directions that hit the ball.
+
+\textbf{MATLAB/Octave:} \texttt{w = randn(1e6,3); w = w./vecnorm(w,2,2);} and the same mean.
+\end{software}
+
+\begin{software}[Poisson's formula and the wake]
+\label{sw:poisson}
+Example~\ref{ex:huygens} in two dimensions. Writing $\rho = |y - x|$, Poisson's formula becomes $u = \frac1{2\pi}\int\theta(\rho)\rho\,d\rho/\sqrt{t^2 - \rho^2}$, with $\theta(\rho)$ the angle of the circle of radius $\rho$ about $x$ that lies in the disc; the substitution $\rho = t\sin\phi$ removes the square-root singularity:
+{\small\begin{verbatim}
+>>> from scipy.integrate import quad
+>>> def poisson(R, t, a=1.0):              # 2D, g = 1 in the unit disc, c = 1
+...     def arc(rho):                # angle of circle |y - x| = rho in disc
+...         if R == 0: return 2 * np.pi * (rho < a)
+...         q = (R**2 + rho**2 - a**2) / (2 * R * rho)
+...         return 2 * np.arccos(np.clip(q, -1, 1))
+...     lo, hi = max(R - a, 0.0), min(R + a, t)
+...     if hi <= lo: return 0.0
+...     f = lambda phi: arc(t * np.sin(phi)) * t * np.sin(phi)  # rho=t sin
+...     lims = np.arcsin(lo / t), np.arcsin(hi / t)
+...     return quad(f, *lims, limit=200)[0] / (2 * np.pi)
+...
+>>> for t in (0.5, 2.0, 10.0, 100.0):    # centre: t - sqrt(t^2 - a^2)
+...     exact = t - np.sqrt(max(t * t - 1, 0))
+...     print(t, round(poisson(0.0, t), 6), round(exact, 6))
+...
+0.5 0.5 0.5
+2.0 0.267949 0.267949
+10.0 0.050126 0.050126
+100.0 0.005 0.005
+>>> [round(poisson(5.0, t), 4) for t in (3.5, 5.0, 6.5, 10.0, 30.0)]
+[0.0, 0.1736, 0.1271, 0.058, 0.0169]
+\end{verbatim}}
+\textbf{Reading the output.} At the centre the quadrature reproduces $t - \sqrt{t^2 - 1}$ to six digits, and the value at $t = 100$, $0.005$, is the asymptotic $1/2t$. At distance $5$ the solution is still $0.058$ at $t = 10$ and $0.0169$ at $t = 30$, close to $1/2t = 0.0167$; in three dimensions it would be exactly $0$ for all $t > 6$.
+
+\textbf{MATLAB/Octave:} \texttt{integral} with the same integrand.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Find the solution in $\mathbb R^3$ with $u(x, 0) = 0$ and $u_t(x, 0) = e^{-|x|^2}$, and its value at the origin.
+\end{problem}
+
+\begin{solution}
+The solution is radial, and $V = ru$ solves the one-dimensional equation with $V(r, 0) = 0$ and $V_t(r, 0) = re^{-r^2}$, which is odd. By d'Alembert,
+\[
+V = \frac1{2c}\int_{r - ct}^{r + ct}se^{-s^2}\,ds = \frac1{4c}\Bigl(e^{-(r - ct)^2} - e^{-(r + ct)^2}\Bigr) ,
+\]
+so $u = V/r$. Letting $r \to 0$, $u(0, t) = \frac1{4c}\cdot 4ct\,e^{-c^2t^2} = te^{-c^2t^2}$, which agrees with Kirchhoff: $tM_g(0, ct) = te^{-c^2t^2}$.
+\end{solution}
+
+\begin{problem}
+Derive the cap fraction used in Example~\ref{ex:huygens}: the fraction of the sphere of radius $\rho$ about a point at distance $R$ from the centre of a ball of radius $a$ that lies inside the ball is $\bigl(a^2 - (R - \rho)^2\bigr)/4R\rho$ when $|R - \rho| < a$.
+\end{problem}
+
+\begin{solution}
+Put the centre of the ball at the origin and the point at $x = (R, 0, 0)$. A point of the sphere is $y = x + \rho\omega$ with $|y|^2 = R^2 + \rho^2 + 2R\rho\omega_1$, and it lies in the ball when
+$\omega_1 < (a^2 - R^2 - \rho^2)/2R\rho$. Since $\omega_1$ is uniformly distributed on $[-1, 1]$ for $\omega$ uniform on the sphere (Archimedes' hat-box theorem), the fraction is $\frac12\bigl(1 + (a^2 - R^2 - \rho^2)/2R\rho\bigr) = \bigl(a^2 - (R - \rho)^2\bigr)/4R\rho$.
+\end{solution}
+
+\begin{problem}
+In two dimensions, show that the value at the centre in Example~\ref{ex:huygens}, $t - \sqrt{t^2 - a^2}$, is asymptotic to $a^2/2t$, and explain the constant in terms of the area struck.
+\end{problem}
+
+\begin{solution}
+$t - \sqrt{t^2 - a^2} = a^2/(t + \sqrt{t^2 - a^2}) \sim a^2/2t$. For large $t$ the whole disc is near the centre of the circle of radius $t$, where the weight $1/(2\pi\sqrt{t^2 - \rho^2}) \approx 1/2\pi t$, so $u \approx \pi a^2/2\pi t$: the area struck times $1/2\pi t$.
+\end{solution}
+
+\begin{problem}
+Use the retarded potential \eqref{eq:retarded} to solve $u_{tt} = c^2\Delta u + 1$ in $\mathbb R^3$ with zero data.
+\end{problem}
+
+\begin{solution}
+$u = \frac1{4\pi c^2}\int_{|y - x| \leq ct}\frac{dy}{|x - y|} = \frac1{4\pi c^2}\int_0^{ct}\frac{4\pi r^2}{r}\,dr = \frac{1}{c^2}\cdot\frac{c^2t^2}{2} = \frac{t^2}{2}$, which plainly solves $u_{tt} = 1$, $\Delta u = 0$.
+\end{solution}
+
+\begin{problem}
+\label{prob:descent}
+Show that Poisson's formula, applied to $f = 0$ and $g$ depending only on $x_1$, gives d'Alembert's formula.
+\end{problem}
+
+\begin{solution}
+With $h = \sqrt{c^2t^2 - (y_1 - x_1)^2}$, the disc $|y - x| < ct$ is $|y_1 - x_1| < ct$, $|y_2 - x_2| < h$, and
+\[
+u = \frac1{2\pi c}\int_{x_1 - ct}^{x_1 + ct}g(y_1)\int_{-h}^{h}\frac{dy_2}{\sqrt{h^2 - y_2^2}}\,dy_1 = \frac1{2\pi c}\int_{x_1 - ct}^{x_1 + ct}\pi g(y_1)\,dy_1 = \frac1{2c}\int_{x_1 - ct}^{x_1 + ct}g .
+\]
+\end{solution}
+
+\begin{problem}
+Thunder from a lightning stroke $2$\,km away is heard as a rumble lasting several seconds, although the flash is almost instantaneous. Given that sound in air obeys the three-dimensional wave equation with $c = 343$\,m/s, which satisfies the sharp Huygens principle, explain the rumble, and find
+how long the thunder lasts from a straight vertical stroke $3$\,km tall, seen from $2$\,km away at ground level.
+\end{problem}
+
+\begin{solution}
+The source is not a point: the stroke is a long line of sources, all at different distances. Each point of the channel is heard sharply, at time distance$/c$. The nearest point is $2$\,km away and the farthest $\sqrt{2^2 + 3^2} = 3.61$\,km, so the thunder lasts from $2000/343 = 5.8$\,s to $3606/343 = 10.5$\,s, about $4.7$\,s. (Echoes and the
+branching of the channel lengthen it further.)
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -1399,9 +1682,12 @@ Grune and Stratton, 382--407.
 \item Godunov, S. K. (1959), A difference method for numerical calculation of discontinuous solutions of the equations of hydrodynamics, \emph{Matematicheskii Sbornik}, 47(89), 271--306.
 \item Hadamard, J. (1902), Sur les probl\`emes aux d\'eriv\'ees partielles et leur signification physique, \emph{Princeton University Bulletin}, 13,
 49--52.
+\item Hadamard, J. (1923), \emph{Lectures on Cauchy's Problem in Linear Partial Differential Equations}, New Haven, Yale University Press.
 \item Holmgren, E. (1901), \"Uber Systeme von linearen partiellen Differentialgleichungen, \emph{\"Ofversigt af Kongl.\ Vetenskaps-Akademiens F\"orhandlingar}, 58, 91--103.
 \item Hopf, E. (1950), The partial differential equation $u_t + uu_x = \mu u_{xx}$, \emph{Communications on Pure and Applied Mathematics}, 3, 201--230.
 \item Hugoniot, H. (1887), M\'emoire sur la propagation du mouvement dans les corps et sp\'ecialement dans les gaz parfaits, \emph{Journal de l'\'Ecole Polytechnique}, 57, 3--97.
+\item Huygens, C. (1690), \emph{Trait\'e de la lumi\`ere}, Leiden, Pierre van der Aa.
+\item Kirchhoff, G. (1883), Zur Theorie der Lichtstrahlen, \emph{Annalen der Physik}, 254, 663--695.
 \item Kowalevsky, S. von (1875), Zur Theorie der partiellen Differentialgleichungen, \emph{Journal f\"ur die reine und angewandte Mathematik}, 80, 1--32.
 \item Kru\v{z}kov, S. N. (1970), First order quasilinear equations in several independent variables, \emph{Mathematics of the USSR-Sbornik}, 10, 217--243.
 \item Lax, P. D. (1957), Hyperbolic systems of conservation laws II, \emph{Communications on Pure and Applied Mathematics}, 10, 537--566.
@@ -1410,6 +1696,7 @@ Grune and Stratton, 382--407.
 \item Lighthill, M. J., and Whitham, G. B. (1955), On kinematic waves II: a theory of traffic flow on long crowded roads, \emph{Proceedings of the Royal Society of London A}, 229, 317--345.
 \item McKendrick, A. G. (1926), Applications of mathematics to medical problems, \emph{Proceedings of the Edinburgh Mathematical Society}, 44, 98--130.
 \item Mersenne, M. (1636), \emph{Harmonie universelle}, Paris, Cramoisy.
+\item Poisson, S. D. (1819), M\'emoire sur l'int\'egration de quelques \'equations lin\'eaires aux diff\'erences partielles, et particuli\`erement de l'\'equation g\'en\'erale du mouvement des fluides \'elastiques, \emph{M\'emoires de l'Acad\'emie Royale des Sciences de l'Institut de France}, 3, 121--176.
 \item Rankine, W. J. M. (1870), On the thermodynamic theory of waves of finite longitudinal disturbance, \emph{Philosophical Transactions of the Royal Society of London}, 160, 277--288.
 \item Richards, P. I. (1956), Shock waves on the highway, \emph{Operations Research}, 4, 42--51.
 \item Tricomi, F. (1923), Sulle equazioni lineari alle derivate parziali di 2$^\circ$ ordine, di tipo misto, \emph{Memorie della Reale Accademia dei Lincei}, serie 5, 14, 133--247.
