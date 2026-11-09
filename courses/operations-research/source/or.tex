@@ -1460,6 +1460,245 @@ By weak duality, the primal objective is bounded above by $b^{\mathsf T}y$ for t
 then has an optimal solution too.
 \end{solution}
 
+%======================================================================
+\section{Sensitivity Analysis and Parametric Programming}
+\label{sec:sensitivity}
+
+The data of a real LP are estimates: prices change, capacities are uncertain, new products are proposed. A solution is of little use unless we also know how it depends on the data. \textbf{Sensitivity analysis} answers, from the final basis alone and without re-solving, questions such as: over what range of a
+resource does the present plan stay optimal, and what is an extra unit worth; how far can a price move before the plan should change; is a new product worth making. \textbf{Parametric programming} follows the solution as a parameter varies over its whole range. Both rest on one observation: a basis $B$
+is optimal exactly when it is \emph{primal feasible}, $B^{-1}b \geq 0$, and \emph{dual feasible}, all reduced costs of the right sign; $b$ enters only the first condition and $c$ only the second.
+
+Throughout, the running example is Example~\ref{ex:graphical} (maximise $10x_1 + 15x_2$ with resources $b = (26, 56, 5)$), with optimal basis $\{s_3, x_1, x_2\}$, $x_B = (3, 8, 10)$, $Z = 230$, and shadow prices $y = (\frac53, \frac{10}3, 0)$, and
+\[
+B^{-1} = \begin{pmatrix} 1 & -\frac12 & 1 \\ \frac23 & -\frac16 & 0 \\ -\frac13 & \frac13 & 0 \end{pmatrix}
+\]
+from the final tableau of Example~\ref{ex:tableau} (rows for $s_3$, $x_1$, $x_2$).
+
+\subsection{Changes in the right-hand side}
+\label{ssec:rhsranging}
+
+\begin{thm}[Right-hand-side ranging]
+\label{thm:rhsranging}
+If $b_i$ changes to $b_i + \delta$, the basis $B$ remains optimal if and only if $x_B + \delta B^{-1}e_i \geq 0$. On that interval of $\delta$ the optimal solution is $x_B + \delta B^{-1}e_i$ and the optimal value is $Z + \delta y_i$.
+\end{thm}
+
+\begin{proof}
+The reduced costs do not involve $b$, so dual feasibility is unaffected, and $B$ is optimal if and only if the new basic solution $B^{-1}(b + \delta e_i)$ is non-negative. The value is $c_B^{\mathsf T}B^{-1}(b + \delta e_i) = Z + \delta y_i$.
+\end{proof}
+
+\begin{exa}
+\label{ex:rhsranging}
+For the second resource, $B^{-1}e_2 = (-\frac12, -\frac16, \frac13)$, so the conditions are $3 - \frac\delta2 \geq 0$, $8 - \frac\delta6 \geq 0$ and $10 + \frac\delta3 \geq 0$, that is $-30 \leq \delta \leq 6$: the basis stays optimal for $26 \leq b_2 \leq 62$, and over that range each extra unit is worth
+$y_2 = \frac{10}3$. Likewise $23 \leq b_1 \leq 56$ with $y_1 = \frac53$, and $b_3 \geq 2$ with $y_3 = 0$ (Software~\ref{sw:ranging}). At the end $b_2 = 62$ the slack $s_3$ reaches $0$; beyond it the third constraint binds, the basis changes, and the second resource is no longer worth anything.
+\end{exa}
+
+The shadow price is thus a \emph{local} value. Outside the range it changes, and the way it changes is described by the following theorem, the geometric content of sensitivity analysis.
+
+\begin{thm}
+\label{thm:valuefunction}
+For the maximisation (P), let $z^*(b)$ be the optimal value as a function of $b$, over the set of $b$ for which (P) is feasible, and suppose the dual feasible set $\{y \geq 0 : A^{\mathsf T}y \geq c\}$ is non-empty with vertices $y^1, \ldots, y^K$. Then
+\[
+z^*(b) = \min_kb^{\mathsf T}y^k ,
+\]
+a concave piecewise linear function of $b$, whose slope in the direction $e_i$ on each piece is the shadow price $y_i$ of the corresponding optimal basis.
+\end{thm}
+
+\begin{proof}
+By strong duality $z^*(b)$ equals the dual optimum $\min\{b^{\mathsf T}y : A^{\mathsf T}y \geq c, y \geq 0\}$, which is finite where (P) is feasible and, by the fundamental theorem applied to the dual, is attained at a vertex. So it is the minimum of the finitely many linear functions $b \mapsto b^{\mathsf T}y^k$, which is concave
+and piecewise linear.
+\end{proof}
+
+Concavity is \textbf{diminishing returns}: each additional unit of a resource is worth no more than the one before (Figure~\ref{fig:parametric}). The theorem also explains why shadow prices can be ambiguous at a breakpoint, where two pieces meet and the optimal basis is degenerate: there the left and right slopes differ,
+and a solver reports one of them.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-0.9,-0.7) rectangle (9.2,3.6);
+\draw[->] (0,0) -- (8.6,0) node[below,font=\small] {$b_2$};
+\draw[->] (0,0) -- (0,3.4) node[left,font=\small] {$z^*$};
+\foreach \v in {20,40,60,80,100} \draw ({0.08*\v},0.06) -- ({0.08*\v},-0.06) node[below,font=\scriptsize] {$\v$};
+\foreach \v in {100,200} \draw (0.06,{0.012*\v}) -- (-0.06,{0.012*\v}) node[left,font=\scriptsize] {$\v$};
+\draw[blue!60!black,thick] (0.000,-0.000) -- (0.080,0.060) -- (0.160,0.120) -- (0.240,0.180) -- (0.320,0.240) -- (0.400,0.300) -- (0.480,0.360) -- (0.560,0.420) -- (0.640,0.480) -- (0.720,0.540) -- (0.800,0.600) -- (0.880,0.660) -- (0.960,0.720) -- (1.040,0.780) -- (1.120,0.840) -- (1.200,0.900) -- (1.280,0.960) -- (1.360,1.020) -- (1.440,1.080) -- (1.520,1.140) -- (1.600,1.200) -- (1.680,1.260) -- (1.760,1.320) -- (1.840,1.380) -- (1.920,1.440) -- (2.000,1.500) -- (2.080,1.560) -- (2.160,1.600) -- (2.240,1.640) -- (2.320,1.680) -- (2.400,1.720) -- (2.480,1.760) -- (2.560,1.800) -- (2.640,1.840) -- (2.720,1.880) -- (2.800,1.920) -- (2.880,1.960) -- (2.960,2.000) -- (3.040,2.040) -- (3.120,2.080) -- (3.200,2.120) -- (3.280,2.160) -- (3.360,2.200) -- (3.440,2.240) -- (3.520,2.280) -- (3.600,2.320) -- (3.680,2.360) -- (3.760,2.400) -- (3.840,2.440) -- (3.920,2.480) -- (4.000,2.520) -- (4.080,2.560) -- (4.160,2.600) -- (4.240,2.640) -- (4.320,2.680) -- (4.400,2.720) -- (4.480,2.760) -- (4.560,2.800) -- (4.640,2.840) -- (4.720,2.880) -- (4.800,2.920) -- (4.880,2.960) -- (4.960,3.000) -- (5.040,3.000) -- (5.120,3.000) -- (5.200,3.000) -- (5.280,3.000) -- (5.360,3.000) -- (5.440,3.000) -- (5.520,3.000) -- (5.600,3.000) -- (5.680,3.000) -- (5.760,3.000) -- (5.840,3.000) -- (5.920,3.000) -- (6.000,3.000) -- (6.080,3.000) -- (6.160,3.000) -- (6.240,3.000) -- (6.320,3.000) -- (6.400,3.000) -- (6.480,3.000) -- (6.560,3.000) -- (6.640,3.000) -- (6.720,3.000) -- (6.800,3.000) -- (6.880,3.000) -- (6.960,3.000) -- (7.040,3.000) -- (7.120,3.000) -- (7.200,3.000) -- (7.280,3.000) -- (7.360,3.000) -- (7.440,3.000) -- (7.520,3.000) -- (7.600,3.000) -- (7.680,3.000) -- (7.760,3.000) -- (7.840,3.000) -- (7.920,3.000) -- (8.000,3.000);
+\draw[black!40,dashed] (2.08,0) -- (2.08,1.56); \draw[black!40,dashed] (4.96,0) -- (4.96,3.0);
+\fill[red!70!black] (2.08,1.56) circle (2pt); \fill[red!70!black] (4.96,3.0) circle (2pt); \fill[green!45!black] (4.48,2.76) circle (2pt);
+\node[font=\scriptsize,anchor=west] at (0.95,0.3) {slope $5$};
+\node[font=\scriptsize,anchor=east] at (3.0,2.35) {slope $\frac{10}3$};
+\node[font=\scriptsize,anchor=west] at (6.0,3.2) {slope $0$};
+\node[font=\scriptsize,green!45!black,anchor=north west] at (5.1,2.75) {$b_2 = 56$: $z^* = 230$};\draw[green!45!black,->] (5.1,2.6) -- (4.55,2.74);
+\end{tikzpicture}
+\caption{The optimal profit of Example~\ref{ex:graphical} as a function of the second resource $b_2$, computed by solving the LP at $241$ values. It is concave and piecewise linear, with breakpoints at $b_2 = 26$ and $b_2 = 62$; the slopes $5$, $\frac{10}3$ and $0$ are the shadow prices of the three optimal bases met
+along the way. The present value $b_2 = 56$ lies inside the middle range found by ranging.}
+\label{fig:parametric}
+\end{figure}
+
+\subsection{Changes in the objective}
+\label{ssec:costranging}
+
+A change in $c$ leaves $x_B = B^{-1}b$ feasible and alters only the reduced costs $\bar c_j = c_j - c_B^{\mathsf T}B^{-1}A_j$ (for the maximisation, optimal while all $\bar c_j \leq 0$).
+\begin{itemize}
+\item If $c_j$ belongs to a \textbf{non-basic} variable, only $\bar c_j$ changes, and by the same amount: the basis stays optimal while $c_j$ rises by less than $-\bar c_j$. This is how much a product's profit must improve before it is worth making.
+\item If $c_k$ belongs to a \textbf{basic} variable, $c_B$ changes, so every reduced cost changes, linearly in $c_k$; the range is the interval on which all of them keep their sign. The solution $x$ is unchanged on that range, and the value changes by $x_k$ per unit change in $c_k$.
+\end{itemize}
+For the running example the ranges are $7.5 \leq c_1 \leq 30$ and $5 \leq c_2 \leq 20$ (Software~\ref{sw:ranging}), the second agreeing with the graphical calculation of the problem at the end of the section on geometry. The analogue of Theorem~\ref{thm:valuefunction} is that the optimal value is a \emph{convex} piecewise linear function of $c$, the maximum of
+$c^{\mathsf T}v$ over the vertices $v$ of the primal region.
+
+Ranges hold for one coefficient at a time. For simultaneous changes the \textbf{$100\%$ rule} (Bradley, Hax and Magnanti) gives a sufficient condition: if each change is expressed as a fraction of the allowed change in its direction, the basis remains optimal when the fractions add up to at most $1$.
+
+\subsection{New variables and new constraints}
+\label{ssec:newvars}
+
+\textbf{A new variable} $x_{n + 1}$ with column $a$ and profit $c_{n + 1}$ is priced out with the existing shadow prices: its reduced profit is $c_{n + 1} - y^{\mathsf T}a$. If this is $\leq 0$ the present plan stays optimal and the new activity is not worth starting; if it is positive, $x_{n + 1}$ enters the basis and the
+primal simplex method continues from the old optimum. A product using one unit of each resource ($a = (1, 1, 1)$) is worth making in the running example only if its profit exceeds $y^{\mathsf T}a = \frac53 + \frac{10}3 + 0 = 5$, the value of the resources it would consume (Software~\ref{sw:newvar}).
+
+\textbf{A new constraint} that the present optimum satisfies changes nothing. If it is violated, add it with its slack, express it in the current basis, and the tableau is dual feasible but primal infeasible: the dual simplex method of the section on duality restores optimality, usually in a few pivots.
+
+\subsection{Parametric programming}
+\label{ssec:parametric}
+
+In \textbf{parametric programming} the data depend on a parameter $\theta$, for example $b(\theta) = b + \theta d$, and the solution is traced for all $\theta$. By Theorem~\ref{thm:rhsranging} the basis stays optimal on an interval of $\theta$; at its end a basic variable reaches zero, a dual simplex pivot changes the basis, and
+the next interval begins. The optimal value is linear on each interval and concave overall, with slope $y^{\mathsf T}d$ on each piece. For $c(\theta) = c + \theta d$ the roles are exchanged: primal simplex pivots at the breakpoints, and a convex value function. Figure~\ref{fig:parametric} is the case $d = e_2$.
+
+\subsection{Sensitivity in software}
+\label{ssec:software6}
+
+\begin{software}[Ranging]
+\label{sw:ranging}
+From the optimal basis $\{s_3, x_1, x_2\}$ of the running example: $x_B$ and $y$, the range of each $b_i$ from Theorem~\ref{thm:rhsranging}, and the range of each $c_j$ over which the reduced costs keep their sign, found on a fine grid:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.optimize import linprog
+>>> A = np.array([[2., 1], [2, 4], [-1, 1]]); b = np.array([26., 56, 5])
+>>> c = np.array([10., 15])
+>>> Af = np.hstack([A, np.eye(3)]); cf = np.r_[c, 0, 0, 0]   # with slacks
+>>> basis = [4, 0, 1]                      # s3, x1, x2: the optimal basis
+>>> Binv = np.linalg.inv(Af[:, basis]); xB = Binv @ b
+>>> y = cf[basis] @ Binv; xB, y          # basic values and shadow prices
+(array([ 3.,  8., 10.]), array([1.66666667, 3.33333333, 0.        ]))
+>>> for i in range(3):                     # right-hand-side ranges
+...     col = Binv[:, i]; t = -xB / np.where(col == 0, np.nan, col)
+...     lo = np.nanmax(np.where(col > 0, t, np.nan), initial=-np.inf)
+...     hi = np.nanmin(np.where(col < 0, t, np.nan), initial=np.inf)
+...     print(f"b{i+1}: {b[i] + lo:6.2f} to {b[i] + hi:6.2f}, y = {y[i]:.4f}")
+...
+b1:  23.00 to  56.00, y = 1.6667
+b2:  26.00 to  62.00, y = 3.3333
+b3:   2.00 to    inf, y = 0.0000
+>>> def still_optimal(cc):           # all reduced costs <= 0 (maximising)
+...     cfull = np.r_[cc, 0, 0, 0]
+...     return np.all(cfull - (cfull[basis] @ Binv) @ Af <= 1e-9)
+...
+>>> grid = np.linspace(0, 60, 60001)       # cost ranges, on a fine grid
+>>> for j in range(2):
+...     trial = lambda t: np.where(np.arange(2) == j, t, c)
+...     ok = [t for t in grid if still_optimal(trial(t))]
+...     print(f"c{j+1}: {min(ok):.2f} to {max(ok):.2f}")
+...
+c1: 7.50 to 30.00
+c2: 5.00 to 20.00
+\end{verbatim}}
+\textbf{Reading the output.} The ranges are $23 \leq b_1 \leq 56$, $26 \leq b_2 \leq 62$, $b_3 \geq 2$, and $7.5 \leq c_1 \leq 30$, $5 \leq c_2 \leq 20$. The third resource has price $0$ and can grow without limit, but cannot fall below $2$, where its slack of $3$ is used up.
+
+\textbf{MATLAB/Octave:} \texttt{Binv = inv(Af(:, basis))} and the same ratio formulas.
+\end{software}
+
+\begin{software}[The value function]
+\label{sw:valuefunction}
+The optimal profit for $241$ values of $b_2$ from $0$ to $120$, its breakpoints, and the distinct slopes between them:
+{\small\begin{verbatim}
+>>> bs = np.linspace(0, 120, 241); z = []
+>>> for b2 in bs:                          # parametric right-hand side b2
+...     r = linprog(-c, A_ub=A, b_ub=[26, b2, 5], method='highs')
+...     z.append(-r.fun)
+...
+>>> slopes = np.round(np.diff(z) / np.diff(bs), 4)
+>>> breaks = [bs[k] for k in range(1, len(slopes))
+...           if slopes[k] != slopes[k - 1]]
+>>> breaks, sorted(set(slopes), reverse=True)
+([26.0, 62.0], [5.0, 3.3333, 0.0])
+\end{verbatim}}
+\textbf{Reading the output.} The slope changes at $b_2 = 26$ and $b_2 = 62$, exactly the ends of the range found by ranging, and the slopes are $5$, $\frac{10}3$ and $0$, decreasing as Theorem~\ref{thm:valuefunction} requires. Below $26$ the constraints $2x_1 + 4x_2 \leq b_2$ and $-x_1 + x_2 \leq 5$ bind and an extra unit of
+$b_2$ is worth $5$; above $62$ the second resource is in surplus.
+
+\textbf{MATLAB/Octave:} a loop of \texttt{linprog} calls.
+\end{software}
+
+\begin{software}[A new product and a new constraint]
+\label{sw:newvar}
+Pricing a new product with column $(1, 1, 1)$ and profit $12$, then re-solving with it; and re-solving the original problem with the added constraint $x_1 \leq 6$:
+{\small\begin{verbatim}
+>>> a3, c3 = np.array([1., 1, 1]), 12.0    # a new product: price it out
+>>> y @ a3, c3 - y @ a3                    # reduced profit > 0: worth making
+(5.0, 7.0)
+>>> r = linprog(-np.r_[c, c3], A_ub=np.c_[A, a3], b_ub=b, method='highs')
+>>> r.x, -r.fun
+(array([ 7., 10.,  2.]), 244.0)
+>>> r = linprog(-c, A_ub=np.r_[A, [[1, 0]]], b_ub=np.r_[b, 6],
+...             method='highs')            # a new constraint x1 <= 6
+>>> r.x, -r.fun
+(array([ 6., 11.]), 225.0)
+\end{verbatim}}
+\textbf{Reading the output.} The resources the new product uses are worth $5$, so a profit of $12$ gives a reduced profit of $7 > 0$: it should be made. The new optimum makes $7$, $10$ and $2$ units for a profit of $244$. The constraint $x_1 \leq 6$ cuts off the old optimum $(8, 10)$, and the new optimum is the vertex
+$C(6, 11)$ with $Z = 225$: the restriction costs $5$.
+
+\textbf{MATLAB/Octave:} \texttt{linprog} with the extra column or row.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+In the running example, find the range of $b_1$ by hand from $B^{-1}$, and the optimal solution when $b_1 = 30$.
+\end{problem}
+
+\begin{solution}
+$B^{-1}e_1 = (1, \frac23, -\frac13)$, so the conditions are $3 + \delta \geq 0$, $8 + \frac23\delta \geq 0$, $10 - \frac13\delta \geq 0$: $-3 \leq \delta \leq 30$, that is $23 \leq b_1 \leq 56$. At $b_1 = 30$, $\delta = 4$: $s_3 = 7$, $x_1 = 8 + \frac83 = \frac{32}3$, $x_2 = 10 - \frac43 = \frac{26}3$, and
+$Z = 230 + 4 \cdot \frac53 = 236.7$.
+\end{solution}
+
+\begin{problem}
+Derive the range $7.5 \leq c_1 \leq 30$ from the reduced costs.
+\end{problem}
+
+\begin{solution}
+With $c_B = (0, c_1, 15)$ for $(s_3, x_1, x_2)$, the multipliers are $y = c_B^{\mathsf T}B^{-1} = (\frac23c_1 - 5, -\frac16c_1 + 5, 0)$, and the reduced profits of $s_1$ and $s_2$ are $-y_1$ and $-y_2$. Optimality requires $y_1 \geq 0$ and $y_2 \geq 0$: $c_1 \geq 7.5$ and $c_1 \leq 30$. At $c_1 = 10$ these give
+$y = (\frac53, \frac{10}3, 0)$.
+\end{solution}
+
+\begin{problem}
+A new product needs $3$, $1$ and $0$ units of the three resources. What profit per unit must it earn to be worth making?
+\end{problem}
+
+\begin{solution}
+It is worth making if its profit exceeds $y^{\mathsf T}a = 3\cdot\frac53 + 1\cdot\frac{10}3 + 0 = \frac{25}3 = 8.33$.
+\end{solution}
+
+\begin{problem}
+Using the 100\% rule, decide whether the basis stays optimal if $b_1$ rises by $10$ and $b_2$ falls by $15$ at the same time.
+\end{problem}
+
+\begin{solution}
+The allowed increase of $b_1$ is $30$ and the allowed decrease of $b_2$ is $30$. The fractions are $\frac{10}{30} + \frac{15}{30} = \frac56 \leq 1$, so the basis remains optimal. Check:
+\[
+x_B = (3, 8, 10) + 10\bigl(1, \tfrac23, -\tfrac13\bigr) - 15\bigl(-\tfrac12, -\tfrac16, \tfrac13\bigr) = (20.5, 17.17, 1.67) \geq 0 .
+\]
+\end{solution}
+
+\begin{problem}
+Explain why the optimal value is a convex function of the cost vector $c$, for a fixed feasible region.
+\end{problem}
+
+\begin{solution}
+For a bounded feasible region with vertices $v^1, \ldots, v^K$, the optimal value of the maximisation is $\max_kc^{\mathsf T}v^k$, a maximum of linear functions of $c$, which is convex. Economically, if prices can vary, being able to re-optimise is worth more the more they vary.
+\end{solution}
+
+\begin{problem}
+In the running example the third resource has slack $3$ and price $0$. A consultant proposes buying $10$ more units of it at Rs.~1 each. Should the firm accept?
+\end{problem}
+
+\begin{solution}
+No. Its shadow price is $0$ for all $b_3 \geq 2$, so extra units add no profit: the firm would pay Rs.~10 for nothing. The third resource is not a bottleneck; the first two are, worth $\frac53$ and $\frac{10}3$ per unit within their ranges.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -1492,6 +1731,7 @@ then has an optimal solution too.
 \item Beale, E. M. L. (1955), Cycling in the dual simplex algorithm, \emph{Naval Research Logistics Quarterly}, 2, 269--275.
 \item Blackett, P. M. S. (1962), \emph{Studies of War: Nuclear and Conventional}, Edinburgh, Oliver and Boyd.
 \item Bland, R. G. (1977), New finite pivoting rules for the simplex method, \emph{Mathematics of Operations Research}, 2, 103--107.
+\item Bradley, S. P., Hax, A. C., and Magnanti, T. L. (1977), \emph{Applied Mathematical Programming}, Reading, Addison-Wesley.
 \item Charnes, A. (1952), Optimality and degeneracy in linear programming, \emph{Econometrica}, 20, 160--170.
 \item Charnes, A., Cooper, W. W., and Ferguson, R. O. (1955), Optimal estimation of executive compensation by linear programming, \emph{Management Science}, 1, 138--151.
 \item Dantzig, G. B. (1951), Maximization of a linear function of variables subject to linear inequalities, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 339--347.
@@ -1499,7 +1739,9 @@ then has an optimal solution too.
 \item Dantzig, G. B., and Orchard-Hays, W. (1954), The product form for the inverse in the simplex method, \emph{Mathematical Tables and Other Aids to Computation}, 8, 64--67.
 \item Farkas, J. (1902), Theorie der einfachen Ungleichungen, \emph{Journal f\"ur die reine und angewandte Mathematik}, 124, 1--27.
 \item Forrest, J. J. H., and Tomlin, J. A. (1972), Updated triangular factors of the basis to maintain sparsity in the product form simplex method, \emph{Mathematical Programming}, 2, 263--278.
+\item Gal, T., and Greenberg, H. J. (eds.) (1997), \emph{Advances in Sensitivity Analysis and Parametric Programming}, Boston, Kluwer.
 \item Gale, D., Kuhn, H. W., and Tucker, A. W. (1951), Linear programming and the theory of games, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 317--329.
+\item Gass, S. I., and Saaty, T. L. (1955), The computational algorithm for the parametric objective function, \emph{Naval Research Logistics Quarterly}, 2, 39--45.
 \item Goldfarb, D., and Reid, J. K. (1977), A practicable steepest-edge simplex algorithm, \emph{Mathematical Programming}, 12, 361--371.
 \item Harris, P. M. J. (1973), Pivot selection methods of the Devex LP code, \emph{Mathematical Programming}, 5, 1--28.
 \item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.

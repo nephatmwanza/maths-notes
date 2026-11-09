@@ -1,0 +1,174 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>6.5 Sensitivity in software — Operations Research</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='or.css' rel='stylesheet' type='text/css' /> 
+<meta content='or.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Operations Research</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="orse1.html">Operations Research and Linear Programming Models</a></li>
+<li class="sub"><a class="" href="orsu1.html">The linear programming model</a></li>
+<li class="sub"><a class="" href="orsu2.html">Formulating models</a></li>
+<li class="sub"><a class="" href="orsu3.html">Linearising non-linear features</a></li>
+<li class="sub"><a class="" href="orsu4.html">Linear programming in software</a></li>
+<li class="sub"><a class="" href="orsu5.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse2.html">The Geometry of Linear Programming</a></li>
+<li class="sub"><a class="" href="orsu6.html">Convex sets and polyhedra</a></li>
+<li class="sub"><a class="" href="orsu7.html">Basic feasible solutions</a></li>
+<li class="sub"><a class="" href="orsu8.html">The graphical method</a></li>
+<li class="sub"><a class="" href="orsu9.html">Geometry in software</a></li>
+<li class="sub"><a class="" href="orsu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse3.html">The Simplex Method</a></li>
+<li class="sub"><a class="" href="orsu11.html">Reduced costs and the optimality test</a></li>
+<li class="sub"><a class="" href="orsu12.html">The tableau</a></li>
+<li class="sub"><a class="" href="orsu13.html">Starting the method: artificial variables</a></li>
+<li class="sub"><a class="" href="orsu14.html">Degeneracy, cycling and Bland’s rule</a></li>
+<li class="sub"><a class="" href="orsu15.html">How fast is the simplex method?</a></li>
+<li class="sub"><a class="" href="orsu16.html">The simplex method in software</a></li>
+<li class="sub"><a class="" href="orsu17.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse4.html">The Revised Simplex Method and Bounded Variables</a></li>
+<li class="sub"><a class="" href="orsu18.html">The revised simplex method</a></li>
+<li class="sub"><a class="" href="orsu19.html">Bounded variables</a></li>
+<li class="sub"><a class="" href="orsu20.html">Numerical practice</a></li>
+<li class="sub"><a class="" href="orsu21.html">Revised methods in software</a></li>
+<li class="sub"><a class="" href="orsu22.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse5.html">Duality</a></li>
+<li class="sub"><a class="" href="orsu23.html">The dual problem</a></li>
+<li class="sub"><a class="" href="orsu24.html">Weak and strong duality</a></li>
+<li class="sub"><a class="" href="orsu25.html">Complementary slackness</a></li>
+<li class="sub"><a class="" href="orsu26.html">Farkas’ lemma</a></li>
+<li class="sub"><a class="" href="orsu27.html">The dual simplex method</a></li>
+<li class="sub"><a class="" href="orsu28.html">Duality in software</a></li>
+<li class="sub"><a class="" href="orsu29.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse6.html">Sensitivity Analysis and Parametric Programming</a></li>
+<li class="sub"><a class="" href="orsu30.html">Changes in the right-hand side</a></li>
+<li class="sub"><a class="" href="orsu31.html">Changes in the objective</a></li>
+<li class="sub"><a class="" href="orsu32.html">New variables and new constraints</a></li>
+<li class="sub"><a class="" href="orsu33.html">Parametric programming</a></li>
+<li class="sub"><a class="current" href="orsu34.html">Sensitivity in software</a></li>
+<li class="sub"><a class="" href="orsu35.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="orli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 1562 --><div class='crosslinks'><p class='noindent'>[<a href='orsu35.html'>next</a>] [<a href='orsu33.html'>prev</a>] [<a href='orsu33.html#tailorsu33.html'>prev-tail</a>] [<a href='#tailorsu34.html'>tail</a>] [<a href='orse6.html#orsu34.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>6.5   </span> <a id='x42-410006.5'></a>Sensitivity in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 1565 --><p class='noindent'><span class='head'>
+<a id='x42-41001r1'></a>
+<span class='cmbx-10x-x-109'>Software 6.5.1 </span>(Ranging)<span class='cmbx-10x-x-109'>.</span>  </span> From the optimal basis \(\{s_3, x_1, x_2\}\) of the running example: \(x_B\) and \(y\), the range of each
+\(b_i\) from Theorem <a href='orsu30.html#x38-37001r1'>6.1.1<!-- tex4ht:ref: thm:rhsranging  --></a>, and the range of each \(c_j\) over which the reduced costs keep their sign, found on a
+fine grid:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-16'>
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; from scipy.optimize import linprog
+&gt;&gt;&gt; A = np.array([[2., 1], [2, 4], [-1, 1]]); b = np.array([26., 56, 5])
+&gt;&gt;&gt; c = np.array([10., 15])
+&gt;&gt;&gt; Af = np.hstack([A, np.eye(3)]); cf = np.r_[c, 0, 0, 0]   # with slacks
+&gt;&gt;&gt; basis = [4, 0, 1]                      # s3, x1, x2: the optimal basis
+&gt;&gt;&gt; Binv = np.linalg.inv(Af[:, basis]); xB = Binv @ b
+&gt;&gt;&gt; y = cf[basis] @ Binv; xB, y          # basic values and shadow prices
+(array([ 3.,  8., 10.]), array([1.66666667, 3.33333333, 0.        ]))
+&gt;&gt;&gt; for i in range(3):                     # right-hand-side ranges
+...     col = Binv[:, i]; t = -xB / np.where(col == 0, np.nan, col)
+...     lo = np.nanmax(np.where(col &gt; 0, t, np.nan), initial=-np.inf)
+...     hi = np.nanmin(np.where(col &lt; 0, t, np.nan), initial=np.inf)
+...     print(f"b{i+1}: {b[i] + lo:6.2f} to {b[i] + hi:6.2f}, y = {y[i]:.4f}")
+...
+b1:  23.00 to  56.00, y = 1.6667
+b2:  26.00 to  62.00, y = 3.3333
+b3:   2.00 to    inf, y = 0.0000
+&gt;&gt;&gt; def still_optimal(cc):           # all reduced costs &lt;= 0 (maximising)
+...     cfull = np.r_[cc, 0, 0, 0]
+...     return np.all(cfull - (cfull[basis] @ Binv) @ Af &lt;= 1e-9)
+...
+&gt;&gt;&gt; grid = np.linspace(0, 60, 60001)       # cost ranges, on a fine grid
+&gt;&gt;&gt; for j in range(2):
+...     trial = lambda t: np.where(np.arange(2) == j, t, c)
+...     ok = [t for t in grid if still_optimal(trial(t))]
+...     print(f"c{j+1}: {min(ok):.2f} to {max(ok):.2f}")
+...
+c1: 7.50 to 30.00
+c2: 5.00 to 20.00
+</pre>
+<!-- l. 1599 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The ranges are \(23 \leq b_1 \leq 56\), \(26 \leq b_2 \leq 62\), \(b_3 \geq 2\), and \(7.5 \leq c_1 \leq 30\), \(5 \leq c_2 \leq 20\). The third resource has price \(0\) and can grow
+without limit, but cannot fall below \(2\), where its slack of \(3\) is used up.
+</p><!-- l. 1602 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>Binv = inv(Af(:, basis)) </span>and the same ratio formulas.
+</p>
+</div>
+<!-- l. 1603 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1605 --><p class='noindent'><span class='head'>
+<a id='x42-41002r2'></a>
+<span class='cmbx-10x-x-109'>Software 6.5.2 </span>(The value function)<span class='cmbx-10x-x-109'>.</span>  </span> The optimal profit for \(241\) values of \(b_2\) from \(0\) to \(120\), its breakpoints,
+and the distinct slopes between them:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-17'>
+&gt;&gt;&gt; bs = np.linspace(0, 120, 241); z = []
+&gt;&gt;&gt; for b2 in bs:                          # parametric right-hand side b2
+...     r = linprog(-c, A_ub=A, b_ub=[26, b2, 5], method='highs')
+...     z.append(-r.fun)
+...
+&gt;&gt;&gt; slopes = np.round(np.diff(z) / np.diff(bs), 4)
+&gt;&gt;&gt; breaks = [bs[k] for k in range(1, len(slopes))
+...           if slopes[k] != slopes[k - 1]]
+&gt;&gt;&gt; breaks, sorted(set(slopes), reverse=True)
+([26.0, 62.0], [5.0, 3.3333, 0.0])
+</pre>
+<!-- l. 1619 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The slope changes at \(b_2 = 26\) and \(b_2 = 62\), exactly the ends of the range found by
+ranging, and the slopes are \(5\), \(\frac {10}3\) and \(0\), decreasing as Theorem <a href='orsu30.html#x38-37003r3'>6.1.3<!-- tex4ht:ref: thm:valuefunction  --></a> requires. Below \(26\) the constraints
+\(2x_1 + 4x_2 \leq b_2\) and \(-x_1 + x_2 \leq 5\) bind and an extra unit of \(b_2\) is worth \(5\); above \(62\) the second resource is in surplus.
+</p><!-- l. 1623 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span>a loop of <span class='cmtt-10x-x-109'>linprog </span>calls.
+</p>
+</div>
+<!-- l. 1624 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1626 --><p class='noindent'><span class='head'>
+<a id='x42-41003r3'></a>
+<span class='cmbx-10x-x-109'>Software 6.5.3 </span>(A new product and a new constraint)<span class='cmbx-10x-x-109'>.</span>  </span> Pricing a new product with column \((1, 1, 1)\) and
+profit \(12\), then re-solving with it; and re-solving the original problem with the added constraint
+\(x_1 \leq 6\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-18'>
+&gt;&gt;&gt; a3, c3 = np.array([1., 1, 1]), 12.0    # a new product: price it out
+&gt;&gt;&gt; y @ a3, c3 - y @ a3                    # reduced profit &gt; 0: worth making
+(5.0, 7.0)
+&gt;&gt;&gt; r = linprog(-np.r_[c, c3], A_ub=np.c_[A, a3], b_ub=b, method='highs')
+&gt;&gt;&gt; r.x, -r.fun
+(array([ 7., 10.,  2.]), 244.0)
+&gt;&gt;&gt; r = linprog(-c, A_ub=np.r_[A, [[1, 0]]], b_ub=np.r_[b, 6],
+...             method='highs')            # a new constraint x1 &lt;= 6
+&gt;&gt;&gt; r.x, -r.fun
+(array([ 6., 11.]), 225.0)
+</pre>
+<!-- l. 1640 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The resources the new product uses are worth \(5\), so a profit of \(12\) gives a
+reduced profit of \(7 &gt; 0\): it should be made. The new optimum makes \(7\), \(10\) and \(2\) units for a profit of \(244\). The
+constraint \(x_1 \leq 6\) cuts off the old optimum \((8, 10)\), and the new optimum is the vertex \(C(6, 11)\) with \(Z = 225\): the restriction
+costs \(5\).
+</p><!-- l. 1644 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>linprog </span>with the extra column or row.
+</p>
+</div>
+<!-- l. 1645 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 1647 --><div class='crosslinks'><p class='noindent'>[<a href='orsu35.html'>next</a>] [<a href='orsu33.html'>prev</a>] [<a href='orsu33.html#tailorsu33.html'>prev-tail</a>] [<a href='orsu34.html'>front</a>] [<a href='orse6.html#orsu34.html'>up</a>] </p></div>
+<!-- l. 1647 --><p class='noindent'><a id='tailorsu34.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="orsu33.html">&larr; Previous</a><a class="up" href="orse6.html#orsu34.html">Contents</a><a class="next" href="orsu35.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="operations-research/6-5-sensitivity-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
