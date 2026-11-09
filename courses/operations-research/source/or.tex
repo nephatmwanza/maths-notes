@@ -1,0 +1,405 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsfonts,amssymb,amsmath}
+\usepackage[margin=1in]{geometry}
+\usepackage[none]{hyphenat}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{tikz}
+% Straight quotes in verbatim, so that code copied from the notes runs.
+\usepackage{upquote}
+\usepackage[nottoc,notlot,notlof]{tocbibind}
+
+\usetikzlibrary{arrows.meta,shapes,positioning}
+
+\parindent 0ex
+% hyphenat[none] forbids hyphenation, so give TeX room to stretch a line
+% instead of letting it run into the margin.
+\setlength{\emergencystretch}{3em}
+\setlength{\parskip}{0.55\baselineskip}
+\setlength{\abovedisplayskip}{0.5\baselineskip}
+\setlength{\belowdisplayskip}{0.5\baselineskip}
+\setlength{\abovedisplayshortskip}{0.25\baselineskip}
+\setlength{\belowdisplayshortskip}{0.25\baselineskip}
+\numberwithin{equation}{section}
+
+\pagestyle{fancy}
+\fancyfoot[C]{\thepage}
+\fancyhead{}
+\fancyhead[R]{\rightmark}
+\renewcommand{\headrulewidth}{0pt}
+
+% Upright operator names.
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\Real}{Re}
+\DeclareMathOperator{\Imag}{Im}
+
+% Theorem environments.
+\usepackage{amsthm}
+\theoremstyle{definition}
+% One shared counter running section.subsection.n, as in the other courses here.
+\newtheorem{thm}{Theorem}[subsection]
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{exa}[thm]{Example}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{coro}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+% An "In software" panel: the Python commands, the output they print, and how to read
+% it. The web build gives these their own colour (build.py tags the type from
+% the label, and "Software" is tested before every other label).
+\newtheorem{software}[thm]{Software}
+\newtheorem*{note}{Note}
+\newtheorem*{remark}{Remark}
+\newtheorem{problemx}{Problem}[subsection]
+\newenvironment{problem}{\begin{problemx}}{\end{problemx}}
+\newenvironment{solution}
+  {\renewcommand{\qedsymbol}{}\begin{proof}[\textit{Solution}.]}
+  {\end{proof}}
+\usepackage{enumitem}
+% A heading that is legal inside a theorem body, a list or a float, where
+% \subsubsection is not. Same weight as \subsubsection* so the two read alike.
+\newcommand{\subhead}[1]{%
+  \par\medskip\noindent\textbf{#1}\par\nobreak\smallskip}
+
+\begin{document}
+% Title page depersonalised for the web, as with every other course here. The
+% identity kept below is the duality theorem of linear programming, the result
+% on which most of the course's theory rests.
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{center}
+\vspace*{3cm}
+{\Huge\bfseries Operations Research}\\[1.2cm]
+{\large Lecture Notes}\\[2.5cm]
+\line(1,0){300}\\[1.5cm]
+$$\max\{c^{\mathsf T}x : Ax \le b,\ x \ge 0\} = \min\{b^{\mathsf T}y : A^{\mathsf T}y \ge c,\ y \ge 0\}$$
+\end{center}
+\end{titlepage}
+
+\tableofcontents
+\thispagestyle{empty}
+\clearpage
+\setcounter{page}{1}
+
+%======================================================================
+\section{Operations Research and Linear Programming Models}
+\label{sec:models}
+
+Operations research (OR) is the application of mathematical models to decisions about the operation of systems: how much to produce, how to route, whom to assign, when to order, how many servers to provide. The name dates from the Second World War, when groups of scientists in Britain, such as the
+one led by P.~M.~S. Blackett, were attached to the armed forces to study the deployment of radar, the hunting of submarines and the size of convoys. After the war the methods moved to industry and government, and one of them became the core of the subject: \textbf{linear programming}, the optimisation of a
+linear function subject to linear inequalities. Kantorovich formulated production problems of this kind in 1939; Dantzig invented the simplex method for solving them in 1947; and Koopmans used them in economics. Kantorovich and Koopmans shared the 1975 Nobel prize in economics for this work.
+
+This course develops linear programming and its theory first (the first six sections), then networks and integer programming, then non-linear and dynamic programming, and finally the stochastic models of OR: decisions under uncertainty, games, inventories, queues, Markov
+chains and simulation. This first section is about the step that comes before any algorithm: turning a description of a problem into a model.
+
+\subsection{The linear programming model}
+\label{ssec:lpmodel}
+
+\begin{defn}
+A \textbf{linear programme} (LP) consists of
+\begin{enumerate}[label=(\roman*)]
+\item \textbf{decision variables} $x = (x_1, \ldots, x_n)$, the quantities to be chosen;
+\item a linear \textbf{objective function} $c^{\mathsf T}x = c_1x_1 + \cdots + c_nx_n$, to be maximised or minimised;
+\item finitely many linear \textbf{constraints}, each of the form $a^{\mathsf T}x \leq \beta$, $a^{\mathsf T}x \geq \beta$ or $a^{\mathsf T}x = \beta$; usually including the non-negativity constraints $x_j \geq 0$.
+\end{enumerate}
+A point satisfying all the constraints is \textbf{feasible}; the set of feasible points is the \textbf{feasible region}; a feasible point at which the objective attains its best value over the feasible region is \textbf{optimal}. An LP is \textbf{infeasible} if it has no feasible point and \textbf{unbounded} if the objective
+can be made arbitrarily good on the feasible region.
+\end{defn}
+
+The model rests on four assumptions, which should be checked in every application:
+\begin{itemize}
+\item \textbf{proportionality}: the contribution of each activity to the objective and to each constraint is proportional to its level (no set-up costs, no economies of scale);
+\item \textbf{additivity}: the total is the sum of the contributions of the activities (no interactions);
+\item \textbf{divisibility}: the variables may take fractional values;
+\item \textbf{certainty}: all the coefficients are known constants.
+\end{itemize}
+When divisibility fails we need integer programming (the section on integer programming); when proportionality fails, non-linear programming (the section on non-linear programming); when certainty fails, the sensitivity analysis of the section on sensitivity and the stochastic models later in the course.
+
+\begin{defn}
+An LP is in \textbf{standard form} if it reads
+\[
+\text{minimise } c^{\mathsf T}x \quad\text{subject to}\quad Ax = b, \quad x \geq 0 ,
+\]
+with $A$ an $m \times n$ matrix and $b \in \mathbb R^m$, and in \textbf{canonical form} if it reads: maximise $c^{\mathsf T}x$ subject to $Ax \leq b$, $x \geq 0$.
+\end{defn}
+
+\begin{prop}
+\label{prop:standardform}
+Every LP can be written in standard form, with the same optimal value (up to sign) and an explicit correspondence between feasible points.
+\end{prop}
+
+\begin{proof}
+Replace maximisation of $c^{\mathsf T}x$ by minimisation of $-c^{\mathsf T}x$. Replace an inequality $a^{\mathsf T}x \leq \beta$ by $a^{\mathsf T}x + s = \beta$ with a new \textbf{slack} variable $s \geq 0$, and $a^{\mathsf T}x \geq \beta$ by $a^{\mathsf T}x - s = \beta$ with a \textbf{surplus} variable $s \geq 0$. Replace a
+variable $x_j$ that is free in sign by $x_j^+ - x_j^-$ with $x_j^\pm \geq 0$. Each step maps feasible points to feasible points with the same objective value, and back.
+\end{proof}
+
+The slack in a constraint is the amount of the resource left unused at a solution; it will turn out, in the section on duality, to be paired with the value of that resource.
+
+\subsection{Formulating models}
+\label{ssec:formulating}
+
+Formulation is a skill learned from examples. The steps are always the same: identify the decisions and name the variables, with units; write the objective in terms of them; write every restriction as a linear constraint; and check the assumptions.
+
+\begin{exa}[A product mix]
+\label{ex:components}
+A company makes two components, $C_1$ and $C_2$. Each $C_1$ needs Rs.~10 of budget, $3$ hours of machine time and $2$ hours of assembly; each $C_2$ needs Rs.~40, $2$ hours and $3$ hours. In each period Rs.~4000 of budget, $2000$ machine hours and $1400$ assembly hours are available. The
+components sell for Rs.~30 and Rs.~70 and cost Rs.~10 and Rs.~40 to make. With $x_1$, $x_2$ the numbers made, the profit per unit is $30 - 10 = 20$ and $70 - 40 = 30$, and the model is
+\[
+\begin{aligned}
+\text{maximise } & Z = 20x_1 + 30x_2 \\
+\text{subject to } & 10x_1 + 40x_2 \leq 4000 \quad\text{(budget)}, \\
+& 3x_1 + 2x_2 \leq 2000 \quad\text{(machine)}, \qquad 2x_1 + 3x_2 \leq 1400 \quad\text{(assembly)}, \\
+& x_1, x_2 \geq 0 .
+\end{aligned}
+\]
+The solution (Software~\ref{sw:productmix}) is to make $400$ of $C_1$ and none of $C_2$, for a profit of Rs.~8000, using the whole budget and leaving $800$ machine hours and $600$ assembly hours idle: the budget, not the capacity, is the binding constraint.
+\end{exa}
+
+\begin{exa}[Assigning inspectors]
+\label{ex:inspectors}
+At least $2000$ pieces a day must be inspected in an $8$-hour day. There are $9$ Grade~1 inspectors, who check $40$ pieces an hour with $97\%$ accuracy and are paid Rs.~5 an hour, and $11$ Grade~2 inspectors, who check $30$ pieces an hour with $95\%$ accuracy at Rs.~4 an hour. Each error costs the
+company Rs.~3. The hourly cost of a Grade~1 inspector, wages plus errors, is $5 + 3 \times 40 \times 0.03 = 8.60$, and of a Grade~2 inspector $4 + 3 \times 30 \times 0.05 = 8.50$; per day these are $68.8$ and $68$. With $x_1$, $x_2$ the numbers assigned,
+\[
+\text{minimise } 68.8x_1 + 68x_2 \quad\text{subject to}\quad 320x_1 + 240x_2 \geq 2000, \quad 0 \leq x_1 \leq 9, \quad 0 \leq x_2 \leq 11 .
+\]
+The LP solution is $x_1 = 6.25$, $x_2 = 0$, at Rs.~430: Grade~1 inspectors cost $68.8/320 = 0.215$ per piece against $68/240 = 0.283$. But inspectors are whole people, and divisibility fails; the best whole assignment is not $7$ Grade~1 inspectors (Problem~\ref{prob:inspectorsint}). We return to this in the section on integer programming.
+\end{exa}
+
+\begin{exa}[Production planning over time]
+\label{ex:multiperiod}
+Demand for a product over four months is $100$, $150$, $200$ and $120$ units. Each month up to $140$ units can be made in regular time at Rs.~10 each and up to $40$ more in overtime at Rs.~14; units carried from one month to the next cost Rs.~2 each to store; there is no initial stock. With $R_t$, $O_t$ the
+regular and overtime production and $I_t$ the stock at the end of month $t$ ($I_0 = 0$), the model is
+\begin{gather*}
+\text{minimise } \sum_{t = 1}^4(10R_t + 14O_t + 2I_t) \\
+\text{subject to}\quad I_{t - 1} + R_t + O_t - I_t = d_t, \quad 0 \leq R_t \leq 140, \quad 0 \leq O_t \leq 40, \quad I_t \geq 0 .
+\end{gather*}
+The balance equations, one per month, are the typical structure of dynamic models: \emph{what comes in equals what goes out}. The optimal plan (Software~\ref{sw:multiperiod}) uses regular time fully in the first three months and builds stock ahead of the peak, at total cost Rs.~5960; overtime is used only in the peak month,
+because storing a regular unit for one month ($10 + 2 = 12$) is cheaper than overtime ($14$), but storing it for three months ($10 + 6 = 16$) is not.
+\end{exa}
+
+\begin{exa}[Blending]
+\label{ex:feedmix}
+A feed company makes two cattle mixes from wheat and barley: Fertilex, two parts wheat to one of barley, and Multiplex, one part wheat to two of barley. Wheat costs Rs.~1.50 a kilogram, with $1000$\,kg available this month, and barley Rs.~1.25, with $1200$\,kg available. Fertilex sells for Rs.~1.80 and
+Multiplex for Rs.~1.70 a kilogram. With $x_1$, $x_2$ the kilograms of each mix made, the wheat used is $\frac23x_1 + \frac13x_2 \leq 1000$, that is $2x_1 + x_2 \leq 3000$, and the barley used is $\frac13x_1 + \frac23x_2 \leq 1200$, that is $x_1 + 2x_2 \leq 3600$. The profit per kilogram is
+$1.80 - (\frac23\cdot 1.50 + \frac13\cdot 1.25) = 0.383$ for Fertilex and $1.70 - (\frac13\cdot 1.50 + \frac23\cdot 1.25) = 0.367$ for Multiplex. (In a published version of this example the barley constraint appears as $x_1 + 2x_2 \leq 36\,000$, a slip of a factor ten that changes the answer: always check the
+arithmetic of a formulation against the original data.)
+\end{exa}
+
+\subsection{Linearising non-linear features}
+\label{ssec:tricks}
+
+Some objectives that are not linear can be made so by adding variables and constraints.
+
+\textbf{Absolute values.} To minimise $\sum_i|r_i|$ where each $r_i$ is linear in $x$, introduce $e_i \geq 0$ with $-e_i \leq r_i \leq e_i$ and minimise $\sum e_i$. At an optimum each $e_i = |r_i|$, since otherwise $e_i$ could be decreased.
+
+\textbf{Minimax.} To minimise $\max_ir_i$, introduce $t$ with $r_i \leq t$ for all $i$ and minimise $t$. With $-t \leq r_i \leq t$ this minimises $\max_i|r_i|$.
+
+\textbf{Convex piecewise linear costs.} A cost $\max_k(\alpha_k + \beta_kx)$, convex and piecewise linear, is handled as a minimax. Concave costs (economies of scale) cannot be linearised this way; they need integer variables.
+
+These give linear programming formulations of data fitting. Fitting $y \approx a + bx$ to points $(x_i, y_i)$ by least absolute deviations (the $L^1$ fit) or by minimising the largest deviation (the Chebyshev, or $L^\infty$, fit) are both linear programmes, while least squares (the $L^2$ fit) is not, though it has a formula.
+The three can differ greatly when the data contain an outlier (Figure~\ref{fig:fits}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.8cm,y=0.28cm]
+\fill[blue!4,rounded corners=4pt] (-0.9,-2.5) rectangle (12.8,16.6);
+\draw[->] (-0.5,0) -- (9.8,0) node[below,font=\small] {$x$};
+\draw[->] (0,-1.5) -- (0,16) node[left,font=\small] {$y$};
+\foreach \y in {5,10,15} \draw (0.08,\y) -- (-0.08,\y) node[left,font=\scriptsize] {$\y$};
+\foreach \x in {3,6,9} \draw (\x,0.25) -- (\x,-0.25) node[below,font=\scriptsize] {$\x$};
+\draw[green!45!black,thick] (-0.3,0.694) -- (9.5,10.69);
+\draw[blue!60!black,thick] (-0.3,-0.088) -- (9.5,12.40);
+\draw[red!70!black,thick] (-0.3,-1.639) -- (9.5,13.61);
+\foreach \x/\y in {0/1.0,1/2.1,2/2.9,3/4.2,4/4.8,5/6.1,6/7.2,7/7.9,8/9.1,9/15.0} \fill (\x,\y) circle (2.2pt);
+\node[font=\scriptsize,anchor=west] at (9.15,15.0) {outlier};
+\node[font=\scriptsize,green!45!black,anchor=west] at (9.6,10.69) {$L^1$: $1 + 1.02x$};
+\node[font=\scriptsize,blue!60!black,anchor=west] at (9.6,12.2) {$L^2$: $0.29 + 1.27x$};
+\node[font=\scriptsize,red!70!black,anchor=west] at (9.6,13.7) {$L^\infty$: $-1.17 + 1.56x$};
+\end{tikzpicture}
+\caption{Three straight-line fits to ten points, the last an outlier. The least-absolute-deviations ($L^1$) fit, a linear programme, passes through the bulk of the data and ignores the outlier; least squares ($L^2$) is pulled towards it; the minimax ($L^\infty$) fit, also a linear programme, is pulled
+furthest, since it balances the largest deviations (Software~\ref{sw:fits}).}
+\label{fig:fits}
+\end{figure}
+
+\subsection{Linear programming in software}
+\label{ssec:software1}
+
+SciPy's \texttt{linprog} minimises $c^{\mathsf T}x$ subject to $A_{\text{ub}}x \leq b_{\text{ub}}$, $A_{\text{eq}}x = b_{\text{eq}}$ and bounds on each variable, using the HiGHS solvers. A maximisation is entered as the minimisation of $-c^{\mathsf T}x$, and a $\geq$ constraint by multiplying it by $-1$.
+
+\begin{software}[Product mix and inspectors]
+\label{sw:productmix}
+Examples~\ref{ex:components} and \ref{ex:inspectors}:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.optimize import linprog
+>>> c = [-20, -30]  # maximise 20 x1 + 30 x2: minimise -Z
+>>> A = [[10, 40], [3, 2], [2, 3]]         # budget, machine, assembly
+>>> b = [4000, 2000, 1400]
+>>> r = linprog(c, A_ub=A, b_ub=b, method='highs')
+>>> r.x, -r.fun, b - np.array(A) @ r.x     # plan, profit, unused resources
+(array([400.,   0.]), 8000.0, array([  0., 800., 600.]))
+>>> r = linprog([68.8, 68.0],  # inspectors: daily cost per inspector
+...             A_ub=[[-320, -240]], b_ub=[-2000],   # at least 2000 pieces
+...             bounds=[(0, 9), (0, 11)], method='highs')
+>>> r.x, r.fun
+(array([6.25, 0.  ]), 430.0)
+\end{verbatim}}
+\textbf{Reading the output.} The product mix makes $400$ of $C_1$ for a profit of $8000$; the slacks are $0$ for the budget and $800$ and $600$ hours of machine and assembly time. The inspection plan uses $6.25$ Grade~1 inspectors and no Grade~2, at Rs.~430 a day, a fractional answer that the model's divisibility
+assumption allowed.
+
+\textbf{MATLAB/Octave:} \texttt{linprog(-[20;30], [10 40; 3 2; 2 3], [4000; 2000; 1400], [], [], [0;0])}.
+\end{software}
+
+\begin{software}[A four-month plan]
+\label{sw:multiperiod}
+Example~\ref{ex:multiperiod}, with the twelve variables ordered as regular production, overtime and stock, and one balance equation per month:
+{\small\begin{verbatim}
+>>> d = np.array([100, 150, 200, 120])     # demand in four months
+>>> T = len(d)  # variables: regular, overtime, stock
+>>> cost = np.r_[10*np.ones(T), 14*np.ones(T), 2*np.ones(T)]
+>>> Aeq = np.zeros((T, 3*T))
+>>> for t in range(T):            # stock_{t-1} + R_t + O_t - stock_t = d_t
+...     Aeq[t, t] = Aeq[t, T + t] = 1; Aeq[t, 2*T + t] = -1
+...     if t > 0: Aeq[t, 2*T + t - 1] = 1
+...
+>>> bounds = [(0, 140)]*T + [(0, 40)]*T + [(0, None)]*T
+>>> r = linprog(cost, A_eq=Aeq, b_eq=d, bounds=bounds, method='highs')
+>>> r.x.reshape(3, T), r.fun               # rows: regular, overtime, stock
+(array([[140., 140., 140., 120.],
+       [  0.,   0.,  30.,   0.],
+       [ 40.,  30.,   0.,   0.]]), 5960.0)
+\end{verbatim}}
+\textbf{Reading the output.} Regular production is $140$ in each of the first three months and $120$ in the last; overtime of $30$ is used only in month $3$; stocks of $40$ and $30$ are carried out of months $1$ and $2$ into the peak. The total cost is Rs.~5960. Checking month $3$: $30 + 140 + 30 - 0 = 200$.
+
+\textbf{MATLAB/Octave:} the same matrices with \texttt{linprog(cost, [], [], Aeq, d, lb, ub)}.
+\end{software}
+
+\begin{software}[Fitting a line by linear programming]
+\label{sw:fits}
+The $L^\infty$ and $L^1$ fits of Figure~\ref{fig:fits} as linear programmes, with the free intercept and slope declared by the bounds \texttt{(None, None)}, and least squares for comparison:
+{\small\begin{verbatim}
+>>> xs = np.arange(10.0)
+>>> ys = np.array([1.0, 2.1, 2.9, 4.2, 4.8, 6.1, 7.2, 7.9, 9.1, 15.0])
+>>> n = len(xs)                   # L-infinity fit: min t, |y - a - bx| <= t
+>>> one = np.ones(n)
+>>> A = np.r_[np.c_[-one, -xs, -one], np.c_[one, xs, -one]]
+>>> r = linprog([0, 0, 1], A_ub=A, b_ub=np.r_[-ys, ys],
+...             bounds=[(None, None)]*2 + [(0, None)], method='highs')
+>>> cheb = r.x[:2]
+>>> I = np.eye(n)  # L1 fit: min sum e_i, |y_i - a - b x_i| <= e_i
+>>> A = np.r_[np.c_[-np.ones(n), -xs, -I], np.c_[np.ones(n), xs, -I]]
+>>> r = linprog(np.r_[0, 0, np.ones(n)], A_ub=A, b_ub=np.r_[-ys, ys],
+...             bounds=[(None, None)]*2 + [(0, None)]*n, method='highs')
+>>> l1 = r.x[:2]
+>>> ls = np.polyfit(xs, ys, 1)[::-1]       # least squares, for comparison
+>>> np.round(np.array([l1, ls, cheb]), 4)  # rows: L1, L2, L-infinity; (a, b)
+array([[ 1.    ,  1.02  ],
+       [ 0.2945,  1.2745],
+       [-1.1722,  1.5556]])
+\end{verbatim}}
+\textbf{Reading the output.} The $L^1$ line is $1 + 1.02x$, close to the trend of the first nine points; least squares gives $0.29 + 1.27x$ and the Chebyshev fit $-1.17 + 1.56x$. One bad point moves the slope by $25\%$ and $53\%$ for the last two. The $L^1$ fit is the regression analogue of the median, and like it, robust.
+
+\textbf{MATLAB/Octave:} \texttt{linprog} with the same stacked constraint matrices.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+\label{prob:inspectorsint}
+In Example~\ref{ex:inspectors}, find the cheapest assignment in which both numbers of inspectors are whole, by checking the possible numbers of Grade~1 inspectors, and compare it with the LP value Rs.~430 and with rounding $6.25$ up to $7$.
+\end{problem}
+
+\begin{solution}
+For each $x_1 = 0, \ldots, 7$ take the least $x_2$ with $320x_1 + 240x_2 \geq 2000$. The costs are: $x_1 = 7, x_2 = 0$: $481.6$; $6, 1$: $480.8$; $5, 2$: $480.0$; $4, 3$: $479.2$; $3, 5$: $546.4$; $2, 6$: $545.6$; $1, 7$: $544.8$; $0, 9$: $612$. The best is $4$ Grade~1 and $3$ Grade~2 inspectors at
+Rs.~479.2, which inspect exactly $2000$ pieces. Rounding the LP solution up gives Rs.~481.6; the integer optimum mixes the grades, which the LP never does. The gap between Rs.~430 and Rs.~479.2 is the cost of indivisibility.
+\end{solution}
+
+\begin{problem}
+Complete Example~\ref{ex:feedmix}: write the model, solve it graphically or by any method, and state how much wheat and barley are used.
+\end{problem}
+
+\begin{solution}
+Maximise $0.383x_1 + 0.367x_2$ subject to $2x_1 + x_2 \leq 3000$, $x_1 + 2x_2 \leq 3600$, $x \geq 0$. The two constraints meet where $x_1 = 800$, $x_2 = 1400$, with profit $0.383 \times 800 + 0.367 \times 1400 = 820$. The other vertices give $0.383 \times 1500 = 575$ at $(1500, 0)$ and $0.367 \times 1800 = 660$ at
+$(0, 1800)$, so the optimum is $800$\,kg of Fertilex and $1400$\,kg of Multiplex, using all $1000$\,kg of wheat and all $1200$\,kg of barley.
+\end{solution}
+
+\begin{problem}
+A firm makes two products over three months. Product~1 sells for Rs.~14 and costs Rs.~10 to make; product~2 sells for Rs.~11 and costs Rs.~8. Each unit of product~1 needs $0.5$, $0.3$ and $0.2$ hours in departments $A$, $B$, $C$, and each unit of product~2 needs $0.3$, $0.4$ and $0.1$ hours, with $500$, $400$ and
+$200$ hours available. The firm has Rs.~3 lakh of its own funds and may borrow up to Rs.~2 lakh at $20\%$ a year for the three months. Formulate a model to maximise profit after interest, with $x_3$ the amount borrowed, assuming production costs must be paid from funds available.
+\end{problem}
+
+\begin{solution}
+Interest for three months is $0.20 \times \frac3{12} = 0.05$ per rupee. Maximise $Z = 4x_1 + 3x_2 - 0.05x_3$ subject to $0.5x_1 + 0.3x_2 \leq 500$, $0.3x_1 + 0.4x_2 \leq 400$, $0.2x_1 + 0.1x_2 \leq 200$ (capacity); $10x_1 + 8x_2 \leq 300\,000 + x_3$ (funds); $0 \leq x_3 \leq 200\,000$. Here the
+capacity constraints bind long before the funds do (at most $1000$ units of product~1 cost only Rs.~10\,000), so $x_3 = 0$ at the optimum: borrowing is worth while only when money, not capacity, is scarce. The optimum is $x_1 = 727.3$, $x_2 = 454.5$, where departments $A$ and $C$ are fully used, with profit Rs.~4272.7.
+\end{solution}
+
+\begin{problem}
+Write the problem "minimise $|x_1 - 2| + |x_2 + 1|$ subject to $x_1 + x_2 \geq 3$, $x_1, x_2$ free" as a linear programme in standard form.
+\end{problem}
+
+\begin{solution}
+Introduce $e_1, e_2 \geq 0$: minimise $e_1 + e_2$ subject to $-e_1 \leq x_1 - 2 \leq e_1$, $-e_2 \leq x_2 + 1 \leq e_2$, $x_1 + x_2 \geq 3$. For standard form, write $x_j = x_j^+ - x_j^-$ and add a slack or surplus variable to each of the five inequalities, giving $5$ equations in $4 + 2 + 5 = 11$ non-negative
+variables. The optimal value is $2$, attained for example at $x = (2, 1)$.
+\end{solution}
+
+\begin{problem}
+A hospital needs at least $17$, $13$, $15$, $19$, $14$, $16$ and $11$ nurses on the seven days of the week, Monday to Sunday. Each nurse works five consecutive days and then has two days off. Formulate the problem of minimising the number of nurses employed.
+\end{problem}
+
+\begin{solution}
+Let $x_j$ be the number of nurses whose five-day spell starts on day $j$ ($j = 1$ for Monday). A nurse works on day $i$ if the spell started on day $i$ or one of the four days before, cyclically. Minimise $\sum_{j = 1}^7x_j$ subject to, for Monday, $x_1 + x_4 + x_5 + x_6 + x_7 \geq 17$, for Tuesday
+$x_1 + x_2 + x_5 + x_6 + x_7 \geq 13$, and so on cyclically, with $x_j \geq 0$ and integer. Summing the seven constraints, each $x_j$ appears five times, so $5\sum x_j \geq 105$ and at least $21$ nurses are needed.
+\end{solution}
+
+\begin{problem}
+Explain which of the four assumptions of linear programming fails in each case, and how the model might be repaired: (a) a machine must be set up at a fixed cost before any units are made; (b) the price of a product falls as more is sold; (c) the yield of a crop depends on next season's rainfall.
+\end{problem}
+
+\begin{solution}
+(a) Proportionality: the cost is $F + cx$ for $x > 0$ and $0$ for $x = 0$. Repair with a binary variable $y$, cost $Fy + cx$ and $x \leq My$ (see the section on integer programming). (b) Proportionality: revenue $p(x)x$ is non-linear; if it is concave it can be approximated piecewise linearly for maximisation, otherwise use
+non-linear programming. (c) Certainty: the coefficient is random; use expected values with sensitivity analysis, or a stochastic model with scenarios.
+\end{solution}
+
+%SECTIONS
+
+\section*{References}
+\addcontentsline{toc}{section}{References}
+\sloppy
+
+\subhead{Principal texts}
+\begin{enumerate}
+\item Sharma, J. K. (2012), \emph{Operations Research: Problems and Solutions} (3rd ed.), New Delhi, Macmillan.
+\item Hillier, F. S., and Lieberman, G. J. (2015), \emph{Introduction to Operations Research} (10th ed.), New York, McGraw-Hill.
+\item Bertsimas, D., and Tsitsiklis, J. N. (1997), \emph{Introduction to Linear Optimization}, Belmont, Athena Scientific.
+\end{enumerate}
+
+\subhead{Recommended texts}
+\begin{enumerate}
+\item Chv\'atal, V. (1983), \emph{Linear Programming}, New York, W. H. Freeman.
+\item Taha, H. A. (2017), \emph{Operations Research: An Introduction} (10th ed.), Harlow, Pearson.
+\item Winston, W. L. (2004), \emph{Operations Research: Applications and Algorithms} (4th ed.), Belmont, Brooks/Cole.
+\end{enumerate}
+
+\subhead{Software}
+\begin{enumerate}
+\item Harris, C. R., et al. (2020), Array programming with NumPy, \emph{Nature}, 585, 357--362.
+\item Virtanen, P., et al. (2020), SciPy 1.0: fundamental algorithms for scientific computing in Python, \emph{Nature Methods}, 17, 261--272.
+\item Huangfu, Q., and Hall, J. A. J. (2018), Parallelizing the dual revised simplex method, \emph{Mathematical Programming Computation}, 10, 119--142.
+\end{enumerate}
+
+\subhead{Further reading}
+\begin{enumerate}
+\item Blackett, P. M. S. (1962), \emph{Studies of War: Nuclear and Conventional}, Edinburgh, Oliver and Boyd.
+\item Charnes, A., Cooper, W. W., and Ferguson, R. O. (1955), Optimal estimation of executive compensation by linear programming, \emph{Management Science}, 1, 138--151.
+\item Dantzig, G. B. (1951), Maximization of a linear function of variables subject to linear inequalities, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 339--347.
+\item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.
+\item Koopmans, T. C. (ed.) (1951), \emph{Activity Analysis of Production and Allocation}, New York, Wiley.
+\item Stigler, G. J. (1945), The cost of subsistence, \emph{Journal of Farm Economics}, 27, 303--314.
+\end{enumerate}
+
+\end{document}

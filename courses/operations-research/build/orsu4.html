@@ -1,0 +1,138 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>1.4 Linear programming in software — Operations Research</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='or.css' rel='stylesheet' type='text/css' /> 
+<meta content='or.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Operations Research</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="orse1.html">Operations Research and Linear Programming Models</a></li>
+<li class="sub"><a class="" href="orsu1.html">The linear programming model</a></li>
+<li class="sub"><a class="" href="orsu2.html">Formulating models</a></li>
+<li class="sub"><a class="" href="orsu3.html">Linearising non-linear features</a></li>
+<li class="sub"><a class="current" href="orsu4.html">Linear programming in software</a></li>
+<li class="sub"><a class="" href="orsu5.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="orli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 229 --><div class='crosslinks'><p class='noindent'>[<a href='orsu5.html'>next</a>] [<a href='orsu3.html'>prev</a>] [<a href='orsu3.html#tailorsu3.html'>prev-tail</a>] [<a href='#tailorsu4.html'>tail</a>] [<a href='orse1.html#orsu4.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>1.4   </span> <a id='x7-60001.4'></a>Linear programming in software</h4>
+<!-- l. 232 --><p class='noindent'>SciPy’s <span class='cmtt-10x-x-109'>linprog </span>minimises \(c^{\mathsf T}x\) subject to \(A_{\text {ub}}x \leq b_{\text {ub}}\), \(A_{\text {eq}}x = b_{\text {eq}}\) and bounds on each variable, using the HiGHS solvers. A
+maximisation is entered as the minimisation of \(-c^{\mathsf T}x\), and a \(\geq \) constraint by multiplying it by
+\(-1\).
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 234 --><p class='noindent'><span class='head'>
+<a id='x7-6001r1'></a>
+<span class='cmbx-10x-x-109'>Software 1.4.1 </span>(Product mix and inspectors)<span class='cmbx-10x-x-109'>.</span>  </span> Examples <a href='orsu2.html#x5-4001r1'>1.2.1<!-- tex4ht:ref: ex:components  --></a> and <a href='orsu2.html#x5-4002r2'>1.2.2<!-- tex4ht:ref: ex:inspectors  --></a>:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-1'>
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; from scipy.optimize import linprog
+&gt;&gt;&gt; c = [-20, -30]  # maximise 20 x1 + 30 x2: minimise -Z
+&gt;&gt;&gt; A = [[10, 40], [3, 2], [2, 3]]         # budget, machine, assembly
+&gt;&gt;&gt; b = [4000, 2000, 1400]
+&gt;&gt;&gt; r = linprog(c, A_ub=A, b_ub=b, method='highs')
+&gt;&gt;&gt; r.x, -r.fun, b - np.array(A) @ r.x     # plan, profit, unused resources
+(array([400.,   0.]), 8000.0, array([  0., 800., 600.]))
+&gt;&gt;&gt; r = linprog([68.8, 68.0],  # inspectors: daily cost per inspector
+...             A_ub=[[-320, -240]], b_ub=[-2000],   # at least 2000 pieces
+...             bounds=[(0, 9), (0, 11)], method='highs')
+&gt;&gt;&gt; r.x, r.fun
+(array([6.25, 0.  ]), 430.0)
+</pre>
+<!-- l. 251 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The product mix makes \(400\) of \(C_1\) for a profit of \(8000\); the slacks are \(0\) for the
+budget and \(800\) and \(600\) hours of machine and assembly time. The inspection plan uses \(6.25\) Grade 1
+inspectors and no Grade 2, at Rs. 430 a day, a fractional answer that the model’s divisibility
+assumption allowed.
+</p><!-- l. 255 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>linprog(-[20;30], [10 40; 3 2; 2 3], [4000; 2000; 1400], [],
+[], [0;0])</span>.
+</p>
+</div>
+<!-- l. 256 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 258 --><p class='noindent'><span class='head'>
+<a id='x7-6002r2'></a>
+<span class='cmbx-10x-x-109'>Software 1.4.2 </span>(A four-month plan)<span class='cmbx-10x-x-109'>.</span>  </span> Example <a href='orsu2.html#x5-4003r3'>1.2.3<!-- tex4ht:ref: ex:multiperiod  --></a>, with the twelve variables ordered as regular
+production, overtime and stock, and one balance equation per month:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-2'>
+&gt;&gt;&gt; d = np.array([100, 150, 200, 120])     # demand in four months
+&gt;&gt;&gt; T = len(d)  # variables: regular, overtime, stock
+&gt;&gt;&gt; cost = np.r_[10*np.ones(T), 14*np.ones(T), 2*np.ones(T)]
+&gt;&gt;&gt; Aeq = np.zeros((T, 3*T))
+&gt;&gt;&gt; for t in range(T):            # stock_{t-1} + R_t + O_t - stock_t = d_t
+...     Aeq[t, t] = Aeq[t, T + t] = 1; Aeq[t, 2*T + t] = -1
+...     if t &gt; 0: Aeq[t, 2*T + t - 1] = 1
+...
+&gt;&gt;&gt; bounds = [(0, 140)]*T + [(0, 40)]*T + [(0, None)]*T
+&gt;&gt;&gt; r = linprog(cost, A_eq=Aeq, b_eq=d, bounds=bounds, method='highs')
+&gt;&gt;&gt; r.x.reshape(3, T), r.fun               # rows: regular, overtime, stock
+(array([[140., 140., 140., 120.],
+       [  0.,   0.,  30.,   0.],
+       [ 40.,  30.,   0.,   0.]]), 5960.0)
+</pre>
+<!-- l. 276 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>Regular production is \(140\) in each of the first three months and \(120\) in the
+last; overtime of \(30\) is used only in month \(3\); stocks of \(40\) and \(30\) are carried out of months \(1\) and \(2\) into
+the peak. The total cost is Rs. 5960. Checking month \(3\): \(30 + 140 + 30 - 0 = 200\).
+</p><!-- l. 279 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span>the same matrices with <span class='cmtt-10x-x-109'>linprog(cost, [], [], Aeq, d, lb, ub)</span>.
+</p>
+</div>
+<!-- l. 280 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 282 --><p class='noindent'><span class='head'>
+<a id='x7-6003r3'></a>
+<span class='cmbx-10x-x-109'>Software 1.4.3 </span>(Fitting a line by linear programming)<span class='cmbx-10x-x-109'>.</span>  </span> The \(L^\infty \) and \(L^1\) fits of Figure <a href='orsu3.html#x6-5001r1'>1<!-- tex4ht:ref: fig:fits  --></a> as linear
+programmes, with the free intercept and slope declared by the bounds <span class='cmtt-10x-x-109'>(None, None)</span>, and least
+squares for comparison:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-3'>
+&gt;&gt;&gt; xs = np.arange(10.0)
+&gt;&gt;&gt; ys = np.array([1.0, 2.1, 2.9, 4.2, 4.8, 6.1, 7.2, 7.9, 9.1, 15.0])
+&gt;&gt;&gt; n = len(xs)                   # L-infinity fit: min t, |y - a - bx| &lt;= t
+&gt;&gt;&gt; one = np.ones(n)
+&gt;&gt;&gt; A = np.r_[np.c_[-one, -xs, -one], np.c_[one, xs, -one]]
+&gt;&gt;&gt; r = linprog([0, 0, 1], A_ub=A, b_ub=np.r_[-ys, ys],
+...             bounds=[(None, None)]*2 + [(0, None)], method='highs')
+&gt;&gt;&gt; cheb = r.x[:2]
+&gt;&gt;&gt; I = np.eye(n)  # L1 fit: min sum e_i, |y_i - a - b x_i| &lt;= e_i
+&gt;&gt;&gt; A = np.r_[np.c_[-np.ones(n), -xs, -I], np.c_[np.ones(n), xs, -I]]
+&gt;&gt;&gt; r = linprog(np.r_[0, 0, np.ones(n)], A_ub=A, b_ub=np.r_[-ys, ys],
+...             bounds=[(None, None)]*2 + [(0, None)]*n, method='highs')
+&gt;&gt;&gt; l1 = r.x[:2]
+&gt;&gt;&gt; ls = np.polyfit(xs, ys, 1)[::-1]       # least squares, for comparison
+&gt;&gt;&gt; np.round(np.array([l1, ls, cheb]), 4)  # rows: L1, L2, L-infinity; (a, b)
+array([[ 1.    ,  1.02  ],
+       [ 0.2945,  1.2745],
+       [-1.1722,  1.5556]])
+</pre>
+<!-- l. 304 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The \(L^1\) line is \(1 + 1.02x\), close to the trend of the first nine points; least squares
+gives \(0.29 + 1.27x\) and the Chebyshev fit \(-1.17 + 1.56x\). One bad point moves the slope by \(25\%\) and \(53\%\) for the last two. The \(L^1\) fit
+is the regression analogue of the median, and like it, robust.
+</p><!-- l. 307 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>linprog </span>with the same stacked constraint matrices.
+</p>
+</div>
+<!-- l. 308 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 310 --><div class='crosslinks'><p class='noindent'>[<a href='orsu5.html'>next</a>] [<a href='orsu3.html'>prev</a>] [<a href='orsu3.html#tailorsu3.html'>prev-tail</a>] [<a href='orsu4.html'>front</a>] [<a href='orse1.html#orsu4.html'>up</a>] </p></div>
+<!-- l. 310 --><p class='noindent'><a id='tailorsu4.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="orsu3.html">&larr; Previous</a><a class="up" href="orse1.html#orsu4.html">Contents</a><a class="next" href="orsu5.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="operations-research/1-4-linear-programming-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
