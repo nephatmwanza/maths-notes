@@ -1430,6 +1430,340 @@ solution from $y(0) = c > 1$ is $y = \frac{1 + ke^{2t}}{1 - ke^{2t}}$ with $k = 
 is $c > \frac{e^2 + 1}{e^2 - 1} = 1.313$. So for $x(0) > 1.313$ the solution blows up before $t = 1$. For $x(0) = 1$ this argument is inconclusive.
 \end{solution}
 
+%======================================================================
+\section{Linear Systems}
+\label{sec:linear}
+
+Linear systems are the one large class of differential equations with a complete general theory. They describe small oscillations, electrical
+networks, compartment models in pharmacology, and every linearisation of a non-linear system about a solution, which is how they enter the
+stability theory later in the course. This section treats the system
+\[
+x' = A(t)x + g(t), \qquad x \in \mathbb R^n,
+\]
+with $A$ and $g$ continuous on an open interval $I$. By Theorem~\ref{thm:global}, every initial value problem has a unique solution on the whole of $I$, so questions of existence
+are settled; what remains is the structure of the solutions. The next section specialises to constant $A$, where the solutions can be written down.
+
+\subsection{The space of solutions}
+\label{ssec:solspace}
+
+\begin{thm}
+\label{thm:solspace}
+The solutions of the homogeneous system $x' = A(t)x$ on $I$ form a vector space of dimension $n$. For any $t_0 \in I$, the map $x \mapsto x(t_0)$ is an isomorphism from this space onto $\mathbb R^n$.
+\end{thm}
+
+\begin{proof}
+A linear combination of solutions is a solution, since the equation is linear, so the solutions form a vector space $S$. The evaluation map $E\colon x \mapsto x(t_0)$ is linear. It is
+onto, because for every $x_0$ the initial value problem has a solution on $I$, and one-to-one, because a solution with $x(t_0) = 0$ is identically zero by uniqueness (the zero
+function is a solution). So $E$ is an isomorphism and $\dim S = n$.
+\end{proof}
+
+A consequence that is easy to overlook: solutions $x_1, \dots, x_k$ are linearly independent as functions if and only if their values $x_1(t), \dots, x_k(t)$ are linearly independent
+vectors at \emph{any one} time $t$, and then at every time. For solutions, independence at one instant is independence for ever.
+
+\begin{defn}
+A \textbf{fundamental matrix} is an $n \times n$ matrix $\Phi(t)$ whose columns are $n$ linearly independent solutions, so that $\Phi' = A(t)\Phi$ and $\det\Phi(t) \neq 0$. The \textbf{transition
+matrix} (or principal fundamental matrix at $s$) is $\Phi(t, s) = \Phi(t)\Phi(s)^{-1}$.
+\end{defn}
+
+Every solution is $x(t) = \Phi(t)c$ for a constant vector $c$, and the solution with $x(s) = x_s$ is $x(t) = \Phi(t, s)x_s$. The transition matrix does not depend on which fundamental matrix
+is used, since any two differ by a constant invertible factor, $\Psi(t) = \Phi(t)C$, which cancels in $\Psi(t)\Psi(s)^{-1}$.
+
+\begin{prop}
+\label{prop:transition}
+The transition matrix satisfies $\Phi(t, t) = I$, $\Phi(t, s)\Phi(s, r) = \Phi(t, r)$, $\Phi(t, s)^{-1} = \Phi(s, t)$, and
+\[
+\frac{\partial}{\partial t}\Phi(t, s) = A(t)\Phi(t, s), \qquad \frac{\partial}{\partial s}\Phi(t, s) = -\Phi(t, s)A(s) .
+\]
+\end{prop}
+
+\begin{proof}
+The first three follow from $\Phi(t, s) = \Phi(t)\Phi(s)^{-1}$. The first derivative is $\Phi'(t)\Phi(s)^{-1} = A(t)\Phi(t)\Phi(s)^{-1}$. For the second, differentiating
+$\Phi(s)\Phi(s)^{-1} = I$ gives
+\[
+\frac{d}{ds}\Phi(s)^{-1} = -\Phi(s)^{-1}\Phi'(s)\Phi(s)^{-1} = -\Phi(s)^{-1}A(s) ,
+\]
+and multiplying on the left by $\Phi(t)$ gives the result.
+\end{proof}
+
+The composition law is the flow property of Theorem~\ref{thm:flow} for linear systems: the state at time $r$ is carried to time $s$ and then to time $t$.
+
+\subsection{Liouville's formula}
+\label{ssec:liouville}
+
+\begin{thm}[Liouville]
+\label{thm:liouville}
+If $\Phi$ is a matrix solution of $\Phi' = A(t)\Phi$, then
+\[
+\det\Phi(t) = \det\Phi(t_0)\exp\int_{t_0}^t\tr A(s)\,ds .
+\]
+In particular $\det\Phi(t)$ is either never zero or always zero.
+\end{thm}
+
+\begin{proof}
+The determinant is linear in each row, so its derivative is the sum of the determinants obtained by differentiating one row at a time:
+$(\det\Phi)' = \sum_i\det\Phi^{(i)}$, where $\Phi^{(i)}$ is $\Phi$ with row $i$ replaced by its derivative. Row $i$ of $\Phi' = A\Phi$ is $\sum_ja_{ij}(\text{row } j \text{ of } \Phi)$. Substituting, every term with $j \neq i$
+gives a determinant with two equal rows, which is zero, and the term $j = i$ gives $a_{ii}\det\Phi$. So $(\det\Phi)' = \bigl(\sum_ia_{ii}\bigr)\det\Phi = \tr A(t)\det\Phi$, a scalar linear equation, whose solution is
+the formula.
+\end{proof}
+
+The formula has a geometric meaning. The columns of $\Phi(t)$ are the images under the flow of the edges of a parallelepiped, and $\det\Phi(t)$ is its signed volume. Liouville's
+formula says that volumes in the state space change at the rate $\tr A$, the divergence of the vector field $A(t)x$. If $\tr A = 0$ the flow preserves volume, as the pendulum's
+variational flow did in Software~\ref{sw:variational}; if $\tr A < 0$ it contracts volume (Figure~\ref{fig:liouville}). For a non-linear system $x' = f(x)$, the same argument applied to the
+variational equation shows that the flow changes volumes at the rate $\operatorname{div} f$, which is Liouville's theorem of Hamiltonian mechanics when $\operatorname{div} f = 0$.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1.7cm,y=1.7cm]
+\foreach \dx/\lab/\area/\col/\pts in {
+  0/{t = 0}/{1}/blue/{(0,0) -- (1,0) -- (1,1) -- (0,1) -- cycle},
+  3.0/{t = 1.5}/{0.549}/orange/{(0,0) -- (0.225,-0.752) -- (0.977,-0.828) -- (0.752,-0.076) -- cycle},
+  6.0/{t = 3}/{0.301}/red/{(0,0) -- (-0.515,-0.112) -- (-0.403,-0.672) -- (0.112,-0.56) -- cycle}} {
+  \begin{scope}[shift={(\dx,0)}]
+  \fill[\col!6,rounded corners=4pt] (-0.75,-1.4) rectangle (1.25,1.45);
+  \draw[gray!60,->] (-0.65,0) -- (1.15,0); \draw[gray!60,->] (0,-1.05) -- (0,1.2);
+  \filldraw[draw=\col!70!black,fill=\col!25,thick] \pts;
+  \node[font=\small\bfseries,\col!70!black] at (0.25,1.28) {$\lab$};
+  \node[font=\scriptsize] at (0.25,-1.22) {area $\area$};
+  \end{scope}}
+\end{tikzpicture}
+\caption{Liouville's formula for the damped oscillator $x'' + 0.4x' + x = 0$, written as a system with $\tr A = -0.4$. The unit square spanned by the initial vectors $e_1$ and $e_2$ is carried
+by the flow to the parallelogram spanned by the columns of $\Phi(t)$, which rotates and shrinks. Its area is $\det\Phi(t) = e^{-0.4t}$: $0.549$ at $t = 1.5$ and $0.301$ at $t = 3$.}
+\label{fig:liouville}
+\end{figure}
+
+\subhead{Scalar equations of order $n$}
+The equation $y^{(n)} + a_{n-1}(t)y^{(n-1)} + \dots + a_0(t)y = 0$ becomes a system by Theorem~\ref{thm:reduction}, with companion matrix whose trace is $-a_{n-1}(t)$. For solutions $y_1, \dots, y_n$ the
+fundamental matrix has rows $y^{(k)}$, and its determinant is the \textbf{Wronskian}
+\[
+W(t) = \det\begin{bmatrix} y_1 & \cdots & y_n\\ y_1' & \cdots & y_n'\\ \vdots & & \vdots\\ y_1^{(n-1)} & \cdots & y_n^{(n-1)}\end{bmatrix}, \qquad W(t) = W(t_0)\exp\Bigl(-\int_{t_0}^ta_{n-1}(s)\,ds\Bigr) ,
+\]
+the second formula being \textbf{Abel's identity}. The solutions are independent if and only if $W \neq 0$ at one point. For arbitrary functions this criterion fails: $t^2$ and $t|t|$ are
+independent on $(-1, 1)$, but their Wronskian vanishes identically; by Abel's identity they cannot both solve a second-order equation $y'' + py' + qy = 0$ with continuous
+coefficients on $(-1, 1)$.
+
+\subhead{Reduction of order}
+If one solution $y_1$ of $y'' + p(t)y' + q(t)y = 0$ is known, Abel's identity gives a second. With $W = y_1y_2' - y_2y_1' = Ce^{-\int p}$, $(y_2/y_1)' = W/y_1^2$, so
+\[
+y_2 = y_1\int\frac{e^{-\int p(t)\,dt}}{y_1^2}\,dt .
+\]
+
+\begin{exa}
+\label{ex:reduction}
+For $y'' - 2y' + y = 0$ with $y_1 = e^t$: $p = -2$, $e^{-\int p} = e^{2t}$, and $y_2 = e^t\int e^{2t}e^{-2t}\,dt = te^t$. For the Euler equation $t^2y'' - 2y = 0$ on $t > 0$, written as $y'' - (2/t^2)y = 0$, with
+$y_1 = t^2$: $p = 0$, and $y_2 = t^2\int t^{-4}\,dt = -\frac13t^{-1}$, so $t^{-1}$ is a second solution.
+\end{exa}
+
+\subsection{The inhomogeneous system}
+\label{ssec:inhomog}
+
+\begin{thm}[Variation of parameters]
+\label{thm:varpar}
+The solution of $x' = A(t)x + g(t)$, $x(t_0) = x_0$, is
+\[
+x(t) = \Phi(t, t_0)x_0 + \int_{t_0}^t\Phi(t, s)g(s)\,ds .
+\]
+\end{thm}
+
+\begin{proof}
+Seek a solution of the form $x = \Phi(t)c(t)$, letting the constants of the homogeneous solution vary. Then $x' = A\Phi c + \Phi c'$, which equals $A\Phi c + g$ if and only if $\Phi c' = g$, that is
+$c' = \Phi(t)^{-1}g(t)$. Integrating with $c(t_0) = \Phi(t_0)^{-1}x_0$,
+\[
+x(t) = \Phi(t)\Phi(t_0)^{-1}x_0 + \int_{t_0}^t\Phi(t)\Phi(s)^{-1}g(s)\,ds ,
+\]
+which is the formula. Since the problem has a unique solution, this is it.
+\end{proof}
+
+The formula is \textbf{Duhamel's principle}: the response to the forcing $g$ is the superposition of the responses to impulses $g(s)\,ds$ applied at each earlier time $s$, each
+propagated forward by the homogeneous flow $\Phi(t, s)$. The general solution is a particular solution plus the general homogeneous solution, the pattern of
+Theorem~\ref{thm:linear1} in $n$ dimensions.
+
+For a second-order scalar equation $y'' + p(t)y' + q(t)y = g(t)$ with independent homogeneous solutions $y_1$, $y_2$ and Wronskian $W$, the formula reduces to
+\[
+y_p(t) = -y_1(t)\int\frac{y_2(t)g(t)}{W(t)}\,dt + y_2(t)\int\frac{y_1(t)g(t)}{W(t)}\,dt ,
+\]
+which is the classical method of variation of parameters (Problem~\ref{prob:vp2}). Written as a single integral, $y_p(t) = \int_{t_0}^tG(t, s)g(s)\,ds$ with
+$G(t, s) = \bigl(y_1(s)y_2(t) - y_1(t)y_2(s)\bigr)/W(s)$, it introduces the Green's function of the initial value problem, studied with its boundary value counterpart later in the course.
+
+\subsection{The adjoint system}
+\label{ssec:adjoint}
+
+\begin{thm}
+\label{thm:adjoint}
+If $x' = A(t)x$ and $y' = -A(t)^{\mathsf T}y$, then $y(t)^{\mathsf T}x(t)$ is constant. If $\Phi$ is a fundamental matrix of the first system, $(\Phi^{-1})^{\mathsf T}$ is a fundamental matrix of the second,
+the \textbf{adjoint} system.
+\end{thm}
+
+\begin{proof}
+$(y^{\mathsf T}x)' = y'^{\mathsf T}x + y^{\mathsf T}x' = -y^{\mathsf T}Ax + y^{\mathsf T}Ax = 0$. For the second statement, $\frac{d}{dt}\Phi^{-1} = -\Phi^{-1}A$, so $\Psi = (\Phi^{-1})^{\mathsf T}$ satisfies $\Psi' = -A^{\mathsf T}\Psi$, and it is invertible.
+\end{proof}
+
+The adjoint propagates linear functionals, such as the sensitivity of a final quantity $c^{\mathsf T}x(T)$ to the state at earlier times, backwards in time. It is the basis of the adjoint
+method for computing gradients in optimal control and data assimilation, and of the Fredholm alternative for boundary value problems.
+
+\subsection{When is the fundamental matrix an exponential?}
+\label{ssec:commute}
+
+For a scalar equation $x' = a(t)x$ the solution is $\exp\bigl(\int_{t_0}^ta\bigr)x_0$. It is tempting to write $\Phi(t, t_0) = \exp\bigl(\int_{t_0}^tA(s)\,ds\bigr)$ for systems, using the matrix exponential
+$e^M = \sum_kM^k/k!$ of the next section.
+
+\begin{prop}
+\label{prop:commute}
+If $A(t)$ commutes with $B(t) = \int_{t_0}^tA(s)\,ds$ for all $t$, then $\Phi(t, t_0) = e^{B(t)}$. Without commutativity the formula is false in general.
+\end{prop}
+
+\begin{proof}
+If $A$ commutes with $B$, it commutes with every power of $B$, and differentiating the series term by term, $\frac{d}{dt}B^k = \sum_{j=0}^{k-1}B^jB'B^{k-1-j} = kB^{k-1}A$, using $B' = A$ and commutativity.
+Hence $\frac{d}{dt}e^B = \sum_k\frac{kB^{k-1}A}{k!} = e^BA = Ae^B$, and $e^{B(t_0)} = I$. Without commutativity the step $B^jAB^{k-1-j} = B^{k-1}A$ fails; Software~\ref{sw:commute} gives a counterexample.
+\end{proof}
+
+The condition holds when $A$ is constant, and when $A(t) = a(t)A_0$ for a fixed matrix $A_0$. It fails for most variable-coefficient systems, which is why they rarely have closed-form
+solutions, and why the theory of this section is structural rather than computational.
+
+\subsection{Linear systems in software}
+\label{ssec:software4}
+
+\begin{software}[Liouville's formula]
+\label{sw:liouville}
+For $x'' + 0.2x' + (1 + 0.5\cos t)x = 0$, a damped oscillator with a periodically varying stiffness, the fundamental matrix is computed by integrating $\Phi' = A(t)\Phi$ from $\Phi(0) = I$;
+here $\tr A = -0.2$:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.integrate import solve_ivp
+>>> A = lambda t: np.array([[0.0, 1.0], [-(1 + 0.5 * np.cos(t)), -0.2]])
+>>> def fund(t, z):                        # Phi' = A(t) Phi, Phi(0) = I
+...     return (A(t) @ z.reshape(2, 2)).ravel()
+...
+>>> sol = solve_ivp(fund, (0, 20), np.eye(2).ravel(), rtol=1e-11, atol=1e-13,
+...                 dense_output=True)
+>>> for t in (5.0, 10.0, 20.0):
+...     Phi = sol.sol(t).reshape(2, 2)
+...     print(t, round(np.linalg.det(Phi), 8), round(np.exp(-0.2 * t), 8))
+...
+5.0 0.36787944 0.36787944
+10.0 0.13533528 0.13533528
+20.0 0.01831564 0.01831564
+\end{verbatim}}
+\textbf{Reading the output.} The determinant of the numerically computed $\Phi(t)$ equals $e^{-0.2t}$ to eight decimals at every time, although $\Phi$ itself has no closed form: the
+stiffness varies with time, but only the trace matters for the volume. This is a useful check on numerical work: a computed fundamental matrix whose determinant
+drifts from Liouville's value has accumulated error.
+
+\textbf{MATLAB/Octave:} integrate \texttt{@(t, z) reshape(A(t)*reshape(z, 2, 2), 4, 1)} with \texttt{ode45} from \texttt{reshape(eye(2), 4, 1)}.
+\end{software}
+
+\begin{software}[Variation of parameters]
+\label{sw:varpar}
+For $y'' + y = \sec t$ on $(-\pi/2, \pi/2)$, with $y_1 = \cos t$, $y_2 = \sin t$:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> t = sp.symbols('t')
+>>> y1, y2, g = sp.cos(t), sp.sin(t), 1 / sp.cos(t)   # y'' + y = sec t
+>>> W = sp.simplify(y1 * y2.diff(t) - y2 * y1.diff(t)); W
+1
+>>> yp = sp.simplify(-y1 * sp.integrate(y2 * g / W, t)
+...                  + y2 * sp.integrate(y1 * g / W, t)); yp
+t*sin(t) + log(cos(t))*cos(t)
+>>> sp.simplify(yp.diff(t, 2) + yp - g)
+0
+\end{verbatim}}
+\textbf{Reading the output.} The Wronskian is $1$, and the particular solution is $y_p = t\sin t + \cos t\log\cos t$, which the last line confirms by substitution. The method of
+undetermined coefficients cannot produce this, because $\sec t$ is not of the exponential-polynomial form it requires.
+
+\textbf{MATLAB/Octave:} \texttt{syms y(t); dsolve(diff(y, 2) + y == sec(t))}.
+\end{software}
+
+\begin{software}[A non-commuting coefficient matrix]
+\label{sw:commute}
+For $B(t) = \begin{bmatrix} 1 & t\\ 0 & 0\end{bmatrix}$, compare the true transition matrix $\Phi(1, 0)$ with $\exp\int_0^1B(s)\,ds$:
+{\small\begin{verbatim}
+>>> from scipy.linalg import expm
+>>> B = lambda t: np.array([[1.0, t], [0.0, 0.0]])
+>>> intB = lambda t: np.array([[t, t**2 / 2], [0.0, 0.0]])
+>>> B(1.0) @ intB(1.0) - intB(1.0) @ B(1.0)        # they do not commute
+array([[ 0. , -0.5],
+       [ 0. ,  0. ]])
+>>> Phi = solve_ivp(lambda t, z: (B(t) @ z.reshape(2, 2)).ravel(), (0, 1),
+...                 np.eye(2).ravel(), rtol=1e-12, atol=1e-13).y[:, -1]
+>>> np.round(Phi.reshape(2, 2), 6), np.round(expm(intB(1.0)), 6)
+(array([[2.718282, 0.718282],
+       [0.      , 1.      ]]), array([[2.718282, 0.859141],
+       [0.      , 1.      ]]))
+\end{verbatim}}
+\textbf{Reading the output.} $B(1)$ and $\int_0^1B$ do not commute, and the two matrices differ in their top-right entry: the true value is $e - 2 = 0.718282$, obtained by solving
+$x_2 = c$, $x_1' = x_1 + tc$ directly, while the exponential gives $(e - 1)/2 = 0.859141$. Proposition~\ref{prop:commute} cannot be used without checking commutativity.
+
+\textbf{MATLAB/Octave:} \texttt{expm([1 0.5; 0 0])} for the exponential.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Verify that $y_1 = t$ and $y_2 = t^2$ solve $t^2y'' - 2ty' + 2y = 0$ on $t > 0$. Compute their Wronskian directly and from Abel's identity.
+\end{problem}
+
+\begin{solution}
+$t^2 \cdot 0 - 2t + 2t = 0$ and $t^2 \cdot 2 - 2t \cdot 2t + 2t^2 = 0$. Directly, $W = t \cdot 2t - t^2 \cdot 1 = t^2$. In normal form the equation is $y'' - (2/t)y' + (2/t^2)y = 0$, so $a_1 = -2/t$, and
+Abel gives $W(t) = W(1)\exp\int_1^t2/s\,ds = 1 \cdot t^2$.
+\end{solution}
+
+\begin{problem}
+Show that $\sin t$ and $t$ cannot both be solutions of an equation $y'' + p(t)y' + q(t)y = 0$ with $p, q$ continuous on $(-1, 1)$.
+\end{problem}
+
+\begin{solution}
+Their Wronskian is $W = \sin t \cdot 1 - t\cos t$, which is $0$ at $t = 0$ but not identically zero ($W'(t) = t\sin t > 0$ for $t \neq 0$ near $0$, so $W \neq 0$ for small $t \neq 0$). By Abel's identity the
+Wronskian of two solutions is either never zero or always zero, so they cannot both be solutions.
+\end{solution}
+
+\begin{problem}
+\label{prob:vp2}
+Derive the variation of parameters formula for $y'' + p(t)y' + q(t)y = g(t)$ from Theorem~\ref{thm:varpar}, and use it to solve $y'' + y = \tan t$ on $(-\pi/2, \pi/2)$.
+\end{problem}
+
+\begin{solution}
+With $x = (y, y')$, $\Phi = \begin{bmatrix} y_1 & y_2\\ y_1' & y_2'\end{bmatrix}$ and forcing $(0, g)^{\mathsf T}$, the condition $\Phi c' = (0, g)^{\mathsf T}$ gives $c_1' = -y_2g/W$, $c_2' = y_1g/W$ by Cramer's rule, and $y_p = c_1y_1 + c_2y_2$,
+which is the stated formula. For $\tan t$, with $y_1 = \cos t$, $y_2 = \sin t$, $W = 1$:
+\[
+c_1 = -\int\sin t\tan t\,dt = \sin t - \log|\sec t + \tan t|, \qquad c_2 = \int\sin t\,dt = -\cos t ,
+\]
+so
+\[
+y_p = \cos t\sin t - \cos t\log|\sec t + \tan t| - \sin t\cos t = -\cos t\log|\sec t + \tan t| .
+\]
+\end{solution}
+
+\begin{problem}
+Find a second solution of $(1 - t^2)y'' - 2ty' + 2y = 0$ on $(-1, 1)$, given $y_1 = t$ (this is Legendre's equation of order one).
+\end{problem}
+
+\begin{solution}
+In normal form $p = -2t/(1 - t^2)$, so $e^{-\int p} = e^{-\log(1 - t^2)} = 1/(1 - t^2)$. Then
+\begin{align*}
+y_2 &= t\int\frac{dt}{t^2(1 - t^2)} = t\int\Bigl(\frac{1}{t^2} + \frac{1}{1 - t^2}\Bigr)dt\\
+&= t\Bigl(-\frac1t + \frac12\log\frac{1 + t}{1 - t}\Bigr) = \frac t2\log\frac{1 + t}{1 - t} - 1 ,
+\end{align*}
+the Legendre function of the second kind $Q_1$, which is singular at $t = \pm1$.
+\end{solution}
+
+\begin{problem}
+Let $x$ solve $x' = A(t)x$ and $y$ solve the adjoint system. Show that if $y(T) = c$, then $y(t)^{\mathsf T}x(t) = c^{\mathsf T}x(T)$ for all $t$, and explain how one backward integration of the adjoint
+gives the sensitivity of $c^{\mathsf T}x(T)$ to the initial state $x(t_0)$.
+\end{problem}
+
+\begin{solution}
+By Theorem~\ref{thm:adjoint}, $y^{\mathsf T}x$ is constant, so it equals its value $c^{\mathsf T}x(T)$ at $t = T$. In particular $c^{\mathsf T}x(T) = y(t_0)^{\mathsf T}x(t_0)$, so the gradient of $c^{\mathsf T}x(T)$ with respect to $x(t_0)$ is
+$y(t_0)$. One backward integration of the adjoint from $y(T) = c$ gives all $n$ partial derivatives, where finite differences would need $n + 1$ forward integrations.
+\end{solution}
+
+\begin{problem}
+Show that for $A(t) = a(t)A_0$ with $A_0$ a constant matrix, $\Phi(t, t_0) = \exp\bigl(A_0\int_{t_0}^ta(s)\,ds\bigr)$, and use this to solve $x' = \frac1t\begin{bmatrix} 0 & 1\\ 1 & 0\end{bmatrix}x$ on $t > 0$.
+\end{problem}
+
+\begin{solution}
+$B(t) = \bigl(\int_{t_0}^ta\bigr)A_0$ is a scalar multiple of $A_0$, which commutes with $A(t) = a(t)A_0$, so Proposition~\ref{prop:commute} applies. Here $\int_1^tds/s = \log t$, and since $A_0^2 = I$,
+$e^{\tau A_0} = \cosh\tau\,I + \sinh\tau\,A_0$. With $\tau = \log t$, $\cosh\tau = \frac12(t + t^{-1})$ and $\sinh\tau = \frac12(t - t^{-1})$, so $\Phi(t, 1) = \frac12\begin{bmatrix} t + t^{-1} & t - t^{-1}\\ t - t^{-1} & t + t^{-1}\end{bmatrix}$. Its
+determinant is $1$, as Liouville's formula requires since $\tr A = 0$.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -1458,6 +1792,7 @@ Amsterdam, Academic Press.
 
 \subhead{Further reading}
 \begin{enumerate}
+\item Abel, N. H. (1829), Pr\'ecis d'une th\'eorie des fonctions elliptiques, \emph{Journal f\"ur die reine und angewandte Mathematik}, 4, 309--348.
 \item Banach, S. (1922), Sur les op\'erations dans les ensembles abstraits et leur application aux \'equations int\'egrales, \emph{Fundamenta
 Mathematicae}, 3, 133--181.
 \item Bielecki, A. (1956), Une remarque sur la m\'ethode de Banach--Cacciopoli--Tikhonov dans la th\'eorie des \'equations diff\'erentielles
@@ -1468,6 +1803,8 @@ ordinaires, \emph{Bulletin de l'Acad\'emie Polonaise des Sciences}, 4, 261--264.
 London, Series A}, 115, 700--721.
 \item Lindel\"of, E. (1894), Sur l'application de la m\'ethode des approximations successives aux \'equations diff\'erentielles ordinaires du
 premier ordre, \emph{Comptes Rendus de l'Acad\'emie des Sciences}, 118, 454--457.
+\item Liouville, J. (1838), Note sur la th\'eorie de la variation des constantes arbitraires, \emph{Journal de Math\'ematiques Pures et Appliqu\'ees}, 3,
+342--349.
 \item Lotka, A. J. (1925), \emph{Elements of Physical Biology}, Baltimore, Williams and Wilkins.
 \item Osgood, W. F. (1898), Beweis der Existenz einer L\"osung der Differentialgleichung $dy/dx = f(x, y)$ ohne Hinzunahme der Cauchy-Lipschitz'schen
 Bedingung, \emph{Monatshefte f\"ur Mathematik und Physik}, 9, 331--345.
