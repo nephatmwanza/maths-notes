@@ -625,6 +625,326 @@ The vertices are $(1, 0)$ and $(0, 1)$, and the unbounded edges point in the dir
 unique: $\frac12(1, 0) + \frac12(0, 1) + \frac52(1, 0) + \frac32(0, 1)$ also works.
 \end{solution}
 
+%======================================================================
+\section{The Simplex Method}
+\label{sec:simplex}
+
+By the fundamental theorem, an optimal solution of an LP can be found among its basic feasible solutions. Dantzig's \textbf{simplex method} (1947) moves from one BFS to an adjacent one with a better objective value, until no neighbour is better. Each move is a \textbf{pivot}: one variable enters the basis and
+one leaves. This section derives the method from the algebra of bases, proves that it stops at an optimum, shows how to start it, and explains the two things that can go wrong, degeneracy and exponential running time.
+
+\subsection{Reduced costs and the optimality test}
+\label{ssec:reducedcosts}
+
+Consider the standard-form problem: minimise $c^{\mathsf T}x$ subject to $Ax = b$, $x \geq 0$, and a BFS with basis matrix $B$, so that $x_B = B^{-1}b \geq 0$ and $x_N = 0$. Every solution of $Ax = b$ satisfies $Bx_B + Nx_N = b$, so
+\[
+x_B = B^{-1}b - B^{-1}Nx_N, \qquad c^{\mathsf T}x = c_B^{\mathsf T}B^{-1}b + \sum_{j \in N}\bar c_jx_j, \qquad \bar c_j = c_j - c_B^{\mathsf T}B^{-1}A_j .
+\]
+The number $\bar c_j$ is the \textbf{reduced cost} of the non-basic variable $x_j$: the rate at which the objective changes when $x_j$ is increased from $0$ and the basic variables adjust to keep $Ax = b$. (Sharma, following a common textbook convention for maximisation, writes $c_j - z_j$ with
+$z_j = c_B^{\mathsf T}B^{-1}A_j$; it is the same quantity.)
+
+\begin{thm}[Optimality test]
+\label{thm:optimality}
+If $\bar c_j \geq 0$ for every non-basic $j$, the BFS is optimal.
+\end{thm}
+
+\begin{proof}
+For any feasible $y$, $y_N \geq 0$, so by the identity above $c^{\mathsf T}y = c_B^{\mathsf T}B^{-1}b + \sum_{j \in N}\bar c_jy_j \geq c_B^{\mathsf T}B^{-1}b = c^{\mathsf T}x$.
+\end{proof}
+
+If some $\bar c_j < 0$, increasing $x_j$ improves the objective. Put $u = B^{-1}A_j$; increasing $x_j$ to $\theta$ changes the basic variables to $x_B - \theta u$. They stay non-negative as long as $\theta \leq x_{B(i)}/u_i$ for every $i$ with $u_i > 0$, which gives the \textbf{ratio test}
+\[
+\theta^* = \min\Bigl\{\frac{x_{B(i)}}{u_i} : u_i > 0\Bigr\} .
+\]
+
+\begin{thm}[A pivot]
+\label{thm:pivot}
+Let $\bar c_j < 0$.
+\begin{enumerate}[label=(\roman*)]
+\item If $u = B^{-1}A_j \leq 0$, the LP is unbounded: $x + \theta d$ is feasible for all $\theta \geq 0$, where $d_j = 1$, $d_B = -u$ and $d$ is $0$ elsewhere, and its cost $c^{\mathsf T}x + \theta\bar c_j \to -\infty$.
+\item Otherwise, let the minimum in the ratio test be attained at row $\ell$. Replacing the basic variable $x_{B(\ell)}$ by $x_j$ gives a new basis, the new BFS is $x + \theta^*d$, and its cost is $c^{\mathsf T}x + \theta^*\bar c_j \leq c^{\mathsf T}x$, with strict inequality if $\theta^* > 0$.
+\end{enumerate}
+\end{thm}
+
+\begin{proof}
+$Ad = A_j - Bu = 0$, so $A(x + \theta d) = b$, and $x + \theta d \geq 0$ for $0 \leq \theta \leq \theta^*$ by the ratio test (for all $\theta \geq 0$ in case (i)); its cost is $c^{\mathsf T}x + \theta(c_j - c_B^{\mathsf T}u) = c^{\mathsf T}x + \theta\bar c_j$. In case (ii), at $\theta = \theta^*$ the variable $x_{B(\ell)}$ becomes $0$. The new
+columns are independent: $A_j = Bu$ with $u_\ell > 0$, so $A_j$ is not in the span of the other basic columns. So the new point is a BFS.
+\end{proof}
+
+\begin{thm}[Finite termination]
+\label{thm:termination}
+If every BFS is non-degenerate, the simplex method stops after finitely many pivots, either with an optimal BFS or with a proof of unboundedness.
+\end{thm}
+
+\begin{proof}
+Without degeneracy every $\theta^* > 0$, so each pivot strictly decreases the cost. Hence no basis is visited twice, and there are at most $\binom nm$ bases.
+\end{proof}
+
+\subsection{The tableau}
+\label{ssec:tableau}
+
+By hand, the computation is organised in a \textbf{tableau}: the rows of $[B^{-1}A \mid B^{-1}b]$, one per basic variable, and an objective row holding the reduced costs and the current value. A pivot on row $\ell$ and column $j$ divides row $\ell$ by the pivot element and subtracts multiples of it from the other rows,
+including the objective row, so that column $j$ becomes a unit vector. For a maximisation written with slack variables, the objective row starts as $-c$, and the tableau is optimal when the objective row has no negative entries.
+
+\begin{exa}
+\label{ex:tableau}
+For Example~\ref{ex:graphical}, add slacks $s_1, s_2, s_3$. The initial tableau, with basis $\{s_1, s_2, s_3\}$ at the origin, and the final one are
+\begin{center}
+\small
+\begin{tabular}{c|rrrrr|r}
+basic & $x_1$ & $x_2$ & $s_1$ & $s_2$ & $s_3$ & rhs \\
+\hline
+$s_1$ & $2$ & $1$ & $1$ & $0$ & $0$ & $26$ \\
+$s_2$ & $2$ & $4$ & $0$ & $1$ & $0$ & $56$ \\
+$s_3$ & $-1$ & $1$ & $0$ & $0$ & $1$ & $5$ \\
+\hline
+$Z$ & $-10$ & $-15$ & $0$ & $0$ & $0$ & $0$
+\end{tabular}
+\qquad
+\begin{tabular}{c|rrrrr|r}
+basic & $x_1$ & $x_2$ & $s_1$ & $s_2$ & $s_3$ & rhs \\
+\hline
+$s_3$ & $0$ & $0$ & $1$ & $-\frac12$ & $1$ & $3$ \\
+$x_1$ & $1$ & $0$ & $\frac23$ & $-\frac16$ & $0$ & $8$ \\
+$x_2$ & $0$ & $1$ & $-\frac13$ & $\frac13$ & $0$ & $10$ \\
+\hline
+$Z$ & $0$ & $0$ & $\frac53$ & $\frac{10}3$ & $0$ & $230$
+\end{tabular}
+\end{center}
+With Dantzig's rule (enter the most negative entry of the objective row), $x_2$ enters first; the ratios are $26$, $14$ and $5$, so $s_3$ leaves and the method moves to $D(0, 5)$. Then $x_1$ enters and $s_1$ leaves, at $C(6, 11)$, and finally $s_3$ re-enters and $s_2$ leaves, at $B(8, 10)$ (Figure~\ref{fig:path},
+Software~\ref{sw:tableau}). In the final tableau the objective row is non-negative, so $B$ is optimal. Its entries $\frac53$ and $\frac{10}3$ under $s_1$ and $s_2$ are the amounts by which $Z$ would rise per extra unit of the first and second resource: the \textbf{shadow prices}, which the section on duality interprets.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.24cm,y=0.24cm]
+\fill[blue!4,rounded corners=4pt] (-3,-3.2) rectangle (30,17.5);
+\fill[green!25] (0,0) -- (13,0) -- (8,10) -- (6,11) -- (0,5) -- cycle;
+\draw[->] (0,0) -- (29,0) node[below,font=\small] {$x_1$};
+\draw[->] (0,0) -- (0,16.5) node[left,font=\small] {$x_2$};
+\draw[black!40] (0,14) -- (28,0); \draw[black!40] (5.5,15) -- (13.5,-1); \draw[black!40] (0,5) -- (10,15);
+\draw[->,red!70!black,very thick] (0,0) -- (0,4.6);
+\draw[->,red!70!black,very thick] (0,5) -- (5.7,10.7);
+\draw[->,red!70!black,very thick] (6,11) -- (7.65,10.17);
+\foreach \p/\q/\l/\z/\a in {0/0/O/0/below left, 0/5/D/75/left, 6/11/C/225/above, 8/10/B/230/right, 13/0/A/130/below}
+  \fill (\p,\q) circle (2.4pt) node[\a=2pt,font=\scriptsize] {$\l$: $\z$};
+\node[font=\scriptsize\bfseries,red!70!black,align=left,anchor=west] at (15,12) {Dantzig's rule:\\$O \to D \to C \to B$\\three pivots};
+\end{tikzpicture}
+\caption{The path of the simplex method for Example~\ref{ex:tableau}, with the objective value $Z = 10x_1 + 15x_2$ at each vertex. Each pivot moves along an edge of the feasible region to an adjacent vertex with a larger $Z$. The rule chose $x_2$ first because its coefficient $15$ is larger, which here costs one extra pivot:
+entering $x_1$ first would have gone $O \to A \to B$.}
+\label{fig:path}
+\end{figure}
+
+\subsection{Starting the method: artificial variables}
+\label{ssec:artificial}
+
+With constraints $Ax \leq b$ and $b \geq 0$ the slacks give a starting BFS at the origin. With $\geq$ or $=$ constraints there is no obvious one, and \textbf{artificial variables} are added: for $Ax = b$ with $b \geq 0$ (multiply rows by $-1$ if necessary), solve
+\[
+\text{Phase I:}\quad\text{minimise } \sum_ia_i \quad\text{subject to}\quad Ax + a = b, \quad x, a \geq 0 ,
+\]
+which starts from the BFS $x = 0$, $a = b$. The original problem is feasible if and only if the Phase~I optimum is $0$; then the final basis, after pivoting out any artificial variables left at value $0$, is a BFS of the original problem, and \textbf{Phase~II} continues from it with the true objective. The
+\textbf{Big-M method} combines the phases by adding $M\sum a_i$ to the objective with $M$ large; it is simpler by hand but numerically worse, because $M$ must be large compared with the data.
+
+\subsection{Degeneracy, cycling and Bland's rule}
+\label{ssec:cycling}
+
+At a degenerate BFS the ratio test can give $\theta^* = 0$: the basis changes but the point does not. The proof of Theorem~\ref{thm:termination} then fails, and the method can \textbf{cycle}, returning to a basis it has visited and repeating forever. Beale (1955) gave an example with three constraints in which
+Dantzig's rule cycles through six bases at the same degenerate vertex (Software~\ref{sw:cycling}). Cycling is rare in practice, but it can be prevented.
+
+\begin{thm}[Bland's rule]
+\label{thm:bland}
+If the entering variable is always the eligible one ($\bar c_j < 0$) with the smallest index, and ties in the ratio test are broken by choosing the leaving variable with the smallest index, the simplex method never cycles.
+\end{thm}
+
+The proof (Bland, 1977) supposes a cycle and considers the largest index $t$ of a variable that enters and leaves during it; comparing the tableau where $x_t$ leaves with the one where it re-enters yields a contradiction in the signs of the reduced costs. Other remedies are the lexicographic rule and small perturbations
+of $b$. With any anti-cycling rule, the simplex method solves every LP in finitely many pivots, which gives a constructive proof of the fundamental theorem.
+
+\subsection{How fast is the simplex method?}
+\label{ssec:complexity}
+
+In practice the number of pivots grows roughly linearly with the number of constraints, typically between $m$ and $3m$. In the worst case it does not. Klee and Minty (1972) constructed a distorted cube in $\mathbb R^n$ on which Dantzig's rule visits all $2^n$ vertices, taking $2^n - 1$ pivots (Software~\ref{sw:cycling}).
+Similar examples are known for every simple pivoting rule. Whether some pivoting rule is polynomial is still unknown. Spielman and Teng (2004) explained the good practical behaviour by \emph{smoothed analysis}: after a small random perturbation of the data the expected number of pivots is polynomial. Linear programming itself
+is solvable in polynomial time, by Khachiyan's ellipsoid method (1979) and by Karmarkar's interior-point method (1984), whose descendants compete with the simplex method on large problems.
+
+\subsection{The simplex method in software}
+\label{ssec:software3}
+
+The panels use a short tableau implementation in exact rational arithmetic (Python's \texttt{fractions}), so that every entry is printed exactly; production solvers such as HiGHS use the revised method of the next section in floating point.
+
+\begin{software}[The tableau method]
+\label{sw:tableau}
+The functions \texttt{pivot} and \texttt{simplex}, and Example~\ref{ex:tableau}: the basic columns, the vertex $(x_1, x_2)$ and $Z$ after each pivot (columns $0, 1$ are $x_1, x_2$ and $2, 3, 4$ the slacks):
+{\small\begin{verbatim}
+>>> from fractions import Fraction as F
+>>> def pivot(T, r, j):             # make column j a unit vector, 1 in row r
+...     T[r] = [v / T[r][j] for v in T[r]]
+...     for i in range(len(T)):
+...         if i != r and T[i][j] != 0:
+...             T[i] = [a - T[i][j] * p for a, p in zip(T[i], T[r])]
+...
+>>> def simplex(T, basis, n, rule='dantzig', limit=100):
+...     """T: rows [A | b], last row [-c | z] (maximise c x); basis[i] is the
+...     basic column of row i; n original variables.  Returns the status and
+...     the history of (basis, x, z) at each tableau."""
+...     def state():
+...         x = [F(0)] * n
+...         for i, j in enumerate(basis):
+...             if j < n: x[j] = T[i][-1]
+...         return tuple(basis), tuple(x), T[-1][-1]
+...     hist = [state()]
+...     for _ in range(limit):
+...         z = T[-1][:-1]
+...         enter = [j for j, v in enumerate(z) if v < 0]
+...         if not enter: return 'optimal', hist
+...         if rule == 'bland': j = min(enter)        # smallest index
+...         else: j = min(enter, key=lambda k: (z[k], k))   # most negative
+...         rows = [i for i in range(len(T) - 1) if T[i][j] > 0]
+...         if not rows: return 'unbounded', hist
+...         tie = (lambda i: basis[i]) if rule == 'bland' else (lambda i: i)
+...         key = lambda i: (T[i][-1] / T[i][j], tie(i))
+...         r = min(rows, key=key)
+...         pivot(T, r, j); basis[r] = j; hist.append(state())
+...         if [h[0] for h in hist].count(tuple(basis)) > 1:
+...             return 'cycling', hist
+...     return 'iteration limit', hist
+...
+>>> def tableau(rows): return [[F(v) for v in r] for r in rows]
+>>> T = tableau([[2, 1, 1, 0, 0, 26],      # Example 2.3.1, slacks s1, s2, s3
+...              [2, 4, 0, 1, 0, 56],
+...              [-1, 1, 0, 0, 1, 5],
+...              [-10, -15, 0, 0, 0, 0]])  # objective row: max 10 x1 + 15 x2
+>>> status, hist = simplex(T, [2, 3, 4], n=2)
+>>> status
+'optimal'
+>>> for B, x, z in hist:                   # basic columns, vertex, objective
+...     print(B, [str(v) for v in x], z)
+...
+(2, 3, 4) ['0', '0'] 0
+(2, 3, 1) ['0', '5'] 75
+(2, 0, 1) ['6', '11'] 225
+(4, 0, 1) ['8', '10'] 230
+\end{verbatim}}
+\textbf{Reading the output.} The method passes through $(0, 0)$, $(0, 5)$, $(6, 11)$ and $(8, 10)$, with $Z = 0$, $75$, $225$, $230$, the path of Figure~\ref{fig:path}; each pivot changes one basic column.
+
+\textbf{MATLAB/Octave:} the same row operations, \texttt{T(r,:) = T(r,:)/T(r,j)} and so on; with the Symbolic Math Toolbox, \texttt{sym} entries keep them exact.
+\end{software}
+
+\begin{software}[Two phases]
+\label{sw:twophase}
+Minimise $20x_1 + 10x_2$ subject to $x_1 + 2x_2 \leq 40$, $3x_1 + x_2 \geq 30$, $4x_1 + 3x_2 \geq 60$ (the problem of Software~\ref{sw:bases}), with artificial variables in the two $\geq$ rows. Phase~I maximises $-(a_1 + a_2)$, after subtracting the artificial rows from the objective row so that it is
+expressed in the non-basic variables; Phase~II restores the true objective and drops the artificial columns:
+{\small\begin{verbatim}
+>>> T = tableau([[1, 2, 1, 0, 0, 0, 0, 40],    # Phase I: x1 + 2 x2 + s1 = 40
+...              [3, 1, 0, -1, 0, 1, 0, 30],   # 3 x1 + x2 - s2 + a1 = 30
+...              [4, 3, 0, 0, -1, 0, 1, 60],   # 4 x1 + 3 x2 - s3 + a2 = 60
+...              [0, 0, 0, 0, 0, 1, 1, 0]])    # max -(a1 + a2)
+>>> for k in (1, 2): T[-1] = [u - v for u, v in zip(T[-1], T[k])]  # price out
+>>> basis = [2, 5, 6]
+>>> status, hist = simplex(T, basis, n=2)
+>>> status, -T[-1][-1], basis              # Phase I value 0: feasible
+('optimal', Fraction(0, 1), [2, 0, 1])
+>>> T[-1] = [F(20), F(10)] + [F(0)] * 6   # Phase II: maximise -cost
+>>> for i, j in enumerate(basis):
+...     if T[-1][j] != 0:                  # price out the basic columns
+...         T[-1] = [u - T[-1][j] * v for u, v in zip(T[-1], T[i])]
+...
+>>> for row in T: row[5] = row[6] = F(0)   # drop the artificial columns
+>>> status, hist = simplex(T, basis, n=2)
+>>> status, [str(v) for v in hist[-1][1]], -hist[-1][2]
+('optimal', ['6', '12'], Fraction(240, 1))
+\end{verbatim}}
+\textbf{Reading the output.} Phase~I reaches $a_1 + a_2 = 0$ with basis $\{s_1, x_1, x_2\}$ (columns $2, 0, 1$), no artificial variable remaining, so the problem is feasible. Phase~II finds it already optimal there: $(6, 12)$ at cost $240$, as enumeration gave.
+
+\textbf{MATLAB/Octave:} \texttt{linprog} handles the start internally; the two phases are for understanding.
+\end{software}
+
+\begin{software}[Cycling and the Klee--Minty cube]
+\label{sw:cycling}
+Beale's example (maximise $10x_1 - 57x_2 - 9x_3 - 24x_4$ subject to three constraints with right-hand sides $0$, $0$ and $1$) under Dantzig's rule and Bland's rule; then the number of pivots Dantzig's rule takes on the Klee--Minty cube in dimensions $2$ to $8$:
+{\small\begin{verbatim}
+>>> beale = [[F(1, 2), F(-11, 2), F(-5, 2), 9, 1, 0, 0, 0],  # Beale, as in
+...          [F(1, 2), F(-3, 2), F(-1, 2), 1, 0, 1, 0, 0],    # Chvatal
+...          [1, 0, 0, 0, 0, 0, 1, 1],
+...          [-10, 57, 9, 24, 0, 0, 0, 0]]
+>>> for rule in ('dantzig', 'bland'):
+...     status, hist = simplex(tableau(beale), [4, 5, 6], n=4, rule=rule)
+...     print(rule, status, len(hist) - 1, 'pivots, z =', hist[-1][2])
+...
+dantzig cycling 6 pivots, z = 0
+bland optimal 7 pivots, z = 1
+>>> def klee_minty(n):                     # Klee and Minty's cube
+...     rows = []
+...     for i in range(n):
+...         r = [2**(i - j + 1) if j < i else int(j == i) for j in range(n)]
+...         slack = [int(k == i) for k in range(n)]
+...         rows.append(r + slack + [5**(i + 1)])
+...     rows.append([-2**(n - 1 - j) for j in range(n)] + [0] * n + [0])
+...     return tableau(rows)
+...
+>>> [len(simplex(klee_minty(n), list(range(n, 2*n)), n, limit=10**4)[1]) - 1
+...  for n in range(2, 9)]                 # pivots taken by Dantzig's rule
+[3, 7, 15, 31, 63, 127, 255]
+\end{verbatim}}
+\textbf{Reading the output.} With Dantzig's rule the method returns to its starting basis after six degenerate pivots, with $Z$ still $0$: it would cycle forever. Bland's rule escapes after seven pivots and finds the optimum $Z = 1$. On the Klee--Minty cubes the pivot counts are $3, 7, 15, \ldots, 255$, exactly $2^n - 1$:
+the method visits every vertex.
+
+\textbf{MATLAB/Octave:} the same loops; \texttt{linprog} uses anti-cycling safeguards and never cycles.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Solve Example~\ref{ex:tableau} by the simplex method entering $x_1$ first, and confirm the path $O \to A \to B$.
+\end{problem}
+
+\begin{solution}
+With $x_1$ entering, the ratios are $26/2 = 13$ and $56/2 = 28$ (the third row has a negative entry), so $s_1$ leaves: $A(13, 0)$, $Z = 130$. In the new tableau the objective row has $-10$ under $x_2$, which enters; the ratios are $13/\frac12 = 26$ for the $x_1$ row, $30/3 = 10$ for the $s_2$ row (now
+$3x_2 - s_1 + s_2 = 30$) and $18/\frac32 = 12$ for the $s_3$ row, so $s_2$ leaves, giving $x_2 = 10$, $x_1 = 13 - 5 = 8$: the point $B$, $Z = 230$, in two pivots.
+\end{solution}
+
+\begin{problem}
+Use the simplex method to solve: maximise $Z = 3x_1 + 2x_2$ subject to $x_1 + x_2 \leq 4$, $x_1 - x_2 \leq 2$, $x \geq 0$.
+\end{problem}
+
+\begin{solution}
+Initial basis $\{s_1, s_2\}$. $x_1$ enters (coefficient $-3$); ratios $4$ and $2$, so $s_2$ leaves: $x_1 = 2$, $Z = 6$. Now the $x_1$ row is $x_1 - x_2 + s_2 = 2$ and the $s_1$ row $2x_2 - s_2 + s_1 = 2$; the objective row has $-5$ under $x_2$. $x_2$ enters, only the $s_1$ row has a positive
+entry, so $x_2 = 1$, $x_1 = 3$, $Z = 11$. The objective row is then $\frac52$ under $s_1$ and $\frac12$ under $s_2$, non-negative, so $(3, 1)$ is optimal with $Z = 11$.
+\end{solution}
+
+\begin{problem}
+Show by the simplex method that maximising $x_1 + x_2$ subject to $x_1 - x_2 \leq 1$, $-x_1 + x_2 \leq 1$, $x \geq 0$ is unbounded, and give the direction along which the objective increases.
+\end{problem}
+
+\begin{solution}
+From the origin, $x_1$ enters and $s_1$ leaves: $x_1 = 1$, with rows $x_1 - x_2 + s_1 = 1$ and $s_1 + s_2 = 2$ (adding the rows). The objective row has $-2$ under $x_2$, but the column of $x_2$ is $(-1, 0)$, with no positive entry: by Theorem~\ref{thm:pivot}(i) the problem is unbounded. The direction is
+$d = (1, 1)$ in $(x_1, x_2)$: along $(1, 0) + \theta(1, 1)$ both constraints stay satisfied and $Z = 1 + 2\theta$.
+\end{solution}
+
+\begin{problem}
+Write the Phase~I problem for: minimise $x_1 + x_2$ subject to $x_1 + 2x_2 \geq 4$, $3x_1 + x_2 = 3$, $x \geq 0$, and find a starting basis for Phase~II.
+\end{problem}
+
+\begin{solution}
+Standard form: $x_1 + 2x_2 - s = 4$, $3x_1 + x_2 = 3$. Phase~I: minimise $a_1 + a_2$ subject to $x_1 + 2x_2 - s + a_1 = 4$, $3x_1 + x_2 + a_2 = 3$. Solving, the point $x_1 = \frac25$, $x_2 = \frac95$ satisfies both equations with $s = 0$ ($\frac25 + \frac{18}5 = 4$, $\frac65 + \frac95 = 3$), so the
+basis $\{x_1, x_2\}$ is feasible and Phase~I ends with value $0$ there. For Phase~II, the reduced cost of $s$ is $\bar c_s = 0 - c_B^{\mathsf T}B^{-1}(-1, 0)^{\mathsf T} = \frac25 \geq 0$, so this BFS is already optimal, with cost $\frac{11}5$.
+\end{solution}
+
+\begin{problem}
+Explain why, in the tableau, the objective-row entries under the slack variables at the optimum equal the shadow prices $c_B^{\mathsf T}B^{-1}$, with signs, and check this in Example~\ref{ex:tableau}.
+\end{problem}
+
+\begin{solution}
+The column of slack $s_i$ in $A$ is the unit vector $e_i$ and its cost is $0$, so its reduced cost (for the minimisation of $-Z$) is $0 - (-c_B)^{\mathsf T}B^{-1}e_i = (c_B^{\mathsf T}B^{-1})_i$: the objective row under the slacks is the row vector $y^{\mathsf T} = c_B^{\mathsf T}B^{-1}$. In Example~\ref{ex:tableau},
+$c_B = (0, 10, 15)$ for $(s_3, x_1, x_2)$ and the rows of $B^{-1}$ for $x_1$ and $x_2$ give $y_1 = 10\cdot\frac23 + 15\cdot(-\frac13) = \frac53$ and $y_2 = 10\cdot(-\frac16) + 15\cdot\frac13 = \frac{10}3$, as in the final tableau.
+\end{solution}
+
+\begin{problem}
+How many bases does a problem with $m = 20$ equality constraints and $n = 60$ variables have at most, and how does that compare with the typical number of simplex pivots?
+\end{problem}
+
+\begin{solution}
+At most $\binom{60}{20} = 4.19 \times 10^{15}$. The simplex method typically needs between $m$ and $3m$ pivots, that is $20$ to $60$; each pivot costs $O(mn)$ operations, so the whole solve takes well under a million operations, against more than $10^{15}$ linear systems for enumeration.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -654,13 +974,19 @@ unique: $\frac12(1, 0) + \frac12(0, 1) + \frac52(1, 0) + \frac32(0, 1)$ also wor
 
 \subhead{Further reading}
 \begin{enumerate}
+\item Beale, E. M. L. (1955), Cycling in the dual simplex algorithm, \emph{Naval Research Logistics Quarterly}, 2, 269--275.
 \item Blackett, P. M. S. (1962), \emph{Studies of War: Nuclear and Conventional}, Edinburgh, Oliver and Boyd.
+\item Bland, R. G. (1977), New finite pivoting rules for the simplex method, \emph{Mathematics of Operations Research}, 2, 103--107.
+\item Charnes, A. (1952), Optimality and degeneracy in linear programming, \emph{Econometrica}, 20, 160--170.
 \item Charnes, A., Cooper, W. W., and Ferguson, R. O. (1955), Optimal estimation of executive compensation by linear programming, \emph{Management Science}, 1, 138--151.
 \item Dantzig, G. B. (1951), Maximization of a linear function of variables subject to linear inequalities, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 339--347.
 \item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.
+\item Karmarkar, N. (1984), A new polynomial-time algorithm for linear programming, \emph{Combinatorica}, 4, 373--395.
+\item Khachiyan, L. G. (1979), A polynomial algorithm in linear programming, \emph{Soviet Mathematics Doklady}, 20, 191--194.
 \item Klee, V., and Minty, G. J. (1972), How good is the simplex algorithm?, in O. Shisha (ed.), \emph{Inequalities III}, New York, Academic Press, 159--175.
 \item Koopmans, T. C. (ed.) (1951), \emph{Activity Analysis of Production and Allocation}, New York, Wiley.
 \item Minkowski, H. (1896), \emph{Geometrie der Zahlen}, Leipzig, Teubner.
+\item Spielman, D. A., and Teng, S.-H. (2004), Smoothed analysis of algorithms: why the simplex algorithm usually takes polynomial time, \emph{Journal of the ACM}, 51, 385--463.
 \item Stigler, G. J. (1945), The cost of subsistence, \emph{Journal of Farm Economics}, 27, 303--314.
 \item Weyl, H. (1935), Elementare Theorie der konvexen Polyeder, \emph{Commentarii Mathematici Helvetici}, 7, 290--306.
 \end{enumerate}
