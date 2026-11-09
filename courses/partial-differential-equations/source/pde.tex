@@ -1921,6 +1921,361 @@ The first is the scaling invariance; the second follows by differentiating the e
 on the half-line $x > 0$ with $u(0, t) = 0$ produced by a dipole, a source and an equal sink at the origin, and it is the derivative of the kernel along the direction of the dipole.
 \end{solution}
 
+%======================================================================
+\section{Separation of Variables and Fourier Series}
+\label{sec:fourier}
+
+On a bounded interval, the heat and wave equations can be solved by looking for solutions of the special form $X(x)T(t)$. Each such solution is a single mode, a sine profile decaying or oscillating in time, and the general solution is a superposition of modes. To fit the initial data one must
+expand an arbitrary function in a series of sines and cosines. Fourier claimed in 1807 that this is always possible; making the claim precise, and finding in what sense the series converges, occupied analysts for a century and created much of modern analysis. This section gives the method and the
+convergence theorems that justify it.
+
+\subsection{Separation of variables}
+\label{ssec:separation}
+
+Consider the heat equation on a rod with ends held at temperature $0$:
+\[
+u_t = \kappa u_{xx} \quad (0 < x < L,\ t > 0), \qquad u(0, t) = u(L, t) = 0, \qquad u(x, 0) = g(x) .
+\]
+Substituting $u = X(x)T(t)$ and dividing by $\kappa XT$ gives $T'/\kappa T = X''/X$. The left side depends on $t$ only and the right on $x$ only, so both equal a constant $-\lambda$:
+\[
+X'' + \lambda X = 0, \quad X(0) = X(L) = 0; \qquad T' = -\kappa\lambda T .
+\]
+The boundary value problem for $X$ has non-zero solutions only for the \textbf{eigenvalues} $\lambda_k = (k\pi/L)^2$, $k = 1, 2, \ldots$, with \textbf{eigenfunctions} $X_k = \sin(k\pi x/L)$; this is the simplest Sturm--Liouville problem, whose general theory is part of the theory of ordinary differential equations. Then $T_k = e^{-\kappa\lambda_kt}$, and superposing,
+\begin{equation}
+\label{eq:heatseries}
+u(x, t) = \sum_{k = 1}^\infty b_ke^{-\kappa(k\pi/L)^2t}\sin\frac{k\pi x}{L} ,
+\end{equation}
+with
+\[
+b_k = \frac2L\int_0^Lg(x)\sin\frac{k\pi x}{L}\,dx ,
+\]
+the formula for $b_k$ coming from setting $t = 0$ and using the orthogonality $\int_0^L\sin\frac{j\pi x}{L}\sin\frac{k\pi x}{L}\,dx = \frac L2\delta_{jk}$.
+
+For the vibrating string $u_{tt} = c^2u_{xx}$ with fixed ends, the same separation gives $T'' = -c^2\lambda_kT$, so each mode oscillates with angular frequency $\omega_k = k\pi c/L$:
+\[
+u(x, t) = \sum_{k = 1}^\infty\Bigl(a_k\cos\frac{k\pi ct}{L} + \frac{L\beta_k}{k\pi c}\sin\frac{k\pi ct}{L}\Bigr)\sin\frac{k\pi x}{L} ,
+\]
+with $a_k$ and $\beta_k$ the sine coefficients of $u(x, 0)$ and $u_t(x, 0)$. The frequencies $kc/2L$ are the harmonics of the string; that they are integer multiples of the fundamental is why a string sounds a definite pitch. The two solutions differ in one telling way: in the heat series the
+$k$th term is damped by $e^{-\kappa k^2\pi^2t/L^2}$, so high modes die almost at once; in the wave series nothing is damped, and the smoothness of $u$ is exactly that of the data.
+
+With insulated ends, $u_x = 0$, the eigenfunctions are $\cos(k\pi x/L)$, $k = 0, 1, \ldots$, and the solution is a cosine series whose $k = 0$ term, the mean of $g$, is the limit as $t \to \infty$. With periodic conditions (a ring) both sines and cosines appear, and the data must be expanded in a full Fourier series.
+
+\subsection{Fourier series}
+\label{ssec:fourierseries}
+
+For an integrable function $f$ on $[-\pi, \pi]$, the \textbf{Fourier coefficients} and the partial sums of the \textbf{Fourier series} are
+\begin{gather*}
+a_k = \frac1\pi\int_{-\pi}^\pi f(x)\cos kx\,dx, \qquad b_k = \frac1\pi\int_{-\pi}^\pi f(x)\sin kx\,dx, \\
+S_Nf(x) = \frac{a_0}2 + \sum_{k = 1}^N\bigl(a_k\cos kx + b_k\sin kx\bigr) .
+\end{gather*}
+The functions $1, \cos kx, \sin kx$ are orthogonal on $[-\pi, \pi]$, with $\int\cos^2kx = \int\sin^2kx = \pi$ for $k \geq 1$. An odd function has only sine terms, an even one only cosines; the sine series of a function on $[0, \pi]$ is the Fourier series of its odd extension, which is how \eqref{eq:heatseries} arises (with $x$ rescaled). A
+function on an interval of length $2L$ is handled by the substitution $x \mapsto \pi x/L$.
+
+\begin{lem}[Bessel's inequality]
+\label{lem:bessel}
+If $f^2$ is integrable on $[-\pi, \pi]$, then $\frac{a_0^2}2 + \sum_{k = 1}^\infty(a_k^2 + b_k^2) \leq \frac1\pi\int_{-\pi}^\pi f^2\,dx$. In particular $a_k, b_k \to 0$.
+\end{lem}
+
+\begin{proof}
+By orthogonality, $\int fS_Nf = \int(S_Nf)^2 = \pi\bigl(\frac{a_0^2}2 + \sum_1^N(a_k^2 + b_k^2)\bigr)$, so $0 \leq \int(f - S_Nf)^2 = \int f^2 - \pi\bigl(\frac{a_0^2}2 + \sum_1^N(a_k^2 + b_k^2)\bigr)$. Let $N \to \infty$.
+\end{proof}
+
+The same computation shows that $S_Nf$ is the \emph{best} approximation to $f$ in the mean-square sense among all trigonometric polynomials of degree $N$: adding anything orthogonal to $S_Nf - f$ only increases the error. The statement that the coefficients tend to zero, for any integrable function, is the \textbf{Riemann--Lebesgue
+lemma}.
+
+\begin{thm}[Dirichlet]
+\label{thm:dirichlet}
+Let $f$ be $2\pi$-periodic and piecewise $C^1$ (finitely many pieces in each period, each $C^1$ up to its ends). Then for every $x$,
+\[
+S_Nf(x) \to \tfrac12\bigl(f(x+) + f(x-)\bigr) ,
+\]
+which is $f(x)$ wherever $f$ is continuous.
+\end{thm}
+
+\begin{proof}
+Substituting the coefficients into $S_Nf$ and summing the geometric series $\frac12 + \sum_1^N\cos ky = \sin((N + \frac12)y)/(2\sin\frac y2)$ gives
+\[
+S_Nf(x) = \int_{-\pi}^\pi D_N(y)f(x + y)\,dy, \qquad D_N(y) = \frac{\sin\bigl((N + \frac12)y\bigr)}{2\pi\sin\frac y2} ,
+\]
+the \textbf{Dirichlet kernel}, which is even and has $\int_0^\pi D_N = \frac12$ (integrate the cosine sum). Hence
+\[
+S_Nf(x) - \tfrac12\bigl(f(x+) + f(x-)\bigr) = \int_0^\pi\sin\bigl((N + \tfrac12)y\bigr)\,\bigl(q_+(y) + q_-(y)\bigr)\,dy ,
+\]
+where
+\[
+q_\pm(y) = \frac{f(x \pm y) - f(x\pm)}{2\pi\sin\frac y2} .
+\]
+Since $f$ has one-sided derivatives at $x$, $q_\pm(y)$ tends to a finite limit as $y \to 0+$, so $q_\pm$ is bounded and piecewise continuous on $(0, \pi]$. The functions $\sin((N + \frac12)y)$ are orthogonal on $[0, \pi]$, each with $\int_0^\pi\sin^2 = \frac\pi2$, so by Bessel's inequality for this system the integrals, which are $\frac\pi2$ times the
+coefficients of $q_+ + q_-$, tend to $0$.
+\end{proof}
+
+The proof shows that convergence at $x$ depends only on the behaviour of $f$ near $x$: the \emph{localisation principle}. Mere continuity is not enough: du Bois-Reymond (1873) constructed a continuous function whose Fourier series diverges at a point. In the other direction, Carleson (1966) proved
+that the Fourier series of every square-integrable function converges almost everywhere.
+
+\begin{thm}[Uniform convergence]
+\label{thm:uniformfs}
+If $f$ is $2\pi$-periodic, continuous and piecewise $C^1$, then $\sum(|a_k| + |b_k|) < \infty$, and $S_Nf \to f$ uniformly.
+\end{thm}
+
+\begin{proof}
+Integrating by parts on each piece, the boundary terms cancel because $f$ is continuous and periodic, and the coefficients of $f'$ are $a_k' = kb_k$, $b_k' = -ka_k$. By the Cauchy--Schwarz inequality and Bessel's inequality for $f'$,
+\[
+\sum_{k \geq 1}\bigl(|a_k| + |b_k|\bigr) = \sum_{k \geq 1}\frac{|b_k'| + |a_k'|}k \leq \Bigl(2\sum_{k \geq 1}(a_k'^2 + b_k'^2)\Bigr)^{1/2}\Bigl(\sum_{k \geq 1}\frac1{k^2}\Bigr)^{1/2} < \infty .
+\]
+By the Weierstrass M-test the series converges uniformly, and by Theorem~\ref{thm:dirichlet} its sum is $f$.
+\end{proof}
+
+The argument shows the general principle: \emph{smoothness of $f$ is decay of its coefficients}. If $f$ and its first $m - 1$ derivatives are continuous and periodic and $f^{(m)}$ is square-integrable, then $\sum k^{2m}(a_k^2 + b_k^2) < \infty$; a jump in $f$ itself allows only decay like $1/k$, a jump in $f'$ like $1/k^2$.
+
+\begin{thm}[Parseval]
+\label{thm:parseval}
+If $f$ is piecewise continuous on $[-\pi, \pi]$, then $\int_{-\pi}^\pi(f - S_Nf)^2\,dx \to 0$, and
+\[
+\frac1\pi\int_{-\pi}^\pi f^2\,dx = \frac{a_0^2}2 + \sum_{k = 1}^\infty\bigl(a_k^2 + b_k^2\bigr) .
+\]
+\end{thm}
+
+\begin{proof}
+Given $\varepsilon > 0$, there is a continuous, periodic, piecewise linear $g$ with $\int(f - g)^2 < \varepsilon$ (round off each jump over a short interval). By Theorem~\ref{thm:uniformfs}, $S_Ng \to g$ uniformly, so $\int(g - S_Ng)^2 < \varepsilon$ for large $N$. Since $S_Nf$ is the best mean-square approximation of degree $N$,
+\[
+\|f - S_Nf\| \leq \|f - S_Ng\| \leq \|f - g\| + \|g - S_Ng\| < 2\sqrt\varepsilon ,
+\]
+writing $\|h\|^2 = \int h^2$. So the error tends to $0$, and the identity is the computation in the proof of Lemma~\ref{lem:bessel} with equality in the limit.
+\end{proof}
+
+Parseval's identity says that the trigonometric system is \emph{complete}: no non-zero function is orthogonal to all of it. For $f(x) = x$, $b_k = 2(-1)^{k + 1}/k$, and the identity gives $\sum 4/k^2 = \frac1\pi\int x^2 = \frac{2\pi^2}3$, that is, $\sum_{k \geq 1}1/k^2 = \pi^2/6$ (Software~\ref{sw:coeffs}).
+
+\subsection{The Gibbs phenomenon}
+\label{ssec:gibbs}
+
+Near a jump, the partial sums converge pointwise but not uniformly. For the square wave, $\operatorname{sign}x$ on $(-\pi, \pi)$, with series $\frac4\pi\sum_{k\ \text{odd}}\frac{\sin kx}k$, the partial sums overshoot to about $1.179$ just to the right of $0$, however many terms are taken (Figure~\ref{fig:gibbs}). The peak of $S_N$ is near $x = \pi/N$, and as $N \to \infty$ its
+height tends to
+\[
+\frac2\pi\int_0^\pi\frac{\sin s}s\,ds = \frac2\pi\operatorname{Si}(\pi) = 1.17898 ,
+\]
+an overshoot of $8.95\%$ of the jump of $2$. Wilbraham found this in 1848; Gibbs described it again in 1899. The overshoot moves towards the jump and gets narrower, so it does not prevent mean-square convergence, but it matters wherever discontinuous signals are truncated in frequency, as in filtering and
+spectral numerical methods. Averaging the partial sums (Fej\'er's sums) removes it.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\begin{scope}
+\fill[blue!5,rounded corners=4pt] (-3.8,-2.3) rectangle (3.8,1.85);
+\draw[->] (-3.65,0) -- (3.7,0) node[below,font=\small] {$x$};
+\draw[->] (0,-1.6) -- (0,1.75);
+\draw[black!45,dashed] (-3.456,-1.1) -- (0,-1.1) -- (0,1.1) -- (3.456,1.1);
+\draw[red!60!black,dotted,thick] (-3.6,1.297) -- (3.6,1.297) node[above left,font=\scriptsize] {$1.179$};
+\draw[orange!80!black,thick] (-3.456,-0.000) -- (-3.444,-0.044) -- (-3.433,-0.088) -- (-3.421,-0.132) -- (-3.410,-0.175) -- (-3.398,-0.219) -- (-3.387,-0.262) -- (-3.375,-0.305) -- (-3.364,-0.347) -- (-3.352,-0.389) -- (-3.341,-0.431) -- (-3.329,-0.472) -- (-3.318,-0.512) -- (-3.306,-0.552) -- (-3.294,-0.591) -- (-3.283,-0.629) -- (-3.271,-0.667) -- (-3.260,-0.703) -- (-3.248,-0.739) -- (-3.237,-0.774) -- (-3.225,-0.808) -- (-3.214,-0.841) -- (-3.202,-0.873) -- (-3.191,-0.904) -- (-3.179,-0.934) -- (-3.168,-0.963) -- (-3.156,-0.991) -- (-3.145,-1.018) -- (-3.133,-1.043) -- (-3.122,-1.067) -- (-3.110,-1.091) -- (-3.099,-1.113) -- (-3.087,-1.133) -- (-3.076,-1.153) -- (-3.064,-1.171) -- (-3.053,-1.188) -- (-3.041,-1.204) -- (-3.030,-1.219) -- (-3.018,-1.233) -- (-3.007,-1.245) -- (-2.995,-1.256) -- (-2.983,-1.266) -- (-2.972,-1.275) -- (-2.960,-1.283) -- (-2.949,-1.289) -- (-2.937,-1.295) -- (-2.926,-1.299) -- (-2.914,-1.303) -- (-2.903,-1.305) -- (-2.891,-1.307) -- (-2.880,-1.307) -- (-2.868,-1.307) -- (-2.857,-1.305) -- (-2.845,-1.303) -- (-2.834,-1.300) -- (-2.822,-1.296) -- (-2.811,-1.292) -- (-2.799,-1.287) -- (-2.788,-1.281) -- (-2.776,-1.274) -- (-2.765,-1.267) -- (-2.753,-1.260) -- (-2.742,-1.252) -- (-2.730,-1.243) -- (-2.719,-1.234) -- (-2.707,-1.225) -- (-2.695,-1.215) -- (-2.684,-1.205) -- (-2.672,-1.195) -- (-2.661,-1.185) -- (-2.649,-1.175) -- (-2.638,-1.164) -- (-2.626,-1.154) -- (-2.615,-1.143) -- (-2.603,-1.133) -- (-2.592,-1.122) -- (-2.580,-1.112) -- (-2.569,-1.102) -- (-2.557,-1.092) -- (-2.546,-1.082) -- (-2.534,-1.073) -- (-2.523,-1.063) -- (-2.511,-1.054) -- (-2.500,-1.046) -- (-2.488,-1.038) -- (-2.477,-1.030) -- (-2.465,-1.022) -- (-2.454,-1.015) -- (-2.442,-1.009) -- (-2.431,-1.003) -- (-2.419,-0.997) -- (-2.408,-0.992) -- (-2.396,-0.988) -- (-2.384,-0.984) -- (-2.373,-0.980) -- (-2.361,-0.977) -- (-2.350,-0.975) -- (-2.338,-0.973) -- (-2.327,-0.971) -- (-2.315,-0.971) -- (-2.304,-0.970) -- (-2.292,-0.971) -- (-2.281,-0.971) -- (-2.269,-0.973) -- (-2.258,-0.975) -- (-2.246,-0.977) -- (-2.235,-0.980) -- (-2.223,-0.983) -- (-2.212,-0.987) -- (-2.200,-0.991) -- (-2.189,-0.995) -- (-2.177,-1.000) -- (-2.166,-1.005) -- (-2.154,-1.011) -- (-2.143,-1.017) -- (-2.131,-1.023) -- (-2.120,-1.030) -- (-2.108,-1.036) -- (-2.096,-1.043) -- (-2.085,-1.050) -- (-2.073,-1.058) -- (-2.062,-1.065) -- (-2.050,-1.072) -- (-2.039,-1.080) -- (-2.027,-1.088) -- (-2.016,-1.095) -- (-2.004,-1.103) -- (-1.993,-1.110) -- (-1.981,-1.118) -- (-1.970,-1.125) -- (-1.958,-1.132) -- (-1.947,-1.139) -- (-1.935,-1.146) -- (-1.924,-1.153) -- (-1.912,-1.159) -- (-1.901,-1.165) -- (-1.889,-1.171) -- (-1.878,-1.177) -- (-1.866,-1.182) -- (-1.855,-1.187) -- (-1.843,-1.191) -- (-1.832,-1.196) -- (-1.820,-1.199) -- (-1.809,-1.203) -- (-1.797,-1.206) -- (-1.785,-1.208) -- (-1.774,-1.210) -- (-1.762,-1.212) -- (-1.751,-1.213) -- (-1.739,-1.214) -- (-1.728,-1.214) -- (-1.716,-1.214) -- (-1.705,-1.213) -- (-1.693,-1.212) -- (-1.682,-1.210) -- (-1.670,-1.208) -- (-1.659,-1.206) -- (-1.647,-1.203) -- (-1.636,-1.199) -- (-1.624,-1.196) -- (-1.613,-1.191) -- (-1.601,-1.187) -- (-1.590,-1.182) -- (-1.578,-1.177) -- (-1.567,-1.171) -- (-1.555,-1.165) -- (-1.544,-1.159) -- (-1.532,-1.153) -- (-1.521,-1.146) -- (-1.509,-1.139) -- (-1.497,-1.132) -- (-1.486,-1.125) -- (-1.474,-1.118) -- (-1.463,-1.110) -- (-1.451,-1.103) -- (-1.440,-1.095) -- (-1.428,-1.088) -- (-1.417,-1.080) -- (-1.405,-1.072) -- (-1.394,-1.065) -- (-1.382,-1.058) -- (-1.371,-1.050) -- (-1.359,-1.043) -- (-1.348,-1.036) -- (-1.336,-1.030) -- (-1.325,-1.023) -- (-1.313,-1.017) -- (-1.302,-1.011) -- (-1.290,-1.005) -- (-1.279,-1.000) -- (-1.267,-0.995) -- (-1.256,-0.991) -- (-1.244,-0.987) -- (-1.233,-0.983) -- (-1.221,-0.980) -- (-1.210,-0.977) -- (-1.198,-0.975) -- (-1.186,-0.973) -- (-1.175,-0.971) -- (-1.163,-0.971) -- (-1.152,-0.970) -- (-1.140,-0.971) -- (-1.129,-0.971) -- (-1.117,-0.973) -- (-1.106,-0.975) -- (-1.094,-0.977) -- (-1.083,-0.980) -- (-1.071,-0.984) -- (-1.060,-0.988) -- (-1.048,-0.992) -- (-1.037,-0.997) -- (-1.025,-1.003) -- (-1.014,-1.009) -- (-1.002,-1.015) -- (-0.991,-1.022) -- (-0.979,-1.030) -- (-0.968,-1.038) -- (-0.956,-1.046) -- (-0.945,-1.054) -- (-0.933,-1.063) -- (-0.922,-1.073) -- (-0.910,-1.082) -- (-0.898,-1.092) -- (-0.887,-1.102) -- (-0.875,-1.112) -- (-0.864,-1.122) -- (-0.852,-1.133) -- (-0.841,-1.143) -- (-0.829,-1.154) -- (-0.818,-1.164) -- (-0.806,-1.175) -- (-0.795,-1.185) -- (-0.783,-1.195) -- (-0.772,-1.205) -- (-0.760,-1.215) -- (-0.749,-1.225) -- (-0.737,-1.234) -- (-0.726,-1.243) -- (-0.714,-1.252) -- (-0.703,-1.260) -- (-0.691,-1.267) -- (-0.680,-1.274) -- (-0.668,-1.281) -- (-0.657,-1.287) -- (-0.645,-1.292) -- (-0.634,-1.296) -- (-0.622,-1.300) -- (-0.611,-1.303) -- (-0.599,-1.305) -- (-0.587,-1.307) -- (-0.576,-1.307) -- (-0.564,-1.307) -- (-0.553,-1.305) -- (-0.541,-1.303) -- (-0.530,-1.299) -- (-0.518,-1.295) -- (-0.507,-1.289) -- (-0.495,-1.283) -- (-0.484,-1.275) -- (-0.472,-1.266) -- (-0.461,-1.256) -- (-0.449,-1.245) -- (-0.438,-1.233) -- (-0.426,-1.219) -- (-0.415,-1.204) -- (-0.403,-1.188) -- (-0.392,-1.171) -- (-0.380,-1.153) -- (-0.369,-1.133) -- (-0.357,-1.113) -- (-0.346,-1.091) -- (-0.334,-1.067) -- (-0.323,-1.043) -- (-0.311,-1.018) -- (-0.299,-0.991) -- (-0.288,-0.963) -- (-0.276,-0.934) -- (-0.265,-0.904) -- (-0.253,-0.873) -- (-0.242,-0.841) -- (-0.230,-0.808) -- (-0.219,-0.774) -- (-0.207,-0.739) -- (-0.196,-0.703) -- (-0.184,-0.667) -- (-0.173,-0.629) -- (-0.161,-0.591) -- (-0.150,-0.552) -- (-0.138,-0.512) -- (-0.127,-0.472) -- (-0.115,-0.431) -- (-0.104,-0.389) -- (-0.092,-0.347) -- (-0.081,-0.305) -- (-0.069,-0.262) -- (-0.058,-0.219) -- (-0.046,-0.175) -- (-0.035,-0.132) -- (-0.023,-0.088) -- (-0.012,-0.044) -- (-0.000,-0.000) -- (0.012,0.044) -- (0.023,0.088) -- (0.035,0.132) -- (0.046,0.175) -- (0.058,0.219) -- (0.069,0.262) -- (0.081,0.305) -- (0.092,0.347) -- (0.104,0.389) -- (0.115,0.431) -- (0.127,0.472) -- (0.138,0.512) -- (0.150,0.552) -- (0.161,0.591) -- (0.173,0.629) -- (0.184,0.667) -- (0.196,0.703) -- (0.207,0.739) -- (0.219,0.774) -- (0.230,0.808) -- (0.242,0.841) -- (0.253,0.873) -- (0.265,0.904) -- (0.276,0.934) -- (0.288,0.963) -- (0.299,0.991) -- (0.311,1.018) -- (0.323,1.043) -- (0.334,1.067) -- (0.346,1.091) -- (0.357,1.113) -- (0.369,1.133) -- (0.380,1.153) -- (0.392,1.171) -- (0.403,1.188) -- (0.415,1.204) -- (0.426,1.219) -- (0.438,1.233) -- (0.449,1.245) -- (0.461,1.256) -- (0.472,1.266) -- (0.484,1.275) -- (0.495,1.283) -- (0.507,1.289) -- (0.518,1.295) -- (0.530,1.299) -- (0.541,1.303) -- (0.553,1.305) -- (0.564,1.307) -- (0.576,1.307) -- (0.587,1.307) -- (0.599,1.305) -- (0.611,1.303) -- (0.622,1.300) -- (0.634,1.296) -- (0.645,1.292) -- (0.657,1.287) -- (0.668,1.281) -- (0.680,1.274) -- (0.691,1.267) -- (0.703,1.260) -- (0.714,1.252) -- (0.726,1.243) -- (0.737,1.234) -- (0.749,1.225) -- (0.760,1.215) -- (0.772,1.205) -- (0.783,1.195) -- (0.795,1.185) -- (0.806,1.175) -- (0.818,1.164) -- (0.829,1.154) -- (0.841,1.143) -- (0.852,1.133) -- (0.864,1.122) -- (0.875,1.112) -- (0.887,1.102) -- (0.898,1.092) -- (0.910,1.082) -- (0.922,1.073) -- (0.933,1.063) -- (0.945,1.054) -- (0.956,1.046) -- (0.968,1.038) -- (0.979,1.030) -- (0.991,1.022) -- (1.002,1.015) -- (1.014,1.009) -- (1.025,1.003) -- (1.037,0.997) -- (1.048,0.992) -- (1.060,0.988) -- (1.071,0.984) -- (1.083,0.980) -- (1.094,0.977) -- (1.106,0.975) -- (1.117,0.973) -- (1.129,0.971) -- (1.140,0.971) -- (1.152,0.970) -- (1.163,0.971) -- (1.175,0.971) -- (1.186,0.973) -- (1.198,0.975) -- (1.210,0.977) -- (1.221,0.980) -- (1.233,0.983) -- (1.244,0.987) -- (1.256,0.991) -- (1.267,0.995) -- (1.279,1.000) -- (1.290,1.005) -- (1.302,1.011) -- (1.313,1.017) -- (1.325,1.023) -- (1.336,1.030) -- (1.348,1.036) -- (1.359,1.043) -- (1.371,1.050) -- (1.382,1.058) -- (1.394,1.065) -- (1.405,1.072) -- (1.417,1.080) -- (1.428,1.088) -- (1.440,1.095) -- (1.451,1.103) -- (1.463,1.110) -- (1.474,1.118) -- (1.486,1.125) -- (1.497,1.132) -- (1.509,1.139) -- (1.521,1.146) -- (1.532,1.153) -- (1.544,1.159) -- (1.555,1.165) -- (1.567,1.171) -- (1.578,1.177) -- (1.590,1.182) -- (1.601,1.187) -- (1.613,1.191) -- (1.624,1.196) -- (1.636,1.199) -- (1.647,1.203) -- (1.659,1.206) -- (1.670,1.208) -- (1.682,1.210) -- (1.693,1.212) -- (1.705,1.213) -- (1.716,1.214) -- (1.728,1.214) -- (1.739,1.214) -- (1.751,1.213) -- (1.762,1.212) -- (1.774,1.210) -- (1.785,1.208) -- (1.797,1.206) -- (1.809,1.203) -- (1.820,1.199) -- (1.832,1.196) -- (1.843,1.191) -- (1.855,1.187) -- (1.866,1.182) -- (1.878,1.177) -- (1.889,1.171) -- (1.901,1.165) -- (1.912,1.159) -- (1.924,1.153) -- (1.935,1.146) -- (1.947,1.139) -- (1.958,1.132) -- (1.970,1.125) -- (1.981,1.118) -- (1.993,1.110) -- (2.004,1.103) -- (2.016,1.095) -- (2.027,1.088) -- (2.039,1.080) -- (2.050,1.072) -- (2.062,1.065) -- (2.073,1.058) -- (2.085,1.050) -- (2.096,1.043) -- (2.108,1.036) -- (2.120,1.030) -- (2.131,1.023) -- (2.143,1.017) -- (2.154,1.011) -- (2.166,1.005) -- (2.177,1.000) -- (2.189,0.995) -- (2.200,0.991) -- (2.212,0.987) -- (2.223,0.983) -- (2.235,0.980) -- (2.246,0.977) -- (2.258,0.975) -- (2.269,0.973) -- (2.281,0.971) -- (2.292,0.971) -- (2.304,0.970) -- (2.315,0.971) -- (2.327,0.971) -- (2.338,0.973) -- (2.350,0.975) -- (2.361,0.977) -- (2.373,0.980) -- (2.384,0.984) -- (2.396,0.988) -- (2.408,0.992) -- (2.419,0.997) -- (2.431,1.003) -- (2.442,1.009) -- (2.454,1.015) -- (2.465,1.022) -- (2.477,1.030) -- (2.488,1.038) -- (2.500,1.046) -- (2.511,1.054) -- (2.523,1.063) -- (2.534,1.073) -- (2.546,1.082) -- (2.557,1.092) -- (2.569,1.102) -- (2.580,1.112) -- (2.592,1.122) -- (2.603,1.133) -- (2.615,1.143) -- (2.626,1.154) -- (2.638,1.164) -- (2.649,1.175) -- (2.661,1.185) -- (2.672,1.195) -- (2.684,1.205) -- (2.695,1.215) -- (2.707,1.225) -- (2.719,1.234) -- (2.730,1.243) -- (2.742,1.252) -- (2.753,1.260) -- (2.765,1.267) -- (2.776,1.274) -- (2.788,1.281) -- (2.799,1.287) -- (2.811,1.292) -- (2.822,1.296) -- (2.834,1.300) -- (2.845,1.303) -- (2.857,1.305) -- (2.868,1.307) -- (2.880,1.307) -- (2.891,1.307) -- (2.903,1.305) -- (2.914,1.303) -- (2.926,1.299) -- (2.937,1.295) -- (2.949,1.289) -- (2.960,1.283) -- (2.972,1.275) -- (2.983,1.266) -- (2.995,1.256) -- (3.007,1.245) -- (3.018,1.233) -- (3.030,1.219) -- (3.041,1.204) -- (3.053,1.188) -- (3.064,1.171) -- (3.076,1.153) -- (3.087,1.133) -- (3.099,1.113) -- (3.110,1.091) -- (3.122,1.067) -- (3.133,1.043) -- (3.145,1.018) -- (3.156,0.991) -- (3.168,0.963) -- (3.179,0.934) -- (3.191,0.904) -- (3.202,0.873) -- (3.214,0.841) -- (3.225,0.808) -- (3.237,0.774) -- (3.248,0.739) -- (3.260,0.703) -- (3.271,0.667) -- (3.283,0.629) -- (3.294,0.591) -- (3.306,0.552) -- (3.318,0.512) -- (3.329,0.472) -- (3.341,0.431) -- (3.352,0.389) -- (3.364,0.347) -- (3.375,0.305) -- (3.387,0.262) -- (3.398,0.219) -- (3.410,0.175) -- (3.421,0.132) -- (3.433,0.088) -- (3.444,0.044) -- (3.456,0.000);
+\draw[blue!60!black,thick] (-3.456,-0.000) -- (-3.444,-0.190) -- (-3.433,-0.375) -- (-3.421,-0.551) -- (-3.410,-0.714) -- (-3.398,-0.861) -- (-3.387,-0.988) -- (-3.375,-1.093) -- (-3.364,-1.176) -- (-3.352,-1.237) -- (-3.341,-1.276) -- (-3.329,-1.295) -- (-3.318,-1.296) -- (-3.306,-1.281) -- (-3.294,-1.255) -- (-3.283,-1.220) -- (-3.271,-1.180) -- (-3.260,-1.139) -- (-3.248,-1.099) -- (-3.237,-1.063) -- (-3.225,-1.033) -- (-3.214,-1.011) -- (-3.202,-0.997) -- (-3.191,-0.992) -- (-3.179,-0.995) -- (-3.168,-1.006) -- (-3.156,-1.023) -- (-3.145,-1.045) -- (-3.133,-1.069) -- (-3.122,-1.093) -- (-3.110,-1.117) -- (-3.099,-1.138) -- (-3.087,-1.155) -- (-3.076,-1.167) -- (-3.064,-1.173) -- (-3.053,-1.174) -- (-3.041,-1.169) -- (-3.030,-1.160) -- (-3.018,-1.146) -- (-3.007,-1.130) -- (-2.995,-1.112) -- (-2.983,-1.094) -- (-2.972,-1.078) -- (-2.960,-1.064) -- (-2.949,-1.053) -- (-2.937,-1.046) -- (-2.926,-1.043) -- (-2.914,-1.044) -- (-2.903,-1.050) -- (-2.891,-1.059) -- (-2.880,-1.070) -- (-2.868,-1.084) -- (-2.857,-1.098) -- (-2.845,-1.112) -- (-2.834,-1.124) -- (-2.822,-1.135) -- (-2.811,-1.142) -- (-2.799,-1.146) -- (-2.788,-1.147) -- (-2.776,-1.144) -- (-2.765,-1.138) -- (-2.753,-1.130) -- (-2.742,-1.119) -- (-2.730,-1.108) -- (-2.719,-1.096) -- (-2.707,-1.085) -- (-2.695,-1.075) -- (-2.684,-1.067) -- (-2.672,-1.062) -- (-2.661,-1.060) -- (-2.649,-1.060) -- (-2.638,-1.064) -- (-2.626,-1.070) -- (-2.615,-1.079) -- (-2.603,-1.088) -- (-2.592,-1.099) -- (-2.580,-1.109) -- (-2.569,-1.118) -- (-2.557,-1.126) -- (-2.546,-1.132) -- (-2.534,-1.135) -- (-2.523,-1.136) -- (-2.511,-1.134) -- (-2.500,-1.130) -- (-2.488,-1.123) -- (-2.477,-1.115) -- (-2.465,-1.106) -- (-2.454,-1.097) -- (-2.442,-1.088) -- (-2.431,-1.080) -- (-2.419,-1.074) -- (-2.408,-1.069) -- (-2.396,-1.067) -- (-2.384,-1.068) -- (-2.373,-1.071) -- (-2.361,-1.076) -- (-2.350,-1.082) -- (-2.338,-1.090) -- (-2.327,-1.099) -- (-2.315,-1.107) -- (-2.304,-1.115) -- (-2.292,-1.122) -- (-2.281,-1.127) -- (-2.269,-1.130) -- (-2.258,-1.130) -- (-2.246,-1.129) -- (-2.235,-1.125) -- (-2.223,-1.120) -- (-2.212,-1.113) -- (-2.200,-1.105) -- (-2.189,-1.097) -- (-2.177,-1.090) -- (-2.166,-1.083) -- (-2.154,-1.077) -- (-2.143,-1.073) -- (-2.131,-1.071) -- (-2.120,-1.072) -- (-2.108,-1.074) -- (-2.096,-1.078) -- (-2.085,-1.084) -- (-2.073,-1.091) -- (-2.062,-1.098) -- (-2.050,-1.106) -- (-2.039,-1.113) -- (-2.027,-1.119) -- (-2.016,-1.124) -- (-2.004,-1.127) -- (-1.993,-1.128) -- (-1.981,-1.127) -- (-1.970,-1.123) -- (-1.958,-1.119) -- (-1.947,-1.112) -- (-1.935,-1.105) -- (-1.924,-1.098) -- (-1.912,-1.091) -- (-1.901,-1.084) -- (-1.889,-1.079) -- (-1.878,-1.075) -- (-1.866,-1.073) -- (-1.855,-1.073) -- (-1.843,-1.075) -- (-1.832,-1.079) -- (-1.820,-1.085) -- (-1.809,-1.091) -- (-1.797,-1.098) -- (-1.785,-1.106) -- (-1.774,-1.112) -- (-1.762,-1.118) -- (-1.751,-1.123) -- (-1.739,-1.126) -- (-1.728,-1.127) -- (-1.716,-1.126) -- (-1.705,-1.123) -- (-1.693,-1.118) -- (-1.682,-1.112) -- (-1.670,-1.106) -- (-1.659,-1.098) -- (-1.647,-1.091) -- (-1.636,-1.085) -- (-1.624,-1.079) -- (-1.613,-1.075) -- (-1.601,-1.073) -- (-1.590,-1.073) -- (-1.578,-1.075) -- (-1.567,-1.079) -- (-1.555,-1.084) -- (-1.544,-1.091) -- (-1.532,-1.098) -- (-1.521,-1.105) -- (-1.509,-1.112) -- (-1.497,-1.119) -- (-1.486,-1.123) -- (-1.474,-1.127) -- (-1.463,-1.128) -- (-1.451,-1.127) -- (-1.440,-1.124) -- (-1.428,-1.119) -- (-1.417,-1.113) -- (-1.405,-1.106) -- (-1.394,-1.098) -- (-1.382,-1.091) -- (-1.371,-1.084) -- (-1.359,-1.078) -- (-1.348,-1.074) -- (-1.336,-1.072) -- (-1.325,-1.071) -- (-1.313,-1.073) -- (-1.302,-1.077) -- (-1.290,-1.083) -- (-1.279,-1.090) -- (-1.267,-1.097) -- (-1.256,-1.105) -- (-1.244,-1.113) -- (-1.233,-1.120) -- (-1.221,-1.125) -- (-1.210,-1.129) -- (-1.198,-1.130) -- (-1.186,-1.130) -- (-1.175,-1.127) -- (-1.163,-1.122) -- (-1.152,-1.115) -- (-1.140,-1.107) -- (-1.129,-1.099) -- (-1.117,-1.090) -- (-1.106,-1.082) -- (-1.094,-1.076) -- (-1.083,-1.071) -- (-1.071,-1.068) -- (-1.060,-1.067) -- (-1.048,-1.069) -- (-1.037,-1.074) -- (-1.025,-1.080) -- (-1.014,-1.088) -- (-1.002,-1.097) -- (-0.991,-1.106) -- (-0.979,-1.115) -- (-0.968,-1.123) -- (-0.956,-1.130) -- (-0.945,-1.134) -- (-0.933,-1.136) -- (-0.922,-1.135) -- (-0.910,-1.132) -- (-0.898,-1.126) -- (-0.887,-1.118) -- (-0.875,-1.109) -- (-0.864,-1.099) -- (-0.852,-1.088) -- (-0.841,-1.079) -- (-0.829,-1.070) -- (-0.818,-1.064) -- (-0.806,-1.060) -- (-0.795,-1.060) -- (-0.783,-1.062) -- (-0.772,-1.067) -- (-0.760,-1.075) -- (-0.749,-1.085) -- (-0.737,-1.096) -- (-0.726,-1.108) -- (-0.714,-1.119) -- (-0.703,-1.130) -- (-0.691,-1.138) -- (-0.680,-1.144) -- (-0.668,-1.147) -- (-0.657,-1.146) -- (-0.645,-1.142) -- (-0.634,-1.135) -- (-0.622,-1.124) -- (-0.611,-1.112) -- (-0.599,-1.098) -- (-0.587,-1.084) -- (-0.576,-1.070) -- (-0.564,-1.059) -- (-0.553,-1.050) -- (-0.541,-1.044) -- (-0.530,-1.043) -- (-0.518,-1.046) -- (-0.507,-1.053) -- (-0.495,-1.064) -- (-0.484,-1.078) -- (-0.472,-1.094) -- (-0.461,-1.112) -- (-0.449,-1.130) -- (-0.438,-1.146) -- (-0.426,-1.160) -- (-0.415,-1.169) -- (-0.403,-1.174) -- (-0.392,-1.173) -- (-0.380,-1.167) -- (-0.369,-1.155) -- (-0.357,-1.138) -- (-0.346,-1.117) -- (-0.334,-1.093) -- (-0.323,-1.069) -- (-0.311,-1.045) -- (-0.299,-1.023) -- (-0.288,-1.006) -- (-0.276,-0.995) -- (-0.265,-0.992) -- (-0.253,-0.997) -- (-0.242,-1.011) -- (-0.230,-1.033) -- (-0.219,-1.063) -- (-0.207,-1.099) -- (-0.196,-1.139) -- (-0.184,-1.180) -- (-0.173,-1.220) -- (-0.161,-1.255) -- (-0.150,-1.281) -- (-0.138,-1.296) -- (-0.127,-1.295) -- (-0.115,-1.276) -- (-0.104,-1.237) -- (-0.092,-1.176) -- (-0.081,-1.093) -- (-0.069,-0.988) -- (-0.058,-0.861) -- (-0.046,-0.714) -- (-0.035,-0.551) -- (-0.023,-0.375) -- (-0.012,-0.190) -- (-0.000,-0.000) -- (0.012,0.190) -- (0.023,0.375) -- (0.035,0.551) -- (0.046,0.714) -- (0.058,0.861) -- (0.069,0.988) -- (0.081,1.093) -- (0.092,1.176) -- (0.104,1.237) -- (0.115,1.276) -- (0.127,1.295) -- (0.138,1.296) -- (0.150,1.281) -- (0.161,1.255) -- (0.173,1.220) -- (0.184,1.180) -- (0.196,1.139) -- (0.207,1.099) -- (0.219,1.063) -- (0.230,1.033) -- (0.242,1.011) -- (0.253,0.997) -- (0.265,0.992) -- (0.276,0.995) -- (0.288,1.006) -- (0.299,1.023) -- (0.311,1.045) -- (0.323,1.069) -- (0.334,1.093) -- (0.346,1.117) -- (0.357,1.138) -- (0.369,1.155) -- (0.380,1.167) -- (0.392,1.173) -- (0.403,1.174) -- (0.415,1.169) -- (0.426,1.160) -- (0.438,1.146) -- (0.449,1.130) -- (0.461,1.112) -- (0.472,1.094) -- (0.484,1.078) -- (0.495,1.064) -- (0.507,1.053) -- (0.518,1.046) -- (0.530,1.043) -- (0.541,1.044) -- (0.553,1.050) -- (0.564,1.059) -- (0.576,1.070) -- (0.587,1.084) -- (0.599,1.098) -- (0.611,1.112) -- (0.622,1.124) -- (0.634,1.135) -- (0.645,1.142) -- (0.657,1.146) -- (0.668,1.147) -- (0.680,1.144) -- (0.691,1.138) -- (0.703,1.130) -- (0.714,1.119) -- (0.726,1.108) -- (0.737,1.096) -- (0.749,1.085) -- (0.760,1.075) -- (0.772,1.067) -- (0.783,1.062) -- (0.795,1.060) -- (0.806,1.060) -- (0.818,1.064) -- (0.829,1.070) -- (0.841,1.079) -- (0.852,1.088) -- (0.864,1.099) -- (0.875,1.109) -- (0.887,1.118) -- (0.898,1.126) -- (0.910,1.132) -- (0.922,1.135) -- (0.933,1.136) -- (0.945,1.134) -- (0.956,1.130) -- (0.968,1.123) -- (0.979,1.115) -- (0.991,1.106) -- (1.002,1.097) -- (1.014,1.088) -- (1.025,1.080) -- (1.037,1.074) -- (1.048,1.069) -- (1.060,1.067) -- (1.071,1.068) -- (1.083,1.071) -- (1.094,1.076) -- (1.106,1.082) -- (1.117,1.090) -- (1.129,1.099) -- (1.140,1.107) -- (1.152,1.115) -- (1.163,1.122) -- (1.175,1.127) -- (1.186,1.130) -- (1.198,1.130) -- (1.210,1.129) -- (1.221,1.125) -- (1.233,1.120) -- (1.244,1.113) -- (1.256,1.105) -- (1.267,1.097) -- (1.279,1.090) -- (1.290,1.083) -- (1.302,1.077) -- (1.313,1.073) -- (1.325,1.071) -- (1.336,1.072) -- (1.348,1.074) -- (1.359,1.078) -- (1.371,1.084) -- (1.382,1.091) -- (1.394,1.098) -- (1.405,1.106) -- (1.417,1.113) -- (1.428,1.119) -- (1.440,1.124) -- (1.451,1.127) -- (1.463,1.128) -- (1.474,1.127) -- (1.486,1.123) -- (1.497,1.119) -- (1.509,1.112) -- (1.521,1.105) -- (1.532,1.098) -- (1.544,1.091) -- (1.555,1.084) -- (1.567,1.079) -- (1.578,1.075) -- (1.590,1.073) -- (1.601,1.073) -- (1.613,1.075) -- (1.624,1.079) -- (1.636,1.085) -- (1.647,1.091) -- (1.659,1.098) -- (1.670,1.106) -- (1.682,1.112) -- (1.693,1.118) -- (1.705,1.123) -- (1.716,1.126) -- (1.728,1.127) -- (1.739,1.126) -- (1.751,1.123) -- (1.762,1.118) -- (1.774,1.112) -- (1.785,1.106) -- (1.797,1.098) -- (1.809,1.091) -- (1.820,1.085) -- (1.832,1.079) -- (1.843,1.075) -- (1.855,1.073) -- (1.866,1.073) -- (1.878,1.075) -- (1.889,1.079) -- (1.901,1.084) -- (1.912,1.091) -- (1.924,1.098) -- (1.935,1.105) -- (1.947,1.112) -- (1.958,1.119) -- (1.970,1.123) -- (1.981,1.127) -- (1.993,1.128) -- (2.004,1.127) -- (2.016,1.124) -- (2.027,1.119) -- (2.039,1.113) -- (2.050,1.106) -- (2.062,1.098) -- (2.073,1.091) -- (2.085,1.084) -- (2.096,1.078) -- (2.108,1.074) -- (2.120,1.072) -- (2.131,1.071) -- (2.143,1.073) -- (2.154,1.077) -- (2.166,1.083) -- (2.177,1.090) -- (2.189,1.097) -- (2.200,1.105) -- (2.212,1.113) -- (2.223,1.120) -- (2.235,1.125) -- (2.246,1.129) -- (2.258,1.130) -- (2.269,1.130) -- (2.281,1.127) -- (2.292,1.122) -- (2.304,1.115) -- (2.315,1.107) -- (2.327,1.099) -- (2.338,1.090) -- (2.350,1.082) -- (2.361,1.076) -- (2.373,1.071) -- (2.384,1.068) -- (2.396,1.067) -- (2.408,1.069) -- (2.419,1.074) -- (2.431,1.080) -- (2.442,1.088) -- (2.454,1.097) -- (2.465,1.106) -- (2.477,1.115) -- (2.488,1.123) -- (2.500,1.130) -- (2.511,1.134) -- (2.523,1.136) -- (2.534,1.135) -- (2.546,1.132) -- (2.557,1.126) -- (2.569,1.118) -- (2.580,1.109) -- (2.592,1.099) -- (2.603,1.088) -- (2.615,1.079) -- (2.626,1.070) -- (2.638,1.064) -- (2.649,1.060) -- (2.661,1.060) -- (2.672,1.062) -- (2.684,1.067) -- (2.695,1.075) -- (2.707,1.085) -- (2.719,1.096) -- (2.730,1.108) -- (2.742,1.119) -- (2.753,1.130) -- (2.765,1.138) -- (2.776,1.144) -- (2.788,1.147) -- (2.799,1.146) -- (2.811,1.142) -- (2.822,1.135) -- (2.834,1.124) -- (2.845,1.112) -- (2.857,1.098) -- (2.868,1.084) -- (2.880,1.070) -- (2.891,1.059) -- (2.903,1.050) -- (2.914,1.044) -- (2.926,1.043) -- (2.937,1.046) -- (2.949,1.053) -- (2.960,1.064) -- (2.972,1.078) -- (2.983,1.094) -- (2.995,1.112) -- (3.007,1.130) -- (3.018,1.146) -- (3.030,1.160) -- (3.041,1.169) -- (3.053,1.174) -- (3.064,1.173) -- (3.076,1.167) -- (3.087,1.155) -- (3.099,1.138) -- (3.110,1.117) -- (3.122,1.093) -- (3.133,1.069) -- (3.145,1.045) -- (3.156,1.023) -- (3.168,1.006) -- (3.179,0.995) -- (3.191,0.992) -- (3.202,0.997) -- (3.214,1.011) -- (3.225,1.033) -- (3.237,1.063) -- (3.248,1.099) -- (3.260,1.139) -- (3.271,1.180) -- (3.283,1.220) -- (3.294,1.255) -- (3.306,1.281) -- (3.318,1.296) -- (3.329,1.295) -- (3.341,1.276) -- (3.352,1.237) -- (3.364,1.176) -- (3.375,1.093) -- (3.387,0.988) -- (3.398,0.861) -- (3.410,0.714) -- (3.421,0.551) -- (3.433,0.375) -- (3.444,0.190) -- (3.456,0.000);
+\node[font=\scriptsize,orange!80!black] at (-2.0,1.55) {$N = 5$}; \node[font=\scriptsize,blue!60!black] at (1.8,0.75) {$N = 25$};
+\node[font=\scriptsize\bfseries,black!70] at (0,-2.05) {partial sums of the square wave};
+\end{scope}
+\begin{scope}[shift={(5.4,-1.3)}]
+\fill[green!7,rounded corners=4pt] (-0.5,-0.45) rectangle (5.0,3.15);
+\draw[->] (0,0) -- (4.8,0) node[below,font=\scriptsize] {$k$};
+\fill[green!50!black] (0.33,0) rectangle (0.57,2.000);
+\node[font=\tiny,below] at (0.45,0) {1};
+\fill[green!50!black] (0.78,0) rectangle (1.02,0.500);
+\node[font=\tiny,below] at (0.90,0) {2};
+\fill[red!70!black] (1.35,0.04) circle (1.5pt);
+\node[font=\tiny,below] at (1.35,0) {3};
+\fill[green!50!black] (1.68,0) rectangle (1.92,0.125);
+\node[font=\tiny,below] at (1.80,0) {4};
+\fill[green!50!black] (2.13,0) rectangle (2.37,0.080);
+\node[font=\tiny,below] at (2.25,0) {5};
+\fill[red!70!black] (2.70,0.04) circle (1.5pt);
+\node[font=\tiny,below] at (2.70,0) {6};
+\fill[green!50!black] (3.03,0) rectangle (3.27,0.041);
+\node[font=\tiny,below] at (3.15,0) {7};
+\fill[green!50!black] (3.48,0) rectangle (3.72,0.031);
+\node[font=\tiny,below] at (3.60,0) {8};
+\fill[red!70!black] (4.05,0.04) circle (1.5pt);
+\node[font=\tiny,below] at (4.05,0) {9};
+\node[font=\scriptsize\bfseries,green!40!black,align=center] at (2.6,2.6) {string plucked at $\frac13$:\\ $|b_k|/b_1$};
+\node[font=\scriptsize,green!40!black] at (2.6,0.55) {$k = 3, 6, 9$ silent};
+\end{scope}
+\end{tikzpicture}
+\caption{Left: partial sums $S_5$ and $S_{25}$ of the Fourier series of the square wave $\operatorname{sign}x$ (dashed). Near the jump each overshoots to about $1.18$; more terms make the overshoot narrower, not lower. Right: the sine coefficients of a string plucked at one third of its length, relative to the first. They decay like
+$1/k^2$, and every third harmonic is missing, because the pluck is at a node of those modes.}
+\label{fig:gibbs}
+\end{figure}
+
+\begin{exa}
+\label{ex:pluck}
+A string of length $1$ plucked at $x = p$ to height $h$ has initial shape $hx/p$ on $[0, p]$ and $h(1 - x)/(1 - p)$ on $[p, 1]$, and sine coefficients
+\[
+b_k = \frac{2h\sin k\pi p}{k^2\pi^2p(1 - p)} .
+\]
+They decay like $1/k^2$, since the shape is continuous with a corner. The harmonic $k$ is absent whenever $kp$ is an integer: plucking at the middle silences all the even harmonics, and plucking at one third every third one (Figure~\ref{fig:gibbs}). Guitarists choose where to pluck to control the tone.
+\end{exa}
+
+\subsection{Justifying the series solution}
+\label{ssec:justify}
+
+\begin{thm}
+\label{thm:heatseries}
+Let $g$ be piecewise continuous on $[0, L]$. Then the series \eqref{eq:heatseries} converges for $t > 0$, together with all its term-by-term derivatives, uniformly on $[0, L] \times [t_0, \infty)$ for each $t_0 > 0$. Its sum $u$ is $C^\infty$ for $t > 0$, satisfies the heat equation and the boundary conditions,
+$\int_0^L(u(x, t) - g(x))^2\,dx \to 0$ as $t \to 0$, and $u(x, t) \to g(x)$ at every point of continuity where $g$ is piecewise $C^1$.
+\end{thm}
+
+\begin{proof}
+$|b_k| \leq \frac2L\int_0^L|g| =: B$. A term differentiated $i$ times in $x$ and $j$ times in $t$ is bounded by $B(k\pi/L)^{i + 2j}\kappa^je^{-\kappa(k\pi/L)^2t_0}$, and these numbers are summable in $k$, so every differentiated series converges uniformly by the M-test. Each term solves the equation and vanishes at the ends,
+hence so does $u$. By Parseval, $\int_0^L(u - g)^2 = \frac L2\sum b_k^2(1 - e^{-\kappa\lambda_kt})^2$, which tends to $0$ by dominated convergence for series, since $\sum b_k^2 < \infty$. The pointwise statement is Abel's theorem applied to the convergent series of Theorem~\ref{thm:dirichlet}, with the decreasing factors
+$e^{-\kappa\lambda_kt}$.
+\end{proof}
+
+Uniqueness, from the maximum principle of Section~\ref{sec:heat} or from energy, shows that the series is \emph{the} solution. For the wave equation the situation is different: the series converges only as well as the series of the data, and to get a classical solution the data must be smooth enough for
+$\sum k^2(|a_k| + |\beta_k|/k) < \infty$; otherwise the series defines the weak solution of d'Alembert's formula.
+
+\subsection{Fourier series in software}
+\label{ssec:software7}
+
+\begin{software}[Coefficients and Parseval]
+\label{sw:coeffs}
+The coefficients of $f(x) = x$ on $(-\pi, \pi)$ and Parseval's identity for them; then the coefficients of the plucked string of Example~\ref{ex:pluck}, and their values for $p = \frac13$:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> x, p, h = sp.symbols('x p h', positive=True)
+>>> k = sp.symbols('k', integer=True, positive=True)
+>>> bk = sp.integrate(x * sp.sin(k*x), (x, -sp.pi, sp.pi)) / sp.pi
+>>> bk                                     # f(x) = x on (-pi, pi)
+-2*(-1)**k/k
+>>> sp.summation(bk**2, (k, 1, sp.oo))     # Parseval: equals (1/pi) int x^2
+2*pi**2/3
+>>> sp.integrate(x**2, (x, -sp.pi, sp.pi)) / sp.pi
+2*pi**2/3
+>>> s = sp.sin(k * sp.pi * x)               # plucked at p to height h, L = 1
+>>> pk = 2 * (sp.integrate(h*x/p * s, (x, 0, p))
+...           + sp.integrate(h*(1 - x)/(1 - p) * s, (x, p, 1)))
+>>> sp.factor(sp.simplify(pk))
+-2*h*sin(pi*k*p)/(pi**2*k**2*p*(p - 1))
+>>> unit = 9 * sp.sqrt(3) / sp.pi**2      # p = 1/3, h = 1: b_k in these units
+>>> [sp.simplify(pk.subs({p: sp.Rational(1, 3), h: 1, k: j}) / unit)
+...  for j in range(1, 7)]
+[1/2, 1/8, 0, -1/32, -1/50, 0]
+\end{verbatim}}
+\textbf{Reading the output.} $b_k = -2(-1)^k/k$, and $\sum b_k^2 = 2\pi^2/3$ equals $\frac1\pi\int x^2$, which is $\sum 1/k^2 = \pi^2/6$. The plucked-string formula agrees with Example~\ref{ex:pluck} (the factor $p - 1$ in the denominator carries the sign). For $p = \frac13$ the coefficients in units of $9\sqrt3/\pi^2$ are
+$\frac12, \frac18, 0, -\frac1{32}, -\frac1{50}, 0$: the third and sixth harmonics vanish.
+
+\textbf{MATLAB/Octave:} \texttt{integral(@(x) x.*sin(k*x), -pi, pi)/pi} for each \texttt{k}.
+\end{software}
+
+\begin{software}[The Gibbs overshoot]
+\label{sw:gibbs}
+The maximum of the partial sum $S_N$ of the square wave on $(0, \pi/2]$, and where it occurs, in units of $1/N$:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> xs = np.linspace(1e-6, np.pi / 2, 200001)          # square wave: sign(x)
+>>> def S(N, x):                     # (4/pi) sum, odd k <= N, of sin(kx)/k
+...     k = np.arange(1, N + 1, 2)[:, None]
+...     return 4 / np.pi * (np.sin(k * x) / k).sum(axis=0)
+...
+>>> for N in (11, 101, 1001):
+...     s = S(N, xs)
+...     print(N, round(s.max(), 5), round(float(xs[s.argmax()] * N), 3))
+...
+11 1.1813 2.88
+101 1.17901 3.11
+1001 1.17898 3.138
+>>> from scipy.special import sici
+>>> 2 / np.pi * sici(np.pi)[0]             # the limit of the overshoot
+1.178979744472167
+\end{verbatim}}
+\textbf{Reading the output.} The peak value tends to $1.17898$, the limit $\frac2\pi\operatorname{Si}(\pi)$ in the last line; it is $1.1813$ already with $11$ terms. The peak sits at $x \approx \pi/N$ (the products approach $3.14$), so the overshoot crowds into the jump without shrinking.
+
+\textbf{MATLAB/Octave:} \texttt{2/pi*integral(@(s) sin(s)./s, 0, pi)}.
+\end{software}
+
+\begin{software}[Cooling a rod]
+\label{sw:rod}
+A rod of length $1$ with $\kappa = 1$, initially at temperature $1$, with its ends put in ice at $t = 0$. The sine coefficients of $g = 1$ are $4/k\pi$ for odd $k$. The centre temperature from the series, summed until the coefficients fall below $10^{-12}$, the last $k$ used, and the one-term approximation:
+{\small\begin{verbatim}
+>>> def rod(x, t, tol=1e-12):        # u_t = u_xx on (0, 1), u = 0 at ends
+...     total, k = 0.0, 1            # u(x, 0) = 1: b_k = 4 / (k pi), k odd
+...     while True:
+...         c = 4 / (k * np.pi) * np.exp(-(k * np.pi)**2 * t)
+...         total += c * np.sin(k * np.pi * x)
+...         if c < tol:
+...             return total, k
+...         k += 2
+...
+>>> for t in (0.001, 0.01, 0.1, 0.5):
+...     u, K = rod(0.5, t)
+...     print(t, round(u, 8), K, round(4/np.pi * np.exp(-np.pi**2 * t), 8))
+...
+0.001 1.0 51 1.26073498
+0.01 0.9991861 17 1.15357802
+0.1 0.47448746 7 0.47454636
+0.5 0.00915699 3 0.00915699
+\end{verbatim}}
+\textbf{Reading the output.} At $t = 0.001$ the centre has not yet felt the ends ($1.0$), and the series needs terms up to $k = 51$; the single term $\frac4\pi e^{-\pi^2t}$ is useless ($1.26$). By $t = 0.1$ seven terms suffice and one term is within $10^{-4}$; by $t = 0.5$ the first mode alone is exact to eight digits. The high modes, which
+carry the sharp corners of the initial state, are damped first, so for large times the temperature is a pure $\sin\pi x$ profile decaying at rate $\pi^2\kappa/L^2$.
+
+\textbf{MATLAB/Octave:} \texttt{k = 1:2:51; sum(4./(k*pi).*exp(-(k*pi).\^{}2*t).*sin(k*pi/2))}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Find the Fourier series of $|x|$ on $[-\pi, \pi]$, and deduce $\sum_{k\ \text{odd}}1/k^2 = \pi^2/8$.
+\end{problem}
+
+\begin{solution}
+$|x|$ is even, so $b_k = 0$; $a_0 = \frac2\pi\int_0^\pi x\,dx = \pi$, and $a_k = \frac2\pi\int_0^\pi x\cos kx\,dx = \frac{2((-1)^k - 1)}{\pi k^2}$, which is $-\frac4{\pi k^2}$ for odd $k$ and $0$ for even $k$. So
+\[
+|x| = \frac\pi2 - \frac4\pi\sum_{k\ \text{odd}}\frac{\cos kx}{k^2} ,
+\]
+uniformly, by Theorem~\ref{thm:uniformfs}. At $x = 0$: $0 = \frac\pi2 - \frac4\pi\sum_{\text{odd}}\frac1{k^2}$.
+\end{solution}
+
+\begin{problem}
+Using Parseval's identity for $|x|$, show that $\sum_{k \geq 1}1/k^4 = \pi^4/90$.
+\end{problem}
+
+\begin{solution}
+$\frac1\pi\int_{-\pi}^\pi x^2 = \frac{2\pi^2}3 = \frac{\pi^2}2 + \sum_{\text{odd}}\frac{16}{\pi^2k^4}$, so $\sum_{\text{odd}}k^{-4} = \frac{\pi^2}{16}\cdot\frac{\pi^2}6 = \frac{\pi^4}{96}$. Since the even terms sum to $\frac1{16}$ of the whole, the whole is $\frac{16}{15}\cdot\frac{\pi^4}{96} = \frac{\pi^4}{90}$.
+\end{solution}
+
+\begin{problem}
+Solve $u_t = u_{xx}$ on $0 < x < 1$ with insulated ends, $u_x(0, t) = u_x(1, t) = 0$, and $u(x, 0) = x$. What is the final temperature?
+\end{problem}
+
+\begin{solution}
+The eigenfunctions are $\cos k\pi x$, $k \geq 0$. The coefficients are $a_0 = 2\int_0^1x\,dx = 1$ and $a_k = 2\int_0^1x\cos k\pi x\,dx = \frac{2((-1)^k - 1)}{k^2\pi^2}$, so
+\[
+u = \frac12 - \frac4{\pi^2}\sum_{k\ \text{odd}}\frac{e^{-k^2\pi^2t}\cos k\pi x}{k^2} \to \frac12 ,
+\]
+the mean initial temperature, as it must be, since an insulated rod conserves its heat.
+\end{solution}
+
+\begin{problem}
+A string is plucked at its midpoint. Which harmonics are absent, and what fraction of the energy is in the fundamental? (The energy of mode $k$ is proportional to $\omega_k^2b_k^2$.)
+\end{problem}
+
+\begin{solution}
+With $p = \frac12$, $b_k \propto \sin(k\pi/2)/k^2$, which vanishes for even $k$. For odd $k$, $\omega_k^2b_k^2 \propto k^2\cdot k^{-4} = k^{-2}$, so the fraction in the fundamental is $1/\sum_{\text{odd}}k^{-2} = 8/\pi^2 = 0.811$.
+\end{solution}
+
+\begin{problem}
+Solve $u_{tt} = c^2u_{xx}$ on $0 < x < 1$ with fixed ends, $u(x, 0) = 0$ and $u_t(x, 0) = \sin\pi x + \frac12\sin 3\pi x$.
+\end{problem}
+
+\begin{solution}
+Here $a_k = 0$, $\beta_1 = 1$, $\beta_3 = \frac12$, so
+\[
+u = \frac{\sin\pi ct\,\sin\pi x}{\pi c} + \frac{\sin 3\pi ct\,\sin 3\pi x}{6\pi c} .
+\]
+\end{solution}
+
+\begin{problem}
+Explain why the Fourier series of $f(x) = x$ on $(-\pi, \pi)$ cannot converge uniformly on $[-\pi, \pi]$, and find its sum at $x = \pi$.
+\end{problem}
+
+\begin{solution}
+The partial sums are continuous and $2\pi$-periodic, so a uniform limit would be a continuous periodic function, but it would have to equal $x$ on $(-\pi, \pi)$, which tends to $\pi$ at the right end and $-\pi$ at the left. At $x = \pi$ every term $\sin k\pi$ vanishes, so the sum is $0$, the average of $f(\pi-) = \pi$
+and $f(\pi+) = f(-\pi+) = -\pi$, as Theorem~\ref{thm:dirichlet} says.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 \sloppy
@@ -1949,14 +2304,19 @@ on the half-line $x > 0$ with $u(0, t) = 0$ produced by a dipole, a source and a
 \subhead{Further reading}
 \begin{enumerate}
 \item d'Alembert, J. le R. (1747), Recherches sur la courbe que forme une corde tendu\"e mise en vibration, \emph{Histoire de l'Acad\'emie Royale des Sciences et Belles Lettres de Berlin}, 3, 214--219.
+\item du Bois-Reymond, P. (1873), Ueber die Fourierschen Reihen, \emph{Nachrichten von der K\"oniglichen Gesellschaft der Wissenschaften zu G\"ottingen}, 21, 571--582.
 \item Burgers, J. M. (1948), A mathematical model illustrating the theory of turbulence, \emph{Advances in Applied Mechanics}, 1, 171--199.
+\item Carleson, L. (1966), On convergence and growth of partial sums of Fourier series, \emph{Acta Mathematica}, 116, 135--157.
 \item Cole, J. D. (1951), On a quasi-linear parabolic equation occurring in aerodynamics, \emph{Quarterly of Applied Mathematics}, 9, 225--236.
+\item Dirichlet, P. G. L. (1829), Sur la convergence des s\'eries trigonom\'etriques qui servent \`a repr\'esenter une fonction arbitraire entre des limites donn\'ees, \emph{Journal f\"ur die reine und angewandte Mathematik}, 4, 157--169.
 \item Duhamel, J. M. C. (1833), M\'emoire sur la m\'ethode g\'en\'erale relative au mouvement de la chaleur dans les corps solides plong\'es dans des milieux dont la temp\'erature varie avec le temps, \emph{Journal de l'\'Ecole Polytechnique}, 14 (cahier 22), 20--77.
 \item Einstein, A. (1905), \"Uber die von der molekularkinetischen Theorie der W\"arme geforderte Bewegung von in ruhenden Fl\"ussigkeiten suspendierten Teilchen, \emph{Annalen der Physik}, 322, 549--560.
+\item Fej\'er, L. (1904), Untersuchungen \"uber Fouriersche Reihen, \emph{Mathematische Annalen}, 58, 51--69.
 \item Fick, A. (1855), \"Uber Diffusion, \emph{Annalen der Physik}, 170, 59--86.
 \item von Foerster, H. (1959), Some remarks on changing populations, in F. Stohlman (ed.), \emph{The Kinetics of Cellular Proliferation}, New York,
 Grune and Stratton, 382--407.
 \item Fourier, J. (1822), \emph{Th\'eorie analytique de la chaleur}, Paris, Firmin Didot.
+\item Gibbs, J. W. (1899), Fourier's series, \emph{Nature}, 59, 606.
 \item Godunov, S. K. (1959), A difference method for numerical calculation of discontinuous solutions of the equations of hydrodynamics, \emph{Matematicheskii Sbornik}, 47(89), 271--306.
 \item Hadamard, J. (1902), Sur les probl\`emes aux d\'eriv\'ees partielles et leur signification physique, \emph{Princeton University Bulletin}, 13,
 49--52.
@@ -1975,12 +2335,14 @@ Grune and Stratton, 382--407.
 \item McKendrick, A. G. (1926), Applications of mathematics to medical problems, \emph{Proceedings of the Edinburgh Mathematical Society}, 44, 98--130.
 \item Mersenne, M. (1636), \emph{Harmonie universelle}, Paris, Cramoisy.
 \item Nirenberg, L. (1953), A strong maximum principle for parabolic equations, \emph{Communications on Pure and Applied Mathematics}, 6, 167--177.
+\item Parseval, M.-A. (1806), M\'emoire sur les s\'eries et sur l'int\'egration compl\`ete d'une \'equation aux diff\'erences partielles lin\'eaires du second ordre, \`a coefficients constants, \emph{M\'emoires pr\'esent\'es \`a l'Institut des Sciences, Lettres et Arts, par divers savans}, 1, 638--648.
 \item Poisson, S. D. (1819), M\'emoire sur l'int\'egration de quelques \'equations lin\'eaires aux diff\'erences partielles, et particuli\`erement de l'\'equation g\'en\'erale du mouvement des fluides \'elastiques, \emph{M\'emoires de l'Acad\'emie Royale des Sciences de l'Institut de France}, 3, 121--176.
 \item Rankine, W. J. M. (1870), On the thermodynamic theory of waves of finite longitudinal disturbance, \emph{Philosophical Transactions of the Royal Society of London}, 160, 277--288.
 \item Richards, P. I. (1956), Shock waves on the highway, \emph{Operations Research}, 4, 42--51.
 \item Tricomi, F. (1923), Sulle equazioni lineari alle derivate parziali di 2$^\circ$ ordine, di tipo misto, \emph{Memorie della Reale Accademia dei Lincei}, serie 5, 14, 133--247.
 \item Tychonoff, A. (1935), Th\'eor\`emes d'unicit\'e pour l'\'equation de la chaleur, \emph{Matematicheskii Sbornik}, 42, 199--216.
 \item Widder, D. V. (1944), Positive temperatures on an infinite rod, \emph{Transactions of the American Mathematical Society}, 55, 85--95.
+\item Wilbraham, H. (1848), On a certain periodic function, \emph{Cambridge and Dublin Mathematical Journal}, 3, 198--201.
 \end{enumerate}
 
 \end{document}
