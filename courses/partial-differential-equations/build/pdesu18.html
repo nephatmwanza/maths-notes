@@ -1,0 +1,137 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>3.4 Classification in software — Partial Differential Equations</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='pde.css' rel='stylesheet' type='text/css' /> 
+<meta content='pde.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Partial Differential Equations</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="pdese1.html">First-Order Equations and Characteristics</a></li>
+<li class="sub"><a class="" href="pdesu1.html">Partial differential equations</a></li>
+<li class="sub"><a class="" href="pdesu2.html">The transport equation</a></li>
+<li class="sub"><a class="" href="pdesu3.html">Linear equations in two variables</a></li>
+<li class="sub"><a class="" href="pdesu4.html">The Cauchy problem</a></li>
+<li class="sub"><a class="" href="pdesu5.html">Variable speed and conservation laws</a></li>
+<li class="sub"><a class="" href="pdesu6.html">An application: age-structured populations</a></li>
+<li class="sub"><a class="" href="pdesu7.html">Characteristics in software</a></li>
+<li class="sub"><a class="" href="pdesu8.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="pdese2.html">Non-linear Conservation Laws and Shocks</a></li>
+<li class="sub"><a class="" href="pdesu9.html">Quasilinear equations and breaking</a></li>
+<li class="sub"><a class="" href="pdesu10.html">Weak solutions and the Rankine–Hugoniot condition</a></li>
+<li class="sub"><a class="" href="pdesu11.html">The Riemann problem and the entropy condition</a></li>
+<li class="sub"><a class="" href="pdesu12.html">Traffic flow</a></li>
+<li class="sub"><a class="" href="pdesu13.html">Conservation laws in software</a></li>
+<li class="sub"><a class="" href="pdesu14.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="pdese3.html">Classification of Second-order Equations</a></li>
+<li class="sub"><a class="" href="pdesu15.html">The discriminant and its invariance</a></li>
+<li class="sub"><a class="" href="pdesu16.html">Characteristics and canonical forms</a></li>
+<li class="sub"><a class="" href="pdesu17.html">Well-posed problems</a></li>
+<li class="sub"><a class="current" href="pdesu18.html">Classification in software</a></li>
+<li class="sub"><a class="" href="pdesu19.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="pdeli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 958 --><div class='crosslinks'><p class='noindent'>[<a href='pdesu19.html'>next</a>] [<a href='pdesu17.html'>prev</a>] [<a href='pdesu17.html#tailpdesu17.html'>prev-tail</a>] [<a href='#tailpdesu18.html'>tail</a>] [<a href='pdese3.html#pdesu18.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>3.4   </span> <a id='x23-220003.4'></a>Classification in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 961 --><p class='noindent'><span class='head'>
+<a id='x23-22001r1'></a>
+<span class='cmbx-10x-x-109'>Software 3.4.1 </span>(A canonical form)<span class='cmbx-10x-x-109'>.</span>  </span> The discriminant and characteristic slopes of \(u_{xx} + 4u_{xy} + 3u_{yy} = 0\), and a check of
+the general solution of Example <a href='pdesu16.html#x21-20005r2'>3.2.2<!-- tex4ht:ref: ex:canonical  --></a>:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-7'>
+&gt;&gt;&gt; import sympy as sp
+&gt;&gt;&gt; x, y = sp.symbols('x y')
+&gt;&gt;&gt; a, b, c = 1, 2, 3                      # u_xx + 4 u_xy + 3 u_yy = 0
+&gt;&gt;&gt; b**2 - a*c                             # discriminant: hyperbolic
+1
+&gt;&gt;&gt; m = sp.symbols('m')
+&gt;&gt;&gt; sp.solve(a*m**2 - 2*b*m + c, m)        # characteristic slopes dy/dx
+[1, 3]
+&gt;&gt;&gt; F, G = sp.Function('F'), sp.Function('G')
+&gt;&gt;&gt; u = F(y - x) + G(y - 3*x)              # constant on each family
+&gt;&gt;&gt; sp.simplify(u.diff(x, 2) + 4*u.diff(x, y) + 3*u.diff(y, 2))
+0
+</pre>
+<!-- l. 977 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The discriminant is \(1 &gt; 0\), the slopes are \(1\) and \(3\), and \(F(y - x) + G(y - 3x)\) satisfies the equation
+identically for arbitrary twice-differentiable \(F\) and \(G\).
+</p><!-- l. 980 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>roots([1 -4 3])</span>.
+</p>
+</div>
+<!-- l. 981 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 983 --><p class='noindent'><span class='head'>
+<a id='x23-22002r2'></a>
+<span class='cmbx-10x-x-109'>Software 3.4.2 </span>(Hadamard’s example)<span class='cmbx-10x-x-109'>.</span>  </span> The size of the Cauchy data and of the solution at \(y = 1\) in
+Example <a href='pdesu17.html#x22-21001r1'>3.3.1<!-- tex4ht:ref: ex:hadamard  --></a>:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-8'>
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; for n in (1, 5, 10, 20, 40):           # Hadamard: u_xx + u_yy = 0
+...     data = 1 / n**2                    # max |u_y(x, 0)|, with u(x, 0) = 0
+...     sol = np.sinh(n) / n**3            # max |u(x, 1)|
+...     print(n, f"{data:.2e}", f"{sol:.2e}")
+...
+1 1.00e+00 1.18e+00
+5 4.00e-02 5.94e-01
+10 1.00e-02 1.10e+01
+20 2.50e-03 3.03e+04
+40 6.25e-04 1.84e+12
+</pre>
+<!-- l. 998 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>As \(n\) goes from \(1\) to \(40\) the data shrink by a factor of \(1600\), while the solution
+at \(y = 1\) grows from \(1.18\) to \(1.84 \times 10^{12}\). A perturbation of the data smaller than any measuring instrument could
+detect changes the solution beyond recognition.
+</p><!-- l. 1001 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>n = [1 5 10 20 40]; [1./n.^2; sinh(n)./n.^3]</span>.
+</p>
+</div>
+<!-- l. 1002 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1004 --><p class='noindent'><span class='head'>
+<a id='x23-22003r3'></a>
+<span class='cmbx-10x-x-109'>Software 3.4.3 </span>(The backward heat equation)<span class='cmbx-10x-x-109'>.</span>  </span> An error of \(10^{-10}\) in each of the first \(40\) sine coefficients of a
+final temperature profile, propagated backwards; the root sum of squares of the coefficient errors at
+three earlier times:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-9'>
+&gt;&gt;&gt; k = np.arange(1, 41)                   # backward heat: u_t = -u_xx
+&gt;&gt;&gt; eps = 1e-10                            # error in each sine coefficient
+&gt;&gt;&gt; for t in (0.01, 0.05, 0.1):
+...     print(t, f"{np.sqrt(np.sum((eps * np.exp(k**2 * t))**2)):.3e}")
+...
+0.01 9.987e-04
+0.05 5.542e+24
+0.1 3.070e+59
+&gt;&gt;&gt; eps * np.exp(-k[-1]**2 * 0.1)          # the forward problem damps it
+3.257488532207521e-80
+</pre>
+<!-- l. 1018 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>Going back only \(0.01\) time units turns errors of \(10^{-10}\) into errors of \(10^{-3}\), and going
+back \(0.1\) produces \(3 \times 10^{59}\): the computed initial state is meaningless. The same error run forwards for \(0.1\)
+units is multiplied by \(e^{-160}\) in the \(40\)th mode; the forward problem is as stable as the backward one is
+unstable.
+</p><!-- l. 1022 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>k = 1:40; norm(1e-10*exp(k.^2*0.05))</span>.
+</p>
+</div>
+<!-- l. 1023 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 1025 --><div class='crosslinks'><p class='noindent'>[<a href='pdesu19.html'>next</a>] [<a href='pdesu17.html'>prev</a>] [<a href='pdesu17.html#tailpdesu17.html'>prev-tail</a>] [<a href='pdesu18.html'>front</a>] [<a href='pdese3.html#pdesu18.html'>up</a>] </p></div>
+<!-- l. 1025 --><p class='noindent'><a id='tailpdesu18.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="pdesu17.html">&larr; Previous</a><a class="up" href="pdese3.html#pdesu18.html">Contents</a><a class="next" href="pdesu19.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="partial-differential-equations/3-4-classification-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
