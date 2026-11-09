@@ -1,0 +1,150 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>2.5 Conservation laws in software — Partial Differential Equations</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='pde.css' rel='stylesheet' type='text/css' /> 
+<meta content='pde.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Partial Differential Equations</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="pdese1.html">First-Order Equations and Characteristics</a></li>
+<li class="sub"><a class="" href="pdesu1.html">Partial differential equations</a></li>
+<li class="sub"><a class="" href="pdesu2.html">The transport equation</a></li>
+<li class="sub"><a class="" href="pdesu3.html">Linear equations in two variables</a></li>
+<li class="sub"><a class="" href="pdesu4.html">The Cauchy problem</a></li>
+<li class="sub"><a class="" href="pdesu5.html">Variable speed and conservation laws</a></li>
+<li class="sub"><a class="" href="pdesu6.html">An application: age-structured populations</a></li>
+<li class="sub"><a class="" href="pdesu7.html">Characteristics in software</a></li>
+<li class="sub"><a class="" href="pdesu8.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="pdese2.html">Non-linear Conservation Laws and Shocks</a></li>
+<li class="sub"><a class="" href="pdesu9.html">Quasilinear equations and breaking</a></li>
+<li class="sub"><a class="" href="pdesu10.html">Weak solutions and the Rankine–Hugoniot condition</a></li>
+<li class="sub"><a class="" href="pdesu11.html">The Riemann problem and the entropy condition</a></li>
+<li class="sub"><a class="" href="pdesu12.html">Traffic flow</a></li>
+<li class="sub"><a class="current" href="pdesu13.html">Conservation laws in software</a></li>
+<li class="sub"><a class="" href="pdesu14.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="pdeli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 633 --><div class='crosslinks'><p class='noindent'>[<a href='pdesu14.html'>next</a>] [<a href='pdesu12.html'>prev</a>] [<a href='pdesu12.html#tailpdesu12.html'>prev-tail</a>] [<a href='#tailpdesu13.html'>tail</a>] [<a href='pdese2.html#pdesu13.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>2.5   </span> <a id='x17-160002.5'></a>Conservation laws in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 636 --><p class='noindent'><span class='head'>
+<a id='x17-16001r1'></a>
+<span class='cmbx-10x-x-109'>Software 2.5.1 </span>(The breaking time)<span class='cmbx-10x-x-109'>.</span>  </span> For Burgers’ equation with \(u_0 = e^{-x^2}\), the breaking time from
+Theorem <a href='pdesu9.html#x13-12002r2'>2.1.2<!-- tex4ht:ref: thm:breaking  --></a>, and a direct check that the characteristic map \(x_0 \mapsto x_0 + u_0(x_0)t\) stops being monotone:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-4'>
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; u0 = lambda x: np.exp(-x**2)           # u_t + u u_x = 0
+&gt;&gt;&gt; du0 = lambda x: -2 * x * np.exp(-x**2)
+&gt;&gt;&gt; xs = np.linspace(-3, 3, 600001)
+&gt;&gt;&gt; tb = -1 / du0(xs).min(); tb, 1 / (np.sqrt(2) * np.exp(-0.5))
+(1.1658219908227196, 1.165821990798562)
+&gt;&gt;&gt; X = lambda x0, t: x0 + u0(x0) * t      # straight characteristics
+&gt;&gt;&gt; for t in (1.0, tb, 1.5):
+...     print(round(t, 4), bool(np.all(np.diff(X(xs, t)) &gt; 0)))   # ordered?
+...
+1.0 True
+1.1658 False
+1.5 False
+</pre>
+<!-- l. 653 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The minimum of \(u_0'\) on a fine grid gives \(t_b = 1.16582\), agreeing with \(e^{1/2}/\sqrt 2\) to ten digits. At \(t = 1\)
+the characteristic positions are still in order, so the solution is single-valued; at \(t_b\) and after, they
+are not, and the classical solution has ceased to exist.
+</p><!-- l. 657 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>-1/min(gradient(exp(-x.^2), x))</span>.
+</p>
+</div>
+<!-- l. 658 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 660 --><p class='noindent'><span class='head'>
+<a id='x17-16002r2'></a>
+<span class='cmbx-10x-x-109'>Software 2.5.2 </span>(Conservative and non-conservative schemes)<span class='cmbx-10x-x-109'>.</span>  </span> Godunov’s method updates cell
+averages using the exact flux of the Riemann problem at each cell interface. It is compared with a
+naive upwind discretisation of \(u_t + uu_x = 0\), which is consistent with the equation for smooth solutions but is not
+in conservation form. Riemann data \(u_l = 2\), \(u_r = 0\) until \(T = 2\); then the reverse data:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-5'>
+&gt;&gt;&gt; def godunov(ul, ur):                   # Riemann flux, f(u) = u^2/2
+...     shock = np.where(ul + ur &gt; 0, ul**2, ur**2) / 2
+...     fan = np.where(ul &gt; 0, ul**2 / 2, np.where(ur &lt; 0, ur**2 / 2, 0.0))
+...     return np.where(ul &gt; ur, shock, fan)
+...
+&gt;&gt;&gt; def solve(uL, uR, conservative, N=800, L=8.0, T=2.0):
+...     dx = L / N; x = -L / 2 + dx * (np.arange(N) + 0.5)
+...     u = np.where(x &lt; 0, uL, uR); dt = 0.4 * dx / max(abs(uL), abs(uR))
+...     for _ in range(int(round(T / dt))):
+...         if conservative:
+...             F = godunov(u[:-1], u[1:])
+...             u[1:-1] -= dt / dx * (F[1:] - F[:-1])
+...         else:                          # upwind on u u_x: not conservative
+...             u[1:] -= dt / dx * u[1:] * (u[1:] - u[:-1])
+...     return x, u
+...
+&gt;&gt;&gt; for cons in (True, False):             # uL = 2, uR = 0, until T = 2
+...     x, u = solve(2.0, 0.0, cons)
+...     print(cons, round(x[np.argmax(u &lt; 1.0)], 3))   # where u drops
+...
+True 2.005
+False 0.005
+&gt;&gt;&gt; x, u = solve(0.0, 2.0, True)           # the reverse: a rarefaction fan
+&gt;&gt;&gt; [round(float(np.interp(q, x, u)), 3) for q in (-1.0, 1.0, 2.0, 3.0, 5.0)]
+[0.0, 0.512, 1.007, 1.498, 2.0]
+</pre>
+<!-- l. 690 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The exact shock speed is \(\frac 12(2 + 0) = 1\), so at \(T = 2\) the shock is at \(x = 2\). Godunov’s method
+places it at \(2.005\), within one cell. The non-conservative scheme leaves it at the origin, \(0.005\): it converges,
+but to the wrong weak solution, because it does not respect the integral form of the law on
+which the Rankine–Hugoniot condition rests. This is the Lax–Wendroff theorem in negative
+form: conservative schemes that converge, converge to weak solutions; non-conservative ones
+need not. For the reverse data, Godunov’s method produces the fan \(u = x/t\): at \(x = 1, 2, 3\) the values \(0.51\), \(1.01\), \(1.50\) against
+the exact \(0.5\), \(1\), \(1.5\).
+</p><!-- l. 696 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span>the same vectorised update in a loop.
+</p>
+</div>
+<!-- l. 697 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 699 --><p class='noindent'><span class='head'>
+<a id='x17-16003r3'></a>
+<span class='cmbx-10x-x-109'>Software 2.5.3 </span>(A red light)<span class='cmbx-10x-x-109'>.</span>  </span> For a road with \(v_{\max } = 100\) km/h and jam density \(150\) cars/km, traffic at \(50\) cars/km
+meets a queue at a red light:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-6'>
+&gt;&gt;&gt; vmax, rmax = 100.0, 150.0              # km/h, cars per km (jammed)
+&gt;&gt;&gt; flux = lambda r: r * vmax * (1 - r / rmax)
+&gt;&gt;&gt; speed = lambda r: vmax * (1 - 2 * r / rmax)       # characteristic speed
+&gt;&gt;&gt; rL, rR = 50.0, 150.0                   # queue at a red light ahead
+&gt;&gt;&gt; (flux(rR) - flux(rL)) / (rR - rL), speed(rL), speed(rR)
+(-33.333333333333336, 33.333333333333336, -100.0)
+&gt;&gt;&gt; rc = rmax / 2; rc, flux(rc)            # density of maximum flow, capacity
+(75.0, 3750.0)
+</pre>
+<!-- l. 711 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The back of the queue moves backwards at \(33.3\) km/h, equal to \(v_{\max }\rho _l/\rho _{\max }\). The
+entropy condition holds: the characteristic speeds on the two sides, \(+33.3\) and \(-100\) km/h, both run into
+the shock. The capacity of the road is \(3750\) cars an hour, at the critical density \(75\) cars/km, where cars
+travel at \(50\) km/h.
+</p><!-- l. 715 --><p class='noindent'><span class='cmbx-10x-x-109'>MATLAB/Octave: </span><span class='cmtt-10x-x-109'>q = @(r) r*100.*(1 - r/150); (q(150) - q(50))/(150 - 50)</span>.
+</p>
+</div>
+<!-- l. 716 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 718 --><div class='crosslinks'><p class='noindent'>[<a href='pdesu14.html'>next</a>] [<a href='pdesu12.html'>prev</a>] [<a href='pdesu12.html#tailpdesu12.html'>prev-tail</a>] [<a href='pdesu13.html'>front</a>] [<a href='pdese2.html#pdesu13.html'>up</a>] </p></div>
+<!-- l. 718 --><p class='noindent'><a id='tailpdesu13.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="pdesu12.html">&larr; Previous</a><a class="up" href="pdese2.html#pdesu13.html">Contents</a><a class="next" href="pdesu14.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="partial-differential-equations/2-5-conservation-laws-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

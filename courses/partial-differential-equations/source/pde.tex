@@ -432,6 +432,338 @@ $M(a) = \mu a$, so the stable distribution is $Be^{-\mu a}$, with total $\int_0^
 the mean age is $50$ years.
 \end{solution}
 
+%======================================================================
+\section{Non-linear Conservation Laws and Shocks}
+\label{sec:shocks}
+
+For a linear first-order equation the characteristics are fixed in advance, by the coefficients. For a quasilinear equation such as $u_t + uu_x = 0$ the
+speed of each characteristic depends on the solution itself, so faster parts of a wave can catch up with slower parts, characteristics cross, and a
+smooth solution ceases to exist after a finite time: the wave \textbf{breaks}. What happens next cannot be described by a classical solution at all.
+The resolution, weak solutions with discontinuities called shocks, selected by an entropy condition, is one of the central ideas of the subject, and it
+governs gas dynamics, traffic flow, river floods and blast waves. This section develops it for scalar equations in one space dimension.
+
+\subsection{Quasilinear equations and breaking}
+\label{ssec:quasilinear}
+
+\begin{defn}
+A scalar \textbf{conservation law} is $u_t + f(u)_x = 0$, with \textbf{flux} $f$, or for smooth solutions $u_t + a(u)u_x = 0$ with $a = f'$. The basic example is the inviscid \textbf{Burgers equation},
+$f(u) = \frac12u^2$, $a(u) = u$.
+\end{defn}
+
+By the method of Section~\ref{sec:characteristics}, along a curve with $dx/dt = a(u)$ the solution satisfies $du/dt = u_t + a(u)u_x = 0$, so $u$ is constant on the curve, and therefore so is its speed $a(u)$: the
+characteristics are \emph{straight lines}, $x = x_0 + a(u_0(x_0))t$, each carrying its initial value.
+
+\begin{thm}
+\label{thm:breaking}
+Let $u_0$ be $C^1$ and bounded with bounded derivative, and $a$ be $C^1$. The initial value problem $u_t + a(u)u_x = 0$, $u(x, 0) = u_0(x)$, has a $C^1$ solution, given implicitly by
+\[
+u = u_0\bigl(x - a(u)t\bigr),
+\]
+for $0 \leq t < t_b$, where
+\[
+t_b = -\frac{1}{\inf_x\,\frac{d}{dx}a(u_0(x))}
+\]
+($t_b = \infty$ if $a(u_0)$ is non-decreasing). If $t_b < \infty$, the derivative $u_x$ becomes unbounded as $t \to t_b$, and no $C^1$ solution exists beyond $t_b$.
+\end{thm}
+
+\begin{proof}
+Write $\sigma(x_0) = a(u_0(x_0))$, the speed of the characteristic from $x_0$. The map $x_0 \mapsto X(x_0, t) = x_0 + \sigma(x_0)t$ has derivative $1 + \sigma'(x_0)t$, which is positive for all $x_0$ exactly when $t < t_b$; it is then
+strictly increasing and, since $\sigma$ is bounded, onto $\mathbb R$. So each $(x, t)$ lies on exactly one characteristic, with foot $x_0(x, t)$, and $u(x, t) = u_0(x_0(x, t))$ is $C^1$ by the inverse function theorem. Differentiating,
+\[
+u_x = \frac{u_0'(x_0)}{1 + \sigma'(x_0)t} ,
+\]
+and along the characteristic where $\sigma'$ attains (or approaches) its infimum, the denominator tends to $0$ as $t \to t_b$ while the numerator does not (since $\sigma' = a'(u_0)u_0'$), so $u_x \to \infty$. At $t_b$ two
+characteristics carrying different values meet, and $u$ would have to take both values at one point.
+\end{proof}
+
+For Burgers' equation, $\sigma = u_0$ and $t_b = -1/\min u_0'$: the wave breaks first where it is steepest on its front. For $u_0 = e^{-x^2}$, $\min u_0' = -\sqrt2e^{-1/2}$ at $x = 1/\sqrt2$, and $t_b = e^{1/2}/\sqrt2 = 1.166$
+(Figure~\ref{fig:breaking}). The top of the hump travels faster than its foot and overtakes it, exactly as an ocean wave steepens and breaks on a beach.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!5,rounded corners=4pt] (-0.3,-0.6) rectangle (10.6,4.1);
+\draw[->] (0,0) -- (10.4,0) node[below,font=\small] {$x$};
+\draw[->] (3.2,0) -- (3.2,3.9) node[left,font=\small] {$t$};
+\foreach \v/\x in {-1/1.6, 1/4.8, 3/8.0} \draw (\x,-0.08) -- (\x,0.08) node[below,font=\scriptsize] at (\x,-0.08) {$\v$};
+\draw[blue!60!black] (0.320,0.000) -- (0.458,3.520);
+\draw[blue!60!black] (0.640,0.000) -- (0.912,3.520);
+\draw[blue!60!black] (0.960,0.000) -- (1.456,3.520);
+\draw[blue!60!black] (1.280,0.000) -- (2.114,3.520);
+\draw[blue!60!black] (1.600,0.000) -- (2.895,3.520);
+\draw[blue!60!black] (1.920,0.000) -- (3.776,3.520);
+\draw[blue!60!black] (2.240,0.000) -- (4.696,3.520);
+\draw[blue!60!black] (2.560,0.000) -- (5.560,3.520);
+\draw[blue!60!black] (2.880,0.000) -- (6.262,3.520);
+\draw[blue!60!black] (3.200,0.000) -- (6.720,3.520);
+\draw[blue!60!black] (3.520,0.000) -- (6.902,3.520);
+\draw[blue!60!black] (3.840,0.000) -- (6.840,3.520);
+\draw[blue!60!black] (4.160,0.000) -- (6.616,3.520);
+\draw[blue!60!black] (4.480,0.000) -- (6.336,3.520);
+\draw[blue!60!black] (4.800,0.000) -- (6.095,3.520);
+\draw[blue!60!black] (5.120,0.000) -- (5.954,3.520);
+\draw[blue!60!black] (5.440,0.000) -- (5.936,3.520);
+\draw[blue!60!black] (5.760,0.000) -- (6.032,3.520);
+\draw[blue!60!black] (6.080,0.000) -- (6.218,3.520);
+\draw[blue!60!black] (6.400,0.000) -- (6.464,3.520);
+\draw[blue!60!black] (6.720,0.000) -- (6.748,3.520);
+\draw[red!70!black,dashed] (0,1.865) -- (10.2,1.865) node[above left,font=\scriptsize] {$t_b = 1.166$};
+\fill[red!70!black] (5.463,1.865) circle (2.5pt);
+\node[font=\scriptsize,red!70!black,anchor=west,fill=blue!5] at (7.0,1.35) {first crossing};
+\draw[red!70!black,->] (6.95,1.4) -- (5.6,1.82);
+\end{tikzpicture}
+\caption{Characteristics of Burgers' equation $u_t + uu_x = 0$ with $u_0(x) = e^{-x^2}$. Each line has slope $dx/dt = u_0(x_0)$, so the characteristics from the top of the hump are fastest. Those from the front of the hump
+converge, and the first pair crosses at $t_b = 1.166$, where the wave breaks.}
+\label{fig:breaking}
+\end{figure}
+
+\subsection{Weak solutions and the Rankine--Hugoniot condition}
+\label{ssec:weak}
+
+After breaking, the conservation law still makes sense in its integral form: for every interval $[\alpha, \beta]$,
+\[
+\frac{d}{dt}\int_\alpha^\beta u\,dx = f\bigl(u(\alpha, t)\bigr) - f\bigl(u(\beta, t)\bigr) ,
+\]
+which does not require derivatives of $u$. Equivalently, $u$ is a \textbf{weak solution} if for every smooth test function $\phi$ with compact support in $\mathbb R \times [0, \infty)$,
+\[
+\int_0^\infty\!\!\int_{-\infty}^\infty\bigl(u\phi_t + f(u)\phi_x\bigr)\,dx\,dt + \int_{-\infty}^\infty u_0(x)\phi(x, 0)\,dx = 0 ,
+\]
+obtained by multiplying the equation by $\phi$ and integrating by parts. A classical solution is a weak solution, and a weak solution that is $C^1$ is classical. Weak solutions may have jumps.
+
+\begin{thm}[Rankine--Hugoniot]
+\label{thm:rh}
+Let $u$ be a weak solution that is $C^1$ on either side of a curve $x = s(t)$, with limits $u_l$ and $u_r$ on the left and right. Then the speed of the discontinuity satisfies
+\[
+s'(t) = \frac{f(u_r) - f(u_l)}{u_r - u_l} = \frac{[f]}{[u]} .
+\]
+For Burgers' equation, $s' = \frac12(u_l + u_r)$.
+\end{thm}
+
+\begin{proof}
+Take $\alpha < s(t) < \beta$ with $[\alpha, \beta]$ small. Splitting the integral at the shock and differentiating,
+\[
+\frac{d}{dt}\Bigl(\int_\alpha^{s(t)}u\,dx + \int_{s(t)}^\beta u\,dx\Bigr) = \int_\alpha^{s}u_t\,dx + \int_{s}^\beta u_t\,dx + s'u_l - s'u_r .
+\]
+On each side $u_t = -f(u)_x$, so the integrals equal $f(u(\alpha)) - f(u_l) + f(u_r) - f(u(\beta))$. Comparing with the integral form of the law, $f(u(\alpha)) - f(u(\beta))$, gives $s'(u_l - u_r) = f(u_l) - f(u_r)$.
+\end{proof}
+
+The condition says that the amount of $u$ swept up as the shock moves is supplied by the difference of the fluxes on its two sides. It applies to any conservation law, and is the jump
+condition across a shock wave in a gas.
+
+\subsection{The Riemann problem and the entropy condition}
+\label{ssec:riemann}
+
+The \textbf{Riemann problem} has piecewise constant data, $u_0 = u_l$ for $x < 0$ and $u_r$ for $x > 0$. For Burgers' equation there are two cases.
+\begin{enumerate}[label=(\roman*)]
+\item If $u_l > u_r$, the characteristics from the left are faster and run into those from the right, and the solution is a \textbf{shock} moving at the Rankine--Hugoniot speed $s = \frac12(u_l + u_r)$:
+$u = u_l$ for $x < st$, $u = u_r$ for $x > st$.
+\item If $u_l < u_r$, the characteristics diverge, leaving a wedge $u_lt < x < u_rt$ that no characteristic from $t = 0$ reaches. The solution there is the \textbf{rarefaction fan} $u = x/t$, the only self-similar continuous
+solution, which joins $u_l$ to $u_r$ (Figure~\ref{fig:riemann}).
+\end{enumerate}
+In case (ii) the discontinuous function $u = u_l$ for $x < st$, $u = u_r$ for $x > st$, with $s = \frac12(u_l + u_r)$, is also a weak solution: weak solutions are not unique. The non-physical one has characteristics
+coming \emph{out} of the shock, which would create information from nothing. The \textbf{Lax entropy condition} rules it out:
+\[
+a(u_l) > s > a(u_r),
+\]
+that is, characteristics must run \emph{into} a shock from both sides. With this condition, and more generally with Kru\v{z}kov's entropy inequalities, the Cauchy problem for a scalar conservation law
+has a unique weak solution. The entropy solution is also the limit as $\nu \to 0$ of the viscous Burgers equation $u_t + uu_x = \nu u_{xx}$, whose shock is a smooth transition of width of order $\nu$: the physically correct solution is the one that small
+diffusion selects.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\begin{scope}
+\fill[red!6,rounded corners=4pt] (-3.2,-0.6) rectangle (3.2,3.75);
+\draw[->] (-3,0) -- (3,0) node[below,font=\small] {$x$}; \draw[->] (0,0) -- (0,3) node[left,font=\small] {$t$};
+\draw[blue!60!black] (-2.80,0) -- (-0.100,2.700);
+\draw[blue!60!black] (-2.30,0) -- (0.400,2.700);
+\draw[blue!60!black] (-1.80,0) -- (0.900,2.700);
+\draw[blue!60!black] (-1.30,0) -- (1.300,2.600);
+\draw[blue!60!black] (-0.80,0) -- (0.800,1.600);
+\draw[blue!60!black] (-0.30,0) -- (0.300,0.600);
+\draw[blue!60!black] (0.20,0) -- (0.20,0.400);
+\draw[blue!60!black] (0.60,0) -- (0.60,1.200);
+\draw[blue!60!black] (1.00,0) -- (1.00,2.000);
+\draw[blue!60!black] (1.40,0) -- (1.40,2.700);
+\draw[blue!60!black] (1.80,0) -- (1.80,2.700);
+\draw[blue!60!black] (2.20,0) -- (2.20,2.700);
+\draw[blue!60!black] (2.60,0) -- (2.60,2.700);
+\draw[red!70!black,very thick] (0,0) -- (1.35,2.7);
+\node[font=\scriptsize,red!70!black] at (1.9,3.05) {shock, $s = \frac12$};
+\node[font=\scriptsize\bfseries,red!60!black] at (0,3.5) {$u_l = 1 > u_r = 0$: shock};
+\end{scope}
+\begin{scope}[shift={(7.4,0)}]
+\fill[green!7,rounded corners=4pt] (-3.2,-0.6) rectangle (3.2,3.75);
+\draw[->] (-3,0) -- (3,0) node[below,font=\small] {$x$}; \draw[->] (0,0) -- (0,3) node[left,font=\small] {$t$};
+\foreach \x in {-2.8,-2.4,...,-0.3} \draw[blue!60!black] (\x,0) -- (\x,2.7);
+\draw[blue!60!black] (0.30,0) -- (3.000,2.700);
+\draw[blue!60!black] (0.70,0) -- (3.000,2.300);
+\draw[blue!60!black] (1.10,0) -- (3.000,1.900);
+\draw[blue!60!black] (1.50,0) -- (3.000,1.500);
+\draw[blue!60!black] (1.90,0) -- (3.000,1.100);
+\draw[blue!60!black] (2.30,0) -- (3.000,0.700);
+\foreach \k in {0.15,0.35,...,0.95} \draw[green!40!black] (0,0) -- ({\k*2.7},2.7);
+\node[font=\scriptsize\bfseries,green!40!black] at (0,3.5) {$u_l = 0 < u_r = 1$: rarefaction};
+\node[font=\scriptsize,green!40!black,fill=green!7] at (1.5,1.9) {$u = x/t$};
+\end{scope}
+\end{tikzpicture}
+\caption{Riemann problems for Burgers' equation in the $(x, t)$ plane. Left: the characteristics from both sides run into a shock moving at the Rankine--Hugoniot speed $\frac12(u_l + u_r)$. Right: the characteristics diverge,
+and the gap is filled by the fan of characteristics $x = ct$, $0 \leq c \leq 1$, from the origin, on which $u = x/t$.}
+\label{fig:riemann}
+\end{figure}
+
+\subsection{Traffic flow}
+\label{ssec:traffic}
+
+Lighthill and Whitham (1955) and Richards (1956) modelled road traffic by the density $\rho(x, t)$ of cars, in cars per kilometre, with flux $q = \rho v(\rho)$. The speed falls from $v_{\max}$ on an empty road to $0$ at the
+jam density $\rho_{\max}$; the simplest choice is $v = v_{\max}(1 - \rho/\rho_{\max})$, giving the conservation law
+\[
+\rho_t + q(\rho)_x = 0, \qquad q(\rho) = v_{\max}\rho\Bigl(1 - \frac{\rho}{\rho_{\max}}\Bigr) .
+\]
+The flux is greatest, $q_{\max} = \frac14v_{\max}\rho_{\max}$, at $\rho_c = \frac12\rho_{\max}$: the capacity of the road. The characteristic speed $q'(\rho) = v_{\max}(1 - 2\rho/\rho_{\max})$ is the speed at which \emph{disturbances} travel, which is less than
+the speed of the cars $v(\rho)$, and negative in dense traffic: a disturbance in heavy traffic travels backwards, against the flow, as every driver who has braked for no visible reason knows.
+
+At a red light, cars arriving at density $\rho_l$ meet stopped cars at $\rho_r = \rho_{\max}$. Since $q'(\rho_l) > q'(\rho_{\max})$, this is a shock, the back of the queue, and by Rankine--Hugoniot it moves at speed
+\[
+s = \frac{q(\rho_{\max}) - q(\rho_l)}{\rho_{\max} - \rho_l} = -v_{\max}\frac{\rho_l}{\rho_{\max}} ,
+\]
+backwards. When the light turns green, the jam at $\rho_{\max}$ on the left faces an empty road on the right, and the solution is a rarefaction fan in which the density thins out continuously:
+the front cars accelerate away while the cars further back are still waiting for the fan to reach them.
+
+\subsection{Conservation laws in software}
+\label{ssec:software2}
+
+\begin{software}[The breaking time]
+\label{sw:breaking}
+For Burgers' equation with $u_0 = e^{-x^2}$, the breaking time from Theorem~\ref{thm:breaking}, and a direct check that the characteristic map $x_0 \mapsto x_0 + u_0(x_0)t$ stops being monotone:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> u0 = lambda x: np.exp(-x**2)           # u_t + u u_x = 0
+>>> du0 = lambda x: -2 * x * np.exp(-x**2)
+>>> xs = np.linspace(-3, 3, 600001)
+>>> tb = -1 / du0(xs).min(); tb, 1 / (np.sqrt(2) * np.exp(-0.5))
+(1.1658219908227196, 1.165821990798562)
+>>> X = lambda x0, t: x0 + u0(x0) * t      # straight characteristics
+>>> for t in (1.0, tb, 1.5):
+...     print(round(t, 4), bool(np.all(np.diff(X(xs, t)) > 0)))   # ordered?
+...
+1.0 True
+1.1658 False
+1.5 False
+\end{verbatim}}
+\textbf{Reading the output.} The minimum of $u_0'$ on a fine grid gives $t_b = 1.16582$, agreeing with $e^{1/2}/\sqrt2$ to ten digits. At $t = 1$ the characteristic positions are still in order, so the solution is
+single-valued; at $t_b$ and after, they are not, and the classical solution has ceased to exist.
+
+\textbf{MATLAB/Octave:} \texttt{-1/min(gradient(exp(-x.\^{}2), x))}.
+\end{software}
+
+\begin{software}[Conservative and non-conservative schemes]
+\label{sw:godunov}
+Godunov's method updates cell averages using the exact flux of the Riemann problem at each cell interface. It is compared with a naive upwind discretisation of $u_t + uu_x = 0$, which is consistent with
+the equation for smooth solutions but is not in conservation form. Riemann data $u_l = 2$, $u_r = 0$ until $T = 2$; then the reverse data:
+{\small\begin{verbatim}
+>>> def godunov(ul, ur):                   # Riemann flux, f(u) = u^2/2
+...     shock = np.where(ul + ur > 0, ul**2, ur**2) / 2
+...     fan = np.where(ul > 0, ul**2 / 2, np.where(ur < 0, ur**2 / 2, 0.0))
+...     return np.where(ul > ur, shock, fan)
+...
+>>> def solve(uL, uR, conservative, N=800, L=8.0, T=2.0):
+...     dx = L / N; x = -L / 2 + dx * (np.arange(N) + 0.5)
+...     u = np.where(x < 0, uL, uR); dt = 0.4 * dx / max(abs(uL), abs(uR))
+...     for _ in range(int(round(T / dt))):
+...         if conservative:
+...             F = godunov(u[:-1], u[1:])
+...             u[1:-1] -= dt / dx * (F[1:] - F[:-1])
+...         else:                          # upwind on u u_x: not conservative
+...             u[1:] -= dt / dx * u[1:] * (u[1:] - u[:-1])
+...     return x, u
+...
+>>> for cons in (True, False):             # uL = 2, uR = 0, until T = 2
+...     x, u = solve(2.0, 0.0, cons)
+...     print(cons, round(x[np.argmax(u < 1.0)], 3))   # where u drops
+...
+True 2.005
+False 0.005
+>>> x, u = solve(0.0, 2.0, True)           # the reverse: a rarefaction fan
+>>> [round(float(np.interp(q, x, u)), 3) for q in (-1.0, 1.0, 2.0, 3.0, 5.0)]
+[0.0, 0.512, 1.007, 1.498, 2.0]
+\end{verbatim}}
+\textbf{Reading the output.} The exact shock speed is $\frac12(2 + 0) = 1$, so at $T = 2$ the shock is at $x = 2$. Godunov's method places it at $2.005$, within one cell. The non-conservative scheme leaves it at the origin, $0.005$: it
+converges, but to the wrong weak solution, because it does not respect the integral form of the law on which the Rankine--Hugoniot condition rests. This is the Lax--Wendroff theorem in negative form:
+conservative schemes that converge, converge to weak solutions; non-conservative ones need not. For the reverse data, Godunov's method produces the fan $u = x/t$: at $x = 1, 2, 3$ the values $0.51$, $1.01$, $1.50$
+against the exact $0.5$, $1$, $1.5$.
+
+\textbf{MATLAB/Octave:} the same vectorised update in a loop.
+\end{software}
+
+\begin{software}[A red light]
+\label{sw:traffic}
+For a road with $v_{\max} = 100$\,km/h and jam density $150$ cars/km, traffic at $50$ cars/km meets a queue at a red light:
+{\small\begin{verbatim}
+>>> vmax, rmax = 100.0, 150.0              # km/h, cars per km (jammed)
+>>> flux = lambda r: r * vmax * (1 - r / rmax)
+>>> speed = lambda r: vmax * (1 - 2 * r / rmax)       # characteristic speed
+>>> rL, rR = 50.0, 150.0                   # queue at a red light ahead
+>>> (flux(rR) - flux(rL)) / (rR - rL), speed(rL), speed(rR)
+(-33.333333333333336, 33.333333333333336, -100.0)
+>>> rc = rmax / 2; rc, flux(rc)            # density of maximum flow, capacity
+(75.0, 3750.0)
+\end{verbatim}}
+\textbf{Reading the output.} The back of the queue moves backwards at $33.3$\,km/h, equal to $v_{\max}\rho_l/\rho_{\max}$. The entropy condition holds: the characteristic speeds on the two sides, $+33.3$ and $-100$\,km/h, both run into the shock. The capacity of
+the road is $3750$ cars an hour, at the critical density $75$ cars/km, where cars travel at $50$\,km/h.
+
+\textbf{MATLAB/Octave:} \texttt{q = @(r) r*100.*(1 - r/150); (q(150) - q(50))/(150 - 50)}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Find the breaking time for Burgers' equation with $u_0(x) = \sin x$, and where the first shock forms.
+\end{problem}
+
+\begin{solution}
+$\min u_0' = \min\cos x = -1$, at $x = \pi$, so $t_b = 1$. The characteristic from $x_0 = \pi$ has speed $\sin\pi = 0$, so the shock forms at $x = \pi$, $t = 1$, and stays there by symmetry: $u$ is odd about $\pi$, so $u_l = -u_r$ and
+$s = 0$.
+\end{solution}
+
+\begin{problem}
+Solve Burgers' equation with $u_0 = 1$ for $x < 0$, $u_0 = 1 - x$ for $0 \leq x \leq 1$, $u_0 = 0$ for $x > 1$, up to breaking, and continue the solution after.
+\end{problem}
+
+\begin{solution}
+Characteristics from $x_0 \in [0, 1]$ have speed $1 - x_0$ and are $x = x_0 + (1 - x_0)t$; all of them meet at $x = 1$, $t = 1$, so $t_b = 1$. For $t < 1$, in the ramp, $x = x_0 + (1 - x_0)t$ gives $x_0 = (x - t)/(1 - t)$ and
+$u = 1 - x_0 = (1 - x)/(1 - t)$ for $t \leq x \leq 1$; $u = 1$ for $x < t$; $u = 0$ for $x > 1$. At $t = 1$ a shock forms at $x = 1$ joining $u_l = 1$ to $u_r = 0$; it moves at speed $\frac12$, so $x = 1 + \frac12(t - 1)$ for $t \geq 1$.
+\end{solution}
+
+\begin{problem}
+Show that for $u_l < u_r$ the fan $u = x/t$ satisfies Burgers' equation, and that the discontinuous weak solution with speed $\frac12(u_l + u_r)$ violates the entropy condition.
+\end{problem}
+
+\begin{solution}
+$u_t + uu_x = -\frac{x}{t^2} + \frac xt\cdot\frac1t = 0$. For the discontinuous solution, $a(u_l) = u_l < \frac12(u_l + u_r) < u_r = a(u_r)$, so $a(u_l) < s$ and $s < a(u_r)$, the reverse of the Lax condition: characteristics leave the shock on both sides.
+\end{solution}
+
+\begin{problem}
+For the traffic model of Section~\ref{ssec:traffic}, show that the shock at the back of a queue has speed $-v_{\max}\rho_l/\rho_{\max}$, and find how long a queue grows behind a light that is red for $60$ seconds, with
+$v_{\max} = 100$\,km/h, $\rho_{\max} = 150$ and $\rho_l = 50$ cars/km.
+\end{problem}
+
+\begin{solution}
+$q(\rho_{\max}) = 0$, so
+\[
+s = -\frac{q(\rho_l)}{\rho_{\max} - \rho_l} = -\frac{v_{\max}\rho_l(1 - \rho_l/\rho_{\max})}{\rho_{\max}(1 - \rho_l/\rho_{\max})} = -v_{\max}\frac{\rho_l}{\rho_{\max}} .
+\]
+Here $s = -33.3$\,km/h, so after one minute the back of the queue is $33.3/60 = 0.556$\,km behind the light, and the queue holds $0.556 \times 150 = 83.3$ cars. As a check by conservation: $0.556 \times 50 = 27.8$ cars were already on that stretch when the light turned red, and $q(\rho_l)/60 = 3333/60 = 55.6$ more arrived during the minute, $83.3$ in all.
+\end{solution}
+
+\begin{problem}
+Find the shock speed for the conservation law $u_t + (u^3)_x = 0$ with $u_l = 1$, $u_r = 0$, and check the entropy condition.
+\end{problem}
+
+\begin{solution}
+$s = (0 - 1)/(0 - 1) = 1$. With $a(u) = 3u^2$, $a(u_l) = 3 > 1 > 0 = a(u_r)$: the Lax condition holds, and the shock is admissible.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
@@ -458,11 +790,22 @@ the mean age is $50$ years.
 
 \subhead{Further reading}
 \begin{enumerate}
-\item Hadamard, J. (1902), Sur les probl\`emes aux d\'eriv\'ees partielles et leur signification physique, \emph{Princeton University Bulletin}, 13,
-49--52.
-\item McKendrick, A. G. (1926), Applications of mathematics to medical problems, \emph{Proceedings of the Edinburgh Mathematical Society}, 44, 98--130.
+\item Burgers, J. M. (1948), A mathematical model illustrating the theory of turbulence, \emph{Advances in Applied Mechanics}, 1, 171--199.
+\item Cole, J. D. (1951), On a quasi-linear parabolic equation occurring in aerodynamics, \emph{Quarterly of Applied Mathematics}, 9, 225--236.
 \item von Foerster, H. (1959), Some remarks on changing populations, in F. Stohlman (ed.), \emph{The Kinetics of Cellular Proliferation}, New York,
 Grune and Stratton, 382--407.
+\item Godunov, S. K. (1959), A difference method for numerical calculation of discontinuous solutions of the equations of hydrodynamics, \emph{Matematicheskii Sbornik}, 47(89), 271--306.
+\item Hadamard, J. (1902), Sur les probl\`emes aux d\'eriv\'ees partielles et leur signification physique, \emph{Princeton University Bulletin}, 13,
+49--52.
+\item Hopf, E. (1950), The partial differential equation $u_t + uu_x = \mu u_{xx}$, \emph{Communications on Pure and Applied Mathematics}, 3, 201--230.
+\item Hugoniot, H. (1887), M\'emoire sur la propagation du mouvement dans les corps et sp\'ecialement dans les gaz parfaits, \emph{Journal de l'\'Ecole Polytechnique}, 57, 3--97.
+\item Kru\v{z}kov, S. N. (1970), First order quasilinear equations in several independent variables, \emph{Mathematics of the USSR-Sbornik}, 10, 217--243.
+\item Lax, P. D. (1957), Hyperbolic systems of conservation laws II, \emph{Communications on Pure and Applied Mathematics}, 10, 537--566.
+\item Lax, P. D., and Wendroff, B. (1960), Systems of conservation laws, \emph{Communications on Pure and Applied Mathematics}, 13, 217--237.
+\item Lighthill, M. J., and Whitham, G. B. (1955), On kinematic waves II: a theory of traffic flow on long crowded roads, \emph{Proceedings of the Royal Society of London A}, 229, 317--345.
+\item McKendrick, A. G. (1926), Applications of mathematics to medical problems, \emph{Proceedings of the Edinburgh Mathematical Society}, 44, 98--130.
+\item Rankine, W. J. M. (1870), On the thermodynamic theory of waves of finite longitudinal disturbance, \emph{Philosophical Transactions of the Royal Society of London}, 160, 277--288.
+\item Richards, P. I. (1956), Shock waves on the highway, \emph{Operations Research}, 4, 42--51.
 \end{enumerate}
 
 \end{document}
