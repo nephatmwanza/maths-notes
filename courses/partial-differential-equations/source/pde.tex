@@ -3678,6 +3678,271 @@ $\frac{d}{dt}\int u_x^2 = 2\int u_xu_{xt} = -2\int u_{xx}u_t = -2\kappa\int u_{x
 $2\kappa t\int u_x(x, t)^2 \leq \int g^2$: the gradient becomes finite at once, even for rough data.
 \end{solution}
 
+%======================================================================
+\section{Finite Difference Methods}
+\label{sec:fd}
+
+Most problems met in practice have no formula and no series; they are solved on a computer. The oldest and most direct method replaces derivatives by difference quotients on a grid. Richardson tried in 1922 to forecast the weather this way by hand, and his forecast failed, not because of the arithmetic but
+because his scheme was unstable. The theory that explains such failures, due to Courant, Friedrichs and Lewy (1928) and to von Neumann in the 1940s, is the subject of this section. Its central lesson is that a scheme which approximates the equation well may still produce nonsense, and that stability is a
+property to be checked, not assumed.
+
+\subsection{Difference quotients and consistency}
+\label{ssec:consistency}
+
+On a grid $x_j = j\Delta x$, $t_n = n\Delta t$, write $u_j^n$ for the computed approximation to $u(x_j, t_n)$. Taylor's theorem gives, for smooth $u$,
+\[
+\frac{u(x + h) - u(x)}{h} = u' + \frac h2u'' + O(h^2), \qquad \frac{u(x + h) - 2u(x) + u(x - h)}{h^2} = u'' + \frac{h^2}{12}u'''' + O(h^4) .
+\]
+A scheme is \textbf{consistent} if its \textbf{truncation error}, the residual left when the exact solution is substituted into it, tends to $0$ with $\Delta x$ and $\Delta t$; its \textbf{order} is the power with which it does so. The simplest scheme for $u_t = \kappa u_{xx}$ is the explicit
+\textbf{forward-time centred-space} (FTCS) scheme
+\[
+u_j^{n + 1} = u_j^n + r\bigl(u_{j + 1}^n - 2u_j^n + u_{j - 1}^n\bigr), \qquad r = \frac{\kappa\,\Delta t}{\Delta x^2} ,
+\]
+with truncation error $O(\Delta t + \Delta x^2)$.
+
+\subsection{Stability: the von Neumann method}
+\label{ssec:vonneumann}
+
+The scheme is linear with constant coefficients, so it acts on each Fourier mode separately. Substituting $u_j^n = G^ne^{ij\theta}$, $0 \leq \theta \leq \pi$, the mode is reproduced with the \textbf{amplification factor}
+\[
+G(\theta) = 1 + r(e^{i\theta} - 2 + e^{-i\theta}) = 1 - 4r\sin^2\frac\theta2 .
+\]
+The scheme is \textbf{stable in the sense of von Neumann} if $|G(\theta)| \leq 1 + C\Delta t$ for all $\theta$, so that no mode can grow faster than a fixed exponential. For FTCS, $G$ ranges from $1$ down to $1 - 4r$, so the condition is $1 - 4r \geq -1$:
+\[
+r = \frac{\kappa\,\Delta t}{\Delta x^2} \leq \frac12 .
+\]
+If $r > \frac12$, the highest mode $\theta = \pi$, the sawtooth $(-1)^j$, is multiplied at each step by $1 - 4r < -1$, and any trace of it, even rounding error, grows exponentially and swamps the solution (Software~\ref{sw:ftcs}). The restriction $\Delta t \leq \Delta x^2/2\kappa$ is severe: halving $\Delta x$ requires four times as
+many steps.
+
+\begin{thm}[Convergence of FTCS]
+\label{thm:ftcsconv}
+Let $u$ be a solution of $u_t = \kappa u_{xx}$ on $[0, 1] \times [0, T]$ with bounded derivatives $u_{tt}$ and $u_{xxxx}$, and boundary values imposed exactly. If $r \leq \frac12$, the FTCS solution with exact initial values satisfies
+\[
+\max_{j,\,n\Delta t \leq T}|u_j^n - u(x_j, t_n)| \leq T\Bigl(\frac{\Delta t}2\max|u_{tt}| + \frac{\kappa\Delta x^2}{12}\max|u_{xxxx}|\Bigr) .
+\]
+\end{thm}
+
+\begin{proof}
+Let $e_j^n = u_j^n - u(x_j, t_n)$. The exact solution satisfies the scheme up to $\Delta t\,\tau_j^n$, where by Taylor's theorem $|\tau_j^n| \leq \frac{\Delta t}2\max|u_{tt}| + \frac{\kappa\Delta x^2}{12}\max|u_{xxxx}| =: \tau$. Subtracting,
+\[
+e_j^{n + 1} = re_{j - 1}^n + (1 - 2r)e_j^n + re_{j + 1}^n - \Delta t\,\tau_j^n .
+\]
+When $r \leq \frac12$ all three coefficients are non-negative and sum to $1$, so $\max_j|e^{n + 1}| \leq \max_j|e^n| + \Delta t\,\tau$. Since $e^0 = 0$, $\max_j|e^n| \leq n\Delta t\,\tau \leq T\tau$.
+\end{proof}
+
+The proof used only that the new value is a convex combination of old ones: a \textbf{discrete maximum principle}, the counterpart of Theorem~\ref{thm:maxheat}. The general statement is the \textbf{Lax equivalence theorem} (Lax and Richtmyer, 1956): for a consistent linear scheme for a well-posed linear problem,
+stability is necessary and sufficient for convergence.
+
+\subsection{Implicit schemes}
+\label{ssec:implicit}
+
+Evaluating the space difference at the new time level gives the \textbf{backward Euler} scheme, and averaging the two levels gives \textbf{Crank--Nicolson}:
+\[
+u_j^{n + 1} - u_j^n = r\,\delta^2u_j^{n + 1}, \qquad u_j^{n + 1} - u_j^n = \frac r2\bigl(\delta^2u_j^{n + 1} + \delta^2u_j^n\bigr) ,
+\]
+where $\delta^2u_j = u_{j + 1} - 2u_j + u_{j - 1}$. Each step needs the solution of a tridiagonal linear system, which costs only $O(N)$ operations. Their amplification factors, with $s = \sin^2(\theta/2)$, are
+\[
+G_{\mathrm{BE}} = \frac1{1 + 4rs}, \qquad G_{\mathrm{CN}} = \frac{1 - 2rs}{1 + 2rs} ,
+\]
+both of modulus at most $1$ for \emph{every} $r$: the schemes are \textbf{unconditionally stable} (Figure~\ref{fig:amplification}). Backward Euler is first order in time; Crank--Nicolson is second order, $O(\Delta t^2 + \Delta x^2)$, and is the standard choice. Its weakness is that for large $r$ the highest modes have
+$G_{\mathrm{CN}} \approx -1$: they are not damped but flip sign at each step, so sharp initial data produce slowly decaying oscillations, which backward Euler, with $G \to 0$, does not.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-0.9,-0.65) rectangle (10.2,3.55);
+\fill[red!10] (0,2.2) rectangle (7,3.3);
+\draw[->] (0,0) -- (7.4,0) node[below,font=\small] {$\theta$};
+\draw[->] (0,0) -- (0,3.4) node[left,font=\small] {$|G|$};
+\draw (7,0.06) -- (7,-0.06) node[below,font=\scriptsize] {$\pi$};
+\draw (3.5,0.06) -- (3.5,-0.06) node[below,font=\scriptsize] {$\pi/2$};
+\draw[black!60,dashed] (0,2.2) -- (7,2.2); \node[font=\scriptsize,left] at (0,2.2) {$1$};
+\node[font=\scriptsize,red!60!black] at (3.5,3.05) {unstable: $|G| > 1$};
+\draw[blue!60!black,thick] (0.000,2.200) -- (0.058,2.199) -- (0.117,2.198) -- (0.175,2.195) -- (0.233,2.190) -- (0.292,2.185) -- (0.350,2.178) -- (0.408,2.171) -- (0.467,2.162) -- (0.525,2.151) -- (0.583,2.140) -- (0.642,2.128) -- (0.700,2.114) -- (0.758,2.099) -- (0.817,2.083) -- (0.875,2.066) -- (0.933,2.048) -- (0.992,2.029) -- (1.050,2.008) -- (1.108,1.987) -- (1.167,1.964) -- (1.225,1.941) -- (1.283,1.916) -- (1.342,1.890) -- (1.400,1.864) -- (1.458,1.836) -- (1.517,1.808) -- (1.575,1.778) -- (1.633,1.748) -- (1.692,1.717) -- (1.750,1.685) -- (1.808,1.652) -- (1.867,1.618) -- (1.925,1.583) -- (1.983,1.548) -- (2.042,1.511) -- (2.100,1.475) -- (2.158,1.437) -- (2.217,1.399) -- (2.275,1.360) -- (2.333,1.320) -- (2.392,1.280) -- (2.450,1.239) -- (2.508,1.198) -- (2.567,1.156) -- (2.625,1.114) -- (2.683,1.071) -- (2.742,1.028) -- (2.800,0.984) -- (2.858,0.940) -- (2.917,0.896) -- (2.975,0.851) -- (3.033,0.806) -- (3.092,0.761) -- (3.150,0.715) -- (3.208,0.670) -- (3.267,0.624) -- (3.325,0.578) -- (3.383,0.532) -- (3.442,0.486) -- (3.500,0.440) -- (3.558,0.394) -- (3.617,0.348) -- (3.675,0.302) -- (3.733,0.256) -- (3.792,0.210) -- (3.850,0.165) -- (3.908,0.119) -- (3.967,0.074) -- (4.025,0.029) -- (4.083,0.016) -- (4.142,0.060) -- (4.200,0.104) -- (4.258,0.148) -- (4.317,0.191) -- (4.375,0.234) -- (4.433,0.276) -- (4.492,0.318) -- (4.550,0.359) -- (4.608,0.400) -- (4.667,0.440) -- (4.725,0.480) -- (4.783,0.519) -- (4.842,0.557) -- (4.900,0.595) -- (4.958,0.631) -- (5.017,0.668) -- (5.075,0.703) -- (5.133,0.738) -- (5.192,0.772) -- (5.250,0.805) -- (5.308,0.837) -- (5.367,0.868) -- (5.425,0.898) -- (5.483,0.928) -- (5.542,0.956) -- (5.600,0.984) -- (5.658,1.010) -- (5.717,1.036) -- (5.775,1.061) -- (5.833,1.084) -- (5.892,1.107) -- (5.950,1.128) -- (6.008,1.149) -- (6.067,1.168) -- (6.125,1.186) -- (6.183,1.203) -- (6.242,1.219) -- (6.300,1.234) -- (6.358,1.248) -- (6.417,1.260) -- (6.475,1.271) -- (6.533,1.282) -- (6.592,1.291) -- (6.650,1.298) -- (6.708,1.305) -- (6.767,1.310) -- (6.825,1.315) -- (6.883,1.318) -- (6.942,1.319) -- (7.000,1.320);
+\draw[red!70!black,thick] (0.000,2.200) -- (0.058,2.199) -- (0.117,2.196) -- (0.175,2.192) -- (0.233,2.186) -- (0.292,2.177) -- (0.350,2.167) -- (0.408,2.156) -- (0.467,2.142) -- (0.525,2.127) -- (0.583,2.110) -- (0.642,2.091) -- (0.700,2.071) -- (0.758,2.049) -- (0.817,2.025) -- (0.875,1.999) -- (0.933,1.972) -- (0.992,1.943) -- (1.050,1.912) -- (1.108,1.880) -- (1.167,1.846) -- (1.225,1.811) -- (1.283,1.774) -- (1.342,1.736) -- (1.400,1.696) -- (1.458,1.654) -- (1.517,1.612) -- (1.575,1.567) -- (1.633,1.522) -- (1.692,1.475) -- (1.750,1.427) -- (1.808,1.377) -- (1.867,1.327) -- (1.925,1.275) -- (1.983,1.221) -- (2.042,1.167) -- (2.100,1.112) -- (2.158,1.055) -- (2.217,0.998) -- (2.275,0.939) -- (2.333,0.880) -- (2.392,0.820) -- (2.450,0.759) -- (2.508,0.697) -- (2.567,0.634) -- (2.625,0.570) -- (2.683,0.506) -- (2.742,0.441) -- (2.800,0.376) -- (2.858,0.310) -- (2.917,0.243) -- (2.975,0.176) -- (3.033,0.109) -- (3.092,0.041) -- (3.150,0.027) -- (3.208,0.095) -- (3.267,0.164) -- (3.325,0.233) -- (3.383,0.302) -- (3.442,0.371) -- (3.500,0.440) -- (3.558,0.509) -- (3.617,0.578) -- (3.675,0.647) -- (3.733,0.716) -- (3.792,0.785) -- (3.850,0.853) -- (3.908,0.921) -- (3.967,0.989) -- (4.025,1.056) -- (4.083,1.123) -- (4.142,1.190) -- (4.200,1.256) -- (4.258,1.321) -- (4.317,1.386) -- (4.375,1.450) -- (4.433,1.514) -- (4.492,1.577) -- (4.550,1.639) -- (4.608,1.700) -- (4.667,1.760) -- (4.725,1.819) -- (4.783,1.878) -- (4.842,1.935) -- (4.900,1.992) -- (4.958,2.047) -- (5.017,2.101) -- (5.075,2.155) -- (5.133,2.207) -- (5.192,2.257) -- (5.250,2.307) -- (5.308,2.355) -- (5.367,2.402) -- (5.425,2.447) -- (5.483,2.492) -- (5.542,2.534) -- (5.600,2.576) -- (5.658,2.616) -- (5.717,2.654) -- (5.775,2.691) -- (5.833,2.726) -- (5.892,2.760) -- (5.950,2.792) -- (6.008,2.823) -- (6.067,2.852) -- (6.125,2.879) -- (6.183,2.905) -- (6.242,2.929) -- (6.300,2.951) -- (6.358,2.971) -- (6.417,2.990) -- (6.475,3.007) -- (6.533,3.022) -- (6.592,3.036) -- (6.650,3.047) -- (6.708,3.057) -- (6.767,3.066) -- (6.825,3.072) -- (6.883,3.076) -- (6.942,3.079) -- (7.000,3.080);
+\draw[green!45!black,thick] (0.000,2.200) -- (0.058,2.192) -- (0.117,2.170) -- (0.175,2.133) -- (0.233,2.083) -- (0.292,2.020) -- (0.350,1.945) -- (0.408,1.860) -- (0.467,1.767) -- (0.525,1.666) -- (0.583,1.559) -- (0.642,1.449) -- (0.700,1.335) -- (0.758,1.219) -- (0.817,1.103) -- (0.875,0.987) -- (0.933,0.872) -- (0.992,0.759) -- (1.050,0.648) -- (1.108,0.540) -- (1.167,0.435) -- (1.225,0.333) -- (1.283,0.235) -- (1.342,0.141) -- (1.400,0.051) -- (1.458,0.036) -- (1.517,0.119) -- (1.575,0.198) -- (1.633,0.274) -- (1.692,0.346) -- (1.750,0.415) -- (1.808,0.480) -- (1.867,0.542) -- (1.925,0.602) -- (1.983,0.658) -- (2.042,0.712) -- (2.100,0.763) -- (2.158,0.811) -- (2.217,0.857) -- (2.275,0.901) -- (2.333,0.943) -- (2.392,0.983) -- (2.450,1.020) -- (2.508,1.056) -- (2.567,1.091) -- (2.625,1.123) -- (2.683,1.154) -- (2.742,1.184) -- (2.800,1.212) -- (2.858,1.239) -- (2.917,1.265) -- (2.975,1.290) -- (3.033,1.313) -- (3.092,1.335) -- (3.150,1.357) -- (3.208,1.377) -- (3.267,1.397) -- (3.325,1.415) -- (3.383,1.433) -- (3.442,1.450) -- (3.500,1.467) -- (3.558,1.482) -- (3.617,1.497) -- (3.675,1.512) -- (3.733,1.525) -- (3.792,1.539) -- (3.850,1.551) -- (3.908,1.563) -- (3.967,1.575) -- (4.025,1.586) -- (4.083,1.597) -- (4.142,1.607) -- (4.200,1.617) -- (4.258,1.626) -- (4.317,1.635) -- (4.375,1.644) -- (4.433,1.652) -- (4.492,1.660) -- (4.550,1.668) -- (4.608,1.675) -- (4.667,1.682) -- (4.725,1.689) -- (4.783,1.696) -- (4.842,1.702) -- (4.900,1.708) -- (4.958,1.713) -- (5.017,1.719) -- (5.075,1.724) -- (5.133,1.729) -- (5.192,1.734) -- (5.250,1.739) -- (5.308,1.743) -- (5.367,1.747) -- (5.425,1.751) -- (5.483,1.755) -- (5.542,1.759) -- (5.600,1.762) -- (5.658,1.765) -- (5.717,1.768) -- (5.775,1.771) -- (5.833,1.774) -- (5.892,1.777) -- (5.950,1.779) -- (6.008,1.781) -- (6.067,1.784) -- (6.125,1.786) -- (6.183,1.788) -- (6.242,1.789) -- (6.300,1.791) -- (6.358,1.792) -- (6.417,1.794) -- (6.475,1.795) -- (6.533,1.796) -- (6.592,1.797) -- (6.650,1.798) -- (6.708,1.798) -- (6.767,1.799) -- (6.825,1.799) -- (6.883,1.800) -- (6.942,1.800) -- (7.000,1.800);
+\draw[orange!80!black,thick] (0.000,2.200) -- (0.058,2.192) -- (0.117,2.170) -- (0.175,2.134) -- (0.233,2.086) -- (0.292,2.027) -- (0.350,1.959) -- (0.408,1.884) -- (0.467,1.805) -- (0.525,1.724) -- (0.583,1.641) -- (0.642,1.558) -- (0.700,1.477) -- (0.758,1.398) -- (0.817,1.322) -- (0.875,1.249) -- (0.933,1.180) -- (0.992,1.114) -- (1.050,1.053) -- (1.108,0.995) -- (1.167,0.940) -- (1.225,0.889) -- (1.283,0.842) -- (1.342,0.797) -- (1.400,0.756) -- (1.458,0.717) -- (1.517,0.681) -- (1.575,0.648) -- (1.633,0.616) -- (1.692,0.587) -- (1.750,0.560) -- (1.808,0.534) -- (1.867,0.511) -- (1.925,0.488) -- (1.983,0.467) -- (2.042,0.448) -- (2.100,0.430) -- (2.158,0.412) -- (2.217,0.396) -- (2.275,0.381) -- (2.333,0.367) -- (2.392,0.353) -- (2.450,0.341) -- (2.508,0.329) -- (2.567,0.317) -- (2.625,0.307) -- (2.683,0.297) -- (2.742,0.287) -- (2.800,0.278) -- (2.858,0.270) -- (2.917,0.262) -- (2.975,0.254) -- (3.033,0.247) -- (3.092,0.240) -- (3.150,0.233) -- (3.208,0.227) -- (3.267,0.221) -- (3.325,0.215) -- (3.383,0.210) -- (3.442,0.205) -- (3.500,0.200) -- (3.558,0.195) -- (3.617,0.191) -- (3.675,0.187) -- (3.733,0.183) -- (3.792,0.179) -- (3.850,0.175) -- (3.908,0.172) -- (3.967,0.168) -- (4.025,0.165) -- (4.083,0.162) -- (4.142,0.159) -- (4.200,0.156) -- (4.258,0.153) -- (4.317,0.151) -- (4.375,0.148) -- (4.433,0.146) -- (4.492,0.144) -- (4.550,0.142) -- (4.608,0.139) -- (4.667,0.138) -- (4.725,0.136) -- (4.783,0.134) -- (4.842,0.132) -- (4.900,0.130) -- (4.958,0.129) -- (5.017,0.127) -- (5.075,0.126) -- (5.133,0.124) -- (5.192,0.123) -- (5.250,0.122) -- (5.308,0.121) -- (5.367,0.119) -- (5.425,0.118) -- (5.483,0.117) -- (5.542,0.116) -- (5.600,0.115) -- (5.658,0.114) -- (5.717,0.113) -- (5.775,0.113) -- (5.833,0.112) -- (5.892,0.111) -- (5.950,0.110) -- (6.008,0.110) -- (6.067,0.109) -- (6.125,0.109) -- (6.183,0.108) -- (6.242,0.108) -- (6.300,0.107) -- (6.358,0.107) -- (6.417,0.106) -- (6.475,0.106) -- (6.533,0.106) -- (6.592,0.106) -- (6.650,0.105) -- (6.708,0.105) -- (6.767,0.105) -- (6.825,0.105) -- (6.883,0.105) -- (6.942,0.105) -- (7.000,0.105);
+\node[font=\scriptsize,red!70!black,anchor=west] at (7.15,3.08) {FTCS, $r = 0.6$};
+\node[font=\scriptsize,green!45!black,anchor=west] at (7.15,1.8) {CN, $r = 5$};
+\node[font=\scriptsize,blue!60!black,anchor=west] at (7.15,1.32) {FTCS, $r = 0.4$};
+\node[font=\scriptsize,orange!80!black,anchor=west] at (7.15,0.45) {backward Euler, $r = 5$};
+\end{tikzpicture}
+\caption{Amplification factors $|G(\theta)|$ for the heat equation. Low frequencies ($\theta$ near $0$) are treated accurately by every scheme. At high frequencies FTCS with $r = 0.6$ amplifies, and is unstable; Crank--Nicolson with $r = 5$ is stable but damps the highest mode only to $0.82$; backward Euler damps it almost completely.}
+\label{fig:amplification}
+\end{figure}
+
+\subsection{Hyperbolic equations and the CFL condition}
+\label{ssec:cfl}
+
+For the advection equation $u_t + au_x = 0$ with $a > 0$, the \textbf{upwind} scheme takes the space difference on the side from which information comes:
+\[
+u_j^{n + 1} = u_j^n - \nu\bigl(u_j^n - u_{j - 1}^n\bigr), \qquad \nu = \frac{a\,\Delta t}{\Delta x} ,
+\]
+where $\nu$ is the \textbf{Courant number}. Its amplification factor $G = 1 - \nu(1 - e^{-i\theta})$ has $|G|^2 = 1 - 2\nu(1 - \nu)(1 - \cos\theta)$, so it is stable exactly when $0 \leq \nu \leq 1$. The centred FTCS scheme $u_j^{n + 1} = u_j^n - \frac\nu2(u_{j + 1}^n - u_{j - 1}^n)$, although consistent, has
+$|G|^2 = 1 + \nu^2\sin^2\theta > 1$ and is unstable for every $\Delta t$.
+
+The condition $\nu \leq 1$ has a geometric meaning. The value $u_j^{n + 1}$ depends on $u_{j - 1}^n$ and $u_j^n$, so after $n$ steps on data in $[x_j - n\Delta x, x_j]$: the \textbf{numerical domain of dependence}. The exact solution at $(x_j, t_n)$ depends on the data at $x_j - at_n = x_j - n\nu\Delta x$.
+If $\nu > 1$, that point lies outside the numerical domain of dependence, and the scheme cannot converge, since changing the data there changes the solution but not the computation.
+
+\begin{thm}[Courant--Friedrichs--Lewy]
+\label{thm:cfl}
+A necessary condition for an explicit scheme to converge is that its numerical domain of dependence contain the domain of dependence of the differential equation, in the limit as the grid is refined with $\Delta t/\Delta x$ fixed.
+\end{thm}
+
+For the wave equation $u_{tt} = c^2u_{xx}$ and the leapfrog scheme of Section~\ref{sec:wave1d}, the condition is $c\,\Delta t \leq \Delta x$; at equality the scheme is exact in one dimension. For explicit schemes for hyperbolic equations, $\Delta t$ need only be proportional to $\Delta x$, much less restrictive than the
+$\Delta x^2$ of the heat equation, because information travels at a finite speed.
+
+Upwind is first order; its \textbf{modified equation}, the equation it solves to higher accuracy, is $u_t + au_x = \frac{a\Delta x}2(1 - \nu)u_{xx}$, so it adds \textbf{numerical diffusion} that smears sharp fronts. The second-order \textbf{Lax--Wendroff} scheme
+\[
+u_j^{n + 1} = u_j^n - \frac\nu2\bigl(u_{j + 1}^n - u_{j - 1}^n\bigr) + \frac{\nu^2}2\bigl(u_{j + 1}^n - 2u_j^n + u_{j - 1}^n\bigr)
+\]
+is stable for $\nu \leq 1$ and keeps fronts sharper, but produces oscillations next to them. This is unavoidable: Godunov's theorem says that a linear scheme which never creates new maxima or minima is at most first-order accurate. Modern schemes for conservation laws, like those of Section~\ref{sec:shocks}, escape the theorem by being
+non-linear, switching to first order only near discontinuities.
+
+\subsection{Finite differences in software}
+\label{ssec:software13}
+
+\begin{software}[Stability of FTCS]
+\label{sw:ftcs}
+FTCS for $u_t = u_{xx}$ with $u(x, 0) = \sin\pi x$ plus a sawtooth of size $10^{-12}$, on $50$ intervals, up to $t = 0.1$: the largest error for $r = 0.45$, $0.5$, $0.55$; then the error for $r = 0.4$ on four grids:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> def ftcs(N, r, T):              # u_t = u_xx on (0, 1), u = 0 at the ends
+...     x = np.linspace(0, 1, N + 1); dx = 1 / N; dt = r * dx**2
+...     u = np.sin(np.pi * x) + 1e-12 * (-1)**np.arange(N + 1)  # tiny noise
+...     u[0] = u[-1] = 0
+...     steps = int(round(T / dt))
+...     for _ in range(steps):
+...         u[1:-1] = u[1:-1] + r * (u[2:] - 2*u[1:-1] + u[:-2])
+...     exact = np.exp(-np.pi**2 * steps * dt) * np.sin(np.pi * x)
+...     return np.abs(u - exact).max()
+...
+>>> for r in (0.45, 0.50, 0.55):           # N = 50, up to t = 0.1
+...     print(r, f"{ftcs(50, r, 0.1):.3e}")
+...
+0.45 2.059e-04
+0.5 2.422e-04
+0.55 5.947e+23
+>>> [f"{ftcs(N, 0.4, 0.1):.3e}" for N in (10, 20, 40, 80)]   # second order
+['4.294e-03', '1.063e-03', '2.649e-04', '6.620e-05']
+\end{verbatim}}
+\textbf{Reading the output.} For $r \leq \frac12$ the error is $2 \times 10^{-4}$. At $r = 0.55$ the sawtooth is multiplied by $|1 - 4r| = 1.2$ at each of $455$ steps, a factor of $10^{36}$, and the $10^{-12}$ has grown to $6 \times 10^{23}$. With $r$ fixed at $0.4$, each halving of $\Delta x$ divides the error by $4$: second order in $\Delta x$, as
+Theorem~\ref{thm:ftcsconv} predicts, since $\Delta t \propto \Delta x^2$.
+
+\textbf{MATLAB/Octave:} \texttt{u(2:end-1) = u(2:end-1) + r*diff(u,2)} in a loop.
+\end{software}
+
+\begin{software}[Amplification factors]
+\label{sw:amplification}
+The largest $|G(\theta)|$ over $0 \leq \theta \leq \pi$, and $G$ at the sawtooth mode $\theta = \pi$, for the schemes of this section:
+{\small\begin{verbatim}
+>>> th = np.linspace(0, np.pi, 2001); s = np.sin(th / 2)**2
+>>> G = {                                  # amplification factors G(theta)
+...   'FTCS heat':    lambda r: 1 - 4*r*s,
+...   'backward':     lambda r: 1 / (1 + 4*r*s),
+...   'Crank-Nic.':   lambda r: (1 - 2*r*s) / (1 + 2*r*s),
+...   'upwind':       lambda v: 1 - v * (1 - np.exp(-1j*th)),
+...   'FTCS advect':  lambda v: 1 - 1j * v * np.sin(th),
+...   'Lax-Wendroff': lambda v: 1 - 1j*v*np.sin(th) - 2*v**2*s}
+>>> for name, p in (('FTCS heat', 0.4), ('FTCS heat', 0.6), ('backward', 5),
+...                 ('Crank-Nic.', 5), ('upwind', 0.8), ('upwind', 1.2),
+...                 ('FTCS advect', 0.5), ('Lax-Wendroff', 0.8)):
+...     g = G[name](p)                     # worst case, and the highest mode
+...     print(f"{name:13s} {p:4}  max|G| = {np.abs(g).max():.4f}"
+...           f"  G(pi) = {complex(g[-1]).real:+.4f}")
+...
+FTCS heat      0.4  max|G| = 1.0000  G(pi) = -0.6000
+FTCS heat      0.6  max|G| = 1.4000  G(pi) = -1.4000
+backward         5  max|G| = 1.0000  G(pi) = +0.0476
+Crank-Nic.       5  max|G| = 1.0000  G(pi) = -0.8182
+upwind         0.8  max|G| = 1.0000  G(pi) = -0.6000
+upwind         1.2  max|G| = 1.4000  G(pi) = -1.4000
+FTCS advect    0.5  max|G| = 1.1180  G(pi) = +1.0000
+Lax-Wendroff   0.8  max|G| = 1.0000  G(pi) = -0.2800
+\end{verbatim}}
+\textbf{Reading the output.} Every scheme has $|G(0)| = 1$, so the maximum is at least $1$; stability means it is not more. FTCS for heat fails at $r = 0.6$ and upwind at $\nu = 1.2$, both with $G(\pi) = -1.4$; centred FTCS for advection fails at $\nu = 0.5$ ($|G| = 1.118$ at $\theta = \pi/2$). Backward Euler and Crank--Nicolson are stable at $r = 5$, but
+Crank--Nicolson leaves the sawtooth at $-0.82$ per step.
+
+\textbf{MATLAB/Octave:} \texttt{max(abs(1 - 4*r*sin(th/2).\^{}2))}.
+\end{software}
+
+\begin{software}[Upwind against Lax--Wendroff]
+\label{sw:advection}
+A square pulse carried once round a periodic interval by $u_t + u_x = 0$, on $200$ cells with $\nu = 0.8$:
+{\small\begin{verbatim}
+>>> N, nu = 200, 0.8                       # u_t + u_x = 0, periodic on [0, 1)
+>>> x = np.arange(N) / N
+>>> u0 = ((x > 0.25) & (x < 0.5)).astype(float)          # a square pulse
+>>> up, lw = u0.copy(), u0.copy()
+>>> for _ in range(int(round(N / nu))):    # one full period
+...     up = up - nu * (up - np.roll(up, 1))
+...     lw = (lw - nu/2 * (np.roll(lw, -1) - np.roll(lw, 1))
+...           + nu**2/2 * (np.roll(lw, -1) - 2*lw + np.roll(lw, 1)))
+...
+>>> for name, v in (('upwind', up), ('Lax-Wendroff', lw)):
+...     print(f"{name:12s} max {v.max():.3f}  min {v.min():+.3f}"
+...           f"  L1 error {np.abs(v - u0).mean():.4f}")
+...
+upwind       max 1.000  min +0.000  L1 error 0.0504
+Lax-Wendroff max 1.195  min -0.195  L1 error 0.0347
+\end{verbatim}}
+\textbf{Reading the output.} Upwind keeps the solution between $0$ and $1$, but its numerical diffusion smears the edges, with mean error $0.050$. Lax--Wendroff is more accurate overall ($0.035$) but overshoots to $1.195$ and undershoots to $-0.195$ next to the jumps: Godunov's theorem in action.
+
+\textbf{MATLAB/Octave:} \texttt{circshift} in place of \texttt{np.roll}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Show that $\bigl(u(x + h) - 2u(x) + u(x - h)\bigr)/h^2 = u''(x) + \frac{h^2}{12}u''''(x) + O(h^4)$.
+\end{problem}
+
+\begin{solution}
+$u(x \pm h) = u \pm hu' + \frac{h^2}2u'' \pm \frac{h^3}6u''' + \frac{h^4}{24}u'''' + O(h^5)$. Adding, the odd terms cancel: $u(x + h) + u(x - h) - 2u = h^2u'' + \frac{h^4}{12}u'''' + O(h^6)$; divide by $h^2$.
+\end{solution}
+
+\begin{problem}
+Derive the amplification factor of backward Euler for the heat equation and show that it is unconditionally stable.
+\end{problem}
+
+\begin{solution}
+Substituting $u_j^n = G^ne^{ij\theta}$ into $u_j^{n + 1} - u_j^n = r(u_{j + 1}^{n + 1} - 2u_j^{n + 1} + u_{j - 1}^{n + 1})$ gives $G - 1 = rG(2\cos\theta - 2) = -4rG\sin^2\frac\theta2$, so $G = 1/(1 + 4r\sin^2\frac\theta2) \in (0, 1]$ for every $r > 0$.
+\end{solution}
+
+\begin{problem}
+For the leapfrog scheme for $u_{tt} = c^2u_{xx}$, show that the amplification factors satisfy $G^2 - 2(1 - 2\rho^2\sin^2\frac\theta2)G + 1 = 0$ with $\rho = c\Delta t/\Delta x$, and that $|G| = 1$ for all $\theta$ exactly when $\rho \leq 1$.
+\end{problem}
+
+\begin{solution}
+Substituting into $u_j^{n + 1} - 2u_j^n + u_j^{n - 1} = \rho^2\delta^2u_j^n$ and dividing by $G^{n - 1}e^{ij\theta}$: $G^2 - 2G + 1 = -4\rho^2\sin^2\frac\theta2\,G$. The roots have product $1$; they are complex conjugates of modulus $1$ when the discriminant $4(b^2 - 1) \leq 0$, $b = 1 - 2\rho^2\sin^2\frac\theta2$,
+that is when $|b| \leq 1$, which holds for all $\theta$ iff $\rho \leq 1$. If $\rho > 1$, at $\theta = \pi$, $b < -1$ and one real root has modulus greater than $1$.
+\end{solution}
+
+\begin{problem}
+Find the numerical diffusion coefficient of the upwind scheme with $a = 1$, $\Delta x = 0.005$ and $\nu = 0.8$, and estimate how far a front is smeared after unit time.
+\end{problem}
+
+\begin{solution}
+$D = \frac{a\Delta x}2(1 - \nu) = \frac{0.005}2\times 0.2 = 5 \times 10^{-4}$. A front diffuses over a width of order $\sqrt{4Dt} = 0.045$ after $t = 1$, about nine cells, consistent with the smeared edges in Software~\ref{sw:advection}. At $\nu = 1$ the scheme is exact ($u_j^{n + 1} = u_{j - 1}^n$) and $D = 0$.
+\end{solution}
+
+\begin{problem}
+How many steps do FTCS and Crank--Nicolson need to solve $u_t = u_{xx}$ on $(0, 1)$ to $t = 1$ with $\Delta x = 0.01$, if Crank--Nicolson uses $\Delta t = 0.01$? Compare the work.
+\end{problem}
+
+\begin{solution}
+FTCS needs $\Delta t \leq \frac12\Delta x^2 = 5 \times 10^{-5}$, so $20\,000$ steps of $O(N)$ work each. Crank--Nicolson with $\Delta t = 0.01$ ($r = 100$) takes $100$ steps, each a tridiagonal solve, also $O(N)$, so about $200$ times less work for an error of order $\Delta t^2 + \Delta x^2 \approx 2 \times 10^{-4}$ in the
+smooth part of the solution.
+\end{solution}
+
+\begin{problem}
+Show that the FTCS scheme satisfies a discrete maximum principle when $r \leq \frac12$, and that it fails when $r > \frac12$.
+\end{problem}
+
+\begin{solution}
+For $r \leq \frac12$, $u_j^{n + 1} = ru_{j - 1}^n + (1 - 2r)u_j^n + ru_{j + 1}^n$ is a convex combination, so $\min_ku_k^n \leq u_j^{n + 1} \leq \max_ku_k^n$. For $r > \frac12$ take $u^n = (\ldots, 0, 1, 0, \ldots)$: then $u_j^{n + 1} = 1 - 2r < 0$, a new minimum below the old one.
+\end{solution}
+
 \section*{References}
 \addcontentsline{toc}{section}{References}
 \sloppy
@@ -3712,9 +3977,12 @@ $2\kappa t\int u_x(x, t)^2 \leq \int g^2$: the gradient becomes finite at once, 
 \item Burgers, J. M. (1948), A mathematical model illustrating the theory of turbulence, \emph{Advances in Applied Mechanics}, 1, 171--199.
 \item Carleson, L. (1966), On convergence and growth of partial sums of Fourier series, \emph{Acta Mathematica}, 116, 135--157.
 \item C\'ea, J. (1964), Approximation variationnelle des probl\`emes aux limites, \emph{Annales de l'Institut Fourier}, 14, 345--444.
+\item Charney, J. G., Fj\o rtoft, R., and von Neumann, J. (1950), Numerical integration of the barotropic vorticity equation, \emph{Tellus}, 2, 237--254.
 \item Cole, J. D. (1951), On a quasi-linear parabolic equation occurring in aerodynamics, \emph{Quarterly of Applied Mathematics}, 9, 225--236.
 \item Cooley, J. W., and Tukey, J. W. (1965), An algorithm for the machine calculation of complex Fourier series, \emph{Mathematics of Computation}, 19, 297--301.
 \item Courant, R. (1943), Variational methods for the solution of problems of equilibrium and vibrations, \emph{Bulletin of the American Mathematical Society}, 49, 1--23.
+\item Courant, R., Friedrichs, K., and Lewy, H. (1928), \"Uber die partiellen Differenzengleichungen der mathematischen Physik, \emph{Mathematische Annalen}, 100, 32--74.
+\item Crank, J., and Nicolson, P. (1947), A practical method for numerical evaluation of solutions of partial differential equations of the heat-conduction type, \emph{Proceedings of the Cambridge Philosophical Society}, 43, 50--67.
 \item Dirichlet, P. G. L. (1829), Sur la convergence des s\'eries trigonom\'etriques qui servent \`a repr\'esenter une fonction arbitraire entre des limites donn\'ees, \emph{Journal f\"ur die reine und angewandte Mathematik}, 4, 157--169.
 \item Duhamel, J. M. C. (1833), M\'emoire sur la m\'ethode g\'en\'erale relative au mouvement de la chaleur dans les corps solides plong\'es dans des milieux dont la temp\'erature varie avec le temps, \emph{Journal de l'\'Ecole Polytechnique}, 14 (cahier 22), 20--77.
 \item Earnshaw, S. (1842), On the nature of the molecular forces which regulate the constitution of the luminiferous ether, \emph{Transactions of the Cambridge Philosophical Society}, 7, 97--112.
@@ -3747,6 +4015,7 @@ Grune and Stratton, 382--407.
 \item Laplace, P.-S. (1785), Th\'eorie des attractions des sph\'ero\"ides et de la figure des plan\`etes, \emph{M\'emoires de l'Acad\'emie Royale des Sciences de Paris} (ann\'ee 1782), 113--196.
 \item Lax, P. D. (1957), Hyperbolic systems of conservation laws II, \emph{Communications on Pure and Applied Mathematics}, 10, 537--566.
 \item Lax, P. D., and Milgram, A. N. (1954), Parabolic equations, in \emph{Contributions to the Theory of Partial Differential Equations}, Annals of Mathematics Studies 33, Princeton University Press, 167--190.
+\item Lax, P. D., and Richtmyer, R. D. (1956), Survey of the stability of linear finite difference equations, \emph{Communications on Pure and Applied Mathematics}, 9, 267--293.
 \item Lax, P. D., and Wendroff, B. (1960), Systems of conservation laws, \emph{Communications on Pure and Applied Mathematics}, 13, 217--237.
 \item Legendre, A.-M. (1785), Recherches sur l'attraction des sph\'ero\"ides homog\`enes, \emph{M\'emoires de Math\'ematique et de Physique pr\'esent\'es \`a l'Acad\'emie Royale des Sciences par divers savans}, 10, 411--434.
 \item Lewy, H. (1957), An example of a smooth linear partial differential equation without solution, \emph{Annals of Mathematics}, 66, 155--158.
@@ -3755,6 +4024,7 @@ Grune and Stratton, 382--407.
 \item McKendrick, A. G. (1926), Applications of mathematics to medical problems, \emph{Proceedings of the Edinburgh Mathematical Society}, 44, 98--130.
 \item Mersenne, M. (1636), \emph{Harmonie universelle}, Paris, Cramoisy.
 \item Nirenberg, L. (1953), A strong maximum principle for parabolic equations, \emph{Communications on Pure and Applied Mathematics}, 6, 167--177.
+\item O'Brien, G. G., Hyman, M. A., and Kaplan, S. (1951), A study of the numerical solution of partial differential equations, \emph{Journal of Mathematics and Physics}, 29, 223--251.
 \item Parseval, M.-A. (1806), M\'emoire sur les s\'eries et sur l'int\'egration compl\`ete d'une \'equation aux diff\'erences partielles lin\'eaires du second ordre, \`a coefficients constants, \emph{M\'emoires pr\'esent\'es \`a l'Institut des Sciences, Lettres et Arts, par divers savans}, 1, 638--648.
 \item Perry, J. (1895), On the age of the Earth, \emph{Nature}, 51, 224--227.
 \item Plancherel, M. (1910), Contribution \`a l'\'etude de la repr\'esentation d'une fonction arbitraire par des int\'egrales d\'efinies, \emph{Rendiconti del Circolo Matematico di Palermo}, 30, 289--335.
@@ -3763,6 +4033,7 @@ Grune and Stratton, 382--407.
 \item Rankine, W. J. M. (1870), On the thermodynamic theory of waves of finite longitudinal disturbance, \emph{Philosophical Transactions of the Royal Society of London}, 160, 277--288.
 \item Rayleigh, Lord (J. W. Strutt) (1877), \emph{The Theory of Sound}, London, Macmillan.
 \item Richards, P. I. (1956), Shock waves on the highway, \emph{Operations Research}, 4, 42--51.
+\item Richardson, L. F. (1922), \emph{Weather Prediction by Numerical Process}, Cambridge University Press.
 \item Riemann, B. (1851), \emph{Grundlagen f\"ur eine allgemeine Theorie der Functionen einer ver\"anderlichen complexen Gr\"osse}, Inauguraldissertation, G\"ottingen.
 \item Ritz, W. (1909), \"Uber eine neue Methode zur L\"osung gewisser Variationsprobleme der mathematischen Physik, \emph{Journal f\"ur die reine und angewandte Mathematik}, 135, 1--61.
 \item Sobolev, S. L. (1938), Sur un th\'eor\`eme d'analyse fonctionnelle, \emph{Matematicheskii Sbornik}, 4(46), 471--497.
