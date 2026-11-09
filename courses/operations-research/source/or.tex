@@ -49,9 +49,9 @@
 \newtheorem{prop}[thm]{Proposition}
 \newtheorem{coro}[thm]{Corollary}
 \newtheorem{lem}[thm]{Lemma}
-% An "In software" panel: the Python commands, the output they print, and how to read
+% An ``In software'' panel: the Python commands, the output they print, and how to read
 % it. The web build gives these their own colour (build.py tags the type from
-% the label, and "Software" is tested before every other label).
+% the label, and ``Software'' is tested before every other label).
 \newtheorem{software}[thm]{Software}
 \newtheorem*{note}{Note}
 \newtheorem*{remark}{Remark}
@@ -339,7 +339,7 @@ capacity constraints bind long before the funds do (at most $1000$ units of prod
 \end{solution}
 
 \begin{problem}
-Write the problem "minimise $|x_1 - 2| + |x_2 + 1|$ subject to $x_1 + x_2 \geq 3$, $x_1, x_2$ free" as a linear programme in standard form.
+Write the problem ``minimise $|x_1 - 2| + |x_2 + 1|$ subject to $x_1 + x_2 \geq 3$, $x_1, x_2$ free'' as a linear programme in standard form.
 \end{problem}
 
 \begin{solution}
@@ -1193,6 +1193,273 @@ The basic variables satisfy $Bx_B = b - \sum_{k \in N}A_kx_k$. Changing the non-
 allowed only if this new $x_B$ is within its bounds, which is what the ratio test checked.
 \end{solution}
 
+%======================================================================
+\section{Duality}
+\label{sec:duality}
+
+Every linear programme has a twin, its \textbf{dual}, built from the same data. If the original problem, the \textbf{primal}, asks how to use scarce resources to maximise profit, the dual asks what the resources are worth. The two problems have the same optimal value, the solution of each certifies the optimality of the
+other, and the dual variables are the shadow prices met in the simplex tableau. Duality is the central theoretical result of linear programming; it underlies sensitivity analysis, the theory of games, the dual simplex method and most algorithms for large problems.
+
+\subsection{The dual problem}
+\label{ssec:dualproblem}
+
+Consider the primal in the form
+\[
+\text{(P)}\quad\text{maximise } c^{\mathsf T}x \quad\text{subject to}\quad Ax \leq b, \quad x \geq 0 .
+\]
+Multiply the $i$th constraint by a number $y_i \geq 0$ and add. If $A^{\mathsf T}y \geq c$, then for every feasible $x$, $c^{\mathsf T}x \leq (A^{\mathsf T}y)^{\mathsf T}x = y^{\mathsf T}Ax \leq y^{\mathsf T}b$: every such $y$ gives an upper bound on the primal objective. The best bound is the \textbf{dual}
+\[
+\text{(D)}\quad\text{minimise } b^{\mathsf T}y \quad\text{subject to}\quad A^{\mathsf T}y \geq c, \quad y \geq 0 .
+\]
+There is one dual variable per primal constraint and one dual constraint per primal variable. The dual of the dual is the primal. For other forms the rules are: a primal equality constraint gives a dual variable free in sign, and a primal variable free in sign gives a dual equality constraint; $\geq$ constraints in a
+maximisation give $y_i \leq 0$. These all follow by writing the problem in the form (P) first.
+
+\begin{exa}
+\label{ex:dualproductmix}
+The dual of Example~\ref{ex:graphical} (maximise $10x_1 + 15x_2$ with resource limits $26$, $56$, $5$) is
+\[
+\text{minimise } 26y_1 + 56y_2 + 5y_3 \quad\text{subject to}\quad 2y_1 + 2y_2 - y_3 \geq 10, \quad y_1 + 4y_2 + y_3 \geq 15, \quad y \geq 0 .
+\]
+Read $y_i$ as a price per unit of resource $i$. A buyer who wants to acquire all the firm's resources must offer prices at which making a product is no more profitable than selling the resources it uses (the dual constraints), and wishes to pay as little as possible in total. The answer
+(Software~\ref{sw:dual}) is $y = (\frac53, \frac{10}3, 0)$, with total value $26\cdot\frac53 + 56\cdot\frac{10}3 = 230$, exactly the maximum profit.
+\end{exa}
+
+\subsection{Weak and strong duality}
+\label{ssec:strongduality}
+
+\begin{thm}[Weak duality]
+\label{thm:weakduality}
+If $x$ is feasible for (P) and $y$ for (D), then $c^{\mathsf T}x \leq b^{\mathsf T}y$. Consequently, if $c^{\mathsf T}x = b^{\mathsf T}y$, both are optimal; if (P) is unbounded, (D) is infeasible; and if (D) is unbounded, (P) is infeasible.
+\end{thm}
+
+\begin{proof}
+$c^{\mathsf T}x \leq (A^{\mathsf T}y)^{\mathsf T}x = y^{\mathsf T}(Ax) \leq y^{\mathsf T}b$, using $x \geq 0$ with $A^{\mathsf T}y \geq c$ in the first step and $y \geq 0$ with $Ax \leq b$ in the second. If the values are equal, no feasible $x$ can do better than $b^{\mathsf T}y$, and no feasible $y$ better than $c^{\mathsf T}x$.
+If (P) were unbounded and (D) had a feasible $y$, the primal objective would be bounded by $b^{\mathsf T}y$.
+\end{proof}
+
+\begin{thm}[Strong duality]
+\label{thm:strongduality}
+If (P) has an optimal solution, so does (D), and the optimal values are equal.
+\end{thm}
+
+\begin{proof}
+Write (P) in standard form with slacks: minimise $-c^{\mathsf T}x$ subject to $Ax + s = b$, $x, s \geq 0$, with matrix $[A \mid I]$ and costs $(-c, 0)$. By the simplex method with Bland's rule (Theorem~\ref{thm:bland}) and two phases, there is an optimal basis $B$ at which all reduced costs are non-negative. Put
+$\mu^{\mathsf T} = (-c_B)^{\mathsf T}B^{-1}$ and $y = -\mu$. The reduced costs of the slack columns are $0 - \mu^{\mathsf T}e_i = y_i \geq 0$, and those of the $x$ columns are $-c_j - \mu^{\mathsf T}A_j = (A^{\mathsf T}y)_j - c_j \geq 0$. So $y$ is feasible for (D), and
+$b^{\mathsf T}y = -\mu^{\mathsf T}b$, which is minus the optimal value of the minimisation, that is $c^{\mathsf T}x$. By weak duality both are optimal.
+\end{proof}
+
+Combining the two theorems, exactly one of the following holds for a primal--dual pair: both have optimal solutions with equal values; one is unbounded and the other infeasible; or both are infeasible. The last case does occur (Problem~\ref{prob:bothinfeasible}). The gap between
+primal and dual objective values, positive at any feasible pair that is not optimal, shrinks to zero at the optimum (Figure~\ref{fig:duality}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.045cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-15,-1.25) rectangle (325,1.5);
+\draw[->,thick] (0,0) -- (315,0) node[below,font=\scriptsize] {objective};
+\foreach \v in {0,75,130,225,230} \fill[blue!60!black] (\v,0) circle (1.8pt);
+\foreach \v in {248,280,298} \fill[red!70!black] (\v,0) circle (1.8pt);
+\fill[green!45!black] (230,0) circle (3.2pt);
+\node[font=\scriptsize,blue!60!black,align=center] at (110,0.75) {primal values $c^{\mathsf T}x$ at feasible $x$\\(vertices $O, D, A, C, B$)};
+\node[font=\scriptsize,red!70!black,align=center] at (280,0.75) {dual values $b^{\mathsf T}y$\\at feasible $y$};
+\draw[green!45!black,->] (230,-0.7) -- (230,-0.15);
+\node[font=\scriptsize\bfseries,green!45!black] at (230,-0.95) {$\max = \min = 230$};
+\foreach \v/\l in {0/0,130/130,280/280} \node[font=\tiny,below] at (\v,-0.08) {$\l$};
+\end{tikzpicture}
+\caption{Weak and strong duality for Example~\ref{ex:dualproductmix}. Every primal feasible value lies to the left of every dual feasible value; the dual values $248$, $280$ and $298$ shown come from the feasible prices $y = (2, \frac72, 0)$, $(0, 5, 0)$ and $(5, 3, 0)$. The two sets meet at the common optimum $230$.}
+\label{fig:duality}
+\end{figure}
+
+\subsection{Complementary slackness}
+\label{ssec:compslack}
+
+\begin{thm}[Complementary slackness]
+\label{thm:compslack}
+Feasible $x$ for (P) and $y$ for (D) are both optimal if and only if
+\[
+y_i\bigl(b_i - (Ax)_i\bigr) = 0 \text{ for every } i, \qquad x_j\bigl((A^{\mathsf T}y)_j - c_j\bigr) = 0 \text{ for every } j .
+\]
+\end{thm}
+
+\begin{proof}
+In the proof of weak duality, $b^{\mathsf T}y - c^{\mathsf T}x = y^{\mathsf T}(b - Ax) + x^{\mathsf T}(A^{\mathsf T}y - c)$, a sum of non-negative terms. It is zero, which by strong duality is optimality, if and only if every term is zero.
+\end{proof}
+
+In words: a resource that is not fully used has price zero, and a resource with a positive price is fully used; a product that is made just breaks even at the dual prices, and a product that would lose money at those prices is not made. In Example~\ref{ex:dualproductmix} the third constraint has slack $3$ at the optimum,
+so $y_3 = 0$, and both products are made, so both dual constraints are tight: $2y_1 + 2y_2 = 10$ and $y_1 + 4y_2 = 15$, which give $y = (\frac53, \frac{10}3, 0)$ without solving the dual. This is the usual way to recover dual solutions by hand, and to check that a proposed solution is optimal.
+
+\subsection{Farkas' lemma}
+\label{ssec:farkas}
+
+Duality gives a short proof of the classical theorem of the alternative.
+
+\begin{thm}[Farkas' lemma]
+\label{thm:farkas}
+Exactly one of the following has a solution: (a) $Ax \leq b$; (b) $y \geq 0$ with $A^{\mathsf T}y = 0$ and $b^{\mathsf T}y < 0$.
+\end{thm}
+
+\begin{proof}
+Both cannot hold: $0 = (A^{\mathsf T}y)^{\mathsf T}x = y^{\mathsf T}Ax \leq y^{\mathsf T}b < 0$. Suppose (a) fails. The LP ``maximise $0$ subject to $Ax \leq b$'' (with $x$ free) is infeasible, so its dual ``minimise $b^{\mathsf T}y$ subject to $A^{\mathsf T}y = 0$, $y \geq 0$'' is either infeasible or unbounded. It is
+feasible ($y = 0$), so it is unbounded, and some feasible $y$ has $b^{\mathsf T}y < 0$.
+\end{proof}
+
+A solution of (b) is a \textbf{certificate of infeasibility}: a non-negative combination of the constraints that reads $0 \leq$ (a negative number). Solvers return such certificates, and they are easy to check. For $x_1 + x_2 \leq 2$ and $x_1 + x_2 \geq 3$, the combination with weights $(\frac12, \frac12)$ of $x_1 + x_2 \leq 2$
+and $-x_1 - x_2 \leq -3$ gives $0 \leq -\frac12$ (Software~\ref{sw:farkas}).
+
+\subsection{The dual simplex method}
+\label{ssec:dualsimplex}
+
+The primal simplex method keeps $x_B \geq 0$ (primal feasibility) and works towards non-negative reduced costs (dual feasibility). The \textbf{dual simplex method} (Lemke, 1954) does the opposite: it keeps the reduced costs non-negative and works towards $x_B \geq 0$. An iteration chooses a row $r$ with
+$x_{B(r)} < 0$ to leave, and among the columns with a negative entry in that row chooses the entering one by the \textbf{dual ratio test}
+\[
+j = \operatorname*{arg\,min}\Bigl\{\frac{\bar c_j}{|T_{rj}|} : T_{rj} < 0\Bigr\} ,
+\]
+which keeps every reduced cost non-negative after the pivot. If no entry of the row is negative, the row reads $\sum_jT_{rj}x_j = x_{B(r)} < 0$ with $T_{rj} \geq 0$, which no $x \geq 0$ satisfies, so the primal is infeasible. The objective value moves monotonically towards the optimum from the other side, and the method is the
+simplex method applied to the dual, carried out on the primal tableau.
+
+It is the natural method when a solved problem gains a constraint, as in the branch-and-bound and cutting-plane methods for integer programming: the old optimal basis stays dual feasible, the new constraint makes it primal infeasible, and a few dual pivots restore optimality. It is also the default of most modern solvers,
+because it handles bounds and degeneracy well.
+
+\begin{exa}
+\label{ex:dualsimplex}
+Minimise $20x_1 + 10x_2$ subject to $x_1 + 2x_2 \leq 40$, $3x_1 + x_2 \geq 30$, $4x_1 + 3x_2 \geq 60$. Multiplying the $\geq$ rows by $-1$ and adding slacks, the slack basis has $x_B = (40, -30, -60)$, primal infeasible, but reduced costs $(20, 10) \geq 0$, dual feasible. The most negative row, $-60$,
+leaves; the dual ratios are $20/4 = 5$ and $10/3$, so $x_2$ enters. Then the second row, now $-10$, leaves and $x_1$ enters, giving the optimum $(6, 12)$ at cost $240$ in two pivots without any artificial variables (Software~\ref{sw:dualsimplex}).
+\end{exa}
+
+\subsection{Duality in software}
+\label{ssec:software5}
+
+\begin{software}[A primal--dual pair]
+\label{sw:dual}
+Example~\ref{ex:dualproductmix} and its dual solved separately, the multipliers that HiGHS returns with the primal solution, and the products in the complementary slackness conditions:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.optimize import linprog
+>>> A = np.array([[2., 1], [2, 4], [-1, 1]]); b = np.array([26., 56, 5])
+>>> c = np.array([10., 15])
+>>> P = linprog(-c, A_ub=A, b_ub=b, method='highs')        # primal: max c x
+>>> D = linprog(b, A_ub=-A.T, b_ub=-c, method='highs')     # dual: min b y
+>>> P.x, -P.fun, D.x, D.fun                # A^T y >= c, y >= 0
+(array([ 8., 10.]), 230.0, array([1.66666667, 3.33333333, 0.        ]), 230.0)
+>>> -P.ineqlin.marginals                   # HiGHS's multipliers: the dual
+array([1.66666667, 3.33333333, 0.        ])
+>>> slack = b - A @ P.x; surplus = A.T @ D.x - c
+>>> np.round(slack * D.x, 9) + 0, np.round(surplus * P.x, 9) + 0   # all 0
+(array([0., 0., 0.]), array([0., 0.]))
+\end{verbatim}}
+\textbf{Reading the output.} The primal optimum $(8, 10)$ and the dual optimum $(\frac53, \frac{10}3, 0)$ have the same value $230$. HiGHS reports the dual solution as the \texttt{marginals} of the inequality constraints (with a minus sign, because it minimised $-Z$), so solving the dual separately is never necessary.
+Every product $y_i \times \text{slack}_i$ and $x_j \times \text{surplus}_j$ is zero.
+
+\textbf{MATLAB/Octave:} \texttt{[x, fval, flag, out, lambda] = linprog(...)}; the dual is \texttt{lambda.ineqlin}.
+\end{software}
+
+\begin{software}[The dual simplex method]
+\label{sw:dualsimplex}
+A dual simplex method on the tableau, in exact arithmetic, for Example~\ref{ex:dualsimplex}; each line shows the basis (columns $0, 1$ are $x_1, x_2$, $2, 3, 4$ the slacks), the right-hand sides and the objective value:
+{\small\begin{verbatim}
+>>> from fractions import Fraction as F
+>>> def dual_simplex(T, basis):
+...     """T: rows [A | b], last row [c | -z] with c >= 0 (dual feasible).
+...     Pivots until b >= 0 (primal feasible), printing each basis."""
+...     while True:
+...         rhs = [str(T[i][-1]) for i in range(len(T) - 1)]
+...         print(basis, rhs, -T[-1][-1])
+...         r = min(range(len(T) - 1), key=lambda i: T[i][-1])
+...         if T[r][-1] >= 0: return
+...         cols = [j for j in range(len(T[0]) - 1) if T[r][j] < 0]
+...         if not cols: raise ValueError('primal infeasible')
+...         j = min(cols, key=lambda j: T[-1][j] / -T[r][j])   # ratio test
+...         T[r] = [v / T[r][j] for v in T[r]]
+...         for i in range(len(T)):
+...             if i != r:
+...                 T[i] = [a - T[i][j] * p for a, p in zip(T[i], T[r])]
+...         basis[r] = j
+...
+>>> T = [[F(v) for v in row] for row in
+...      [[1, 2, 1, 0, 0, 40],              # x1 + 2 x2 <= 40
+...       [-3, -1, 0, 1, 0, -30],           # 3 x1 + x2 >= 30, times -1
+...       [-4, -3, 0, 0, 1, -60],           # 4 x1 + 3 x2 >= 60, times -1
+...       [20, 10, 0, 0, 0, 0]]]            # minimise 20 x1 + 10 x2
+>>> dual_simplex(T, [2, 3, 4])             # start from the slack basis
+[2, 3, 4] ['40', '-30', '-60'] 0
+[2, 3, 1] ['0', '-10', '20'] 200
+[2, 0, 1] ['10', '6', '12'] 240
+\end{verbatim}}
+\textbf{Reading the output.} The right-hand sides start at $(40, -30, -60)$ and become non-negative after two pivots. The objective rises from $0$ to $200$ to $240$: in the dual simplex method the value approaches the optimum from below for a minimisation, since each intermediate basis gives a feasible dual solution and
+hence a lower bound.
+
+\textbf{MATLAB/Octave:} the same row operations; \texttt{linprog} with \texttt{'dual-simplex'} uses this method.
+\end{software}
+
+\begin{software}[A certificate of infeasibility]
+\label{sw:farkas}
+For the infeasible system $x_1 + x_2 \leq 2$, $-x_1 - x_2 \leq -3$, a Farkas vector found by linear programming, normalised so that its entries sum to $1$:
+{\small\begin{verbatim}
+>>> A = np.array([[1., 1], [-1, -1]]); b = np.array([2., -3])  # x1 + x2 <= 2,
+>>> far = linprog(b, A_eq=np.vstack([A.T, np.ones(2)]),        # x1 + x2 >= 3
+...               b_eq=[0, 0, 1], method='highs')  # y >= 0, y A = 0, sum 1
+>>> far.x, far.fun                         # y b < 0: a proof of infeasibility
+(array([0.5, 0.5]), -0.5)
+\end{verbatim}}
+\textbf{Reading the output.} $y = (\frac12, \frac12)$ satisfies $A^{\mathsf T}y = 0$ with $b^{\mathsf T}y = -\frac12 < 0$: adding half of each constraint gives $0 \leq -\frac12$, an impossibility that proves the system has no solution.
+
+\textbf{MATLAB/Octave:} the same \texttt{linprog} call with \texttt{Aeq = [A'; ones(1,2)]}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Write the dual of: minimise $3x_1 + 2x_2 + x_3$ subject to $x_1 + x_2 + x_3 \geq 6$, $2x_1 - x_2 = 1$, $x_1, x_3 \geq 0$, $x_2$ free.
+\end{problem}
+
+\begin{solution}
+With dual variables $y_1 \geq 0$ for the $\geq$ row (in a minimisation) and $y_2$ free for the equation: maximise $6y_1 + y_2$ subject to $y_1 + 2y_2 \leq 3$ (from $x_1 \geq 0$), $y_1 - y_2 = 2$ (from $x_2$ free), $y_1 \leq 1$ (from $x_3 \geq 0$), $y_1 \geq 0$, $y_2$ free.
+\end{solution}
+
+\begin{problem}
+Use complementary slackness to show that $x = (6, 12)$ is optimal for Example~\ref{ex:dualsimplex}, and find the dual solution.
+\end{problem}
+
+\begin{solution}
+The dual is: maximise $-40w_1 + 30w_2 + 60w_3$ subject to $-w_1 + 3w_2 + 4w_3 \leq 20$, $-2w_1 + w_2 + 3w_3 \leq 10$, $w \geq 0$ (the first primal constraint written as $-x_1 - 2x_2 \geq -40$). At $x = (6, 12)$ the first constraint has slack $40 - 30 = 10$, so $w_1 = 0$; both $x_j > 0$, so both dual
+constraints are tight: $3w_2 + 4w_3 = 20$, $w_2 + 3w_3 = 10$, giving $w_3 = 2$, $w_2 = 4$. These are non-negative, so $w$ is dual feasible, and $30\cdot 4 + 60\cdot 2 = 240$ equals the primal cost: both are optimal.
+\end{solution}
+
+\begin{problem}
+\label{prob:bothinfeasible}
+Show that the primal ``maximise $x_1 + x_2$ subject to $x_1 - x_2 \leq -1$, $-x_1 + x_2 \leq -1$, $x \geq 0$'' and its dual are both infeasible. What happens to the dual if the objective is $x_1 - x_2$ instead?
+\end{problem}
+
+\begin{solution}
+Adding the primal constraints gives $0 \leq -2$, so the primal is infeasible. The dual is: minimise $-y_1 - y_2$ subject to $y_1 - y_2 \geq 1$, $-y_1 + y_2 \geq 1$, $y \geq 0$, and adding its constraints gives $0 \geq 2$: infeasible too. With the objective $x_1 - x_2$ the dual constraints become
+$y_1 - y_2 \geq 1$ and $-y_1 + y_2 \geq -1$, which force $y_1 - y_2 = 1$ and are satisfied by $y = (1 + t, t)$ for every $t \geq 0$; the dual objective $-1 - 2t \to -\infty$, so the dual is unbounded, as it must be when the primal is infeasible and the dual feasible.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:dualproductmix}, interpret $y_2 = \frac{10}3$ and predict the profit if the second resource rises from $56$ to $60$ units.
+\end{problem}
+
+\begin{solution}
+$y_2$ is the value of one more unit of the second resource. If the basis stays optimal, the profit rises by $4 \times \frac{10}3 = 13.3$, to $243.3$. Check: with $2x_1 + x_2 = 26$ and $2x_1 + 4x_2 = 60$, $x_2 = \frac{34}3$, $x_1 = \frac{22}3$, feasible for the third constraint ($-\frac{22}3 + \frac{34}3 = 4 \leq 5$), and
+$10\cdot\frac{22}3 + 15\cdot\frac{34}3 = \frac{730}3 = 243.3$. How far the resource can change before the basis changes is the subject of the next section.
+\end{solution}
+
+\begin{problem}
+Use Farkas' lemma to show that the system $x_1 + 2x_2 \leq 1$, $-x_1 \leq -2$, $-x_2 \leq 0$ has no solution, by exhibiting a certificate.
+\end{problem}
+
+\begin{solution}
+Take $y = (1, 1, 2)$: $A^{\mathsf T}y = (1 - 1 + 0, 2 + 0 - 2) = (0, 0)$, and $b^{\mathsf T}y = 1 - 2 + 0 = -1 < 0$. Indeed adding the first constraint, the second and twice the third gives $0 \leq -1$.
+\end{solution}
+
+\begin{problem}
+Show that if (P) has a feasible solution and (D) has a feasible solution, then both have optimal solutions.
+\end{problem}
+
+\begin{solution}
+By weak duality, the primal objective is bounded above by $b^{\mathsf T}y$ for the feasible $y$, so (P) is feasible and bounded. A feasible bounded LP has an optimal solution: the simplex method with Bland's rule terminates, and it cannot end with unboundedness, so it ends at an optimal BFS. By strong duality (D)
+then has an optimal solution too.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -1230,7 +1497,9 @@ allowed only if this new $x_B$ is within its bounds, which is what the ratio tes
 \item Dantzig, G. B. (1951), Maximization of a linear function of variables subject to linear inequalities, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 339--347.
 \item Dantzig, G. B. (1955), Upper bounds, secondary constraints, and block triangularity in linear programming, \emph{Econometrica}, 23, 174--183.
 \item Dantzig, G. B., and Orchard-Hays, W. (1954), The product form for the inverse in the simplex method, \emph{Mathematical Tables and Other Aids to Computation}, 8, 64--67.
+\item Farkas, J. (1902), Theorie der einfachen Ungleichungen, \emph{Journal f\"ur die reine und angewandte Mathematik}, 124, 1--27.
 \item Forrest, J. J. H., and Tomlin, J. A. (1972), Updated triangular factors of the basis to maintain sparsity in the product form simplex method, \emph{Mathematical Programming}, 2, 263--278.
+\item Gale, D., Kuhn, H. W., and Tucker, A. W. (1951), Linear programming and the theory of games, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 317--329.
 \item Goldfarb, D., and Reid, J. K. (1977), A practicable steepest-edge simplex algorithm, \emph{Mathematical Programming}, 12, 361--371.
 \item Harris, P. M. J. (1973), Pivot selection methods of the Devex LP code, \emph{Mathematical Programming}, 5, 1--28.
 \item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.
@@ -1238,7 +1507,9 @@ allowed only if this new $x_B$ is within its bounds, which is what the ratio tes
 \item Khachiyan, L. G. (1979), A polynomial algorithm in linear programming, \emph{Soviet Mathematics Doklady}, 20, 191--194.
 \item Klee, V., and Minty, G. J. (1972), How good is the simplex algorithm?, in O. Shisha (ed.), \emph{Inequalities III}, New York, Academic Press, 159--175.
 \item Koopmans, T. C. (ed.) (1951), \emph{Activity Analysis of Production and Allocation}, New York, Wiley.
+\item Lemke, C. E. (1954), The dual method of solving the linear programming problem, \emph{Naval Research Logistics Quarterly}, 1, 36--47.
 \item Minkowski, H. (1896), \emph{Geometrie der Zahlen}, Leipzig, Teubner.
+\item von Neumann, J. (1947), Discussion of a maximum problem, unpublished manuscript, in A. H. Taub (ed.), \emph{John von Neumann: Collected Works}, Vol.~VI (1963), Oxford, Pergamon, 89--95.
 \item Spielman, D. A., and Teng, S.-H. (2004), Smoothed analysis of algorithms: why the simplex algorithm usually takes polynomial time, \emph{Journal of the ACM}, 51, 385--463.
 \item Stigler, G. J. (1945), The cost of subsistence, \emph{Journal of Farm Economics}, 27, 303--314.
 \item Weyl, H. (1935), Elementare Theorie der konvexen Polyeder, \emph{Commentarii Mathematici Helvetici}, 7, 290--306.

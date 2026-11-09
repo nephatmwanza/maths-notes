@@ -1,0 +1,87 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>5.5 The dual simplex method — Operations Research</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='or.css' rel='stylesheet' type='text/css' /> 
+<meta content='or.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Operations Research</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="orse1.html">Operations Research and Linear Programming Models</a></li>
+<li class="sub"><a class="" href="orsu1.html">The linear programming model</a></li>
+<li class="sub"><a class="" href="orsu2.html">Formulating models</a></li>
+<li class="sub"><a class="" href="orsu3.html">Linearising non-linear features</a></li>
+<li class="sub"><a class="" href="orsu4.html">Linear programming in software</a></li>
+<li class="sub"><a class="" href="orsu5.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse2.html">The Geometry of Linear Programming</a></li>
+<li class="sub"><a class="" href="orsu6.html">Convex sets and polyhedra</a></li>
+<li class="sub"><a class="" href="orsu7.html">Basic feasible solutions</a></li>
+<li class="sub"><a class="" href="orsu8.html">The graphical method</a></li>
+<li class="sub"><a class="" href="orsu9.html">Geometry in software</a></li>
+<li class="sub"><a class="" href="orsu10.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse3.html">The Simplex Method</a></li>
+<li class="sub"><a class="" href="orsu11.html">Reduced costs and the optimality test</a></li>
+<li class="sub"><a class="" href="orsu12.html">The tableau</a></li>
+<li class="sub"><a class="" href="orsu13.html">Starting the method: artificial variables</a></li>
+<li class="sub"><a class="" href="orsu14.html">Degeneracy, cycling and Bland’s rule</a></li>
+<li class="sub"><a class="" href="orsu15.html">How fast is the simplex method?</a></li>
+<li class="sub"><a class="" href="orsu16.html">The simplex method in software</a></li>
+<li class="sub"><a class="" href="orsu17.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse4.html">The Revised Simplex Method and Bounded Variables</a></li>
+<li class="sub"><a class="" href="orsu18.html">The revised simplex method</a></li>
+<li class="sub"><a class="" href="orsu19.html">Bounded variables</a></li>
+<li class="sub"><a class="" href="orsu20.html">Numerical practice</a></li>
+<li class="sub"><a class="" href="orsu21.html">Revised methods in software</a></li>
+<li class="sub"><a class="" href="orsu22.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="orse5.html">Duality</a></li>
+<li class="sub"><a class="" href="orsu23.html">The dual problem</a></li>
+<li class="sub"><a class="" href="orsu24.html">Weak and strong duality</a></li>
+<li class="sub"><a class="" href="orsu25.html">Complementary slackness</a></li>
+<li class="sub"><a class="" href="orsu26.html">Farkas’ lemma</a></li>
+<li class="sub"><a class="current" href="orsu27.html">The dual simplex method</a></li>
+<li class="sub"><a class="" href="orsu28.html">Duality in software</a></li>
+<li class="sub"><a class="" href="orsu29.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="orli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 1308 --><div class='crosslinks'><p class='noindent'>[<a href='orsu28.html'>next</a>] [<a href='orsu26.html'>prev</a>] [<a href='orsu26.html#tailorsu26.html'>prev-tail</a>] [<a href='#tailorsu27.html'>tail</a>] [<a href='orse5.html#orsu27.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>5.5   </span> <a id='x34-330005.5'></a>The dual simplex method</h4>
+<!-- l. 1311 --><p class='noindent'>The primal simplex method keeps \(x_B \geq 0\) (primal feasibility) and works towards non-negative reduced costs
+(dual feasibility). The <span class='cmbx-10x-x-109'>dual simplex method </span>(Lemke, 1954) does the opposite: it keeps the
+reduced costs non-negative and works towards \(x_B \geq 0\). An iteration chooses a row \(r\) with \(x_{B(r)} &lt; 0\) to leave,
+and among the columns with a negative entry in that row chooses the entering one by
+the <span class='cmbx-10x-x-109'>dual ratio test </span>\[ j = \operatorname *{arg\,min}\Bigl \{\frac {\bar c_j}{|T_{rj}|} : T_{rj} &lt; 0\Bigr \} , \] which keeps every reduced cost non-negative after the pivot. If no
+entry of the row is negative, the row reads \(\sum _jT_{rj}x_j = x_{B(r)} &lt; 0\) with \(T_{rj} \geq 0\), which no \(x \geq 0\) satisfies, so the primal is
+infeasible. The objective value moves monotonically towards the optimum from the other
+side, and the method is the simplex method applied to the dual, carried out on the primal
+tableau.
+</p><!-- l. 1319 --><p class='noindent'>It is the natural method when a solved problem gains a constraint, as in the branch-and-bound and
+cutting-plane methods for integer programming: the old optimal basis stays dual feasible,
+the new constraint makes it primal infeasible, and a few dual pivots restore optimality.
+It is also the default of most modern solvers, because it handles bounds and degeneracy
+well.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 1322 --><p class='noindent'><span class='head'>
+<a id='x34-33001r1'></a>
+<span class='cmbx-10x-x-109'>Example 5.5.1.</span>  </span> Minimise \(20x_1 + 10x_2\) subject to \(x_1 + 2x_2 \leq 40\), \(3x_1 + x_2 \geq 30\), \(4x_1 + 3x_2 \geq 60\). Multiplying the \(\geq \) rows by \(-1\) and adding slacks, the
+slack basis has \(x_B = (40, -30, -60)\), primal infeasible, but reduced costs \((20, 10) \geq 0\), dual feasible. The most negative row, \(-60\),
+leaves; the dual ratios are \(20/4 = 5\) and \(10/3\), so \(x_2\) enters. Then the second row, now \(-10\), leaves and \(x_1\) enters,
+giving the optimum \((6, 12)\) at cost \(240\) in two pivots without any artificial variables (Software <a href='orsu28.html#x35-34002r2'>5.6.2<!-- tex4ht:ref: sw:dualsimplex  --></a>).
+</p>
+</div>
+<!-- l. 1326 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 1328 --><div class='crosslinks'><p class='noindent'>[<a href='orsu28.html'>next</a>] [<a href='orsu26.html'>prev</a>] [<a href='orsu26.html#tailorsu26.html'>prev-tail</a>] [<a href='orsu27.html'>front</a>] [<a href='orse5.html#orsu27.html'>up</a>] </p></div>
+<!-- l. 1328 --><p class='noindent'><a id='tailorsu27.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="orsu26.html">&larr; Previous</a><a class="up" href="orse5.html#orsu27.html">Contents</a><a class="next" href="orsu28.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="operations-research/5-5-the-dual-simplex-method" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
