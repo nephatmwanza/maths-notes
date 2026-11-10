@@ -1,0 +1,166 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>5.4 Cumulative hazards and life tables in software — Survival Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='survival.css' rel='stylesheet' type='text/css' /> 
+<meta content='survival.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Survival Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="survivalse1.html">Survival Data</a></li>
+<li class="sub"><a class="" href="survivalsu1.html">Time-to-event data</a></li>
+<li class="sub"><a class="" href="survivalsu2.html">Censoring</a></li>
+<li class="sub"><a class="" href="survivalsu3.html">Why ordinary methods fail</a></li>
+<li class="sub"><a class="" href="survivalsu4.html">Recording survival data</a></li>
+<li class="sub"><a class="" href="survivalsu5.html">Survival data in software</a></li>
+<li class="sub"><a class="" href="survivalsu6.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse2.html">Survival, Hazard and Cumulative Hazard</a></li>
+<li class="sub"><a class="" href="survivalsu7.html">The survival function</a></li>
+<li class="sub"><a class="" href="survivalsu8.html">The hazard function</a></li>
+<li class="sub"><a class="" href="survivalsu9.html">The cumulative hazard and the basic identity</a></li>
+<li class="sub"><a class="" href="survivalsu10.html">Summaries: mean, median and residual life</a></li>
+<li class="sub"><a class="" href="survivalsu11.html">Hazards in software</a></li>
+<li class="sub"><a class="" href="survivalsu12.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse3.html">Parametric Models</a></li>
+<li class="sub"><a class="" href="survivalsu13.html">The likelihood with censored data</a></li>
+<li class="sub"><a class="" href="survivalsu14.html">The exponential model</a></li>
+<li class="sub"><a class="" href="survivalsu15.html">The Weibull and other families</a></li>
+<li class="sub"><a class="" href="survivalsu16.html">Choosing a model</a></li>
+<li class="sub"><a class="" href="survivalsu17.html">Parametric models in software</a></li>
+<li class="sub"><a class="" href="survivalsu18.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse4.html">The Kaplan–Meier Estimator</a></li>
+<li class="sub"><a class="" href="survivalsu19.html">The product-limit estimator</a></li>
+<li class="sub"><a class="" href="survivalsu20.html">Greenwood’s formula and confidence intervals</a></li>
+<li class="sub"><a class="" href="survivalsu21.html">The median and reading the curve</a></li>
+<li class="sub"><a class="" href="survivalsu22.html">Kaplan–Meier estimation in software</a></li>
+<li class="sub"><a class="" href="survivalsu23.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse5.html">The Nelson–Aalen Estimator and Life Tables</a></li>
+<li class="sub"><a class="" href="survivalsu24.html">The Nelson–Aalen estimator</a></li>
+<li class="sub"><a class="" href="survivalsu25.html">Using the cumulative hazard to choose a model</a></li>
+<li class="sub"><a class="" href="survivalsu26.html">Life tables</a></li>
+<li class="sub"><a class="current" href="survivalsu27.html">Cumulative hazards and life tables in software</a></li>
+<li class="sub"><a class="" href="survivalsu28.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="survivalli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 1340 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu28.html'>next</a>] [<a href='survivalsu26.html'>prev</a>] [<a href='survivalsu26.html#tailsurvivalsu26.html'>prev-tail</a>] [<a href='#tailsurvivalsu27.html'>tail</a>] [<a href='survivalse5.html#survivalsu27.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>5.4   </span> <a id='x34-330005.4'></a>Cumulative hazards and life tables in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 1343 --><p class='noindent'><span class='head'>
+<a id='x34-33001r1'></a>
+<span class='cmbx-10x-x-109'>Software 5.4.1 </span>(Nelson–Aalen by hand)<span class='cmbx-10x-x-109'>.</span>  </span> Example <a href='survivalsu24.html#x31-30002r2'>5.1.2<!-- tex4ht:ref: ex:nahand  --></a>: the cumulative hazard and its
+standard error at each event time, the survival estimate \(\exp (-\hat H)\), and the Kaplan–Meier estimate for
+comparison:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-13'>
+&gt; library(survival)
+&gt; tm &lt;- c(3, 5, 6, 8, 10, 12, 15, 18, 22, 24)
+&gt; ev &lt;- c(1, 0, 1, 1, 0, 1, 0, 1, 0, 0)
+&gt; km &lt;- survfit(Surv(tm, ev) ~ 1)
+&gt; k &lt;- km$n.event &gt; 0                     # rows at event times
+&gt; H &lt;- cumsum(km$n.event[k] / km$n.risk[k])   # Nelson-Aalen
+&gt; v &lt;- cumsum(km$n.event[k] / km$n.risk[k]^2) # its variance
+&gt; round(cbind(t = km$time[k], H_NA = H, se = sqrt(v), exp_minus_H = exp(-H),
++             KM = km$surv[k]), 4)
+      t   H_NA     se exp_minus_H     KM
+[1,]  3 0.1000 0.1000      0.9048 0.9000
+[2,]  6 0.2250 0.1601      0.7985 0.7875
+[3,]  8 0.3679 0.2146      0.6922 0.6750
+[4,] 12 0.5679 0.2933      0.5667 0.5400
+[5,] 18 0.9012 0.4440      0.4061 0.3600
+</pre>
+<!-- l. 1362 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output.</span> \(\hat H\) rises by \(d_j/n_j\) at each death, reaching \(0.901\) at \(18\) months with standard error \(0.444\).
+Every value of \(\exp (-\hat H)\) exceeds the Kaplan–Meier value, as Proposition <a href='survivalsu24.html#x31-30001r1'>5.1.1<!-- tex4ht:ref: prop:kmna  --></a> requires, by up to \(0.046\) at the
+last death.
+</p><!-- l. 1365 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span><span class='cmtt-10x-x-109'>lifelines.NelsonAalenFitter().fit(tm, ev).cumulative_hazard_</span>.
+</p>
+</div>
+<!-- l. 1366 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1368 --><p class='noindent'><span class='head'>
+<a id='x34-33002r2'></a>
+<span class='cmbx-10x-x-109'>Software 5.4.2 </span>(A Weibull check)<span class='cmbx-10x-x-109'>.</span>  </span> The Nelson–Aalen estimate for <span class='cmtt-10x-x-109'>lung</span>, a least-squares line of \(\log \hat H\) on \(\log t\)
+through the death times, and a comparison of \(\hat H(365)\) with \(-\log \hat S_{\text {KM}}(365)\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-14'>
+&gt; fit &lt;- survfit(Surv(time, status) ~ 1, data = lung)
+&gt; ok &lt;- fit$n.event &gt; 0 &amp; fit$surv &gt; 0
+&gt; Hl &lt;- cumsum(fit$n.event / fit$n.risk)[ok]
+&gt; x &lt;- log(fit$time[ok]); y &lt;- log(Hl)
+&gt; round(coef(lm(y ~ x)), 4)               # slope estimates the Weibull shape
+(Intercept)           x
+    -7.3392      1.2096
+&gt; round(c(H_at_365 = Hl[max(which(fit$time[ok] &lt;= 365))],
++         minus_log_KM = -log(summary(fit, times = 365)$surv)), 4)
+    H_at_365 minus_log_KM
+      0.8883       0.8934
+</pre>
+<!-- l. 1383 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The slope \(1.21\) confirms an increasing hazard, as the Weibull fit found (\(1.32\)).
+At one year \(\hat H = 0.888\) and \(-\log \hat S_{\text {KM}} = 0.893\): with \(65\) or more at risk throughout the first year, the two estimators nearly
+agree.
+</p><!-- l. 1386 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span><span class='cmtt-10x-x-109'>numpy.polyfit(numpy.log(t), numpy.log(H), 1)</span>.
+</p>
+</div>
+<!-- l. 1387 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 1389 --><p class='noindent'><span class='head'>
+<a id='x34-33003r3'></a>
+<span class='cmbx-10x-x-109'>Software 5.4.3 </span>(An actuarial life table)<span class='cmbx-10x-x-109'>.</span>  </span> Example <a href='survivalsu26.html#x33-32001r1'>5.3.1<!-- tex4ht:ref: ex:lifetable  --></a>: deaths and censorings by quarter-year, the
+numbers entering each interval, the conditional probabilities of death with the half-interval correction,
+and the survival at the end of each interval; then the Kaplan–Meier estimates at \(91\), \(182\), \(364\) and \(728\)
+days:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-15'>
+&gt; br &lt;- seq(0, 1092, by = 91)             # quarter-year intervals
+&gt; grp &lt;- cut(lung$time, br, right = FALSE)
+&gt; d &lt;- unname(tapply(lung$status == 2, grp, sum))       # deaths in each
+&gt; cen &lt;- unname(tapply(lung$status == 1, grp, sum))     # and censored
+&gt; n &lt;- nrow(lung) - c(0, cumsum(d + cen)[-length(d)])   # entering each
+&gt; nprime &lt;- n - cen / 2                   # effective number at risk
+&gt; q &lt;- d / nprime; S &lt;- cumprod(1 - q)
+&gt; tab &lt;- data.frame(start = head(br, -1), n, deaths = d, censored = cen,
++                   q = round(q, 4), S_end = round(S, 4))
+&gt; tab[1:8, ]
+  start   n deaths censored      q  S_end
+1     0 228     27        0 0.1184 0.8816
+2    91 201     38        6 0.1919 0.7124
+3   182 157     28       23 0.1924 0.5753
+4   273 106     27       12 0.2700 0.4200
+5   364  67     13        7 0.2047 0.3340
+6   455  47     10        5 0.2247 0.2589
+7   546  32      7        3 0.2295 0.1995
+8   637  22      8        0 0.3636 0.1270
+&gt; round(summary(fit, times = c(91, 182, 364, 728))$surv, 4)   # KM, to compare
+[1] 0.8816 0.7081 0.4092 0.1157
+</pre>
+<!-- l. 1414 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The quarterly probability of death rises from \(0.12\) in the first quarter to
+about \(0.19\)–\(0.27\) thereafter, the increasing hazard again. The life table’s survival at the ends of the
+intervals, \(0.882\), \(0.712\), …, \(0.420\) at one year and \(0.127\) at two, tracks the Kaplan–Meier values \(0.882\), \(0.708\), \(0.409\), \(0.116\) within a little
+over a percentage point.
+</p><!-- l. 1417 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span><span class='cmtt-10x-x-109'>lifelines.utils.survival_table_from_events </span>gives the counts, from which the
+table follows.
+</p>
+</div>
+<!-- l. 1418 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 1420 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu28.html'>next</a>] [<a href='survivalsu26.html'>prev</a>] [<a href='survivalsu26.html#tailsurvivalsu26.html'>prev-tail</a>] [<a href='survivalsu27.html'>front</a>] [<a href='survivalse5.html#survivalsu27.html'>up</a>] </p></div>
+<!-- l. 1420 --><p class='noindent'><a id='tailsurvivalsu27.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="survivalsu26.html">&larr; Previous</a><a class="up" href="survivalse5.html#survivalsu27.html">Contents</a><a class="next" href="survivalsu28.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="survival-analysis/5-4-cumulative-hazards-and-life-tables-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

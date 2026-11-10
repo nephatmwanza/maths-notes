@@ -1118,6 +1118,357 @@ Show that if all subjects are censored after the last event, $\hat S$ remains co
 There are no events after the last event time, so no further factors enter the product, and $\hat S$ stays at its last value $s > 0$ up to the largest censored time and is undefined beyond. The mean is the area under $S$, which depends on the unobserved tail; the \textbf{restricted mean} $\int_0^\tau\hat S(t)\,dt$ up to a time $\tau$ within follow-up is reported instead.
 \end{solution}
 
+%======================================================================
+\section{The Nelson--Aalen Estimator and Life Tables}
+\label{sec:nelson}
+
+The Kaplan--Meier estimator estimates the survival function. Its companion, the \textbf{Nelson--Aalen estimator}, estimates the cumulative hazard directly, and is the natural tool for checking whether a parametric model fits and for building the regression models later in the course. When data come grouped into intervals (deaths per year, as in
+insurance and demography), the older \textbf{life-table} or \textbf{actuarial} method is used. This section treats both.
+
+\subsection{The Nelson--Aalen estimator}
+\label{ssec:na}
+
+At each event time $t_{(j)}$, the proportion $d_j/n_j$ of those at risk who have the event estimates the hazard over that instant. Adding these increments gives the \textbf{Nelson--Aalen estimator} of the cumulative hazard,
+\[
+\hat H(t) = \sum_{t_{(j)} \leq t}\frac{d_j}{n_j}, \qquad \widehat{\operatorname{Var}}\,\hat H(t) = \sum_{t_{(j)} \leq t}\frac{d_j}{n_j^2} ,
+\]
+the variance coming from treating each $d_j$ as approximately Poisson with mean $n_j\,\Delta H_j$. Through $S = e^{-H}$ it gives a second estimate of the survival function, $\tilde S(t) = \exp(-\hat H(t))$, the \textbf{Fleming--Harrington} (or Breslow) estimator.
+
+\begin{prop}
+\label{prop:kmna}
+At every $t$, $\hat S_{\text{KM}}(t) \leq \exp\bigl(-\hat H(t)\bigr)$, with the two close when the numbers at risk are large compared with the numbers of events.
+\end{prop}
+
+\begin{proof}
+For $0 \leq x \leq 1$, $1 - x \leq e^{-x}$. Applying this to each factor $1 - d_j/n_j$ of the Kaplan--Meier product gives $\prod(1 - d_j/n_j) \leq \prod e^{-d_j/n_j} = e^{-\hat H(t)}$. When $d_j/n_j$ is small, $1 - x$ and $e^{-x}$ differ by about $x^2/2$, so the estimates nearly agree.
+\end{proof}
+
+\begin{exa}
+\label{ex:nahand}
+For the ten patients of Example~\ref{ex:kmhand}, the increments are $\frac1{10}$, $\frac18$, $\frac17$, $\frac15$, $\frac13$, so $\hat H = 0.100$, $0.225$, $0.368$, $0.568$, $0.901$ at the event times $3$, $6$, $8$, $12$, $18$. Then $\exp(-\hat H) = 0.905$, $0.799$, $0.692$, $0.567$, $0.406$, each a little above the Kaplan--Meier values
+$0.900$, $0.788$, $0.675$, $0.540$, $0.360$; the gap is largest at the end, where only three patients remain (Software~\ref{sw:na}).
+\end{exa}
+
+\subsection{Using the cumulative hazard to choose a model}
+\label{ssec:hazardplots}
+
+The cumulative hazard is the best scale on which to look for a parametric model, because the common families become straight lines:
+\begin{itemize}
+\item \textbf{exponential}: $H(t) = \lambda t$, so a plot of $\hat H(t)$ against $t$ is a straight line through the origin with slope $\lambda$;
+\item \textbf{Weibull}: $\log H(t) = k\log t - k\log\lambda$, so a plot of $\log\hat H(t)$ against $\log t$ is a straight line with slope $k$;
+\item \textbf{proportional hazards} between two groups, the assumption of the Cox model of a later section: the curves of $\log\hat H$ for the groups are parallel, a constant vertical distance apart.
+\end{itemize}
+For \texttt{lung}, the plot of $\log\hat H$ against $\log t$ is close to a straight line (Figure~\ref{fig:loglog}), and a least-squares line through it has slope $1.21$, near the maximum likelihood shape $\hat k = 1.32$ of the section on parametric models; the curvature at the left, from the first few deaths, is typical and carries little weight. Such
+plots are informal checks, not tests, but they show at once whether a model is plausible.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-0.9,-0.75) rectangle (8.2,4.3);
+\draw[->] (0,0) -- (7.9,0) node[below,font=\scriptsize] {$\log t$};
+\draw[->] (0,0) -- (0,4.15) node[left,font=\scriptsize] {$\log\hat H(t)$};
+\foreach \v in {2,3,4,5,6} \draw ({1.4*(\v-1.5)},0.06) -- ({1.4*(\v-1.5)},-0.06) node[below,font=\tiny] {$\v$};
+\foreach \v in {-5,-4,-3,-2,-1,0,1} \draw (0.06,{0.55*(\v+6)}) -- (-0.06,{0.55*(\v+6)}) node[left,font=\tiny] {$\v$};
+\fill[blue!60!black] (0.153,0.314) circle (1pt);
+\fill[blue!60!black] (1.257,1.078) circle (1pt);
+\fill[blue!60!black] (1.379,1.202) circle (1pt);
+\fill[blue!60!black] (1.491,1.390) circle (1pt);
+\fill[blue!60!black] (1.691,1.465) circle (1pt);
+\fill[blue!60!black] (2.461,1.531) circle (1pt);
+\fill[blue!60!black] (2.662,1.590) circle (1pt);
+\fill[blue!60!black] (2.708,1.644) circle (1pt);
+\fill[blue!60!black] (3.458,1.738) circle (1pt);
+\fill[blue!60!black] (3.485,1.781) circle (1pt);
+\fill[blue!60!black] (3.609,1.820) circle (1pt);
+\fill[blue!60!black] (3.632,1.891) circle (1pt);
+\fill[blue!60!black] (3.655,1.924) circle (1pt);
+\fill[blue!60!black] (3.678,1.955) circle (1pt);
+\fill[blue!60!black] (3.744,2.013) circle (1pt);
+\fill[blue!60!black] (3.868,2.040) circle (1pt);
+\fill[blue!60!black] (4.017,2.065) circle (1pt);
+\fill[blue!60!black] (4.052,2.114) circle (1pt);
+\fill[blue!60!black] (4.168,2.159) circle (1pt);
+\fill[blue!60!black] (4.231,2.180) circle (1pt);
+\fill[blue!60!black] (4.246,2.201) circle (1pt);
+\fill[blue!60!black] (4.275,2.240) circle (1pt);
+\fill[blue!60!black] (4.416,2.259) circle (1pt);
+\fill[blue!60!black] (4.442,2.296) circle (1pt);
+\fill[blue!60!black] (4.481,2.313) circle (1pt);
+\fill[blue!60!black] (4.555,2.330) circle (1pt);
+\fill[blue!60!black] (4.579,2.347) circle (1pt);
+\fill[blue!60!black] (4.626,2.363) circle (1pt);
+\fill[blue!60!black] (4.725,2.379) circle (1pt);
+\fill[blue!60!black] (4.736,2.409) circle (1pt);
+\fill[blue!60!black] (4.767,2.424) circle (1pt);
+\fill[blue!60!black] (4.838,2.439) circle (1pt);
+\fill[blue!60!black] (4.858,2.453) circle (1pt);
+\fill[blue!60!black] (4.867,2.480) circle (1pt);
+\fill[blue!60!black] (4.887,2.494) circle (1pt);
+\fill[blue!60!black] (4.943,2.507) circle (1pt);
+\fill[blue!60!black] (4.970,2.533) circle (1pt);
+\fill[blue!60!black] (5.031,2.569) circle (1pt);
+\fill[blue!60!black] (5.057,2.593) circle (1pt);
+\fill[blue!60!black] (5.065,2.604) circle (1pt);
+\fill[blue!60!black] (5.090,2.616) circle (1pt);
+\fill[blue!60!black] (5.131,2.627) circle (1pt);
+\fill[blue!60!black] (5.139,2.638) circle (1pt);
+\fill[blue!60!black] (5.147,2.649) circle (1pt);
+\fill[blue!60!black] (5.162,2.671) circle (1pt);
+\fill[blue!60!black] (5.170,2.682) circle (1pt);
+\fill[blue!60!black] (5.178,2.702) circle (1pt);
+\fill[blue!60!black] (5.186,2.713) circle (1pt);
+\fill[blue!60!black] (5.193,2.723) circle (1pt);
+\fill[blue!60!black] (5.216,2.733) circle (1pt);
+\fill[blue!60!black] (5.238,2.743) circle (1pt);
+\fill[blue!60!black] (5.275,2.753) circle (1pt);
+\fill[blue!60!black] (5.296,2.763) circle (1pt);
+\fill[blue!60!black] (5.311,2.773) circle (1pt);
+\fill[blue!60!black] (5.325,2.793) circle (1pt);
+\fill[blue!60!black] (5.332,2.802) circle (1pt);
+\fill[blue!60!black] (5.366,2.812) circle (1pt);
+\fill[blue!60!black] (5.373,2.822) circle (1pt);
+\fill[blue!60!black] (5.386,2.831) circle (1pt);
+\fill[blue!60!black] (5.399,2.841) circle (1pt);
+\fill[blue!60!black] (5.438,2.850) circle (1pt);
+\fill[blue!60!black] (5.464,2.859) circle (1pt);
+\fill[blue!60!black] (5.470,2.869) circle (1pt);
+\fill[blue!60!black] (5.489,2.878) circle (1pt);
+\fill[blue!60!black] (5.507,2.888) circle (1pt);
+\fill[blue!60!black] (5.513,2.897) circle (1pt);
+\fill[blue!60!black] (5.567,2.915) circle (1pt);
+\fill[blue!60!black] (5.602,2.925) circle (1pt);
+\fill[blue!60!black] (5.607,2.934) circle (1pt);
+\fill[blue!60!black] (5.722,2.944) circle (1pt);
+\fill[blue!60!black] (5.727,2.953) circle (1pt);
+\fill[blue!60!black] (5.733,2.962) circle (1pt);
+\fill[blue!60!black] (5.738,2.972) circle (1pt);
+\fill[blue!60!black] (5.804,2.981) circle (1pt);
+\fill[blue!60!black] (5.809,2.991) circle (1pt);
+\fill[blue!60!black] (5.813,3.009) circle (1pt);
+\fill[blue!60!black] (5.818,3.019) circle (1pt);
+\fill[blue!60!black] (5.828,3.028) circle (1pt);
+\fill[blue!60!black] (5.843,3.037) circle (1pt);
+\fill[blue!60!black] (5.852,3.047) circle (1pt);
+\fill[blue!60!black] (5.890,3.056) circle (1pt);
+\fill[blue!60!black] (5.899,3.066) circle (1pt);
+\fill[blue!60!black] (5.908,3.075) circle (1pt);
+\fill[blue!60!black] (5.913,3.085) circle (1pt);
+\fill[blue!60!black] (5.931,3.104) circle (1pt);
+\fill[blue!60!black] (5.976,3.113) circle (1pt);
+\fill[blue!60!black] (6.014,3.123) circle (1pt);
+\fill[blue!60!black] (6.048,3.132) circle (1pt);
+\fill[blue!60!black] (6.061,3.142) circle (1pt);
+\fill[blue!60!black] (6.081,3.151) circle (1pt);
+\fill[blue!60!black] (6.093,3.160) circle (1pt);
+\fill[blue!60!black] (6.101,3.170) circle (1pt);
+\fill[blue!60!black] (6.105,3.179) circle (1pt);
+\fill[blue!60!black] (6.113,3.198) circle (1pt);
+\fill[blue!60!black] (6.144,3.207) circle (1pt);
+\fill[blue!60!black] (6.152,3.226) circle (1pt);
+\fill[blue!60!black] (6.156,3.235) circle (1pt);
+\fill[blue!60!black] (6.183,3.254) circle (1pt);
+\fill[blue!60!black] (6.242,3.263) circle (1pt);
+\fill[blue!60!black] (6.253,3.273) circle (1pt);
+\fill[blue!60!black] (6.267,3.283) circle (1pt);
+\fill[blue!60!black] (6.376,3.293) circle (1pt);
+\fill[blue!60!black] (6.383,3.304) circle (1pt);
+\fill[blue!60!black] (6.386,3.314) circle (1pt);
+\fill[blue!60!black] (6.399,3.324) circle (1pt);
+\fill[blue!60!black] (6.428,3.334) circle (1pt);
+\fill[blue!60!black] (6.434,3.345) circle (1pt);
+\fill[blue!60!black] (6.453,3.355) circle (1pt);
+\fill[blue!60!black] (6.468,3.365) circle (1pt);
+\fill[blue!60!black] (6.475,3.376) circle (1pt);
+\fill[blue!60!black] (6.484,3.387) circle (1pt);
+\fill[blue!60!black] (6.523,3.398) circle (1pt);
+\fill[blue!60!black] (6.535,3.408) circle (1pt);
+\fill[blue!60!black] (6.653,3.420) circle (1pt);
+\fill[blue!60!black] (6.655,3.431) circle (1pt);
+\fill[blue!60!black] (6.666,3.454) circle (1pt);
+\fill[blue!60!black] (6.690,3.466) circle (1pt);
+\fill[blue!60!black] (6.734,3.479) circle (1pt);
+\fill[blue!60!black] (6.754,3.492) circle (1pt);
+\fill[blue!60!black] (6.777,3.506) circle (1pt);
+\fill[blue!60!black] (6.794,3.520) circle (1pt);
+\fill[blue!60!black] (6.815,3.534) circle (1pt);
+\fill[blue!60!black] (6.886,3.548) circle (1pt);
+\fill[blue!60!black] (6.911,3.563) circle (1pt);
+\fill[blue!60!black] (6.948,3.579) circle (1pt);
+\fill[blue!60!black] (6.953,3.594) circle (1pt);
+\fill[blue!60!black] (6.976,3.610) circle (1pt);
+\fill[blue!60!black] (6.978,3.626) circle (1pt);
+\fill[blue!60!black] (7.045,3.643) circle (1pt);
+\fill[blue!60!black] (7.049,3.660) circle (1pt);
+\fill[blue!60!black] (7.081,3.678) circle (1pt);
+\fill[blue!60!black] (7.085,3.696) circle (1pt);
+\fill[blue!60!black] (7.126,3.715) circle (1pt);
+\fill[blue!60!black] (7.132,3.734) circle (1pt);
+\fill[blue!60!black] (7.140,3.755) circle (1pt);
+\fill[blue!60!black] (7.196,3.778) circle (1pt);
+\fill[blue!60!black] (7.243,3.803) circle (1pt);
+\fill[blue!60!black] (7.283,3.834) circle (1pt);
+\fill[blue!60!black] (7.397,3.884) circle (1pt); 
+\draw[red!70!black,thick] (0.140,0.088) -- (7.700,3.996);
+\node[font=\scriptsize,red!70!black,anchor=west] at (0.6,3.6) {Weibull fit: slope $\hat k = 1.32$};
+\node[font=\scriptsize,blue!60!black,anchor=west] at (0.6,3.25) {Nelson--Aalen, at each death};
+\end{tikzpicture}
+\caption{The Weibull check for the \texttt{lung} data: the logarithm of the Nelson--Aalen cumulative hazard against log time, one point per death time, with the line implied by the fitted Weibull model of the section on parametric models. The points follow a straight line closely, so the Weibull model is reasonable; for an exponential the slope would be $1$.}
+\label{fig:loglog}
+\end{figure}
+
+The hazard itself, the derivative of $H$, can be estimated by smoothing the increments $d_j/n_j$ with a kernel, which gives a picture of how the risk changes over time; the result is noisy unless the data are extensive.
+
+\subsection{Life tables}
+\label{ssec:lifetables}
+
+When only grouped data are available, or when the number of subjects is very large, survival is estimated by intervals. Divide time into intervals $[a_{i - 1}, a_i)$; for each record the number $n_i$ entering the interval, the number $d_i$ dying in it and the number $c_i$ censored in it. The censored subjects were at risk, on average, for about half the
+interval, so the \textbf{effective number at risk} is taken as $n_i' = n_i - c_i/2$. The \textbf{actuarial} estimates are then
+\[
+\hat q_i = \frac{d_i}{n_i'}, \qquad \hat p_i = 1 - \hat q_i, \qquad \hat S(a_i) = \prod_{l \leq i}\hat p_l ,
+\]
+the probability of dying in the interval for those entering it, of surviving it, and of surviving to its end. The hazard in the interval can be estimated by $d_i/\bigl((n_i' - d_i/2)(a_i - a_{i - 1})\bigr)$, deaths per unit of time at risk.
+
+\begin{exa}
+\label{ex:lifetable}
+Grouping \texttt{lung} into quarter-years of $91$ days: of the $228$ patients, $27$ die in the first quarter and none is censored, so $\hat q_1 = 0.118$ and $\hat S(91) = 0.882$. In the second, $201$ enter, $38$ die and $6$ are censored, so $n_2' = 198$, $\hat q_2 = 0.192$ and $\hat S(182) = 0.712$. Continuing, $\hat S(364) = 0.420$ and
+$\hat S(728) = 0.127$, close to the Kaplan--Meier values $0.708$, $0.409$ and $0.116$ at those times (Software~\ref{sw:lifetable}). The small differences come from grouping and the half-interval assumption; with finer intervals the life table tends to the Kaplan--Meier estimate.
+\end{exa}
+
+The same arithmetic underlies the \textbf{population life tables} of demography and actuarial science, which give, for each year of age, the probability $q_x$ that a person aged $x$ dies before $x + 1$. They are built from deaths and population counts in a recent period (a \emph{current} or period life table) and give the life expectancies quoted
+in official statistics; Halley's table of 1693 for Breslau was the first.
+
+\subsection{Cumulative hazards and life tables in software}
+\label{ssec:software5}
+
+\begin{software}[Nelson--Aalen by hand]
+\label{sw:na}
+Example~\ref{ex:nahand}: the cumulative hazard and its standard error at each event time, the survival estimate $\exp(-\hat H)$, and the Kaplan--Meier estimate for comparison:
+{\small\begin{verbatim}
+> library(survival)
+> tm <- c(3, 5, 6, 8, 10, 12, 15, 18, 22, 24)
+> ev <- c(1, 0, 1, 1, 0, 1, 0, 1, 0, 0)
+> km <- survfit(Surv(tm, ev) ~ 1)
+> k <- km$n.event > 0                     # rows at event times
+> H <- cumsum(km$n.event[k] / km$n.risk[k])   # Nelson-Aalen
+> v <- cumsum(km$n.event[k] / km$n.risk[k]^2) # its variance
+> round(cbind(t = km$time[k], H_NA = H, se = sqrt(v), exp_minus_H = exp(-H),
++             KM = km$surv[k]), 4)
+      t   H_NA     se exp_minus_H     KM
+[1,]  3 0.1000 0.1000      0.9048 0.9000
+[2,]  6 0.2250 0.1601      0.7985 0.7875
+[3,]  8 0.3679 0.2146      0.6922 0.6750
+[4,] 12 0.5679 0.2933      0.5667 0.5400
+[5,] 18 0.9012 0.4440      0.4061 0.3600
+\end{verbatim}}
+\textbf{Reading the output.} $\hat H$ rises by $d_j/n_j$ at each death, reaching $0.901$ at $18$ months with standard error $0.444$. Every value of $\exp(-\hat H)$ exceeds the Kaplan--Meier value, as Proposition~\ref{prop:kmna} requires, by up to $0.046$ at the last death.
+
+\textbf{Python:} \texttt{lifelines.NelsonAalenFitter().fit(tm, ev).cumulative\_hazard\_}.
+\end{software}
+
+\begin{software}[A Weibull check]
+\label{sw:loglog}
+The Nelson--Aalen estimate for \texttt{lung}, a least-squares line of $\log\hat H$ on $\log t$ through the death times, and a comparison of $\hat H(365)$ with $-\log\hat S_{\text{KM}}(365)$:
+{\small\begin{verbatim}
+> fit <- survfit(Surv(time, status) ~ 1, data = lung)
+> ok <- fit$n.event > 0 & fit$surv > 0
+> Hl <- cumsum(fit$n.event / fit$n.risk)[ok]
+> x <- log(fit$time[ok]); y <- log(Hl)
+> round(coef(lm(y ~ x)), 4)               # slope estimates the Weibull shape
+(Intercept)           x 
+    -7.3392      1.2096 
+> round(c(H_at_365 = Hl[max(which(fit$time[ok] <= 365))],
++         minus_log_KM = -log(summary(fit, times = 365)$surv)), 4)
+    H_at_365 minus_log_KM 
+      0.8883       0.8934 
+\end{verbatim}}
+\textbf{Reading the output.} The slope $1.21$ confirms an increasing hazard, as the Weibull fit found ($1.32$). At one year $\hat H = 0.888$ and $-\log\hat S_{\text{KM}} = 0.893$: with $65$ or more at risk throughout the first year, the two estimators nearly agree.
+
+\textbf{Python:} \texttt{numpy.polyfit(numpy.log(t), numpy.log(H), 1)}.
+\end{software}
+
+\begin{software}[An actuarial life table]
+\label{sw:lifetable}
+Example~\ref{ex:lifetable}: deaths and censorings by quarter-year, the numbers entering each interval, the conditional probabilities of death with the half-interval correction, and the survival at the end of each interval; then the Kaplan--Meier estimates at $91$, $182$, $364$ and $728$ days:
+{\small\begin{verbatim}
+> br <- seq(0, 1092, by = 91)             # quarter-year intervals
+> grp <- cut(lung$time, br, right = FALSE)
+> d <- unname(tapply(lung$status == 2, grp, sum))       # deaths in each
+> cen <- unname(tapply(lung$status == 1, grp, sum))     # and censored
+> n <- nrow(lung) - c(0, cumsum(d + cen)[-length(d)])   # entering each
+> nprime <- n - cen / 2                   # effective number at risk
+> q <- d / nprime; S <- cumprod(1 - q)
+> tab <- data.frame(start = head(br, -1), n, deaths = d, censored = cen,
++                   q = round(q, 4), S_end = round(S, 4))
+> tab[1:8, ]
+  start   n deaths censored      q  S_end
+1     0 228     27        0 0.1184 0.8816
+2    91 201     38        6 0.1919 0.7124
+3   182 157     28       23 0.1924 0.5753
+4   273 106     27       12 0.2700 0.4200
+5   364  67     13        7 0.2047 0.3340
+6   455  47     10        5 0.2247 0.2589
+7   546  32      7        3 0.2295 0.1995
+8   637  22      8        0 0.3636 0.1270
+> round(summary(fit, times = c(91, 182, 364, 728))$surv, 4)   # KM, to compare
+[1] 0.8816 0.7081 0.4092 0.1157
+\end{verbatim}}
+\textbf{Reading the output.} The quarterly probability of death rises from $0.12$ in the first quarter to about $0.19$--$0.27$ thereafter, the increasing hazard again. The life table's survival at the ends of the intervals, $0.882$, $0.712$, \ldots, $0.420$ at one year and $0.127$ at two, tracks the Kaplan--Meier values $0.882$, $0.708$, $0.409$, $0.116$ within a little over a percentage point.
+
+\textbf{Python:} \texttt{lifelines.utils.survival\_table\_from\_events} gives the counts, from which the table follows.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+For the times $2, 4, 4, 5^+, 7, 9^+, 11$ of the Kaplan--Meier problems, compute the Nelson--Aalen estimate and $\exp(-\hat H)$ at each event time.
+\end{problem}
+
+\begin{solution}
+At $2$: $\frac17 = 0.143$; at $4$: $+\frac26$, $\hat H = 0.476$; at $7$: $+\frac13$, $\hat H = 0.810$; at $11$: $+1$, $\hat H = 1.810$. Then $\exp(-\hat H) = 0.867$, $0.621$, $0.445$, $0.164$, against Kaplan--Meier $0.857$, $0.571$, $0.381$, $0$. The last difference is large because the final factor $1 - \frac11 = 0$
+of the Kaplan--Meier product has no counterpart: $e^{-1} = 0.37$.
+\end{solution}
+
+\begin{problem}
+A plot of $\hat H(t)$ against $t$ is a straight line through the origin with slope $0.05$ per month. What model does this suggest, and what are its mean and median?
+\end{problem}
+
+\begin{solution}
+A constant hazard, the exponential model with $\lambda = 0.05$ per month. Mean $1/\lambda = 20$ months, median $\log 2/\lambda = 13.9$ months.
+\end{solution}
+
+\begin{problem}
+Explain why the effective number at risk in a life table is $n_i - c_i/2$, and what happens to the estimates if censoring occurs mostly at the start of each interval.
+\end{problem}
+
+\begin{solution}
+A censored subject was observed for part of the interval; if censoring times are spread evenly, the average is half the interval, so each counts as half a subject at risk. If censoring happens mostly at the start, the censored subjects were at risk for less than half the interval, $n_i'$ is overstated, $\hat q_i$ too small, and survival overestimated; then $n_i - c_i$
+would be more accurate.
+\end{solution}
+
+\begin{problem}
+Construct the life table for $100$ machines observed over three years: in year $1$, $10$ fail and $4$ are withdrawn; in year $2$, $15$ fail and $6$ are withdrawn; in year $3$, $20$ fail and $5$ are withdrawn. Estimate the probability of lasting three years.
+\end{problem}
+
+\begin{solution}
+Year 1: $n = 100$, $n' = 98$, $q = 0.102$, $p = 0.898$. Year 2: $n = 86$, $n' = 83$, $q = 0.181$, $p = 0.819$. Year 3: $n = 65$, $n' = 62.5$, $q = 0.320$, $p = 0.680$. $\hat S(3) = 0.898 \times 0.819 \times 0.680 = 0.500$: half the machines last three years.
+\end{solution}
+
+\begin{problem}
+Show that if two groups have proportional hazards, $h_2(t) = ch_1(t)$, then $\log H_2(t) - \log H_1(t) = \log c$ for all $t$, and explain how this is used.
+\end{problem}
+
+\begin{solution}
+$H_2(t) = \int_0^tch_1 = cH_1(t)$, so $\log H_2 - \log H_1 = \log c$, a constant. Plotting $\log\hat H$ (equivalently $\log(-\log\hat S)$) for both groups against $\log t$ should therefore give parallel curves; curves that converge, diverge or cross suggest that the hazards are not proportional, which matters for the Cox model.
+\end{solution}
+
+\begin{problem}
+In a population life table, $q_{60} = 0.010$, $q_{61} = 0.011$ and $q_{62} = 0.012$. Find the probability that a $60$-year-old survives to $63$, and the probability of dying aged $62$.
+\end{problem}
+
+\begin{solution}
+$P(\text{survive to } 63) = 0.990 \times 0.989 \times 0.988 = 0.967$. The probability of dying aged $62$ is that of surviving to $62$ times $q_{62}$: $0.990 \times 0.989 \times 0.012 = 0.0117$.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -1147,17 +1498,22 @@ There are no events after the last event time, so no further factors enter the p
 
 \subhead{Further reading}
 \begin{enumerate}
+\item Aalen, O. O. (1978), Nonparametric inference for a family of counting processes, \emph{Annals of Statistics}, 6, 701--726.
 \item Akaike, H. (1974), A new look at the statistical model identification, \emph{IEEE Transactions on Automatic Control}, 19, 716--723.
 \item Brookmeyer, R., and Crowley, J. (1982), A confidence interval for the median survival time, \emph{Biometrics}, 38, 29--41.
+\item Chiang, C. L. (1984), \emph{The Life Table and Its Applications}, Malabar, Krieger.
 \item Cohen, A. C. (1965), Maximum likelihood estimation in the Weibull distribution based on complete and on censored samples, \emph{Technometrics}, 7, 579--588.
+\item Cutler, S. J., and Ederer, F. (1958), Maximum utilization of the life table method in analyzing survival, \emph{Journal of Chronic Diseases}, 8, 699--712.
 \item Edmonson, J. H., Fleming, T. R., Decker, D. G., et al. (1979), Different chemotherapeutic sensitivities and host factors affecting prognosis in advanced ovarian carcinoma versus minimal residual disease, \emph{Cancer Treatment Reports}, 63, 241--247.
 \item Epstein, B., and Sobel, M. (1953), Life testing, \emph{Journal of the American Statistical Association}, 48, 486--502.
+\item Fleming, T. R., and Harrington, D. P. (1984), Nonparametric estimation of the survival distribution in censored data, \emph{Communications in Statistics: Theory and Methods}, 13, 2469--2486.
 \item Gompertz, B. (1825), On the nature of the function expressive of the law of human mortality, \emph{Philosophical Transactions of the Royal Society of London}, 115, 513--583.
 \item Greenwood, M. (1926), The natural duration of cancer, \emph{Reports on Public Health and Medical Subjects}, 33, London, His Majesty's Stationery Office.
 \item Halley, E. (1693), An estimate of the degrees of the mortality of mankind, \emph{Philosophical Transactions of the Royal Society of London}, 17, 596--610.
 \item Kaplan, E. L., and Meier, P. (1958), Nonparametric estimation from incomplete observations, \emph{Journal of the American Statistical Association}, 53, 457--481.
 \item Leung, K.-M., Elashoff, R. M., and Afifi, A. A. (1997), Censoring issues in survival analysis, \emph{Annual Review of Public Health}, 18, 83--104.
 \item Loprinzi, C. L., et al. (1994), Prospective evaluation of prognostic variables from patient-completed questionnaires, \emph{Journal of Clinical Oncology}, 12, 601--607.
+\item Nelson, W. (1969), Hazard plotting for incomplete failure data, \emph{Journal of Quality Technology}, 1, 27--52.
 \item Pocock, S. J., Clayton, T. C., and Altman, D. G. (2002), Survival plots of time-to-event outcomes in clinical trials: good practice and pitfalls, \emph{The Lancet}, 359, 1686--1689.
 \item Prentice, R. L. (1973), Exponential survivals with censoring and explanatory variables, \emph{Biometrika}, 60, 279--288.
 \item Schemper, M., and Smith, T. L. (1996), A note on quantifying follow-up in studies of failure time, \emph{Controlled Clinical Trials}, 17, 343--346.
