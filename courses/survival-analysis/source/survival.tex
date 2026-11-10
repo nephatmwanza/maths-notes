@@ -2504,6 +2504,284 @@ A baseline measurement describes the subject's state at entry. Its relevance fad
 effect of the baseline value shrink with time.
 \end{solution}
 
+%======================================================================
+\section{Accelerated Failure Time Models}
+\label{sec:aft}
+
+The Cox model describes how covariates multiply the hazard. An \textbf{accelerated failure time} (AFT) model describes instead how they stretch or shrink time itself: a covariate that doubles the time scale makes every stage of the process, the median, the upper quartile, the time by which $90\%$ have failed, twice as long. The model is fully parametric, so it gives
+survival curves, medians and predictions beyond the data directly, and its coefficients have a reading, ``this treatment extends survival by $40\%$'', that many find more natural than a ratio of hazards. It is also one of the remedies, noted in the previous section, when hazards are not proportional.
+
+\subsection{The model}
+\label{ssec:aftmodel}
+
+Let $T_0$ be a survival time with survivor function $S_0$, the baseline. The AFT model with covariates $x$ and coefficients $\beta$ says that
+\[
+T = e^{\beta^{\mathsf T}x}\,T_0 , \qquad\text{so}\qquad S(t \mid x) = S_0\big(te^{-\beta^{\mathsf T}x}\big) .
+\]
+The factor $e^{\beta_j}$ is the \textbf{time ratio} (or acceleration factor) for a unit increase in $x_j$: every quantile of $T$ is multiplied by it. A time ratio above $1$ means longer survival, the opposite direction to a hazard ratio. Differentiating, the hazard is
+\[
+h(t \mid x) = e^{-\beta^{\mathsf T}x}h_0\big(te^{-\beta^{\mathsf T}x}\big) ,
+\]
+the baseline hazard read at a rescaled time and multiplied by the rate of rescaling, which is proportional to $h_0(t)$ only for special $h_0$. Taking logarithms gives the form in which AFT models are fitted, a linear model for log time,
+\[
+\log T = \mu + \beta^{\mathsf T}x + \sigma W ,
+\]
+where $W$ has a fixed standard distribution, $\mu$ is an intercept and $\sigma > 0$ a scale. The choice of $W$ chooses the family (Table~\ref{tab:aft}), and the parameters are estimated by maximum likelihood with censored observations contributing $S(t_i \mid x_i)$, exactly as for the parametric models of the section on parametric models.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+\hline
+Distribution of $W$ & Distribution of $T$ & Shape of the hazard \\
+\hline
+standard extreme value (minimum) & Weibull, $k = 1/\sigma$ & monotone \\
+the same, with $\sigma = 1$ & exponential & constant \\
+standard normal & log-normal & rises, then falls \\
+standard logistic & log-logistic, $\alpha = 1/\sigma$ & falls ($\sigma \ge 1$), or rises then falls \\
+\hline
+\end{tabular}
+\caption{The common AFT families. The extreme value density is $e^{w - e^w}$; it gives $P(T > t) = \exp\{-(t/\lambda)^{1/\sigma}\}$ with $\lambda = e^{\mu}$.}
+\label{tab:aft}
+\end{table}
+
+\subsection{The Weibull model: both AFT and proportional hazards}
+\label{ssec:aftweibull}
+
+\begin{thm}
+\label{thm:weibullaft}
+A Weibull AFT model with scale $\sigma$ and coefficients $\beta$ is a proportional hazards model with hazard ratios
+\[
+e^{\gamma_j} = e^{-\beta_j/\sigma} ,
+\]
+so a Weibull regression can be reported either way.
+\end{thm}
+
+\begin{proof}
+With $k = 1/\sigma$ and baseline $S_0(t) = \exp\{-(t/\lambda)^k\}$,
+\[
+S(t \mid x) = S_0\big(te^{-\beta^{\mathsf T}x}\big) = \exp\big\{-(t/\lambda)^ke^{-k\beta^{\mathsf T}x}\big\} = S_0(t)^{\exp(-k\beta^{\mathsf T}x)} .
+\]
+This is the form $S(t\mid x) = S_0(t)^{\exp(\gamma^{\mathsf T}x)}$ of a proportional hazards model (the section on the Cox model), with $\gamma = -k\beta = -\beta/\sigma$.
+\end{proof}
+
+The Weibull is the only family with both properties; in particular, for the exponential ($\sigma = 1$) the hazard ratio is simply $e^{-\beta_j}$, the reciprocal of the time ratio. The minus sign matters: a covariate that lengthens survival lowers the hazard.
+
+\begin{exa}
+\label{ex:aftlung}
+A Weibull AFT model for the \texttt{lung} data with age, sex and ECOG score gives $\hat\sigma = 0.731$ and time ratios $0.993$ per year of age, $1.49$ for women against men and $0.712$ per ECOG point (Software~\ref{sw:aftlung}): women's survival times are about one and a half times as long, and each ECOG point shortens them by $29\%$. By Theorem~\ref{thm:weibullaft}, the hazard ratio for sex is
+$e^{-0.4011/0.7311} = e^{-0.549} = 0.578$, against $0.575$ from the Cox model of the section on the Cox model, and those for age and ECOG are $1.010$ and $1.591$, against $1.011$ and $1.590$. When the Weibull fits, the two models tell the same story in two languages.
+\end{exa}
+
+\subsection{Log-normal and log-logistic models}
+\label{ssec:aftother}
+
+When the hazard rises and then falls, as after surgery or for some cancers, the Weibull cannot follow it and the log-normal or log-logistic models are used. The log-logistic survivor function is
+\[
+S(t \mid x) = \frac{1}{1 + \big(te^{-\mu - \beta^{\mathsf T}x}\big)^{\alpha}} , \qquad \alpha = \frac1\sigma ,
+\]
+and its hazard, $h(t) = \alpha t^{\alpha-1}e^{-\alpha m}/\{1 + (te^{-m})^{\alpha}\}$ with $m = \mu + \beta^{\mathsf T}x$, decreases from the start when $\alpha \le 1$ and, when $\alpha > 1$, rises to a peak at $t = (\alpha - 1)^{1/\alpha}e^{m}$ and then falls. The odds of failure by time $t$ are
+\[
+\frac{1 - S(t \mid x)}{S(t \mid x)} = t^{\alpha}e^{-\alpha\mu}\,e^{-\alpha\beta^{\mathsf T}x} ,
+\]
+so covariates multiply these odds by $e^{-\alpha\beta_j}$ at every $t$: the log-logistic AFT model is also a \textbf{proportional odds} model, the analogue for odds of the Weibull's double role. The log-normal model has a similar hazard shape and no such second reading, and is often close to the log-logistic in fit.
+
+\begin{exa}
+\label{ex:vetaft}
+The Cox model for the \texttt{veteran} trial violated proportional hazards (the section on checking proportional hazards). Fitting the same covariates, treatment, cell type and Karnofsky score, as AFT models gives AIC $1445.7$ for the Weibull, $1445.8$ for the log-normal and $1439.1$ for the log-logistic, which is preferred (Software~\ref{sw:aftvet}). Its scale is
+$\hat\sigma = 0.581$, so $\hat\alpha = 1.72$ and the hazard rises and then falls. The time ratios are $0.95$ for the test treatment ($95\%$ interval $0.67$ to $1.34$), $0.50$ for small-cell, $0.46$ for adenocarcinoma and $0.97$ for large-cell against squamous tumours, and $1.0366$ per Karnofsky point, or $1.0366^{10} = 1.43$ for ten points: ten points more on the performance scale lengthen survival by $43\%$. For a patient on the standard regimen with a squamous tumour,
+the predicted median survival is $52$ days at a Karnofsky score of $40$, $107$ days at $60$ and $220$ days at $80$ (Figure~\ref{fig:aft}), and the hazard at a score of $60$ peaks at $0.827 \times 107 = 89$ days.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-0.9,-0.75) rectangle (6.4,3.55);
+\draw[->] (0,0) -- (5.75,0) node[right,font=\scriptsize] {days};
+\draw[->] (0,0) -- (0,3.3) node[left,font=\scriptsize] {$S(t)$};
+\foreach \t in {0,100,200,300,400,500,600} \draw ({\t/100*0.9},0.06) -- ({\t/100*0.9},-0.06) node[below,font=\tiny] {$\t$};
+\foreach \s in {0,0.5,1} \draw (0.06,{\s*3}) -- (-0.06,{\s*3}) node[left,font=\tiny] {$\s$};
+\draw[black!30,dashed] (0,1.5) -- (5.4,1.5);
+\draw[red!70!black,thick] plot coordinates {(0.000,3.000) (0.090,2.835) (0.180,2.518) (0.270,2.166) (0.360,1.839) (0.450,1.557) (0.540,1.322) (0.630,1.130) (0.720,0.974) (0.810,0.845) (0.900,0.740) (0.990,0.652) (1.080,0.579) (1.170,0.517) (1.260,0.465) (1.350,0.420) (1.440,0.382) (1.530,0.348) (1.620,0.319) (1.710,0.293) (1.800,0.271) (1.890,0.251) (1.980,0.233) (2.070,0.217) (2.160,0.203) (2.250,0.190) (2.340,0.178) (2.430,0.168) (2.520,0.158) (2.610,0.149) (2.700,0.141) (2.790,0.134) (2.880,0.127) (2.970,0.121) (3.060,0.115) (3.150,0.110) (3.240,0.105) (3.330,0.100) (3.420,0.096) (3.510,0.091) (3.600,0.088) (3.690,0.084) (3.780,0.081) (3.870,0.078) (3.960,0.075) (4.050,0.072) (4.140,0.069) (4.230,0.067) (4.320,0.065) (4.410,0.062) (4.500,0.060) (4.590,0.058) (4.680,0.056) (4.770,0.055) (4.860,0.053) (4.950,0.051) (5.040,0.050) (5.130,0.048) (5.220,0.047) (5.310,0.046) (5.400,0.044)};
+\draw[orange!80!black,thick] plot coordinates {(0.000,3.000) (0.090,2.950) (0.180,2.842) (0.270,2.699) (0.360,2.535) (0.450,2.364) (0.540,2.193) (0.630,2.027) (0.720,1.870) (0.810,1.724) (0.900,1.590) (0.990,1.467) (1.080,1.355) (1.170,1.254) (1.260,1.162) (1.350,1.078) (1.440,1.003) (1.530,0.934) (1.620,0.872) (1.710,0.816) (1.800,0.765) (1.890,0.718) (1.980,0.675) (2.070,0.636) (2.160,0.600) (2.250,0.567) (2.340,0.536) (2.430,0.508) (2.520,0.483) (2.610,0.459) (2.700,0.436) (2.790,0.416) (2.880,0.397) (2.970,0.379) (3.060,0.362) (3.150,0.346) (3.240,0.332) (3.330,0.318) (3.420,0.305) (3.510,0.293) (3.600,0.282) (3.690,0.271) (3.780,0.261) (3.870,0.252) (3.960,0.243) (4.050,0.234) (4.140,0.226) (4.230,0.219) (4.320,0.211) (4.410,0.205) (4.500,0.198) (4.590,0.192) (4.680,0.186) (4.770,0.180) (4.860,0.175) (4.950,0.170) (5.040,0.165) (5.130,0.160) (5.220,0.156) (5.310,0.151) (5.400,0.147)};
+\draw[green!40!black,thick] plot coordinates {(0.000,3.000) (0.090,2.985) (0.180,2.952) (0.270,2.906) (0.360,2.849) (0.450,2.783) (0.540,2.710) (0.630,2.633) (0.720,2.553) (0.810,2.470) (0.900,2.386) (0.990,2.302) (1.080,2.218) (1.170,2.136) (1.260,2.056) (1.350,1.977) (1.440,1.901) (1.530,1.828) (1.620,1.757) (1.710,1.688) (1.800,1.623) (1.890,1.560) (1.980,1.500) (2.070,1.443) (2.160,1.388) (2.250,1.336) (2.340,1.286) (2.430,1.239) (2.520,1.193) (2.610,1.150) (2.700,1.109) (2.790,1.070) (2.880,1.033) (2.970,0.997) (3.060,0.963) (3.150,0.931) (3.240,0.900) (3.330,0.871) (3.420,0.842) (3.510,0.816) (3.600,0.790) (3.690,0.766) (3.780,0.742) (3.870,0.720) (3.960,0.698) (4.050,0.678) (4.140,0.658) (4.230,0.639) (4.320,0.621) (4.410,0.604) (4.500,0.587) (4.590,0.571) (4.680,0.556) (4.770,0.541) (4.860,0.527) (4.950,0.514) (5.040,0.501) (5.130,0.488) (5.220,0.476) (5.310,0.464) (5.400,0.453)};
+\draw[red!70!black,thick] (2.7,2.85) -- (3.1,2.85) node[right,font=\tiny] {Karnofsky $40$: median $52$};
+\draw[orange!80!black,thick] (2.7,2.55) -- (3.1,2.55) node[right,font=\tiny] {Karnofsky $60$: median $107$};
+\draw[green!40!black,thick] (2.7,2.25) -- (3.1,2.25) node[right,font=\tiny] {Karnofsky $80$: median $220$};
+\node[font=\scriptsize,anchor=north] at (2.0,3.5) {(a) log-logistic predictions};
+\begin{scope}[xshift=7.7cm]
+\fill[orange!6,rounded corners=4pt] (-0.9,-0.75) rectangle (4.6,3.55);
+\draw[->] (0,0) -- (3.55,0) node[right,font=\scriptsize] {$r$};
+\draw[->] (0,0) -- (0,3.4) node[right,font=\scriptsize] {$\hat H(r)$};
+\foreach \r in {0,1,2} \draw ({\r*1.5},0.06) -- ({\r*1.5},-0.06) node[below,font=\tiny] {$\r$};
+\foreach \r in {1,2} \draw (0.06,{\r*1.5}) -- (-0.06,{\r*1.5}) node[left,font=\tiny] {$\r$};
+\draw[black!45,dashed] (0,0) -- (3.3,3.3);
+\draw[blue!60!black,thick] (0,0) -- (0.002,0.000) -- (0.002,0.011) -- (0.006,0.011) -- (0.006,0.022) -- (0.017,0.022) -- (0.017,0.033) -- (0.018,0.033) -- (0.018,0.045) -- (0.019,0.045) -- (0.019,0.055) -- (0.035,0.055) -- (0.035,0.055) -- (0.058,0.055) -- (0.058,0.068) -- (0.058,0.068) -- (0.058,0.080) -- (0.075,0.080) -- (0.075,0.090) -- (0.083,0.090) -- (0.083,0.102) -- (0.096,0.102) -- (0.096,0.114) -- (0.101,0.114) -- (0.101,0.126) -- (0.121,0.126) -- (0.121,0.138) -- (0.128,0.138) -- (0.128,0.150) -- (0.128,0.150) -- (0.128,0.162) -- (0.184,0.162) -- (0.184,0.176) -- (0.201,0.176) -- (0.201,0.188) -- (0.217,0.188) -- (0.217,0.200) -- (0.223,0.200) -- (0.223,0.213) -- (0.226,0.213) -- (0.226,0.225) -- (0.265,0.225) -- (0.265,0.238) -- (0.273,0.238) -- (0.273,0.251) -- (0.273,0.251) -- (0.273,0.264) -- (0.297,0.264) -- (0.297,0.277) -- (0.301,0.277) -- (0.301,0.277) -- (0.318,0.277) -- (0.318,0.291) -- (0.323,0.291) -- (0.323,0.291) -- (0.324,0.291) -- (0.324,0.304) -- (0.336,0.304) -- (0.336,0.318) -- (0.360,0.318) -- (0.360,0.333) -- (0.367,0.333) -- (0.367,0.347) -- (0.378,0.347) -- (0.378,0.360) -- (0.390,0.360) -- (0.390,0.375) -- (0.390,0.375) -- (0.390,0.390) -- (0.398,0.390) -- (0.398,0.404) -- (0.407,0.404) -- (0.407,0.419) -- (0.413,0.419) -- (0.413,0.433) -- (0.432,0.433) -- (0.432,0.449) -- (0.443,0.449) -- (0.443,0.464) -- (0.443,0.464) -- (0.443,0.480) -- (0.446,0.480) -- (0.446,0.495) -- (0.476,0.495) -- (0.476,0.512) -- (0.482,0.512) -- (0.482,0.526) -- (0.498,0.526) -- (0.498,0.543) -- (0.501,0.543) -- (0.501,0.559) -- (0.517,0.559) -- (0.517,0.559) -- (0.587,0.559) -- (0.587,0.559) -- (0.612,0.559) -- (0.612,0.576) -- (0.625,0.576) -- (0.625,0.593) -- (0.625,0.593) -- (0.625,0.610) -- (0.658,0.610) -- (0.658,0.627) -- (0.723,0.627) -- (0.723,0.645) -- (0.729,0.645) -- (0.729,0.663) -- (0.730,0.663) -- (0.730,0.681) -- (0.738,0.681) -- (0.738,0.699) -- (0.765,0.699) -- (0.765,0.717) -- (0.765,0.717) -- (0.765,0.735) -- (0.777,0.735) -- (0.777,0.754) -- (0.790,0.754) -- (0.790,0.774) -- (0.836,0.774) -- (0.836,0.794) -- (0.877,0.794) -- (0.877,0.813) -- (0.888,0.813) -- (0.888,0.833) -- (0.959,0.833) -- (0.959,0.852) -- (0.962,0.852) -- (0.962,0.873) -- (0.972,0.873) -- (0.972,0.894) -- (0.981,0.894) -- (0.981,0.915) -- (0.986,0.915) -- (0.986,0.936) -- (0.993,0.936) -- (0.993,0.957) -- (0.993,0.957) -- (0.993,0.980) -- (1.032,0.980) -- (1.032,1.002) -- (1.086,1.002) -- (1.086,1.025) -- (1.104,1.025) -- (1.104,1.047) -- (1.107,1.047) -- (1.107,1.071) -- (1.131,1.071) -- (1.131,1.093) -- (1.155,1.093) -- (1.155,1.117) -- (1.173,1.117) -- (1.173,1.143) -- (1.182,1.143) -- (1.182,1.167) -- (1.188,1.167) -- (1.188,1.193) -- (1.205,1.193) -- (1.205,1.218) -- (1.237,1.218) -- (1.237,1.244) -- (1.249,1.244) -- (1.249,1.270) -- (1.249,1.270) -- (1.249,1.297) -- (1.263,1.297) -- (1.263,1.325) -- (1.268,1.325) -- (1.268,1.353) -- (1.320,1.353) -- (1.320,1.381) -- (1.381,1.381) -- (1.381,1.411) -- (1.417,1.411) -- (1.417,1.440) -- (1.419,1.440) -- (1.419,1.472) -- (1.419,1.472) -- (1.419,1.501) -- (1.432,1.501) -- (1.432,1.533) -- (1.479,1.533) -- (1.479,1.566) -- (1.500,1.566) -- (1.500,1.599) -- (1.563,1.599) -- (1.563,1.632) -- (1.564,1.632) -- (1.564,1.632) -- (1.600,1.632) -- (1.600,1.668) -- (1.602,1.668) -- (1.602,1.704) -- (1.612,1.704) -- (1.612,1.742) -- (1.720,1.742) -- (1.720,1.779) -- (1.725,1.779) -- (1.725,1.818) -- (1.731,1.818) -- (1.731,1.859) -- (1.764,1.859) -- (1.764,1.899) -- (1.811,1.899) -- (1.811,1.941) -- (1.857,1.941) -- (1.857,1.984) -- (1.860,1.984) -- (1.860,2.030) -- (1.871,2.030) -- (1.871,2.076) -- (1.900,2.076) -- (1.900,2.123) -- (1.932,2.123) -- (1.932,2.172) -- (2.006,2.172) -- (2.006,2.172) -- (2.059,2.172) -- (2.059,2.224) -- (2.109,2.224) -- (2.109,2.280) -- (2.160,2.280) -- (2.160,2.335) -- (2.272,2.335) -- (2.272,2.396) -- (2.310,2.396) -- (2.310,2.457) -- (2.444,2.457) -- (2.444,2.520) -- (2.599,2.520) -- (2.599,2.588) -- (2.606,2.588) -- (2.606,2.656) -- (2.795,2.656) -- (2.795,2.730) -- (2.797,2.730) -- (2.797,2.806) -- (2.950,2.806) -- (2.950,2.888) -- (3.024,2.888) -- (3.024,2.973) -- (3.035,2.973) -- (3.035,3.065) -- (3.232,3.065) -- (3.232,3.065) -- (3.232,3.065) -- (3.232,3.168) -- (3.292,3.168) -- (3.292,3.279);
+\node[font=\tiny,black!60,anchor=west] at (0.4,2.6) {line $\hat H(r) = r$};
+\node[font=\tiny,blue!60!black,anchor=west] at (1.6,0.9) {$-\log$ Kaplan--Meier};
+\node[font=\tiny,blue!60!black,anchor=west] at (1.6,0.6) {of the residuals};
+\node[font=\scriptsize,anchor=north] at (1.8,-0.4) {(b) Cox--Snell check};
+\end{scope}
+\end{tikzpicture}
+\caption{(a) Predicted survival for a patient on the standard regimen with a squamous tumour in the log-logistic AFT model for the \texttt{veteran} trial, at Karnofsky scores $40$, $60$ and $80$: each curve is the one before stretched along the time axis by $1.0366^{20} = 2.05$. (b) The cumulative hazard of the Cox--Snell residuals, estimated as $-\log$ of their Kaplan--Meier curve, against the residual: close to the line of slope
+$1$, so the log-logistic model fits.}
+\label{fig:aft}
+\end{figure}
+
+\subsection{Checking and choosing a model}
+\label{ssec:aftcheck}
+
+If $T$ has cumulative hazard $H(t \mid x)$, then $H(T \mid x)$ has the unit exponential distribution, since $P\{H(T) > r\} = P\{T > H^{-1}(r)\} = e^{-r}$. The \textbf{Cox--Snell residuals} $r_i = \hat H(t_i \mid x_i)$ are therefore approximately a censored sample from the unit exponential when the model is right, censored where $t_i$ is. Estimating their cumulative hazard, with the Kaplan--Meier
+or Nelson--Aalen estimator, and plotting it against $r$ should give a line through the origin with slope $1$ (Figure~\ref{fig:aft}); systematic departures, especially at small $r$ where most of the data are, show lack of fit. For the log-logistic, $\hat H(t \mid x) = \log\{1 + (te^{-\hat m})^{\hat\alpha}\}$; for the \texttt{veteran} model the estimated cumulative hazard of the residuals is $0.47$, $1.07$ and $1.93$
+at $r = 0.5$, $1$ and $2$ (Software~\ref{sw:aftpredict}). For a single categorical covariate, a simpler check uses the Kaplan--Meier curve of each group: $\log\{-\log\hat S(t)\}$ against $\log t$ is a straight line for a Weibull, and $\log\{\hat S(t)/(1 - \hat S(t))\}$ against $\log t$ is a straight line for a log-logistic, with equal slopes across groups if the model holds.
+
+To choose between models:
+\begin{itemize}
+\item Among parametric families with the same covariates, compare AIC $= -2\log L + 2p$, which can be done because all are fitted to the same data by maximum likelihood; with the same number of parameters, as here, this is a comparison of log-likelihoods, $-712.6$ for the log-logistic and $-715.9$ for the Weibull.
+\item Between the Cox model and a parametric one, there is no likelihood comparison, since the Cox model's partial likelihood is not a full likelihood. Check proportional hazards for the Cox model and the residuals for the AFT model; if both are satisfactory, and the Weibull fits, the answers agree, as in Example~\ref{ex:aftlung}.
+\item Prefer an AFT model when hazards are clearly not proportional, when predictions, medians or extrapolation beyond the follow-up are wanted, or when time ratios suit the audience. Prefer the Cox model when the baseline hazard has no simple form and only relative effects are needed, since it leaves $h_0$ unspecified and cannot be wrong about its shape.
+\end{itemize}
+
+\subsection{AFT models in software}
+\label{ssec:software10}
+
+\begin{software}[A Weibull model in both languages]
+\label{sw:aftlung}
+\texttt{survreg} fits AFT models; its coefficients are on the log time scale. The Weibull fit for \texttt{lung}, its time ratios and scale, and the hazard ratios from Theorem~\ref{thm:weibullaft} beside those of \texttt{coxph}:
+{\small\begin{verbatim}
+> library(survival); options(show.signif.stars = FALSE)
+> lg <- na.omit(lung[, c("time", "status", "age", "sex", "ph.ecog")])
+> w <- survreg(Surv(time, status) ~ age + sex + ph.ecog, data = lg,
++              dist = "weibull")
+> round(cbind(coef = coef(w)[-1], time_ratio = exp(coef(w)[-1])), 4)
+           coef time_ratio
+age     -0.0075     0.9926
+sex      0.4011     1.4935
+ph.ecog -0.3396     0.7120
+> round(w$scale, 4)
+[1] 0.7311
+> hr_from_aft <- exp(-coef(w)[-1] / w$scale)     # HR = exp(-b / sigma)
+> cx <- coxph(Surv(time, status) ~ age + sex + ph.ecog, data = lg)
+> round(rbind(weibull_HR = hr_from_aft, cox_HR = exp(coef(cx))), 4)
+              age    sex ph.ecog
+weibull_HR 1.0103 0.5778  1.5913
+cox_HR     1.0111 0.5754  1.5900
+\end{verbatim}}
+\textbf{Reading the output.} Women's times are $1.49$ times men's; the scale $0.731$ is the reciprocal of the Weibull shape, $k = 1.37$, an increasing hazard. Converted, the hazard ratios agree with Cox's to two decimals.
+
+\textbf{Python:} \texttt{lifelines.WeibullAFTFitter}; its \texttt{rho\_} parameter is the shape $k$.
+\end{software}
+
+\begin{software}[Comparing AFT families]
+\label{sw:aftvet}
+The \texttt{veteran} model fitted with three distributions and compared by AIC; then the time ratios of the log-logistic with $95\%$ intervals, and the ratio for ten Karnofsky points:
+{\small\begin{verbatim}
+> vet <- veteran; vet$trt <- factor(vet$trt, labels = c("standard", "test"))
+> f <- Surv(time, status) ~ trt + celltype + karno
+> aic <- sapply(c("weibull", "lognormal", "loglogistic"),
++               function(d) AIC(survreg(f, data = vet, dist = d)))
+> round(aic, 2)
+    weibull   lognormal loglogistic 
+    1445.71     1445.81     1439.10 
+> ll <- survreg(f, data = vet, dist = "loglogistic")
+> round(ll$scale, 4)
+[1] 0.5811
+> round(exp(cbind(TR = coef(ll), confint(ll)))[-1, ], 4)   # time ratios
+                      TR  2.5 % 97.5 %
+trttest           0.9479 0.6705 1.3401
+celltypesmallcell 0.4966 0.3070 0.8033
+celltypeadeno     0.4605 0.2737 0.7748
+celltypelarge     0.9671 0.5765 1.6224
+karno             1.0366 1.0276 1.0456
+> round(exp(10 * coef(ll)["karno"]), 4)          # per ten Karnofsky points
+ karno 
+1.4325 
+\end{verbatim}}
+\textbf{Reading the output.} The log-logistic has the lowest AIC, by more than $6$. Treatment has no clear effect (the interval for its time ratio contains $1$); small-cell and adenocarcinoma tumours halve survival times compared with squamous; ten Karnofsky points lengthen them by $43\%$.
+
+\textbf{Python:} \texttt{LogLogisticAFTFitter} and \texttt{LogNormalAFTFitter} in \texttt{lifelines}, with an \texttt{AIC\_} attribute.
+\end{software}
+
+\begin{software}[Predictions and Cox--Snell residuals]
+\label{sw:aftpredict}
+Predicted medians at three Karnofsky scores; then the Cox--Snell residuals and the cumulative hazard of their Kaplan--Meier curve at $r = 0.5$, $1$ and $2$:
+{\small\begin{verbatim}
+> nd <- data.frame(trt = "standard", celltype = "squamous",
++                  karno = c(40, 60, 80))
+> round(predict(ll, newdata = nd, type = "quantile", p = 0.5), 1)
+    1     2     3 
+ 52.3 107.2 220.0 
+> z <- (log(vet$time) - predict(ll, type = "lp")) / ll$scale
+> r <- log(1 + exp(z))                           # Cox-Snell: H(t_i | x_i)
+> km <- survfit(Surv(r, vet$status) ~ 1)         # should be exponential(1)
+> H <- -log(summary(km, times = c(0.5, 1, 2))$surv)
+> round(rbind(r = c(0.5, 1, 2), H_hat = H), 3)
+       [,1]  [,2]  [,3]
+r     0.500 1.000 2.000
+H_hat 0.466 1.066 1.925
+\end{verbatim}}
+\textbf{Reading the output.} The medians are $52$, $107$ and $220$ days, each $1.43^2 = 2.05$ times the one before. The residuals' cumulative hazard is close to $r$ at each point, so the model is adequate.
+
+\textbf{Python:} \texttt{predict\_median} on a fitted \texttt{lifelines} AFT model.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+In an AFT model the time ratio for a new treatment is $1.5$, and the median survival under the control is $10$ months. What are the median and the upper quartile under the new treatment, if the control's upper quartile is $18$ months?
+\end{problem}
+
+\begin{solution}
+Every quantile is multiplied by $1.5$: the median is $15$ months and the upper quartile $27$ months.
+\end{solution}
+
+\begin{problem}
+Show that in an exponential AFT model the hazard ratio for a covariate is the reciprocal of its time ratio.
+\end{problem}
+
+\begin{solution}
+With $h_0(t) = \lambda$ constant, $h(t \mid x) = e^{-\beta^{\mathsf T}x}h_0(te^{-\beta^{\mathsf T}x}) = \lambda e^{-\beta^{\mathsf T}x}$, so a unit increase in $x_j$ multiplies the hazard by $e^{-\beta_j} = 1/e^{\beta_j}$. This is Theorem~\ref{thm:weibullaft} with $\sigma = 1$.
+\end{solution}
+
+\begin{problem}
+A Weibull AFT model has $\hat\sigma = 0.8$ and a coefficient $-0.4$ for smoking. Give the time ratio and the hazard ratio, and interpret both.
+\end{problem}
+
+\begin{solution}
+Time ratio $e^{-0.4} = 0.67$: smokers' survival times are two-thirds of non-smokers'. Hazard ratio $e^{0.4/0.8} = e^{0.5} = 1.65$: at any time, smokers' hazard is $65\%$ higher. The shape is $k = 1/0.8 = 1.25$.
+\end{solution}
+
+\begin{problem}
+In the log-logistic model of Example~\ref{ex:vetaft}, $\hat\alpha = 1.72$ and the Karnofsky coefficient is $\log 1.0366 = 0.0360$. By what factor do ten Karnofsky points multiply the odds of dying by any given time?
+\end{problem}
+
+\begin{solution}
+By $e^{-\alpha\beta \times 10} = e^{-1.72 \times 0.360} = e^{-0.619} = 0.54$: ten points almost halve the odds of having died by any time, the proportional odds reading of the same model.
+\end{solution}
+
+\begin{problem}
+Using Example~\ref{ex:vetaft}, predict the median survival of a patient on the standard regimen with an adenocarcinoma and a Karnofsky score of $60$, and of one with a squamous tumour and a score of $70$.
+\end{problem}
+
+\begin{solution}
+Medians scale with the time ratios. The adenocarcinoma patient: $107.2 \times 0.4605 = 49$ days. The squamous patient with $10$ more points: $107.2 \times 1.4325 = 154$ days.
+\end{solution}
+
+\begin{problem}
+Why are Cox--Snell residuals approximately unit exponential when the model is correct, and why is the check weak in the upper tail?
+\end{problem}
+
+\begin{solution}
+$S(T \mid x)$ is uniform on $(0, 1)$, so $H(T \mid x) = -\log S(T \mid x)$ is unit exponential; with estimated parameters this holds approximately, and censored $t_i$ give censored residuals. Few residuals are large, so the estimated cumulative hazard at large $r$ rests on a handful of subjects and wanders from the line even for a correct model.
+\end{solution}
+
+\begin{problem}
+A trial reports a Cox hazard ratio of $0.70$ and a Weibull AFT time ratio of $1.32$ for the same treatment, with $\hat\sigma = 0.78$. Are these consistent, and how would you explain the result to a clinician?
+\end{problem}
+
+\begin{solution}
+The Weibull hazard ratio is $e^{-\log(1.32)/0.78} = e^{-0.356} = 0.70$, the Cox value, so they agree. For a clinician: patients on the treatment have, at any moment, $30\%$ lower risk of dying; equivalently, their survival times are about a third longer, so a median of $12$ months becomes about $16$.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -2536,12 +2814,14 @@ effect of the baseline value shrink with time.
 \item Aalen, O. O. (1978), Nonparametric inference for a family of counting processes, \emph{Annals of Statistics}, 6, 701--726.
 \item Akaike, H. (1974), A new look at the statistical model identification, \emph{IEEE Transactions on Automatic Control}, 19, 716--723.
 \item Andersen, P. K., and Gill, R. D. (1982), Cox's regression model for counting processes: a large sample study, \emph{Annals of Statistics}, 10, 1100--1120.
+\item Bennett, S. (1983), Log-logistic regression models for survival data, \emph{Applied Statistics}, 32, 165--171.
 \item Breslow, N. E. (1972), Contribution to the discussion of the paper by D. R. Cox, \emph{Journal of the Royal Statistical Society B}, 34, 216--217.
 \item Brookmeyer, R., and Crowley, J. (1982), A confidence interval for the median survival time, \emph{Biometrics}, 38, 29--41.
 \item Chiang, C. L. (1984), \emph{The Life Table and Its Applications}, Malabar, Krieger.
 \item Cohen, A. C. (1965), Maximum likelihood estimation in the Weibull distribution based on complete and on censored samples, \emph{Technometrics}, 7, 579--588.
 \item Cox, D. R. (1972), Regression models and life-tables, \emph{Journal of the Royal Statistical Society B}, 34, 187--220.
 \item Cox, D. R. (1975), Partial likelihood, \emph{Biometrika}, 62, 269--276.
+\item Cox, D. R., and Snell, E. J. (1968), A general definition of residuals, \emph{Journal of the Royal Statistical Society, Series B}, 30, 248--275.
 \item Cutler, S. J., and Ederer, F. (1958), Maximum utilization of the life table method in analyzing survival, \emph{Journal of Chronic Diseases}, 8, 699--712.
 \item Edmonson, J. H., Fleming, T. R., Decker, D. G., et al. (1979), Different chemotherapeutic sensitivities and host factors affecting prognosis in advanced ovarian carcinoma versus minimal residual disease, \emph{Cancer Treatment Reports}, 63, 241--247.
 \item Efron, B. (1977), The efficiency of Cox's likelihood function for censored data, \emph{Journal of the American Statistical Association}, 72, 557--565.
@@ -2569,6 +2849,7 @@ effect of the baseline value shrink with time.
 \item Schemper, M., and Smith, T. L. (1996), A note on quantifying follow-up in studies of failure time, \emph{Controlled Clinical Trials}, 17, 343--346.
 \item Schoenfeld, D. (1982), Partial residuals for the proportional hazards regression model, \emph{Biometrika}, 69, 239--241.
 \item Therneau, T. M., Grambsch, P. M., and Fleming, T. R. (1990), Martingale-based residuals for survival models, \emph{Biometrika}, 77, 147--160.
+\item Wei, L. J. (1992), The accelerated failure time model: a useful alternative to the Cox regression model in survival analysis, \emph{Statistics in Medicine}, 11, 1871--1879.
 \item Weibull, W. (1951), A statistical distribution function of wide applicability, \emph{Journal of Applied Mechanics}, 18, 293--297.
 \end{enumerate}
 
