@@ -1,0 +1,80 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>2.4 Summaries: mean, median and residual life — Survival Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='survival.css' rel='stylesheet' type='text/css' /> 
+<meta content='survival.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Survival Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="survivalse1.html">Survival Data</a></li>
+<li class="sub"><a class="" href="survivalsu1.html">Time-to-event data</a></li>
+<li class="sub"><a class="" href="survivalsu2.html">Censoring</a></li>
+<li class="sub"><a class="" href="survivalsu3.html">Why ordinary methods fail</a></li>
+<li class="sub"><a class="" href="survivalsu4.html">Recording survival data</a></li>
+<li class="sub"><a class="" href="survivalsu5.html">Survival data in software</a></li>
+<li class="sub"><a class="" href="survivalsu6.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse2.html">Survival, Hazard and Cumulative Hazard</a></li>
+<li class="sub"><a class="" href="survivalsu7.html">The survival function</a></li>
+<li class="sub"><a class="" href="survivalsu8.html">The hazard function</a></li>
+<li class="sub"><a class="" href="survivalsu9.html">The cumulative hazard and the basic identity</a></li>
+<li class="sub"><a class="current" href="survivalsu10.html">Summaries: mean, median and residual life</a></li>
+<li class="sub"><a class="" href="survivalsu11.html">Hazards in software</a></li>
+<li class="sub"><a class="" href="survivalsu12.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="survivalli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 417 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu11.html'>next</a>] [<a href='survivalsu9.html'>prev</a>] [<a href='survivalsu9.html#tailsurvivalsu9.html'>prev-tail</a>] [<a href='#tailsurvivalsu10.html'>tail</a>] [<a href='survivalse2.html#survivalsu10.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>2.4   </span> <a id='x14-130002.4'></a>Summaries: mean, median and residual life</h4>
+<div class='newtheorem nt-proposition'>
+<!-- l. 420 --><p class='noindent'><span class='head'>
+<a id='x14-13001r1'></a>
+<span class='cmbx-10x-x-109'>Proposition 2.4.1.</span>  </span> For a non-negative survival time, \(\mathbb E[T] = \int _0^\infty S(t)\,dt\).
+</p>
+</div>
+<!-- l. 423 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 426 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>\(T = \int _0^\infty \mathbf 1\{T &gt; t\}\,dt\); take expectations and exchange the expectation and the integral (allowed since the
+integrand is non-negative).                                                                                       □
+</p>
+</div>
+<!-- l. 429 --><p class='noindent'>So the mean is the area under the survival curve. In practice the mean is often a poor summary:
+survival distributions are skewed, and with censoring the tail of the curve is not observed, so its area
+cannot be computed. The <span class='cmbx-10x-x-109'>median survival time</span>, the \(m\) with \(S(m) = \frac 12\), is preferred: it is defined as soon as half
+the subjects have had the event, and it is insensitive to the tail. Other percentiles are defined in the
+same way. For the exponential with rate \(\lambda \) the median is \(\log 2/\lambda = 0.693/\lambda \), below the mean \(1/\lambda \), reflecting the long right
+tail.
+</p><!-- l. 432 --><p class='noindent'>The <span class='cmbx-10x-x-109'>mean residual life </span>at time \(t\) is the expected further survival of a subject who has lasted to \(t\), \[ m(t) = \mathbb E[T - t \mid T &gt; t] = \frac {\int _t^\infty S(u)\,du}{S(t)} . \] For
+the exponential it is constant, \(1/\lambda \); for an increasing hazard it decreases with \(t\), and for a decreasing hazard
+it increases: a component that has survived its burn-in period is expected to last <span class='cmti-10x-x-109'>longer </span>than a new
+one.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 438 --><p class='noindent'><span class='head'>
+                                                                                      
+                                                                                      
+<a id='x14-13002r2'></a>
+<span class='cmbx-10x-x-109'>Example 2.4.2.</span>  </span> Adult human mortality is well described by the <span class='cmbx-10x-x-109'>Gompertz </span>hazard \(h(x) = ae^{bx}\) at age \(x\),
+which increases exponentially. With \(a = 5 \times 10^{-5}\) and \(b = 0.09\), the hazard doubles every \(\log 2/b = 7.7\) years. For a person alive
+at \(30\), the cumulative hazard to age \(x\) is \(\frac ab(e^{bx} - e^{30b})\); the probability of reaching \(60\) is \(0.892\), of reaching \(80\) is \(0.479\), and the
+median age at death is \(79.3\). A person alive at \(60\) reaches \(80\) with probability \(S(80)/S(60) = 0.537\), more than the \(0.479\) for a
+\(30\)-year-old, because the risks between \(30\) and \(60\) have already been survived (Software <a href='survivalsu11.html#x15-14003r3'>2.5.3<!-- tex4ht:ref: sw:gompertz  --></a>).
+</p>
+</div>
+<!-- l. 442 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 444 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu11.html'>next</a>] [<a href='survivalsu9.html'>prev</a>] [<a href='survivalsu9.html#tailsurvivalsu9.html'>prev-tail</a>] [<a href='survivalsu10.html'>front</a>] [<a href='survivalse2.html#survivalsu10.html'>up</a>] </p></div>
+<!-- l. 444 --><p class='noindent'><a id='tailsurvivalsu10.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="survivalsu9.html">&larr; Previous</a><a class="up" href="survivalse2.html#survivalsu10.html">Contents</a><a class="next" href="survivalsu11.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="survival-analysis/2-4-summaries-mean-median-and-residual-life" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

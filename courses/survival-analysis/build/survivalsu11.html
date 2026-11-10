@@ -1,0 +1,147 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>2.5 Hazards in software — Survival Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='survival.css' rel='stylesheet' type='text/css' /> 
+<meta content='survival.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Survival Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="survivalse1.html">Survival Data</a></li>
+<li class="sub"><a class="" href="survivalsu1.html">Time-to-event data</a></li>
+<li class="sub"><a class="" href="survivalsu2.html">Censoring</a></li>
+<li class="sub"><a class="" href="survivalsu3.html">Why ordinary methods fail</a></li>
+<li class="sub"><a class="" href="survivalsu4.html">Recording survival data</a></li>
+<li class="sub"><a class="" href="survivalsu5.html">Survival data in software</a></li>
+<li class="sub"><a class="" href="survivalsu6.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse2.html">Survival, Hazard and Cumulative Hazard</a></li>
+<li class="sub"><a class="" href="survivalsu7.html">The survival function</a></li>
+<li class="sub"><a class="" href="survivalsu8.html">The hazard function</a></li>
+<li class="sub"><a class="" href="survivalsu9.html">The cumulative hazard and the basic identity</a></li>
+<li class="sub"><a class="" href="survivalsu10.html">Summaries: mean, median and residual life</a></li>
+<li class="sub"><a class="current" href="survivalsu11.html">Hazards in software</a></li>
+<li class="sub"><a class="" href="survivalsu12.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="survivalli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 444 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu12.html'>next</a>] [<a href='survivalsu10.html'>prev</a>] [<a href='survivalsu10.html#tailsurvivalsu10.html'>prev-tail</a>] [<a href='#tailsurvivalsu11.html'>tail</a>] [<a href='survivalse2.html#survivalsu11.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>2.5   </span> <a id='x15-140002.5'></a>Hazards in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 447 --><p class='noindent'><span class='head'>
+<a id='x15-14001r1'></a>
+<span class='cmbx-10x-x-109'>Software 2.5.1 </span>(The Weibull functions)<span class='cmbx-10x-x-109'>.</span>  </span> \(S\), \(h\) and \(\exp (-H)\) at \(t = 5\) for Weibull distributions with scale \(10\) and shapes
+\(0.5\), \(1\), \(2\); a check that \(f = hS\) integrates to \(1\); and the mean of the \(k = 2\) distribution as the area under \(S\) and from the
+formula \(\lambda \Gamma (1 + 1/k)\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-4'>
+&gt; S &lt;- function(t, k, lam) exp(-(t / lam)^k)          # Weibull survival
+&gt; h &lt;- function(t, k, lam) (k / lam) * (t / lam)^(k - 1)  # and its hazard
+&gt; H &lt;- function(t, k, lam) (t / lam)^k                 # cumulative hazard
+&gt; for (k in c(0.5, 1, 2)) {
++   cat(sprintf("k = %3.1f  S(5) = %.4f  h(5) = %.4f  exp(-H(5)) = %.4f\n",
++               k, S(5, k, 10), h(5, k, 10), exp(-H(5, k, 10))))
++ }
+k = 0.5  S(5) = 0.4931  h(5) = 0.0707  exp(-H(5)) = 0.4931
+k = 1.0  S(5) = 0.6065  h(5) = 0.1000  exp(-H(5)) = 0.6065
+k = 2.0  S(5) = 0.7788  h(5) = 0.1000  exp(-H(5)) = 0.7788
+&gt; f &lt;- function(t) h(t, 2, 10) * S(t, 2, 10)           # density = h S
+&gt; integrate(f, 0, Inf)$value                           # integrates to 1
+[1] 1
+&gt; c(mean_by_integral = integrate(function(t) S(t, 2, 10), 0, Inf)$value,
++   mean_by_formula = 10 * gamma(1 + 1/2))
+mean_by_integral  mean_by_formula
+        8.862269         8.862269
+</pre>
+<!-- l. 468 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>In every case \(S(5) = \exp (-H(5))\), as Theorem <a href='survivalsu9.html#x13-12002r2'>2.3.2<!-- tex4ht:ref: thm:identity  --></a> requires. At \(t = 5\) the decreasing hazard
+(\(k = 0.5\)) has already removed half the population, while the increasing one (\(k = 2\)) has removed only \(22\%\). The
+area under \(S\) gives the mean \(8.862\), equal to \(10\,\Gamma (1.5)\).
+</p><!-- l. 471 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span><span class='cmtt-10x-x-109'>scipy.stats.weibull_min(c=k, scale=10) </span>provides <span class='cmtt-10x-x-109'>sf</span>, <span class='cmtt-10x-x-109'>pdf </span>and <span class='cmtt-10x-x-109'>mean</span>.
+</p>
+</div>
+<!-- l. 472 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 474 --><p class='noindent'><span class='head'>
+<a id='x15-14002r2'></a>
+<span class='cmbx-10x-x-109'>Software 2.5.2 </span>(Medians, memory and residual life)<span class='cmbx-10x-x-109'>.</span>  </span> For the exponential with mean \(10\): the median,
+the conditional probability of surviving \(5\) more units having survived \(10\), and the unconditional
+probability of surviving \(5\). Then the same comparison, the median and the mean residual life at ages \(0, 5, 10, 20\)
+for the Weibull with \(k = 2\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-5'>
+&gt; lam &lt;- 0.1  # exponential, mean 10
+&gt; c(median = log(2) / lam, mean = 1 / lam)
+   median      mean
+ 6.931472 10.000000
+&gt; c(P_survive_5_more_given_10 = exp(-lam * 15) / exp(-lam * 10),
++   P_survive_5_from_start = exp(-lam * 5))            # memoryless
+P_survive_5_more_given_10    P_survive_5_from_start
+                0.6065307                 0.6065307
+&gt; Sw &lt;- function(t) S(t, 2, 10)  # Weibull k = 2: ageing
+&gt; c(Sw(15) / Sw(10), Sw(5))  # conditional is lower
+[1] 0.2865048 0.7788008
+&gt; med &lt;- uniroot(function(t) Sw(t) - 0.5, c(0, 100), tol = 1e-10)$root
+&gt; c(median = med, formula = 10 * log(2)^(1/2))
+  median  formula
+8.325546 8.325546
+&gt; mrl &lt;- function(t) integrate(Sw, t, Inf)$value / Sw(t)  # mean residual life
+&gt; round(sapply(c(0, 5, 10, 20), mrl), 3)
+[1] 8.862 5.456 3.789 2.263
+</pre>
+<!-- l. 496 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The exponential’s median, \(6.93\), is below its mean \(10\), and its conditional and
+unconditional probabilities are both \(0.607\): it is memoryless. For the Weibull with increasing hazard,
+surviving \(5\) more units after \(10\) has probability \(0.287\), much less than \(0.779\) from new: it ages. Its median is \(8.33 = 10\sqrt {\log 2}\),
+and its mean residual life falls from \(8.86\) when new to \(2.26\) at age \(20\).
+</p><!-- l. 500 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span><span class='cmtt-10x-x-109'>scipy.integrate.quad </span>for the residual life integral.
+</p>
+</div>
+<!-- l. 501 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 503 --><p class='noindent'><span class='head'>
+<a id='x15-14003r3'></a>
+<span class='cmbx-10x-x-109'>Software 2.5.3 </span>(A Gompertz life table)<span class='cmbx-10x-x-109'>.</span>  </span> Example <a href='survivalsu10.html#x14-13002r2'>2.4.2<!-- tex4ht:ref: ex:gompertz  --></a>: the probabilities of surviving from \(30\) to \(60\), \(80\)
+and \(90\), the median age at death, the probability of reaching \(80\) from \(60\), and the doubling time of the
+hazard:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-6'>
+&gt; a &lt;- 5e-5; b &lt;- 0.09  # Gompertz hazard a e^(b x)
+&gt; Hg &lt;- function(x, x0) (a / b) * (exp(b * x) - exp(b * x0))
+&gt; Sg &lt;- function(x, x0 = 30) exp(-Hg(x, x0))           # from age 30
+&gt; round(c(to_60 = Sg(60), to_80 = Sg(80), to_90 = Sg(90)), 4)
+ to_60  to_80  to_90
+0.8916 0.4791 0.1617
+&gt; uniroot(function(x) Sg(x) - 0.5, c(30, 120), tol = 1e-8)$root  # median
+[1] 79.34316
+&gt; round(Sg(80) / Sg(60), 4)  # P(reach 80 | alive at 60)
+[1] 0.5373
+&gt; round(log(2) / b, 2)  # hazard doubling time
+[1] 7.7
+</pre>
+<!-- l. 519 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output.</span> \(89\%\) of \(30\)-year-olds reach \(60\) and \(48\%\) reach \(80\); the median age at death is \(79.3\); of those
+alive at \(60\), \(54\%\) reach \(80\). The hazard doubles every \(7.7\) years, close to the eight years observed in many
+populations.
+</p><!-- l. 522 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span>the same functions with <span class='cmtt-10x-x-109'>numpy.exp </span>and <span class='cmtt-10x-x-109'>scipy.optimize.brentq </span>for the median.
+</p>
+</div>
+<!-- l. 523 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 525 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu12.html'>next</a>] [<a href='survivalsu10.html'>prev</a>] [<a href='survivalsu10.html#tailsurvivalsu10.html'>prev-tail</a>] [<a href='survivalsu11.html'>front</a>] [<a href='survivalse2.html#survivalsu11.html'>up</a>] </p></div>
+<!-- l. 525 --><p class='noindent'><a id='tailsurvivalsu11.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="survivalsu10.html">&larr; Previous</a><a class="up" href="survivalse2.html#survivalsu11.html">Contents</a><a class="next" href="survivalsu12.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="survival-analysis/2-5-hazards-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
