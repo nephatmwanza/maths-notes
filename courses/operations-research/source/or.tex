@@ -3173,6 +3173,276 @@ State: stock $I$ at the start of month $t$. Decision: production $x$ with $0 \le
 of scale.
 \end{solution}
 
+%======================================================================
+\section{Decision Theory and Games}
+\label{sec:games}
+
+The models so far assumed that the data are known. Most decisions are taken without knowing what will happen: how large demand will be, whether a competitor will cut prices, whether a test will succeed. \textbf{Decision theory} chooses among actions whose outcomes depend on an uncertain state of nature, with or without
+probabilities for the states, and values the information that would reduce the uncertainty. When the uncertainty comes from an opponent who chooses deliberately, the problem becomes a \textbf{game}, and for two-person zero-sum games von Neumann's minimax theorem, which turns out to be LP duality in another form, gives a complete solution.
+
+\subsection{Decisions under uncertainty}
+\label{ssec:uncertainty}
+
+A decision problem has actions $a_1, \ldots, a_m$, states of nature $\theta_1, \ldots, \theta_n$, and a payoff $P_{ij}$ for action $a_i$ in state $\theta_j$. With no probabilities for the states, several criteria are in use, each expressing an attitude to risk:
+\begin{itemize}
+\item \textbf{maximin} (Wald): choose the action whose worst payoff is largest, the pessimist's rule;
+\item \textbf{maximax}: choose the action whose best payoff is largest, the optimist's;
+\item \textbf{Hurwicz}: maximise $\alpha\max_jP_{ij} + (1 - \alpha)\min_jP_{ij}$ for a chosen coefficient of optimism $\alpha$;
+\item \textbf{minimax regret} (Savage): with the \textbf{regret} $R_{ij} = \max_kP_{kj} - P_{ij}$, the amount lost by not choosing the best action for state $j$, minimise the largest regret;
+\item \textbf{Laplace}: treat the states as equally likely and maximise the average payoff.
+\end{itemize}
+
+\begin{exa}
+\label{ex:plant}
+A firm can build a large, medium or small plant; demand will be high, medium or low. The payoffs (Rs.~lakh) are
+\begin{center}
+\small
+\begin{tabular}{l|rrr}
+ & high & medium & low \\
+\hline
+large & $200$ & $50$ & $-120$ \\
+medium & $120$ & $80$ & $-30$ \\
+small & $60$ & $40$ & $20$
+\end{tabular}
+\end{center}
+Maximin chooses the small plant (worst case $20$), maximax the large ($200$), Hurwicz with $\alpha = 0.6$ the large ($72$ against $60$ and $44$), and minimax regret and Laplace the medium plant, whose largest regret is $80$ against $140$ for the other two (Software~\ref{sw:criteria}). The criteria disagree because they answer different questions.
+\end{exa}
+
+\subsection{Decisions under risk}
+\label{ssec:risk}
+
+When probabilities $\pi_j$ for the states are available, the standard criterion is the \textbf{expected monetary value} $\text{EMV}(a_i) = \sum_j\pi_jP_{ij}$. With $\pi = (0.3, 0.5, 0.2)$ in Example~\ref{ex:plant} the EMVs are $61$, $70$ and $42$: build the medium plant. Minimising the expected regret, the \textbf{expected opportunity loss}, always gives the same choice,
+since $\sum_j\pi_jR_{ij} = \sum_j\pi_j\max_kP_{kj} - \text{EMV}(a_i)$ and the first term does not depend on $i$.
+
+\textbf{The value of information.} If the state could be known before deciding, the best action for each state would be taken, with expected payoff $\sum_j\pi_j\max_iP_{ij}$. The difference
+\[
+\text{EVPI} = \sum_j\pi_j\max_iP_{ij} - \max_i\text{EMV}(a_i)
+\]
+is the \textbf{expected value of perfect information}, the most it is worth paying for any forecast. In Example~\ref{ex:plant}, $\text{EVPI} = 0.3 \times 200 + 0.5 \times 80 + 0.2 \times 20 - 70 = 104 - 70 = 34$, which is also the expected regret of the best action.
+
+Real information is imperfect. A market survey reports \emph{favourable} or \emph{unfavourable}, with known reliabilities $P(\text{fav} \mid \theta_j)$; by Bayes' theorem it turns the prior $\pi$ into a posterior, the best action is chosen for each report, and the expected payoff with the survey, minus that without, is the \textbf{expected value of sample information}
+(EVSI). The calculation is organised as a \textbf{decision tree}, with square decision nodes, round chance nodes, and payoffs at the leaves, evaluated from the leaves back to the root (\textbf{rolling back}): at a chance node take the expectation, at a decision node the best branch. This is dynamic programming (Theorem~\ref{thm:bellman}) with
+expectations.
+
+\begin{exa}
+\label{ex:survey}
+In Example~\ref{ex:plant} a survey is favourable with probability $0.8$, $0.5$, $0.1$ when demand is high, medium, low. Then $P(\text{fav}) = 0.3 \times 0.8 + 0.5 \times 0.5 + 0.2 \times 0.1 = 0.51$, and the posteriors are $(0.471, 0.490, 0.039)$ after a favourable report and $(0.122, 0.510, 0.367)$ after an unfavourable one. The best
+actions are the large plant ($113.9$) and the medium plant ($44.5$), so with the survey the expected payoff is $0.51 \times 113.9 + 0.49 \times 44.5 = 79.9$, and $\text{EVSI} = 79.9 - 70 = 9.9$ (Figure~\ref{fig:tree}, Software~\ref{sw:survey}). The survey is worth commissioning if it costs less than Rs.~9.9~lakh; its
+\emph{efficiency}, $\text{EVSI}/\text{EVPI} = 0.29$, says how much of the uncertainty it removes.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,
+  dec/.style={draw,fill=orange!25,minimum size=0.55cm,font=\scriptsize},
+  cha/.style={draw,circle,fill=blue!15,minimum size=0.6cm,font=\scriptsize},
+  lab/.style={font=\scriptsize,fill=yellow!7,inner sep=1pt}]
+\fill[yellow!7,rounded corners=4pt] (-0.7,-2.9) rectangle (11.6,3.0);
+\node[dec] (root) at (0,0) {};
+\node[cha] (s) at (3.2,1.5) {};
+\node[dec] (f) at (6.4,2.4) {}; \node[dec] (u) at (6.4,0.6) {};
+\node[cha] (n) at (3.2,-1.6) {};
+\draw (root) -- node[lab,midway] {survey} (s);
+\draw (root) -- node[lab,midway] {no survey} (n);
+\draw (s) -- node[lab,midway] {fav $0.51$} (f);
+\draw (s) -- node[lab,midway] {unfav $0.49$} (u);
+\draw[red!70!black,thick] (f) -- (9.0,2.4) node[right,font=\scriptsize] {large: $113.9$};
+\draw[red!70!black,thick] (u) -- (9.0,0.6) node[right,font=\scriptsize] {medium: $44.5$};
+\draw[red!70!black,thick] (n) -- (6.4,-1.6) node[right,font=\scriptsize,align=left] {medium: EMV $70$\\(large $61$, small $42$)};
+\node[font=\scriptsize\bfseries,blue!50!black] at (3.2,2.1) {$79.9$};
+\node[font=\scriptsize\bfseries,blue!50!black] at (3.2,-2.2) {$70$};
+\node[font=\scriptsize\bfseries,orange!50!black,align=center] at (0,0.75) {$79.9$};
+\node[font=\scriptsize,black!70,align=left,anchor=west] at (6.6,-0.4) {EVSI $= 79.9 - 70 = 9.9$; EVPI $= 34$};
+\end{tikzpicture}
+\caption{The decision tree of Example~\ref{ex:survey}, rolled back. Squares are decisions, circles chance events. After each survey report the best plant is chosen (red), at the chance node the two outcomes are averaged, and at the root the survey branch, worth $79.9$, beats the no-survey branch, worth $70$, by the EVSI of $9.9$, before the survey's cost.}
+\label{fig:tree}
+\end{figure}
+
+EMV is appropriate when the stakes are small relative to the decision maker's wealth. For large risks, payoffs are replaced by \textbf{utilities} $u(P_{ij})$, and the expected utility is maximised (von Neumann and Morgenstern, 1944). A concave $u$ expresses \textbf{risk aversion}: the decision maker prefers a sure amount to a gamble with the same expected value, and the
+\textbf{certainty equivalent} of a gamble, the sure amount with the same expected utility, is less than its expected value.
+
+\subsection{Two-person zero-sum games}
+\label{ssec:zerosum}
+
+In a \textbf{two-person zero-sum game}, a row player chooses one of $m$ strategies and a column player one of $n$, simultaneously, and the column player pays the row player $a_{ij}$. The row player can guarantee at least $\max_i\min_ja_{ij}$ (the \textbf{maximin}), and the column player can hold the loss to at most
+$\min_j\max_ia_{ij}$ (the \textbf{minimax}); always maximin $\leq$ minimax. If they are equal, the game has a \textbf{saddle point}, an entry that is the smallest in its row and the largest in its column, and both players should play it.
+
+Most games have no saddle point, and the players must randomise. A \textbf{mixed strategy} for the row player is a probability vector $p$; against the column player's mixed strategy $q$ the expected payoff is $p^{\mathsf T}Aq$. Against a fixed $p$, the column player's best reply is a pure strategy, so the row player can guarantee
+$\min_j(A^{\mathsf T}p)_j$.
+
+\begin{thm}[Minimax theorem; von Neumann, 1928]
+\label{thm:minimax}
+For every matrix $A$,
+\[
+\max_p\min_qp^{\mathsf T}Aq = \min_q\max_pp^{\mathsf T}Aq ,
+\]
+the maxima and minima being over probability vectors. The common value is the \textbf{value} of the game, and strategies attaining the outer optima are \textbf{optimal strategies}.
+\end{thm}
+
+\begin{proof}
+The row player's problem is the LP: maximise $v$ subject to $\sum_ip_ia_{ij} \geq v$ for all $j$, $\sum_ip_i = 1$, $p \geq 0$ ($v$ free). The column player's problem is: minimise $w$ subject to $\sum_ja_{ij}q_j \leq w$ for all $i$, $\sum_jq_j = 1$, $q \geq 0$. Writing out the dual of the first by the rules of the section on duality (a free
+variable $v$ gives an equality constraint, the equation $\sum p_i = 1$ a free variable) gives exactly the second. Both are feasible and bounded (any pure strategy is feasible, and $v$, $w$ lie between $\min a_{ij}$ and $\max a_{ij}$), so by strong duality (Theorem~\ref{thm:strongduality}) their optimal values are equal. The first value is $\max_p\min_jp^{\mathsf T}Ae_j = \max_p\min_qp^{\mathsf T}Aq$
+and the second $\min_q\max_i(Aq)_i = \min_q\max_pp^{\mathsf T}Aq$.
+\end{proof}
+
+So every finite zero-sum game is solved by linear programming, and the optimal strategies are the primal and dual solutions (Software~\ref{sw:games}). Complementary slackness says that a pure strategy used with positive probability earns exactly the value against the opponent's optimal strategy, and one that would earn less is
+never used. For small games there are shortcuts:
+\begin{itemize}
+\item \textbf{Dominance}: a row whose entries are all no larger than those of another row (or of a mixture of rows) can be deleted, and likewise a column whose entries are all no smaller than another's.
+\item \textbf{$2 \times 2$ games} without a saddle point, $A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}$, have $p_1 = \frac{d - c}{a - b - c + d}$, $q_1 = \frac{d - b}{a - b - c + d}$ and value $\frac{ad - bc}{a - b - c + d}$, found by making the opponent indifferent between its two strategies.
+\item \textbf{$2 \times n$ and $m \times 2$ games} are solved graphically: plot the payoff of each of the opponent's pure strategies as a line in $p_1$, and find the highest point of their lower envelope.
+\end{itemize}
+
+\begin{exa}
+\label{ex:game}
+The game $A = \begin{pmatrix} 3 & -1 \\ -2 & 4 \end{pmatrix}$ has maximin $-1$ and minimax $3$: no saddle point. The formula gives $p = (0.6, 0.4)$, $q = (0.5, 0.5)$ and value $\frac{12 - 2}{10} = 1$. The game $\begin{pmatrix} 2 & -1 & 3 \\ -1 & 3 & -2 \\ 1 & 0 & 1 \end{pmatrix}$ has value $\frac57$, with optimal strategies
+$p = q = (\frac47, \frac37, 0)$: the third row and the third column are never used, although neither is dominated by a single other row or column.
+\end{exa}
+
+Games that are not zero-sum, in which the players' interests partly coincide, need the concept of a \textbf{Nash equilibrium} (1950), a pair of strategies each a best reply to the other; such equilibria always exist in mixed strategies but need not be unique or efficient, as the prisoner's dilemma shows.
+
+\subsection{Decisions and games in software}
+\label{ssec:software12}
+
+\begin{software}[Decision criteria]
+\label{sw:criteria}
+The criteria of the subsection on decisions under uncertainty, and the EMV, applied to Example~\ref{ex:plant}, with the action each selects; then the EVPI:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.optimize import linprog
+>>> acts = ['large', 'medium', 'small']
+>>> P = np.array([[200, 50, -120],         # payoff (Rs. lakh) by demand:
+...               [120, 80, -30],          # high, medium, low
+...               [60, 40, 20]])
+>>> prob = np.array([0.3, 0.5, 0.2])
+>>> regret = P.max(axis=0) - P
+>>> crit = {'maximin': P.min(axis=1), 'maximax': P.max(axis=1),
+...         'Hurwicz 0.6': 0.6 * P.max(axis=1) + 0.4 * P.min(axis=1),
+...         'Laplace': P.mean(axis=1), 'minimax regret': -regret.max(axis=1),
+...         'EMV': P @ prob}
+>>> for name, score in crit.items():
+...     print(f"{name:15s}", np.round(score, 2), acts[int(np.argmax(score))])
+...
+maximin         [-120  -30   20] small
+maximax         [200 120  60] large
+Hurwicz 0.6     [72. 60. 44.] large
+Laplace         [43.33 56.67 40.  ] medium
+minimax regret  [-140  -80 -140] medium
+EMV             [61. 70. 42.] medium
+>>> evpi = prob @ P.max(axis=0) - (P @ prob).max(); evpi
+34.0
+\end{verbatim}}
+\textbf{Reading the output.} Maximin chooses the small plant, maximax and Hurwicz ($\alpha = 0.6$) the large, Laplace, minimax regret (printed with a minus sign, so that the largest is best) and EMV the medium. The EVPI is $34$.
+
+\textbf{MATLAB/Octave:} \texttt{min(P, [], 2)}, \texttt{max(P, [], 2)} and \texttt{P*prob'} give the same columns.
+\end{software}
+
+\begin{software}[The value of a survey]
+\label{sw:survey}
+Example~\ref{ex:survey}: the probability of a favourable report, the posterior probabilities after each report, the best action and its expected payoff after each, and the expected payoff with the survey, the EVSI and the efficiency:
+{\small\begin{verbatim}
+>>> like = np.array([0.8, 0.5, 0.1])       # P(favourable survey | demand)
+>>> pf = prob @ like                       # P(favourable)
+>>> post_f = prob * like / pf; post_u = prob * (1 - like) / (1 - pf)
+>>> round(pf, 3), np.round(post_f, 4), np.round(post_u, 4)
+(0.51, array([0.4706, 0.4902, 0.0392]), array([0.1224, 0.5102, 0.3673]))
+>>> best_f, best_u = (P @ post_f).max(), (P @ post_u).max()
+>>> choose = lambda post: acts[int(np.argmax(P @ post))]
+>>> (choose(post_f), round(best_f, 2)), (choose(post_u), round(best_u, 2))
+(('large', 113.92), ('medium', 44.49))
+>>> with_survey = pf * best_f + (1 - pf) * best_u
+>>> evsi = with_survey - (P @ prob).max()
+>>> round(with_survey, 2), round(evsi, 2), round(evsi / evpi, 3)  # efficiency
+(79.9, 9.9, 0.291)
+\end{verbatim}}
+\textbf{Reading the output.} A favourable report (probability $0.51$) makes high demand much more likely ($0.47$) and leads to the large plant, worth $113.9$; an unfavourable one leads to the medium plant, worth $44.5$. With the survey the expected payoff is $79.9$; the EVSI is $9.9$, $29\%$ of the EVPI.
+
+\textbf{MATLAB/Octave:} the same vector arithmetic, \texttt{prob.*like/(prob*like')}.
+\end{software}
+
+\begin{software}[Games by linear programming]
+\label{sw:games}
+A function that solves any zero-sum game by the two LPs of the proof of Theorem~\ref{thm:minimax} (after adding a constant to make all entries positive, so that the value is positive and the variables $y = p/v$ can be used); a check for a saddle point; and three games:
+{\small\begin{verbatim}
+>>> def solve_game(A):               # value and optimal mixed strategies
+...     A = np.asarray(A, float); m, n = A.shape
+...     k = 1 - A.min(); B = A + k         # shift so that every entry is > 0
+...     # row player: minimise sum y with B^T y >= 1; then p = y / sum y
+...     r = linprog(np.ones(m), A_ub=-B.T, b_ub=-np.ones(n), method='highs')
+...     p = r.x / r.x.sum(); v = 1 / r.x.sum() - k
+...     s = linprog(-np.ones(n), A_ub=B, b_ub=np.ones(m), method='highs')
+...     q = s.x / s.x.sum()
+...     return round(v, 6), np.round(p, 4), np.round(q, 4)
+...
+>>> A1 = [[4, 2, 3], [5, 3, 4], [1, 0, 6]]  # has a saddle point
+>>> np.max(np.min(A1, axis=1)), np.min(np.max(A1, axis=0))
+(3, 3)
+>>> solve_game([[3, -1], [-2, 4]])         # 2 x 2 without a saddle point
+(1.0, array([0.6, 0.4]), array([0.5, 0.5]))
+>>> solve_game([[0, -1, 1], [1, 0, -1], [-1, 1, 0]])   # rock, paper, scissors
+(0.0, array([0.3333, 0.3333, 0.3333]), array([0.3333, 0.3333, 0.3333]))
+>>> solve_game([[2, -1, 3], [-1, 3, -2], [1, 0, 1]])
+(0.714286, array([0.5714, 0.4286, 0.    ]), array([0.5714, 0.4286, 0.    ]))
+\end{verbatim}}
+\textbf{Reading the output.} The first matrix has maximin $=$ minimax $= 3$, a saddle point. The $2 \times 2$ game has value $1$ with $p = (0.6, 0.4)$ and $q = (0.5, 0.5)$, as the formula gives. Rock--paper--scissors has value $0$ and the uniform strategies. The last game has value $0.714 = \frac57$, both players mixing their first two
+strategies in the ratio $4 : 3$.
+
+\textbf{MATLAB/Octave:} the same two \texttt{linprog} calls.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+In Example~\ref{ex:plant}, for which values of the Hurwicz coefficient $\alpha$ is the large plant preferred to the medium one?
+\end{problem}
+
+\begin{solution}
+The Hurwicz values are $320\alpha - 120$ (large), $150\alpha - 30$ (medium) and $40\alpha + 20$ (small). Large beats medium when $320\alpha - 120 > 150\alpha - 30$, that is $\alpha > \frac9{17} = 0.529$. Over the whole range: small beats medium when $\alpha < \frac5{11} = 0.455$ and beats large when $\alpha < \frac12$, so the small plant is chosen for
+$\alpha < 0.455$, the medium for $0.455 < \alpha < 0.529$, and the large for $\alpha > 0.529$, which includes the $\alpha = 0.6$ of Software~\ref{sw:criteria}.
+\end{solution}
+
+\begin{problem}
+Verify that in Example~\ref{ex:plant} the expected opportunity loss of the medium plant equals the EVPI.
+\end{problem}
+
+\begin{solution}
+The regrets of the medium plant are $200 - 120 = 80$, $80 - 80 = 0$ and $20 - (-30) = 50$; their expectation is $0.3 \times 80 + 0.5 \times 0 + 0.2 \times 50 = 34$, the EVPI. The best action always has expected regret equal to the EVPI.
+\end{solution}
+
+\begin{problem}
+Solve the game $\begin{pmatrix} 5 & 1 \\ 3 & 4 \end{pmatrix}$.
+\end{problem}
+
+\begin{solution}
+Row minima $1, 3$, maximin $3$; column maxima $5, 4$, minimax $4$: no saddle point. With $a - b - c + d = 5 - 1 - 3 + 4 = 5$: $p_1 = \frac{4 - 3}5 = \frac15$, $q_1 = \frac{4 - 1}5 = \frac35$, value $\frac{20 - 3}5 = 3.4$.
+\end{solution}
+
+\begin{problem}
+Use dominance to reduce and solve $\begin{pmatrix} 3 & 2 & 4 \\ 1 & 4 & 2 \\ 2 & 1 & 3 \end{pmatrix}$.
+\end{problem}
+
+\begin{solution}
+Row $3$ is dominated by row $1$ ($3 \geq 2$, $2 \geq 1$, $4 \geq 3$) and is deleted. In the remaining rows column $3$, $(4, 2)$, is dominated by column $1$, $(3, 1)$, which the column player prefers, and is deleted. The game $\begin{pmatrix} 3 & 2 \\ 1 & 4 \end{pmatrix}$ has no saddle point (maximin $2$, minimax $3$), and
+$p_1 = \frac{4 - 1}4 = \frac34$, $q_1 = \frac{4 - 2}4 = \frac12$, value $\frac{12 - 2}4 = 2.5$.
+\end{solution}
+
+\begin{problem}
+A decision maker with utility $u(x) = \sqrt x$ can take Rs.~100 for certain or a gamble paying Rs.~250 or nothing with equal probability. Which does she choose, and what is the gamble's certainty equivalent?
+\end{problem}
+
+\begin{solution}
+The gamble's expected value is $125$, but its expected utility is $\frac12\sqrt{250} = 7.91 < \sqrt{100} = 10$, so she takes the sure Rs.~100. The certainty equivalent is $7.91^2 = 62.5$: she would exchange the gamble for any sure amount above Rs.~62.5. The difference $125 - 62.5$ is her risk premium.
+\end{solution}
+
+\begin{problem}
+Show that a pure strategy that is used with positive probability in an optimal mixed strategy earns exactly the value of the game against the opponent's optimal strategy.
+\end{problem}
+
+\begin{solution}
+Let $p$, $q$ be optimal and $v$ the value. Each row earns $(Aq)_i \leq v$, by optimality of $q$. Then $v = p^{\mathsf T}Aq = \sum_ip_i(Aq)_i \leq \sum_ip_iv = v$, so equality holds term by term: $p_i > 0$ forces $(Aq)_i = v$. This is complementary slackness for the pair of LPs in the proof of
+Theorem~\ref{thm:minimax}.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -3252,13 +3522,19 @@ of scale.
 \item Malcolm, D. G., Roseboom, J. H., Clark, C. E., and Fazar, W. (1959), Application of a technique for research and development program evaluation, \emph{Operations Research}, 7, 646--669.
 \item Markowitz, H. (1952), Portfolio selection, \emph{Journal of Finance}, 7, 77--91.
 \item Minkowski, H. (1896), \emph{Geometrie der Zahlen}, Leipzig, Teubner.
+\item Nash, J. F. (1950), Equilibrium points in n-person games, \emph{Proceedings of the National Academy of Sciences}, 36, 48--49.
+\item von Neumann, J. (1928), Zur Theorie der Gesellschaftsspiele, \emph{Mathematische Annalen}, 100, 295--320.
 \item von Neumann, J. (1947), Discussion of a maximum problem, unpublished manuscript, in A. H. Taub (ed.), \emph{John von Neumann: Collected Works}, Vol.~VI (1963), Oxford, Pergamon, 89--95.
+\item von Neumann, J., and Morgenstern, O. (1944), \emph{Theory of Games and Economic Behavior}, Princeton University Press.
 \item Padberg, M., and Rinaldi, G. (1991), A branch-and-cut algorithm for the resolution of large-scale symmetric traveling salesman problems, \emph{SIAM Review}, 33, 60--100.
+\item Raiffa, H., and Schlaifer, R. (1961), \emph{Applied Statistical Decision Theory}, Boston, Harvard Business School.
+\item Savage, L. J. (1951), The theory of statistical decision, \emph{Journal of the American Statistical Association}, 46, 55--67.
 \item Slater, M. (1950), Lagrange multipliers revisited, \emph{Cowles Commission Discussion Paper: Mathematics}, 403.
 \item Smith, W. E. (1956), Various optimizers for single-stage production, \emph{Naval Research Logistics Quarterly}, 3, 59--66.
 \item Spielman, D. A., and Teng, S.-H. (2004), Smoothed analysis of algorithms: why the simplex algorithm usually takes polynomial time, \emph{Journal of the ACM}, 51, 385--463.
 \item Stigler, G. J. (1945), The cost of subsistence, \emph{Journal of Farm Economics}, 27, 303--314.
 \item Vogel, W. R. (1958), A short-cut solution to the transportation problem, cited in N. V. Reinfeld and W. R. Vogel, \emph{Mathematical Programming}, Englewood Cliffs, Prentice-Hall.
+\item Wald, A. (1950), \emph{Statistical Decision Functions}, New York, Wiley.
 \item Weyl, H. (1935), Elementare Theorie der konvexen Polyeder, \emph{Commentarii Mathematici Helvetici}, 7, 290--306.
 \item Wolfe, P. (1959), The simplex method for quadratic programming, \emph{Econometrica}, 27, 382--398.
 \end{enumerate}
