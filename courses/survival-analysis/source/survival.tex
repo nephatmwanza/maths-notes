@@ -2175,6 +2175,335 @@ Two patients have predicted linear predictors $\hat\beta^{\mathsf T}x$ of $0.2$ 
 $\hat S_2 = \hat S_1^{\exp(1.1 - 0.2)} = 0.6^{e^{0.9}} = 0.6^{2.46} = 0.285$. The second patient, with the higher linear predictor, has the higher hazard at all times and the lower survival, and a concordant model predicts that this patient dies first.
 \end{solution}
 
+%======================================================================
+\section{Checking Proportional Hazards}
+\label{sec:ph}
+
+The Cox model assumes that each covariate multiplies the hazard by the same factor at every time. When this fails, the single hazard ratio the model reports is a kind of average over follow-up, which may describe no period well: a treatment that halves the risk in the first year and does nothing afterwards is reported as a modest constant effect. This section
+shows how to check the assumption, with plots and with tests based on the Schoenfeld residuals, and what to do when it fails, using the \texttt{veteran} model of the previous section, in which it does fail.
+
+\subsection{Graphical checks}
+\label{ssec:phplots}
+
+For a categorical covariate, proportional hazards means $H_g(t) = c_gH_1(t)$, so the curves of $\log\hat H_g(t) = \log(-\log\hat S_g(t))$ for the groups should be \textbf{parallel} when plotted against $\log t$ (the problem on proportional hazards in the section on the Nelson--Aalen estimator). Curves that converge, diverge or cross suggest that the hazard ratio changes
+with time; crossing Kaplan--Meier curves, as for the \texttt{veteran} regimens (Figure~\ref{fig:crossing}), always mean crossing hazards. These plots work for a few groups but not for continuous covariates or for several covariates at once, for which residuals are used.
+
+\subsection{Schoenfeld residuals}
+\label{ssec:schoenfeld}
+
+At each event time $t_{(j)}$, with subject $i_j$ failing, the Cox model predicts the covariate of the subject who fails: it is subject $l$ in the risk set with probability $w_l = e^{\hat\beta^{\mathsf T}x_l}/\sum_{m \in R_j}e^{\hat\beta^{\mathsf T}x_m}$. The \textbf{Schoenfeld residual} is the observed minus the predicted covariate,
+\[
+r_j = x_{i_j} - \sum_{l \in R_j}w_lx_l ,
+\]
+one vector for each event. The residuals sum to zero (this is the score equation that defines $\hat\beta$), and if the model is right they have no trend in time. Grambsch and Therneau (1994) showed that the \textbf{scaled} Schoenfeld residuals, $r_j$ multiplied by the inverse of their variance and added to $\hat\beta$, satisfy approximately
+\[
+\mathbb E[r_j^*] \approx \beta(t_{(j)}) ,
+\]
+where $\beta(t)$ is the coefficient at time $t$ in a model that allows it to vary. A plot of the scaled residuals against time, with a smooth curve through them, therefore shows how the log hazard ratio changes over follow-up (Figure~\ref{fig:schoenfeld}), and a test of zero slope, regressing $r_j^*$ on a function $g(t_{(j)})$ of time, is a test of proportional hazards.
+R's \texttt{cox.zph} gives this test for each covariate and a global test for all of them, with $g$ chosen as the Kaplan--Meier transform of time by default.
+
+\begin{exa}
+\label{ex:zph}
+For the \texttt{veteran} model with treatment, cell type and Karnofsky score, \texttt{cox.zph} gives $\chi^2_1 = 0.21$ ($p = 0.65$) for treatment, $\chi^2_3 = 14.5$ ($p = 0.002$) for cell type and $\chi^2_1 = 12.8$ ($p = 0.0003$) for the Karnofsky score, and a global $\chi^2_5 = 22.9$ ($p = 0.0004$) (Software~\ref{sw:zph}). The scaled residuals for the Karnofsky score
+show that its coefficient, $-0.031$ on average, is about $-0.06$ early and near $0$ after a few months: the performance score predicts early deaths strongly and later ones hardly at all.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-1.0,-0.85) rectangle (7.6,3.55);
+\draw[->] (0,0) -- (7.3,0); \node[font=\scriptsize] at (3.5,-0.6) {days (log scale)};
+\draw[->] (0,0) -- (0,3.35) node[left,font=\scriptsize] {$\beta(t)$};
+\foreach \t in {3,10,30,100,300,1000} \draw ({ln(\t)/ln(1000)*7},0.06) -- ({ln(\t)/ln(1000)*7},-0.06) node[below,font=\tiny] {$\t$};
+\foreach \b in {-0.1,-0.05,0,0.05} \draw (0.06,{(\b+0.15)/0.25*3.2}) -- (-0.06,{(\b+0.15)/0.25*3.2}) node[left,font=\tiny] {$\b$};
+\draw[black!40,dashed] (0,1.92) -- (7.0,1.92);
+\draw[green!45!black,thick,dashed] (0,1.520) -- (7.0,1.520);
+\fill[blue!50!black,opacity=0.6] (0.000,0.277) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (0.000,1.588) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (0.702,1.472) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (1.113,0.854) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (1.405,1.524) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (1.972,1.952) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (1.972,0.574) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (1.972,1.200) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.107,1.154) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.107,0.363) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.107,3.166) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.107,1.607) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.333,0.258) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.333,1.463) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.430,2.433) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.518,1.643) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.518,0.903) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.599,2.323) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.599,0.945) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.744,1.478) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.744,0.384) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.810,0.988) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.929,0.525) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.929,0.962) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.929,1.084) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.984,1.483) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (2.984,0.306) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.036,0.899) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.036,0.831) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.085,1.298) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.085,0.357) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.132,2.134) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.220,2.069) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.220,0.947) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.262,0.733) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.262,2.482) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.340,2.082) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.412,1.146) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.447,2.080) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.447,2.120) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.480,2.748) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.480,2.651) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.543,0.398) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.603,0.967) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.631,2.195) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.788,1.752) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.811,1.466) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.835,1.686) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.857,0.896) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.984,1.753) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.984,0.374) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (3.984,1.438) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.004,2.150) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.004,1.398) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.004,1.096) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.023,1.094) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.042,2.584) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.042,2.147) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.079,2.598) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.132,0.422) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.166,2.052) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.198,1.255) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.334,1.354) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.348,1.369) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.441,1.152) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.441,0.467) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.466,0.382) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.490,2.142) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.526,1.530) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.560,1.287) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.582,1.781) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.615,2.231) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.615,1.974) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.656,2.005) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.656,2.661) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.667,1.110) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.697,1.978) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.716,1.998) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.763,2.224) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.772,1.722) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.772,1.065) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.782,2.152) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.826,2.566) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.826,2.319) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.834,1.829) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.868,2.600) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.901,1.369) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.948,2.324) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (4.956,1.760) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.000,2.601) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.008,1.874) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.029,2.534) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.036,0.143) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.084,1.273) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.098,1.693) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.117,1.589) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.156,2.342) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.156,2.039) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.168,1.570) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.245,0.765) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.296,2.721) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.369,2.109) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.374,2.276) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.447,0.829) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.502,1.438) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.515,1.585) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.562,0.891) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.595,1.563) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.635,2.003) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.703,1.147) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.721,2.582) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.735,1.698) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.826,0.954) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.907,1.928) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (5.956,1.740) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (6.014,1.973) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (6.030,1.755) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (6.043,2.723) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (6.051,1.001) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (6.099,1.547) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (6.228,2.358) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (6.400,1.442) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (6.460,1.127) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (6.991,1.215) circle (1.1pt);
+\fill[blue!50!black,opacity=0.6] (6.999,1.520) circle (1.1pt); 
+\draw[red!70!black,very thick] (0.000,1.109) -- (0.000,1.109) -- (0.702,1.145) -- (1.113,1.167) -- (1.405,1.184) -- (1.972,1.213) -- (1.972,1.213) -- (1.972,1.213) -- (2.107,1.210) -- (2.107,1.210) -- (2.107,1.210) -- (2.107,1.210) -- (2.333,1.212) -- (2.333,1.212) -- (2.430,1.217) -- (2.518,1.223) -- (2.518,1.223) -- (2.599,1.231) -- (2.599,1.231) -- (2.744,1.246) -- (2.744,1.246) -- (2.810,1.256) -- (2.929,1.273) -- (2.929,1.273) -- (2.929,1.273) -- (2.984,1.280) -- (2.984,1.280) -- (3.036,1.286) -- (3.036,1.286) -- (3.085,1.292) -- (3.085,1.292) -- (3.132,1.297) -- (3.220,1.311) -- (3.220,1.311) -- (3.262,1.319) -- (3.262,1.319) -- (3.262,1.319) -- (3.340,1.335) -- (3.412,1.351) -- (3.447,1.361) -- (3.447,1.361) -- (3.480,1.371) -- (3.480,1.371) -- (3.543,1.392) -- (3.603,1.415) -- (3.631,1.423) -- (3.788,1.482) -- (3.811,1.487) -- (3.835,1.492) -- (3.857,1.498) -- (3.923,1.504) -- (3.944,1.506) -- (3.984,1.512) -- (3.984,1.512) -- (3.984,1.512) -- (4.004,1.514) -- (4.004,1.514) -- (4.004,1.514) -- (4.023,1.516) -- (4.042,1.518) -- (4.042,1.518) -- (4.079,1.521) -- (4.132,1.520) -- (4.166,1.532) -- (4.198,1.544) -- (4.334,1.598) -- (4.348,1.605) -- (4.441,1.653) -- (4.441,1.653) -- (4.466,1.665) -- (4.490,1.676) -- (4.526,1.691) -- (4.560,1.707) -- (4.582,1.716) -- (4.615,1.730) -- (4.615,1.730) -- (4.656,1.749) -- (4.656,1.749) -- (4.667,1.754) -- (4.697,1.766) -- (4.716,1.773) -- (4.763,1.788) -- (4.772,1.791) -- (4.772,1.791) -- (4.782,1.794) -- (4.826,1.809) -- (4.826,1.809) -- (4.834,1.812) -- (4.868,1.815) -- (4.901,1.819) -- (4.948,1.815) -- (4.956,1.814) -- (5.000,1.809) -- (5.008,1.808) -- (5.029,1.806) -- (5.036,1.805) -- (5.084,1.798) -- (5.098,1.796) -- (5.117,1.793) -- (5.156,1.788) -- (5.156,1.788) -- (5.168,1.786) -- (5.245,1.780) -- (5.296,1.776) -- (5.369,1.770) -- (5.374,1.770) -- (5.447,1.761) -- (5.502,1.752) -- (5.515,1.750) -- (5.562,1.741) -- (5.595,1.736) -- (5.635,1.727) -- (5.703,1.712) -- (5.721,1.708) -- (5.735,1.705) -- (5.826,1.683) -- (5.907,1.663) -- (5.956,1.651) -- (6.014,1.637) -- (6.030,1.634) -- (6.043,1.631) -- (6.051,1.629) -- (6.099,1.618) -- (6.228,1.589) -- (6.400,1.552) -- (6.460,1.539) -- (6.991,1.424) -- (6.999,1.422);
+\node[font=\tiny,green!40!black,anchor=west,fill=blue!4,inner sep=1pt] at (0.3,3.3) {dashed: Cox estimate $\hat\beta = -0.031$};
+\node[font=\tiny,red!70!black,anchor=west,fill=blue!4,inner sep=1pt] at (4.2,3.3) {smooth: $\beta(t)$ rises towards $0$};
+\end{tikzpicture}
+\caption{Scaled Schoenfeld residuals for the Karnofsky score in the \texttt{veteran} model, one point per death (three outlying points beyond the plotted range are omitted), against time on a log scale, with a smooth curve. Under proportional hazards the curve would be flat at $\hat\beta$. Instead it rises from about $-0.06$ in the first weeks to near $0$ after
+a few months: the protective effect of a good performance score fades.}
+\label{fig:schoenfeld}
+\end{figure}
+
+Other residuals serve other checks. \textbf{Martingale residuals}, $\delta_i - \hat H_0(t_i)e^{\hat\beta^{\mathsf T}x_i}$ (observed minus expected events for each subject), plotted against a continuous covariate left out of the model, show the functional form it should take; \textbf{deviance residuals}, a symmetrised version, help to find poorly fitted subjects; and
+\textbf{dfbeta} residuals, the change in each coefficient when a subject is removed, find influential observations.
+
+\subsection{What to do when hazards are not proportional}
+\label{ssec:phremedies}
+
+Several remedies are available, and the choice depends on whether the covariate's effect is of interest.
+\begin{itemize}
+\item \textbf{Stratify} by a categorical covariate that violates the assumption and is not of primary interest (the stratified model of the previous section). Here, stratifying by cell type removes its violation; the other coefficients are still estimated.
+\item \textbf{Split the follow-up} into periods and estimate a separate coefficient in each: with R's \texttt{survSplit}, each subject's record is cut at the chosen times and the covariate is replaced by its product with period indicators. The model becomes one with \textbf{time-dependent coefficients}, still a Cox model, fitted with the counting-process form
+\texttt{Surv(start, stop, event)}.
+\item Model the change smoothly, $\beta(t) = \beta + \gamma g(t)$, for example with $g(t) = \log t$; in R the \texttt{tt()} term does this. A test of $\gamma = 0$ is another test of proportional hazards.
+\item Use a model that does not assume proportional hazards, such as the accelerated failure time models of the next section, or report survival at fixed times or a restricted mean.
+\end{itemize}
+
+\begin{exa}
+\label{ex:split}
+Splitting the \texttt{veteran} follow-up at $100$ days, ten Karnofsky points multiply the hazard by $0.65$ in the first $100$ days ($p < 10^{-6}$) and by $1.04$ afterwards ($p = 0.69$). With $\beta(t) = \beta + \gamma\log t$ instead, $\hat\gamma = 0.0135$ ($p = 0.002$): the coefficient $-0.081 + 0.0135\log t$ is $-0.081$ at one day, $-0.019$ at $100$ days and
+$0$ at about $400$ days (Software~\ref{sw:split}). Both say the same thing as Figure~\ref{fig:schoenfeld}: the performance score measures the patient's state at entry, which predicts the near future well and the distant future poorly, a common reason for non-proportional hazards with baseline measurements.
+\end{exa}
+
+\subsection{Checking the assumption in software}
+\label{ssec:software9}
+
+\begin{software}[Tests of proportional hazards]
+\label{sw:zph}
+\texttt{cox.zph} for the \texttt{veteran} model: a test for each covariate (with $3$ degrees of freedom for the four-level cell type) and a global test:
+{\small\begin{verbatim}
+> library(survival); options(show.signif.stars = FALSE)
+> vet <- veteran; vet$trt <- factor(vet$trt, labels = c("standard", "test"))
+> m1 <- coxph(Surv(time, status) ~ trt + celltype + karno, data = vet)
+> z <- cox.zph(m1, transform = "km")     # tests of proportional hazards
+> round(z$table, 4)
+           chisq df      p
+trt       0.2063  1 0.6497
+celltype 14.5317  3 0.0023
+karno    12.8133  1 0.0003
+GLOBAL   22.8597  5 0.0004
+\end{verbatim}}
+\textbf{Reading the output.} Treatment satisfies the assumption ($p = 0.65$); cell type ($p = 0.002$) and the Karnofsky score ($p = 0.0003$) do not, and the global test rejects proportional hazards for the model ($p = 0.0004$). The treatment comparison, the trial's purpose, is still valid if the model is fixed for the other covariates, for example by stratifying by cell type and letting the
+Karnofsky effect vary with time.
+
+\textbf{Python:} \texttt{cph.check\_assumptions(df)} in \texttt{lifelines}.
+\end{software}
+
+\begin{software}[A Schoenfeld residual by hand]
+\label{sw:schoen}
+The Schoenfeld residual for the Karnofsky score at the first death time shared by no other death, computed as the dying patient's score minus the risk-weighted mean score of those at risk, against the value from \texttt{residuals} with \texttt{type} set to \texttt{schoenfeld}; then the slope of the scaled residuals on log time:
+{\small\begin{verbatim}
+> r <- residuals(m1, type = "schoenfeld")[, "karno"]
+> dt <- sort(vet$time[vet$status == 1])        # death times, in order
+> k <- which(!(dt %in% dt[duplicated(dt)]))[1]   # the first untied one
+> tj <- dt[k]; i <- which(vet$time == tj & vet$status == 1)
+> risk <- vet$time >= tj; lp <- predict(m1, type = "lp")
+> w <- exp(lp[risk]) / sum(exp(lp[risk]))        # weights in the risk set
+> c(time = tj, by_hand = vet$karno[i] - sum(w * vet$karno[risk]),
++   coxph = unname(r[k]))
+     time   by_hand     coxph 
+ 2.000000 -4.624778 -4.624778 
+> sr <- residuals(m1, type = "scaledsch")[, "karno"]  # beta(t), roughly
+> round(coef(lm(sr ~ log(dt))), 5)               # a trend in beta(t)?
+(Intercept)     log(dt) 
+   -0.07203     0.01004 
+> round(c(beta_hat = unname(coef(m1)["karno"])), 5)
+beta_hat 
+-0.03127 
+\end{verbatim}}
+\textbf{Reading the output.} At day $2$ the patient who died had a Karnofsky score $4.62$ points below the weighted average of those at risk, the value R reports. The scaled residuals rise by $0.010$ per unit of log time: $\beta(t)$ increases, from strongly negative towards zero, while the fitted constant is $-0.031$.
+
+\textbf{Python:} \texttt{cph.compute\_residuals(df, 'schoenfeld')}.
+\end{software}
+
+\begin{software}[Time-dependent coefficients]
+\label{sw:split}
+The follow-up split at $100$ days with \texttt{survSplit}, a separate Karnofsky coefficient in each period (shown as hazard ratios for $10$ points, with $p$-values); then a coefficient varying as $\beta + \gamma\log t$ with \texttt{tt()}:
+{\small\begin{verbatim}
+> vs <- survSplit(Surv(time, status) ~ ., data = vet, cut = 100,
++                 episode = "period")            # before and after 100 days
+> vs$karno_early <- vs$karno * (vs$period == 1)
+> vs$karno_late <- vs$karno * (vs$period == 2)
+> m2 <- coxph(Surv(tstart, time, status) ~ trt + celltype + karno_early +
++               karno_late, data = vs)
+> round(exp(10 * coef(m2)[c("karno_early", "karno_late")]), 4)  # 10 points
+karno_early  karno_late 
+     0.6508      1.0427 
+> round(summary(m2)$coefficients[c("karno_early", "karno_late"), 5], 6)
+karno_early  karno_late 
+   0.000000    0.689911 
+> m3 <- coxph(Surv(time, status) ~ trt + celltype + karno + tt(karno),
++             data = vet, tt = function(x, t, ...) x * log(t))
+> round(summary(m3)$coefficients[c("karno", "tt(karno)"), c(1, 5)], 5)
+              coef Pr(>|z|)
+karno     -0.08087  0.00000
+tt(karno)  0.01350  0.00175
+\end{verbatim}}
+\textbf{Reading the output.} Before $100$ days, $10$ points lower the hazard by a third (HR $0.65$); after, there is no effect (HR $1.04$, $p = 0.69$). In the smooth model, $\hat\gamma = 0.0135$, $p = 0.002$, so the effect shrinks steadily over time.
+
+\textbf{Python:} \texttt{lifelines.CoxTimeVaryingFitter} with data in start--stop form.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Plots of $\log(-\log\hat S)$ against $\log t$ for two groups are parallel lines $1.2$ units apart. What does this say about the hazards, and what is the hazard ratio?
+\end{problem}
+
+\begin{solution}
+Parallel curves mean proportional hazards, and the vertical distance is $\log H_2 - \log H_1 = \log\text{HR}$, so $\text{HR} = e^{1.2} = 3.3$. If the lines are also straight, both groups follow Weibull distributions with the same shape.
+\end{solution}
+
+\begin{problem}
+Explain why the Schoenfeld residuals of a covariate sum to zero over all events.
+\end{problem}
+
+\begin{solution}
+Their sum is $\sum_j(x_{i_j} - \sum_{l \in R_j}w_lx_l)$, which is the derivative of the log partial likelihood with respect to $\beta$ at $\hat\beta$. The estimate is defined by setting this derivative to zero.
+\end{solution}
+
+\begin{problem}
+A treatment has hazard ratio $0.5$ in the first year and $1.0$ afterwards. A Cox model with a constant effect is fitted to five years of data. What will it report, and why is that misleading?
+\end{problem}
+
+\begin{solution}
+A hazard ratio between $0.5$ and $1$, a weighted average of the two periods with weights depending on the numbers of events in each, perhaps about $0.7$. It suggests a modest permanent benefit, when the truth is a large early benefit that disappears. The Schoenfeld residuals would show a trend; the right report gives the effect in each period, or survival curves.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:split}, at what time does the fitted coefficient $-0.081 + 0.0135\log t$ reach zero, and what is the hazard ratio for $10$ Karnofsky points at $30$ days?
+\end{problem}
+
+\begin{solution}
+$\log t = 0.081/0.0135 = 6.0$, $t = e^6 = 403$ days. At $30$ days the coefficient is $-0.081 + 0.0135\log 30 = -0.081 + 0.0459 = -0.035$, and the hazard ratio for $10$ points is $e^{-0.35} = 0.70$.
+\end{solution}
+
+\begin{problem}
+Describe how to fit a model in which a covariate's coefficient is different before and after $6$ months, and why the data must be restructured.
+\end{problem}
+
+\begin{solution}
+Split each subject's follow-up at $6$ months into two records, $(0, \min(t, 6)]$ and, if $t > 6$, $(6, t]$, with the event indicator only on the record in which the event occurs; define $x_{\text{early}} = x \times \mathbf 1\{\text{first period}\}$ and $x_{\text{late}} = x \times \mathbf 1\{\text{second}\}$; fit the Cox model with
+\texttt{Surv(start, stop, event)}. The restructuring is needed because the covariate entering the hazard now depends on time, and each record states which value applies over which interval; the risk sets are formed correctly from the start and stop times.
+\end{solution}
+
+\begin{problem}
+Why do covariates measured at the start of a study, such as a performance score, often show hazard ratios that weaken over time?
+\end{problem}
+
+\begin{solution}
+A baseline measurement describes the subject's state at entry. Its relevance fades as that state changes: patients' condition improves or worsens, and those with poor scores who survive the early period are often those whose condition was better than the score suggested. Selection by survival also plays a part: the high-risk subjects remaining later are a selected, more robust group. Both make the
+effect of the baseline value shrink with time.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -2220,10 +2549,12 @@ $\hat S_2 = \hat S_1^{\exp(1.1 - 0.2)} = 0.6^{e^{0.9}} = 0.6^{2.46} = 0.285$. Th
 \item Fleming, T. R., and Harrington, D. P. (1984), Nonparametric estimation of the survival distribution in censored data, \emph{Communications in Statistics: Theory and Methods}, 13, 2469--2486.
 \item Gehan, E. A. (1965), A generalized Wilcoxon test for comparing arbitrarily singly-censored samples, \emph{Biometrika}, 52, 203--223.
 \item Gompertz, B. (1825), On the nature of the function expressive of the law of human mortality, \emph{Philosophical Transactions of the Royal Society of London}, 115, 513--583.
+\item Grambsch, P. M., and Therneau, T. M. (1994), Proportional hazards tests and diagnostics based on weighted residuals, \emph{Biometrika}, 81, 515--526.
 \item Greenwood, M. (1926), The natural duration of cancer, \emph{Reports on Public Health and Medical Subjects}, 33, London, His Majesty's Stationery Office.
 \item Halley, E. (1693), An estimate of the degrees of the mortality of mankind, \emph{Philosophical Transactions of the Royal Society of London}, 17, 596--610.
 \item Harrell, F. E., Califf, R. M., Pryor, D. B., Lee, K. L., and Rosati, R. A. (1982), Evaluating the yield of medical tests, \emph{Journal of the American Medical Association}, 247, 2543--2546.
 \item Harrington, D. P., and Fleming, T. R. (1982), A class of rank test procedures for censored survival data, \emph{Biometrika}, 69, 553--566.
+\item Kalbfleisch, J. D., and Prentice, R. L. (1973), Marginal likelihoods based on Cox's regression and life model, \emph{Biometrika}, 60, 267--278.
 \item Kaplan, E. L., and Meier, P. (1958), Nonparametric estimation from incomplete observations, \emph{Journal of the American Statistical Association}, 53, 457--481.
 \item Karnofsky, D. A., and Burchenal, J. H. (1949), The clinical evaluation of chemotherapeutic agents in cancer, in C. M. MacLeod (ed.), \emph{Evaluation of Chemotherapeutic Agents}, New York, Columbia University Press, 191--205.
 \item Leung, K.-M., Elashoff, R. M., and Afifi, A. A. (1997), Censoring issues in survival analysis, \emph{Annual Review of Public Health}, 18, 83--104.
@@ -2236,6 +2567,8 @@ $\hat S_2 = \hat S_1^{\exp(1.1 - 0.2)} = 0.6^{e^{0.9}} = 0.6^{2.46} = 0.285$. Th
 \item Pocock, S. J., Clayton, T. C., and Altman, D. G. (2002), Survival plots of time-to-event outcomes in clinical trials: good practice and pitfalls, \emph{The Lancet}, 359, 1686--1689.
 \item Prentice, R. L. (1973), Exponential survivals with censoring and explanatory variables, \emph{Biometrika}, 60, 279--288.
 \item Schemper, M., and Smith, T. L. (1996), A note on quantifying follow-up in studies of failure time, \emph{Controlled Clinical Trials}, 17, 343--346.
+\item Schoenfeld, D. (1982), Partial residuals for the proportional hazards regression model, \emph{Biometrika}, 69, 239--241.
+\item Therneau, T. M., Grambsch, P. M., and Fleming, T. R. (1990), Martingale-based residuals for survival models, \emph{Biometrika}, 77, 147--160.
 \item Weibull, W. (1951), A statistical distribution function of wide applicability, \emph{Journal of Applied Mechanics}, 18, 293--297.
 \end{enumerate}
 
