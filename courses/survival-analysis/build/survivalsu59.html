@@ -1,0 +1,152 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>11.2 Regression with competing risks — Survival Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='survival.css' rel='stylesheet' type='text/css' /> 
+<meta content='survival.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Survival Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="survivalse1.html">Survival Data</a></li>
+<li class="sub"><a class="" href="survivalsu1.html">Time-to-event data</a></li>
+<li class="sub"><a class="" href="survivalsu2.html">Censoring</a></li>
+<li class="sub"><a class="" href="survivalsu3.html">Why ordinary methods fail</a></li>
+<li class="sub"><a class="" href="survivalsu4.html">Recording survival data</a></li>
+<li class="sub"><a class="" href="survivalsu5.html">Survival data in software</a></li>
+<li class="sub"><a class="" href="survivalsu6.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse2.html">Survival, Hazard and Cumulative Hazard</a></li>
+<li class="sub"><a class="" href="survivalsu7.html">The survival function</a></li>
+<li class="sub"><a class="" href="survivalsu8.html">The hazard function</a></li>
+<li class="sub"><a class="" href="survivalsu9.html">The cumulative hazard and the basic identity</a></li>
+<li class="sub"><a class="" href="survivalsu10.html">Summaries: mean, median and residual life</a></li>
+<li class="sub"><a class="" href="survivalsu11.html">Hazards in software</a></li>
+<li class="sub"><a class="" href="survivalsu12.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse3.html">Parametric Models</a></li>
+<li class="sub"><a class="" href="survivalsu13.html">The likelihood with censored data</a></li>
+<li class="sub"><a class="" href="survivalsu14.html">The exponential model</a></li>
+<li class="sub"><a class="" href="survivalsu15.html">The Weibull and other families</a></li>
+<li class="sub"><a class="" href="survivalsu16.html">Choosing a model</a></li>
+<li class="sub"><a class="" href="survivalsu17.html">Parametric models in software</a></li>
+<li class="sub"><a class="" href="survivalsu18.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse4.html">The Kaplan–Meier Estimator</a></li>
+<li class="sub"><a class="" href="survivalsu19.html">The product-limit estimator</a></li>
+<li class="sub"><a class="" href="survivalsu20.html">Greenwood’s formula and confidence intervals</a></li>
+<li class="sub"><a class="" href="survivalsu21.html">The median and reading the curve</a></li>
+<li class="sub"><a class="" href="survivalsu22.html">Kaplan–Meier estimation in software</a></li>
+<li class="sub"><a class="" href="survivalsu23.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse5.html">The Nelson–Aalen Estimator and Life Tables</a></li>
+<li class="sub"><a class="" href="survivalsu24.html">The Nelson–Aalen estimator</a></li>
+<li class="sub"><a class="" href="survivalsu25.html">Using the cumulative hazard to choose a model</a></li>
+<li class="sub"><a class="" href="survivalsu26.html">Life tables</a></li>
+<li class="sub"><a class="" href="survivalsu27.html">Cumulative hazards and life tables in software</a></li>
+<li class="sub"><a class="" href="survivalsu28.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse6.html">Comparing Groups: the Log-rank Test</a></li>
+<li class="sub"><a class="" href="survivalsu29.html">The test</a></li>
+<li class="sub"><a class="" href="survivalsu30.html">Several groups, trends and strata</a></li>
+<li class="sub"><a class="" href="survivalsu31.html">Weighted log-rank tests</a></li>
+<li class="sub"><a class="" href="survivalsu32.html">The log-rank test in software</a></li>
+<li class="sub"><a class="" href="survivalsu33.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse7.html">The Cox Proportional Hazards Model</a></li>
+<li class="sub"><a class="" href="survivalsu34.html">The model</a></li>
+<li class="sub"><a class="" href="survivalsu35.html">The partial likelihood</a></li>
+<li class="sub"><a class="" href="survivalsu36.html">Inference and interpretation</a></li>
+<li class="sub"><a class="" href="survivalsu37.html">The baseline hazard and predicted survival</a></li>
+<li class="sub"><a class="" href="survivalsu38.html">Cox regression in software</a></li>
+<li class="sub"><a class="" href="survivalsu39.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse8.html">Fitting Cox Models in Practice</a></li>
+<li class="sub"><a class="" href="survivalsu40.html">Categorical covariates</a></li>
+<li class="sub"><a class="" href="survivalsu41.html">Tied event times</a></li>
+<li class="sub"><a class="" href="survivalsu42.html">Interactions and stratification</a></li>
+<li class="sub"><a class="" href="survivalsu43.html">Model building</a></li>
+<li class="sub"><a class="" href="survivalsu44.html">Adjusted survival curves</a></li>
+<li class="sub"><a class="" href="survivalsu45.html">Model fitting in software</a></li>
+<li class="sub"><a class="" href="survivalsu46.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse9.html">Checking Proportional Hazards</a></li>
+<li class="sub"><a class="" href="survivalsu47.html">Graphical checks</a></li>
+<li class="sub"><a class="" href="survivalsu48.html">Schoenfeld residuals</a></li>
+<li class="sub"><a class="" href="survivalsu49.html">What to do when hazards are not proportional</a></li>
+<li class="sub"><a class="" href="survivalsu50.html">Checking the assumption in software</a></li>
+<li class="sub"><a class="" href="survivalsu51.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse10.html">Accelerated Failure Time Models</a></li>
+<li class="sub"><a class="" href="survivalsu52.html">The model</a></li>
+<li class="sub"><a class="" href="survivalsu53.html">The Weibull model: both AFT and proportional hazards</a></li>
+<li class="sub"><a class="" href="survivalsu54.html">Log-normal and log-logistic models</a></li>
+<li class="sub"><a class="" href="survivalsu55.html">Checking and choosing a model</a></li>
+<li class="sub"><a class="" href="survivalsu56.html">AFT models in software</a></li>
+<li class="sub"><a class="" href="survivalsu57.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse11.html">Competing Risks, Frailty and Recurrent Events</a></li>
+<li class="sub"><a class="" href="survivalsu58.html">Competing risks and the cumulative incidence function</a></li>
+<li class="sub"><a class="current" href="survivalsu59.html">Regression with competing risks</a></li>
+<li class="sub"><a class="" href="survivalsu60.html">Frailty models</a></li>
+<li class="sub"><a class="" href="survivalsu61.html">Recurrent events</a></li>
+<li class="sub"><a class="" href="survivalsu62.html">Competing risks and multiple events in software</a></li>
+<li class="sub"><a class="" href="survivalsu63.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="survivalli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 2841 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu60.html'>next</a>] [<a href='survivalsu58.html'>prev</a>] [<a href='survivalsu58.html#tailsurvivalsu58.html'>prev-tail</a>] [<a href='#tailsurvivalsu59.html'>tail</a>] [<a href='survivalse11.html#survivalsu59.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>11.2   </span> <a id='x72-7100011.2'></a>Regression with competing risks</h4>
+<!-- l. 2844 --><p class='noindent'>There are two regression models, answering different questions. </p>
+     <ul class='itemize1'>
+     <li class='itemize'>The <span class='cmbx-10x-x-109'>cause-specific Cox model </span>fits a Cox model to \(h_k(t \mid x)\), treating failures from other causes as
+     censored. This is legitimate, unlike the Kaplan–Meier estimate above, because the partial
+     likelihood for \(h_k\) needs only the risk sets, and a subject who failed from another cause has
+     left them. Its hazard ratios describe the effect of \(x\) on the <span class='cmti-10x-x-109'>rate </span>of cause-\(k\) failure among those
+     still event-free, the right target for questions about causes and mechanisms.
+     </li>
+     <li class='itemize'>The <span class='cmbx-10x-x-109'>Fine–Gray model </span>puts proportional hazards on the <span class='cmbx-10x-x-109'>subdistribution hazard</span>, \(\tilde h_k(t) = -\frac {\mathrm d}{\mathrm dt}\log \{1 - F_k(t)\}\), so
+     that \(F_k(t \mid x) = 1 - \{1 - F_{k0}(t)\}^{\exp (\beta ^{\mathsf T}x)}\). Its risk set at \(t\) keeps subjects who have already failed from other causes, with weights
+     that allow for censoring, and its coefficients describe the effect of \(x\) on the cumulative
+     incidence itself, the right target for prediction and for questions such as “who is more
+     likely to progress?”.</li></ul>
+<!-- l. 2849 --><p class='noindent'>The two can differ in sign when \(x\) also affects the competing cause, and a full analysis reports the
+cause-specific models for every cause alongside the cumulative incidences.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 2851 --><p class='noindent'><span class='head'>
+<a id='x72-71001r1'></a>
+<span class='cmbx-10x-x-109'>Example 11.2.1.</span>  </span> For progression in <span class='cmtt-10x-x-109'>mgus2</span>, with age, sex and the size of the monoclonal
+protein spike (<span class='cmtt-10x-x-109'>mspike</span>, in g/dl), the cause-specific hazard ratios are \(1.017\) per year of age, \(0.995\) for men
+and \(2.42\) per g/dl, and the Fine–Gray subdistribution hazard ratios are \(0.983\), \(0.808\) and \(2.43\) (Software <a href='survivalsu62.html#x75-74002r2'>11.5.2<!-- tex4ht:ref: sw:finegray  --></a>).
+The spike predicts progression whichever way it is measured. Age does not: among patients still
+alive and free of PCM, older patients progress at a slightly higher rate, but the cause-specific
+hazard of death rises by \(6.7\%\) per year of age, so older patients more often die first and have a lower
+cumulative incidence of progression. Both statements are true; they answer different questions.
+The same is true for sex, with men’s death hazard \(1.48\) times women’s.
+</p>
+</div>
+                                                                                      
+                                                                                      
+<!-- l. 2855 --><p class='noindent'>
+</p>
+<figure class='figure'> 
+
+                                                                                      
+                                                                                      
+<a id='x72-71002r11'></a>
+                                                                                      
+                                                                                      
+<!-- l. 2859 --><p class='noindent'><img alt='yp0123001Pdad(dm01234011pin(er000.5Cealivasa)ae00000000.5.5latbarobMtehyaceer)sah,edmgsnbfe cbwno:u iorogdilit 1snn:ithev−2feg myoueK:caetntM sttimap,aonmnrowcsagrkecureondmsgusiinloncaidtievnece csount   ' src='survival10x.svg' />
+</p>
+<figcaption class='caption'><span class='id'>Figure 11:  </span><span class='content'>(a)  Aalen–Johansen  estimates  for  the  <span class='cmtt-10x-x-109'>mgus2 </span>patients,  stacked:  the  cumulative
+incidence  of  progression  (bottom  band),  of  death  without  progression  (middle)  and  the
+probability of neither (top), which add to one at every time. The dashed curve, one minus the
+Kaplan–Meier estimate with deaths censored, overstates the risk of progression more and more
+as deaths accumulate. (b) The mean cumulative number of serious infections per patient in the
+<span class='cmtt-10x-x-109'>cgd </span>trial: after a year, \(1.26\) on placebo and \(0.42\) on interferon gamma.</span></figcaption><!-- tex4ht:label?: x72-71002r11  -->
+                                                                                      
+                                                                                      
+</figure>
+                                                                                      
+                                                                                      
+<!-- l. 2894 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu60.html'>next</a>] [<a href='survivalsu58.html'>prev</a>] [<a href='survivalsu58.html#tailsurvivalsu58.html'>prev-tail</a>] [<a href='survivalsu59.html'>front</a>] [<a href='survivalse11.html#survivalsu59.html'>up</a>] </p></div>
+<!-- l. 2894 --><p class='noindent'><a id='tailsurvivalsu59.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="survivalsu58.html">&larr; Previous</a><a class="up" href="survivalse11.html#survivalsu59.html">Contents</a><a class="next" href="survivalsu60.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="survival-analysis/11-2-regression-with-competing-risks" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

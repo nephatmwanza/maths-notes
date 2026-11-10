@@ -2782,6 +2782,330 @@ A trial reports a Cox hazard ratio of $0.70$ and a Weibull AFT time ratio of $1.
 The Weibull hazard ratio is $e^{-\log(1.32)/0.78} = e^{-0.356} = 0.70$, the Cox value, so they agree. For a clinician: patients on the treatment have, at any moment, $30\%$ lower risk of dying; equivalently, their survival times are about a third longer, so a median of $12$ months becomes about $16$.
 \end{solution}
 
+%======================================================================
+\section{Competing Risks, Frailty and Recurrent Events}
+\label{sec:multi}
+
+The models so far follow each subject to a single event of a single kind, with subjects independent of one another. Three common departures are treated in this section. With \textbf{competing risks}, a subject can fail from one of several causes, and the occurrence of one prevents the others. With \textbf{frailty}, subjects come in clusters, such as patients in hospitals or two kidneys
+of one patient, that share unmeasured risk. With \textbf{recurrent events}, the same subject can have the event, an infection or a hospital admission, several times. Each needs a change in what is estimated as well as in how.
+
+\subsection{Competing risks and the cumulative incidence function}
+\label{ssec:competing}
+
+Suppose a subject fails at time $T$ from cause $D \in \{1, \dots, K\}$. The \textbf{cause-specific hazard} of cause $k$ is the rate of failing from that cause among those still event-free,
+\[
+h_k(t) = \lim_{\Delta t \to 0}\frac{P(t \le T < t + \Delta t,\ D = k \mid T \ge t)}{\Delta t} ,
+\]
+and the hazards add, $h(t) = \sum_k h_k(t)$, so the overall survivor function is $S(t) = \exp\{-\sum_k H_k(t)\}$. The quantity usually wanted is the probability of having failed from cause $k$ by time $t$, the \textbf{cumulative incidence function}
+\[
+F_k(t) = P(T \le t,\ D = k) = \int_0^t h_k(u)S(u^-)\,\mathrm du ,
+\]
+the rate of cause-$k$ failure at $u$ among those still at risk, times the probability of still being at risk. It depends on all the cause-specific hazards through $S$, not on $h_k$ alone: a treatment that lowers the risk of a competing cause leaves more subjects exposed to cause $k$ and so can raise $F_k$.
+
+A tempting estimate of $F_k$ is one minus the Kaplan--Meier curve computed with failures from other causes treated as censored. This is wrong. Censoring assumes that the censored subjects could still fail later; a subject who has died of another cause cannot. The curve $1 - \hat S_{\text{KM}}$ estimates instead the probability of cause-$k$ failure in a hypothetical world with the other causes removed, which is not
+identifiable from the data without assuming the causes act independently, and it is always at least as large as the cumulative incidence. The correct estimate replaces $h_k(u)\,\mathrm du$ and $S(u^-)$ by their empirical versions. With $d_{kj}$ failures from cause $k$ among $n_j$ at risk at time $t_{(j)}$ and $\hat S$ the Kaplan--Meier estimate for failure from any cause, it is the
+\textbf{Aalen--Johansen estimator}
+\[
+\hat F_k(t) = \sum_{t_{(j)} \le t}\hat S(t_{(j-1)})\frac{d_{kj}}{n_j} .
+\]
+
+\begin{prop}
+\label{prop:cifsum}
+At every $t$, $\sum_{k=1}^K\hat F_k(t) + \hat S(t) = 1$.
+\end{prop}
+
+\begin{proof}
+At $t_{(j)}$ the Kaplan--Meier estimate drops by $\hat S(t_{(j-1)}) - \hat S(t_{(j)}) = \hat S(t_{(j-1)})\,d_j/n_j$, where $d_j = \sum_kd_{kj}$; this is exactly the total of the increases in the $\hat F_k$ at that time. Summing over event times up to $t$, the fall of $\hat S$ from $1$ equals $\sum_k\hat F_k(t)$.
+\end{proof}
+
+The estimated probabilities of each way the story can end, and of its not having ended yet, therefore add to one, which the sum of the $1 - \hat S_{\text{KM}}$ curves for the separate causes does not.
+
+\begin{exa}
+\label{ex:cifhand}
+Ten subjects have times $2, 3, 3^+, 5, 6, 8^+, 9, 10^+, 12, 14^+$, with failures at $2$, $5$ and $9$ from cause $1$ and at $3$, $6$ and $12$ from cause $2$ ($+$ for censored). The Kaplan--Meier estimate for any failure is $0.9$ after time $2$, $0.8$ after $3$, $0.6857$ after $5$, $0.5714$ after $6$, $0.4286$ after $9$ and $0.2143$ after $12$. Then
+\[
+\hat F_1(14) = 1 \times \tfrac1{10} + 0.8 \times \tfrac17 + 0.5714 \times \tfrac14 = 0.1 + 0.1143 + 0.1429 = 0.3571 ,
+\]
+\[
+\hat F_2(14) = 0.9 \times \tfrac19 + 0.6857 \times \tfrac16 + 0.4286 \times \tfrac12 = 0.1 + 0.1143 + 0.2143 = 0.4286 ,
+\]
+and $0.3571 + 0.4286 + 0.2143 = 1$, as Proposition~\ref{prop:cifsum} says. Treating cause-$2$ failures as censored instead gives $1 - \frac9{10}\cdot\frac67\cdot\frac34 = 0.4214$ for cause $1$, an overestimate by $0.064$.
+\end{exa}
+
+\begin{exa}
+\label{ex:mgus}
+The \texttt{mgus2} data follow $1384$ patients with monoclonal gammopathy of undetermined significance (MGUS), a blood abnormality that can progress to a plasma cell malignancy (PCM) such as myeloma; median age at diagnosis is $72$. There were $115$ progressions and $860$ deaths without progression, so death is a strong competing risk. The Aalen--Johansen estimate of the
+cumulative incidence of progression is $6.4\%$ at $10$ years and $10.0\%$ at $20$ years, while one minus the Kaplan--Meier curve with deaths censored gives $9.5\%$ and $21.0\%$, about twice the true risk at $20$ years and more than three times at $30$ ($42\%$ against $13\%$) (Software~\ref{sw:cif}, Figure~\ref{fig:cif}). A patient told the second figure would be misled: most patients with MGUS die of other causes before it progresses.
+\end{exa}
+
+\subsection{Regression with competing risks}
+\label{ssec:crregression}
+
+There are two regression models, answering different questions.
+\begin{itemize}
+\item The \textbf{cause-specific Cox model} fits a Cox model to $h_k(t \mid x)$, treating failures from other causes as censored. This is legitimate, unlike the Kaplan--Meier estimate above, because the partial likelihood for $h_k$ needs only the risk sets, and a subject who failed from another cause has left them. Its hazard ratios describe the effect of $x$ on the \emph{rate} of cause-$k$ failure among those still event-free, the right target for questions about causes and mechanisms.
+\item The \textbf{Fine--Gray model} puts proportional hazards on the \textbf{subdistribution hazard}, $\tilde h_k(t) = -\frac{\mathrm d}{\mathrm dt}\log\{1 - F_k(t)\}$, so that $F_k(t \mid x) = 1 - \{1 - F_{k0}(t)\}^{\exp(\beta^{\mathsf T}x)}$. Its risk set at $t$ keeps subjects who have already failed from other causes, with weights that allow for censoring, and its coefficients describe the effect of $x$ on the cumulative incidence itself, the right target for prediction and for questions such as ``who is more likely to progress?''.
+\end{itemize}
+The two can differ in sign when $x$ also affects the competing cause, and a full analysis reports the cause-specific models for every cause alongside the cumulative incidences.
+
+\begin{exa}
+\label{ex:mgusreg}
+For progression in \texttt{mgus2}, with age, sex and the size of the monoclonal protein spike (\texttt{mspike}, in g/dl), the cause-specific hazard ratios are $1.017$ per year of age, $0.995$ for men and $2.42$ per g/dl, and the Fine--Gray subdistribution hazard ratios are $0.983$, $0.808$ and $2.43$ (Software~\ref{sw:finegray}). The spike predicts progression whichever way it is measured. Age does not: among patients still alive and
+free of PCM, older patients progress at a slightly higher rate, but the cause-specific hazard of death rises by $6.7\%$ per year of age, so older patients more often die first and have a lower cumulative incidence of progression. Both statements are true; they answer different questions. The same is true for sex, with men's death hazard $1.48$ times women's.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-0.9,-0.75) rectangle (6.4,3.55);
+\fill[green!14] (0,0) rectangle (5.400,3);
+\fill[black!16] (0.000,0.000) -- (0.090,0.271) -- (0.180,0.395) -- (0.270,0.471) -- (0.360,0.562) -- (0.450,0.651) -- (0.540,0.736) -- (0.630,0.816) -- (0.720,0.914) -- (0.810,0.999) -- (0.900,1.064) -- (0.990,1.153) -- (1.080,1.224) -- (1.170,1.315) -- (1.260,1.392) -- (1.350,1.450) -- (1.440,1.519) -- (1.530,1.607) -- (1.620,1.672) -- (1.710,1.732) -- (1.800,1.787) -- (1.890,1.850) -- (1.980,1.880) -- (2.070,1.954) -- (2.160,2.001) -- (2.250,2.050) -- (2.340,2.104) -- (2.430,2.138) -- (2.520,2.179) -- (2.610,2.218) -- (2.700,2.259) -- (2.790,2.272) -- (2.880,2.304) -- (2.970,2.325) -- (3.060,2.348) -- (3.150,2.359) -- (3.240,2.386) -- (3.330,2.401) -- (3.420,2.444) -- (3.510,2.444) -- (3.600,2.471) -- (3.690,2.471) -- (3.780,2.483) -- (3.870,2.532) -- (3.960,2.558) -- (4.050,2.585) -- (4.140,2.616) -- (4.230,2.616) -- (4.320,2.616) -- (4.410,2.616) -- (4.500,2.616) -- (4.590,2.616) -- (4.680,2.641) -- (4.770,2.669) -- (4.860,2.706) -- (4.950,2.706) -- (5.040,2.706) -- (5.130,2.755) -- (5.220,2.755) -- (5.310,2.755) -- (5.400,2.755) -- (5.400,0) -- (0,0) -- cycle;
+\fill[red!30] (0.000,0.000) -- (0.090,0.011) -- (0.180,0.028) -- (0.270,0.041) -- (0.360,0.052) -- (0.450,0.058) -- (0.540,0.067) -- (0.630,0.078) -- (0.720,0.083) -- (0.810,0.091) -- (0.900,0.102) -- (0.990,0.109) -- (1.080,0.118) -- (1.170,0.128) -- (1.260,0.146) -- (1.350,0.154) -- (1.440,0.159) -- (1.530,0.177) -- (1.620,0.177) -- (1.710,0.185) -- (1.800,0.191) -- (1.890,0.203) -- (1.980,0.209) -- (2.070,0.215) -- (2.160,0.218) -- (2.250,0.224) -- (2.340,0.231) -- (2.430,0.241) -- (2.520,0.253) -- (2.610,0.253) -- (2.700,0.261) -- (2.790,0.261) -- (2.880,0.270) -- (2.970,0.276) -- (3.060,0.281) -- (3.150,0.281) -- (3.240,0.281) -- (3.330,0.281) -- (3.420,0.290) -- (3.510,0.290) -- (3.600,0.299) -- (3.690,0.299) -- (3.780,0.299) -- (3.870,0.299) -- (3.960,0.312) -- (4.050,0.312) -- (4.140,0.328) -- (4.230,0.328) -- (4.320,0.328) -- (4.410,0.328) -- (4.500,0.328) -- (4.590,0.328) -- (4.680,0.353) -- (4.770,0.353) -- (4.860,0.353) -- (4.950,0.353) -- (5.040,0.353) -- (5.130,0.402) -- (5.220,0.402) -- (5.310,0.402) -- (5.400,0.402) -- (5.400,0) -- (0,0) -- cycle;
+\draw[black!55] (0.000,0.000) -- (0.090,0.271) -- (0.180,0.395) -- (0.270,0.471) -- (0.360,0.562) -- (0.450,0.651) -- (0.540,0.736) -- (0.630,0.816) -- (0.720,0.914) -- (0.810,0.999) -- (0.900,1.064) -- (0.990,1.153) -- (1.080,1.224) -- (1.170,1.315) -- (1.260,1.392) -- (1.350,1.450) -- (1.440,1.519) -- (1.530,1.607) -- (1.620,1.672) -- (1.710,1.732) -- (1.800,1.787) -- (1.890,1.850) -- (1.980,1.880) -- (2.070,1.954) -- (2.160,2.001) -- (2.250,2.050) -- (2.340,2.104) -- (2.430,2.138) -- (2.520,2.179) -- (2.610,2.218) -- (2.700,2.259) -- (2.790,2.272) -- (2.880,2.304) -- (2.970,2.325) -- (3.060,2.348) -- (3.150,2.359) -- (3.240,2.386) -- (3.330,2.401) -- (3.420,2.444) -- (3.510,2.444) -- (3.600,2.471) -- (3.690,2.471) -- (3.780,2.483) -- (3.870,2.532) -- (3.960,2.558) -- (4.050,2.585) -- (4.140,2.616) -- (4.230,2.616) -- (4.320,2.616) -- (4.410,2.616) -- (4.500,2.616) -- (4.590,2.616) -- (4.680,2.641) -- (4.770,2.669) -- (4.860,2.706) -- (4.950,2.706) -- (5.040,2.706) -- (5.130,2.755) -- (5.220,2.755) -- (5.310,2.755) -- (5.400,2.755);
+\draw[red!60!black] (0.000,0.000) -- (0.090,0.011) -- (0.180,0.028) -- (0.270,0.041) -- (0.360,0.052) -- (0.450,0.058) -- (0.540,0.067) -- (0.630,0.078) -- (0.720,0.083) -- (0.810,0.091) -- (0.900,0.102) -- (0.990,0.109) -- (1.080,0.118) -- (1.170,0.128) -- (1.260,0.146) -- (1.350,0.154) -- (1.440,0.159) -- (1.530,0.177) -- (1.620,0.177) -- (1.710,0.185) -- (1.800,0.191) -- (1.890,0.203) -- (1.980,0.209) -- (2.070,0.215) -- (2.160,0.218) -- (2.250,0.224) -- (2.340,0.231) -- (2.430,0.241) -- (2.520,0.253) -- (2.610,0.253) -- (2.700,0.261) -- (2.790,0.261) -- (2.880,0.270) -- (2.970,0.276) -- (3.060,0.281) -- (3.150,0.281) -- (3.240,0.281) -- (3.330,0.281) -- (3.420,0.290) -- (3.510,0.290) -- (3.600,0.299) -- (3.690,0.299) -- (3.780,0.299) -- (3.870,0.299) -- (3.960,0.312) -- (4.050,0.312) -- (4.140,0.328) -- (4.230,0.328) -- (4.320,0.328) -- (4.410,0.328) -- (4.500,0.328) -- (4.590,0.328) -- (4.680,0.353) -- (4.770,0.353) -- (4.860,0.353) -- (4.950,0.353) -- (5.040,0.353) -- (5.130,0.402) -- (5.220,0.402) -- (5.310,0.402) -- (5.400,0.402);
+\draw[red!70!black,thick,dashed] (0.000,0.000) -- (0.090,0.011) -- (0.180,0.031) -- (0.270,0.046) -- (0.360,0.059) -- (0.450,0.067) -- (0.540,0.078) -- (0.630,0.092) -- (0.720,0.098) -- (0.810,0.110) -- (0.900,0.127) -- (0.990,0.137) -- (1.080,0.151) -- (1.170,0.166) -- (1.260,0.198) -- (1.350,0.211) -- (1.440,0.220) -- (1.530,0.256) -- (1.620,0.256) -- (1.710,0.273) -- (1.800,0.286) -- (1.890,0.312) -- (1.980,0.326) -- (2.070,0.341) -- (2.160,0.349) -- (2.250,0.367) -- (2.340,0.386) -- (2.430,0.417) -- (2.520,0.451) -- (2.610,0.451) -- (2.700,0.479) -- (2.790,0.479) -- (2.880,0.511) -- (2.970,0.531) -- (3.060,0.551) -- (3.150,0.551) -- (3.240,0.551) -- (3.330,0.551) -- (3.420,0.587) -- (3.510,0.587) -- (3.600,0.629) -- (3.690,0.629) -- (3.780,0.629) -- (3.870,0.629) -- (3.960,0.693) -- (4.050,0.693) -- (4.140,0.782) -- (4.230,0.782) -- (4.320,0.782) -- (4.410,0.782) -- (4.500,0.782) -- (4.590,0.782) -- (4.680,0.929) -- (4.770,0.929) -- (4.860,0.929) -- (4.950,0.929) -- (5.040,0.929) -- (5.130,1.274) -- (5.220,1.274) -- (5.310,1.274) -- (5.400,1.274);
+\draw[->] (0,0) -- (5.75,0) node[right,font=\scriptsize] {years};
+\draw[->] (0,0) -- (0,3.3) node[left,font=\scriptsize] {probability};
+\foreach \y in {0,10,20,30} \draw ({\y*0.18},0.06) -- ({\y*0.18},-0.06) node[below,font=\tiny] {$\y$};
+\foreach \p in {0,0.5,1} \draw (0.06,{\p*3}) -- (-0.06,{\p*3}) node[left,font=\tiny] {$\p$};
+\node[font=\tiny,red!60!black,anchor=west] at (4.6,0.17) {PCM};
+\node[font=\tiny,black!70,anchor=west] at (2.2,1.55) {death without progression};
+\node[font=\tiny,green!35!black,anchor=west] at (0.15,2.85) {alive, no event};
+\node[font=\tiny,red!70!black,anchor=west] at (1.0,0.75) {dashed: $1-$KM, wrong};
+\node[font=\scriptsize,anchor=north] at (2.6,-0.4) {(a) \texttt{mgus2}: stacked incidences};
+\begin{scope}[xshift=7.7cm]
+\fill[orange!6,rounded corners=4pt] (-0.9,-0.75) rectangle (5.4,3.55);
+\draw[->] (0,0) -- (4.65,0) node[right,font=\scriptsize] {days};
+\draw[->] (0,0) -- (0,3.3) node[right,font=\scriptsize] {mean infections};
+\foreach \d in {0,100,200,300,400} \draw ({\d/100},0.06) -- ({\d/100},-0.06) node[below,font=\tiny] {$\d$};
+\foreach \m in {0.5,1,1.5} \draw (0.06,{\m*2}) -- (-0.06,{\m*2}) node[left,font=\tiny] {$\m$};
+\draw[red!70!black,thick] (0,0) -- (0.04,0.000) -- (0.04,0.031) -- (0.06,0.031) -- (0.06,0.062) -- (0.08,0.062) -- (0.08,0.092) -- (0.11,0.092) -- (0.11,0.123) -- (0.14,0.123) -- (0.14,0.154) -- (0.18,0.154) -- (0.18,0.185) -- (0.19,0.185) -- (0.19,0.215) -- (0.22,0.215) -- (0.22,0.246) -- (0.23,0.246) -- (0.23,0.277) -- (0.26,0.277) -- (0.26,0.308) -- (0.52,0.308) -- (0.52,0.338) -- (0.57,0.338) -- (0.57,0.369) -- (0.65,0.369) -- (0.65,0.400) -- (0.67,0.400) -- (0.67,0.431) -- (0.91,0.431) -- (0.91,0.462) -- (0.99,0.462) -- (0.99,0.493) -- (1.04,0.493) -- (1.04,0.526) -- (1.20,0.526) -- (1.20,0.558) -- (1.21,0.558) -- (1.21,0.622) -- (1.46,0.622) -- (1.46,0.655) -- (1.52,0.655) -- (1.52,0.687) -- (1.59,0.687) -- (1.59,0.719) -- (1.68,0.719) -- (1.68,0.751) -- (1.69,0.751) -- (1.69,0.784) -- (1.75,0.784) -- (1.75,0.816) -- (2.03,0.816) -- (2.03,0.850) -- (2.06,0.850) -- (2.06,0.886) -- (2.11,0.886) -- (2.11,0.922) -- (2.13,0.922) -- (2.13,0.959) -- (2.26,0.959) -- (2.26,0.996) -- (2.36,0.996) -- (2.36,1.034) -- (2.41,1.034) -- (2.41,1.073) -- (2.46,1.073) -- (2.46,1.112) -- (2.48,1.112) -- (2.48,1.151) -- (2.49,1.151) -- (2.49,1.190) -- (2.50,1.190) -- (2.50,1.230) -- (2.53,1.230) -- (2.53,1.270) -- (2.55,1.270) -- (2.55,1.310) -- (2.60,1.310) -- (2.60,1.350) -- (2.64,1.350) -- (2.64,1.392) -- (2.65,1.392) -- (2.65,1.435) -- (2.69,1.435) -- (2.69,1.477) -- (2.80,1.477) -- (2.80,1.591) -- (2.84,1.591) -- (2.84,1.650) -- (2.92,1.650) -- (2.92,1.717) -- (2.94,1.717) -- (2.94,1.786) -- (3.04,1.786) -- (3.04,1.863) -- (3.06,1.863) -- (3.06,1.940) -- (3.07,1.940) -- (3.07,2.023) -- (3.18,2.023) -- (3.18,2.128) -- (3.22,2.128) -- (3.22,2.234) -- (3.34,2.234) -- (3.34,2.359) -- (3.50,2.359) -- (3.50,2.525) -- (3.70,2.525) -- (3.70,3.025);
+\draw[blue!60!black,thick] (0,0) -- (0.65,0.000) -- (0.65,0.032) -- (0.82,0.032) -- (0.82,0.063) -- (1.13,0.063) -- (1.13,0.095) -- (1.14,0.095) -- (1.14,0.127) -- (1.18,0.127) -- (1.18,0.159) -- (1.46,0.159) -- (1.46,0.190) -- (1.65,0.190) -- (1.65,0.223) -- (1.67,0.223) -- (1.67,0.255) -- (1.87,0.255) -- (1.87,0.288) -- (1.88,0.288) -- (1.88,0.321) -- (2.07,0.321) -- (2.07,0.355) -- (2.19,0.355) -- (2.19,0.391) -- (2.40,0.391) -- (2.40,0.426) -- (2.65,0.426) -- (2.65,0.467) -- (2.67,0.467) -- (2.67,0.509) -- (2.74,0.509) -- (2.74,0.559) -- (3.37,0.559) -- (3.37,0.664) -- (3.61,0.664) -- (3.61,0.831) -- (3.73,0.831) -- (3.73,1.402);
+\node[font=\tiny,red!70!black,anchor=west] at (1.7,2.3) {placebo};
+\node[font=\tiny,blue!60!black,anchor=west] at (2.9,0.2) {interferon gamma};
+\node[font=\scriptsize,anchor=north] at (2.2,-0.4) {(b) \texttt{cgd}: mean cumulative count};
+\end{scope}
+\end{tikzpicture}
+\caption{(a) Aalen--Johansen estimates for the \texttt{mgus2} patients, stacked: the cumulative incidence of progression (bottom band), of death without progression (middle) and the probability of neither (top), which add to one at every time. The dashed curve, one minus the Kaplan--Meier estimate with deaths censored, overstates the risk of progression more and more as deaths accumulate. (b) The mean
+cumulative number of serious infections per patient in the \texttt{cgd} trial: after a year, $1.26$ on placebo and $0.42$ on interferon gamma.}
+\label{fig:cif}
+\end{figure}
+
+\subsection{Frailty models}
+\label{ssec:frailty}
+
+Some subjects are more prone to the event than their covariates say, because of genes, environment or unmeasured severity. A \textbf{frailty model} puts this into the hazard as an unobserved multiplier $Z$,
+\[
+h(t \mid x, Z) = Z\,h_0(t)e^{\beta^{\mathsf T}x} ,
+\]
+usually with $Z$ gamma distributed with mean $1$ and variance $\theta$. In a \textbf{shared frailty} model, all subjects of one cluster (twins, a litter, the repeated events of one patient) share the same $Z$, which makes their times correlated, with larger $\theta$ meaning stronger dependence; $\theta = 0$ gives the ordinary Cox model.
+
+\begin{prop}
+\label{prop:gammafrailty}
+With gamma frailty of variance $\theta$, the population survivor function and hazard are
+\[
+S(t \mid x) = \big\{1 + \theta H_0(t)e^{\beta^{\mathsf T}x}\big\}^{-1/\theta} , \qquad h(t \mid x) = \frac{h_0(t)e^{\beta^{\mathsf T}x}}{1 + \theta H_0(t)e^{\beta^{\mathsf T}x}} .
+\]
+\end{prop}
+
+\begin{proof}
+Given $Z$, $S(t \mid x, Z) = \exp\{-ZH_0(t)e^{\beta^{\mathsf T}x}\}$. Averaging over $Z$ with density $z^{1/\theta - 1}e^{-z/\theta}/\{\Gamma(1/\theta)\theta^{1/\theta}\}$ gives the Laplace transform of the gamma distribution, $E[e^{-sZ}] = (1 + \theta s)^{-1/\theta}$, at $s = H_0(t)e^{\beta^{\mathsf T}x}$. The hazard is $-\frac{\mathrm d}{\mathrm dt}\log S$.
+\end{proof}
+
+The population hazard ratio between $x = 1$ and $x = 0$ is therefore $e^{\beta}\{1 + \theta H_0(t)\}/\{1 + \theta H_0(t)e^{\beta}\}$: it equals $e^\beta$ at the start and moves towards $1$ as $H_0(t)$ grows, because the frail die early in the high-risk group and the survivors become a selected, robust population. Unmeasured heterogeneity alone can thus produce the fading hazard ratios of the section on checking proportional hazards, and a model that ignores it
+estimates a \textbf{marginal} effect closer to $1$ than the \textbf{conditional} effect $e^\beta$ for a given subject. An alternative that estimates the marginal effect directly is an ordinary Cox model with \textbf{robust} (sandwich) standard errors clustered on the subject, \texttt{cluster(id)} in R, which corrects the inference for the correlation without modelling it.
+
+\begin{exa}
+\label{ex:kidney}
+The \texttt{kidney} data record, for $38$ patients on portable dialysis, the times to infection at the catheter insertion point, twice per patient. A shared gamma frailty model with age and sex gives $\hat\theta = 0.41$ ($p = 0.04$ for $\theta = 0$): patients differ in their susceptibility. The conditional hazard ratio for women against men is $0.20$ ($p = 0.0006$), while the marginal model with robust errors gives $0.44$
+($p = 0.09$) (Software~\ref{sw:frailty}). Both say women have fewer infections; the conditional ratio, comparing a woman with a man of the same frailty, is further from $1$, as the discussion above predicts.
+\end{exa}
+
+\subsection{Recurrent events}
+\label{ssec:recurrent}
+
+When the event can recur, each subject contributes a sequence of times, and the data are kept in the counting-process form of the section on checking proportional hazards, one record $(t_{\text{start}}, t_{\text{stop}}]$ per interval between events. A simple descriptive summary is the \textbf{mean cumulative function} $M(t)$, the expected number of events per subject by time $t$, estimated by the
+Nelson--Aalen sum $\hat M(t) = \sum_{t_j \le t}d_j/n_j$, where $n_j$ now counts subjects under observation at $t_j$ whatever their number of previous events. Three regression models are common.
+\begin{itemize}
+\item The \textbf{Andersen--Gill} model treats each subject's events as a counting process with intensity $h_0(t)e^{\beta^{\mathsf T}x}$, the same for every event. The subject stays in the risk set after each event. Robust standard errors clustered on the subject allow for the dependence between a subject's events.
+\item The \textbf{Prentice--Williams--Peterson} (PWP) model stratifies by event number, so the $m$th event has its own baseline hazard and only subjects who have had $m - 1$ events are at risk of it; it suits events that change the subject, where a second infection is not like the first.
+\item The \textbf{Wei--Lin--Weissfeld} marginal model fits a separate Cox model for the time from the start to each event number, with robust standard errors.
+\end{itemize}
+
+\begin{exa}
+\label{ex:cgd}
+In a placebo-controlled trial of interferon gamma for chronic granulomatous disease, an inherited immune disorder, $128$ patients had $76$ serious infections: $56$ among $65$ on placebo and $20$ among $63$ on interferon. The mean cumulative number of infections after a year is $1.26$ per patient on placebo and $0.42$ on interferon (Figure~\ref{fig:cif}). The Andersen--Gill model gives a rate ratio of $0.334$ ($p = 0.0004$ with the robust
+standard error $0.312$, larger than the model-based $0.261$ because a patient's infections are correlated); the PWP model gives $0.423$ ($p = 0.003$), and an analysis of the first infection alone gives $0.335$ ($p = 0.001$) (Software~\ref{sw:recurrent}). Interferon cuts the rate of infection by about two-thirds.
+\end{exa}
+
+\subsection{Competing risks and multiple events in software}
+\label{ssec:software11}
+
+\begin{software}[Cumulative incidence]
+\label{sw:cif}
+In R's \texttt{survival} package, a factor event whose first level is censoring makes \texttt{survfit} compute the Aalen--Johansen estimates. The \texttt{mgus2} data, with the time to progression or to death (in months), the estimated probabilities at $10$ and $20$ years of being event-free, progressed or dead, and the incorrect one minus Kaplan--Meier for progression:
+{\small\begin{verbatim}
+> library(survival); options(show.signif.stars = FALSE)
+> m <- mgus2
+> m$etime <- with(m, ifelse(pstat == 1, ptime, futime))      # months
+> m$event <- factor(with(m, ifelse(pstat == 1, 1, 2 * death)), 0:2,
++                   labels = c("censor", "pcm", "death"))
+> table(m$event)
+
+censor    pcm  death 
+   409    115    860 
+> aj <- survfit(Surv(etime, event) ~ 1, data = m)           # Aalen-Johansen
+> s <- summary(aj, times = c(120, 240))
+> round(cbind(months = s$time, s$pstate), 4)
+     months                     
+[1,]    120 0.4045 0.0637 0.5318
+[2,]    240 0.1762 0.0998 0.7240
+> km <- survfit(Surv(etime, event == "pcm") ~ 1, data = m)  # wrong: 1 - KM
+> round(1 - summary(km, times = c(120, 240))$surv, 4)
+[1] 0.0952 0.2096
+\end{verbatim}}
+\textbf{Reading the output.} At $120$ months, $40\%$ are alive without progression, $6.4\%$ have progressed and $53\%$ have died without progression; the rows add to one. The naive estimate of progression, $9.5\%$, is too high.
+
+\textbf{Python:} \texttt{lifelines.AalenJohansenFitter}, with \texttt{event\_of\_interest} set to the cause.
+\end{software}
+
+\begin{software}[Cause-specific and Fine--Gray models]
+\label{sw:finegray}
+A cause-specific Cox model for progression, the Fine--Gray model fitted with \texttt{finegray} (which builds the weighted data set) and a weighted \texttt{coxph}, and the cause-specific model for death:
+{\small\begin{verbatim}
+> cs <- coxph(Surv(etime, event == "pcm") ~ age + sex + mspike, data = m)
+> fg <- finegray(Surv(etime, event) ~ ., data = m, etype = "pcm")
+> sd <- coxph(Surv(fgstart, fgstop, fgstatus) ~ age + sex + mspike,
++             data = fg, weights = fgwt)
+> round(rbind(cause_specific = exp(coef(cs)),
++             subdistribution = exp(coef(sd))), 4)
+                   age   sexM mspike
+cause_specific  1.0165 0.9950 2.4208
+subdistribution 0.9833 0.8081 2.4312
+> cd <- coxph(Surv(etime, event == "death") ~ age + sex + mspike, data = m)
+> round(exp(coef(cd)), 4)                       # cause-specific, for death
+   age   sexM mspike 
+1.0674 1.4754 0.9425 
+\end{verbatim}}
+\textbf{Reading the output.} The effect of the spike is the same in both models; the age and sex effects differ, because age and sex act strongly on death, the competing risk.
+
+\textbf{Python:} \texttt{lifelines} fits cause-specific models with \texttt{CoxPHFitter}; the Fine--Gray model is not in \texttt{lifelines}.
+\end{software}
+
+\begin{software}[Frailty and robust standard errors]
+\label{sw:frailty}
+The \texttt{kidney} data with a marginal model and robust standard errors, and with a shared gamma frailty for each patient, with the estimated frailty variance and its test:
+{\small\begin{verbatim}
+> k1 <- coxph(Surv(time, status) ~ age + sex + cluster(id), data = kidney)
+> k2 <- coxph(Surv(time, status) ~ age + sex +
++               frailty(id, distribution = "gamma"), data = kidney,
++             control = coxph.control(iter.max = 100))
+> round(rbind(marginal = exp(coef(k1)), frailty = exp(coef(k2))), 3)
+           age   sex
+marginal 1.002 0.436
+frailty  1.005 0.204
+> round(summary(k1)$coef["sex", c("robust se", "Pr(>|z|)")], 4)
+robust se  Pr(>|z|) 
+   0.4835    0.0863 
+> round(summary(k2)$coefficients[1:2, c("se(coef)", "p")], 4)
+    se(coef)      p
+age   0.0119 0.6587
+sex   0.4606 0.0006
+> round(c(theta = k2$history[[1]]$theta,              # frailty variance
++         p_frailty = summary(k2)$coefficients[3, "p"]), 4)
+    theta p_frailty 
+   0.4078    0.0404 
+\end{verbatim}}
+\textbf{Reading the output.} The frailty model's sex effect is stronger ($0.20$ against $0.44$) and more significant; $\hat\theta = 0.41$ with $p = 0.04$ shows the patients' two infection times are dependent.
+
+\textbf{Python:} \texttt{CoxPHFitter} with \texttt{cluster\_col} gives robust errors; gamma frailty is not in \texttt{lifelines}.
+\end{software}
+
+\begin{software}[Recurrent events]
+\label{sw:recurrent}
+The \texttt{cgd} trial in counting-process form: the Andersen--Gill and PWP models with robust errors, the number of infections in each arm, and a model for the first infection only:
+{\small\begin{verbatim}
+> ag <- coxph(Surv(tstart, tstop, status) ~ treat + cluster(id), data = cgd)
+> pwp <- coxph(Surv(tstart, tstop, status) ~ treat + strata(enum) +
++                cluster(id), data = cgd)
+> cols <- c("exp(coef)", "se(coef)", "robust se", "Pr(>|z|)")
+> round(rbind(AG = summary(ag)$coef[, cols],
++             PWP = summary(pwp)$coef[, cols]), 4)
+    exp(coef) se(coef) robust se Pr(>|z|)
+AG     0.3344   0.2610    0.3119   0.0004
+PWP    0.4231   0.2802    0.2919   0.0032
+> with(cgd, tapply(status, treat, sum))         # infections in each arm
+placebo  rIFN-g 
+     56      20 
+> first <- coxph(Surv(tstart, tstop, status) ~ treat, data = cgd,
++                subset = enum == 1)            # first infection only
+> round(summary(first)$coef[, c("exp(coef)", "Pr(>|z|)")], 4)
+exp(coef)  Pr(>|z|) 
+   0.3349    0.0011 
+\end{verbatim}}
+\textbf{Reading the output.} All three analyses put the reduction in infections at $58\%$ to $67\%$; the robust standard error is about $20\%$ larger than the naive one in the Andersen--Gill model.
+
+\textbf{Python:} \texttt{CoxTimeVaryingFitter} with start--stop data in \texttt{lifelines}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+In a study of patients with a kidney graft, the events are graft failure and death with a functioning graft. Explain why one minus the Kaplan--Meier curve for graft failure, with deaths censored, does not estimate the proportion of patients whose graft fails by $5$ years.
+\end{problem}
+
+\begin{solution}
+Censoring a death treats the patient as if their graft could still fail later, so the patient's future risk is represented by those still at risk. But a patient who has died cannot lose the graft. The curve estimates graft failure in a hypothetical population without deaths and is too high; the cumulative incidence function, estimated by Aalen--Johansen, gives the proportion actually experiencing graft failure.
+\end{solution}
+
+\begin{problem}
+Using Example~\ref{ex:cifhand}, compute $\hat F_1$ and $\hat F_2$ at time $7$ and check Proposition~\ref{prop:cifsum}.
+\end{problem}
+
+\begin{solution}
+By time $7$ the events are at $2$, $3$, $5$ and $6$: $\hat F_1(7) = 0.1 + 0.1143 = 0.2143$ and $\hat F_2(7) = 0.1 + 0.1143 = 0.2143$, and $\hat S(7) = 0.5714$; the sum is $0.2143 + 0.2143 + 0.5714 = 1$.
+\end{solution}
+
+\begin{problem}
+With two causes of constant cause-specific hazards $h_1 = 0.02$ and $h_2 = 0.08$ per year, find the cumulative incidence of cause $1$ at $10$ years and as $t \to \infty$, and compare with $1 - e^{-h_1 t}$.
+\end{problem}
+
+\begin{solution}
+$F_1(t) = \int_0^t h_1e^{-(h_1 + h_2)u}\,\mathrm du = \frac{h_1}{h_1 + h_2}\{1 - e^{-(h_1 + h_2)t}\}$. At $10$ years, $0.2(1 - e^{-1}) = 0.126$; as $t \to \infty$, $0.2$. The naive $1 - e^{-0.2} = 0.181$ at $10$ years, rising to $1$: in the long run everyone would fail of cause $1$ in a world without cause $2$.
+\end{solution}
+
+\begin{problem}
+A treatment has no effect on the cause-specific hazard of relapse but halves the hazard of death without relapse. What happens to its cause-specific and subdistribution hazard ratios for relapse?
+\end{problem}
+
+\begin{solution}
+The cause-specific hazard ratio for relapse is $1$. But treated patients live longer without relapsing, so more of them remain exposed to relapse and the cumulative incidence of relapse is higher; the subdistribution hazard ratio is above $1$. The treatment does not cause relapse; it prevents a competing event.
+\end{solution}
+
+\begin{problem}
+With gamma frailty of variance $\theta = 1$, a conditional hazard ratio $e^\beta = 3$ and $H_0(t) = 0.5$ at one year, find the population hazard ratio at time $0$ and at one year.
+\end{problem}
+
+\begin{solution}
+At time $0$, $3$. At one year, $3(1 + 0.5)/(1 + 1.5) = 4.5/2.5 = 1.8$: the population ratio has fallen because the frailest high-risk subjects have already failed.
+\end{solution}
+
+\begin{problem}
+In the \texttt{cgd} trial, why is the robust standard error larger than the model-based one in the Andersen--Gill model, and what would happen to the inference if it were ignored?
+\end{problem}
+
+\begin{solution}
+Patients prone to infection have several, so a patient's events are positively correlated, and the data contain less independent information than the number of events suggests. The model-based standard error assumes independence and is too small; ignoring this gives confidence intervals too narrow and $p$-values too small. Here the robust error is $0.312$ against $0.261$.
+\end{solution}
+
+\begin{problem}
+Explain the difference between the Andersen--Gill and PWP models for recurrent events, and suggest a setting where each is appropriate.
+\end{problem}
+
+\begin{solution}
+Andersen--Gill uses one baseline intensity for all events and keeps every subject at risk throughout, so a first and a fifth event have the same baseline rate; it suits events that do not change the subject, such as minor infections or seizures. PWP stratifies by event number, with subjects at risk of the $m$th event only after the $(m-1)$th; it suits events that change the risk, such as successive heart attacks or tumour recurrences after surgery.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -2812,12 +3136,14 @@ The Weibull hazard ratio is $e^{-\log(1.32)/0.78} = e^{-0.356} = 0.70$, the Cox 
 \subhead{Further reading}
 \begin{enumerate}
 \item Aalen, O. O. (1978), Nonparametric inference for a family of counting processes, \emph{Annals of Statistics}, 6, 701--726.
+\item Aalen, O. O., and Johansen, S. (1978), An empirical transition matrix for non-homogeneous Markov chains based on censored observations, \emph{Scandinavian Journal of Statistics}, 5, 141--150.
 \item Akaike, H. (1974), A new look at the statistical model identification, \emph{IEEE Transactions on Automatic Control}, 19, 716--723.
 \item Andersen, P. K., and Gill, R. D. (1982), Cox's regression model for counting processes: a large sample study, \emph{Annals of Statistics}, 10, 1100--1120.
 \item Bennett, S. (1983), Log-logistic regression models for survival data, \emph{Applied Statistics}, 32, 165--171.
 \item Breslow, N. E. (1972), Contribution to the discussion of the paper by D. R. Cox, \emph{Journal of the Royal Statistical Society B}, 34, 216--217.
 \item Brookmeyer, R., and Crowley, J. (1982), A confidence interval for the median survival time, \emph{Biometrics}, 38, 29--41.
 \item Chiang, C. L. (1984), \emph{The Life Table and Its Applications}, Malabar, Krieger.
+\item Clayton, D. G. (1978), A model for association in bivariate life tables and its application in epidemiological studies of familial tendency in chronic disease incidence, \emph{Biometrika}, 65, 141--151.
 \item Cohen, A. C. (1965), Maximum likelihood estimation in the Weibull distribution based on complete and on censored samples, \emph{Technometrics}, 7, 579--588.
 \item Cox, D. R. (1972), Regression models and life-tables, \emph{Journal of the Royal Statistical Society B}, 34, 187--220.
 \item Cox, D. R. (1975), Partial likelihood, \emph{Biometrika}, 62, 269--276.
@@ -2826,30 +3152,38 @@ The Weibull hazard ratio is $e^{-\log(1.32)/0.78} = e^{-0.356} = 0.70$, the Cox 
 \item Edmonson, J. H., Fleming, T. R., Decker, D. G., et al. (1979), Different chemotherapeutic sensitivities and host factors affecting prognosis in advanced ovarian carcinoma versus minimal residual disease, \emph{Cancer Treatment Reports}, 63, 241--247.
 \item Efron, B. (1977), The efficiency of Cox's likelihood function for censored data, \emph{Journal of the American Statistical Association}, 72, 557--565.
 \item Epstein, B., and Sobel, M. (1953), Life testing, \emph{Journal of the American Statistical Association}, 48, 486--502.
+\item Fine, J. P., and Gray, R. J. (1999), A proportional hazards model for the subdistribution of a competing risk, \emph{Journal of the American Statistical Association}, 94, 496--509.
 \item Fleming, T. R., and Harrington, D. P. (1984), Nonparametric estimation of the survival distribution in censored data, \emph{Communications in Statistics: Theory and Methods}, 13, 2469--2486.
 \item Gehan, E. A. (1965), A generalized Wilcoxon test for comparing arbitrarily singly-censored samples, \emph{Biometrika}, 52, 203--223.
 \item Gompertz, B. (1825), On the nature of the function expressive of the law of human mortality, \emph{Philosophical Transactions of the Royal Society of London}, 115, 513--583.
 \item Grambsch, P. M., and Therneau, T. M. (1994), Proportional hazards tests and diagnostics based on weighted residuals, \emph{Biometrika}, 81, 515--526.
+\item Gray, R. J. (1988), A class of $K$-sample tests for comparing the cumulative incidence of a competing risk, \emph{Annals of Statistics}, 16, 1141--1154.
 \item Greenwood, M. (1926), The natural duration of cancer, \emph{Reports on Public Health and Medical Subjects}, 33, London, His Majesty's Stationery Office.
 \item Halley, E. (1693), An estimate of the degrees of the mortality of mankind, \emph{Philosophical Transactions of the Royal Society of London}, 17, 596--610.
 \item Harrell, F. E., Califf, R. M., Pryor, D. B., Lee, K. L., and Rosati, R. A. (1982), Evaluating the yield of medical tests, \emph{Journal of the American Medical Association}, 247, 2543--2546.
 \item Harrington, D. P., and Fleming, T. R. (1982), A class of rank test procedures for censored survival data, \emph{Biometrika}, 69, 553--566.
+\item International Chronic Granulomatous Disease Cooperative Study Group (1991), A controlled trial of interferon gamma to prevent infection in chronic granulomatous disease, \emph{New England Journal of Medicine}, 324, 509--516.
 \item Kalbfleisch, J. D., and Prentice, R. L. (1973), Marginal likelihoods based on Cox's regression and life model, \emph{Biometrika}, 60, 267--278.
 \item Kaplan, E. L., and Meier, P. (1958), Nonparametric estimation from incomplete observations, \emph{Journal of the American Statistical Association}, 53, 457--481.
 \item Karnofsky, D. A., and Burchenal, J. H. (1949), The clinical evaluation of chemotherapeutic agents in cancer, in C. M. MacLeod (ed.), \emph{Evaluation of Chemotherapeutic Agents}, New York, Columbia University Press, 191--205.
+\item Kyle, R. A., Therneau, T. M., Rajkumar, S. V., Offord, J. R., Larson, D. R., Plevak, M. F., and Melton, L. J. (2002), A long-term study of prognosis in monoclonal gammopathy of undetermined significance, \emph{New England Journal of Medicine}, 346, 564--569.
 \item Leung, K.-M., Elashoff, R. M., and Afifi, A. A. (1997), Censoring issues in survival analysis, \emph{Annual Review of Public Health}, 18, 83--104.
 \item Loprinzi, C. L., et al. (1994), Prospective evaluation of prognostic variables from patient-completed questionnaires, \emph{Journal of Clinical Oncology}, 12, 601--607.
 \item Mantel, N. (1966), Evaluation of survival data and two new rank order statistics arising in its consideration, \emph{Cancer Chemotherapy Reports}, 50, 163--170.
 \item Mantel, N., and Haenszel, W. (1959), Statistical aspects of the analysis of data from retrospective studies of disease, \emph{Journal of the National Cancer Institute}, 22, 719--748.
+\item McGilchrist, C. A., and Aisbett, C. W. (1991), Regression with frailty in survival analysis, \emph{Biometrics}, 47, 461--466.
 \item Nelson, W. (1969), Hazard plotting for incomplete failure data, \emph{Journal of Quality Technology}, 1, 27--52.
 \item Peduzzi, P., Concato, J., Feinstein, A. R., and Holford, T. R. (1995), Importance of events per independent variable in proportional hazards regression analysis, \emph{Journal of Clinical Epidemiology}, 48, 1503--1510.
 \item Peto, R., and Peto, J. (1972), Asymptotically efficient rank invariant test procedures, \emph{Journal of the Royal Statistical Society A}, 135, 185--207.
 \item Pocock, S. J., Clayton, T. C., and Altman, D. G. (2002), Survival plots of time-to-event outcomes in clinical trials: good practice and pitfalls, \emph{The Lancet}, 359, 1686--1689.
 \item Prentice, R. L. (1973), Exponential survivals with censoring and explanatory variables, \emph{Biometrika}, 60, 279--288.
+\item Prentice, R. L., Williams, B. J., and Peterson, A. V. (1981), On the regression analysis of multivariate failure time data, \emph{Biometrika}, 68, 373--379.
 \item Schemper, M., and Smith, T. L. (1996), A note on quantifying follow-up in studies of failure time, \emph{Controlled Clinical Trials}, 17, 343--346.
 \item Schoenfeld, D. (1982), Partial residuals for the proportional hazards regression model, \emph{Biometrika}, 69, 239--241.
 \item Therneau, T. M., Grambsch, P. M., and Fleming, T. R. (1990), Martingale-based residuals for survival models, \emph{Biometrika}, 77, 147--160.
+\item Vaupel, J. W., Manton, K. G., and Stallard, E. (1979), The impact of heterogeneity in individual frailty on the dynamics of mortality, \emph{Demography}, 16, 439--454.
 \item Wei, L. J. (1992), The accelerated failure time model: a useful alternative to the Cox regression model in survival analysis, \emph{Statistics in Medicine}, 11, 1871--1879.
+\item Wei, L. J., Lin, D. Y., and Weissfeld, L. (1989), Regression analysis of multivariate incomplete failure time data by modeling marginal distributions, \emph{Journal of the American Statistical Association}, 84, 1065--1073.
 \item Weibull, W. (1951), A statistical distribution function of wide applicability, \emph{Journal of Applied Mechanics}, 18, 293--297.
 \end{enumerate}
 
