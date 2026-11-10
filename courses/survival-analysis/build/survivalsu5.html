@@ -1,0 +1,135 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>1.5 Survival data in software — Survival Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='survival.css' rel='stylesheet' type='text/css' /> 
+<meta content='survival.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Survival Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="survivalse1.html">Survival Data</a></li>
+<li class="sub"><a class="" href="survivalsu1.html">Time-to-event data</a></li>
+<li class="sub"><a class="" href="survivalsu2.html">Censoring</a></li>
+<li class="sub"><a class="" href="survivalsu3.html">Why ordinary methods fail</a></li>
+<li class="sub"><a class="" href="survivalsu4.html">Recording survival data</a></li>
+<li class="sub"><a class="current" href="survivalsu5.html">Survival data in software</a></li>
+<li class="sub"><a class="" href="survivalsu6.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="survivalli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 186 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu6.html'>next</a>] [<a href='survivalsu4.html'>prev</a>] [<a href='survivalsu4.html#tailsurvivalsu4.html'>prev-tail</a>] [<a href='#tailsurvivalsu5.html'>tail</a>] [<a href='survivalse1.html#survivalsu5.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>1.5   </span> <a id='x8-70001.5'></a>Survival data in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 189 --><p class='noindent'><span class='head'>
+<a id='x8-7001r1'></a>
+<span class='cmbx-10x-x-109'>Software 1.5.1 </span>(A survival object)<span class='cmbx-10x-x-109'>.</span>  </span> The first patients of the <span class='cmtt-10x-x-109'>lung </span>data, the coding of the status
+variable, the survival object, and the numbers of events and censored times:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-1'>
+&gt; library(survival)
+&gt; head(lung[, c("time", "status", "age", "sex")], 5)
+  time status age sex
+1  306      2  74   1
+2  455      2  68   1
+3 1010      1  56   1
+4  210      2  57   1
+5  883      2  60   1
+&gt; table(lung$status)                    # 1 = censored, 2 = died
+
+  1   2
+ 63 165
+&gt; y &lt;- Surv(lung$time, lung$status == 2)
+&gt; head(y, 10)                           # a + marks a censored time
+ [1]  306   455  1010+  210   883  1022+  310   361   218   166
+&gt; c(events = sum(lung$status == 2), censored = sum(lung$status == 1))
+  events censored
+     165       63
+&gt; round(mean(lung$status == 1), 3)      # proportion censored
+[1] 0.276
+</pre>
+<!-- l. 213 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The third patient was followed for \(1010\) days and was still alive, printed \(1010+\).
+There are \(165\) deaths and \(63\) censored times, so \(27.6\%\) of the observations are censored: too many to ignore.
+</p><!-- l. 216 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span>with <span class='cmtt-10x-x-109'>lifelines</span>, the pair is kept as two columns, <span class='cmtt-10x-x-109'>durations </span>and <span class='cmtt-10x-x-109'>event_observed</span>.
+</p>
+</div>
+<!-- l. 217 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 219 --><p class='noindent'><span class='head'>
+<a id='x8-7002r2'></a>
+<span class='cmbx-10x-x-109'>Software 1.5.2 </span>(The cost of ignoring censoring)<span class='cmbx-10x-x-109'>.</span>  </span> Simulated exponential lifetimes with mean \(10\), each
+censored at an independent uniform time on \((0, 20)\); the fraction of deaths observed, and four estimates of
+the mean:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-2'>
+&gt; set.seed(1)
+&gt; n &lt;- 10000
+&gt; t_true &lt;- rexp(n, rate = 1/10)        # true lifetimes, mean 10
+&gt; cens &lt;- runif(n, 0, 20)               # censoring time, uniform on (0, 20)
+&gt; time &lt;- pmin(t_true, cens); event &lt;- as.numeric(t_true &lt;= cens)
+&gt; round(mean(event), 3)                 # fraction of deaths observed
+[1] 0.571
+&gt; round(c(true = mean(t_true), all_times = mean(time),
++         deaths_only = mean(time[event == 1]),
++         rate_method = sum(time) / sum(event)), 3)
+       true   all_times deaths_only rate_method
+      9.984       5.616       4.674       9.844
+</pre>
+<!-- l. 235 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>Only \(57\%\) of the deaths are observed. The mean of all recorded times is \(5.6\)
+and the mean of the uncensored times \(4.7\), both far below the true mean of about \(10\). Dividing the
+total time at risk by the number of deaths gives \(9.84\), close to the truth.
+</p><!-- l. 238 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span><span class='cmtt-10x-x-109'>numpy.random.exponential </span>and <span class='cmtt-10x-x-109'>numpy.minimum </span>give the same simulation.
+</p>
+</div>
+<!-- l. 239 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 241 --><p class='noindent'><span class='head'>
+<a id='x8-7003r3'></a>
+<span class='cmbx-10x-x-109'>Software 1.5.3 </span>(Follow-up by group)<span class='cmbx-10x-x-109'>.</span>  </span> The median recorded time for the deceased and the
+censored patients in <span class='cmtt-10x-x-109'>lung</span>, and the numbers and proportions of deaths by sex (\(1\) = male, \(2\) =
+female):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-3'>
+&gt; with(lung, tapply(time, status, median))   # median time by status
+  1   2
+284 226
+&gt; with(lung, table(sex, status))
+   status
+sex   1   2
+  1  26 112
+  2  37  53
+&gt; round(prop.table(with(lung, table(sex, status)), 1), 3)
+   status
+sex     1     2
+  1 0.188 0.812
+  2 0.411 0.589
+</pre>
+<!-- l. 258 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output.</span> \(81\%\) of the men died during the study but only \(59\%\) of the women. This suggests
+that women survived longer, but the comparison is not yet fair: the groups may have been
+followed for different lengths of time. The Kaplan–Meier curves and the log-rank test of later
+sections make such comparisons properly.
+</p><!-- l. 261 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span><span class='cmtt-10x-x-109'>pandas.crosstab(df.sex, df.status, normalize=’index’)</span>.
+</p>
+</div>
+<!-- l. 262 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 264 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu6.html'>next</a>] [<a href='survivalsu4.html'>prev</a>] [<a href='survivalsu4.html#tailsurvivalsu4.html'>prev-tail</a>] [<a href='survivalsu5.html'>front</a>] [<a href='survivalse1.html#survivalsu5.html'>up</a>] </p></div>
+<!-- l. 264 --><p class='noindent'><a id='tailsurvivalsu5.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="survivalsu4.html">&larr; Previous</a><a class="up" href="survivalse1.html#survivalsu5.html">Contents</a><a class="next" href="survivalsu6.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="survival-analysis/1-5-survival-data-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

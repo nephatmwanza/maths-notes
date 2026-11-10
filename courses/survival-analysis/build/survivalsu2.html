@@ -1,0 +1,81 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>1.2 Censoring — Survival Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='survival.css' rel='stylesheet' type='text/css' /> 
+<meta content='survival.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Survival Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="survivalse1.html">Survival Data</a></li>
+<li class="sub"><a class="" href="survivalsu1.html">Time-to-event data</a></li>
+<li class="sub"><a class="current" href="survivalsu2.html">Censoring</a></li>
+<li class="sub"><a class="" href="survivalsu3.html">Why ordinary methods fail</a></li>
+<li class="sub"><a class="" href="survivalsu4.html">Recording survival data</a></li>
+<li class="sub"><a class="" href="survivalsu5.html">Survival data in software</a></li>
+<li class="sub"><a class="" href="survivalsu6.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="survivalli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 113 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu3.html'>next</a>] [<a href='survivalsu1.html'>prev</a>] [<a href='survivalsu1.html#tailsurvivalsu1.html'>prev-tail</a>] [<a href='#tailsurvivalsu2.html'>tail</a>] [<a href='survivalse1.html#survivalsu2.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>1.2   </span> <a id='x5-40001.2'></a>Censoring</h4>
+<!-- l. 116 --><p class='noindent'>For those \(63\) patients the survival time is not known; we know only that it is <span class='cmti-10x-x-109'>longer </span>than
+the time at which they were last seen. Such an observation is <span class='cmbx-10x-x-109'>right censored</span>. It is the
+most common kind of incompleteness in survival data, and it arises for several reasons:
+</p>
+     <ul class='itemize1'>
+     <li class='itemize'><span class='cmbx-10x-x-109'>the study ends </span>before the event has happened (administrative censoring);
+     </li>
+     <li class='itemize'>the subject is <span class='cmbx-10x-x-109'>lost to follow-up</span>: moves away, stops attending;
+     </li>
+     <li class='itemize'>the subject <span class='cmbx-10x-x-109'>withdraws</span>, or dies of a cause unrelated to the one being studied (if that
+     cause is the event of interest, this is the competing-risks problem of a later section).</li></ul>
+<!-- l. 122 --><p class='noindent'>Three patterns are distinguished. In <span class='cmbx-10x-x-109'>Type I </span>censoring the study stops at a fixed time, so everyone
+still alive then is censored at that time. In <span class='cmbx-10x-x-109'>Type II </span>censoring, used in reliability testing, the study
+stops when a fixed number of items have failed. Most clinical studies have <span class='cmbx-10x-x-109'>random </span>censoring: patients
+enter at different calendar times and the study ends on one date, so each has a different potential
+follow-up time (Figure <a href='#x5-4001r1'>1<!-- tex4ht:ref: fig:followup  --></a>).
+</p><!-- l. 125 --><p class='noindent'>Other kinds of incompleteness are <span class='cmbx-10x-x-109'>left censoring</span>, when the event is known only to have happened
+before some time (a test shows that an infection has already occurred), and <span class='cmbx-10x-x-109'>interval censoring</span>,
+when it is known only to have happened between two visits. <span class='cmbx-10x-x-109'>Left truncation</span>, or delayed entry,
+is different: subjects enter the study only if they have survived to some time, so short
+survivors are never seen at all, as when patients are recruited at a clinic some time after
+diagnosis.
+</p>
+<figure class='figure'> 
+
+                                                                                      
+                                                                                      
+<a id='x5-4001r1'></a>
+                                                                                      
+                                                                                      
+<!-- l. 130 --><p class='noindent'><img alt='c012345st12345678××××ay0123412345678××××a×aluseasendy rr adedesnaaenc satrdruinlyh ysicseteeaed ed∘rnt crenysored: alive at the end of the study (2, 5, 8) or lost to follow-up (4)   ' src='survival0x.svg' />
+</p>
+<figcaption class='caption'><span class='id'>Figure 1: </span><span class='content'>Eight patients in a study that recruits for three years and ends at year \(5\). Left: in
+calendar time, patients enter at different dates. Right: the same data on the time scale used for
+analysis, time since entry. Patients \(2\), \(5\) and \(8\) are censored by the end of the study after different
+lengths of follow-up, and patient \(4\) is lost to follow-up.</span></figcaption><!-- tex4ht:label?: x5-4001r1  -->
+                                                                                      
+                                                                                      
+</figure>
+<!-- l. 164 --><p class='noindent'><span class='cmbx-10x-x-109'>The key assumption. </span>Almost every method in this course assumes that censoring is
+<span class='cmbx-10x-x-109'>non-informative</span>: a subject censored at time \(c\) has the same chance of the event afterwards as
+subjects still under observation at \(c\). Administrative censoring usually satisfies this. Censoring because
+a patient became too ill to attend does not: those patients are more likely to die soon,
+and treating them like the others makes survival look better than it is. The assumption
+cannot be checked from the data alone, so it must be argued from how the study was
+run.
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 167 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu3.html'>next</a>] [<a href='survivalsu1.html'>prev</a>] [<a href='survivalsu1.html#tailsurvivalsu1.html'>prev-tail</a>] [<a href='survivalsu2.html'>front</a>] [<a href='survivalse1.html#survivalsu2.html'>up</a>] </p></div>
+<!-- l. 167 --><p class='noindent'><a id='tailsurvivalsu2.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="survivalsu1.html">&larr; Previous</a><a class="up" href="survivalse1.html#survivalsu2.html">Contents</a><a class="next" href="survivalsu3.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="survival-analysis/1-2-censoring" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
