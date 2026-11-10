@@ -3443,6 +3443,256 @@ Let $p$, $q$ be optimal and $v$ the value. Each row earns $(Aq)_i \leq v$, by op
 Theorem~\ref{thm:minimax}.
 \end{solution}
 
+%======================================================================
+\section{Inventory Models}
+\label{sec:inventory}
+
+Inventories buffer supply against demand: raw materials waiting for production, goods waiting for customers, spare parts waiting for breakdowns. Holding them costs money (capital, storage, spoilage), and so does ordering them (set-up, paperwork, transport) and running out of them (lost sales, idle plant, goodwill). Inventory
+theory finds \textbf{how much} to order and \textbf{when}, trading these costs against each other. This section starts with Harris's economic order quantity (1913), the oldest model in OR, and moves to random demand: the single-period newsvendor problem and the $(s, S)$ policies that are optimal for periodic review.
+
+\subsection{The economic order quantity}
+\label{ssec:eoq}
+
+Demand occurs at a constant rate $D$ units a year; each order costs $K$ regardless of size and arrives instantly; holding a unit for a year costs $h$ (often $h = ic$, an interest rate $i$ times the unit cost $c$); shortages are not allowed. With orders of size $Q$, the stock falls from $Q$ to $0$ at rate $D$ and is then
+replenished, a \textbf{sawtooth} with average level $Q/2$, and $D/Q$ orders are placed a year. The annual cost, excluding the purchase cost $cD$ which does not depend on $Q$, is
+\[
+C(Q) = \frac{KD}Q + \frac{hQ}2 .
+\]
+
+\begin{thm}[Economic order quantity]
+\label{thm:eoq}
+$C$ is minimised by $Q^* = \sqrt{2KD/h}$, where the ordering and holding costs are equal and $C(Q^*) = \sqrt{2KDh}$. Moreover
+\[
+\frac{C(Q)}{C(Q^*)} = \frac12\Bigl(\frac Q{Q^*} + \frac{Q^*}Q\Bigr) .
+\]
+\end{thm}
+
+\begin{proof}
+$C'(Q) = -KD/Q^2 + h/2$ vanishes at $Q^*$, and $C''(Q) = 2KD/Q^3 > 0$, so $C$ is convex and $Q^*$ is its minimum. At $Q^*$, $KD/Q^* = \sqrt{KDh/2} = hQ^*/2$, so $C(Q^*) = \sqrt{2KDh}$. Substituting $KD = hQ^{*2}/2$ gives $C(Q) = \frac h2(Q^{*2}/Q + Q)$, and dividing by $hQ^*$ gives the ratio.
+\end{proof}
+
+The ratio formula shows that the total cost is \textbf{flat} near the optimum: ordering $50\%$ too much raises the cost by only $\frac12(1.5 + \frac1{1.5}) - 1 = 8.3\%$, and ordering twice the optimum raises it by $25\%$. This robustness is why the EOQ is used even when its assumptions hold only roughly; errors in estimating $K$, $D$ or $h$ enter $Q^*$ only through a
+square root. If an order takes a \textbf{lead time} $L$ to arrive, it is placed when the stock falls to the \textbf{reorder point} $r = DL$.
+
+\begin{exa}
+\label{ex:eoq}
+A firm uses $D = 12\,000$ units a year, costing Rs.~12 each; an order costs $K = $ Rs.~500, and holding costs $20\%$ a year, so $h = 2.4$. Then $Q^* = \sqrt{2 \times 500 \times 12\,000/2.4} = 2236$ units, about $5.4$ orders a year, at an annual ordering-and-holding cost of $\sqrt{2 \times 500 \times 12\,000 \times 2.4} =$ Rs.~5367
+(Figure~\ref{fig:eoq}). Ordering $3000$ instead costs $4.4\%$ more, and $1500$ costs $8.1\%$ more (Software~\ref{sw:eoq}).
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-0.9,-0.75) rectangle (9.4,5.1);
+\draw[->] (0,0) -- (8.8,0) node[below,font=\small] {$Q$};
+\draw[->] (0,0) -- (0,5.0) node[left,font=\small] {cost a year};
+\foreach \q in {1000,2000,3000,4000,5000,6000} \draw ({1.4*\q/1000},0.06) -- ({1.4*\q/1000},-0.06) node[below,font=\scriptsize] {$\q$};
+\foreach \c in {2000,4000,6000,8000,10000} \draw (0.06,{0.45*\c/1000}) -- (-0.06,{0.45*\c/1000}) node[left,font=\scriptsize] {$\c$};
+\draw[orange!80!black] (0.840,4.500) -- (0.916,4.125) -- (0.993,3.808) -- (1.069,3.536) -- (1.145,3.300) -- (1.222,3.094) -- (1.298,2.912) -- (1.375,2.750) -- (1.451,2.605) -- (1.527,2.475) -- (1.604,2.357) -- (1.680,2.250) -- (1.756,2.152) -- (1.833,2.063) -- (1.909,1.980) -- (1.985,1.904) -- (2.062,1.833) -- (2.138,1.768) -- (2.215,1.707) -- (2.291,1.650) -- (2.367,1.597) -- (2.444,1.547) -- (2.520,1.500) -- (2.596,1.456) -- (2.673,1.414) -- (2.749,1.375) -- (2.825,1.338) -- (2.902,1.303) -- (2.978,1.269) -- (3.055,1.238) -- (3.131,1.207) -- (3.207,1.179) -- (3.284,1.151) -- (3.360,1.125) -- (3.436,1.100) -- (3.513,1.076) -- (3.589,1.053) -- (3.665,1.031) -- (3.742,1.010) -- (3.818,0.990) -- (3.895,0.971) -- (3.971,0.952) -- (4.047,0.934) -- (4.124,0.917) -- (4.200,0.900) -- (4.276,0.884) -- (4.353,0.868) -- (4.429,0.853) -- (4.505,0.839) -- (4.582,0.825) -- (4.658,0.811) -- (4.735,0.798) -- (4.811,0.786) -- (4.887,0.773) -- (4.964,0.762) -- (5.040,0.750) -- (5.116,0.739) -- (5.193,0.728) -- (5.269,0.717) -- (5.345,0.707) -- (5.422,0.697) -- (5.498,0.688) -- (5.575,0.678) -- (5.651,0.669) -- (5.727,0.660) -- (5.804,0.651) -- (5.880,0.643) -- (5.956,0.635) -- (6.033,0.627) -- (6.109,0.619) -- (6.185,0.611) -- (6.262,0.604) -- (6.338,0.596) -- (6.415,0.589) -- (6.491,0.582) -- (6.567,0.576) -- (6.644,0.569) -- (6.720,0.562) -- (6.796,0.556) -- (6.873,0.550) -- (6.949,0.544) -- (7.025,0.538) -- (7.102,0.532) -- (7.178,0.527) -- (7.255,0.521) -- (7.331,0.516) -- (7.407,0.510) -- (7.484,0.505) -- (7.560,0.500) -- (7.636,0.495) -- (7.713,0.490) -- (7.789,0.485) -- (7.865,0.481) -- (7.942,0.476) -- (8.018,0.471) -- (8.095,0.467) -- (8.171,0.463) -- (8.247,0.458) -- (8.324,0.454) -- (8.400,0.450);
+\draw[green!45!black] (0.840,0.324) -- (0.916,0.353) -- (0.993,0.383) -- (1.069,0.412) -- (1.145,0.442) -- (1.222,0.471) -- (1.298,0.501) -- (1.375,0.530) -- (1.451,0.560) -- (1.527,0.589) -- (1.604,0.619) -- (1.680,0.648) -- (1.756,0.677) -- (1.833,0.707) -- (1.909,0.736) -- (1.985,0.766) -- (2.062,0.795) -- (2.138,0.825) -- (2.215,0.854) -- (2.291,0.884) -- (2.367,0.913) -- (2.444,0.943) -- (2.520,0.972) -- (2.596,1.001) -- (2.673,1.031) -- (2.749,1.060) -- (2.825,1.090) -- (2.902,1.119) -- (2.978,1.149) -- (3.055,1.178) -- (3.131,1.208) -- (3.207,1.237) -- (3.284,1.267) -- (3.360,1.296) -- (3.436,1.325) -- (3.513,1.355) -- (3.589,1.384) -- (3.665,1.414) -- (3.742,1.443) -- (3.818,1.473) -- (3.895,1.502) -- (3.971,1.532) -- (4.047,1.561) -- (4.124,1.591) -- (4.200,1.620) -- (4.276,1.649) -- (4.353,1.679) -- (4.429,1.708) -- (4.505,1.738) -- (4.582,1.767) -- (4.658,1.797) -- (4.735,1.826) -- (4.811,1.856) -- (4.887,1.885) -- (4.964,1.915) -- (5.040,1.944) -- (5.116,1.973) -- (5.193,2.003) -- (5.269,2.032) -- (5.345,2.062) -- (5.422,2.091) -- (5.498,2.121) -- (5.575,2.150) -- (5.651,2.180) -- (5.727,2.209) -- (5.804,2.239) -- (5.880,2.268) -- (5.956,2.297) -- (6.033,2.327) -- (6.109,2.356) -- (6.185,2.386) -- (6.262,2.415) -- (6.338,2.445) -- (6.415,2.474) -- (6.491,2.504) -- (6.567,2.533) -- (6.644,2.563) -- (6.720,2.592) -- (6.796,2.621) -- (6.873,2.651) -- (6.949,2.680) -- (7.025,2.710) -- (7.102,2.739) -- (7.178,2.769) -- (7.255,2.798) -- (7.331,2.828) -- (7.407,2.857) -- (7.484,2.887) -- (7.560,2.916) -- (7.636,2.945) -- (7.713,2.975) -- (7.789,3.004) -- (7.865,3.034) -- (7.942,3.063) -- (8.018,3.093) -- (8.095,3.122) -- (8.171,3.152) -- (8.247,3.181) -- (8.324,3.211) -- (8.400,3.240);
+\draw[blue!60!black,very thick] (0.840,4.824) -- (0.916,4.478) -- (0.993,4.191) -- (1.069,3.948) -- (1.145,3.742) -- (1.222,3.565) -- (1.298,3.412) -- (1.375,3.280) -- (1.451,3.165) -- (1.527,3.064) -- (1.604,2.976) -- (1.680,2.898) -- (1.756,2.830) -- (1.833,2.769) -- (1.909,2.716) -- (1.985,2.670) -- (2.062,2.629) -- (2.138,2.593) -- (2.215,2.561) -- (2.291,2.534) -- (2.367,2.510) -- (2.444,2.489) -- (2.520,2.472) -- (2.596,2.457) -- (2.673,2.445) -- (2.749,2.435) -- (2.825,2.428) -- (2.902,2.422) -- (2.978,2.418) -- (3.055,2.416) -- (3.131,2.415) -- (3.207,2.416) -- (3.284,2.418) -- (3.360,2.421) -- (3.436,2.425) -- (3.513,2.431) -- (3.589,2.438) -- (3.665,2.445) -- (3.742,2.453) -- (3.818,2.463) -- (3.895,2.473) -- (3.971,2.484) -- (4.047,2.495) -- (4.124,2.507) -- (4.200,2.520) -- (4.276,2.533) -- (4.353,2.547) -- (4.429,2.562) -- (4.505,2.577) -- (4.582,2.592) -- (4.658,2.608) -- (4.735,2.625) -- (4.811,2.641) -- (4.887,2.659) -- (4.964,2.676) -- (5.040,2.694) -- (5.116,2.712) -- (5.193,2.731) -- (5.269,2.750) -- (5.345,2.769) -- (5.422,2.788) -- (5.498,2.808) -- (5.575,2.828) -- (5.651,2.849) -- (5.727,2.869) -- (5.804,2.890) -- (5.880,2.911) -- (5.956,2.932) -- (6.033,2.953) -- (6.109,2.975) -- (6.185,2.997) -- (6.262,3.019) -- (6.338,3.041) -- (6.415,3.063) -- (6.491,3.086) -- (6.567,3.109) -- (6.644,3.132) -- (6.720,3.155) -- (6.796,3.178) -- (6.873,3.201) -- (6.949,3.224) -- (7.025,3.248) -- (7.102,3.272) -- (7.178,3.295) -- (7.255,3.319) -- (7.331,3.343) -- (7.407,3.367) -- (7.484,3.392) -- (7.560,3.416) -- (7.636,3.440) -- (7.713,3.465) -- (7.789,3.490) -- (7.865,3.514) -- (7.942,3.539) -- (8.018,3.564) -- (8.095,3.589) -- (8.171,3.614) -- (8.247,3.639) -- (8.324,3.665) -- (8.400,3.690);
+\draw[black!40,dashed] (3.130,0) -- (3.130,2.415);
+\fill[red!70!black] (3.130,2.415) circle (2.2pt) node[above=4pt,font=\scriptsize,red!70!black] {$Q^* = 2236$, Rs.~$5367$};
+\node[font=\scriptsize,orange!80!black,anchor=west] at (1.0,4.4) {ordering $KD/Q$};
+\node[font=\scriptsize,green!45!black,anchor=north west] at (6.4,2.3) {holding $hQ/2$};
+\node[font=\scriptsize\bfseries,blue!60!black,anchor=west] at (6.8,4.45) {total $C(Q)$};
+\end{tikzpicture}
+\caption{The EOQ trade-off for Example~\ref{ex:eoq}. The ordering cost falls and the holding cost rises with the order size; their sum is minimised where they are equal, at $Q^* = 2236$. The total is flat near the minimum, so a moderate error in $Q$ costs little.}
+\label{fig:eoq}
+\end{figure}
+
+\subsection{Variations}
+\label{ssec:eoqvariations}
+
+\textbf{Planned shortages.} If unmet demand can be backordered at cost $p$ per unit per year, it pays to let the stock run negative for part of each cycle. The optimal order size and maximum backlog are
+\[
+Q^* = \sqrt{\frac{2KD}h\cdot\frac{h + p}p}, \qquad B^* = Q^*\frac h{h + p} ,
+\]
+and as $p \to \infty$ these reduce to the EOQ with no backlog.
+
+\textbf{Finite production rate.} If the items are made at rate $P > D$ rather than bought, the stock builds up at rate $P - D$ during production, the maximum stock is $Q(1 - D/P)$, and the \textbf{economic production quantity} is $Q^* = \sqrt{2KD/h(1 - D/P)}$.
+
+\textbf{Quantity discounts.} If the unit price falls with the order size, as $c_1 > c_2 > \cdots$ for $Q$ in successive ranges, the total cost $C_k(Q) = KD/Q + ic_kQ/2 + c_kD$ includes the purchase cost and is a different convex function on each range. For each range, the best feasible $Q$ is the EOQ for that price if it lies in the range, and otherwise the nearest end of the range, which in practice is the lower end: the EOQs differ little between prices, while the cheaper ranges start at larger orders. The best of these candidates is optimal. In Example~\ref{ex:eoq} with prices Rs.~12, 11.5 and 11 for orders below $2000$, from $2000$ to $4999$, and of $5000$ or more, the candidates cost Rs.~149\,367, 143\,254 and 138\,700, so the firm should order
+$5000$ at a time, more than twice the EOQ, to earn the lowest price (Software~\ref{sw:eoq}).
+
+\subsection{Random demand: the newsvendor problem}
+\label{ssec:newsvendor}
+
+A newspaper seller must decide how many copies to buy before the day's demand $X$, with distribution function $F$, is known. Each copy costs $c$, sells for $p$, and unsold copies are salvaged for $s < c$. Ordering one copy too few loses the margin $c_u = p - c$ (the \textbf{underage cost}); ordering one too many loses $c_o = c - s$ (the
+\textbf{overage cost}).
+
+\begin{thm}[Critical fractile]
+\label{thm:newsvendor}
+The expected profit is maximised by the order $Q^*$ with
+\[
+F(Q^*) = \frac{c_u}{c_u + c_o} ,
+\]
+the \textbf{critical fractile}, or by the smallest $Q$ with $F(Q) \geq c_u/(c_u + c_o)$ if demand is discrete.
+\end{thm}
+
+\begin{proof}
+Increase the order from $Q$ to $Q + 1$ (or by $dQ$). The extra unit is sold, gaining $c_u$, if demand exceeds $Q$, which has probability $1 - F(Q)$, and is left over, losing $c_o$, otherwise. The expected marginal gain $c_u(1 - F(Q)) - c_oF(Q)$ is decreasing in $Q$ and changes sign where $F(Q) = c_u/(c_u + c_o)$, so the expected
+profit, which is concave, is maximised there.
+\end{proof}
+
+When the margin is large compared with the loss on leftovers, the ratio is near $1$ and the seller orders well above the mean demand; when leftovers are costly, below it. For normal demand $N(\mu, \sigma^2)$, $Q^* = \mu + z\sigma$ with $\Phi(z) = c_u/(c_u + c_o)$. With $\mu = 200$, $\sigma = 40$, $p = 10$, $c = 6$, $s = 1$: $c_u = 4$,
+$c_o = 5$, the critical fractile is $\frac49 = 0.444$, $z = -0.14$ and $Q^* = 194$, slightly below the mean (Software~\ref{sw:newsvendor}). The same logic sizes airline overbooking, fashion orders, blood stocks and hotel capacity.
+
+\subsection{Safety stock and $(s, S)$ policies}
+\label{ssec:sS}
+
+When demand in the lead time $L$ is random with mean $\mu_L$ and standard deviation $\sigma_L$, a reorder point $r = \mu_L + z\sigma_L$ gives a probability $\Phi(z)$ of not running out in a cycle (normal approximation); the \textbf{safety stock} $z\sigma_L$ is the price of that service level. Combined with an order quantity near the EOQ,
+this is the continuous-review $(r, Q)$ policy.
+
+Under \textbf{periodic review} with a fixed ordering cost, demand random and independent from period to period, and linear holding and backorder costs, the optimal policy has a remarkably simple form: if the stock (on hand plus on order) has fallen to $s$ or below, order up to $S$; otherwise order nothing. Scarf (1960) proved this by showing that the
+dynamic programming value function (Theorem~\ref{thm:bellman}) is \emph{$K$-convex}, a weakening of convexity that survives the recursion. Finding the best $s$ and $S$ is a numerical task, by dynamic programming over the stock level or by simulation (Software~\ref{sw:sS}); the EOQ formula with $s$ set for the desired service usually comes close.
+
+\subsection{Inventory in software}
+\label{ssec:software13}
+
+\begin{software}[EOQ and discounts]
+\label{sw:eoq}
+Example~\ref{ex:eoq}: the EOQ, orders a year and annual cost; the cost of three other order sizes relative to the optimum; then the all-units discount schedule, with the EOQ at each price, the best feasible order in each range, and its total annual cost including purchases:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> D, K, i = 12000, 500.0, 0.20  # demand a year, cost per order, rate
+>>> def cost(Q, price):               # ordering + holding + purchase, a year
+...     return K * D / Q + i * price * Q / 2 + price * D
+...
+>>> eoq = lambda price: np.sqrt(2 * K * D / (i * price))
+>>> Q = eoq(12.0)
+>>> round(Q, 1), round(D / Q, 2), round(cost(Q, 12) - 12 * D, 1)
+(2236.1, 5.37, 5366.6)
+>>> for q in (1500, 3000, 4472):           # cost relative to the optimum
+...     print(q, round((cost(q, 12) - 12*D) / (cost(Q, 12) - 12*D), 4))
+...
+1500 1.0808
+3000 1.0435
+4472 1.25
+>>> breaks = [(0, 12.0), (2000, 11.5), (5000, 11.0)]   # all-units discounts
+>>> for lo, price in breaks:
+...     q = max(eoq(price), lo)            # best order in this price range
+...     print(price, round(eoq(price), 1), round(q, 1),
+...           round(cost(q, price), 1))
+...
+12.0 2236.1 2236.1 149366.6
+11.5 2284.2 2284.2 143253.6
+11.0 2335.5 5000 138700.0
+\end{verbatim}}
+\textbf{Reading the output.} $Q^* = 2236$, $5.37$ orders a year, Rs.~5367. Orders of $1500$ and $3000$ cost $8.1\%$ and $4.4\%$ more, and $4472 = 2Q^*$ costs $25\%$ more, as the ratio formula predicts. With discounts, the EOQ at Rs.~11 is $2336$, below the $5000$ needed for that price, so the candidate is $5000$; it costs Rs.~138\,700
+against Rs.~143\,254 for the best order at Rs.~11.5, and is optimal.
+
+\textbf{MATLAB/Octave:} \texttt{sqrt(2*K*D./(i*price))} for the three EOQs.
+\end{software}
+
+\begin{software}[The newsvendor]
+\label{sw:newsvendor}
+The critical fractile and order quantity for normal demand, checked by simulating $400\,000$ days and searching a grid of orders:
+{\small\begin{verbatim}
+>>> from scipy.stats import norm
+>>> mu, sd = 200, 40                       # newsvendor: demand N(200, 40^2)
+>>> price, c, salvage = 10.0, 6.0, 1.0
+>>> cu, co = price - c, c - salvage        # underage and overage costs
+>>> ratio = cu / (cu + co); Q = norm.ppf(ratio, mu, sd)
+>>> round(ratio, 4), round(Q, 2)
+(0.4444, 194.41)
+>>> rng = np.random.default_rng(0); d = rng.normal(mu, sd, 400000)
+>>> def profit(q):
+...     sold = np.minimum(d, q)
+...     return np.mean(price * sold + salvage * (q - sold) - c * q)
+...
+>>> qs = np.arange(150, 251, 5)
+>>> best = qs[np.argmax([profit(q) for q in qs])]
+>>> best, round(profit(Q), 2), round(profit(mu), 2)
+(195, 657.54, 656.14)
+\end{verbatim}}
+\textbf{Reading the output.} The fractile $0.444$ gives $Q^* = 194.4$. The simulation's best order on the grid of steps of $5$ is $195$, in agreement, and the expected profit at $Q^*$ is $657.5$, against $656.1$ for ordering the mean demand $200$: the profit curve is flat, like the EOQ cost, but its peak is below the mean because leftovers cost more than
+shortages here.
+
+\textbf{MATLAB/Octave:} \texttt{norminv(cu/(cu+co), mu, sd)}.
+\end{software}
+
+\begin{software}[An $(s, S)$ policy by simulation]
+\label{sw:sS}
+Periodic review with Poisson demand of mean $10$ a period, ordering cost $50$, holding cost $1$ and backorder cost $8$ per unit per period: the average cost of each $(s, S)$ on a grid over $50\,000$ simulated periods (the same demands for every policy), the best pair, and the EOQ-based policy with $S - s = \sqrt{2KD/h}$:
+{\small\begin{verbatim}
+>>> rng = np.random.default_rng(1)
+>>> dem = rng.poisson(10, 50000)           # demand per period
+>>> Kf, h, p = 50.0, 1.0, 8.0              # order, holding, backorder costs
+>>> def avg_cost(s, S):                    # periodic review, zero lead time
+...     x, total = S, 0.0
+...     for dt in dem:
+...         if x <= s: total += Kf; x = S    # order up to S
+...         x -= dt
+...         total += h * max(x, 0) + p * max(-x, 0)
+...     return total / len(dem)
+...
+>>> grid = [(s, S) for s in range(0, 16) for S in range(s + 1, 61, 2)]
+>>> costs = {sS: avg_cost(*sS) for sS in grid}
+>>> best = min(costs, key=costs.get); best, round(costs[best], 3)
+((6, 35), 30.852)
+>>> q = round(np.sqrt(2 * Kf * 10 / h)); q, round(avg_cost(5, 5 + q), 3)
+(32, 30.917)
+\end{verbatim}}
+\textbf{Reading the output.} The best policy on the grid is $(6, 35)$, at an average cost of $30.85$ a period: reorder when the stock falls to $6$, which with zero lead time balances backorders against holding, and order up to $35$, so that each order is at least $35 - 6 = 29$ units, a little more on average because the stock usually falls below $6$ before the review. The EOQ heuristic, $S - s = 32$ with $s = 5$, costs $30.92$, within
+$0.2\%$. Using common random numbers makes the comparison between policies far more precise than the absolute costs.
+
+\textbf{MATLAB/Octave:} \texttt{poissrnd(10, 1, 50000)} and the same loop.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+A shop sells $2400$ units a year; ordering costs Rs.~100 per order and holding Rs.~3 per unit per year. Find the EOQ, the number of orders, the cycle time and the annual cost, and the reorder point if delivery takes $5$ working days out of $300$.
+\end{problem}
+
+\begin{solution}
+$Q^* = \sqrt{2 \times 100 \times 2400/3} = 400$; $D/Q^* = 6$ orders a year, one every $2$ months ($50$ working days); cost $\sqrt{2 \times 100 \times 2400 \times 3} =$ Rs.~1200. Daily demand is $2400/300 = 8$, so reorder when the stock falls to $r = 5 \times 8 = 40$.
+\end{solution}
+
+\begin{problem}
+In the previous problem, a supplier offers a $2\%$ discount on orders of $1000$ or more, the unit price being Rs.~20 and holding $15\%$ of the price a year. Should the shop accept?
+\end{problem}
+
+\begin{solution}
+Without the discount: $h = 3$, cost $1200 + 20 \times 2400 = 49\,200$. With it, price $19.6$, $h = 2.94$, and at $Q = 1000$ (the EOQ $\sqrt{2 \times 100 \times 2400/2.94} = 404$ is below the minimum), the cost is $100 \times 2.4 + 2.94 \times 500 + 19.6 \times 2400 = 240 + 1470 + 47\,040 = 48\,750$. Accept: the saving of Rs.~960 on purchases outweighs the
+extra Rs.~510 of ordering and holding.
+\end{solution}
+
+\begin{problem}
+Derive the EOQ with backorders: show that with order size $Q$ and maximum backlog $B$ the annual cost is $KD/Q + h(Q - B)^2/2Q + pB^2/2Q$, and minimise it.
+\end{problem}
+
+\begin{solution}
+In each cycle of length $Q/D$ the stock is positive for a fraction $(Q - B)/Q$ of the time with average $(Q - B)/2$, and negative for a fraction $B/Q$ with average backlog $B/2$, giving the holding and backorder terms. Setting $\partial/\partial B = 0$: $-h(Q - B) + pB = 0$, $B = hQ/(h + p)$. Substituting, the cost becomes
+$KD/Q + \frac{hp}{h + p}\cdot\frac Q2$, an EOQ cost with holding rate $hp/(h + p)$, minimised at $Q^* = \sqrt{2KD(h + p)/hp}$.
+\end{solution}
+
+\begin{problem}
+A baker sells cakes at Rs.~50, costing Rs.~20 to make; unsold cakes are given away. Daily demand is uniform on $\{20, 21, \ldots, 39\}$. How many should be baked?
+\end{problem}
+
+\begin{solution}
+$c_u = 30$, $c_o = 20$, critical fractile $\frac{30}{50} = 0.6$. $F(Q) = (Q - 19)/20$ for $Q$ in the range, and $F(Q) \geq 0.6$ first at $Q - 19 = 12$, $Q = 31$. Bake $31$ cakes, more than the mean demand $29.5$, because a lost sale costs more than a wasted cake.
+\end{solution}
+
+\begin{problem}
+Lead-time demand is normal with mean $200$ and standard deviation $30$. Find the reorder point for a $95\%$ probability of no stock-out per cycle, and the safety stock.
+\end{problem}
+
+\begin{solution}
+$z = 1.645$, so $r = 200 + 1.645 \times 30 = 249.4$, say $250$; the safety stock is about $50$ units. Raising the service level to $99\%$ ($z = 2.326$) needs $r = 270$: the last few percentage points of service are expensive.
+\end{solution}
+
+\begin{problem}
+Show that in the newsvendor model the optimal expected profit equals $(p - c)\mu$ minus a term proportional to $\sigma$ when demand is normal, and interpret.
+\end{problem}
+
+\begin{solution}
+Write $Q = \mu + z\sigma$. The expected leftover is $\mathbb E(Q - X)^+ = \sigma\,\mathbb E(z - Z)^+$ and the expected shortage $\sigma\,\mathbb E(Z - z)^+$ with $Z$ standard normal, so the expected profit is $(p - c)\mu - \sigma\bigl(c_o\mathbb E(z - Z)^+ + c_u\mathbb E(Z - z)^+\bigr)$. At the critical fractile the bracket equals
+$(c_u + c_o)\varphi(z)$, so the loss from uncertainty is $(c_u + c_o)\varphi(z)\sigma$, proportional to $\sigma$: halving the forecast error halves the cost of uncertainty, which measures what better forecasting is worth.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -3472,6 +3722,7 @@ Theorem~\ref{thm:minimax}.
 
 \subhead{Further reading}
 \begin{enumerate}
+\item Arrow, K. J., Harris, T., and Marschak, J. (1951), Optimal inventory policy, \emph{Econometrica}, 19, 250--272.
 \item Beale, E. M. L. (1955), Cycling in the dual simplex algorithm, \emph{Naval Research Logistics Quarterly}, 2, 269--275.
 \item Bellman, R. (1957), \emph{Dynamic Programming}, Princeton University Press.
 \item Bellman, R. (1958), On a routing problem, \emph{Quarterly of Applied Mathematics}, 16, 87--90.
@@ -3487,6 +3738,7 @@ Theorem~\ref{thm:minimax}.
 \item Dantzig, G. B., and Orchard-Hays, W. (1954), The product form for the inverse in the simplex method, \emph{Mathematical Tables and Other Aids to Computation}, 8, 64--67.
 \item Dantzig, G. B., Fulkerson, D. R., and Johnson, S. M. (1954), Solution of a large-scale traveling-salesman problem, \emph{Journal of the Operations Research Society of America}, 2, 393--410.
 \item Dijkstra, E. W. (1959), A note on two problems in connexion with graphs, \emph{Numerische Mathematik}, 1, 269--271.
+\item Edgeworth, F. Y. (1888), The mathematical theory of banking, \emph{Journal of the Royal Statistical Society}, 51, 113--127.
 \item Edmonds, J. (1965), Maximum matching and a polyhedron with 0,1-vertices, \emph{Journal of Research of the National Bureau of Standards}, 69B, 125--130.
 \item Edmonds, J., and Karp, R. M. (1972), Theoretical improvements in algorithmic efficiency for network flow problems, \emph{Journal of the ACM}, 19, 248--264.
 \item Egerv\'ary, J. (1931), M\'atrixok kombinatorius tulajdons\'agair\'ol, \emph{Matematikai \'es Fizikai Lapok}, 38, 16--28.
@@ -3500,6 +3752,7 @@ Theorem~\ref{thm:minimax}.
 \item Gass, S. I., and Saaty, T. L. (1955), The computational algorithm for the parametric objective function, \emph{Naval Research Logistics Quarterly}, 2, 39--45.
 \item Goldfarb, D., and Reid, J. K. (1977), A practicable steepest-edge simplex algorithm, \emph{Mathematical Programming}, 12, 361--371.
 \item Gomory, R. E. (1958), Outline of an algorithm for integer solutions to linear programs, \emph{Bulletin of the American Mathematical Society}, 64, 275--278.
+\item Harris, F. W. (1913), How many parts to make at once, \emph{Factory, The Magazine of Management}, 10, 135--136, 152.
 \item Harris, P. M. J. (1973), Pivot selection methods of the Devex LP code, \emph{Mathematical Programming}, 5, 1--28.
 \item Hitchcock, F. L. (1941), The distribution of a product from several sources to numerous localities, \emph{Journal of Mathematics and Physics}, 20, 224--230.
 \item Hoffman, A. J., and Kruskal, J. B. (1956), Integral boundary points of convex polyhedra, in H. W. Kuhn and A. W. Tucker (eds.), \emph{Linear Inequalities and Related Systems}, Annals of Mathematics Studies 38, Princeton University Press, 223--246.
@@ -3529,6 +3782,7 @@ Theorem~\ref{thm:minimax}.
 \item Padberg, M., and Rinaldi, G. (1991), A branch-and-cut algorithm for the resolution of large-scale symmetric traveling salesman problems, \emph{SIAM Review}, 33, 60--100.
 \item Raiffa, H., and Schlaifer, R. (1961), \emph{Applied Statistical Decision Theory}, Boston, Harvard Business School.
 \item Savage, L. J. (1951), The theory of statistical decision, \emph{Journal of the American Statistical Association}, 46, 55--67.
+\item Scarf, H. (1960), The optimality of (S, s) policies in the dynamic inventory problem, in K. J. Arrow, S. Karlin and P. Suppes (eds.), \emph{Mathematical Methods in the Social Sciences}, Stanford University Press, 196--202.
 \item Slater, M. (1950), Lagrange multipliers revisited, \emph{Cowles Commission Discussion Paper: Mathematics}, 403.
 \item Smith, W. E. (1956), Various optimizers for single-stage production, \emph{Naval Research Logistics Quarterly}, 3, 59--66.
 \item Spielman, D. A., and Teng, S.-H. (2004), Smoothed analysis of algorithms: why the simplex algorithm usually takes polynomial time, \emph{Journal of the ACM}, 51, 385--463.
@@ -3536,6 +3790,7 @@ Theorem~\ref{thm:minimax}.
 \item Vogel, W. R. (1958), A short-cut solution to the transportation problem, cited in N. V. Reinfeld and W. R. Vogel, \emph{Mathematical Programming}, Englewood Cliffs, Prentice-Hall.
 \item Wald, A. (1950), \emph{Statistical Decision Functions}, New York, Wiley.
 \item Weyl, H. (1935), Elementare Theorie der konvexen Polyeder, \emph{Commentarii Mathematici Helvetici}, 7, 290--306.
+\item Wilson, R. H. (1934), A scientific routine for stock control, \emph{Harvard Business Review}, 13, 116--128.
 \item Wolfe, P. (1959), The simplex method for quadratic programming, \emph{Econometrica}, 27, 382--398.
 \end{enumerate}
 
