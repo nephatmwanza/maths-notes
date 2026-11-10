@@ -2642,6 +2642,266 @@ Priority $1$: profit $\geq 1000$ is attainable (for example $x_1 = 25$). Priorit
 overtime goal by $5$ hours. No plan meets both goals: the profit goal forces at least $75$ hours.
 \end{solution}
 
+%======================================================================
+\section{Non-linear Programming}
+\label{sec:nlp}
+
+When the objective or the constraints are not linear, because of economies of scale, risk, physical laws or diminishing returns, the problem is a \textbf{non-linear programme}:
+\[
+\text{minimise } f(x) \quad\text{subject to}\quad g_i(x) \leq 0 \ (i = 1, \ldots, m), \quad h_k(x) = 0 \ (k = 1, \ldots, p) .
+\]
+The optimum need no longer be at a vertex, and there may be many local optima. Two ideas restore order. \textbf{Convexity} makes every local optimum global, as in linear programming. The \textbf{Karush--Kuhn--Tucker conditions} generalise both the Lagrange multipliers of calculus and LP duality: at an optimum the gradient of the
+objective is a non-negative combination of the gradients of the active constraints, with multipliers that are shadow prices. This section develops both and applies them to quadratic programming and portfolio selection.
+
+\subsection{Convexity}
+\label{ssec:convexity}
+
+\begin{defn}
+A function $f$ on a convex set $C$ is \textbf{convex} if $f(\lambda x + (1 - \lambda)y) \leq \lambda f(x) + (1 - \lambda)f(y)$ for $x, y \in C$ and $0 \leq \lambda \leq 1$. A problem is a \textbf{convex programme} if $f$ and all $g_i$ are convex and all $h_k$ are affine.
+\end{defn}
+
+For a differentiable $f$, convexity is equivalent to $f(y) \geq f(x) + \nabla f(x)^{\mathsf T}(y - x)$ for all $x, y$: the tangent plane lies below the graph. For a twice differentiable $f$ it is equivalent to the Hessian $\nabla^2f(x)$ being positive semidefinite everywhere. The feasible set of a convex programme is convex, since each set
+$\{g_i \leq 0\}$ is.
+
+\begin{thm}
+\label{thm:localglobal}
+For a convex programme, every local minimum is a global minimum, and the set of minima is convex.
+\end{thm}
+
+\begin{proof}
+If $x$ is a local minimum and $y$ is feasible with $f(y) < f(x)$, then for small $\lambda > 0$ the point $x + \lambda(y - x)$ is feasible, close to $x$, and $f(x + \lambda(y - x)) \leq (1 - \lambda)f(x) + \lambda f(y) < f(x)$, a contradiction. If $x$ and $y$ are both minima with value $f^*$, convexity gives
+$f \leq f^*$ on the segment between them, so the segment consists of minima.
+\end{proof}
+
+\subsection{The Karush--Kuhn--Tucker conditions}
+\label{ssec:kkt}
+
+For equality constraints alone, Lagrange's condition says that at a minimum $\nabla f + \sum_k\mu_k\nabla h_k = 0$ for some multipliers $\mu_k$. With inequality constraints the multipliers must also have the right sign, and must vanish on constraints that are not active.
+
+\begin{thm}[KKT conditions]
+\label{thm:kkt}
+Let $x^*$ be a local minimum, with $f$, $g_i$, $h_k$ continuously differentiable, and suppose a \textbf{constraint qualification} holds at $x^*$ (for instance, the gradients of the active constraints are linearly independent). Then there are multipliers $\lambda_i$ and $\mu_k$ with
+\begin{align*}
+&\nabla f(x^*) + \sum_i\lambda_i\nabla g_i(x^*) + \sum_k\mu_k\nabla h_k(x^*) = 0 && \text{(stationarity)}, \\
+&\lambda_i \geq 0, \qquad \lambda_ig_i(x^*) = 0 && \text{(dual feasibility, complementary slackness)},
+\end{align*}
+together with feasibility of $x^*$. Conversely, for a convex programme, any feasible $x^*$ satisfying these conditions is a global minimum, with no constraint qualification needed.
+\end{thm}
+
+\begin{proof}
+\emph{Necessity} (sketch). At a local minimum there is no direction $d$ that decreases $f$ to first order, $\nabla f^{\mathsf T}d < 0$, while keeping the active inequality constraints, $\nabla g_i^{\mathsf T}d \leq 0$, and the equalities, $\nabla h_k^{\mathsf T}d = 0$, satisfied to first order; the constraint qualification makes this
+linearisation accurate. By Farkas' lemma (Theorem~\ref{thm:farkas}), the absence of such a $d$ is equivalent to the existence of the multipliers, with $\lambda_i = 0$ for the inactive constraints.
+
+\emph{Sufficiency.} Let $x$ be feasible. By convexity, $f(x) \geq f(x^*) + \nabla f(x^*)^{\mathsf T}(x - x^*)$, and by stationarity $\nabla f(x^*)^{\mathsf T}(x - x^*) = -\sum_i\lambda_i\nabla g_i(x^*)^{\mathsf T}(x - x^*) - \sum_k\mu_k\nabla h_k(x^*)^{\mathsf T}(x - x^*)$. The last sum is $0$ since $h_k$ is affine and
+$h_k(x) = h_k(x^*) = 0$. For each $i$, convexity of $g_i$ gives $\nabla g_i(x^*)^{\mathsf T}(x - x^*) \leq g_i(x) - g_i(x^*)$, and $\lambda_i\bigl(g_i(x) - g_i(x^*)\bigr) = \lambda_ig_i(x) \leq 0$ by complementary slackness and feasibility. So $f(x) \geq f(x^*)$.
+\end{proof}
+
+For a linear programme the KKT conditions are exactly primal feasibility, dual feasibility and complementary slackness (Theorem~\ref{thm:compslack}); the multipliers are the dual variables. In general $\lambda_i$ is again a \textbf{shadow price}: if the constraint is relaxed to $g_i \leq \varepsilon$, the optimal value changes at
+rate $-\lambda_i$. For convex programmes satisfying \textbf{Slater's condition} (some point with every $g_i < 0$) the theory extends to a full duality theorem, with no duality gap.
+
+\begin{exa}
+\label{ex:kkt}
+Minimise $(x - 2)^2 + (y - 1)^2$ subject to $x + y \leq 2$, $x, y \geq 0$: the point of the triangle nearest to $(2, 1)$. If only $x + y \leq 2$ is active, stationarity gives $2(x - 2) + \lambda = 0$, $2(y - 1) + \lambda = 0$, so $x - 2 = y - 1$, and with $x + y = 2$, $x = \frac32$, $y = \frac12$,
+$\lambda = 1 \geq 0$. The other constraints are inactive. The problem is convex, so this is the global minimum, with value $\frac12$, and $\lambda = 1$ says that relaxing the constraint to $x + y \leq 2 + \varepsilon$ lowers the minimum by about $\varepsilon$. Software~\ref{sw:kkt} tries all eight active sets and finds only this one.
+\end{exa}
+
+\subsection{Quadratic programming and portfolios}
+\label{ssec:qp}
+
+A \textbf{quadratic programme} has a quadratic objective $\frac12x^{\mathsf T}Qx + c^{\mathsf T}x$ and linear constraints; it is convex when $Q$ is positive semidefinite. With equality constraints $Ax = b$ only, the KKT conditions are a linear system,
+\[
+\begin{pmatrix} Q & A^{\mathsf T} \\ A & 0 \end{pmatrix}\begin{pmatrix} x \\ \mu \end{pmatrix} = \begin{pmatrix} -c \\ b \end{pmatrix} ,
+\]
+and with inequalities, \textbf{active-set methods} guess which constraints are tight, solve this system, and adjust the guess, much as the simplex method adjusts its basis.
+
+The best-known application is Markowitz's \textbf{portfolio selection} (1952). With expected returns $\mu$ and covariance matrix $\Sigma$ of $n$ assets, a portfolio with weights $w$ has expected return $\mu^{\mathsf T}w$ and variance $w^{\mathsf T}\Sigma w$. An investor minimises risk for a required return:
+\[
+\text{minimise } w^{\mathsf T}\Sigma w \quad\text{subject to}\quad \mu^{\mathsf T}w \geq r, \quad \textstyle\sum w_j = 1, \quad w \geq 0 .
+\]
+Solving for every $r$ traces the \textbf{efficient frontier}, the best attainable trade-off between return and risk (Figure~\ref{fig:frontier}). Diversification shows in the numbers: the minimum-variance portfolio of three assets has standard deviation $0.170$, below the $0.2$ of the least risky asset alone, because the assets are imperfectly
+correlated.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-0.9,-0.75) rectangle (8.8,4.7);
+\draw[->] (0,0) -- (7.8,0) node[below,font=\small] {risk $\sigma$};
+\draw[->] (0,0) -- (0,4.5) node[left,font=\small] {return};
+\foreach \s in {0.15,0.2,0.25,0.3,0.35,0.4} \draw ({(\s-0.12)*25},0.06) -- ({(\s-0.12)*25},-0.06) node[below,font=\scriptsize] {$\s$};
+\foreach \m in {0.08,0.10,0.12,0.14} \draw (0.06,{(\m-0.07)*50}) -- (-0.06,{(\m-0.07)*50}) node[left,font=\scriptsize] {$\m$};
+\draw[blue!60!black,very thick] (1.247,1.316) -- (1.251,1.384) -- (1.265,1.453) -- (1.287,1.522) -- (1.318,1.590) -- (1.358,1.659) -- (1.406,1.728) -- (1.462,1.797) -- (1.526,1.866) -- (1.598,1.935) -- (1.677,2.003) -- (1.762,2.072) -- (1.854,2.141) -- (1.952,2.210) -- (2.056,2.279) -- (2.165,2.348) -- (2.279,2.417) -- (2.398,2.485) -- (2.521,2.554) -- (2.649,2.623) -- (2.780,2.692) -- (2.915,2.761) -- (3.053,2.830) -- (3.194,2.898) -- (3.339,2.967) -- (3.486,3.036) -- (3.635,3.105) -- (3.787,3.174) -- (3.941,3.243) -- (4.102,3.312) -- (4.290,3.380) -- (4.506,3.449) -- (4.749,3.518) -- (5.016,3.587) -- (5.304,3.656) -- (5.612,3.725) -- (5.937,3.793) -- (6.278,3.862) -- (6.633,3.931) -- (7.000,4.000);
+\draw[blue!60!black,dashed] (2.000,0.500) -- (1.819,0.591) -- (1.664,0.681) -- (1.537,0.772) -- (1.441,0.862) -- (1.372,0.953) -- (1.318,1.043) -- (1.279,1.134) -- (1.255,1.224) -- (1.247,1.315);
+\fill[red!70!black] (2.0,0.5) circle (2.4pt) node[below right,font=\scriptsize] {asset 1};
+\fill[red!70!black] (4.5,2.5) circle (2.4pt) node[right,font=\scriptsize] {asset 2};
+\fill[red!70!black] (7.0,4.0) circle (2.4pt) node[below,font=\scriptsize] {asset 3};
+\fill[green!45!black] (1.247,1.316) circle (2.4pt); \node[font=\scriptsize,green!45!black,anchor=west] at (2.3,1.55) {minimum variance}; \draw[green!45!black,->] (2.28,1.52) -- (1.37,1.33);
+\node[font=\scriptsize\bfseries,blue!60!black,anchor=west] at (0.6,3.95) {efficient frontier};
+\end{tikzpicture}
+\caption{The long-only efficient frontier for three assets with expected returns $0.08$, $0.12$, $0.15$ and standard deviations $0.2$, $0.3$, $0.4$, computed by solving the portfolio QP for $40$ required returns. Portfolios on the solid curve give the highest return for their risk; the dashed part below the minimum-variance point is
+inefficient. Every single asset except the riskiest lies inside the curve.}
+\label{fig:frontier}
+\end{figure}
+
+\subsection{Algorithms}
+\label{ssec:nlpalgorithms}
+
+For unconstrained problems, \textbf{gradient descent} moves along $-\nabla f$ and converges linearly; \textbf{Newton's method} solves $\nabla^2f\,d = -\nabla f$ and converges quadratically near a minimum with positive definite Hessian; quasi-Newton methods (BFGS) build up curvature information from gradients. Constraints are handled by
+\begin{itemize}
+\item \textbf{penalty methods}, which add $\rho\sum\max(0, g_i)^2$ to the objective and let $\rho \to \infty$;
+\item \textbf{barrier methods}, which add $-t\sum\log(-g_i)$, keeping iterates strictly feasible, and let $t \to 0$; for a convex problem the barrier minimiser $x(t)$ is within $mt$ of optimal, and $\lambda_i(t) = -t/g_i(x(t))$ estimates the multipliers. This is the idea behind the interior-point methods for LP mentioned in the section on the revised simplex method;
+\item \textbf{sequential quadratic programming} (SQP), which solves at each step a QP built from a quadratic model of the Lagrangian and linearised constraints, and is the method of SciPy's \texttt{SLSQP}.
+\end{itemize}
+For non-convex problems these methods find local optima only, and global optimisation needs branch and bound over the variables' ranges or many starting points.
+
+\subsection{Non-linear programming in software}
+\label{ssec:software10}
+
+\begin{software}[Solving the KKT conditions]
+\label{sw:kkt}
+Example~\ref{ex:kkt}: for each of the $2^3$ choices of active constraints, solve stationarity together with $g_i = 0$ (active) or $\lambda_i = 0$ (inactive), and keep the solutions that are feasible with $\lambda \geq 0$:
+{\small\begin{verbatim}
+>>> import sympy as sp
+>>> from itertools import product
+>>> x, y = sp.symbols('x y', real=True)
+>>> f = (x - 2)**2 + (y - 1)**2            # minimise f subject to g_i <= 0
+>>> g = [x + y - 2, -x, -y]
+>>> lam = sp.symbols('l1:4', real=True)
+>>> L = f + sum(l * gi for l, gi in zip(lam, g))
+>>> for active in product([0, 1], repeat=3):        # guess the active set
+...     eqs = [L.diff(x), L.diff(y)]
+...     eqs += [gi if a else l for a, gi, l in zip(active, g, lam)]
+...     for s in sp.solve(eqs, [x, y, *lam], dict=True):
+...         ok = (all(gi.subs(s) <= 0 for gi in g)
+...               and all(s[l] >= 0 for l in lam))
+...         if ok: print(active, s, f.subs(s))
+...
+(1, 0, 0) {l1: 1, l2: 0, l3: 0, x: 3/2, y: 1/2} 1/2
+\end{verbatim}}
+\textbf{Reading the output.} Only the active set $\{x + y \leq 2\}$ gives a KKT point: $(\frac32, \frac12)$ with $\lambda_1 = 1$ and value $\frac12$. Enumerating active sets is exponential in general, but it shows exactly what the conditions say.
+
+\textbf{MATLAB/Octave:} \texttt{solve} with the Symbolic Math Toolbox on the same systems.
+\end{software}
+
+\begin{software}[The efficient frontier]
+\label{sw:portfolio}
+The portfolio QP solved by SLSQP for five required returns, giving the weights and the standard deviation; then the minimum-variance portfolio from the formula $w = \Sigma^{-1}\mathbf 1/\mathbf 1^{\mathsf T}\Sigma^{-1}\mathbf 1$, which ignores $w \geq 0$:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.optimize import minimize
+>>> mu = np.array([0.08, 0.12, 0.15])      # expected returns of three assets
+>>> S = np.array([[0.04, 0.006, 0.010],    # covariance matrix of the returns
+...               [0.006, 0.09, 0.030],
+...               [0.010, 0.030, 0.16]])
+>>> def frontier(target):  # min w S w, mu w >= target, sum w = 1
+...     cons = [{'type': 'eq', 'fun': lambda w: w.sum() - 1},
+...             {'type': 'ineq', 'fun': lambda w: mu @ w - target}]
+...     r = minimize(lambda w: w @ S @ w, np.ones(3) / 3,
+...                  jac=lambda w: 2 * S @ w, constraints=cons,
+...                  bounds=[(0, 1)] * 3, method='SLSQP')
+...     return r.x, np.sqrt(r.x @ S @ r.x)
+...
+>>> for t in (0.08, 0.10, 0.12, 0.14, 0.15):
+...     w, sd = frontier(t)
+...     print(t, np.round(w, 3), round(sd, 4))
+...
+0.08 [0.662 0.245 0.093] 0.1699
+0.1 [0.6   0.268 0.133] 0.1712
+0.12 [0.262 0.389 0.349] 0.2169
+0.14 [0.    0.333 0.667] 0.3073
+0.15 [0. 0. 1.] 0.4
+>>> one = np.ones(3); Si = np.linalg.inv(S)  # unconstrained minimum variance
+>>> wmv = Si @ one / (one @ Si @ one); np.round(wmv, 4), round(mu @ wmv, 4)
+(array([0.6614, 0.2456, 0.093 ]), 0.0963)
+\end{verbatim}}
+\textbf{Reading the output.} For required returns up to $0.096$ the constraint is not active and the answer is the minimum-variance portfolio $(0.661, 0.246, 0.093)$ with $\sigma = 0.170$; the formula gives the same weights, all positive, so the bounds were not needed. For higher returns the weight shifts to assets $2$ and $3$: at
+$0.14$, asset $1$ is dropped entirely, and a return of $0.15$ requires holding only asset $3$, at $\sigma = 0.4$.
+
+\textbf{MATLAB/Octave:} \texttt{quadprog(2*S, [], -mu', -r, ones(1,3), 1, zeros(3,1))}.
+\end{software}
+
+\begin{software}[A barrier method]
+\label{sw:barrier}
+Minimise $x_1^2 + x_2^2$ subject to $x_1x_2 \geq 1$, by minimising $x_1^2 + x_2^2 - t\log(x_1x_2 - 1)$ for decreasing $t$; each line shows $t$, the minimiser, the objective and the multiplier estimate $t/(x_1x_2 - 1)$; then SLSQP:
+{\small\begin{verbatim}
+>>> def barrier(t):  # min x1^2 + x2^2 - t log(x1 x2 - 1)
+...     def phi(z):
+...         gap = z[0] * z[1] - 1
+...         return z @ z - t * np.log(gap) if gap > 0 else np.inf
+...     opts = {'xatol': 1e-10, 'fatol': 1e-12, 'maxiter': 4000}
+...     return minimize(phi, [2.0, 2.0], method='Nelder-Mead', options=opts).x
+...
+>>> for t in (1.0, 0.1, 0.01, 0.001):
+...     z = barrier(t); lam_est = t / (z[0] * z[1] - 1)  # multiplier
+...     print(t, np.round(z, 5), round(z @ z, 5), round(lam_est, 4))
+...
+1.0 [1.22474 1.22474] 3.0 2.0
+0.1 [1.0247 1.0247] 2.1 2.0
+0.01 [1.0025 1.0025] 2.01 2.0
+0.001 [1.00025 1.00025] 2.001 2.0
+>>> cons = [{'type': 'ineq', 'fun': lambda z: z[0] * z[1] - 1}]
+>>> r = minimize(lambda z: z @ z, [2.0, 0.6], constraints=cons,
+...              method='SLSQP')
+>>> np.round(r.x, 6), round(r.fun, 6)
+(array([0.999999, 1.000001]), 2.0)
+\end{verbatim}}
+\textbf{Reading the output.} The minimisers $(1.2247, 1.2247)$, $(1.0247, 1.0247)$, \ldots approach the optimum $(1, 1)$ from inside the feasible region, and the objective $2 + t$ exceeds the optimum $2$ by exactly $mt$ with $m = 1$. The multiplier estimate is $2$ throughout, the exact KKT multiplier: at $(1, 1)$,
+$\nabla f = (2, 2) = 2\nabla(x_1x_2)$. SLSQP finds $(1, 1)$ directly.
+
+\textbf{MATLAB/Octave:} \texttt{fmincon(@(z) z*z', [2 0.6], [], [], [], [], [], [], @(z) deal(1 - z(1)*z(2), []))}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Use the KKT conditions to maximise $xy$ subject to $x + 2y \leq 8$, $x, y \geq 0$, and interpret the multiplier.
+\end{problem}
+
+\begin{solution}
+Minimise $-xy$. With $x, y > 0$ and the constraint active: $-y + \lambda = 0$, $-x + 2\lambda = 0$, so $x = 2y$, and $x + 2y = 8$ gives $x = 4$, $y = 2$, $\lambda = 2$. The objective $-xy$ is not convex, but on the region $x, y > 0$ the maximum of $xy$ is at this point by the AM--GM inequality: $8 = x + 2y \geq 2\sqrt{2xy}$, so
+$xy \leq 8$. Relaxing the constraint to $8 + \varepsilon$ raises the maximum by about $2\varepsilon$.
+\end{solution}
+
+\begin{problem}
+Show that $f(x) = x^{\mathsf T}Qx$ is convex if and only if $Q$ is positive semidefinite.
+\end{problem}
+
+\begin{solution}
+The Hessian is $2Q$, constant, and a twice differentiable function is convex exactly when its Hessian is positive semidefinite everywhere. Directly: $f(\lambda x + (1 - \lambda)y) - \lambda f(x) - (1 - \lambda)f(y) = -\lambda(1 - \lambda)(x - y)^{\mathsf T}Q(x - y)$, which is $\leq 0$ for all $x, y$ exactly when
+$Q$ is positive semidefinite.
+\end{solution}
+
+\begin{problem}
+Solve the equality-constrained QP: minimise $x_1^2 + 2x_2^2$ subject to $x_1 + x_2 = 3$, by the KKT linear system.
+\end{problem}
+
+\begin{solution}
+$Q = \operatorname{diag}(2, 4)$, $c = 0$, $A = (1, 1)$, $b = 3$. The system is $2x_1 + \mu = 0$, $4x_2 + \mu = 0$, $x_1 + x_2 = 3$, so $x_1 = 2x_2$, $x_2 = 1$, $x_1 = 2$, $\mu = -4$, and the minimum is $4 + 2 = 6$.
+\end{solution}
+
+\begin{problem}
+Find the global minimum-variance portfolio of two assets with variances $\sigma_1^2$, $\sigma_2^2$ and covariance $\sigma_{12}$, allowing short sales.
+\end{problem}
+
+\begin{solution}
+With $w_2 = 1 - w_1$, the variance $w_1^2\sigma_1^2 + 2w_1(1 - w_1)\sigma_{12} + (1 - w_1)^2\sigma_2^2$ is minimised at $w_1 = (\sigma_2^2 - \sigma_{12})/(\sigma_1^2 + \sigma_2^2 - 2\sigma_{12})$. For $\sigma_1^2 = 0.04$, $\sigma_2^2 = 0.09$, $\sigma_{12} = 0.006$: $w_1 = 0.084/0.118 = 0.712$.
+\end{solution}
+
+\begin{problem}
+For the barrier problem of Software~\ref{sw:barrier}, show that the barrier minimiser is $x_1 = x_2 = \sqrt{1 + t/2}$, that the objective there is $2 + t$, and that the multiplier estimate is $2$ for every $t$.
+\end{problem}
+
+\begin{solution}
+By symmetry take $x_1 = x_2 = s$; then $\frac{d}{ds}\bigl(2s^2 - t\log(s^2 - 1)\bigr) = 4s - \frac{2ts}{s^2 - 1} = 0$ gives $s^2 = 1 + \frac t2$. The objective is $2s^2 = 2 + t$, and the multiplier estimate is $t/(s^2 - 1) = t/(t/2) = 2$. At $t = 1$, $s = \sqrt{1.5} = 1.2247$, as printed.
+\end{solution}
+
+\begin{problem}
+Explain why a non-convex problem can satisfy the KKT conditions at a point that is not a minimum, with the example: minimise $-x^2$ subject to $-1 \leq x \leq 1$.
+\end{problem}
+
+\begin{solution}
+At $x = 0$ no constraint is active and $\nabla f = 0$, so the KKT conditions hold with $\lambda = 0$; but $x = 0$ is the global \emph{maximum}. The minima are $x = \pm1$, where $-2x + \lambda_2 = 0$ (for $x \leq 1$) gives $\lambda_2 = 2 \geq 0$ at $x = 1$. The KKT conditions are necessary, not sufficient, without convexity.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -2689,6 +2949,7 @@ overtime goal by $5$ hours. No plan meets both goals: the profit goal forces at 
 \item Edmonds, J., and Karp, R. M. (1972), Theoretical improvements in algorithmic efficiency for network flow problems, \emph{Journal of the ACM}, 19, 248--264.
 \item Egerv\'ary, J. (1931), M\'atrixok kombinatorius tulajdons\'agair\'ol, \emph{Matematikai \'es Fizikai Lapok}, 38, 16--28.
 \item Farkas, J. (1902), Theorie der einfachen Ungleichungen, \emph{Journal f\"ur die reine und angewandte Mathematik}, 124, 1--27.
+\item Fiacco, A. V., and McCormick, G. P. (1968), \emph{Nonlinear Programming: Sequential Unconstrained Minimization Techniques}, New York, Wiley.
 \item Ford, L. R., and Fulkerson, D. R. (1956), Maximal flow through a network, \emph{Canadian Journal of Mathematics}, 8, 399--404.
 \item Forrest, J. J. H., and Tomlin, J. A. (1972), Updated triangular factors of the basis to maintain sparsity in the product form simplex method, \emph{Mathematical Programming}, 2, 263--278.
 \item Gal, T., and Greenberg, H. J. (eds.) (1997), \emph{Advances in Sensitivity Analysis and Parametric Programming}, Boston, Kluwer.
@@ -2702,23 +2963,28 @@ overtime goal by $5$ hours. No plan meets both goals: the profit goal forces at 
 \item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.
 \item Karmarkar, N. (1984), A new polynomial-time algorithm for linear programming, \emph{Combinatorica}, 4, 373--395.
 \item Karp, R. M. (1972), Reducibility among combinatorial problems, in R. E. Miller and J. W. Thatcher (eds.), \emph{Complexity of Computer Computations}, New York, Plenum, 85--103.
+\item Karush, W. (1939), \emph{Minima of Functions of Several Variables with Inequalities as Side Conditions}, M.Sc. dissertation, University of Chicago.
 \item Kelley, J. E., and Walker, M. R. (1959), Critical-path planning and scheduling, \emph{Proceedings of the Eastern Joint Computer Conference}, 160--173.
 \item Khachiyan, L. G. (1979), A polynomial algorithm in linear programming, \emph{Soviet Mathematics Doklady}, 20, 191--194.
 \item Klee, V., and Minty, G. J. (1972), How good is the simplex algorithm?, in O. Shisha (ed.), \emph{Inequalities III}, New York, Academic Press, 159--175.
 \item K\"onig, D. (1931), Gr\'afok \'es m\'atrixok, \emph{Matematikai \'es Fizikai Lapok}, 38, 116--119.
 \item Koopmans, T. C. (ed.) (1951), \emph{Activity Analysis of Production and Allocation}, New York, Wiley.
 \item Kuhn, H. W. (1955), The Hungarian method for the assignment problem, \emph{Naval Research Logistics Quarterly}, 2, 83--97.
+\item Kuhn, H. W., and Tucker, A. W. (1951), Nonlinear programming, in J. Neyman (ed.), \emph{Proceedings of the Second Berkeley Symposium on Mathematical Statistics and Probability}, Berkeley, University of California Press, 481--492.
 \item Land, A. H., and Doig, A. G. (1960), An automatic method of solving discrete programming problems, \emph{Econometrica}, 28, 497--520.
 \item Lemke, C. E. (1954), The dual method of solving the linear programming problem, \emph{Naval Research Logistics Quarterly}, 1, 36--47.
 \item MacCrimmon, K. R., and Ryavec, C. A. (1964), An analytical study of the PERT assumptions, \emph{Operations Research}, 12, 16--37.
 \item Malcolm, D. G., Roseboom, J. H., Clark, C. E., and Fazar, W. (1959), Application of a technique for research and development program evaluation, \emph{Operations Research}, 7, 646--669.
+\item Markowitz, H. (1952), Portfolio selection, \emph{Journal of Finance}, 7, 77--91.
 \item Minkowski, H. (1896), \emph{Geometrie der Zahlen}, Leipzig, Teubner.
 \item von Neumann, J. (1947), Discussion of a maximum problem, unpublished manuscript, in A. H. Taub (ed.), \emph{John von Neumann: Collected Works}, Vol.~VI (1963), Oxford, Pergamon, 89--95.
 \item Padberg, M., and Rinaldi, G. (1991), A branch-and-cut algorithm for the resolution of large-scale symmetric traveling salesman problems, \emph{SIAM Review}, 33, 60--100.
+\item Slater, M. (1950), Lagrange multipliers revisited, \emph{Cowles Commission Discussion Paper: Mathematics}, 403.
 \item Spielman, D. A., and Teng, S.-H. (2004), Smoothed analysis of algorithms: why the simplex algorithm usually takes polynomial time, \emph{Journal of the ACM}, 51, 385--463.
 \item Stigler, G. J. (1945), The cost of subsistence, \emph{Journal of Farm Economics}, 27, 303--314.
 \item Vogel, W. R. (1958), A short-cut solution to the transportation problem, cited in N. V. Reinfeld and W. R. Vogel, \emph{Mathematical Programming}, Englewood Cliffs, Prentice-Hall.
 \item Weyl, H. (1935), Elementare Theorie der konvexen Polyeder, \emph{Commentarii Mathematici Helvetici}, 7, 290--306.
+\item Wolfe, P. (1959), The simplex method for quadratic programming, \emph{Econometrica}, 27, 382--398.
 \end{enumerate}
 
 \end{document}
