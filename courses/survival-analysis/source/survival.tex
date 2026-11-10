@@ -575,6 +575,233 @@ P(\text{reach } 80 \mid \text{alive at } 30) = P(\text{reach } 60 \mid 30) \time
 \] Conditioning on survival to $60$ removes the risk already passed.
 \end{solution}
 
+%======================================================================
+\section{Parametric Models}
+\label{sec:parametric}
+
+If we are willing to assume that survival times follow a particular family of distributions, such as the exponential or the Weibull, the whole survival curve is described by one or two parameters, which can be estimated by maximum likelihood. Parametric models give smooth estimates, allow extrapolation, and are efficient when the assumed family is right. The
+key step is to write down the likelihood correctly when some observations are censored. This section does that, fits the four most common families to the \texttt{lung} data, and shows how to choose among them.
+
+\subsection{The likelihood with censored data}
+\label{ssec:likelihood}
+
+Each subject contributes a pair $(t_i, \delta_i)$. If the event was observed ($\delta_i = 1$), the subject contributes the density $f(t_i)$, the probability (density) of an event at exactly that time. If the time is censored ($\delta_i = 0$), all we know is that $T_i > t_i$, which has probability $S(t_i)$. With independent subjects and non-informative
+censoring, the likelihood is therefore
+\[
+L(\theta) = \prod_{i = 1}^nf(t_i)^{\delta_i}S(t_i)^{1 - \delta_i} = \prod_{i = 1}^nh(t_i)^{\delta_i}S(t_i) ,
+\]
+using $f = hS$ (Theorem~\ref{thm:identity}). Taking logarithms and $S = e^{-H}$,
+\[
+\ell(\theta) = \sum_{i = 1}^n\bigl(\delta_i\log h(t_i) - H(t_i)\bigr) .
+\]
+Every subject, censored or not, contributes $-H(t_i)$, the hazard accumulated over the time it was observed; only the subjects with events contribute the log hazard at their event time. The non-informative assumption is what allows the censoring mechanism to be left out of the likelihood: its own contribution does not involve $\theta$.
+
+\subsection{The exponential model}
+\label{ssec:expmodel}
+
+\begin{thm}
+\label{thm:expmle}
+For the exponential model $h(t) = \lambda$, with $d = \sum\delta_i$ events and total time at risk $T_{\mathrm{tot}} = \sum t_i$, the maximum likelihood estimate is
+\[
+\hat\lambda = \frac d{T_{\mathrm{tot}}}, \qquad \widehat{\operatorname{se}}(\hat\lambda) = \frac{\hat\lambda}{\sqrt d} .
+\]
+\end{thm}
+
+\begin{proof}
+$\ell(\lambda) = d\log\lambda - \lambda T_{\mathrm{tot}}$, so $\ell'(\lambda) = d/\lambda - T_{\mathrm{tot}}$, which vanishes at $\hat\lambda = d/T_{\mathrm{tot}}$, and $\ell''(\lambda) = -d/\lambda^2 < 0$, so it is a maximum. The observed information is $-\ell''(\hat\lambda) = d/\hat\lambda^2$, and the standard error is its inverse square
+root, $\hat\lambda/\sqrt d$.
+\end{proof}
+
+The estimate is the event rate, events per unit of follow-up, justifying the calculation of the section on survival data. The precision depends on the number of \emph{events}, not of subjects: a study with many subjects but few events tells us little. Since $\hat\lambda$ is positive and its distribution skewed, confidence intervals are better computed on the log scale:
+$\log\hat\lambda \pm 1.96/\sqrt d$, transformed back.
+
+\begin{exa}
+\label{ex:lungexp}
+In \texttt{lung}, $165$ deaths in $69\,593$ person-days give $\hat\lambda = 0.00237$ per day, or $0.866$ per year, with standard error $0.067$ and $95\%$ interval $(0.743, 1.009)$ per year. The fitted mean survival is $1/\hat\lambda = 422$ days and the median $\log 2/\hat\lambda = 292$ days (Software~\ref{sw:expfit}).
+\end{exa}
+
+\subsection{The Weibull and other families}
+\label{ssec:families}
+
+The exponential's constant hazard is rarely realistic. The \textbf{Weibull} model, $H(t) = (t/\lambda)^k$, adds a shape parameter $k$; its log-likelihood
+\[
+\ell(k, \lambda) = \sum_i\Bigl(\delta_i\bigl(\log k - \log\lambda + (k - 1)\log(t_i/\lambda)\bigr) - (t_i/\lambda)^k\Bigr)
+\]
+has no closed-form maximum and is maximised numerically (Software~\ref{sw:weibullfit}). Two other families are common:
+\begin{itemize}
+\item the \textbf{log-normal}: $\log T$ is normal with mean $\mu$ and standard deviation $\sigma$; its hazard rises and then falls;
+\item the \textbf{log-logistic}: $\log T$ has a logistic distribution; $S(t) = 1/(1 + (t/\alpha)^\beta)$, with a hump-shaped hazard when $\beta > 1$ and a decreasing one when $\beta \leq 1$.
+\end{itemize}
+All four can be written as \textbf{location--scale models for the log time},
+\[
+\log T = \mu + \sigma W ,
+\]
+where $W$ has a fixed distribution: extreme-value for the Weibull (and exponential, with $\sigma = 1$), normal for the log-normal, logistic for the log-logistic. This is how R's \texttt{survreg} parameterises them: its \texttt{Intercept} is $\mu$ and its \texttt{scale} is $\sigma$. For the Weibull, $k = 1/\sigma$ and $\lambda = e^\mu$.
+The same form, with $\mu$ depending on covariates, gives the accelerated failure time models of a later section.
+
+\subsection{Choosing a model}
+\label{ssec:choosing}
+
+The exponential is the Weibull with $k = 1$, so the two can be compared by a \textbf{likelihood ratio test}: $2(\ell_{\text{Weibull}} - \ell_{\text{exp}})$ is approximately $\chi^2_1$ if $k = 1$. Non-nested families are compared by the \textbf{Akaike information criterion} $\text{AIC} = -2\ell + 2p$, with $p$ the number of parameters; smaller is better. Graphical checks are
+also useful: for the Weibull, $\log H(t) = k\log t - k\log\lambda$, so a plot of $\log(-\log\hat S(t))$ against $\log t$ from a non-parametric estimate $\hat S$ should be close to a straight line with slope $k$; the next section supplies such an estimate.
+
+\begin{exa}
+\label{ex:lungfamilies}
+For \texttt{lung}, the maximised log-likelihoods are $-1162.3$ (exponential), $-1153.9$ (Weibull), $-1169.3$ (log-normal) and $-1160.9$ (log-logistic). The Weibull has the smallest AIC, $2311.7$. Its shape is $\hat k = 1.32$, an increasing hazard, and the likelihood ratio statistic against the exponential is $17.0$ on one degree of freedom,
+$p = 0.00004$: the death rate rises with time since enrolment. The fitted Weibull median is $316$ days, longer than the exponential's $292$ (Figure~\ref{fig:fits}).
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-0.9,-0.75) rectangle (8.4,3.75);
+\draw[->] (0,0) -- (7.8,0) node[below,font=\scriptsize] {days};
+\draw[->] (0,0) -- (0,3.5) node[left,font=\scriptsize] {$S(t)$};
+\foreach \x in {200,400,600,800,1000} \draw ({0.007*\x},0.06) -- ({0.007*\x},-0.06) node[below,font=\tiny] {$\x$};
+\foreach \y in {0.25,0.5,0.75,1} \draw (0.06,{3.2*\y}) -- (-0.06,{3.2*\y}) node[left,font=\tiny] {$\y$};
+\draw[black!55,thick] (0.000,3.200) -- (0.035,3.200) -- (0.035,3.186) -- (0.077,3.186) -- (0.077,3.144) -- (0.084,3.144) -- (0.084,3.130) -- (0.091,3.130) -- (0.091,3.102) -- (0.105,3.102) -- (0.105,3.088) -- (0.182,3.088) -- (0.182,3.074) -- (0.210,3.074) -- (0.210,3.060) -- (0.217,3.060) -- (0.217,3.046) -- (0.371,3.046) -- (0.371,3.018) -- (0.378,3.018) -- (0.378,3.004) -- (0.413,3.004) -- (0.413,2.989) -- (0.420,2.989) -- (0.420,2.961) -- (0.427,2.961) -- (0.427,2.947) -- (0.434,2.947) -- (0.434,2.933) -- (0.455,2.933) -- (0.455,2.905) -- (0.497,2.905) -- (0.497,2.891) -- (0.553,2.891) -- (0.553,2.877) -- (0.567,2.877) -- (0.567,2.849) -- (0.616,2.849) -- (0.616,2.821) -- (0.644,2.821) -- (0.644,2.807) -- (0.651,2.807) -- (0.651,2.793) -- (0.665,2.793) -- (0.665,2.765) -- (0.735,2.765) -- (0.735,2.751) -- (0.749,2.751) -- (0.749,2.722) -- (0.770,2.722) -- (0.770,2.708) -- (0.812,2.708) -- (0.812,2.694) -- (0.826,2.694) -- (0.826,2.680) -- (0.854,2.680) -- (0.854,2.666) -- (0.917,2.666) -- (0.917,2.651) -- (0.924,2.651) -- (0.924,2.623) -- (0.945,2.623) -- (0.945,2.609) -- (0.994,2.609) -- (0.994,2.595) -- (1.008,2.595) -- (1.008,2.580) -- (1.015,2.580) -- (1.015,2.552) -- (1.029,2.552) -- (1.029,2.538) -- (1.071,2.538) -- (1.071,2.524) -- (1.092,2.524) -- (1.092,2.495) -- (1.141,2.495) -- (1.141,2.453) -- (1.162,2.453) -- (1.162,2.424) -- (1.169,2.424) -- (1.169,2.410) -- (1.190,2.410) -- (1.190,2.396) -- (1.211,2.396) -- (1.211,2.396) -- (1.218,2.396) -- (1.218,2.396) -- (1.225,2.396) -- (1.225,2.382) -- (1.232,2.382) -- (1.232,2.367) -- (1.239,2.367) -- (1.239,2.353) -- (1.253,2.353) -- (1.253,2.324) -- (1.260,2.324) -- (1.260,2.309) -- (1.267,2.309) -- (1.267,2.280) -- (1.274,2.280) -- (1.274,2.266) -- (1.281,2.266) -- (1.281,2.251) -- (1.295,2.251) -- (1.295,2.251) -- (1.302,2.251) -- (1.302,2.237) -- (1.316,2.237) -- (1.316,2.237) -- (1.323,2.237) -- (1.323,2.222) -- (1.337,2.222) -- (1.337,2.222) -- (1.344,2.222) -- (1.344,2.222) -- (1.358,2.222) -- (1.358,2.207) -- (1.372,2.207) -- (1.372,2.207) -- (1.379,2.207) -- (1.379,2.192) -- (1.393,2.192) -- (1.393,2.177) -- (1.407,2.177) -- (1.407,2.147) -- (1.414,2.147) -- (1.414,2.132) -- (1.421,2.132) -- (1.421,2.132) -- (1.449,2.132) -- (1.449,2.116) -- (1.456,2.116) -- (1.456,2.101) -- (1.470,2.101) -- (1.470,2.086) -- (1.477,2.086) -- (1.477,2.086) -- (1.484,2.086) -- (1.484,2.070) -- (1.526,2.070) -- (1.526,2.055) -- (1.547,2.055) -- (1.547,2.055) -- (1.554,2.055) -- (1.554,2.039) -- (1.561,2.039) -- (1.561,2.023) -- (1.568,2.023) -- (1.568,2.023) -- (1.575,2.023) -- (1.575,2.023) -- (1.582,2.023) -- (1.582,2.007) -- (1.603,2.007) -- (1.603,1.991) -- (1.610,1.991) -- (1.610,1.975) -- (1.645,1.975) -- (1.645,1.975) -- (1.659,1.975) -- (1.659,1.975) -- (1.673,1.975) -- (1.673,1.943) -- (1.680,1.943) -- (1.680,1.943) -- (1.701,1.943) -- (1.701,1.943) -- (1.715,1.943) -- (1.715,1.926) -- (1.722,1.926) -- (1.722,1.909) -- (1.764,1.909) -- (1.764,1.909) -- (1.813,1.909) -- (1.813,1.909) -- (1.862,1.909) -- (1.862,1.909) -- (1.869,1.909) -- (1.869,1.892) -- (1.876,1.892) -- (1.876,1.875) -- (1.883,1.875) -- (1.883,1.858) -- (1.890,1.858) -- (1.890,1.841) -- (1.904,1.841) -- (1.904,1.841) -- (1.932,1.841) -- (1.932,1.841) -- (1.953,1.841) -- (1.953,1.841) -- (1.981,1.841) -- (1.981,1.823) -- (1.988,1.823) -- (1.988,1.806) -- (1.995,1.806) -- (1.995,1.770) -- (2.002,1.770) -- (2.002,1.752) -- (2.016,1.752) -- (2.016,1.734) -- (2.037,1.734) -- (2.037,1.716) -- (2.044,1.716) -- (2.044,1.716) -- (2.051,1.716) -- (2.051,1.698) -- (2.072,1.698) -- (2.072,1.698) -- (2.100,1.698) -- (2.100,1.698) -- (2.107,1.698) -- (2.107,1.679) -- (2.121,1.679) -- (2.121,1.660) -- (2.135,1.660) -- (2.135,1.641) -- (2.142,1.641) -- (2.142,1.622) -- (2.170,1.622) -- (2.170,1.584) -- (2.205,1.584) -- (2.205,1.584) -- (2.240,1.584) -- (2.240,1.565) -- (2.303,1.565) -- (2.303,1.545) -- (2.324,1.545) -- (2.324,1.545) -- (2.359,1.545) -- (2.359,1.526) -- (2.380,1.526) -- (2.380,1.506) -- (2.415,1.506) -- (2.415,1.487) -- (2.436,1.487) -- (2.436,1.467) -- (2.450,1.467) -- (2.450,1.448) -- (2.457,1.448) -- (2.457,1.428) -- (2.471,1.428) -- (2.471,1.389) -- (2.492,1.389) -- (2.492,1.389) -- (2.527,1.389) -- (2.527,1.369) -- (2.541,1.369) -- (2.541,1.329) -- (2.548,1.329) -- (2.548,1.310) -- (2.597,1.310) -- (2.597,1.269) -- (2.632,1.269) -- (2.632,1.269) -- (2.674,1.269) -- (2.674,1.269) -- (2.688,1.269) -- (2.688,1.269) -- (2.709,1.269) -- (2.709,1.248) -- (2.730,1.248) -- (2.730,1.227) -- (2.758,1.227) -- (2.758,1.206) -- (2.828,1.206) -- (2.828,1.206) -- (2.891,1.206) -- (2.891,1.206) -- (2.982,1.206) -- (2.982,1.184) -- (2.996,1.184) -- (2.996,1.162) -- (3.003,1.162) -- (3.003,1.140) -- (3.031,1.140) -- (3.031,1.118) -- (3.094,1.118) -- (3.094,1.096) -- (3.108,1.096) -- (3.108,1.074) -- (3.150,1.074) -- (3.150,1.052) -- (3.185,1.052) -- (3.185,1.030) -- (3.199,1.030) -- (3.199,1.007) -- (3.206,1.007) -- (3.206,1.007) -- (3.220,1.007) -- (3.220,0.984) -- (3.311,0.984) -- (3.311,0.961) -- (3.339,0.961) -- (3.339,0.938) -- (3.577,0.938) -- (3.577,0.938) -- (3.633,0.938) -- (3.633,0.914) -- (3.640,0.914) -- (3.640,0.890) -- (3.668,0.890) -- (3.668,0.842) -- (3.703,0.842) -- (3.703,0.842) -- (3.731,0.842) -- (3.731,0.817) -- (3.801,0.817) -- (3.801,0.817) -- (3.850,0.817) -- (3.850,0.792) -- (3.857,0.792) -- (3.857,0.792) -- (3.906,0.792) -- (3.906,0.765) -- (3.913,0.765) -- (3.913,0.765) -- (3.969,0.765) -- (3.969,0.738) -- (4.018,0.738) -- (4.018,0.711) -- (4.081,0.711) -- (4.081,0.683) -- (4.116,0.683) -- (4.116,0.683) -- (4.291,0.683) -- (4.291,0.655) -- (4.368,0.655) -- (4.368,0.627) -- (4.487,0.627) -- (4.487,0.598) -- (4.501,0.598) -- (4.501,0.570) -- (4.578,0.570) -- (4.578,0.541) -- (4.585,0.541) -- (4.585,0.513) -- (4.809,0.513) -- (4.809,0.484) -- (4.823,0.484) -- (4.823,0.456) -- (4.935,0.456) -- (4.935,0.427) -- (4.949,0.427) -- (4.949,0.399) -- (5.096,0.399) -- (5.096,0.370) -- (5.117,0.370) -- (5.117,0.342) -- (5.145,0.342) -- (5.145,0.313) -- (5.180,0.313) -- (5.180,0.313) -- (5.355,0.313) -- (5.355,0.282) -- (5.537,0.282) -- (5.537,0.251) -- (5.642,0.251) -- (5.642,0.251) -- (5.698,0.251) -- (5.698,0.215) -- (5.747,0.215) -- (5.747,0.215) -- (5.880,0.215) -- (5.880,0.215) -- (6.181,0.215) -- (6.181,0.161) -- (6.755,0.161) -- (6.755,0.161) -- (7.070,0.161) -- (7.070,0.161) -- (7.154,0.161) -- (7.154,0.161);
+\draw[blue!60!black] (0.000,3.200) -- (0.059,3.137) -- (0.118,3.075) -- (0.176,3.014) -- (0.235,2.955) -- (0.294,2.897) -- (0.353,2.839) -- (0.412,2.783) -- (0.471,2.729) -- (0.529,2.675) -- (0.588,2.622) -- (0.647,2.570) -- (0.706,2.520) -- (0.765,2.470) -- (0.824,2.421) -- (0.882,2.373) -- (0.941,2.327) -- (1.000,2.281) -- (1.059,2.236) -- (1.118,2.192) -- (1.176,2.148) -- (1.235,2.106) -- (1.294,2.064) -- (1.353,2.024) -- (1.412,1.984) -- (1.471,1.945) -- (1.529,1.906) -- (1.588,1.869) -- (1.647,1.832) -- (1.706,1.796) -- (1.765,1.760) -- (1.824,1.725) -- (1.882,1.691) -- (1.941,1.658) -- (2.000,1.625) -- (2.059,1.593) -- (2.118,1.562) -- (2.176,1.531) -- (2.235,1.501) -- (2.294,1.471) -- (2.353,1.442) -- (2.412,1.414) -- (2.471,1.386) -- (2.529,1.359) -- (2.588,1.332) -- (2.647,1.305) -- (2.706,1.280) -- (2.765,1.254) -- (2.824,1.230) -- (2.882,1.205) -- (2.941,1.182) -- (3.000,1.158) -- (3.059,1.136) -- (3.118,1.113) -- (3.176,1.091) -- (3.235,1.070) -- (3.294,1.049) -- (3.353,1.028) -- (3.412,1.008) -- (3.471,0.988) -- (3.529,0.968) -- (3.588,0.949) -- (3.647,0.930) -- (3.706,0.912) -- (3.765,0.894) -- (3.824,0.876) -- (3.882,0.859) -- (3.941,0.842) -- (4.000,0.826) -- (4.059,0.809) -- (4.118,0.793) -- (4.176,0.778) -- (4.235,0.762) -- (4.294,0.747) -- (4.353,0.733) -- (4.412,0.718) -- (4.471,0.704) -- (4.529,0.690) -- (4.588,0.676) -- (4.647,0.663) -- (4.706,0.650) -- (4.765,0.637) -- (4.824,0.625) -- (4.882,0.612) -- (4.941,0.600) -- (5.000,0.588) -- (5.059,0.577) -- (5.118,0.565) -- (5.176,0.554) -- (5.235,0.543) -- (5.294,0.533) -- (5.353,0.522) -- (5.412,0.512) -- (5.471,0.502) -- (5.529,0.492) -- (5.588,0.482) -- (5.647,0.473) -- (5.706,0.463) -- (5.765,0.454) -- (5.824,0.445) -- (5.882,0.436) -- (5.941,0.428) -- (6.000,0.419) -- (6.059,0.411) -- (6.118,0.403) -- (6.176,0.395) -- (6.235,0.387) -- (6.294,0.380) -- (6.353,0.372) -- (6.412,0.365) -- (6.471,0.358) -- (6.529,0.351) -- (6.588,0.344) -- (6.647,0.337) -- (6.706,0.330) -- (6.765,0.324) -- (6.824,0.317) -- (6.882,0.311) -- (6.941,0.305) -- (7.000,0.299);
+\draw[red!70!black,thick] (0.000,3.200) -- (0.059,3.181) -- (0.118,3.154) -- (0.176,3.122) -- (0.235,3.086) -- (0.294,3.048) -- (0.353,3.008) -- (0.412,2.967) -- (0.471,2.924) -- (0.529,2.880) -- (0.588,2.835) -- (0.647,2.790) -- (0.706,2.744) -- (0.765,2.697) -- (0.824,2.650) -- (0.882,2.603) -- (0.941,2.556) -- (1.000,2.509) -- (1.059,2.461) -- (1.118,2.414) -- (1.176,2.367) -- (1.235,2.320) -- (1.294,2.274) -- (1.353,2.227) -- (1.412,2.181) -- (1.471,2.135) -- (1.529,2.090) -- (1.588,2.045) -- (1.647,2.001) -- (1.706,1.957) -- (1.765,1.913) -- (1.824,1.871) -- (1.882,1.828) -- (1.941,1.786) -- (2.000,1.745) -- (2.059,1.704) -- (2.118,1.664) -- (2.176,1.625) -- (2.235,1.586) -- (2.294,1.548) -- (2.353,1.510) -- (2.412,1.473) -- (2.471,1.437) -- (2.529,1.401) -- (2.588,1.366) -- (2.647,1.331) -- (2.706,1.297) -- (2.765,1.264) -- (2.824,1.232) -- (2.882,1.200) -- (2.941,1.168) -- (3.000,1.138) -- (3.059,1.108) -- (3.118,1.078) -- (3.176,1.049) -- (3.235,1.021) -- (3.294,0.993) -- (3.353,0.966) -- (3.412,0.940) -- (3.471,0.914) -- (3.529,0.889) -- (3.588,0.864) -- (3.647,0.840) -- (3.706,0.816) -- (3.765,0.793) -- (3.824,0.771) -- (3.882,0.749) -- (3.941,0.727) -- (4.000,0.707) -- (4.059,0.686) -- (4.118,0.666) -- (4.176,0.647) -- (4.235,0.628) -- (4.294,0.609) -- (4.353,0.591) -- (4.412,0.574) -- (4.471,0.557) -- (4.529,0.540) -- (4.588,0.524) -- (4.647,0.508) -- (4.706,0.493) -- (4.765,0.478) -- (4.824,0.463) -- (4.882,0.449) -- (4.941,0.435) -- (5.000,0.422) -- (5.059,0.409) -- (5.118,0.396) -- (5.176,0.384) -- (5.235,0.372) -- (5.294,0.360) -- (5.353,0.349) -- (5.412,0.338) -- (5.471,0.327) -- (5.529,0.316) -- (5.588,0.306) -- (5.647,0.297) -- (5.706,0.287) -- (5.765,0.278) -- (5.824,0.269) -- (5.882,0.260) -- (5.941,0.252) -- (6.000,0.243) -- (6.059,0.235) -- (6.118,0.228) -- (6.176,0.220) -- (6.235,0.213) -- (6.294,0.206) -- (6.353,0.199) -- (6.412,0.192) -- (6.471,0.186) -- (6.529,0.180) -- (6.588,0.174) -- (6.647,0.168) -- (6.706,0.162) -- (6.765,0.157) -- (6.824,0.151) -- (6.882,0.146) -- (6.941,0.141) -- (7.000,0.136);
+\draw[green!45!black,dashed] (0.000,3.200) -- (0.059,3.198) -- (0.118,3.185) -- (0.176,3.158) -- (0.235,3.119) -- (0.294,3.073) -- (0.353,3.020) -- (0.412,2.964) -- (0.471,2.904) -- (0.529,2.843) -- (0.588,2.781) -- (0.647,2.719) -- (0.706,2.658) -- (0.765,2.597) -- (0.824,2.537) -- (0.882,2.478) -- (0.941,2.420) -- (1.000,2.364) -- (1.059,2.308) -- (1.118,2.255) -- (1.176,2.203) -- (1.235,2.152) -- (1.294,2.102) -- (1.353,2.054) -- (1.412,2.008) -- (1.471,1.962) -- (1.529,1.918) -- (1.588,1.876) -- (1.647,1.834) -- (1.706,1.794) -- (1.765,1.755) -- (1.824,1.717) -- (1.882,1.680) -- (1.941,1.644) -- (2.000,1.610) -- (2.059,1.576) -- (2.118,1.543) -- (2.176,1.511) -- (2.235,1.480) -- (2.294,1.450) -- (2.353,1.421) -- (2.412,1.393) -- (2.471,1.365) -- (2.529,1.338) -- (2.588,1.312) -- (2.647,1.287) -- (2.706,1.262) -- (2.765,1.238) -- (2.824,1.215) -- (2.882,1.192) -- (2.941,1.170) -- (3.000,1.148) -- (3.059,1.127) -- (3.118,1.106) -- (3.176,1.086) -- (3.235,1.067) -- (3.294,1.048) -- (3.353,1.029) -- (3.412,1.011) -- (3.471,0.993) -- (3.529,0.976) -- (3.588,0.959) -- (3.647,0.943) -- (3.706,0.927) -- (3.765,0.911) -- (3.824,0.896) -- (3.882,0.881) -- (3.941,0.867) -- (4.000,0.852) -- (4.059,0.838) -- (4.118,0.825) -- (4.176,0.811) -- (4.235,0.798) -- (4.294,0.786) -- (4.353,0.773) -- (4.412,0.761) -- (4.471,0.749) -- (4.529,0.738) -- (4.588,0.726) -- (4.647,0.715) -- (4.706,0.704) -- (4.765,0.694) -- (4.824,0.683) -- (4.882,0.673) -- (4.941,0.663) -- (5.000,0.653) -- (5.059,0.643) -- (5.118,0.634) -- (5.176,0.625) -- (5.235,0.616) -- (5.294,0.607) -- (5.353,0.598) -- (5.412,0.590) -- (5.471,0.581) -- (5.529,0.573) -- (5.588,0.565) -- (5.647,0.557) -- (5.706,0.549) -- (5.765,0.542) -- (5.824,0.534) -- (5.882,0.527) -- (5.941,0.520) -- (6.000,0.513) -- (6.059,0.506) -- (6.118,0.499) -- (6.176,0.493) -- (6.235,0.486) -- (6.294,0.480) -- (6.353,0.473) -- (6.412,0.467) -- (6.471,0.461) -- (6.529,0.455) -- (6.588,0.449) -- (6.647,0.444) -- (6.706,0.438) -- (6.765,0.432) -- (6.824,0.427) -- (6.882,0.421) -- (6.941,0.416) -- (7.000,0.411);
+\draw[black!55,thick] (4.6,3.25) -- (5.1,3.25) node[right,font=\tiny,black] {Kaplan--Meier estimate};
+\draw[red!70!black,thick] (4.6,2.95) -- (5.1,2.95) node[right,font=\tiny,black] {Weibull, $\hat k = 1.32$};
+\draw[blue!60!black] (4.6,2.65) -- (5.1,2.65) node[right,font=\tiny,black] {exponential};
+\draw[green!45!black,dashed] (4.6,2.35) -- (5.1,2.35) node[right,font=\tiny,black] {log-normal};
+\end{tikzpicture}
+\caption{Parametric fits to the \texttt{lung} data, with the non-parametric Kaplan--Meier estimate of the next section as a reference. The Weibull follows the data closely; the exponential is too low early and too high late, because the true hazard increases; the log-normal, whose hazard eventually falls, has too heavy a tail.}
+\label{fig:fits}
+\end{figure}
+
+\subsection{Parametric models in software}
+\label{ssec:software3}
+
+\begin{software}[The exponential fit by hand]
+\label{sw:expfit}
+Example~\ref{ex:lungexp}: the number of deaths and total follow-up, the estimated rate and its standard error per year, the $95\%$ interval on the log scale, and the fitted mean and median in days:
+{\small\begin{verbatim}
+> library(survival)
+> t <- lung$time; d <- as.numeric(lung$status == 2)
+> c(deaths = sum(d), total_days = sum(t))
+    deaths total_days 
+       165      69593 
+> lam <- sum(d) / sum(t); se <- lam / sqrt(sum(d))     # MLE and its SE
+> round(c(rate_per_year = 365.25 * lam, se = 365.25 * se), 4)
+rate_per_year            se 
+       0.8660        0.0674 
+> ci <- exp(log(lam) + c(-1, 1) * 1.96 / sqrt(sum(d)))  # CI on the log scale
+> round(365.25 * ci, 4)
+[1] 0.7434 1.0087
+> round(c(mean_days = 1 / lam, median_days = log(2) / lam), 1)
+  mean_days median_days 
+      421.8       292.4 
+\end{verbatim}}
+\textbf{Reading the output.} The rate is $0.866$ deaths per person-year (s.e.~$0.067$), with interval $(0.743, 1.009)$; the fitted median survival is $292$ days.
+
+\textbf{Python:} the same arithmetic; \texttt{lifelines.ExponentialFitter().fit(t, d)} gives the fitted mean, $1/\hat\lambda$, as \texttt{lambda\_}.
+\end{software}
+
+\begin{software}[Four families by survreg]
+\label{sw:families}
+The exponential, Weibull, log-normal and log-logistic models fitted with \texttt{survreg}, their log-likelihoods and AICs; the Weibull's location and scale and their translation to $k$ and $\lambda$; and the likelihood ratio test of $k = 1$:
+{\small\begin{verbatim}
+> fits <- lapply(c("exponential", "weibull", "lognormal", "loglogistic"),
++                function(dist) survreg(Surv(time, status) ~ 1, data = lung,
++                                       dist = dist))
+> names(fits) <- c("exponential", "weibull", "lognormal", "loglogistic")
+> round(sapply(fits, function(f) c(logLik = f$loglik[1], AIC = AIC(f))), 2)
+       exponential  weibull lognormal loglogistic
+logLik    -1162.34 -1153.85  -1169.27    -1160.93
+AIC        2326.68  2311.70   2342.54     2325.86
+> w <- fits$weibull
+> c(intercept = unname(coef(w)), scale = w$scale)      # log T = mu + sigma W
+intercept     scale 
+6.0349039 0.7593936 
+> round(c(shape_k = 1 / w$scale, lambda_days = exp(coef(w))[[1]]), 3)
+    shape_k lambda_days 
+      1.317     417.759 
+> lr <- 2 * (w$loglik[1] - fits$exponential$loglik[1])
+> round(c(LR = lr, p = pchisq(lr, 1, lower.tail = FALSE)), 5)  # is k = 1?
+      LR        p 
+16.97398  0.00004 
+\end{verbatim}}
+\textbf{Reading the output.} The Weibull has the largest log-likelihood among the two-parameter models and the smallest AIC. Its \texttt{scale} $\hat\sigma = 0.759$ gives $\hat k = 1/0.759 = 1.32$, and its intercept $6.035$ gives $\hat\lambda = e^{6.035} = 418$ days. The test of $k = 1$ gives $\chi^2_1 = 17.0$, $p = 0.00004$.
+
+\textbf{Python:} \texttt{lifelines.WeibullFitter}, \texttt{LogNormalFitter}, \texttt{LogLogisticFitter}, each with an \texttt{AIC\_} attribute.
+\end{software}
+
+\begin{software}[The Weibull likelihood by hand]
+\label{sw:weibullfit}
+The censored Weibull log-likelihood of the subsection on the Weibull family, maximised with \texttt{optim} over $(\log k, \log\lambda)$ so that both stay positive; the standard errors from the inverse Hessian; and the fitted median $\lambda(\log 2)^{1/k}$:
+{\small\begin{verbatim}
+> nll <- function(p) {              # Weibull by hand, p = (log k, log lam)
++   k <- exp(p[1]); l <- exp(p[2])
++   -sum(d * (log(k) - log(l) + (k - 1) * log(t / l)) - (t / l)^k)
++ }
+> o <- optim(c(0, log(300)), nll, hessian = TRUE)
+> round(c(k = exp(o$par[1]), lambda = exp(o$par[2]), logLik = -o$value), 3)
+        k    lambda    logLik 
+    1.316   417.723 -1153.851 
+> round(sqrt(diag(solve(o$hessian))), 4)   # SEs of log k and log lambda
+[1] 0.0624 0.0591
+> med <- exp(o$par[2]) * log(2)^(1 / exp(o$par[1])); round(med, 1)
+[1] 316.2
+\end{verbatim}}
+\textbf{Reading the output.} The hand-written likelihood reproduces \texttt{survreg}: $\hat k = 1.316$, $\hat\lambda = 418$ days, $\ell = -1153.85$. The standard error of $\log\hat k$ is $0.062$, so $\hat k$ is about $1.32 \pm 0.16$, clearly above $1$. The median is $316$ days.
+
+\textbf{Python:} \texttt{scipy.optimize.minimize} with the same function.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Ten patients have times (months) $3, 5^+, 6, 8, 10^+, 12, 15^+, 18, 22^+, 24^+$, where $^+$ marks censoring. Fit an exponential model: give $\hat\lambda$, its standard error, the fitted median, and a $95\%$ confidence interval for the median.
+\end{problem}
+
+\begin{solution}
+$d = 5$ events and $T_{\mathrm{tot}} = 123$ months, so $\hat\lambda = 5/123 = 0.0407$ per month, s.e.\ $0.0407/\sqrt5 = 0.0182$. The median is $\log 2/\hat\lambda = 17.1$ months. On the log scale, $\log\hat\lambda \pm 1.96/\sqrt5$ gives $\lambda \in (0.0169, 0.0977)$, and since the median is $\log 2/\lambda$ the interval for the
+median is $(7.1, 41.0)$ months: very wide, because only five deaths were observed.
+\end{solution}
+
+\begin{problem}
+Explain why a censored subject contributes $S(t_i)$ rather than $f(t_i)$ to the likelihood, and what is assumed in doing so.
+\end{problem}
+
+\begin{solution}
+For a censored subject we know only that $T_i > t_i$, an event of probability $S(t_i)$. Writing the joint probability of the observed data as $\prod f^{\delta}S^{1 - \delta}$ times a factor for the censoring times assumes that censoring is independent of $T_i$ (non-informative) and that its distribution does not involve $\theta$, so that this factor can be dropped.
+\end{solution}
+
+\begin{problem}
+Show that for the Weibull model with $k$ known, the maximum likelihood estimate of $\lambda$ is $\hat\lambda = \bigl(\sum t_i^k/d\bigr)^{1/k}$.
+\end{problem}
+
+\begin{solution}
+With $k$ fixed, $\ell = \sum\delta_i(\log k + (k - 1)\log t_i) - dk\log\lambda - \lambda^{-k}\sum t_i^k$. Then $\partial\ell/\partial\lambda = -dk/\lambda + k\lambda^{-k - 1}\sum t_i^k = 0$ gives $\lambda^k = \sum t_i^k/d$. For $k = 1$ this is the exponential result $T_{\mathrm{tot}}/d$.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:lungfamilies}, the log-logistic model has log-likelihood $-1160.9$ and the Weibull $-1153.9$, both with two parameters. Which is preferred, and can a likelihood ratio test be used to compare them?
+\end{problem}
+
+\begin{solution}
+With the same number of parameters, AIC prefers the larger log-likelihood: the Weibull, by $2 \times 7.0 = 14$ in AIC, a large difference. A likelihood ratio test is not appropriate, because neither model is a special case of the other; AIC, or a graphical comparison, is used instead.
+\end{solution}
+
+\begin{problem}
+A survreg Weibull fit reports \texttt{Intercept} $= 5.2$ and \texttt{scale} $= 1.25$. Give $k$ and $\lambda$, say whether the hazard increases or decreases, and find the median.
+\end{problem}
+
+\begin{solution}
+$k = 1/1.25 = 0.8$ and $\lambda = e^{5.2} = 181.3$. Since $k < 1$ the hazard decreases with time. The median is $\lambda(\log 2)^{1/k} = 181.3 \times 0.693^{1.25} = 181.3 \times 0.632 = 114.6$.
+\end{solution}
+
+\begin{problem}
+How many deaths must a study observe for the $95\%$ confidence interval for an exponential rate to have upper limit no more than $1.5$ times the lower?
+\end{problem}
+
+\begin{solution}
+The interval is $\hat\lambda e^{\pm1.96/\sqrt d}$, so the ratio of the limits is $e^{3.92/\sqrt d} \leq 1.5$, that is $\sqrt d \geq 3.92/\log 1.5 = 9.67$, $d \geq 94$ deaths, whatever the number of patients.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -604,7 +831,10 @@ P(\text{reach } 80 \mid \text{alive at } 30) = P(\text{reach } 60 \mid 30) \time
 
 \subhead{Further reading}
 \begin{enumerate}
+\item Akaike, H. (1974), A new look at the statistical model identification, \emph{IEEE Transactions on Automatic Control}, 19, 716--723.
+\item Cohen, A. C. (1965), Maximum likelihood estimation in the Weibull distribution based on complete and on censored samples, \emph{Technometrics}, 7, 579--588.
 \item Edmonson, J. H., Fleming, T. R., Decker, D. G., et al. (1979), Different chemotherapeutic sensitivities and host factors affecting prognosis in advanced ovarian carcinoma versus minimal residual disease, \emph{Cancer Treatment Reports}, 63, 241--247.
+\item Epstein, B., and Sobel, M. (1953), Life testing, \emph{Journal of the American Statistical Association}, 48, 486--502.
 \item Gompertz, B. (1825), On the nature of the function expressive of the law of human mortality, \emph{Philosophical Transactions of the Royal Society of London}, 115, 513--583.
 \item Halley, E. (1693), An estimate of the degrees of the mortality of mankind, \emph{Philosophical Transactions of the Royal Society of London}, 17, 596--610.
 \item Kaplan, E. L., and Meier, P. (1958), Nonparametric estimation from incomplete observations, \emph{Journal of the American Statistical Association}, 53, 457--481.

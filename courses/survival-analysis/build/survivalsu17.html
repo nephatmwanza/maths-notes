@@ -1,0 +1,151 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>3.5 Parametric models in software — Survival Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='survival.css' rel='stylesheet' type='text/css' /> 
+<meta content='survival.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Survival Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="survivalse1.html">Survival Data</a></li>
+<li class="sub"><a class="" href="survivalsu1.html">Time-to-event data</a></li>
+<li class="sub"><a class="" href="survivalsu2.html">Censoring</a></li>
+<li class="sub"><a class="" href="survivalsu3.html">Why ordinary methods fail</a></li>
+<li class="sub"><a class="" href="survivalsu4.html">Recording survival data</a></li>
+<li class="sub"><a class="" href="survivalsu5.html">Survival data in software</a></li>
+<li class="sub"><a class="" href="survivalsu6.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse2.html">Survival, Hazard and Cumulative Hazard</a></li>
+<li class="sub"><a class="" href="survivalsu7.html">The survival function</a></li>
+<li class="sub"><a class="" href="survivalsu8.html">The hazard function</a></li>
+<li class="sub"><a class="" href="survivalsu9.html">The cumulative hazard and the basic identity</a></li>
+<li class="sub"><a class="" href="survivalsu10.html">Summaries: mean, median and residual life</a></li>
+<li class="sub"><a class="" href="survivalsu11.html">Hazards in software</a></li>
+<li class="sub"><a class="" href="survivalsu12.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse3.html">Parametric Models</a></li>
+<li class="sub"><a class="" href="survivalsu13.html">The likelihood with censored data</a></li>
+<li class="sub"><a class="" href="survivalsu14.html">The exponential model</a></li>
+<li class="sub"><a class="" href="survivalsu15.html">The Weibull and other families</a></li>
+<li class="sub"><a class="" href="survivalsu16.html">Choosing a model</a></li>
+<li class="sub"><a class="current" href="survivalsu17.html">Parametric models in software</a></li>
+<li class="sub"><a class="" href="survivalsu18.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="survivalli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 675 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu18.html'>next</a>] [<a href='survivalsu16.html'>prev</a>] [<a href='survivalsu16.html#tailsurvivalsu16.html'>prev-tail</a>] [<a href='#tailsurvivalsu17.html'>tail</a>] [<a href='survivalse3.html#survivalsu17.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>3.5   </span> <a id='x22-210003.5'></a>Parametric models in software</h4>
+<div class='newtheorem nt-software'>
+<!-- l. 678 --><p class='noindent'><span class='head'>
+<a id='x22-21001r1'></a>
+<span class='cmbx-10x-x-109'>Software 3.5.1 </span>(The exponential fit by hand)<span class='cmbx-10x-x-109'>.</span>  </span> Example <a href='survivalsu14.html#x19-18002r2'>3.2.2<!-- tex4ht:ref: ex:lungexp  --></a>: the number of deaths and total
+follow-up, the estimated rate and its standard error per year, the \(95\%\) interval on the log scale, and the
+fitted mean and median in days:
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-7'>
+&gt; library(survival)
+&gt; t &lt;- lung$time; d &lt;- as.numeric(lung$status == 2)
+&gt; c(deaths = sum(d), total_days = sum(t))
+    deaths total_days
+       165      69593
+&gt; lam &lt;- sum(d) / sum(t); se &lt;- lam / sqrt(sum(d))     # MLE and its SE
+&gt; round(c(rate_per_year = 365.25 * lam, se = 365.25 * se), 4)
+rate_per_year            se
+       0.8660        0.0674
+&gt; ci &lt;- exp(log(lam) + c(-1, 1) * 1.96 / sqrt(sum(d)))  # CI on the log scale
+&gt; round(365.25 * ci, 4)
+[1] 0.7434 1.0087
+&gt; round(c(mean_days = 1 / lam, median_days = log(2) / lam), 1)
+  mean_days median_days
+      421.8       292.4
+</pre>
+<!-- l. 697 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The rate is \(0.866\) deaths per person-year (s.e. \(0.067\)), with interval \((0.743, 1.009)\); the fitted
+median survival is \(292\) days.
+</p><!-- l. 700 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span>the same arithmetic; <span class='cmtt-10x-x-109'>lifelines.ExponentialFitter().fit(t, d) </span>gives the fitted
+mean, \(1/\hat \lambda \), as <span class='cmtt-10x-x-109'>lambda_</span>.
+</p>
+</div>
+<!-- l. 701 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 703 --><p class='noindent'><span class='head'>
+<a id='x22-21002r2'></a>
+<span class='cmbx-10x-x-109'>Software 3.5.2 </span>(Four families by survreg)<span class='cmbx-10x-x-109'>.</span>  </span> The exponential, Weibull, log-normal and log-logistic
+models fitted with <span class='cmtt-10x-x-109'>survreg</span>, their log-likelihoods and AICs; the Weibull’s location and scale and their
+translation to \(k\) and \(\lambda \); and the likelihood ratio test of \(k = 1\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-8'>
+&gt; fits &lt;- lapply(c("exponential", "weibull", "lognormal", "loglogistic"),
++                function(dist) survreg(Surv(time, status) ~ 1, data = lung,
++                                       dist = dist))
+&gt; names(fits) &lt;- c("exponential", "weibull", "lognormal", "loglogistic")
+&gt; round(sapply(fits, function(f) c(logLik = f$loglik[1], AIC = AIC(f))), 2)
+       exponential  weibull lognormal loglogistic
+logLik    -1162.34 -1153.85  -1169.27    -1160.93
+AIC        2326.68  2311.70   2342.54     2325.86
+&gt; w &lt;- fits$weibull
+&gt; c(intercept = unname(coef(w)), scale = w$scale)      # log T = mu + sigma W
+intercept     scale
+6.0349039 0.7593936
+&gt; round(c(shape_k = 1 / w$scale, lambda_days = exp(coef(w))[[1]]), 3)
+    shape_k lambda_days
+      1.317     417.759
+&gt; lr &lt;- 2 * (w$loglik[1] - fits$exponential$loglik[1])
+&gt; round(c(LR = lr, p = pchisq(lr, 1, lower.tail = FALSE)), 5)  # is k = 1?
+      LR        p
+16.97398  0.00004
+</pre>
+<!-- l. 726 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The Weibull has the largest log-likelihood among the two-parameter
+models and the smallest AIC. Its <span class='cmtt-10x-x-109'>scale</span> \(\hat \sigma = 0.759\) gives \(\hat k = 1/0.759 = 1.32\), and its intercept \(6.035\) gives \(\hat \lambda = e^{6.035} = 418\) days. The test of \(k = 1\) gives
+\(\chi ^2_1 = 17.0\), \(p = 0.00004\).
+</p><!-- l. 729 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span><span class='cmtt-10x-x-109'>lifelines.WeibullFitter</span>, <span class='cmtt-10x-x-109'>LogNormalFitter</span>, <span class='cmtt-10x-x-109'>LogLogisticFitter</span>, each with an
+<span class='cmtt-10x-x-109'>AIC_ </span>attribute.
+</p>
+</div>
+<!-- l. 730 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-software'>
+<!-- l. 732 --><p class='noindent'><span class='head'>
+<a id='x22-21003r3'></a>
+<span class='cmbx-10x-x-109'>Software 3.5.3 </span>(The Weibull likelihood by hand)<span class='cmbx-10x-x-109'>.</span>  </span> The censored Weibull log-likelihood of the
+subsection on the Weibull family, maximised with <span class='cmtt-10x-x-109'>optim </span>over \((\log k, \log \lambda )\) so that both stay positive; the standard
+errors from the inverse Hessian; and the fitted median \(\lambda (\log 2)^{1/k}\):
+                                                                                      
+                                                                                      
+</p>
+<pre class='verbatim' id='verbatim-9'>
+&gt; nll &lt;- function(p) {              # Weibull by hand, p = (log k, log lam)
++   k &lt;- exp(p[1]); l &lt;- exp(p[2])
++   -sum(d * (log(k) - log(l) + (k - 1) * log(t / l)) - (t / l)^k)
++ }
+&gt; o &lt;- optim(c(0, log(300)), nll, hessian = TRUE)
+&gt; round(c(k = exp(o$par[1]), lambda = exp(o$par[2]), logLik = -o$value), 3)
+        k    lambda    logLik
+    1.316   417.723 -1153.851
+&gt; round(sqrt(diag(solve(o$hessian))), 4)   # SEs of log k and log lambda
+[1] 0.0624 0.0591
+&gt; med &lt;- exp(o$par[2]) * log(2)^(1 / exp(o$par[1])); round(med, 1)
+[1] 316.2
+</pre>
+<!-- l. 748 --><p class='nopar'> <span class='cmbx-10x-x-109'>Reading the output. </span>The hand-written likelihood reproduces <span class='cmtt-10x-x-109'>survreg</span>: \(\hat k = 1.316\), \(\hat \lambda = 418\) days, \(\ell = -1153.85\). The standard
+error of \(\log \hat k\) is \(0.062\), so \(\hat k\) is about \(1.32 \pm 0.16\), clearly above \(1\). The median is \(316\) days.
+</p><!-- l. 751 --><p class='noindent'><span class='cmbx-10x-x-109'>Python: </span><span class='cmtt-10x-x-109'>scipy.optimize.minimize </span>with the same function.
+</p>
+</div>
+<!-- l. 752 --><p class='noindent'>
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 754 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu18.html'>next</a>] [<a href='survivalsu16.html'>prev</a>] [<a href='survivalsu16.html#tailsurvivalsu16.html'>prev-tail</a>] [<a href='survivalsu17.html'>front</a>] [<a href='survivalse3.html#survivalsu17.html'>up</a>] </p></div>
+<!-- l. 754 --><p class='noindent'><a id='tailsurvivalsu17.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="survivalsu16.html">&larr; Previous</a><a class="up" href="survivalse3.html#survivalsu17.html">Contents</a><a class="next" href="survivalsu18.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="survival-analysis/3-5-parametric-models-in-software" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
