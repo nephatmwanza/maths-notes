@@ -2383,6 +2383,265 @@ For an undirected graph each edge column has two $+1$s, and Theorem~\ref{thm:bip
 whatever the cycles.
 \end{solution}
 
+%======================================================================
+\section{Integer Programming}
+\label{sec:integer}
+
+When some variables must take whole values, a linear programme becomes an \textbf{integer programme} (IP), or a \textbf{mixed-integer programme} (MIP) if only some of them must. Integer variables model indivisible quantities, as with the inspectors of Section~\ref{sec:models}, and, much more importantly, yes-or-no decisions: whether to open a
+plant, whether to buy a machine, whether one job precedes another. That modelling power has a price: integer programming is NP-hard, and no algorithm is known that solves every instance quickly. Yet modern solvers, combining the LP relaxation with branching and cutting planes, routinely solve problems with thousands of integer variables. This section explains how.
+
+\subsection{Modelling with integer variables}
+\label{ssec:ipmodels}
+
+A binary variable $y \in \{0, 1\}$ expresses a decision, and linear constraints on binaries express logic.
+\begin{itemize}
+\item \textbf{Fixed charges.} A product costs $F$ to set up and $c$ per unit, with at most $M$ units: cost $Fy + cx$ with $0 \leq x \leq My$, so that $x > 0$ forces $y = 1$.
+\item \textbf{Either--or constraints.} To require $g_1(x) \leq 0$ or $g_2(x) \leq 0$, impose $g_1(x) \leq My$ and $g_2(x) \leq M(1 - y)$ with $M$ an upper bound on both.
+\item \textbf{Logical conditions.} ``At most $k$ of these projects'' is $\sum y_j \leq k$; ``project $2$ only if project $1$'' is $y_2 \leq y_1$.
+\item \textbf{Set covering.} Choose sites $y_j$ to cover every customer $i$ by at least one site: $\sum_{j \in S_i}y_j \geq 1$.
+\end{itemize}
+The \textbf{knapsack problem}, maximise $\sum v_jy_j$ subject to $\sum w_jy_j \leq W$, $y \in \{0, 1\}^n$, is the simplest IP and already NP-hard. The value of $M$ matters in practice: too small cuts off solutions, too large weakens the LP relaxation described next.
+
+\subsection{The LP relaxation}
+\label{ssec:relaxation}
+
+Dropping the integrality requirements gives the \textbf{LP relaxation}. Its optimal value is a bound: for a maximisation, $z_{\mathrm{IP}} \leq z_{\mathrm{LP}}$, since every integer solution is feasible for the LP. The bound may be weak, and rounding the LP solution may give a solution that is infeasible, or feasible but poor. For the
+inspectors of Section~\ref{sec:models} the LP gave $6.25$ Grade~1 inspectors and Rs.~430, rounding up gave Rs.~481.6, and the integer optimum, $4$ and $3$ inspectors, Rs.~479.2, is not near the rounded LP solution at all (Software~\ref{sw:milp}). When the constraint matrix is totally unimodular, as in the last two
+sections, the relaxation is exact; in general the art of formulation is to find constraints whose relaxation is as close as possible to the convex hull of the integer points.
+
+\subsection{Branch and bound}
+\label{ssec:branchbound}
+
+\textbf{Branch and bound} (Land and Doig, 1960) searches a tree of subproblems, each the original IP with some variables' bounds tightened. For a maximisation:
+\begin{enumerate}[label=(\arabic*)]
+\item Solve the LP relaxation of a subproblem. If it is infeasible, discard the subproblem.
+\item If its value is no better than the best integer solution found so far (the \textbf{incumbent}), discard it: no integer solution below it can be better (\textbf{pruning by bound}).
+\item If the LP solution is integral, it is the best solution of the subproblem; if it beats the incumbent, it becomes the incumbent.
+\item Otherwise choose a variable with fractional value $x_j^*$, and \textbf{branch}: create two subproblems with $x_j \leq \lfloor x_j^*\rfloor$ and $x_j \geq \lceil x_j^*\rceil$. Every integer solution of the parent lies in one of them, and the current LP solution in neither.
+\end{enumerate}
+
+\begin{thm}
+\label{thm:bb}
+If the LP relaxation's feasible region is bounded, branch and bound terminates, and the final incumbent is an optimal solution (or the IP is infeasible if there is none).
+\end{thm}
+
+\begin{proof}
+Each branching splits the integer points of a subproblem between two children and excludes the parent's fractional LP point. Since the region is bounded, each variable has finitely many integer values available, so along any path of the tree the bounds can be tightened only finitely often, and the tree is finite. A subproblem is
+discarded only if it is infeasible, if its LP bound shows it contains nothing better than the incumbent, or if its best integer point has been considered; so the optimum is never discarded.
+\end{proof}
+
+\begin{exa}
+\label{ex:bb}
+Maximise $5x_1 + 4x_2$ subject to $6x_1 + 4x_2 \leq 24$, $x_1 + 2x_2 \leq 6$, $x \geq 0$ integer. The LP optimum is $(3, 1.5)$ with $z = 21$. Branching on $x_2$: the branch $x_2 \leq 1$ has LP optimum $(3.33, 1)$, $z = 20.67$; branching on $x_1$ gives the integer solutions $(3, 1)$, $z = 19$, and then $(4, 0)$, $z = 20$, the
+incumbent. The branch $x_2 \geq 2$ has LP value $18 < 20$ and is pruned without further work. The optimum is $(4, 0)$, $z = 20$, one less than the LP bound (Figure~\ref{fig:bbtree}).
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+  nd/.style={draw,rounded corners=3pt,fill=white,align=center,font=\scriptsize,minimum width=2.3cm}]
+\fill[blue!4,rounded corners=4pt] (-5.3,-4.35) rectangle (5.3,0.85);
+\node[nd] (r) at (0,0) {LP $(3, 1.5)$\\$z = 21$};
+\node[nd] (a) at (-2.4,-1.7) {$x_2 \leq 1$: $(3.33, 1)$\\$z = 20.67$};
+\node[nd,fill=black!8] (b) at (2.6,-1.7) {$x_2 \geq 2$: $z = 18$\\pruned: $18 < 20$};
+\node[nd,fill=orange!15] (c) at (-3.9,-3.5) {$x_1 \leq 3$: $(3, 1)$\\integer, $z = 19$};
+\node[nd,fill=green!20] (d) at (-0.9,-3.5) {$x_1 \geq 4$: $(4, 0)$\\integer, $z = 20$};
+\draw[->] (r) -- (a); \draw[->] (r) -- (b); \draw[->] (a) -- (c); \draw[->] (a) -- (d);
+\node[font=\scriptsize,green!45!black,anchor=west] at (1.1,-3.5) {optimal: $(4, 0)$, $z = 20$};
+\end{tikzpicture}
+\caption{The branch-and-bound tree for Example~\ref{ex:bb}, explored depth first. Each node shows its added bound, its LP solution and its value. Integer solutions update the incumbent; the right branch is pruned because its LP bound $18$ is below the incumbent $20$.}
+\label{fig:bbtree}
+\end{figure}
+
+The order of exploration matters. \textbf{Depth first} finds integer solutions quickly and keeps memory small; \textbf{best bound} (always expanding the open node with the largest LP value) proves optimality with the fewest nodes. Each node's LP differs from its parent's by one bound, so the dual simplex method re-solves it in a few pivots
+from the parent's basis. The difference between the incumbent and the best open bound, the \textbf{gap}, measures how far from proved optimality the search is, and solvers report it as they run.
+
+\subsection{Cutting planes}
+\label{ssec:cuts}
+
+A \textbf{cutting plane} is an inequality satisfied by every integer feasible point but violated by the current LP optimum. Adding it tightens the relaxation. Gomory (1958) showed how to derive one from any row of the optimal tableau with a fractional right-hand side.
+
+\begin{thm}[Gomory fractional cut]
+\label{thm:gomory}
+Suppose all variables are integers and non-negative, and a row of the optimal tableau reads $x_i + \sum_{j \in N}\bar a_jx_j = \bar b$ with $\bar b$ not an integer. Writing $f(v) = v - \lfloor v\rfloor$ for the fractional part, every integer feasible point satisfies
+\[
+\sum_{j \in N}f(\bar a_j)\,x_j \geq f(\bar b) ,
+\]
+and the current LP solution, with all $x_j = 0$ for $j \in N$, violates it.
+\end{thm}
+
+\begin{proof}
+Write $\bar a_j = \lfloor\bar a_j\rfloor + f(\bar a_j)$ and $\bar b = \lfloor\bar b\rfloor + f(\bar b)$; the row becomes $x_i + \sum\lfloor\bar a_j\rfloor x_j - \lfloor\bar b\rfloor = f(\bar b) - \sum f(\bar a_j)x_j$. At an integer point the left side is an integer. The right side is less than $1$, since $f(\bar b) < 1$ and $\sum f(\bar a_j)x_j \geq 0$.
+An integer less than $1$ is at most $0$, which is the cut. At the LP solution the right side is $f(\bar b) > 0$.
+\end{proof}
+
+In Example~\ref{ex:bb} (with slacks $s_1$, $s_2$, which are integers since the data are) the optimal row for $x_2$ is $x_2 - \frac18s_1 + \frac34s_2 = \frac32$. The cut is $\frac78s_1 + \frac34s_2 \geq \frac12$, and substituting $s_1 = 24 - 6x_1 - 4x_2$, $s_2 = 6 - x_1 - 2x_2$ it becomes
+$6x_1 + 5x_2 \leq 25$ (Software~\ref{sw:gomory}). It cuts off $(3, 1.5)$, keeps every integer point, and moves the LP optimum to $(3.33, 1)$. Gomory proved that repeated cuts of this kind solve any IP in finitely many steps, but on their own they converge slowly; modern solvers use them inside branch and bound
+(\textbf{branch and cut}), together with cuts specific to the structure, such as cover inequalities for knapsack rows.
+
+\subsection{Goal programming}
+\label{ssec:goal}
+
+Real decisions often have several objectives that cannot all be met. \textbf{Goal programming} (Charnes and Cooper, 1961) sets a target $g_k$ for each objective $f_k(x)$ and introduces deviations $d_k^-, d_k^+ \geq 0$ with
+\[
+f_k(x) + d_k^- - d_k^+ = g_k ,
+\]
+the amounts by which the goal is under- and over-achieved. The objective penalises the unwanted deviations: in \textbf{weighted} goal programming, a weighted sum of them; in \textbf{preemptive} (lexicographic) goal programming, the goals are ranked, and each is optimised without worsening those above it, which is approximated by very unequal weights or done exactly by
+solving a sequence of LPs. The weights encode the decision maker's trade-offs, and different weights give different compromises (Software~\ref{sw:milp}).
+
+\subsection{Integer programming in software}
+\label{ssec:software9}
+
+\begin{software}[Branch and bound]
+\label{sw:bb}
+A depth-first branch and bound on Example~\ref{ex:bb}, with each subproblem's LP solved by \texttt{linprog} and printed with its bounds; then SciPy's \texttt{milp}, which calls the HiGHS branch-and-cut solver:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from scipy.optimize import linprog, milp, LinearConstraint, Bounds
+>>> c = np.array([5., 4])                  # max 5 x1 + 4 x2
+>>> A = np.array([[6., 4], [1, 2]]); b = np.array([24., 6])
+>>> best = {'z': -np.inf, 'x': None}
+>>> def branch(bounds, depth=0):
+...     r = linprog(-c, A_ub=A, b_ub=b, bounds=bounds, method='highs')
+...     tag = '  ' * depth + str([(lo, hi) for lo, hi in bounds])
+...     if r.status != 0: print(tag, 'infeasible'); return
+...     z, x = -r.fun, r.x
+...     if z <= best['z'] + 1e-9: print(tag, f"bound {z:.2f}: pruned"); return
+...     frac = [j for j in range(2) if abs(x[j] - round(x[j])) > 1e-9]
+...     if not frac:
+...         best.update(z=z, x=x + 0.0)
+...         print(tag, f"integer {x + 0.0}, z = {z:.0f}"); return
+...     j = frac[0]
+...     print(tag, f"LP {np.round(x, 3)}, z = {z:.2f}, branch x{j+1}")
+...     lo, hi = bounds[j]
+...     down = list(bounds); down[j] = (lo, np.floor(x[j]))
+...     up = list(bounds); up[j] = (np.ceil(x[j]), hi)
+...     branch(down, depth + 1); branch(up, depth + 1)
+...
+>>> branch([(0, None), (0, None)])
+[(0, None), (0, None)] LP [3.  1.5], z = 21.00, branch x2
+  [(0, None), (0, 1.0)] LP [3.333 1.   ], z = 20.67, branch x1
+    [(0, 3.0), (0, 1.0)] integer [3. 1.], z = 19
+    [(4.0, None), (0, 1.0)] integer [4. 0.], z = 20
+  [(0, None), (2.0, None)] bound 18.00: pruned
+>>> best['z'], best['x']
+(20.0, array([4., 0.]))
+>>> r = milp(-c, constraints=LinearConstraint(A, ub=b), integrality=[1, 1])
+>>> r.x, -r.fun                            # SciPy's branch and cut (HiGHS)
+(array([4., 0.]), 20.0)
+\end{verbatim}}
+\textbf{Reading the output.} Five nodes reproduce the tree of Figure~\ref{fig:bbtree}: the root, the node $x_2 \leq 1$, its two integer children, and the pruned node $x_2 \geq 2$. Both methods find $(4, 0)$ with $z = 20$.
+
+\textbf{MATLAB/Octave:} \texttt{intlinprog(-c, [1 2], A, b)}.
+\end{software}
+
+\begin{software}[A Gomory cut]
+\label{sw:gomory}
+The $x_2$ row of the optimal tableau of Example~\ref{ex:bb}, computed as row $2$ of $B^{-1}[A \mid I]$; its fractional parts on the slacks; the cut rewritten in $x_1$, $x_2$; and the LP with the cut added:
+{\small\begin{verbatim}
+>>> from fractions import Fraction as F
+>>> B = np.array([[6., 4], [1, 2]]); Binv = np.linalg.inv(B)
+>>> row_x2 = Binv[1] @ np.hstack([A, np.eye(2)])   # x2 row: coefficients
+>>> rhs = Binv[1] @ b
+>>> [str(F(v).limit_denominator(100)) for v in row_x2], str(F(rhs))
+(['0', '1', '-1/8', '3/4'], '3/2')
+>>> frac = lambda v: v - np.floor(v)  # cut: sum frac(a_j) s_j >= frac(b)
+>>> cut = frac(row_x2[2:]); cut, frac(rhs)  # on the slacks s1, s2
+(array([0.875, 0.75 ]), 0.5)
+>>> g = -(cut @ A); h = frac(rhs) - cut @ b       # g x >= h
+>>> g, h
+(array([-6., -5.]), -25.0)
+>>> r = linprog(-c, A_ub=np.vstack([A, -g]), b_ub=np.r_[b, -h],
+...             method='highs')
+>>> r.x, -r.fun                            # the cut moves the LP optimum
+(array([3.33333333, 1.        ]), 20.666666666666668)
+\end{verbatim}}
+\textbf{Reading the output.} The row is $x_2 - \frac18s_1 + \frac34s_2 = \frac32$; the cut $0.875s_1 + 0.75s_2 \geq 0.5$ becomes $-6x_1 - 5x_2 \geq -25$, that is $6x_1 + 5x_2 \leq 25$. With it the LP optimum moves from $(3, 1.5)$ to $(3.33, 1)$, and the bound falls from $21$ to $20.67$; further cuts would be
+needed to reach $20$.
+
+\textbf{MATLAB/Octave:} \texttt{B \textbackslash\ [A eye(2)]} gives the tableau rows.
+\end{software}
+
+\begin{software}[Inspectors and goals]
+\label{sw:milp}
+The inspector problem of Example~\ref{ex:inspectors} as an IP; then a goal programme with variables $x_1, x_2$ and deviations $d_1^\mp$ (profit $40x_1 + 30x_2$, goal at least $1000$) and $d_2^\mp$ (labour $3x_1 + 4x_2$, goal at most $60$ hours), with capacity $x_1 + x_2 \leq 30$, under two weightings:
+{\small\begin{verbatim}
+>>> pieces = LinearConstraint([[320, 240]], lb=2000)    # pieces a day
+>>> r = milp([68.8, 68.0], constraints=pieces,
+...          integrality=[1, 1], bounds=Bounds([0, 0], [9, 11]))
+>>> r.x, round(r.fun, 1)              # the inspectors of Section 1, as an IP
+(array([4., 3.]), 479.2)
+>>> Ae = [[40, 30, 1, -1, 0, 0],           # 40 x1 + 30 x2 + d1- - d1+ = 1000
+...       [3, 4, 0, 0, 1, -1]]             # 3 x1 + 4 x2 + d2- - d2+ = 60
+>>> for name, w in (('profit first ', [0, 0, 1000, 0, 0, 1]),
+...                 ('labour x 20  ', [0, 0, 1, 0, 0, 20])):
+...     r = linprog(w, A_eq=Ae, b_eq=[1000, 60], A_ub=[[1, 1, 0, 0, 0, 0]],
+...                 b_ub=[30], method='highs')        # and x1 + x2 <= 30
+...     print(name, np.round(r.x, 2))
+...
+profit first  [25.  0.  0.  0.  0. 15.]
+labour x 20   [ 20.   0. 200.   0.   0.   0.]
+\end{verbatim}}
+\textbf{Reading the output.} The inspector IP gives $4$ Grade~1 and $3$ Grade~2 inspectors at Rs.~479.2, the answer found by enumeration in Section~\ref{sec:models}. In the goal programme the two goals conflict. With profit given priority, $x_1 = 25$ meets the profit goal exactly and overruns labour by $15$ hours ($d_2^+ = 15$). With an hour
+weighted as Rs.~20 of profit, $x_1 = 20$ meets the labour goal and falls Rs.~200 short of the profit goal. The model does not choose between them; the weights, set by the decision maker, do.
+
+\textbf{MATLAB/Octave:} \texttt{intlinprog} and \texttt{linprog} with the same matrices.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Formulate: a firm may build up to three warehouses, at sites with fixed costs $100$, $120$, $90$ and capacities $50$, $60$, $40$; it must store $80$ units; storage costs $2$, $1.5$, $2.5$ per unit at the three sites. Minimise total cost.
+\end{problem}
+
+\begin{solution}
+Let $y_j \in \{0, 1\}$ open site $j$ and $x_j \geq 0$ be the units stored there. Minimise $100y_1 + 120y_2 + 90y_3 + 2x_1 + 1.5x_2 + 2.5x_3$ subject to $x_1 + x_2 + x_3 = 80$, $x_j \leq c_jy_j$ with $c = (50, 60, 40)$. Opening sites $1$ and $2$ (capacity $110$) with $x_2 = 60$, $x_1 = 20$ costs $220 + 90 + 40 = 350$; sites $2$ and $3$ with $x_2 = 60$, $x_3 = 20$ cost $210 + 90 + 50 = 350$ as well; sites $1$
+and $3$ hold only $90$ and cost $190 + 100 + 75 = 365$ with $x_1 = 50$, $x_3 = 30$. So the optimum is $350$, attained in two ways.
+\end{solution}
+
+\begin{problem}
+Solve the knapsack problem: maximise $10y_1 + 13y_2 + 7y_3 + 8y_4$ subject to $4y_1 + 6y_2 + 3y_3 + 5y_4 \leq 10$, $y \in \{0, 1\}^4$, and compare with its LP relaxation.
+\end{problem}
+
+\begin{solution}
+The value per unit weight is $2.5$, $2.17$, $2.33$, $1.6$. The LP relaxation fills by ratio: $y_1 = 1$, $y_3 = 1$ (weight $7$), then $y_2 = \frac36 = \frac12$, value $10 + 7 + 6.5 = 23.5$. Among integer choices of weight at most $10$: $\{1, 2\}$ weight $10$, value $23$; $\{1, 3\}$ value $17$; $\{2, 3\}$ weight $9$, value $20$; $\{1, 4\}$ value $18$;
+$\{3, 4\}$ value $15$; $\{2, 4\}$ weighs $11$, and every triple weighs more than $10$. The optimum is $y_1 = y_2 = 1$, value $23$, with LP bound $23.5$.
+\end{solution}
+
+\begin{problem}
+Model the condition ``if product $A$ is made ($x_A > 0$) then at least $10$ units of product $B$ must be made'', with $x_A \leq 100$.
+\end{problem}
+
+\begin{solution}
+Introduce $y \in \{0, 1\}$ with $x_A \leq 100y$ and $x_B \geq 10y$. If $x_A > 0$ then $y = 1$ and $x_B \geq 10$; if $y = 0$ then $x_A = 0$ and $x_B \geq 0$ only.
+\end{solution}
+
+\begin{problem}
+Derive the Gomory cut from the $x_1$ row of the optimal tableau of Example~\ref{ex:bb}, which is $x_1 + \frac14s_1 - \frac12s_2 = 3$, and explain the result.
+\end{problem}
+
+\begin{solution}
+The right-hand side $3$ is an integer, so this row gives no cut: $x_1$ is already integral at the LP optimum. A Gomory cut needs a row whose basic variable is fractional, here the $x_2$ row.
+\end{solution}
+
+\begin{problem}
+Solve Example~\ref{ex:bb} by best-bound search and count the nodes. Does the order matter here?
+\end{problem}
+
+\begin{solution}
+The root ($21$) branches into $x_2 \leq 1$ ($20.67$) and $x_2 \geq 2$ ($18$). Best bound expands $20.67$ first, giving $(3, 1)$ with $19$ and $(4, 0)$ with $20$. The incumbent $20$ now exceeds the open bound $18$, which is pruned. Five LPs are solved, the same as depth first; on larger problems best bound usually
+solves fewer.
+\end{solution}
+
+\begin{problem}
+A company has goals: profit at least Rs.~1000 (priority $1$) and overtime at most $10$ hours (priority $2$). With profit $40x_1 + 30x_2$, labour $3x_1 + 4x_2$ in a week with $60$ regular hours, and $x_1 + x_2 \leq 30$, find the preemptive solution.
+\end{problem}
+
+\begin{solution}
+Priority $1$: profit $\geq 1000$ is attainable (for example $x_1 = 25$). Priority $2$: minimise overtime $3x_1 + 4x_2 - 60$ subject to $40x_1 + 30x_2 \geq 1000$. Labour per rupee of profit is $\frac3{40} = 0.075$ for $x_1$ and $\frac4{30} = 0.133$ for $x_2$, so use $x_1$ only: $x_1 = 25$, labour $75$, overtime $15$, which misses the
+overtime goal by $5$ hours. No plan meets both goals: the profit goal forces at least $75$ hours.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -2419,10 +2678,12 @@ whatever the cycles.
 \item Bland, R. G. (1977), New finite pivoting rules for the simplex method, \emph{Mathematics of Operations Research}, 2, 103--107.
 \item Bradley, S. P., Hax, A. C., and Magnanti, T. L. (1977), \emph{Applied Mathematical Programming}, Reading, Addison-Wesley.
 \item Charnes, A. (1952), Optimality and degeneracy in linear programming, \emph{Econometrica}, 20, 160--170.
+\item Charnes, A., and Cooper, W. W. (1961), \emph{Management Models and Industrial Applications of Linear Programming}, New York, Wiley.
 \item Charnes, A., Cooper, W. W., and Ferguson, R. O. (1955), Optimal estimation of executive compensation by linear programming, \emph{Management Science}, 1, 138--151.
 \item Dantzig, G. B. (1951), Maximization of a linear function of variables subject to linear inequalities, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 339--347.
 \item Dantzig, G. B. (1955), Upper bounds, secondary constraints, and block triangularity in linear programming, \emph{Econometrica}, 23, 174--183.
 \item Dantzig, G. B., and Orchard-Hays, W. (1954), The product form for the inverse in the simplex method, \emph{Mathematical Tables and Other Aids to Computation}, 8, 64--67.
+\item Dantzig, G. B., Fulkerson, D. R., and Johnson, S. M. (1954), Solution of a large-scale traveling-salesman problem, \emph{Journal of the Operations Research Society of America}, 2, 393--410.
 \item Dijkstra, E. W. (1959), A note on two problems in connexion with graphs, \emph{Numerische Mathematik}, 1, 269--271.
 \item Edmonds, J. (1965), Maximum matching and a polyhedron with 0,1-vertices, \emph{Journal of Research of the National Bureau of Standards}, 69B, 125--130.
 \item Edmonds, J., and Karp, R. M. (1972), Theoretical improvements in algorithmic efficiency for network flow problems, \emph{Journal of the ACM}, 19, 248--264.
@@ -2434,22 +2695,26 @@ whatever the cycles.
 \item Gale, D., Kuhn, H. W., and Tucker, A. W. (1951), Linear programming and the theory of games, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 317--329.
 \item Gass, S. I., and Saaty, T. L. (1955), The computational algorithm for the parametric objective function, \emph{Naval Research Logistics Quarterly}, 2, 39--45.
 \item Goldfarb, D., and Reid, J. K. (1977), A practicable steepest-edge simplex algorithm, \emph{Mathematical Programming}, 12, 361--371.
+\item Gomory, R. E. (1958), Outline of an algorithm for integer solutions to linear programs, \emph{Bulletin of the American Mathematical Society}, 64, 275--278.
 \item Harris, P. M. J. (1973), Pivot selection methods of the Devex LP code, \emph{Mathematical Programming}, 5, 1--28.
 \item Hitchcock, F. L. (1941), The distribution of a product from several sources to numerous localities, \emph{Journal of Mathematics and Physics}, 20, 224--230.
 \item Hoffman, A. J., and Kruskal, J. B. (1956), Integral boundary points of convex polyhedra, in H. W. Kuhn and A. W. Tucker (eds.), \emph{Linear Inequalities and Related Systems}, Annals of Mathematics Studies 38, Princeton University Press, 223--246.
 \item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.
 \item Karmarkar, N. (1984), A new polynomial-time algorithm for linear programming, \emph{Combinatorica}, 4, 373--395.
+\item Karp, R. M. (1972), Reducibility among combinatorial problems, in R. E. Miller and J. W. Thatcher (eds.), \emph{Complexity of Computer Computations}, New York, Plenum, 85--103.
 \item Kelley, J. E., and Walker, M. R. (1959), Critical-path planning and scheduling, \emph{Proceedings of the Eastern Joint Computer Conference}, 160--173.
 \item Khachiyan, L. G. (1979), A polynomial algorithm in linear programming, \emph{Soviet Mathematics Doklady}, 20, 191--194.
 \item Klee, V., and Minty, G. J. (1972), How good is the simplex algorithm?, in O. Shisha (ed.), \emph{Inequalities III}, New York, Academic Press, 159--175.
 \item K\"onig, D. (1931), Gr\'afok \'es m\'atrixok, \emph{Matematikai \'es Fizikai Lapok}, 38, 116--119.
 \item Koopmans, T. C. (ed.) (1951), \emph{Activity Analysis of Production and Allocation}, New York, Wiley.
 \item Kuhn, H. W. (1955), The Hungarian method for the assignment problem, \emph{Naval Research Logistics Quarterly}, 2, 83--97.
+\item Land, A. H., and Doig, A. G. (1960), An automatic method of solving discrete programming problems, \emph{Econometrica}, 28, 497--520.
 \item Lemke, C. E. (1954), The dual method of solving the linear programming problem, \emph{Naval Research Logistics Quarterly}, 1, 36--47.
 \item MacCrimmon, K. R., and Ryavec, C. A. (1964), An analytical study of the PERT assumptions, \emph{Operations Research}, 12, 16--37.
 \item Malcolm, D. G., Roseboom, J. H., Clark, C. E., and Fazar, W. (1959), Application of a technique for research and development program evaluation, \emph{Operations Research}, 7, 646--669.
 \item Minkowski, H. (1896), \emph{Geometrie der Zahlen}, Leipzig, Teubner.
 \item von Neumann, J. (1947), Discussion of a maximum problem, unpublished manuscript, in A. H. Taub (ed.), \emph{John von Neumann: Collected Works}, Vol.~VI (1963), Oxford, Pergamon, 89--95.
+\item Padberg, M., and Rinaldi, G. (1991), A branch-and-cut algorithm for the resolution of large-scale symmetric traveling salesman problems, \emph{SIAM Review}, 33, 60--100.
 \item Spielman, D. A., and Teng, S.-H. (2004), Smoothed analysis of algorithms: why the simplex algorithm usually takes polynomial time, \emph{Journal of the ACM}, 51, 385--463.
 \item Stigler, G. J. (1945), The cost of subsistence, \emph{Journal of Farm Economics}, 27, 303--314.
 \item Vogel, W. R. (1958), A short-cut solution to the transportation problem, cited in N. V. Reinfeld and W. R. Vogel, \emph{Mathematical Programming}, Englewood Cliffs, Prentice-Hall.
