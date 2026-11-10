@@ -2029,6 +2029,360 @@ Show that in the assignment problem every BFS is degenerate when $n \geq 2$.
 A basis has $2n - 1$ cells, by Proposition~\ref{prop:transportrank}. A BFS is a vertex, hence by total unimodularity a permutation matrix, with exactly $n$ positive entries. So $n - 1 \geq 1$ basic variables are zero.
 \end{solution}
 
+%======================================================================
+\section{Network Flows and Project Scheduling}
+\label{sec:networks}
+
+Roads, pipelines, telephone circuits and supply chains are networks: nodes joined by arcs along which something flows. Many OR problems on networks are linear programmes whose constraint matrix is the node--arc incidence matrix of a directed graph, and like the transportation problem they have integral solutions and fast special
+algorithms. This section treats the three classical ones, shortest paths, maximum flows and minimum-cost flows, and then project scheduling by the critical path method and PERT, which is a longest-path problem on a network of activities.
+
+\subsection{Networks and minimum-cost flows}
+\label{ssec:mincostflow}
+
+A \textbf{directed network} has nodes $1, \ldots, n$ and arcs $(i, j)$, each with a cost $c_{ij}$ per unit of flow and a capacity $u_{ij}$. Each node has a net supply $b_i$ (positive at sources, negative at sinks, $\sum b_i = 0$). The \textbf{minimum-cost flow problem} is
+\[
+\text{minimise } \sum_{(i,j)}c_{ij}x_{ij} \quad\text{subject to}\quad \sum_jx_{ij} - \sum_jx_{ji} = b_i \ \text{for every node } i, \quad 0 \leq x_{ij} \leq u_{ij} .
+\]
+The equations say that flow out minus flow in equals supply: \textbf{conservation of flow}. In matrix form they are $Nx = b$, where the \textbf{node--arc incidence matrix} $N$ has, in the column of arc $(i, j)$, a $+1$ in row $i$, a $-1$ in row $j$ and zeros elsewhere.
+
+\begin{thm}
+\label{thm:networktu}
+The node--arc incidence matrix of a directed graph is totally unimodular. Hence, if the supplies and capacities are integers, the minimum-cost flow problem (if feasible and bounded) has an integral optimal solution.
+\end{thm}
+
+\begin{proof}
+Each column has one $+1$ and one $-1$. Put all the rows in one group in Theorem~\ref{thm:bipartitetu}: every column has two non-zeros of opposite signs in the same group, as required. Integrality follows from Theorem~\ref{thm:tuintegral}, applied with the capacities as bounds.
+\end{proof}
+
+The transportation and assignment problems are minimum-cost flows on bipartite networks, and the shortest-path and maximum-flow problems below are further special cases. The \textbf{network simplex method}, in which bases are spanning trees exactly as in Proposition~\ref{prop:transportrank}, solves the general problem
+many times faster than a general LP code.
+
+\subsection{Shortest paths}
+\label{ssec:shortestpath}
+
+To find a shortest path from node $s$ to node $t$ with arc lengths $c_{ij}$, send one unit of flow from $s$ to $t$ at least cost: $b_s = 1$, $b_t = -1$, other $b_i = 0$. By Theorem~\ref{thm:networktu} the optimal flow is $0$ or $1$ on each arc and traces a path. The dual has a variable $\pi_i$ for each node, the \textbf{potential}, and
+reads: maximise $\pi_s - \pi_t$ subject to $\pi_i - \pi_j \leq c_{ij}$ for every arc. With $d_i = \pi_s - \pi_i$, the distances from $s$ satisfy \textbf{Bellman's equations} $d_j = \min_i(d_i + c_{ij})$, the principle of optimality of dynamic programming: the last arc of a shortest path to $j$ comes from a shortest path to its tail.
+
+When all lengths are non-negative, Dijkstra's algorithm (1959) computes the distances from $s$ to every node: keep a set $P$ of nodes whose distances are final, starting with $P = \{s\}$, $d_s = 0$; repeatedly add the node outside $P$ with the smallest tentative label $d_j = \min_{i \in P}(d_i + c_{ij})$, and update the labels of its
+neighbours.
+
+\begin{thm}[Dijkstra]
+\label{thm:dijkstra}
+If all $c_{ij} \geq 0$, the label of each node is its true distance from $s$ when the node is added to $P$.
+\end{thm}
+
+\begin{proof}
+By induction on $|P|$. Let $j$ be the next node added, with label $d_j$, which is the length of some path from $s$. Any path from $s$ to $j$ leaves $P$ at some arc $(i, k)$ with $i \in P$, $k \notin P$; its length is at least $d_i + c_{ik}$ (by the induction hypothesis for $i$, and since the remaining arcs have
+non-negative length), which is at least the label of $k$, which is at least $d_j$ by the choice of $j$. So no path is shorter than $d_j$.
+\end{proof}
+
+With a heap the algorithm runs in $O(m\log n)$ time on a network with $m$ arcs. With negative lengths it can fail (Problem~\ref{prob:negative}); the Bellman--Ford algorithm handles them, and detects negative cycles, in $O(mn)$.
+
+\subsection{Maximum flows and minimum cuts}
+\label{ssec:maxflow}
+
+In the \textbf{maximum-flow problem}, the arcs have capacities only, and the aim is to send as much as possible from a source $s$ to a sink $t$. An \textbf{$s$--$t$ cut} is a set $S$ of nodes containing $s$ but not $t$; its capacity $u(S)$ is the total capacity of the arcs from $S$ to its complement. Every unit of flow
+must cross every cut, so the value of any flow is at most the capacity of any cut. The remarkable fact is that the bound is attained.
+
+\begin{thm}[Max-flow min-cut; Ford and Fulkerson, 1956]
+\label{thm:maxflowmincut}
+The maximum value of an $s$--$t$ flow equals the minimum capacity of an $s$--$t$ cut.
+\end{thm}
+
+\begin{proof}
+Given a flow $x$, the \textbf{residual network} has an arc $(i, j)$ with capacity $u_{ij} - x_{ij}$ wherever that is positive, and a reverse arc $(j, i)$ with capacity $x_{ij}$ wherever $x_{ij} > 0$ (flow that may be cancelled). If the residual network contains a path from $s$ to $t$, an \textbf{augmenting path}, pushing the smallest
+residual capacity $\delta > 0$ along it gives a feasible flow of value larger by $\delta$; so at a maximum flow there is none. Let $S$ be the set of nodes reachable from $s$ in the residual network of a maximum flow; then $t \notin S$. Every arc from $S$ to its complement is saturated, $x_{ij} = u_{ij}$, and every arc
+into $S$ carries no flow, since otherwise its end outside $S$ would be reachable. So the net flow across the cut, which equals the flow value, is exactly $u(S)$. (That a maximum flow exists follows from compactness, or constructively from the Edmonds--Karp rule below.)
+\end{proof}
+
+The proof is an algorithm: start from zero flow and augment until no augmenting path remains. With integer capacities each augmentation adds at least $1$, so the method terminates with an integral maximum flow. Choosing a \emph{shortest} augmenting path at each step, by breadth-first search (Edmonds and Karp, 1972), bounds the number of
+augmentations by $O(nm)$ whatever the capacities. The theorem is also an instance of LP duality: the dual of the maximum-flow LP is an LP whose integral solutions are cuts. It has many combinatorial consequences, among them K\"onig's theorem on bipartite matchings used in the Hungarian method.
+
+\begin{exa}
+\label{ex:networks}
+Figure~\ref{fig:network} shows a network with six nodes. With the first number on each arc as its length, the shortest path from $1$ to $5$ is $1 \to 3 \to 6 \to 5$, of length $9 + 2 + 9 = 20$. With the second number as its capacity, the maximum flow from $1$ to $5$ is $25$, and the cut $S = \{1, 2, 3, 4, 6\}$, whose
+outgoing arcs $(4, 5)$ and $(6, 5)$ have capacities $10 + 15 = 25$, proves it (Software~\ref{sw:paths}, \ref{sw:maxflow}).
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth]
+\fill[blue!4,rounded corners=4pt] (-0.9,-0.9) rectangle (9.9,3.9);
+\node[draw,circle,fill=orange!20,minimum size=0.7cm] (1) at (0,1.5) {1};
+\node[draw,circle,fill=white,minimum size=0.7cm] (2) at (2.6,3.1) {2};
+\node[draw,circle,fill=white,minimum size=0.7cm] (3) at (2.6,1.5) {3};
+\node[draw,circle,fill=white,minimum size=0.7cm] (6) at (5.2,-0.1) {6};
+\node[draw,circle,fill=white,minimum size=0.7cm] (4) at (6.0,3.1) {4};
+\node[draw,circle,fill=green!20,minimum size=0.7cm] (5) at (8.6,1.5) {5};
+\foreach \a/\b/\l/\p in {1/2/{7, 10}/0.5, 2/3/{10, 4}/0.5, 2/4/{15, 9}/0.5, 3/4/{11, 15}/0.5, 4/5/{6, 10}/0.3}
+  \draw[->,thick,black!70] (\a) -- (\b) node[pos=\p,fill=blue!4,inner sep=1pt,font=\scriptsize] {$\l$};
+\draw[->,thick,black!70] (1) to[bend right=25] node[pos=0.5,fill=blue!4,inner sep=1pt,font=\scriptsize] {$14, 15$} (6);
+\draw[->,very thick,red!70!black] (1) -- (3) node[pos=0.5,fill=blue!4,inner sep=1pt,font=\scriptsize] {$9, 5$};
+\draw[->,very thick,red!70!black] (3) -- (6) node[pos=0.5,fill=blue!4,inner sep=1pt,font=\scriptsize] {$2, 4$};
+\draw[->,very thick,red!70!black] (6) -- (5) node[pos=0.3,fill=blue!4,inner sep=1pt,font=\scriptsize] {$9, 15$};
+\draw[green!45!black,dashed,very thick] (7.7,3.7) .. controls (7.0,2.0) and (7.3,0.5) .. (7.6,-0.7);
+\node[font=\scriptsize,green!45!black,align=center] at (8.9,3.3) {min cut\\$10 + 15 = 25$};
+\node[font=\scriptsize,red!70!black,anchor=west] at (-0.7,-0.6) {shortest path $1 \to 3 \to 6 \to 5$: length $20$};
+\end{tikzpicture}
+\caption{The network of Example~\ref{ex:networks}, each arc labelled (length, capacity). In red, the shortest path from $1$ to $5$; the dashed curve is a minimum cut, separating node $5$ from the rest, crossed by the arcs $(4, 5)$ and $(6, 5)$ of total capacity $25$, which is the maximum flow.}
+\label{fig:network}
+\end{figure}
+
+\subsection{Project scheduling: CPM}
+\label{ssec:cpm}
+
+A project consists of activities with durations and \textbf{precedence} relations: an activity can start only when its predecessors have finished. In an \emph{activity-on-node} network each activity is a node and each precedence an arc. The project cannot finish before the longest chain of activities does, and the \textbf{critical path method}
+(CPM; Kelley and Walker, 1959) computes:
+\begin{itemize}
+\item in a \textbf{forward pass}, the earliest start $ES_k = \max\{EF_p : p \text{ a predecessor of } k\}$ ($0$ if none) and earliest finish $EF_k = ES_k + t_k$; the project duration is $T = \max_kEF_k$;
+\item in a \textbf{backward pass}, the latest finish $LF_k = \min\{LS_q : q \text{ a successor of } k\}$ ($T$ if none) and latest start $LS_k = LF_k - t_k$;
+\item the \textbf{total float} $LS_k - ES_k$, the delay activity $k$ can suffer without delaying the project.
+\end{itemize}
+Activities with zero float are \textbf{critical}; they form a longest path, the \textbf{critical path}. Since the network has no cycles, the forward pass is the longest-path version of Bellman's equations, solved in one sweep in topological order.
+
+\begin{prop}
+\label{prop:cpm}
+The minimum project duration $T$ equals the length of a longest path of activities through the network, and an activity has zero total float if and only if it lies on such a path.
+\end{prop}
+
+\begin{proof}
+By induction in topological order, $EF_k$ is the length of a longest chain ending with $k$, and so $T$ is the longest path length. A schedule must start each activity no earlier than $ES_k$, so no schedule is shorter. Symmetrically $T - LS_k$ is the length of a longest chain starting with $k$, so $LS_k - ES_k = T - (\text{longest chain through } k)$, which is zero exactly
+when $k$ lies on a longest path.
+\end{proof}
+
+\subsection{Uncertain durations: PERT}
+\label{ssec:pert}
+
+The Program Evaluation and Review Technique (PERT), developed for the Polaris missile programme in 1958, gives each activity an optimistic time $a$, a most likely time $m$ and a pessimistic time $b$, and models the duration as a beta distribution with
+\[
+t_e = \frac{a + 4m + b}6, \qquad \sigma^2 = \Bigl(\frac{b - a}6\Bigr)^2 .
+\]
+The project duration is approximated by the sum along the critical path computed with the $t_e$, which by the central limit theorem is roughly normal with mean $T$ and variance the sum of the variances along the path. Then $P(\text{finish by } D) \approx \Phi\bigl((D - T)/\sigma\bigr)$.
+
+The approximation is optimistic, for two reasons: other paths that are nearly critical may turn out longest (the \textbf{merge-event bias}), since the duration is the \emph{maximum} over paths, and the expected maximum exceeds the maximum of the expectations; and a few activities on one path are not many enough for the central limit
+theorem. Simulation, the subject of the last section, removes both errors.
+
+\begin{exa}
+\label{ex:pert}
+Seven activities have predecessors and estimates $(a, m, b)$: $A$: none, $(2, 4, 6)$; $B$: none, $(3, 5, 9)$; $C$: $A$, $(4, 5, 7)$; $D$: $A$, $(4, 6, 10)$; $E$: $B$ and $C$, $(4, 5, 7)$; $F$: $D$, $(3, 4, 8)$; $G$: $E$, $(3, 5, 8)$. The expected times are $4, 5.33, 5.17, 6.33, 5.17, 4.5, 5.17$. The forward pass gives
+$T = 19.5$ along the critical path $A \to C \to E \to G$ (Figure~\ref{fig:cpm}); $B$ has float $3.83$, and $D$ and $F$ have float $4.67$. The variance along the critical path is $\frac49 + \frac14 + \frac14 + \frac{25}{36} = 1.639$, $\sigma = 1.28$, so $P(\text{finish by } 21) \approx \Phi(1.17) = 0.879$. Simulation
+with beta durations gives $0.848$ (Software~\ref{sw:pert}).
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+  act/.style={draw,rounded corners=3pt,fill=white,align=center,font=\scriptsize,minimum width=1.3cm,minimum height=0.85cm}]
+\fill[yellow!7,rounded corners=4pt] (-1.0,-0.8) rectangle (12.0,4.2);
+\node[act,fill=black!8] (s) at (0,1.7) {start};
+\node[act,fill=red!12] (A) at (2.0,2.6) {$A$\ \ $4$\\$0$--$4$};
+\node[act] (B) at (2.0,0.4) {$B$\ \ $5.33$\\$0$--$5.33$};
+\node[act,fill=red!12] (C) at (4.4,1.7) {$C$\ \ $5.17$\\$4$--$9.17$};
+\node[act] (D) at (4.4,3.5) {$D$\ \ $6.33$\\$4$--$10.33$};
+\node[act,fill=red!12] (E) at (6.8,0.9) {$E$\ \ $5.17$\\$9.17$--$14.33$};
+\node[act] (F) at (7.6,3.5) {$F$\ \ $4.5$\\$10.33$--$14.83$};
+\node[act,fill=red!12] (G) at (9.2,0.9) {$G$\ \ $5.17$\\$14.33$--$19.5$};
+\node[act,fill=black!8] (e) at (11.2,1.9) {end\\$19.5$};
+\foreach \a/\b in {s/B, A/D, B/E, D/F, F/e} \draw[->,black!60] (\a) -- (\b);
+\foreach \a/\b in {s/A, A/C, C/E, E/G, G/e} \draw[->,very thick,red!70!black] (\a) -- (\b);
+\node[font=\scriptsize,red!70!black,anchor=west] at (-0.8,-0.5) {critical path $A \to C \to E \to G$, $T = 19.5$; each box: activity, $t_e$, earliest start--finish};
+\end{tikzpicture}
+\caption{The activity-on-node network of Example~\ref{ex:pert}. The forward pass fills in the earliest start and finish of each activity; the critical activities, with zero float, are shaded. Delaying $B$ by up to $3.83$, or $D$ or $F$ by up to $4.67$, does not delay the project.}
+\label{fig:cpm}
+\end{figure}
+
+When activities can be shortened at a cost (\textbf{crashing}), the cheapest way to meet a deadline is a linear programme: variables for the event times and the amount each activity is crashed, constraints for the precedences, and the objective the total crashing cost. Its solution shortens critical activities, and as the deadline tightens, more paths become
+critical together.
+
+\subsection{Networks in software}
+\label{ssec:software8}
+
+\begin{software}[Shortest paths]
+\label{sw:paths}
+Dijkstra's algorithm with a heap on the network of Example~\ref{ex:networks}, the path recovered from the predecessor labels, and the same problem as a minimum-cost flow LP with the node--arc incidence matrix:
+{\small\begin{verbatim}
+>>> import heapq
+>>> import numpy as np
+>>> from scipy.optimize import linprog
+>>> arcs = {(1, 2): 7, (1, 3): 9, (1, 6): 14, (2, 3): 10, (2, 4): 15,
+...         (3, 4): 11, (3, 6): 2, (4, 5): 6, (6, 5): 9}  # length of each arc
+>>> def dijkstra(arcs, s):
+...     dist, prev, done = {s: 0}, {}, set()
+...     heap = [(0, s)]
+...     while heap:
+...         d, i = heapq.heappop(heap)
+...         if i in done: continue
+...         done.add(i)  # d is now the shortest distance to i
+...         for (a, b), w in arcs.items():
+...             if a == i and d + w < dist.get(b, np.inf):
+...                 dist[b] = d + w; prev[b] = i
+...                 heapq.heappush(heap, (d + w, b))
+...     return dist, prev
+...
+>>> dist, prev = dijkstra(arcs, 1)
+>>> dict(sorted(dist.items()))
+{1: 0, 2: 7, 3: 9, 4: 20, 5: 20, 6: 11}
+>>> path, k = [5], 5
+>>> while k != 1: k = prev[k]; path.append(k)
+>>> path[::-1]                             # the shortest route from 1 to 5
+[1, 3, 6, 5]
+>>> nodes = sorted({v for a in arcs for v in a}); E = list(arcs)
+>>> N = np.zeros((len(nodes), len(E)))     # node-arc incidence matrix
+>>> for e, (a, b) in enumerate(E): N[a - 1, e], N[b - 1, e] = 1, -1
+>>> supply = np.zeros(len(nodes)); supply[0], supply[4] = 1, -1  # 1 -> 5
+>>> r = linprog(list(arcs.values()), A_eq=N, b_eq=supply, method='highs')
+>>> r.fun, [E[e] for e in range(len(E)) if r.x[e] > 0.5]
+(20.0, [(1, 3), (3, 6), (6, 5)])
+\end{verbatim}}
+\textbf{Reading the output.} The distances from node $1$ are $0, 7, 9, 20, 20, 11$, and the shortest route to $5$ is $1, 3, 6, 5$. The LP, which knows nothing about paths, returns a flow of one unit on exactly the arcs $(1, 3)$, $(3, 6)$, $(6, 5)$, with cost $20$: integral, as total unimodularity guarantees.
+
+\textbf{MATLAB/Octave:} \texttt{shortestpath(digraph(s, t, w), 1, 5)}.
+\end{software}
+
+\begin{software}[Augmenting paths]
+\label{sw:maxflow}
+The Edmonds--Karp algorithm: breadth-first search in the residual network, augmenting along the shortest path found, until none remains; it returns the flow value and the set $S$ of nodes still reachable, and the capacity of that cut:
+{\small\begin{verbatim}
+>>> cap = {(1, 2): 10, (1, 3): 5, (1, 6): 15, (2, 3): 4, (2, 4): 9,
+...        (3, 4): 15, (3, 6): 4, (4, 5): 10, (6, 5): 15}
+>>> def max_flow(cap, s, t):  # Edmonds-Karp: shortest augmenting paths
+...     R = dict(cap)                # residual capacities, with reverses
+...     R.update({(b, a): 0 for (a, b) in cap if (b, a) not in cap})
+...     total = 0
+...     while True:
+...         prev, queue = {s: None}, [s]
+...         for i in queue:  # breadth-first search in the residual
+...             for (a, b), c in R.items():
+...                 if a == i and c > 0 and b not in prev:
+...                     prev[b] = a; queue.append(b)
+...         if t not in prev:              # no augmenting path is left
+...             return total, set(prev)    # (prev: the nodes reachable)
+...         path, k = [], t
+...         while prev[k] is not None:
+...             path.append((prev[k], k)); k = prev[k]
+...         delta = min(R[e] for e in path)
+...         for (a, b) in path: R[(a, b)] -= delta; R[(b, a)] += delta
+...         total += delta
+...         print('augment', delta, 'along', [a for a, _ in path[::-1]] + [t])
+...
+>>> value, S = max_flow(cap, 1, 5)
+augment 15 along [1, 6, 5]
+augment 9 along [1, 2, 4, 5]
+augment 1 along [1, 3, 4, 5]
+>>> value, S, sum(c for (a, b), c in cap.items() if a in S and b not in S)
+(25, {1, 2, 3, 4, 6}, 25)
+\end{verbatim}}
+\textbf{Reading the output.} Three augmentations, of $15$, $9$ and $1$, give a flow of $25$. At the end nodes $1, 2, 3, 4, 6$ are reachable and $5$ is not; the arcs leaving that set have capacity $25$, equal to the flow, which proves it maximal.
+
+\textbf{MATLAB/Octave:} \texttt{maxflow(digraph(s, t, cap), 1, 5)}.
+\end{software}
+
+\begin{software}[CPM and PERT]
+\label{sw:pert}
+Expected times and variances, the forward and backward passes, the critical path and floats, the normal approximation to $P(\text{finish by } 21)$, and a simulation of $200\,000$ projects with beta-PERT durations:
+{\small\begin{verbatim}
+>>> from scipy.stats import norm
+>>> acts = {'A': ([], 2, 4, 6), 'B': ([], 3, 5, 9), 'C': (['A'], 4, 5, 7),
+...         'D': (['A'], 4, 6, 10), 'E': (['B', 'C'], 4, 5, 7),
+...         'F': (['D'], 3, 4, 8), 'G': (['E'], 3, 5, 8)}  # (preds, a, m, b)
+>>> te = {k: (a + 4*m + b) / 6 for k, (_, a, m, b) in acts.items()}
+>>> var = {k: ((b - a) / 6)**2 for k, (_, a, m, b) in acts.items()}
+>>> ES, EF = {}, {}
+>>> for k in acts:                         # forward pass (already in order)
+...     ES[k] = max([EF[p] for p in acts[k][0]], default=0)
+...     EF[k] = ES[k] + te[k]
+...
+>>> T = max(EF.values()); LF, LS = {}, {}
+>>> for k in reversed(list(acts)):         # backward pass
+...     succ = [j for j in acts if k in acts[j][0]]
+...     LF[k] = min([LS[j] for j in succ], default=T)
+...     LS[k] = LF[k] - te[k]
+...
+>>> crit = [k for k in acts if abs(LS[k] - ES[k]) < 1e-9]
+>>> round(T, 3), crit
+(19.5, ['A', 'C', 'E', 'G'])
+>>> {k: round(LS[k] - ES[k], 3) for k in acts}   # total floats
+{'A': 0.0, 'B': 3.833, 'C': 0.0, 'D': 4.667, 'E': 0.0, 'F': 4.667, 'G': 0.0}
+>>> sd = np.sqrt(sum(var[k] for k in crit)); round(sd, 4)
+1.2802
+>>> round(norm.cdf((21 - T) / sd), 4)      # P(project done by time 21)
+0.8793
+>>> rng = np.random.default_rng(0)         # simulate with beta-PERT durations
+>>> def beta_pert(a, m, b, size):          # the beta law with mean (a+4m+b)/6
+...     al, be = 1 + 4*(m - a)/(b - a), 1 + 4*(b - m)/(b - a)
+...     return a + (b - a) * rng.beta(al, be, size)
+...
+>>> sims = {k: beta_pert(a, m, b, 200000) for k, (_, a, m, b) in acts.items()}
+>>> fin = {}
+>>> for k in acts:                         # finish time of each activity
+...     pre = [fin[p] for p in acts[k][0]]
+...     fin[k] = (np.maximum.reduce(pre) if pre else 0) + sims[k]
+...
+>>> done = np.maximum.reduce(list(fin.values()))
+>>> round(done.mean(), 3), round((done <= 21).mean(), 4)
+(19.507, 0.8477)
+\end{verbatim}}
+\textbf{Reading the output.} $T = 19.5$ along $A, C, E, G$, with floats $3.83$ for $B$ and $4.67$ for $D$ and $F$; $\sigma = 1.28$, and the normal approximation gives $0.879$. The simulation's mean duration, $19.51$, is close to $T$ because the other paths have large floats, but the probability of finishing by $21$ is
+$0.848$: the beta durations are skewed, and the path $B \to E \to G$ is occasionally the longest, so the PERT formula overstates the chance by $3$ percentage points.
+
+\textbf{MATLAB/Octave:} the same passes over a sorted activity list; \texttt{normcdf} for $\Phi$.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+\label{prob:negative}
+Show that Dijkstra's algorithm gives a wrong answer on the network with arcs $(1, 2)$ of length $2$, $(1, 3)$ of length $3$ and $(3, 2)$ of length $-2$.
+\end{problem}
+
+\begin{solution}
+From node $1$, the labels are $2$ for node $2$ and $3$ for node $3$; node $2$ is made permanent with $d_2 = 2$. Then node $3$ is added with $d_3 = 3$, and the arc $(3, 2)$ would give $3 - 2 = 1 < 2$, but node $2$ is already final. The true distance to $2$ is $1$. The proof of Theorem~\ref{thm:dijkstra} used non-negative lengths
+to say that a path leaving $P$ cannot get shorter afterwards.
+\end{solution}
+
+\begin{problem}
+Write the shortest-path problem from $1$ to $5$ in Example~\ref{ex:networks} as an LP, write its dual, and give an optimal dual solution.
+\end{problem}
+
+\begin{solution}
+Primal: minimise $\sum c_{ij}x_{ij}$ subject to $Nx = e_1 - e_5$, $x \geq 0$. Dual: maximise $\pi_1 - \pi_5$ subject to $\pi_i - \pi_j \leq c_{ij}$ for each arc. Take $\pi_i = 20 - d_i$ with the distances $d = (0, 7, 9, 20, 20, 11)$: then $\pi_i - \pi_j = d_j - d_i \leq c_{ij}$ by Bellman's equations, and
+$\pi_1 - \pi_5 = 20$, equal to the primal optimum.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:networks}, find a cut of capacity larger than $25$ and explain why no cut has capacity below $25$.
+\end{problem}
+
+\begin{solution}
+$S = \{1\}$ has outgoing arcs $(1, 2)$, $(1, 3)$, $(1, 6)$ with capacity $10 + 5 + 15 = 30$. Every cut's capacity is at least the value of every flow, and a flow of $25$ exists, so no cut has capacity below $25$; the cut $\{1, 2, 3, 4, 6\}$ attains it.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:pert}, find the probability of finishing within $20$ time units by the PERT approximation, and the deadline that is met with probability $0.95$.
+\end{problem}
+
+\begin{solution}
+$\Phi\bigl((20 - 19.5)/1.28\bigr) = \Phi(0.39) = 0.652$. For probability $0.95$, $D = 19.5 + 1.645 \times 1.28 = 21.6$. By the simulation the true probabilities are somewhat lower, so a cautious planner would add a margin.
+\end{solution}
+
+\begin{problem}
+Activity $G$ in Example~\ref{ex:pert} can be shortened by one unit at cost $80$, and activity $C$ by one unit at cost $100$. What is the cheapest way to reduce the expected duration to $18.5$, and is $17.5$ reachable by crashing these two alone?
+\end{problem}
+
+\begin{solution}
+Both lie on the critical path, and the other paths have lengths $B \to E \to G$: $15.67$ and $A \to D \to F$: $14.83$, far shorter, so crashing $G$ by one unit (cost $80$) gives $18.5$. To reach $17.5$ crash both $G$ and $C$ (cost $180$); $B \to E \to G$ becomes $14.67$ and $A \to D \to F$ stays $14.83$, so $A \to C \to E \to G$, at $17.5$, is still critical
+and the target is met.
+\end{solution}
+
+\begin{problem}
+Explain why the incidence matrix of an undirected graph with an odd cycle is not totally unimodular, but that of every directed graph is.
+\end{problem}
+
+\begin{solution}
+For an undirected graph each edge column has two $+1$s, and Theorem~\ref{thm:bipartitetu} needs its rows split so that the two ends of every edge fall in different groups, a two-colouring, which exists exactly when the graph is bipartite; the triangle's matrix has determinant $2$. For a directed graph each column has $+1$ and $-1$, and the single group of all rows works,
+whatever the cycles.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -2059,6 +2413,7 @@ A basis has $2n - 1$ cells, by Proposition~\ref{prop:transportrank}. A BFS is a 
 \subhead{Further reading}
 \begin{enumerate}
 \item Beale, E. M. L. (1955), Cycling in the dual simplex algorithm, \emph{Naval Research Logistics Quarterly}, 2, 269--275.
+\item Bellman, R. (1958), On a routing problem, \emph{Quarterly of Applied Mathematics}, 16, 87--90.
 \item Birkhoff, G. (1946), Tres observaciones sobre el \'algebra lineal, \emph{Universidad Nacional de Tucum\'an, Revista, Serie A}, 5, 147--151.
 \item Blackett, P. M. S. (1962), \emph{Studies of War: Nuclear and Conventional}, Edinburgh, Oliver and Boyd.
 \item Bland, R. G. (1977), New finite pivoting rules for the simplex method, \emph{Mathematics of Operations Research}, 2, 103--107.
@@ -2068,9 +2423,12 @@ A basis has $2n - 1$ cells, by Proposition~\ref{prop:transportrank}. A BFS is a 
 \item Dantzig, G. B. (1951), Maximization of a linear function of variables subject to linear inequalities, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 339--347.
 \item Dantzig, G. B. (1955), Upper bounds, secondary constraints, and block triangularity in linear programming, \emph{Econometrica}, 23, 174--183.
 \item Dantzig, G. B., and Orchard-Hays, W. (1954), The product form for the inverse in the simplex method, \emph{Mathematical Tables and Other Aids to Computation}, 8, 64--67.
+\item Dijkstra, E. W. (1959), A note on two problems in connexion with graphs, \emph{Numerische Mathematik}, 1, 269--271.
 \item Edmonds, J. (1965), Maximum matching and a polyhedron with 0,1-vertices, \emph{Journal of Research of the National Bureau of Standards}, 69B, 125--130.
+\item Edmonds, J., and Karp, R. M. (1972), Theoretical improvements in algorithmic efficiency for network flow problems, \emph{Journal of the ACM}, 19, 248--264.
 \item Egerv\'ary, J. (1931), M\'atrixok kombinatorius tulajdons\'agair\'ol, \emph{Matematikai \'es Fizikai Lapok}, 38, 16--28.
 \item Farkas, J. (1902), Theorie der einfachen Ungleichungen, \emph{Journal f\"ur die reine und angewandte Mathematik}, 124, 1--27.
+\item Ford, L. R., and Fulkerson, D. R. (1956), Maximal flow through a network, \emph{Canadian Journal of Mathematics}, 8, 399--404.
 \item Forrest, J. J. H., and Tomlin, J. A. (1972), Updated triangular factors of the basis to maintain sparsity in the product form simplex method, \emph{Mathematical Programming}, 2, 263--278.
 \item Gal, T., and Greenberg, H. J. (eds.) (1997), \emph{Advances in Sensitivity Analysis and Parametric Programming}, Boston, Kluwer.
 \item Gale, D., Kuhn, H. W., and Tucker, A. W. (1951), Linear programming and the theory of games, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 317--329.
@@ -2081,12 +2439,15 @@ A basis has $2n - 1$ cells, by Proposition~\ref{prop:transportrank}. A BFS is a 
 \item Hoffman, A. J., and Kruskal, J. B. (1956), Integral boundary points of convex polyhedra, in H. W. Kuhn and A. W. Tucker (eds.), \emph{Linear Inequalities and Related Systems}, Annals of Mathematics Studies 38, Princeton University Press, 223--246.
 \item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.
 \item Karmarkar, N. (1984), A new polynomial-time algorithm for linear programming, \emph{Combinatorica}, 4, 373--395.
+\item Kelley, J. E., and Walker, M. R. (1959), Critical-path planning and scheduling, \emph{Proceedings of the Eastern Joint Computer Conference}, 160--173.
 \item Khachiyan, L. G. (1979), A polynomial algorithm in linear programming, \emph{Soviet Mathematics Doklady}, 20, 191--194.
 \item Klee, V., and Minty, G. J. (1972), How good is the simplex algorithm?, in O. Shisha (ed.), \emph{Inequalities III}, New York, Academic Press, 159--175.
 \item K\"onig, D. (1931), Gr\'afok \'es m\'atrixok, \emph{Matematikai \'es Fizikai Lapok}, 38, 116--119.
 \item Koopmans, T. C. (ed.) (1951), \emph{Activity Analysis of Production and Allocation}, New York, Wiley.
 \item Kuhn, H. W. (1955), The Hungarian method for the assignment problem, \emph{Naval Research Logistics Quarterly}, 2, 83--97.
 \item Lemke, C. E. (1954), The dual method of solving the linear programming problem, \emph{Naval Research Logistics Quarterly}, 1, 36--47.
+\item MacCrimmon, K. R., and Ryavec, C. A. (1964), An analytical study of the PERT assumptions, \emph{Operations Research}, 12, 16--37.
+\item Malcolm, D. G., Roseboom, J. H., Clark, C. E., and Fazar, W. (1959), Application of a technique for research and development program evaluation, \emph{Operations Research}, 7, 646--669.
 \item Minkowski, H. (1896), \emph{Geometrie der Zahlen}, Leipzig, Teubner.
 \item von Neumann, J. (1947), Discussion of a maximum problem, unpublished manuscript, in A. H. Taub (ed.), \emph{John von Neumann: Collected Works}, Vol.~VI (1963), Oxford, Pergamon, 89--95.
 \item Spielman, D. A., and Teng, S.-H. (2004), Smoothed analysis of algorithms: why the simplex algorithm usually takes polynomial time, \emph{Journal of the ACM}, 51, 385--463.
