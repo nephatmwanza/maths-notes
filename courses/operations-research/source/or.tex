@@ -3942,6 +3942,301 @@ An arrival finds $n$ customers with probability $(1 - \rho)\rho^n$ (Poisson arri
 $0.8e^{-1} = 0.294$: nearly a third of customers wait more than an hour, although the mean wait is $48$ minutes.
 \end{solution}
 
+%======================================================================
+\section{Markov Chains, Decision Processes and Replacement}
+\label{sec:markov}
+
+A customer switches brands, an account moves from current to overdue to paid, a machine wears from good to poor to broken. In each case the system moves among a few states at random, and the probability of the next move depends only on the present state. Such a system is a \textbf{Markov chain}, and its long-run behaviour is
+computed by linear algebra. When a decision maker can influence the moves, by advertising, chasing debts or replacing machines, the chain becomes a \textbf{Markov decision process}, solved by the dynamic programming of the section on that subject extended to an infinite horizon. The classical replacement models of OR are among its first applications.
+
+\subsection{Markov chains}
+\label{ssec:chains}
+
+A \textbf{Markov chain} on states $1, \ldots, m$ has \textbf{transition probabilities} $p_{ij} = P(X_{t + 1} = j \mid X_t = i)$, independent of the earlier history and of $t$; the \textbf{transition matrix} $P = (p_{ij})$ has non-negative entries and rows summing to $1$. If the distribution of $X_t$ is the row vector $\pi^{(t)}$, then
+$\pi^{(t + 1)} = \pi^{(t)}P$, and so $\pi^{(t)} = \pi^{(0)}P^t$: the $n$-step transition probabilities are the entries of $P^n$ (the \textbf{Chapman--Kolmogorov equations}).
+
+\begin{exa}
+\label{ex:brands}
+Customers buy one of three brands each month. Of those who bought $A$, $80\%$ buy $A$ again, $10\%$ switch to $B$ and $10\%$ to $C$; the other rows are $(0.2, 0.7, 0.1)$ for $B$ and $(0.1, 0.3, 0.6)$ for $C$ (Figure~\ref{fig:brands}). A customer who buys $A$ this month buys $A$, $B$, $C$ two months later with
+probabilities $(0.67, 0.18, 0.15)$, the first row of $P^2$.
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+  st/.style={draw,circle,minimum size=1.0cm,font=\small,fill=white}]
+\fill[blue!4,rounded corners=4pt] (-1.4,-1.3) rectangle (9.4,4.75);
+\node[st,fill=red!15] (A) at (0,0) {$A$};
+\node[st,fill=green!15] (B) at (6,0) {$B$};
+\node[st,fill=orange!15] (C) at (3,3) {$C$};
+\draw[->,thick] (A) to[bend left=12] node[above,font=\scriptsize] {$0.1$} (B);
+\draw[->,thick] (B) to[bend left=12] node[below,font=\scriptsize] {$0.2$} (A);
+\draw[->,thick] (A) to[bend left=12] node[left,font=\scriptsize] {$0.1$} (C);
+\draw[->,thick] (C) to[bend left=12] node[right,font=\scriptsize] {$0.1$} (A);
+\draw[->,thick] (B) to[bend left=12] node[right,font=\scriptsize] {$0.1$} (C);
+\draw[->,thick] (C) to[bend left=12] node[left,font=\scriptsize] {$0.3$} (B);
+\draw[->,thick] (A) to[loop left] node[left,font=\scriptsize] {$0.8$} (A);
+\draw[->,thick] (B) to[loop right] node[right,font=\scriptsize] {$0.7$} (B);
+\draw[->,thick] (C) to[loop above] node[above,font=\scriptsize] {$0.6$} (C);
+\node[font=\scriptsize\bfseries,black!70,align=left,anchor=west] at (6.6,2.6) {long-run shares\\$A$: $0.45$\\$B$: $0.35$\\$C$: $0.20$};
+\end{tikzpicture}
+\caption{The brand-switching chain of Example~\ref{ex:brands}: each arrow is a monthly transition with its probability. Whatever the brands' present shares, they converge to the stationary distribution $(0.45, 0.35, 0.20)$, the solution of $\pi = \pi P$.}
+\label{fig:brands}
+\end{figure}
+
+\begin{defn}
+A distribution $\pi$ with $\pi P = \pi$ is \textbf{stationary}. A chain is \textbf{irreducible} if every state can be reached from every other, and \textbf{aperiodic} if some state has $p_{ii} > 0$ (or, more generally, the return times to a state have greatest common divisor $1$).
+\end{defn}
+
+\begin{thm}[Ergodic theorem for finite chains]
+\label{thm:ergodic}
+A finite irreducible aperiodic chain has a unique stationary distribution $\pi$, with all $\pi_j > 0$, and $P^n \to \mathbf 1\pi$ as $n \to \infty$: whatever the starting state, $P(X_n = j) \to \pi_j$. Moreover the mean time between visits to $j$ is $1/\pi_j$, and the long-run fraction of time in state $j$ is $\pi_j$.
+\end{thm}
+
+\begin{proof}[Sketch]
+Some power $P^k$ has all entries positive (irreducibility and aperiodicity), say at least $\delta > 0$. Then for any two distributions $\mu$, $\nu$, $\|\mu P^k - \nu P^k\|_1 \leq (1 - m\delta)\|\mu - \nu\|_1$, since the two rows share a common part of mass at least $m\delta$. So $\mu \mapsto \mu P^k$ is a contraction, the distributions
+$\mu P^n$ converge geometrically to a unique fixed point $\pi$, and $\pi P = \pi$. The statements about times follow from the renewal theorem.
+\end{proof}
+
+For Example~\ref{ex:brands} the stationary distribution is $(0.45, 0.35, 0.20)$, and every row of $P^{20}$ already equals it to four digits (Software~\ref{sw:chains}). The brands' long-run shares do not depend on their present shares; a marketing campaign that changes only the present shares has no lasting effect, while one that changes the
+transition probabilities (loyalty) does.
+
+\subsection{Absorbing chains}
+\label{ssec:absorbing}
+
+A state is \textbf{absorbing} if $p_{ii} = 1$. If every state can reach an absorbing one, order the states with the transient ones first:
+\[
+P = \begin{pmatrix} Q & R \\ 0 & I \end{pmatrix} .
+\]
+
+\begin{thm}
+\label{thm:absorbing}
+The \textbf{fundamental matrix} $N = (I - Q)^{-1} = I + Q + Q^2 + \cdots$ exists; $N_{ij}$ is the expected number of visits to transient state $j$ starting from transient state $i$; $N\mathbf 1$ is the vector of expected times to absorption; and $B = NR$ gives the probabilities of ending in each absorbing state.
+\end{thm}
+
+\begin{proof}
+$Q^n \to 0$, since absorption occurs eventually with probability one from every transient state, so the series converges and equals $(I - Q)^{-1}$. $(Q^n)_{ij}$ is the probability of being in $j$ at step $n$, so the sum is the expected number of visits. The probability of absorption in $k$ is $\sum_n\sum_j(Q^n)_{ij}R_{jk} = (NR)_{ik}$, summing
+over the last transient state $j$ visited and the step $n$ at which it is visited.
+\end{proof}
+
+\begin{exa}
+\label{ex:accounts}
+A firm's accounts are $0$--$30$ days old, $31$--$60$ days old, paid, or written off. Each month, $40\%$ of $0$--$30$ day accounts are paid and $60\%$ age; of $31$--$60$ day accounts, $70\%$ are paid and $30\%$ are written off. Then $N = \begin{pmatrix} 1 & 0.6 \\ 0 & 1 \end{pmatrix}$ and
+$B = NR = \begin{pmatrix} 0.82 & 0.18 \\ 0.70 & 0.30 \end{pmatrix}$: of new receivables of Rs.~10 lakh, Rs.~8.2 lakh will be collected and Rs.~1.8 lakh lost, a provision for bad debts computed from the chain.
+\end{exa}
+
+\subsection{Replacement of deteriorating equipment}
+\label{ssec:replacement}
+
+A machine costs $C$, its running cost in year $k$ is $r_k$, rising with age, and its resale value after $n$ years is $S_n$. Replacing it every $n$ years costs, per year on average,
+\[
+A(n) = \frac{C - S_n + \sum_{k = 1}^nr_k}n .
+\]
+
+\begin{prop}
+\label{prop:replace}
+If the yearly costs $m_k = r_k + (S_{k - 1} - S_k)$ (running cost plus loss of resale value in year $k$, with $S_0 = C$) increase with $k$, then $A(n)$ is minimised at the first $n$ with $m_{n + 1} \geq A(n)$: replace the machine when next year's cost would exceed the average cost so far.
+\end{prop}
+
+\begin{proof}
+$A(n) = \frac1n\sum_{k \leq n}m_k$ is the running average of an increasing sequence. Then $A(n + 1) - A(n) = \frac{m_{n + 1} - A(n)}{n + 1}$, so $A$ decreases while the next term is below the average and increases once it is above; since the terms increase, once above they stay above, and the first such $n$ is the
+minimum.
+\end{proof}
+
+\begin{exa}
+\label{ex:machine}
+With $C = 6000$, running costs $1000, 1200, 1400, 1800, 2300, 2800, 3400, 4000$ and resale values $3000, 1500, 750, 375, 200, 200, 200, 200$, the average costs are $4000$, $3350$, $2950$, $2756$, $2700$, $2717$, $\ldots$, minimal at $n = 5$: the sixth year would cost $m_6 = 2800 > A(5) = 2700$. With money discounted at $10\%$ a year, the
+equivalent annual cost (the level annuity with the same present value) is minimised at $6$ years instead (Software~\ref{sw:replace}): future running costs count for less, so it pays to keep the machine longer.
+\end{exa}
+
+Items that fail suddenly, such as light bulbs or electronic components, are replaced on failure; when individual replacement is costly, \textbf{group replacement} of all items at fixed intervals, with failures replaced in between, can be cheaper, and the best interval is found from the failure distribution by renewal arguments.
+
+\subsection{Markov decision processes}
+\label{ssec:mdp}
+
+A \textbf{Markov decision process} (MDP) has states $s$, actions $a$ available in each state, costs $c_a(s)$, and transition matrices $P_a$; future costs are discounted by $\beta < 1$ per period. A \textbf{policy} chooses an action in each state; under a policy $\sigma$ the discounted cost from each state is
+$v_\sigma = (I - \beta P_\sigma)^{-1}c_\sigma$.
+
+\begin{thm}[Bellman equation and value iteration]
+\label{thm:mdp}
+The optimal discounted cost $v^*$ is the unique solution of
+\[
+v(s) = \min_a\Bigl\{c_a(s) + \beta\sum_{s'}P_a(s, s')v(s')\Bigr\} ,
+\]
+and a policy choosing a minimising action in each state is optimal. Value iteration $v_{k + 1} = Tv_k$, with $T$ the right-hand side, converges to $v^*$ from any start, with $\|v_k - v^*\|_\infty \leq \beta^k\|v_0 - v^*\|_\infty$.
+\end{thm}
+
+\begin{proof}
+For any $u$, $v$ and each $s$ and $a$, $|\beta\sum_{s'}P_a(s, s')(u(s') - v(s'))| \leq \beta\|u - v\|_\infty$, since the transition probabilities sum to $1$; taking minima over $a$ preserves the bound, so $\|Tu - Tv\|_\infty \leq \beta\|u - v\|_\infty$. $T$ is a contraction, and by Banach's fixed-point theorem it has a unique
+fixed point, reached geometrically by iteration. That the fixed point is the optimal cost, and that a greedy policy attains it, is Bellman's principle (Theorem~\ref{thm:bellman}) applied to the horizon $k$ and letting $k \to \infty$.
+\end{proof}
+
+\textbf{Policy iteration} (Howard, 1960) evaluates the current policy exactly, by solving the linear system for $v_\sigma$, then improves it by choosing in each state the action minimising $c_a(s) + \beta P_a(s, \cdot)v_\sigma$; it never gets worse and stops in finitely many steps, usually very few. The optimal costs are also the solution of an LP
+(maximise $\sum_sv(s)$ subject to $v(s) \leq c_a(s) + \beta P_a(s, \cdot)v$ for all $s$, $a$), whose dual variables are discounted state--action frequencies.
+
+\begin{exa}
+\label{ex:mdpmachine}
+A machine is in condition $0$ (good), $1$, $2$ or $3$ (broken), with running costs $0$, $1000$, $3000$, $6000$ a period. If kept, it deteriorates by the transition matrix with rows $(0.7, 0.2, 0.1, 0)$, $(0, 0.6, 0.3, 0.1)$, $(0, 0, 0.5, 0.5)$, $(0, 0, 0, 1)$; it can instead be replaced at cost $4000$, after which it behaves as new.
+With $\beta = 0.9$, value iteration and policy iteration agree that the machine should be kept in conditions $0$ and $1$ and replaced in conditions $2$ and $3$ (Software~\ref{sw:mdp}): a \textbf{control-limit policy}, of the kind that is optimal whenever deterioration and costs are monotone.
+\end{exa}
+
+\subsection{Markov models in software}
+\label{ssec:software15}
+
+\begin{software}[Chains]
+\label{sw:chains}
+Example~\ref{ex:brands}: two-step probabilities, the stationary distribution as the left eigenvector of $P$ for eigenvalue $1$, and $P^{20}$; then the fundamental matrix of Example~\ref{ex:accounts}, the expected times to absorption, and the absorption probabilities:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> P = np.array([[0.80, 0.10, 0.10],    # brand switching: row = this month,
+...               [0.20, 0.70, 0.10],      # columns = next month (A, B, C)
+...               [0.10, 0.30, 0.60]])
+>>> np.linalg.matrix_power(P, 2)[0]        # two months after buying A
+array([0.67, 0.18, 0.15])
+>>> w, V = np.linalg.eig(P.T)              # pi P = pi: left eigenvector for 1
+>>> pi = np.real(V[:, np.argmin(abs(w - 1))])
+>>> pi = pi / pi.sum(); np.round(pi, 4)
+array([0.45, 0.35, 0.2 ])
+>>> np.round(np.linalg.matrix_power(P, 20), 4)   # every row tends to pi
+array([[0.45, 0.35, 0.2 ],
+       [0.45, 0.35, 0.2 ],
+       [0.45, 0.35, 0.2 ]])
+>>> Q = np.array([[0.0, 0.6], [0.0, 0.0]])  # accounts: 0-30 days, 31-60 days
+>>> R = np.array([[0.4, 0.0], [0.7, 0.3]])  # -> paid, bad debt
+>>> N = np.linalg.inv(np.eye(2) - Q)        # fundamental matrix
+>>> N, N @ np.ones(2), N @ R                # visits, time to absorption, B
+(array([[1. , 0.6],
+       [0. , 1. ]]), array([1.6, 1. ]), array([[0.82, 0.18],
+       [0.7 , 0.3 ]]))
+\end{verbatim}}
+\textbf{Reading the output.} The stationary distribution is $(0.45, 0.35, 0.2)$ and $P^{20}$ has three identical rows equal to it. For the accounts, a new account is resolved in $1.6$ months on average, and is paid with probability $0.82$; an account already $31$--$60$ days old is paid with probability $0.7$.
+
+\textbf{MATLAB/Octave:} \texttt{[V, D] = eig(P')}; \texttt{N = inv(eye(2) - Q)}.
+\end{software}
+
+\begin{software}[When to replace a machine]
+\label{sw:replace}
+Example~\ref{ex:machine}: the average annual cost for replacement every $1, \ldots, 8$ years and its minimiser; then the same with a $10\%$ discount rate, as the equivalent annual cost:
+{\small\begin{verbatim}
+>>> price = 6000.0                   # machine: price, running costs, resale
+>>> run = np.array([1000, 1200, 1400, 1800, 2300, 2800, 3400, 4000.])
+>>> resale = np.array([3000, 1500, 750, 375, 200, 200, 200, 200.])
+>>> years = np.arange(1, 9)
+>>> avg = (price - resale + np.cumsum(run)) / years   # average cost a year
+>>> np.round(avg, 1), int(years[np.argmin(avg)])
+(array([4000. , 3350. , 2950. , 2756.2, 2700. , 2716.7, 2814.3, 2962.5]), 5)
+>>> r = 0.10; d = 1 / (1 + r)        # with discounting: equivalent annual
+>>> pv = np.array([price - resale[n - 1] * d**n + sum(run[k] * d**(k + 1)
+...                for k in range(n)) for n in years])
+>>> annuity = pv * r / (1 - d**years)      # cost per year with the same value
+>>> np.round(annuity, 1), int(years[np.argmin(annuity)])
+(array([4600. , 3838.1, 3373.4, 3131.4, 3030. , 3002.8, 3046.7, 3131.9]), 6)
+\end{verbatim}}
+\textbf{Reading the output.} Without discounting the average cost falls to $2700$ at $5$ years and then rises; with discounting the equivalent annual cost is lowest, $3003$, at $6$ years, though $5$ years costs only $27$ a year more. Both curves are flat near the optimum, as the EOQ cost was, so the decision is robust to small errors in the
+data.
+
+\textbf{MATLAB/Octave:} \texttt{(price - resale + cumsum(run))./(1:8)}.
+\end{software}
+
+\begin{software}[Value and policy iteration]
+\label{sw:mdp}
+Example~\ref{ex:mdpmachine}: value iteration to a tolerance of $10^{-9}$, with the number of iterations, the optimal costs and the optimal action in each condition ($1$ = replace); then policy iteration from the policy of never replacing:
+{\small\begin{verbatim}
+>>> from scipy.optimize import linprog
+>>> T = {0: np.array([[0.7, 0.2, 0.1, 0.0], [0.0, 0.6, 0.3, 0.1],
+...                   [0.0, 0.0, 0.5, 0.5], [0.0, 0.0, 0.0, 1.0]]),
+...      1: np.tile([0.7, 0.2, 0.1, 0.0], (4, 1))}    # replace: as if new
+>>> cost = {0: np.array([0., 1000, 3000, 6000]),   # running cost by condition
+...         1: np.full(4, 4000.)}                     # replacement cost
+>>> beta = 0.9
+>>> v = np.zeros(4)
+>>> for it in range(500):                  # value iteration
+...     q = np.array([cost[a] + beta * T[a] @ v for a in (0, 1)])
+...     v_new = q.min(axis=0)
+...     if np.abs(v_new - v).max() < 1e-9: break
+...     v = v_new
+...
+>>> it, np.round(v, 1), q.argmin(axis=0)   # 1 = replace in that condition
+(264, array([ 9450., 12700., 13450., 13450.]), array([0, 0, 1, 1]))
+>>> pol = np.zeros(4, int)           # policy iteration from "always keep"
+>>> for k in range(10):
+...     Tp = np.array([T[pol[s]][s] for s in range(4)])
+...     cp = np.array([cost[pol[s]][s] for s in range(4)])
+...     vp = np.linalg.solve(np.eye(4) - beta * Tp, cp)
+...     qp = np.array([cost[a] + beta * T[a] @ vp for a in (0, 1)])
+...     new = qp.argmin(axis=0)
+...     if (new == pol).all(): break
+...     pol = new
+...
+>>> k, pol, np.round(vp, 1)
+(2, array([0, 0, 1, 1]), array([ 9450., 12700., 13450., 13450.]))
+\end{verbatim}}
+\textbf{Reading the output.} Value iteration takes $264$ iterations, as the contraction factor $0.9$ predicts for this tolerance; policy iteration needs $2$ improvements. Both give costs $(9450, 12\,700, 13\,450, 13\,450)$ and the policy keep, keep, replace, replace. The cost in conditions $2$ and $3$ is the same because the machine is replaced at once in
+both.
+
+\textbf{MATLAB/Octave:} the same loops; the MDP toolbox has \texttt{mdp\_value\_iteration}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Find the stationary distribution of the two-state chain with $p_{12} = a$, $p_{21} = b$, and the mean time between visits to state $1$.
+\end{problem}
+
+\begin{solution}
+$\pi_1a = \pi_2b$ and $\pi_1 + \pi_2 = 1$, so $\pi = \bigl(\frac b{a + b}, \frac a{a + b}\bigr)$. The mean return time to state $1$ is $1/\pi_1 = (a + b)/b$.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:brands}, brand $B$ can raise its loyalty from $0.7$ to $0.8$ by a campaign, taking the extra $0.1$ from customers who would have switched to $A$. Find the new long-run share of $B$.
+\end{problem}
+
+\begin{solution}
+The $B$ row becomes $(0.1, 0.8, 0.1)$. Solving $\pi = \pi P$ with the other rows unchanged: $\pi_A = 0.8\pi_A + 0.1\pi_B + 0.1\pi_C$, $\pi_C = 0.1\pi_A + 0.1\pi_B + 0.6\pi_C$, $\sum\pi = 1$. From the second, $0.4\pi_C = 0.1(\pi_A + \pi_B) = 0.1(1 - \pi_C)$, so $\pi_C = 0.2$; then the first gives
+$0.2\pi_A = 0.1\pi_B + 0.02$ with $\pi_A + \pi_B = 0.8$, so $\pi_A = 0.333$, $\pi_B = 0.467$. $B$'s share rises from $0.35$ to $0.47$.
+\end{solution}
+
+\begin{problem}
+A gambler with Rs.~1 bets Rs.~1 at a time, winning with probability $0.4$, and stops at Rs.~0 or Rs.~3. Find the probability of reaching Rs.~3 and the expected number of bets, by the fundamental matrix.
+\end{problem}
+
+\begin{solution}
+Transient states $1, 2$: $Q = \begin{pmatrix} 0 & 0.4 \\ 0.6 & 0 \end{pmatrix}$, $R$ (to $0$, to $3$) $= \begin{pmatrix} 0.6 & 0 \\ 0 & 0.4 \end{pmatrix}$. $I - Q$ has determinant $1 - 0.24 = 0.76$, so $N = \frac1{0.76}\begin{pmatrix} 1 & 0.4 \\ 0.6 & 1 \end{pmatrix}$. From state $1$:
+$P(\text{reach } 3) = (NR)_{12} = \frac{0.4 \times 0.4}{0.76} = 0.211$, and the expected number of bets is $(1 + 0.4)/0.76 = 1.84$.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:machine}, verify the rule of Proposition~\ref{prop:replace} by computing $m_5$, $m_6$ and $A(4)$, $A(5)$.
+\end{problem}
+
+\begin{solution}
+$m_5 = r_5 + S_4 - S_5 = 2300 + 375 - 200 = 2475$ and $m_6 = 2800 + 200 - 200 = 2800$. $A(4) = 2756.25 > m_5$, so keeping the machine a fifth year lowers the average, to $A(5) = 2700$; $m_6 = 2800 > 2700$, so a sixth year raises it. Replace after $5$ years.
+\end{solution}
+
+\begin{problem}
+Show that in Example~\ref{ex:mdpmachine} replacing in condition $1$ as well would be worse, using the optimal costs.
+\end{problem}
+
+\begin{solution}
+In condition $1$, keeping costs
+\[
+1000 + 0.9(0.6 \times 12\,700 + 0.3 \times 13\,450 + 0.1 \times 13\,450) = 1000 + 0.9 \times 13\,000 = 12\,700 ,
+\]
+while replacing costs
+\[
+4000 + 0.9(0.7 \times 9450 + 0.2 \times 12\,700 + 0.1 \times 13\,450) = 4000 + 0.9 \times 10\,500 = 13\,450 .
+\] Keeping is cheaper by $750$, so the
+policy is right not to replace in condition $1$.
+\end{solution}
+
+\begin{problem}
+Why is value iteration slow when $\beta$ is close to $1$, and how many iterations are needed to reduce the error by a factor $10^{-6}$ when $\beta = 0.99$?
+\end{problem}
+
+\begin{solution}
+The error shrinks by the factor $\beta$ per iteration, so $k$ iterations give $\beta^k$. For $\beta^k = 10^{-6}$, $k = 6\ln 10/(-\ln\beta) = 13.8/0.01005 = 1375$ iterations at $\beta = 0.99$, against $131$ at $\beta = 0.9$. Policy iteration, whose number of steps hardly depends on $\beta$, is then preferable.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -3974,6 +4269,7 @@ $0.8e^{-1} = 0.294$: nearly a third of customers wait more than an hour, althoug
 \item Arrow, K. J., Harris, T., and Marschak, J. (1951), Optimal inventory policy, \emph{Econometrica}, 19, 250--272.
 \item Beale, E. M. L. (1955), Cycling in the dual simplex algorithm, \emph{Naval Research Logistics Quarterly}, 2, 269--275.
 \item Bellman, R. (1957), \emph{Dynamic Programming}, Princeton University Press.
+\item Bellman, R. (1957), A Markovian decision process, \emph{Journal of Mathematics and Mechanics}, 6, 679--684.
 \item Bellman, R. (1958), On a routing problem, \emph{Quarterly of Applied Mathematics}, 16, 87--90.
 \item Birkhoff, G. (1946), Tres observaciones sobre el \'algebra lineal, \emph{Universidad Nacional de Tucum\'an, Revista, Serie A}, 5, 147--151.
 \item Blackett, P. M. S. (1962), \emph{Studies of War: Nuclear and Conventional}, Edinburgh, Oliver and Boyd.
@@ -3982,10 +4278,12 @@ $0.8e^{-1} = 0.294$: nearly a third of customers wait more than an hour, althoug
 \item Charnes, A. (1952), Optimality and degeneracy in linear programming, \emph{Econometrica}, 20, 160--170.
 \item Charnes, A., and Cooper, W. W. (1961), \emph{Management Models and Industrial Applications of Linear Programming}, New York, Wiley.
 \item Charnes, A., Cooper, W. W., and Ferguson, R. O. (1955), Optimal estimation of executive compensation by linear programming, \emph{Management Science}, 1, 138--151.
+\item Cyert, R. M., Davidson, H. J., and Thompson, G. L. (1962), Estimation of the allowance for doubtful accounts by Markov chains, \emph{Management Science}, 8, 287--303.
 \item Dantzig, G. B. (1951), Maximization of a linear function of variables subject to linear inequalities, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 339--347.
 \item Dantzig, G. B. (1955), Upper bounds, secondary constraints, and block triangularity in linear programming, \emph{Econometrica}, 23, 174--183.
 \item Dantzig, G. B., and Orchard-Hays, W. (1954), The product form for the inverse in the simplex method, \emph{Mathematical Tables and Other Aids to Computation}, 8, 64--67.
 \item Dantzig, G. B., Fulkerson, D. R., and Johnson, S. M. (1954), Solution of a large-scale traveling-salesman problem, \emph{Journal of the Operations Research Society of America}, 2, 393--410.
+\item Derman, C. (1963), On optimal replacement rules when changes of state are Markovian, in R. Bellman (ed.), \emph{Mathematical Optimization Techniques}, Berkeley, University of California Press, 201--210.
 \item Dijkstra, E. W. (1959), A note on two problems in connexion with graphs, \emph{Numerische Mathematik}, 1, 269--271.
 \item Edgeworth, F. Y. (1888), The mathematical theory of banking, \emph{Journal of the Royal Statistical Society}, 51, 113--127.
 \item Edmonds, J. (1965), Maximum matching and a polyhedron with 0,1-vertices, \emph{Journal of Research of the National Bureau of Standards}, 69B, 125--130.
@@ -4008,6 +4306,7 @@ $0.8e^{-1} = 0.294$: nearly a third of customers wait more than an hour, althoug
 \item Harris, P. M. J. (1973), Pivot selection methods of the Devex LP code, \emph{Mathematical Programming}, 5, 1--28.
 \item Hitchcock, F. L. (1941), The distribution of a product from several sources to numerous localities, \emph{Journal of Mathematics and Physics}, 20, 224--230.
 \item Hoffman, A. J., and Kruskal, J. B. (1956), Integral boundary points of convex polyhedra, in H. W. Kuhn and A. W. Tucker (eds.), \emph{Linear Inequalities and Related Systems}, Annals of Mathematics Studies 38, Princeton University Press, 223--246.
+\item Howard, R. A. (1960), \emph{Dynamic Programming and Markov Processes}, Cambridge, MIT Press.
 \item Jackson, J. R. (1955), \emph{Scheduling a Production Line to Minimize Maximum Tardiness}, Research Report 43, Management Science Research Project, University of California, Los Angeles.
 \item Jackson, J. R. (1957), Networks of waiting lines, \emph{Operations Research}, 5, 518--521.
 \item Johnson, S. M. (1954), Optimal two- and three-stage production schedules with setup times included, \emph{Naval Research Logistics Quarterly}, 1, 61--68.
@@ -4016,6 +4315,7 @@ $0.8e^{-1} = 0.294$: nearly a third of customers wait more than an hour, althoug
 \item Karp, R. M. (1972), Reducibility among combinatorial problems, in R. E. Miller and J. W. Thatcher (eds.), \emph{Complexity of Computer Computations}, New York, Plenum, 85--103.
 \item Karush, W. (1939), \emph{Minima of Functions of Several Variables with Inequalities as Side Conditions}, M.Sc. dissertation, University of Chicago.
 \item Kelley, J. E., and Walker, M. R. (1959), Critical-path planning and scheduling, \emph{Proceedings of the Eastern Joint Computer Conference}, 160--173.
+\item Kemeny, J. G., and Snell, J. L. (1960), \emph{Finite Markov Chains}, Princeton, Van Nostrand.
 \item Kendall, D. G. (1953), Stochastic processes occurring in the theory of queues and their analysis by the method of the imbedded Markov chain, \emph{Annals of Mathematical Statistics}, 24, 338--354.
 \item Khachiyan, L. G. (1979), A polynomial algorithm in linear programming, \emph{Soviet Mathematics Doklady}, 20, 191--194.
 \item Khintchine, A. Y. (1932), Mathematical theory of a stationary queue (in Russian), \emph{Matematicheskii Sbornik}, 39, 73--84.
@@ -4030,6 +4330,8 @@ $0.8e^{-1} = 0.294$: nearly a third of customers wait more than an hour, althoug
 \item Little, J. D. C. (1961), A proof for the queuing formula $L = \lambda W$, \emph{Operations Research}, 9, 383--387.
 \item MacCrimmon, K. R., and Ryavec, C. A. (1964), An analytical study of the PERT assumptions, \emph{Operations Research}, 12, 16--37.
 \item Malcolm, D. G., Roseboom, J. H., Clark, C. E., and Fazar, W. (1959), Application of a technique for research and development program evaluation, \emph{Operations Research}, 7, 646--669.
+\item Manne, A. S. (1960), Linear programming and sequential decisions, \emph{Management Science}, 6, 259--267.
+\item Markov, A. A. (1906), Rasprostranenie zakona bol'shih chisel na velichiny, zavisyaschie drug ot druga, \emph{Izvestiya Fiziko-matematicheskogo obschestva pri Kazanskom universitete}, 15, 135--156.
 \item Markowitz, H. (1952), Portfolio selection, \emph{Journal of Finance}, 7, 77--91.
 \item Minkowski, H. (1896), \emph{Geometrie der Zahlen}, Leipzig, Teubner.
 \item Nash, J. F. (1950), Equilibrium points in n-person games, \emph{Proceedings of the National Academy of Sciences}, 36, 48--49.
