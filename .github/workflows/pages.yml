@@ -57,6 +57,12 @@ jobs:
           echo "found $count built pages"
           test "$count" -gt 0
 
+      - name: Leave internal files out of the published site
+        # The whole checkout is uploaded, so planning notes would otherwise be
+        # served publicly (STATUS.md names institutions and course codes that
+        # the site deliberately does not show).
+        run: rm -rf STATUS.md README.md scratch .viewport
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
