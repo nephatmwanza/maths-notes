@@ -1,0 +1,106 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>4.1 The product-limit estimator — Survival Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='survival.css' rel='stylesheet' type='text/css' /> 
+<meta content='survival.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Survival Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="survivalse1.html">Survival Data</a></li>
+<li class="sub"><a class="" href="survivalsu1.html">Time-to-event data</a></li>
+<li class="sub"><a class="" href="survivalsu2.html">Censoring</a></li>
+<li class="sub"><a class="" href="survivalsu3.html">Why ordinary methods fail</a></li>
+<li class="sub"><a class="" href="survivalsu4.html">Recording survival data</a></li>
+<li class="sub"><a class="" href="survivalsu5.html">Survival data in software</a></li>
+<li class="sub"><a class="" href="survivalsu6.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse2.html">Survival, Hazard and Cumulative Hazard</a></li>
+<li class="sub"><a class="" href="survivalsu7.html">The survival function</a></li>
+<li class="sub"><a class="" href="survivalsu8.html">The hazard function</a></li>
+<li class="sub"><a class="" href="survivalsu9.html">The cumulative hazard and the basic identity</a></li>
+<li class="sub"><a class="" href="survivalsu10.html">Summaries: mean, median and residual life</a></li>
+<li class="sub"><a class="" href="survivalsu11.html">Hazards in software</a></li>
+<li class="sub"><a class="" href="survivalsu12.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse3.html">Parametric Models</a></li>
+<li class="sub"><a class="" href="survivalsu13.html">The likelihood with censored data</a></li>
+<li class="sub"><a class="" href="survivalsu14.html">The exponential model</a></li>
+<li class="sub"><a class="" href="survivalsu15.html">The Weibull and other families</a></li>
+<li class="sub"><a class="" href="survivalsu16.html">Choosing a model</a></li>
+<li class="sub"><a class="" href="survivalsu17.html">Parametric models in software</a></li>
+<li class="sub"><a class="" href="survivalsu18.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse4.html">The Kaplan–Meier Estimator</a></li>
+<li class="sub"><a class="current" href="survivalsu19.html">The product-limit estimator</a></li>
+<li class="sub"><a class="" href="survivalsu20.html">Greenwood’s formula and confidence intervals</a></li>
+<li class="sub"><a class="" href="survivalsu21.html">The median and reading the curve</a></li>
+<li class="sub"><a class="" href="survivalsu22.html">Kaplan–Meier estimation in software</a></li>
+<li class="sub"><a class="" href="survivalsu23.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="survivalli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 812 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu20.html'>next</a>] [<a href='#tailsurvivalsu19.html'>tail</a>] [<a href='survivalse4.html#survivalsu19.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>4.1   </span> <a id='x25-240004.1'></a>The product-limit estimator</h4>
+<!-- l. 815 --><p class='noindent'>Let \(t_{(1)} &lt; t_{(2)} &lt; \cdots &lt; t_{(r)}\) be the distinct times at which events occur. At each \(t_{(j)}\) let \(n_j\) be the number <span class='cmbx-10x-x-109'>at risk</span>, the subjects still
+under observation just before \(t_{(j)}\), and \(d_j\) the number of events at \(t_{(j)}\). Surviving beyond \(t\) means surviving each
+event time up to \(t\) in turn, so, by repeated conditioning, \[ S(t) = \prod _{t_{(j)} \leq t}P\bigl (T &gt; t_{(j)} \mid T \geq t_{(j)}\bigr ) . \] The conditional probability of surviving \(t_{(j)}\),
+given survival to it, is estimated by the proportion of those at risk who did not have the event, \(1 - d_j/n_j\).
+This gives the <span class='cmbx-10x-x-109'>Kaplan–Meier</span>, or <span class='cmbx-10x-x-109'>product-limit</span>, estimator \[ \hat S(t) = \prod _{t_{(j)} \leq t}\Bigl (1 - \frac {d_j}{n_j}\Bigr ) . \] \(\hat S\) is a step function that
+drops only at event times. Censored subjects never cause a drop, but they leave the risk
+set, so later drops are larger: each remaining subject now represents a larger share of the
+population.
+</p>
+<div class='newtheorem nt-example'>
+<!-- l. 825 --><p class='noindent'><span class='head'>
+                                                                                      
+                                                                                      
+<a id='x25-24001r1'></a>
+<span class='cmbx-10x-x-109'>Example 4.1.1.</span>  </span> For the ten patients with times \(3, 5^+, 6, 8, 10^+, 12, 15^+, 18, 22^+, 24^+\) months, the calculation is </p>
+<div class='center'>
+<!-- l. 828 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-1'><colgroup id='TBL-1-1g'><col id='TBL-1-1' /><col id='TBL-1-2' /><col id='TBL-1-3' /><col id='TBL-1-4' /><col id='TBL-1-5' /></colgroup><tr class='hline'><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-1-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-1-1' style='white-space:nowrap; text-align:right;'> \(t_{(j)}\) </td><td class='td11' id='TBL-1-1-2' style='white-space:nowrap; text-align:right;'> \(n_j\) </td><td class='td11' id='TBL-1-1-3' style='white-space:nowrap; text-align:right;'> \(d_j\) </td><td class='td11' id='TBL-1-1-4' style='white-space:nowrap; text-align:right;'> \(1 - d_j/n_j\) </td><td class='td11' id='TBL-1-1-5' style='white-space:nowrap; text-align:left;'> \(\hat S(t_{(j)})\) </td></tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-1-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-2-1' style='white-space:nowrap; text-align:right;'>  \(3\) </td><td class='td11' id='TBL-1-2-2' style='white-space:nowrap; text-align:right;'>  \(10\) </td><td class='td11' id='TBL-1-2-3' style='white-space:nowrap; text-align:right;'>  \(1\) </td><td class='td11' id='TBL-1-2-4' style='white-space:nowrap; text-align:right;'>  \(0.900\) </td><td class='td11' id='TBL-1-2-5' style='white-space:nowrap; text-align:left;'>  \(0.900\)</td>
+</tr><tr id='TBL-1-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-3-1' style='white-space:nowrap; text-align:right;'>  \(6\) </td><td class='td11' id='TBL-1-3-2' style='white-space:nowrap; text-align:right;'> \(8\) </td><td class='td11' id='TBL-1-3-3' style='white-space:nowrap; text-align:right;'> \(1\) </td><td class='td11' id='TBL-1-3-4' style='white-space:nowrap; text-align:right;'> \(0.875\) </td><td class='td11' id='TBL-1-3-5' style='white-space:nowrap; text-align:left;'> \(0.900 \times 0.875 = 0.7875\) </td></tr><tr id='TBL-1-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-4-1' style='white-space:nowrap; text-align:right;'>  \(8\) </td><td class='td11' id='TBL-1-4-2' style='white-space:nowrap; text-align:right;'>  \(7\) </td><td class='td11' id='TBL-1-4-3' style='white-space:nowrap; text-align:right;'>  \(1\) </td><td class='td11' id='TBL-1-4-4' style='white-space:nowrap; text-align:right;'>  \(0.857\) </td><td class='td11' id='TBL-1-4-5' style='white-space:nowrap; text-align:left;'>  \(0.675\)</td>
+</tr><tr id='TBL-1-5-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-5-1' style='white-space:nowrap; text-align:right;'>  \(12\) </td><td class='td11' id='TBL-1-5-2' style='white-space:nowrap; text-align:right;'> \(5\) </td><td class='td11' id='TBL-1-5-3' style='white-space:nowrap; text-align:right;'> \(1\) </td><td class='td11' id='TBL-1-5-4' style='white-space:nowrap; text-align:right;'> \(0.800\) </td><td class='td11' id='TBL-1-5-5' style='white-space:nowrap; text-align:left;'> \(0.540\) </td>
+</tr><tr id='TBL-1-6-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-6-1' style='white-space:nowrap; text-align:right;'>  \(18\) </td><td class='td11' id='TBL-1-6-2' style='white-space:nowrap; text-align:right;'> \(3\) </td><td class='td11' id='TBL-1-6-3' style='white-space:nowrap; text-align:right;'> \(1\) </td><td class='td11' id='TBL-1-6-4' style='white-space:nowrap; text-align:right;'> \(0.667\) </td><td class='td11' id='TBL-1-6-5' style='white-space:nowrap; text-align:left;'> \(0.360\) </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td></tr></table>                                                                                      </div></div>
+<!-- l. 842 --><p class='noindent'>At \(6\) months only \(8\) are at risk, because one patient died at \(3\) and one was censored at \(5\). The estimated
+probability of surviving \(12\) months is \(0.54\); the curve first falls below \(\frac 12\) at \(18\) months, which is the estimated
+median (Software <a href='survivalsu22.html#x28-27001r1'>4.4.1<!-- tex4ht:ref: sw:kmhand  --></a>).
+</p>
+</div>
+<!-- l. 843 --><p class='noindent'>
+</p>
+<div class='newtheorem nt-proposition'>
+<!-- l. 845 --><p class='noindent'><span class='head'>
+<a id='x25-24002r2'></a>
+<span class='cmbx-10x-x-109'>Proposition 4.1.2.</span>  </span> With no censoring, \(\hat S(t)\) equals the empirical survival function, the proportion
+of subjects with times greater than \(t\).
+</p>
+</div>
+<!-- l. 848 --><p class='noindent'>
+</p>
+<div class='proof'>
+<!-- l. 851 --><p class='noindent'><span class='head'>
+<span class='cmti-10x-x-109'>Proof.</span> </span>Without censoring, \(n_{j + 1} = n_j - d_j\), so the product telescopes: \(\prod _{t_{(j)} \leq t}(n_j - d_j)/n_j = n_{\text {after}}/n\), where \(n_{\text {after}}\) is the number still alive after
+the last event time up to \(t\), that is, the number with times greater than \(t\).                            □
+</p>
+</div>
+                                                                                      
+                                                                                      
+<!-- l. 854 --><p class='noindent'>The Kaplan–Meier estimator is also the <span class='cmbx-10x-x-109'>non-parametric maximum likelihood estimator </span>of \(S\):
+among all distributions, it maximises the censored likelihood of the section on parametric models
+when probability is allowed to sit only at the observed event times. Under non-informative censoring it
+is consistent, and approximately normal in large samples.
+                                                                                      
+                                                                                      
+</p>
+<!-- l. 856 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu20.html'>next</a>] [<a href='survivalsu19.html'>front</a>] [<a href='survivalse4.html#survivalsu19.html'>up</a>] </p></div>
+<!-- l. 856 --><p class='noindent'><a id='tailsurvivalsu19.html'></a> </p> 
+<nav class="pagenav"><a class="up" href="survivalse4.html#survivalsu19.html">Contents</a><a class="next" href="survivalsu20.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="survival-analysis/4-1-the-product-limit-estimator" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>

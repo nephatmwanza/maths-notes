@@ -802,6 +802,322 @@ How many deaths must a study observe for the $95\%$ confidence interval for an e
 The interval is $\hat\lambda e^{\pm1.96/\sqrt d}$, so the ratio of the limits is $e^{3.92/\sqrt d} \leq 1.5$, that is $\sqrt d \geq 3.92/\log 1.5 = 9.67$, $d \geq 94$ deaths, whatever the number of patients.
 \end{solution}
 
+%======================================================================
+\section{The Kaplan--Meier Estimator}
+\label{sec:km}
+
+Parametric models need a family of distributions to be assumed. The \textbf{Kaplan--Meier estimator} (1958) estimates the survival function with no such assumption, using only the order in which events and censorings occur. It is the most widely used method in survival analysis: almost every clinical paper with a time-to-event outcome shows Kaplan--Meier
+curves. This section derives the estimator, computes its standard error and confidence intervals, and shows how to read survival curves and their medians.
+
+\subsection{The product-limit estimator}
+\label{ssec:productlimit}
+
+Let $t_{(1)} < t_{(2)} < \cdots < t_{(r)}$ be the distinct times at which events occur. At each $t_{(j)}$ let $n_j$ be the number \textbf{at risk}, the subjects still under observation just before $t_{(j)}$, and $d_j$ the number of events at $t_{(j)}$. Surviving beyond $t$ means surviving each event time up to $t$ in turn, so, by repeated conditioning,
+\[
+S(t) = \prod_{t_{(j)} \leq t}P\bigl(T > t_{(j)} \mid T \geq t_{(j)}\bigr) .
+\]
+The conditional probability of surviving $t_{(j)}$, given survival to it, is estimated by the proportion of those at risk who did not have the event, $1 - d_j/n_j$. This gives the \textbf{Kaplan--Meier}, or \textbf{product-limit}, estimator
+\[
+\hat S(t) = \prod_{t_{(j)} \leq t}\Bigl(1 - \frac{d_j}{n_j}\Bigr) .
+\]
+$\hat S$ is a step function that drops only at event times. Censored subjects never cause a drop, but they leave the risk set, so later drops are larger: each remaining subject now represents a larger share of the population.
+
+\begin{exa}
+\label{ex:kmhand}
+For the ten patients with times $3, 5^+, 6, 8, 10^+, 12, 15^+, 18, 22^+, 24^+$ months, the calculation is
+\begin{center}
+\small
+\begin{tabular}{rrrrl}
+\hline
+$t_{(j)}$ & $n_j$ & $d_j$ & $1 - d_j/n_j$ & $\hat S(t_{(j)})$ \\
+\hline
+$3$ & $10$ & $1$ & $0.900$ & $0.900$ \\
+$6$ & $8$ & $1$ & $0.875$ & $0.900 \times 0.875 = 0.7875$ \\
+$8$ & $7$ & $1$ & $0.857$ & $0.675$ \\
+$12$ & $5$ & $1$ & $0.800$ & $0.540$ \\
+$18$ & $3$ & $1$ & $0.667$ & $0.360$ \\
+\hline
+\end{tabular}
+\end{center}
+At $6$ months only $8$ are at risk, because one patient died at $3$ and one was censored at $5$. The estimated probability of surviving $12$ months is $0.54$; the curve first falls below $\frac12$ at $18$ months, which is the estimated median (Software~\ref{sw:kmhand}).
+\end{exa}
+
+\begin{prop}
+\label{prop:kmempirical}
+With no censoring, $\hat S(t)$ equals the empirical survival function, the proportion of subjects with times greater than $t$.
+\end{prop}
+
+\begin{proof}
+Without censoring, $n_{j + 1} = n_j - d_j$, so the product telescopes: $\prod_{t_{(j)} \leq t}(n_j - d_j)/n_j = n_{\text{after}}/n$, where $n_{\text{after}}$ is the number still alive after the last event time up to $t$, that is, the number with times greater than $t$.
+\end{proof}
+
+The Kaplan--Meier estimator is also the \textbf{non-parametric maximum likelihood estimator} of $S$: among all distributions, it maximises the censored likelihood of the section on parametric models when probability is allowed to sit only at the observed event times. Under non-informative censoring it is consistent, and approximately normal in large samples.
+
+\subsection{Greenwood's formula and confidence intervals}
+\label{ssec:greenwood}
+
+\begin{thm}[Greenwood's formula]
+\label{thm:greenwood}
+The approximate variance of the Kaplan--Meier estimator is
+\[
+\widehat{\operatorname{Var}}\,\hat S(t) = \hat S(t)^2\sum_{t_{(j)} \leq t}\frac{d_j}{n_j(n_j - d_j)} .
+\]
+\end{thm}
+
+\begin{proof}[Derivation]
+$\log\hat S(t) = \sum\log(1 - \hat q_j)$ with $\hat q_j = d_j/n_j$. Given $n_j$, $d_j$ is approximately binomial, so $\operatorname{Var}\hat q_j \approx q_j(1 - q_j)/n_j$, and the terms are approximately uncorrelated. By the delta method, $\operatorname{Var}\log(1 - \hat q_j) \approx \frac{q_j(1 - q_j)/n_j}{(1 - q_j)^2} = \frac{q_j}{n_j(1 - q_j)}$, which with
+$q_j = d_j/n_j$ is $\frac{d_j}{n_j(n_j - d_j)}$. Summing gives $\operatorname{Var}\log\hat S$, and a second use of the delta method, $\operatorname{Var}\hat S \approx \hat S^2\operatorname{Var}\log\hat S$, gives the formula.
+\end{proof}
+
+The \textbf{plain} interval $\hat S \pm 1.96\,\widehat{\operatorname{se}}$ can go outside $[0, 1]$ and behaves badly near the ends. Intervals are therefore computed on a transformed scale and transformed back: on the \textbf{log} scale, $\hat S\exp(\pm1.96\,\operatorname{se}(\log\hat S))$, the default in R; or on the \textbf{log-log} scale, the default in some other
+packages, which always stays inside $(0, 1)$. All three agree when there are many subjects at risk.
+
+\begin{exa}
+\label{ex:kmlung}
+For \texttt{lung}, the estimated survival is $0.722$ at $6$ months ($95\%$ interval $0.666$ to $0.783$), $0.409$ at one year ($0.345$ to $0.486$), and $0.116$ at two years ($0.072$ to $0.187$). The interval widens as the number at risk falls, from $160$ at $6$ months to $13$ at two years. Greenwood's formula gives the standard error $0.0358$ at one
+year, the value R reports (Software~\ref{sw:kmlung}).
+\end{exa}
+
+\subsection{The median and reading the curve}
+\label{ssec:median}
+
+The estimated \textbf{median survival} is the smallest time at which $\hat S(t) \leq \frac12$. A confidence interval for it (Brookmeyer and Crowley, 1982) consists of the times at which the pointwise interval for $S$ contains $\frac12$: read it off where the lower and upper confidence curves cross $\frac12$. For \texttt{lung} the median is $310$ days, with interval
+$285$ to $363$ days. If $\hat S$ never falls to $\frac12$, the median is not estimable, a common situation when the treatment is effective or follow-up short, and survival at a fixed time is reported instead.
+
+When reading a Kaplan--Meier plot:
+\begin{itemize}
+\item each drop is an event; tick marks show censored times;
+\item the \textbf{number at risk} should be shown below the axis, because the right-hand end of the curve rests on few subjects and is unreliable, however dramatic it looks;
+\item the last step does not mean that everyone dies: if the largest time is censored, the curve stops above zero, and nothing is known beyond it.
+\end{itemize}
+The \textbf{median follow-up} time, which tells the reader how mature the data are, is best estimated by the \textbf{reverse Kaplan--Meier} method, in which censoring is treated as the event and deaths as censored: for \texttt{lung} it is $588$ days.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-1.5,-1.35) rectangle (8.3,3.7);
+\draw[->] (0,0) -- (7.6,0) node[below,font=\scriptsize] {days};
+\draw[->] (0,0) -- (0,3.45) node[left,font=\scriptsize] {$\hat S(t)$};
+\foreach \x in {200,400,600,800,1000} \draw ({0.007*\x},0.06) -- ({0.007*\x},-0.06);
+\foreach \x in {0,200,400,600,800,1000} \node[font=\tiny] at ({0.007*\x},-0.22) {$\x$};
+\foreach \y in {0.25,0.5,0.75,1} \draw (0.06,{3.2*\y}) -- (-0.06,{3.2*\y}) node[left,font=\tiny] {$\y$};
+\draw[black!35,dashed] (0,1.6) -- (7.2,1.6);
+\draw[blue!60!black,thick] (0.000,3.200) -- (0.077,3.200) -- (0.077,3.130) -- (0.084,3.130) -- (0.084,3.107) -- (0.091,3.107) -- (0.091,3.061) -- (0.105,3.061) -- (0.105,3.038) -- (0.182,3.038) -- (0.182,3.014) -- (0.210,3.014) -- (0.210,2.991) -- (0.217,2.991) -- (0.217,2.968) -- (0.371,2.968) -- (0.371,2.922) -- (0.378,2.922) -- (0.378,2.899) -- (0.413,2.899) -- (0.413,2.875) -- (0.420,2.875) -- (0.420,2.852) -- (0.455,2.852) -- (0.455,2.806) -- (0.497,2.806) -- (0.497,2.783) -- (0.567,2.783) -- (0.567,2.759) -- (0.616,2.759) -- (0.616,2.713) -- (0.644,2.713) -- (0.644,2.690) -- (0.651,2.690) -- (0.651,2.667) -- (0.665,2.667) -- (0.665,2.643) -- (0.735,2.643) -- (0.735,2.620) -- (0.749,2.620) -- (0.749,2.597) -- (0.770,2.597) -- (0.770,2.574) -- (0.812,2.574) -- (0.812,2.551) -- (0.826,2.551) -- (0.826,2.528) -- (0.917,2.528) -- (0.917,2.504) -- (0.924,2.504) -- (0.924,2.458) -- (0.945,2.458) -- (0.945,2.435) -- (0.994,2.435) -- (0.994,2.412) -- (1.008,2.412) -- (1.008,2.388) -- (1.029,2.388) -- (1.029,2.365) -- (1.092,2.365) -- (1.092,2.319) -- (1.141,2.319) -- (1.141,2.249) -- (1.162,2.249) -- (1.162,2.226) -- (1.190,2.226) -- (1.190,2.203) -- (1.218,2.203) -- (1.218,2.203) -- (1.225,2.203) -- (1.225,2.179) -- (1.232,2.179) -- (1.232,2.156) -- (1.239,2.156) -- (1.239,2.133) -- (1.253,2.133) -- (1.253,2.086) -- (1.260,2.086) -- (1.260,2.062) -- (1.267,2.062) -- (1.267,2.015) -- (1.281,2.015) -- (1.281,1.992) -- (1.295,1.992) -- (1.295,1.992) -- (1.316,1.992) -- (1.316,1.992) -- (1.323,1.992) -- (1.323,1.968) -- (1.337,1.968) -- (1.337,1.968) -- (1.372,1.968) -- (1.372,1.968) -- (1.379,1.968) -- (1.379,1.943) -- (1.414,1.943) -- (1.414,1.918) -- (1.449,1.918) -- (1.449,1.894) -- (1.470,1.894) -- (1.470,1.869) -- (1.484,1.869) -- (1.484,1.844) -- (1.526,1.844) -- (1.526,1.819) -- (1.547,1.819) -- (1.547,1.819) -- (1.554,1.819) -- (1.554,1.794) -- (1.561,1.794) -- (1.561,1.768) -- (1.575,1.768) -- (1.575,1.768) -- (1.603,1.768) -- (1.603,1.742) -- (1.610,1.742) -- (1.610,1.715) -- (1.659,1.715) -- (1.659,1.715) -- (1.673,1.715) -- (1.673,1.688) -- (1.722,1.688) -- (1.722,1.662) -- (1.813,1.662) -- (1.813,1.662) -- (1.869,1.662) -- (1.869,1.634) -- (1.883,1.634) -- (1.883,1.607) -- (1.890,1.607) -- (1.890,1.580) -- (1.953,1.580) -- (1.953,1.580) -- (1.981,1.580) -- (1.981,1.552) -- (1.988,1.552) -- (1.988,1.524) -- (1.995,1.524) -- (1.995,1.496) -- (2.002,1.496) -- (2.002,1.468) -- (2.016,1.468) -- (2.016,1.440) -- (2.037,1.440) -- (2.037,1.411) -- (2.044,1.411) -- (2.044,1.411) -- (2.100,1.411) -- (2.100,1.411) -- (2.107,1.411) -- (2.107,1.382) -- (2.121,1.382) -- (2.121,1.352) -- (2.142,1.352) -- (2.142,1.321) -- (2.170,1.321) -- (2.170,1.291) -- (2.240,1.291) -- (2.240,1.260) -- (2.303,1.260) -- (2.303,1.229) -- (2.359,1.229) -- (2.359,1.198) -- (2.471,1.198) -- (2.471,1.137) -- (2.541,1.137) -- (2.541,1.106) -- (2.548,1.106) -- (2.548,1.075) -- (2.597,1.075) -- (2.597,1.045) -- (2.709,1.045) -- (2.709,1.014) -- (2.730,1.014) -- (2.730,0.983) -- (2.758,0.983) -- (2.758,0.953) -- (2.828,0.953) -- (2.828,0.953) -- (2.891,0.953) -- (2.891,0.953) -- (2.996,0.953) -- (2.996,0.920) -- (3.003,0.920) -- (3.003,0.887) -- (3.094,0.887) -- (3.094,0.854) -- (3.108,0.854) -- (3.108,0.854) -- (3.185,0.854) -- (3.185,0.820) -- (3.199,0.820) -- (3.199,0.786) -- (3.206,0.786) -- (3.206,0.786) -- (3.220,0.786) -- (3.220,0.750) -- (3.339,0.750) -- (3.339,0.714) -- (3.633,0.714) -- (3.633,0.679) -- (3.668,0.679) -- (3.668,0.643) -- (3.731,0.643) -- (3.731,0.607) -- (3.906,0.607) -- (3.906,0.571) -- (3.969,0.571) -- (3.969,0.536) -- (4.018,0.536) -- (4.018,0.500) -- (4.081,0.500) -- (4.081,0.464) -- (4.291,0.464) -- (4.291,0.429) -- (4.368,0.429) -- (4.368,0.393) -- (4.501,0.393) -- (4.501,0.357) -- (4.585,0.357) -- (4.585,0.321) -- (4.823,0.321) -- (4.823,0.286) -- (4.949,0.286) -- (4.949,0.250) -- (5.537,0.250) -- (5.537,0.214) -- (5.642,0.214) -- (5.642,0.214) -- (5.698,0.214) -- (5.698,0.171) -- (5.880,0.171) -- (5.880,0.171) -- (6.181,0.171) -- (6.181,0.114) -- (7.070,0.114) -- (7.070,0.114) -- (7.154,0.114) -- (7.154,0.114);
+\draw[blue!60!black] (1.218,2.203) -- ++(0,0.09);
+\draw[blue!60!black] (1.295,1.992) -- ++(0,0.09);
+\draw[blue!60!black] (1.316,1.992) -- ++(0,0.09);
+\draw[blue!60!black] (1.337,1.968) -- ++(0,0.09);
+\draw[blue!60!black] (1.372,1.968) -- ++(0,0.09);
+\draw[blue!60!black] (1.379,1.943) -- ++(0,0.09);
+\draw[blue!60!black] (1.547,1.819) -- ++(0,0.09);
+\draw[blue!60!black] (1.554,1.794) -- ++(0,0.09);
+\draw[blue!60!black] (1.575,1.768) -- ++(0,0.09);
+\draw[blue!60!black] (1.659,1.715) -- ++(0,0.09);
+\draw[blue!60!black] (1.813,1.662) -- ++(0,0.09);
+\draw[blue!60!black] (1.953,1.580) -- ++(0,0.09);
+\draw[blue!60!black] (1.988,1.524) -- ++(0,0.09);
+\draw[blue!60!black] (2.044,1.411) -- ++(0,0.09);
+\draw[blue!60!black] (2.100,1.411) -- ++(0,0.09);
+\draw[blue!60!black] (2.107,1.382) -- ++(0,0.09);
+\draw[blue!60!black] (2.121,1.352) -- ++(0,0.09);
+\draw[blue!60!black] (2.828,0.953) -- ++(0,0.09);
+\draw[blue!60!black] (2.891,0.953) -- ++(0,0.09);
+\draw[blue!60!black] (3.108,0.854) -- ++(0,0.09);
+\draw[blue!60!black] (3.206,0.786) -- ++(0,0.09);
+\draw[blue!60!black] (5.642,0.214) -- ++(0,0.09);
+\draw[blue!60!black] (5.880,0.171) -- ++(0,0.09);
+\draw[blue!60!black] (7.070,0.114) -- ++(0,0.09);
+\draw[blue!60!black] (7.154,0.114) -- ++(0,0.09);
+\node[font=\tiny,blue!60!black] at (0.000,-0.75) {138};
+\node[font=\tiny,blue!60!black] at (1.400,-0.75) {78};
+\node[font=\tiny,blue!60!black] at (2.800,-0.75) {31};
+\node[font=\tiny,blue!60!black] at (4.200,-0.75) {13};
+\node[font=\tiny,blue!60!black] at (5.600,-0.75) {6};
+\node[font=\tiny,blue!60!black] at (7.000,-0.75) {2};
+\draw[red!70!black,thick] (0.000,3.200) -- (0.035,3.200) -- (0.035,3.164) -- (0.420,3.164) -- (0.420,3.129) -- (0.427,3.129) -- (0.427,3.093) -- (0.434,3.093) -- (0.434,3.058) -- (0.553,3.058) -- (0.553,3.022) -- (0.567,3.022) -- (0.567,2.987) -- (0.644,2.987) -- (0.644,2.987) -- (0.665,2.987) -- (0.665,2.951) -- (0.735,2.951) -- (0.735,2.951) -- (0.749,2.951) -- (0.749,2.914) -- (0.854,2.914) -- (0.854,2.878) -- (1.015,2.878) -- (1.015,2.805) -- (1.071,2.805) -- (1.071,2.769) -- (1.162,2.769) -- (1.162,2.732) -- (1.169,2.732) -- (1.169,2.696) -- (1.211,2.696) -- (1.211,2.696) -- (1.225,2.696) -- (1.225,2.696) -- (1.239,2.696) -- (1.239,2.696) -- (1.274,2.696) -- (1.274,2.658) -- (1.302,2.658) -- (1.302,2.620) -- (1.344,2.620) -- (1.344,2.620) -- (1.358,2.620) -- (1.358,2.581) -- (1.393,2.581) -- (1.393,2.543) -- (1.407,2.543) -- (1.407,2.466) -- (1.414,2.466) -- (1.414,2.466) -- (1.421,2.466) -- (1.421,2.466) -- (1.456,2.466) -- (1.456,2.426) -- (1.477,2.426) -- (1.477,2.426) -- (1.568,2.426) -- (1.568,2.426) -- (1.582,2.426) -- (1.582,2.385) -- (1.645,2.385) -- (1.645,2.385) -- (1.673,2.385) -- (1.673,2.343) -- (1.680,2.343) -- (1.680,2.343) -- (1.701,2.343) -- (1.701,2.343) -- (1.715,2.343) -- (1.715,2.300) -- (1.764,2.300) -- (1.764,2.300) -- (1.862,2.300) -- (1.862,2.300) -- (1.876,2.300) -- (1.876,2.254) -- (1.883,2.254) -- (1.883,2.254) -- (1.904,2.254) -- (1.904,2.254) -- (1.932,2.254) -- (1.932,2.254) -- (1.995,2.254) -- (1.995,2.206) -- (2.044,2.206) -- (2.044,2.206) -- (2.051,2.206) -- (2.051,2.157) -- (2.072,2.157) -- (2.072,2.157) -- (2.135,2.157) -- (2.135,2.107) -- (2.170,2.107) -- (2.170,2.057) -- (2.205,2.057) -- (2.205,2.057) -- (2.324,2.057) -- (2.324,2.057) -- (2.380,2.057) -- (2.380,2.004) -- (2.415,2.004) -- (2.415,1.952) -- (2.436,1.952) -- (2.436,1.899) -- (2.450,1.899) -- (2.450,1.846) -- (2.457,1.846) -- (2.457,1.793) -- (2.492,1.793) -- (2.492,1.793) -- (2.527,1.793) -- (2.527,1.739) -- (2.541,1.739) -- (2.541,1.685) -- (2.548,1.685) -- (2.548,1.685) -- (2.597,1.685) -- (2.597,1.629) -- (2.632,1.629) -- (2.632,1.629) -- (2.674,1.629) -- (2.674,1.629) -- (2.688,1.629) -- (2.688,1.629) -- (2.982,1.629) -- (2.982,1.566) -- (3.031,1.566) -- (3.031,1.503) -- (3.108,1.503) -- (3.108,1.441) -- (3.150,1.441) -- (3.150,1.378) -- (3.311,1.378) -- (3.311,1.315) -- (3.577,1.315) -- (3.577,1.315) -- (3.640,1.315) -- (3.640,1.246) -- (3.668,1.246) -- (3.668,1.177) -- (3.703,1.177) -- (3.703,1.177) -- (3.801,1.177) -- (3.801,1.177) -- (3.850,1.177) -- (3.850,1.098) -- (3.857,1.098) -- (3.857,1.098) -- (3.913,1.098) -- (3.913,1.098) -- (4.116,1.098) -- (4.116,1.098) -- (4.487,1.098) -- (4.487,0.999) -- (4.578,0.999) -- (4.578,0.899) -- (4.809,0.899) -- (4.809,0.799) -- (4.935,0.799) -- (4.935,0.699) -- (5.096,0.699) -- (5.096,0.599) -- (5.117,0.599) -- (5.117,0.499) -- (5.145,0.499) -- (5.145,0.399) -- (5.180,0.399) -- (5.180,0.399) -- (5.355,0.399) -- (5.355,0.266) -- (5.747,0.266) -- (5.747,0.266) -- (6.755,0.266) -- (6.755,0.266);
+\draw[red!70!black] (0.644,2.987) -- ++(0,0.09);
+\draw[red!70!black] (0.735,2.951) -- ++(0,0.09);
+\draw[red!70!black] (1.211,2.696) -- ++(0,0.09);
+\draw[red!70!black] (1.225,2.696) -- ++(0,0.09);
+\draw[red!70!black] (1.239,2.696) -- ++(0,0.09);
+\draw[red!70!black] (1.344,2.620) -- ++(0,0.09);
+\draw[red!70!black] (1.414,2.466) -- ++(0,0.09);
+\draw[red!70!black] (1.421,2.466) -- ++(0,0.09);
+\draw[red!70!black] (1.477,2.426) -- ++(0,0.09);
+\draw[red!70!black] (1.568,2.426) -- ++(0,0.09);
+\draw[red!70!black] (1.645,2.385) -- ++(0,0.09);
+\draw[red!70!black] (1.680,2.343) -- ++(0,0.09);
+\draw[red!70!black] (1.701,2.343) -- ++(0,0.09);
+\draw[red!70!black] (1.764,2.300) -- ++(0,0.09);
+\draw[red!70!black] (1.862,2.300) -- ++(0,0.09);
+\draw[red!70!black] (1.883,2.254) -- ++(0,0.09);
+\draw[red!70!black] (1.904,2.254) -- ++(0,0.09);
+\draw[red!70!black] (1.932,2.254) -- ++(0,0.09);
+\draw[red!70!black] (2.044,2.206) -- ++(0,0.09);
+\draw[red!70!black] (2.072,2.157) -- ++(0,0.09);
+\draw[red!70!black] (2.205,2.057) -- ++(0,0.09);
+\draw[red!70!black] (2.324,2.057) -- ++(0,0.09);
+\draw[red!70!black] (2.492,1.793) -- ++(0,0.09);
+\draw[red!70!black] (2.548,1.685) -- ++(0,0.09);
+\draw[red!70!black] (2.632,1.629) -- ++(0,0.09);
+\draw[red!70!black] (2.674,1.629) -- ++(0,0.09);
+\draw[red!70!black] (2.688,1.629) -- ++(0,0.09);
+\draw[red!70!black] (3.577,1.315) -- ++(0,0.09);
+\draw[red!70!black] (3.703,1.177) -- ++(0,0.09);
+\draw[red!70!black] (3.801,1.177) -- ++(0,0.09);
+\draw[red!70!black] (3.857,1.098) -- ++(0,0.09);
+\draw[red!70!black] (3.913,1.098) -- ++(0,0.09);
+\draw[red!70!black] (4.116,1.098) -- ++(0,0.09);
+\draw[red!70!black] (5.180,0.399) -- ++(0,0.09);
+\draw[red!70!black] (5.747,0.266) -- ++(0,0.09);
+\draw[red!70!black] (6.755,0.266) -- ++(0,0.09);
+\node[font=\tiny,red!70!black] at (0.000,-1.05) {90};
+\node[font=\tiny,red!70!black] at (1.400,-1.05) {66};
+\node[font=\tiny,red!70!black] at (2.800,-1.05) {26};
+\node[font=\tiny,red!70!black] at (4.200,-1.05) {11};
+\node[font=\tiny,red!70!black] at (5.600,-1.05) {2};
+\node[font=\tiny,red!70!black] at (7.000,-1.05) {0};
+\node[font=\tiny,anchor=east,blue!60!black] at (-0.15,-0.75) {men at risk};
+\node[font=\tiny,anchor=east,red!70!black] at (-0.15,-1.05) {women};
+\draw[blue!60!black,thick] (4.5,3.25) -- (5.0,3.25) node[right,font=\tiny,black] {men: median $270$ days};
+\draw[red!70!black,thick] (4.5,2.95) -- (5.0,2.95) node[right,font=\tiny,black] {women: median $426$ days};
+\end{tikzpicture}
+\caption{Kaplan--Meier curves for men and women in the \texttt{lung} data, with ticks at censored times and the numbers at risk below. The dashed line at $\frac12$ meets the curves at the medians, $270$ and $426$ days. Women survive longer at almost every time (the curves meet only in the sparse tail); whether the difference could be due to chance is tested by the log-rank test of a later section.}
+\label{fig:kmsex}
+\end{figure}
+
+\subsection{Kaplan--Meier estimation in software}
+\label{ssec:software4}
+
+\begin{software}[The estimator by hand]
+\label{sw:kmhand}
+Example~\ref{ex:kmhand}: a loop over the distinct event times computing the number at risk, the deaths and the running product; then \texttt{survfit} for comparison:
+{\small\begin{verbatim}
+> library(survival)
+> tm <- c(3, 5, 6, 8, 10, 12, 15, 18, 22, 24)       # the ten patients of
+> ev <- c(1, 0, 1, 1, 0, 1, 0, 1, 0, 0)             # Section 3, 0 = censored
+> S <- 1; out <- NULL
+> for (tj in sort(unique(tm[ev == 1]))) {           # event times only
++   n <- sum(tm >= tj); dj <- sum(tm == tj & ev == 1)
++   S <- S * (1 - dj / n)
++   out <- rbind(out, c(t = tj, n_risk = n, deaths = dj, S = round(S, 4)))
++ }
+> out
+      t n_risk deaths      S
+[1,]  3     10      1 0.9000
+[2,]  6      8      1 0.7875
+[3,]  8      7      1 0.6750
+[4,] 12      5      1 0.5400
+[5,] 18      3      1 0.3600
+> km <- survfit(Surv(tm, ev) ~ 1)
+> summary(km)$surv                                  # the same steps
+[1] 0.9000 0.7875 0.6750 0.5400 0.3600
+\end{verbatim}}
+\textbf{Reading the output.} The table reproduces the hand calculation, and \texttt{survfit} gives the same five values: $0.9$, $0.7875$, $0.675$, $0.54$, $0.36$.
+
+\textbf{Python:} \texttt{lifelines.KaplanMeierFitter().fit(tm, ev).survival\_function\_}.
+\end{software}
+
+\begin{software}[Survival, intervals and the median]
+\label{sw:kmlung}
+The \texttt{lung} data: the estimated survival at $180$, $365$ and $730$ days with the number at risk and the $95\%$ interval; the median with its interval; and Greenwood's standard error at one year by hand, against \texttt{survfit}'s:
+{\small\begin{verbatim}
+> fit <- survfit(Surv(time, status) ~ 1, data = lung)
+> s <- summary(fit, times = c(180, 365, 730))
+> round(cbind(time = s$time, n_risk = s$n.risk, surv = s$surv,
++             lower = s$lower, upper = s$upper), 3)
+     time n_risk  surv lower upper
+[1,]  180    160 0.722 0.666 0.783
+[2,]  365     65 0.409 0.345 0.486
+[3,]  730     13 0.116 0.072 0.187
+> fit                                               # median and its 95% CI
+Call: survfit(formula = Surv(time, status) ~ 1, data = lung)
+
+       n events median 0.95LCL 0.95UCL
+[1,] 228    165    310     285     363
+> use <- fit$time <= 365                      # Greenwood by hand, at 1 year
+> terms <- fit$n.event / (fit$n.risk * (fit$n.risk - fit$n.event))
+> v <- sum(terms[use])
+> round(c(greenwood_se = s$surv[2] * sqrt(v), survfit_se = s$std.err[2]), 5)
+greenwood_se   survfit_se 
+     0.03582      0.03582 
+\end{verbatim}}
+\textbf{Reading the output.} One-year survival is $40.9\%$ ($34.5\%$ to $48.6\%$). The median is $310$ days ($285$ to $363$). Greenwood's sum gives a standard error of $0.03582$ at one year, exactly the value \texttt{survfit} uses.
+
+\textbf{Python:} \texttt{kmf.median\_survival\_time\_} and \texttt{kmf.confidence\_interval\_}.
+\end{software}
+
+\begin{software}[Curves by group and median follow-up]
+\label{sw:kmsex}
+Kaplan--Meier estimates for men and women, with the numbers of subjects and events, the medians and their intervals; then the reverse Kaplan--Meier estimate of median follow-up:
+{\small\begin{verbatim}
+> bysex <- survfit(Surv(time, status) ~ sex, data = lung)
+> tab <- summary(bysex)$table
+> tab[, c("records", "events", "median", "0.95LCL", "0.95UCL")]
+      records events median 0.95LCL 0.95UCL
+sex=1     138    112    270     212     310
+sex=2      90     53    426     348     550
+> rev_km <- survfit(Surv(time, status == 1) ~ 1, data = lung)  # reverse KM
+> summary(rev_km)$table["median"]                   # median follow-up, days
+median 
+   588 
+\end{verbatim}}
+\textbf{Reading the output.} Men: $138$ patients, $112$ deaths, median $270$ days ($212$ to $310$). Women: $90$ patients, $53$ deaths, median $426$ days ($348$ to $550$). The intervals barely overlap, which suggests a real difference. The median follow-up is $588$ days.
+
+\textbf{Python:} fit a \texttt{KaplanMeierFitter} to each group and plot both on one axis.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Compute the Kaplan--Meier estimate for the times $2, 4, 4, 5^+, 7, 9^+, 11$ and give the estimated median.
+\end{problem}
+
+\begin{solution}
+At $2$: $n = 7$, $d = 1$, $\hat S = \frac67 = 0.857$. At $4$: $n = 6$, $d = 2$, $\hat S = 0.857 \times \frac46 = 0.571$. At $7$: $n = 3$ (after the censoring at $5$), $d = 1$, $\hat S = 0.571 \times \frac23 = 0.381$. At $11$: $n = 1$, $d = 1$, $\hat S = 0$. The curve first falls to $\frac12$ or below at $7$, so the median is $7$.
+\end{solution}
+
+\begin{problem}
+For the data of the previous problem, compute Greenwood's standard error of $\hat S(4)$.
+\end{problem}
+
+\begin{solution}
+$\sum\frac{d_j}{n_j(n_j - d_j)} = \frac1{7 \times 6} + \frac2{6 \times 4} = 0.0238 + 0.0833 = 0.1071$, so $\operatorname{se} = 0.571 \times \sqrt{0.1071} = 0.187$. With seven patients the estimate is very imprecise.
+\end{solution}
+
+\begin{problem}
+Why does a censored observation not cause a drop in the Kaplan--Meier curve, and how does it nevertheless affect the curve?
+\end{problem}
+
+\begin{solution}
+A censored subject did not have the event, so it contributes no death at any time. But it leaves the risk set at its censoring time, so every later conditional probability $1 - d_j/n_j$ is computed from a smaller $n_j$, and later drops are larger. The subject's weight is in effect redistributed to those who remain at risk, which is fair under non-informative censoring.
+\end{solution}
+
+\begin{problem}
+A curve shows estimated $5$-year survival of $0.80$ with $4$ patients at risk at $5$ years. What would you tell a reader who concludes that $80\%$ of patients survive five years?
+\end{problem}
+
+\begin{solution}
+The estimate at $5$ years rests on very few patients; its confidence interval will be wide (one more death among the four would lower it by about a quarter of its value). The number at risk should always be reported, and conclusions about the tail drawn cautiously or not at all.
+\end{solution}
+
+\begin{problem}
+Explain the reverse Kaplan--Meier method for median follow-up, and why simply taking the median of all recorded times is wrong.
+\end{problem}
+
+\begin{solution}
+Follow-up is the time a patient would have been observed had they not died. Patients who die early have short recorded times although their potential follow-up was longer; the median of recorded times therefore understates follow-up. The reverse method treats censoring as the event and death as censoring, so that deaths are treated as incomplete observations of follow-up; the
+median of the resulting curve estimates the potential follow-up. For \texttt{lung} it is $588$ days, much longer than the median recorded time.
+\end{solution}
+
+\begin{problem}
+Show that if all subjects are censored after the last event, $\hat S$ remains constant at its last value, and explain why the mean survival cannot then be estimated without assumptions.
+\end{problem}
+
+\begin{solution}
+There are no events after the last event time, so no further factors enter the product, and $\hat S$ stays at its last value $s > 0$ up to the largest censored time and is undefined beyond. The mean is the area under $S$, which depends on the unobserved tail; the \textbf{restricted mean} $\int_0^\tau\hat S(t)\,dt$ up to a time $\tau$ within follow-up is reported instead.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -832,15 +1148,19 @@ The interval is $\hat\lambda e^{\pm1.96/\sqrt d}$, so the ratio of the limits is
 \subhead{Further reading}
 \begin{enumerate}
 \item Akaike, H. (1974), A new look at the statistical model identification, \emph{IEEE Transactions on Automatic Control}, 19, 716--723.
+\item Brookmeyer, R., and Crowley, J. (1982), A confidence interval for the median survival time, \emph{Biometrics}, 38, 29--41.
 \item Cohen, A. C. (1965), Maximum likelihood estimation in the Weibull distribution based on complete and on censored samples, \emph{Technometrics}, 7, 579--588.
 \item Edmonson, J. H., Fleming, T. R., Decker, D. G., et al. (1979), Different chemotherapeutic sensitivities and host factors affecting prognosis in advanced ovarian carcinoma versus minimal residual disease, \emph{Cancer Treatment Reports}, 63, 241--247.
 \item Epstein, B., and Sobel, M. (1953), Life testing, \emph{Journal of the American Statistical Association}, 48, 486--502.
 \item Gompertz, B. (1825), On the nature of the function expressive of the law of human mortality, \emph{Philosophical Transactions of the Royal Society of London}, 115, 513--583.
+\item Greenwood, M. (1926), The natural duration of cancer, \emph{Reports on Public Health and Medical Subjects}, 33, London, His Majesty's Stationery Office.
 \item Halley, E. (1693), An estimate of the degrees of the mortality of mankind, \emph{Philosophical Transactions of the Royal Society of London}, 17, 596--610.
 \item Kaplan, E. L., and Meier, P. (1958), Nonparametric estimation from incomplete observations, \emph{Journal of the American Statistical Association}, 53, 457--481.
 \item Leung, K.-M., Elashoff, R. M., and Afifi, A. A. (1997), Censoring issues in survival analysis, \emph{Annual Review of Public Health}, 18, 83--104.
 \item Loprinzi, C. L., et al. (1994), Prospective evaluation of prognostic variables from patient-completed questionnaires, \emph{Journal of Clinical Oncology}, 12, 601--607.
+\item Pocock, S. J., Clayton, T. C., and Altman, D. G. (2002), Survival plots of time-to-event outcomes in clinical trials: good practice and pitfalls, \emph{The Lancet}, 359, 1686--1689.
 \item Prentice, R. L. (1973), Exponential survivals with censoring and explanatory variables, \emph{Biometrika}, 60, 279--288.
+\item Schemper, M., and Smith, T. L. (1996), A note on quantifying follow-up in studies of failure time, \emph{Controlled Clinical Trials}, 17, 343--346.
 \item Weibull, W. (1951), A statistical distribution function of wide applicability, \emph{Journal of Applied Mechanics}, 18, 293--297.
 \end{enumerate}
 
