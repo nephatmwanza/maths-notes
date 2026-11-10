@@ -4237,7 +4237,265 @@ Why is value iteration slow when $\beta$ is close to $1$, and how many iteration
 The error shrinks by the factor $\beta$ per iteration, so $k$ iterations give $\beta^k$. For $\beta^k = 10^{-6}$, $k = 6\ln 10/(-\ln\beta) = 13.8/0.01005 = 1375$ iterations at $\beta = 0.99$, against $131$ at $\beta = 0.9$. Policy iteration, whose number of steps hardly depends on $\beta$, is then preferable.
 \end{solution}
 
-%SECTIONS
+%======================================================================
+\section{Simulation and Review}
+\label{sec:simulation}
+
+When a system is too complicated for formulas, with several kinds of customers, priorities, breakdowns, finite buffers and non-exponential times, it can still be studied by imitating it on a computer: generate random arrivals, service times and failures, follow the system through time, and average what happens. This is
+\textbf{simulation}. It answers almost any question about almost any model, but only approximately, with a statistical error that must be estimated, and only for the scenarios that are run. This last section explains how simulation works, how to measure its accuracy and reduce its error, and then reviews the course.
+
+\subsection{The Monte Carlo method}
+\label{ssec:montecarlo}
+
+To estimate $\theta = \mathbb E[g(X)]$, draw independent copies $X_1, \ldots, X_n$ and form $\hat\theta_n = \frac1n\sum g(X_i)$. By the law of large numbers $\hat\theta_n \to \theta$, and by the central limit theorem $\hat\theta_n$ is approximately normal with standard deviation $\sigma/\sqrt n$, where $\sigma^2 = \operatorname{Var}g(X)$ is estimated
+by the sample variance $s^2$. So
+\[
+\hat\theta_n \pm 1.96\,\frac s{\sqrt n}
+\]
+is an approximate $95\%$ confidence interval. The error decreases like $1/\sqrt n$, whatever the dimension of the problem: a hundred times more work buys one more correct digit. Integrals are expectations too: $\int_0^1e^{-v^2}\,dv = \mathbb E[e^{-U^2}]$ for $U$ uniform, estimated from $100\,000$ uniforms as $0.74684 \pm 0.00125$ against the exact
+$0.74682$ (Software~\ref{sw:random}).
+
+\subsection{Random numbers and random variates}
+\label{ssec:variates}
+
+Computers produce \textbf{pseudo-random numbers}: deterministic sequences that pass statistical tests of uniformity and independence. The classical \textbf{linear congruential generator} is $x_{k + 1} = (ax_k + c) \bmod m$, $u_k = x_k/m$; with $m = 2^{31} - 1$, $a = 16\,807$, $c = 0$ (Park and Miller's \emph{minimal standard}) its period is
+$m - 1$. Modern libraries use generators with far longer periods and better high-dimensional uniformity (NumPy's default is PCG64), but the principle is the same, and a fixed seed makes a simulation reproducible.
+
+Other distributions are obtained from uniforms.
+
+\begin{thm}[Inverse transform]
+\label{thm:inverse}
+If $F$ is a distribution function and $U$ is uniform on $(0, 1)$, then $X = F^{-1}(U)$, with $F^{-1}(u) = \inf\{x : F(x) \geq u\}$, has distribution function $F$.
+\end{thm}
+
+\begin{proof}
+For every $x$, $F^{-1}(u) \leq x$ if and only if $u \leq F(x)$, by the definition of $F^{-1}$ and the right-continuity of $F$. So $P(X \leq x) = P(U \leq F(x)) = F(x)$.
+\end{proof}
+
+For the exponential distribution with rate $\lambda$, $F(x) = 1 - e^{-\lambda x}$ and $X = -\ln(1 - U)/\lambda$. For a discrete distribution the method searches the cumulative probabilities. When $F^{-1}$ has no closed form, \textbf{acceptance--rejection} draws from a simpler density $g$ with $f \leq cg$ and accepts a draw $Y$ with probability $f(Y)/cg(Y)$; the accepted
+values have density $f$, and on average $c$ draws are needed per value. Normal variates are produced by the Box--Muller transform or by specialised rejection methods.
+
+\subsection{Discrete-event simulation}
+\label{ssec:des}
+
+A \textbf{discrete-event simulation} represents a system by its state (the number in each queue, which servers are busy), a clock, and a list of future events ordered by time. The main loop repeatedly removes the earliest event, advances the clock to it, updates the state, schedules the events it causes, and records statistics (Figure~\ref{fig:des}).
+For a queue, an arrival schedules the next arrival and either starts a service, scheduling its end, or joins the queue; the end of a service either starts the next customer's service or frees the server.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+  box/.style={draw,rounded corners=3pt,fill=white,align=center,font=\scriptsize,minimum width=2.6cm,minimum height=0.8cm}]
+\fill[green!6,rounded corners=4pt] (-1.8,-4.3) rectangle (10.2,1.0);
+\node[box,fill=blue!12] (init) at (0,0) {initialise: state, clock $0$,\\first arrival on the list};
+\node[box] (pop) at (4.2,0) {take the earliest event;\\advance the clock to it};
+\node[box,fill=orange!15] (arr) at (2.0,-2.0) {arrival: schedule the next;\\serve now or join the queue};
+\node[box,fill=orange!15] (dep) at (6.5,-2.0) {end of service: start the\\next in queue or free server};
+\node[box,fill=red!10] (stat) at (4.2,-3.6) {record waits, queue lengths, busy time};
+\node[box,fill=black!8] (stop) at (8.6,0) {clock $> T$:\\stop and report};
+\draw[->] (init) -- (pop); \draw[->] (pop) -- (arr); \draw[->] (pop) -- (dep);
+\draw[->] (arr) -- (stat); \draw[->] (dep) -- (stat);
+\draw[->,thick,blue!50!black] (stat.west) -- (-0.6,-3.6) -- (-0.6,-1.0) node[pos=0.5,left,font=\scriptsize,align=right] {next\\event} -- (3.0,-1.0) -- (3.0,-0.4);
+\draw[->] (pop) -- (stop);
+\end{tikzpicture}
+\caption{The event loop of a discrete-event simulation. The clock jumps from event to event; each event changes the state and schedules later events, and statistics are collected as the state changes. Many replications, each from a different random-number stream, give a confidence interval for each output.}
+\label{fig:des}
+\end{figure}
+
+\textbf{Output analysis.} The waits of successive customers are strongly correlated, so they cannot be treated as an independent sample. Instead the simulation is run as $R$ independent \textbf{replications}, each giving one average, and a confidence interval is formed from those $R$ numbers with the $t$ distribution; alternatively, one long run is cut into
+\textbf{batches} whose means are nearly independent. A simulation started empty is biased towards short queues at first, and the \textbf{warm-up} period is discarded. For the bank of Example~\ref{ex:bank}, $30$ replications of $2000$ hours give a mean wait of $6.42 \pm 0.13$ minutes, covering the exact Erlang~C value $6.47$
+(Software~\ref{sw:des}): the simulation is \textbf{verified} against a case with a known answer, before it is used for cases without one.
+
+\subsection{Variance reduction}
+\label{ssec:variance}
+
+The cost of precision can be cut by cleverer sampling.
+\begin{itemize}
+\item \textbf{Antithetic variates}: use each uniform $U$ twice, as $U$ and $1 - U$, and average $g(U)$ and $g(1 - U)$. If $g$ is monotone the two are negatively correlated, so the average of a pair has smaller variance than the average of two independent draws.
+\item \textbf{Common random numbers}: when comparing two policies, run both on the same random demands, arrivals or failures. The difference of the outputs then reflects the policies, not the luck of the draw, and its variance is much smaller. The $(s, S)$ search of the section on inventory used this.
+\item \textbf{Control variates} subtract a correlated quantity with known mean, and \textbf{importance sampling} draws more often from the important region and reweights; the latter is indispensable for estimating rare events such as system failures.
+\end{itemize}
+For $\mathbb E[e^U] = e - 1$, antithetic pairs reduce the variance by a factor of $30$ at equal cost; comparing two newsvendor orders with common demands reduces the standard error of the difference by a factor of $5$ (Software~\ref{sw:vr}).
+
+\subsection{Simulation in software}
+\label{ssec:software16}
+
+\begin{software}[Random numbers and Monte Carlo]
+\label{sw:random}
+The Park--Miller generator, checked for mean and variance; exponential variates by the inverse transform; and a Monte Carlo estimate of $\int_0^1e^{-v^2}\,dv$ with its $95\%$ half-width, against the exact value $\frac{\sqrt\pi}2\operatorname{erf}(1)$:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> def lcg(seed, n, a=16807, m=2**31 - 1):     # Park and Miller's generator
+...     x, out = seed, []
+...     for _ in range(n):
+...         x = (a * x) % m; out.append(x / m)
+...     return np.array(out)
+...
+>>> u = lcg(12345, 100000)
+>>> round(u.mean(), 4), round(u.var(), 4)   # uniform: 1/2 and 1/12 = 0.0833
+(0.5, 0.0834)
+>>> x = -np.log(1 - u) / 2.0         # inverse transform: exponential, rate 2
+>>> round(x.mean(), 4), round(x.std(), 4)  # both 1/2
+(0.5008, 0.502)
+>>> f = lambda v: np.exp(-v**2)      # Monte Carlo: int_0^1 exp(-v^2) dv
+>>> fx = f(u); est = fx.mean(); half = 1.96 * fx.std(ddof=1) / np.sqrt(len(u))
+>>> round(est, 5), round(half, 5)          # estimate and 95% half-width
+(0.74684, 0.00125)
+>>> from scipy.special import erf
+>>> round(np.sqrt(np.pi) / 2 * erf(1), 5)  # the exact value
+0.74682
+\end{verbatim}}
+\textbf{Reading the output.} The $100\,000$ uniforms have mean $0.5000$ and variance $0.0834$ (exact $\frac1{12} = 0.0833$); the exponentials with rate $2$ have mean and standard deviation $0.50$, as they should. The integral is estimated as $0.74684 \pm 0.00125$, and the exact $0.74682$ lies well inside.
+
+\textbf{MATLAB/Octave:} \texttt{rand}, \texttt{-log(1-u)/2}, \texttt{mean} and \texttt{std}.
+\end{software}
+
+\begin{software}[A discrete-event simulation]
+\label{sw:des}
+An event-driven simulation of the bank of Example~\ref{ex:bank} with $3$ tellers, the event list kept as a heap; $30$ independent replications of $2000$ hours, and a $95\%$ confidence interval for the mean wait in minutes, using $t_{0.975, 29} = 2.045$:
+{\small\begin{verbatim}
+>>> import heapq
+>>> def bank(c, lam, mu, T, rng):          # event-driven M/M/c: mean wait
+...     events = [(rng.exponential(1 / lam), 'arrive')]
+...     free, queue, waits = c, [], []
+...     while events:
+...         t, kind = heapq.heappop(events)
+...         if t > T: break
+...         if kind == 'arrive':
+...             nxt = t + rng.exponential(1 / lam)
+...             heapq.heappush(events, (nxt, 'arrive'))
+...             if free:                   # a teller is free: serve at once
+...                 free -= 1; waits.append(0.0)
+...                 done = t + rng.exponential(1 / mu)
+...                 heapq.heappush(events, (done, 'end'))
+...             else: queue.append(t)
+...         elif queue:                    # a service ends: take the next
+...             waits.append(t - queue.pop(0))
+...             heapq.heappush(events, (t + rng.exponential(1 / mu), 'end'))
+...         else: free += 1
+...     return np.mean(waits)
+...
+>>> rng = np.random.default_rng(7)
+>>> reps = np.array([bank(3, 24, 10, 2000, rng) for _ in range(30)]) * 60
+>>> m, h = reps.mean(), 2.045 * reps.std(ddof=1) / np.sqrt(len(reps))
+>>> round(m, 3), round(h, 3)               # minutes; Erlang C gives 6.47
+(6.417, 0.127)
+\end{verbatim}}
+\textbf{Reading the output.} The mean wait is $6.42 \pm 0.13$ minutes, consistent with the Erlang C value $6.47$. With the program verified, it could now be changed in ways no formula covers: tellers taking breaks, customers giving up after a while, or a separate counter for business accounts.
+
+\textbf{MATLAB/Octave:} a priority queue of events, or the SimEvents toolbox.
+\end{software}
+
+\begin{software}[Variance reduction]
+\label{sw:vr}
+Estimating $\mathbb E[e^U]$ from $2n$ independent uniforms against $n$ antithetic pairs (the same number of function evaluations), with the variances of the two estimates; then the difference in expected newsvendor profit between orders of $195$ and $210$, estimated with independent and with common demands:
+{\small\begin{verbatim}
+>>> rng = np.random.default_rng(3)
+>>> g = lambda v: np.exp(v)                # estimate E exp(U) = e - 1
+>>> n = 10000; U = rng.uniform(size=n)
+>>> plain = g(rng.uniform(size=2 * n))     # 2n independent draws
+>>> anti = (g(U) + g(1 - U)) / 2           # n antithetic pairs, same effort
+>>> np.e - 1, round(plain.mean(), 5), round(anti.mean(), 5)
+(1.718281828459045, 1.72028, 1.7194)
+>>> round(plain.var() / (2 * n), 9), round(anti.var() / n, 9)   # variances
+(1.2057e-05, 4.01e-07)
+>>> d1 = rng.normal(200, 40, 5000); d2 = rng.normal(200, 40, 5000)
+>>> def prof(q, d):                        # newsvendor profit of Section 13
+...     return 10 * np.minimum(d, q) + np.maximum(q - d, 0) - 6 * q
+...
+>>> indep = prof(195, d1) - prof(210, d2)  # compare two orders, independently
+>>> crn = prof(195, d1) - prof(210, d1)    # ... and with the same demands
+>>> round(indep.mean(), 2), round(indep.std() / np.sqrt(5000), 3)
+(6.0, 4.448)
+>>> round(crn.mean(), 2), round(crn.std() / np.sqrt(5000), 3)
+(11.88, 0.905)
+\end{verbatim}}
+\textbf{Reading the output.} Both estimates of $e - 1 = 1.71828$ are close, but the antithetic one has variance $4.0 \times 10^{-7}$ against $1.2 \times 10^{-5}$, a factor of $30$. For the policy comparison, independent samples give a difference of $6.0$ with standard error $4.4$, which cannot even tell which order is better; common random numbers give
+$11.9$ with standard error $0.9$, clearly favouring the order of $195$, the one near the critical fractile.
+
+\textbf{MATLAB/Octave:} the same vector operations.
+\end{software}
+
+\subsection{Review of the course}
+\label{ssec:orreview}
+
+The course has followed one idea, optimisation under constraints, from its linear core outwards.
+
+\textbf{Linear programming.} The feasible region is a polyhedron and the optimum is at a vertex (the sections on models and geometry); the simplex method walks between vertices, in tableau or revised form (the next two sections); duality supplies certificates of optimality, shadow prices, and sensitivity ranges (the sections on duality and sensitivity).
+
+\textbf{Structure.} Transportation, assignment and network problems have totally unimodular matrices, so their LPs give integer answers and special algorithms are fast (the sections on transportation and networks). General integer programmes need branch and bound and cutting planes; non-linear ones the KKT conditions, which extend duality; and staged problems dynamic programming (the next three sections).
+
+\textbf{Uncertainty.} Decisions under risk use expected values and the value of information; games use minimax, which is LP duality again; inventories, queues and Markov models give formulas for the effect of randomness; and simulation handles what the formulas cannot (the last five sections).
+
+\begin{center}
+\small
+\begin{tabular}{ll}
+\hline
+\textbf{Problem} & \textbf{Main tool} \\
+\hline
+allocate scarce resources & linear programming, duality \\
+ship, assign, route, schedule a project & network flows, total unimodularity \\
+yes--no decisions, fixed costs & integer programming \\
+curved costs, risk & KKT conditions, quadratic programming \\
+decisions in stages & dynamic programming \\
+uncertain states, opponents & decision trees, minimax \\
+stock, waiting lines, deterioration & EOQ, newsvendor, queues, MDPs \\
+anything else & simulation \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Generate the sequence of the linear congruential generator $x_{k + 1} = (5x_k + 3) \bmod 16$ from $x_0 = 7$ and find its period.
+\end{problem}
+
+\begin{solution}
+$7, 6, 1, 8, 11, 10, 5, 12, 15, 14, 9, 0, 3, 2, 13, 4$, and then $7$ again: period $16$, the full modulus. This agrees with the Hull--Dobell theorem: $c = 3$ is coprime to $16$, and $a - 1 = 4$ is divisible by $2$, the only prime factor of $16$, and by $4$, since $16$ is a multiple of $4$.
+\end{solution}
+
+\begin{problem}
+Give the inverse-transform formula for the triangular distribution on $[0, 2]$ with mode $1$.
+\end{problem}
+
+\begin{solution}
+$F(x) = x^2/2$ for $0 \leq x \leq 1$ and $1 - (2 - x)^2/2$ for $1 \leq x \leq 2$. Solving $F(x) = u$: $x = \sqrt{2u}$ for $u \leq \frac12$ and $x = 2 - \sqrt{2(1 - u)}$ for $u > \frac12$.
+\end{solution}
+
+\begin{problem}
+A pilot simulation gives a standard deviation of $2$ minutes for the mean wait per replication. How many replications are needed for a $95\%$ confidence interval of half-width $0.05$ minutes?
+\end{problem}
+
+\begin{solution}
+$1.96 \times 2/\sqrt R \leq 0.05$ requires $R \geq (1.96 \times 2/0.05)^2 = 6147$ replications; halving the half-width would need four times as many.
+\end{solution}
+
+\begin{problem}
+Compute the variance reduction of antithetic variates for $\mathbb E[e^U]$ exactly.
+\end{problem}
+
+\begin{solution}
+$\operatorname{Var}e^U = \frac{e^2 - 1}2 - (e - 1)^2 = 0.2420$ and $\operatorname{Cov}(e^U, e^{1 - U}) = e - (e - 1)^2 = -0.2342$. Two independent draws have mean with variance $0.1210$; an antithetic pair has $\frac12(0.2420 - 0.2342) = 0.0039$. The ratio is $31$, matching the $30$ of Software~\ref{sw:vr}.
+\end{solution}
+
+\begin{problem}
+How would you verify a simulation model of a hospital emergency department, for which no formula is available?
+\end{problem}
+
+\begin{solution}
+Check that each part behaves correctly by tracing events by hand on a short run; run special cases with known answers (one doctor, exponential times: an M/M/1 queue); check identities that hold whatever the details, such as Little's law between the simulated mean number present, arrival rate and mean time in the department; and compare the simulated waits with the
+department's records for the present staffing before using the model to predict the effect of changes. The first steps are verification (is the program right?), the last is validation (is the model right?).
+\end{solution}
+
+\begin{problem}
+For each situation name the model of this course you would use first: (a) choosing a weekly production mix under machine and labour limits; (b) siting two depots among five towns; (c) deciding how many checkout lanes to open; (d) ordering a seasonal product once; (e) deciding when to overhaul a fleet of buses.
+\end{problem}
+
+\begin{solution}
+(a) Linear programming, with sensitivity analysis for the limits. (b) Integer programming (a facility-location model with binary site variables). (c) Queueing, an M/M/$c$ model with a cost or service-level criterion, or simulation if arrivals vary through the day. (d) The newsvendor model. (e) A replacement model, or a Markov decision process if the buses'
+condition is observed and deteriorates at random.
+\end{solution}
+
 
 \section*{References}
 \addcontentsline{toc}{section}{References}
@@ -4274,6 +4532,7 @@ The error shrinks by the factor $\beta$ per iteration, so $k$ iterations give $\
 \item Birkhoff, G. (1946), Tres observaciones sobre el \'algebra lineal, \emph{Universidad Nacional de Tucum\'an, Revista, Serie A}, 5, 147--151.
 \item Blackett, P. M. S. (1962), \emph{Studies of War: Nuclear and Conventional}, Edinburgh, Oliver and Boyd.
 \item Bland, R. G. (1977), New finite pivoting rules for the simplex method, \emph{Mathematics of Operations Research}, 2, 103--107.
+\item Box, G. E. P., and Muller, M. E. (1958), A note on the generation of random normal deviates, \emph{Annals of Mathematical Statistics}, 29, 610--611.
 \item Bradley, S. P., Hax, A. C., and Magnanti, T. L. (1977), \emph{Applied Mathematical Programming}, Reading, Addison-Wesley.
 \item Charnes, A. (1952), Optimality and degeneracy in linear programming, \emph{Econometrica}, 20, 160--170.
 \item Charnes, A., and Cooper, W. W. (1961), \emph{Management Models and Industrial Applications of Linear Programming}, New York, Wiley.
@@ -4302,11 +4561,13 @@ The error shrinks by the factor $\beta$ per iteration, so $k$ iterations give $\
 \item Goldfarb, D., and Reid, J. K. (1977), A practicable steepest-edge simplex algorithm, \emph{Mathematical Programming}, 12, 361--371.
 \item Gomory, R. E. (1958), Outline of an algorithm for integer solutions to linear programs, \emph{Bulletin of the American Mathematical Society}, 64, 275--278.
 \item Halfin, S., and Whitt, W. (1981), Heavy-traffic limits for queues with many exponential servers, \emph{Operations Research}, 29, 567--588.
+\item Hammersley, J. M., and Morton, K. W. (1956), A new Monte Carlo technique: antithetic variates, \emph{Mathematical Proceedings of the Cambridge Philosophical Society}, 52, 449--475.
 \item Harris, F. W. (1913), How many parts to make at once, \emph{Factory, The Magazine of Management}, 10, 135--136, 152.
 \item Harris, P. M. J. (1973), Pivot selection methods of the Devex LP code, \emph{Mathematical Programming}, 5, 1--28.
 \item Hitchcock, F. L. (1941), The distribution of a product from several sources to numerous localities, \emph{Journal of Mathematics and Physics}, 20, 224--230.
 \item Hoffman, A. J., and Kruskal, J. B. (1956), Integral boundary points of convex polyhedra, in H. W. Kuhn and A. W. Tucker (eds.), \emph{Linear Inequalities and Related Systems}, Annals of Mathematics Studies 38, Princeton University Press, 223--246.
 \item Howard, R. A. (1960), \emph{Dynamic Programming and Markov Processes}, Cambridge, MIT Press.
+\item Hull, T. E., and Dobell, A. R. (1962), Random number generators, \emph{SIAM Review}, 4, 230--254.
 \item Jackson, J. R. (1955), \emph{Scheduling a Production Line to Minimize Maximum Tardiness}, Research Report 43, Management Science Research Project, University of California, Los Angeles.
 \item Jackson, J. R. (1957), Networks of waiting lines, \emph{Operations Research}, 5, 518--521.
 \item Johnson, S. M. (1954), Optimal two- and three-stage production schedules with setup times included, \emph{Naval Research Logistics Quarterly}, 1, 61--68.
@@ -4325,6 +4586,8 @@ The error shrinks by the factor $\beta$ per iteration, so $k$ iterations give $\
 \item Kuhn, H. W. (1955), The Hungarian method for the assignment problem, \emph{Naval Research Logistics Quarterly}, 2, 83--97.
 \item Kuhn, H. W., and Tucker, A. W. (1951), Nonlinear programming, in J. Neyman (ed.), \emph{Proceedings of the Second Berkeley Symposium on Mathematical Statistics and Probability}, Berkeley, University of California Press, 481--492.
 \item Land, A. H., and Doig, A. G. (1960), An automatic method of solving discrete programming problems, \emph{Econometrica}, 28, 497--520.
+\item Law, A. M. (2015), \emph{Simulation Modeling and Analysis} (5th ed.), New York, McGraw-Hill.
+\item Lehmer, D. H. (1951), Mathematical methods in large-scale computing units, \emph{Proceedings of the Second Symposium on Large-Scale Digital Calculating Machinery}, Cambridge, Harvard University Press, 141--146.
 \item Lemke, C. E. (1954), The dual method of solving the linear programming problem, \emph{Naval Research Logistics Quarterly}, 1, 36--47.
 \item Lindley, D. V. (1952), The theory of queues with a single server, \emph{Mathematical Proceedings of the Cambridge Philosophical Society}, 48, 277--289.
 \item Little, J. D. C. (1961), A proof for the queuing formula $L = \lambda W$, \emph{Operations Research}, 9, 383--387.
@@ -4333,12 +4596,14 @@ The error shrinks by the factor $\beta$ per iteration, so $k$ iterations give $\
 \item Manne, A. S. (1960), Linear programming and sequential decisions, \emph{Management Science}, 6, 259--267.
 \item Markov, A. A. (1906), Rasprostranenie zakona bol'shih chisel na velichiny, zavisyaschie drug ot druga, \emph{Izvestiya Fiziko-matematicheskogo obschestva pri Kazanskom universitete}, 15, 135--156.
 \item Markowitz, H. (1952), Portfolio selection, \emph{Journal of Finance}, 7, 77--91.
+\item Metropolis, N., and Ulam, S. (1949), The Monte Carlo method, \emph{Journal of the American Statistical Association}, 44, 335--341.
 \item Minkowski, H. (1896), \emph{Geometrie der Zahlen}, Leipzig, Teubner.
 \item Nash, J. F. (1950), Equilibrium points in n-person games, \emph{Proceedings of the National Academy of Sciences}, 36, 48--49.
 \item von Neumann, J. (1928), Zur Theorie der Gesellschaftsspiele, \emph{Mathematische Annalen}, 100, 295--320.
 \item von Neumann, J. (1947), Discussion of a maximum problem, unpublished manuscript, in A. H. Taub (ed.), \emph{John von Neumann: Collected Works}, Vol.~VI (1963), Oxford, Pergamon, 89--95.
 \item von Neumann, J., and Morgenstern, O. (1944), \emph{Theory of Games and Economic Behavior}, Princeton University Press.
 \item Padberg, M., and Rinaldi, G. (1991), A branch-and-cut algorithm for the resolution of large-scale symmetric traveling salesman problems, \emph{SIAM Review}, 33, 60--100.
+\item Park, S. K., and Miller, K. W. (1988), Random number generators: good ones are hard to find, \emph{Communications of the ACM}, 31, 1192--1201.
 \item Pollaczek, F. (1930), \"Uber eine Aufgabe der Wahrscheinlichkeitstheorie, \emph{Mathematische Zeitschrift}, 32, 64--100.
 \item Raiffa, H., and Schlaifer, R. (1961), \emph{Applied Statistical Decision Theory}, Boston, Harvard Business School.
 \item Savage, L. J. (1951), The theory of statistical decision, \emph{Journal of the American Statistical Association}, 46, 55--67.
