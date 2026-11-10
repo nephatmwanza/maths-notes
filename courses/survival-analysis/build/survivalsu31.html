@@ -1,0 +1,100 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>6.3 Weighted log-rank tests — Survival Analysis</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='survival.css' rel='stylesheet' type='text/css' /> 
+<meta content='survival.tex' name='src' /> 
+<script>window.MathJax = { tex: { macros: {"tr": "\\operatorname{tr}", "rank": "\\operatorname{rank}", "sgn": "\\operatorname{sgn}", "Real": "\\operatorname{Re}", "Imag": "\\operatorname{Im}"}, tags: "ams", }, }; </script> 
+ <script async='async' id='MathJax-script' src='../../../site/assets/mathjax/es5/tex-chtml-full.js' type='text/javascript'></script>  
+<link rel="stylesheet" href="../../../site/assets/notes.css">
+<script data-goatcounter="https://wjmaths.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head><body><!-- built by site/build.py --><div class="layout"><aside class="sidebar" id="sidebar">
+<a class="sb-brand" href="../../../site/index.html"><span class="tile">WJ</span>WJ <span>Maths</span></a>
+<div class="sb-course">Survival Analysis</div>
+<ul class="sb-nav">
+<li class="ch"><a class="" href="survivalse1.html">Survival Data</a></li>
+<li class="sub"><a class="" href="survivalsu1.html">Time-to-event data</a></li>
+<li class="sub"><a class="" href="survivalsu2.html">Censoring</a></li>
+<li class="sub"><a class="" href="survivalsu3.html">Why ordinary methods fail</a></li>
+<li class="sub"><a class="" href="survivalsu4.html">Recording survival data</a></li>
+<li class="sub"><a class="" href="survivalsu5.html">Survival data in software</a></li>
+<li class="sub"><a class="" href="survivalsu6.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse2.html">Survival, Hazard and Cumulative Hazard</a></li>
+<li class="sub"><a class="" href="survivalsu7.html">The survival function</a></li>
+<li class="sub"><a class="" href="survivalsu8.html">The hazard function</a></li>
+<li class="sub"><a class="" href="survivalsu9.html">The cumulative hazard and the basic identity</a></li>
+<li class="sub"><a class="" href="survivalsu10.html">Summaries: mean, median and residual life</a></li>
+<li class="sub"><a class="" href="survivalsu11.html">Hazards in software</a></li>
+<li class="sub"><a class="" href="survivalsu12.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse3.html">Parametric Models</a></li>
+<li class="sub"><a class="" href="survivalsu13.html">The likelihood with censored data</a></li>
+<li class="sub"><a class="" href="survivalsu14.html">The exponential model</a></li>
+<li class="sub"><a class="" href="survivalsu15.html">The Weibull and other families</a></li>
+<li class="sub"><a class="" href="survivalsu16.html">Choosing a model</a></li>
+<li class="sub"><a class="" href="survivalsu17.html">Parametric models in software</a></li>
+<li class="sub"><a class="" href="survivalsu18.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse4.html">The Kaplan–Meier Estimator</a></li>
+<li class="sub"><a class="" href="survivalsu19.html">The product-limit estimator</a></li>
+<li class="sub"><a class="" href="survivalsu20.html">Greenwood’s formula and confidence intervals</a></li>
+<li class="sub"><a class="" href="survivalsu21.html">The median and reading the curve</a></li>
+<li class="sub"><a class="" href="survivalsu22.html">Kaplan–Meier estimation in software</a></li>
+<li class="sub"><a class="" href="survivalsu23.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse5.html">The Nelson–Aalen Estimator and Life Tables</a></li>
+<li class="sub"><a class="" href="survivalsu24.html">The Nelson–Aalen estimator</a></li>
+<li class="sub"><a class="" href="survivalsu25.html">Using the cumulative hazard to choose a model</a></li>
+<li class="sub"><a class="" href="survivalsu26.html">Life tables</a></li>
+<li class="sub"><a class="" href="survivalsu27.html">Cumulative hazards and life tables in software</a></li>
+<li class="sub"><a class="" href="survivalsu28.html">Practice Problems</a></li>
+<li class="ch"><a class="" href="survivalse6.html">Comparing Groups: the Log-rank Test</a></li>
+<li class="sub"><a class="" href="survivalsu29.html">The test</a></li>
+<li class="sub"><a class="" href="survivalsu30.html">Several groups, trends and strata</a></li>
+<li class="sub"><a class="current" href="survivalsu31.html">Weighted log-rank tests</a></li>
+<li class="sub"><a class="" href="survivalsu32.html">The log-rank test in software</a></li>
+<li class="sub"><a class="" href="survivalsu33.html">Practice Problems</a></li>
+<li class="sub"><a class="" href="survivalli2.html">References</a></li>
+</ul>
+</aside><main class="content"><div class="inner">
+<!-- l. 1536 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu32.html'>next</a>] [<a href='survivalsu30.html'>prev</a>] [<a href='survivalsu30.html#tailsurvivalsu30.html'>prev-tail</a>] [<a href='#tailsurvivalsu31.html'>tail</a>] [<a href='survivalse6.html#survivalsu31.html'>up</a>] </p></div>
+<h4 class='subsectionHead'><span class='titlemark'>6.3   </span> <a id='x39-380006.3'></a>Weighted log-rank tests</h4>
+<!-- l. 1539 --><p class='noindent'>The log-rank test gives every event time equal weight. A <span class='cmbx-10x-x-109'>weighted log-rank test </span>uses \(\sum _jw_j(d_{1j} - E_{1j})\) with variance
+\(\sum _jw_j^2V_j\): </p>
+     <ul class='itemize1'>
+     <li class='itemize'>\(w_j = 1\): the log-rank test, best for proportional hazards;
+     </li>
+     <li class='itemize'>\(w_j = n_j\): the <span class='cmbx-10x-x-109'>Gehan–Wilcoxon </span>test, which weights early times, when many are at risk;
+     </li>
+     <li class='itemize'>\(w_j = \hat S(t_{(j)})\):  the  <span class='cmbx-10x-x-109'>Peto–Peto </span>test,  also  emphasising  early  differences  but  less  dependent  on  the
+     censoring pattern (R’s <span class='cmtt-10x-x-109'>rho = 1</span>);
+     </li>
+     <li class='itemize'>\(w_j = \hat S(t_{(j)})^\rho (1 - \hat S(t_{(j)}))^\gamma \): the <span class='cmbx-10x-x-109'>Fleming–Harrington </span>family, which can emphasise early (\(\rho &gt; 0\)) or late (\(\gamma &gt; 0\)) differences.</li></ul>
+<!-- l. 1546 --><p class='noindent'>The choice must be made before seeing the data, from what effect is expected; trying several and
+reporting the smallest \(p\)-value is not legitimate. When the curves <span class='cmbx-10x-x-109'>cross</span>, as for the two regimens in
+<span class='cmtt-10x-x-109'>veteran </span>(Figure <a href='#x39-38001r6'>6<!-- tex4ht:ref: fig:crossing  --></a>), early and late differences of opposite sign cancel in the log-rank statistic, and no
+single test is satisfactory; the right response is to describe the curves, survival at fixed times, or a
+restricted mean, rather than to rely on one statistic.
+</p>
+<figure class='figure'> 
+
+                                                                                      
+                                                                                      
+<a id='x39-38001r6'></a>
+                                                                                      
+                                                                                      
+<!-- l. 1551 --><p class='noindent'><img alt='log- rank χ2 = 0.008
+dˆS1020304050600.0.0.1sttePay(t000000257astets)55nd:oa 0–rd.3P:8e 0ato.5t χ5902atda=9y00s,.da08y.17s,10a.0t73a60t360   ' src='survival5x.svg' />
+</p>
+<figcaption class='caption'><span class='id'>Figure 6: </span><span class='content'>Kaplan–Meier curves for the two chemotherapy regimens of the <span class='cmtt-10x-x-109'>veteran </span>trial. The
+standard regimen is better for about the first five months and the test regimen afterwards. The
+early and late differences cancel in the log-rank test; the Peto–Peto test, weighting early deaths,
+gives a larger statistic but still no significant difference.</span></figcaption><!-- tex4ht:label?: x39-38001r6  -->
+                                                                                      
+                                                                                      
+</figure>
+                                                                                      
+                                                                                      
+<!-- l. 1567 --><div class='crosslinks'><p class='noindent'>[<a href='survivalsu32.html'>next</a>] [<a href='survivalsu30.html'>prev</a>] [<a href='survivalsu30.html#tailsurvivalsu30.html'>prev-tail</a>] [<a href='survivalsu31.html'>front</a>] [<a href='survivalse6.html#survivalsu31.html'>up</a>] </p></div>
+<!-- l. 1567 --><p class='noindent'><a id='tailsurvivalsu31.html'></a> </p> 
+<nav class="pagenav"><a class="prev" href="survivalsu30.html">&larr; Previous</a><a class="up" href="survivalse6.html#survivalsu31.html">Contents</a><a class="next" href="survivalsu32.html">Next &rarr;</a></nav><section class="qa"><h2>Questions on this section</h2><p>Stuck on something here? Ask below and it stays attached to this topic.</p><script src="https://giscus.app/client.js" data-repo="nephatmwanza/maths-notes" data-repo-id="R_kgDOTowVJw" data-category="Q&A" data-category-id="DIC_kwDOTowVJ84DCaQH" data-mapping="specific" data-term="survival-analysis/6-3-weighted-log-rank-tests" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-loading="lazy" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></script></section></div></main></div><button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Contents</button></body> 
+</html>
