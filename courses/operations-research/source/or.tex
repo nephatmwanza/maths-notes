@@ -2902,6 +2902,277 @@ Explain why a non-convex problem can satisfy the KKT conditions at a point that 
 At $x = 0$ no constraint is active and $\nabla f = 0$, so the KKT conditions hold with $\lambda = 0$; but $x = 0$ is the global \emph{maximum}. The minima are $x = \pm1$, where $-2x + \lambda_2 = 0$ (for $x \leq 1$) gives $\lambda_2 = 2 \geq 0$ at $x = 1$. The KKT conditions are necessary, not sufficient, without convexity.
 \end{solution}
 
+%======================================================================
+\section{Dynamic Programming and Sequencing}
+\label{sec:dp}
+
+Many decisions are taken in stages: how much to produce this month and next, how many salesmen to send to each region in turn, which item to put in the knapsack next. \textbf{Dynamic programming}, developed by Bellman in the 1950s, solves such problems by working backwards from the last stage, using one simple principle: whatever the earlier
+decisions, the remaining ones must be optimal for the situation they left. It turns an exponential search into a sequence of small optimisations, and it handles non-linear returns and integer decisions with no extra effort. The second half of the section treats \textbf{sequencing}, the ordering of jobs on machines, where simple rules proved by exchange arguments give optimal schedules.
+
+\subsection{The principle of optimality}
+\label{ssec:bellman}
+
+A \textbf{multistage decision problem} has stages $k = 1, \ldots, N$. At stage $k$ the system is in a \textbf{state} $s_k$; a \textbf{decision} $x_k$ chosen from a set $D_k(s_k)$ earns a return $r_k(s_k, x_k)$ and moves the system to the state $s_{k + 1} = T_k(s_k, x_k)$. The aim is to maximise the total return from a given $s_1$.
+
+\begin{thm}[Bellman's principle of optimality]
+\label{thm:bellman}
+Define $f_{N + 1}(s) = 0$ and, for $k = N, N - 1, \ldots, 1$,
+\[
+f_k(s) = \max_{x \in D_k(s)}\bigl\{r_k(s, x) + f_{k + 1}\bigl(T_k(s, x)\bigr)\bigr\} .
+\]
+Then $f_k(s)$ is the largest total return obtainable from stage $k$ onwards starting in state $s$; in particular $f_1(s_1)$ is the optimal value, and choosing at each stage a maximising decision gives an optimal policy.
+\end{thm}
+
+\begin{proof}
+By backward induction on $k$. For $k = N + 1$ there is nothing left to decide. Suppose the claim holds for $k + 1$. Any sequence of decisions from stage $k$ in state $s$ starts with some $x$, earning $r_k(s, x)$, and continues from $T_k(s, x)$, where by the hypothesis it earns at most $f_{k + 1}(T_k(s, x))$, with equality
+for an optimal continuation. So the best total is the maximum over $x$ of their sum, which is $f_k(s)$.
+\end{proof}
+
+The \textbf{value function} $f_k$ summarises the future: once it is known, the decision at stage $k$ depends only on the current state, not on how the state was reached. The work is proportional to the number of stages times the number of states times the number of decisions per state, so dynamic programming is efficient
+when the state is small. When the state is a vector, the number of states grows exponentially with its dimension, Bellman's \textbf{curse of dimensionality}, which limits exact dynamic programming to problems with a few state variables. The shortest-path recursion $d_j = \min_i(d_i + c_{ij})$ of the section on networks is the same principle
+with nodes as states.
+
+\subsection{The knapsack problem}
+\label{ssec:knapsackdp}
+
+For the knapsack problem of the section on integer programming (values $10, 13, 7, 8$, weights $4, 6, 3, 5$, capacity $10$), take the items as stages and the remaining capacity as the state. With $f_k(c)$ the best value using the first $k$ items with capacity $c$,
+\[
+f_k(c) = \max\bigl\{f_{k - 1}(c),\ v_k + f_{k - 1}(c - w_k)\ \text{if } w_k \leq c\bigr\}, \qquad f_0(c) = 0 .
+\]
+The table has $(n + 1)(W + 1)$ entries, each found in constant time, so the problem is solved in $O(nW)$ operations (Software~\ref{sw:knapsack}). This is \textbf{pseudo-polynomial}: polynomial in the numerical value $W$, not in the number of digits needed to write it, which is consistent with the knapsack problem being NP-hard.
+The last row of the table gives the optimum for every capacity at once, a sensitivity analysis for free.
+
+\subsection{Allocating a resource}
+\label{ssec:allocation}
+
+\begin{exa}
+\label{ex:allocation}
+A company has $6$ salesmen to assign to three regions. The expected sales (Rs.~1000) with $0, 1, \ldots, 6$ salesmen in a region are
+\begin{center}
+\small
+\begin{tabular}{c|ccccccc}
+salesmen & $0$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ \\
+\hline
+region $1$ & $0$ & $20$ & $33$ & $42$ & $48$ & $52$ & $54$ \\
+region $2$ & $0$ & $15$ & $28$ & $39$ & $48$ & $55$ & $60$ \\
+region $3$ & $0$ & $25$ & $38$ & $46$ & $51$ & $54$ & $56$
+\end{tabular}
+\end{center}
+Take the regions as stages and the number of salesmen still available as the state, and work backwards. $f_3(s)$ is region $3$'s row; $f_2(s) = \max_x\{R_2(x) + f_3(s - x)\}$, which gives $f_2 = (0, 25, 40, 53, 66, 77, 86)$; and $f_1(6) = \max_x\{R_1(x) + f_2(6 - x)\} = 99$, at $x = 2$. Reading forwards,
+region $1$ gets $2$, leaving $4$, of which region $2$ gets $2$ and region $3$ gets $2$: sales $33 + 28 + 38 = 99$ (Software~\ref{sw:allocation}). The returns are concave (diminishing), and the optimal allocation equalises the marginal returns as nearly as integers allow, the discrete form of the KKT conditions.
+\end{exa}
+
+The same scheme handles production planning with inventories (state: the stock), equipment replacement (state: the machine's age) and capital budgeting. With random transitions the recursion takes expected values, $f_k(s) = \max_x\mathbb E[r_k(s, x, \xi) + f_{k + 1}(T_k(s, x, \xi))]$; this is \textbf{stochastic dynamic programming}, developed further for Markov
+decision processes in a later section.
+
+\subsection{Sequencing jobs}
+\label{ssec:sequencing}
+
+In \textbf{sequencing}, $n$ jobs must be processed on one or more machines, and the order is to be chosen. There are $n!$ orders, but for several important criteria a simple rule is optimal, and the proofs all use the same \textbf{exchange argument}: if an order violates the rule, two adjacent jobs are out of place, and swapping them does not make the
+schedule worse.
+
+\begin{prop}
+\label{prop:spt}
+On a single machine, processing the jobs in order of \textbf{shortest processing time} (SPT) minimises the total (equivalently, the mean) completion time. Processing them in order of \textbf{earliest due date} (EDD) minimises the maximum lateness.
+\end{prop}
+
+\begin{proof}
+Suppose jobs $i$ and $j$ are adjacent, $i$ first, with $p_i > p_j$, starting at time $t$. Swapping them leaves all other completion times unchanged, and changes the completion times of $i$ and $j$ from $t + p_i$ and $t + p_i + p_j$ to $t + p_j$ and $t + p_i + p_j$, reducing the sum by $p_i - p_j > 0$. So an optimal order has no such pair:
+it is SPT. For EDD, if $d_i > d_j$ with $i$ first, the later of the two finishes at $t + p_i + p_j$ in either order; before the swap the lateness of $j$ is $t + p_i + p_j - d_j$, which is at least both latenesses after it, since $d_j < d_i$ and the earlier job finishes sooner. So swapping does not increase the maximum lateness.
+\end{proof}
+
+\textbf{Two machines in series.} Each job goes first to machine $1$ for time $a_j$ and then to machine $2$ for time $b_j$, in the same order on both (a \textbf{flow shop}). The aim is to minimise the \textbf{makespan}, the time the last job leaves machine $2$.
+
+\begin{thm}[Johnson's rule, 1954]
+\label{thm:johnson}
+An order minimising the makespan is: first the jobs with $a_j < b_j$, in increasing order of $a_j$; then the jobs with $a_j \geq b_j$, in decreasing order of $b_j$.
+\end{thm}
+
+\begin{proof}[Sketch]
+The makespan of an order is $\max_k\bigl(\sum_{i \leq k}a_{(i)} + \sum_{i \geq k}b_{(i)}\bigr)$, the longest path through the grid of operations, where $(i)$ is the $i$th job. If two adjacent jobs $i$ then $j$ satisfy $\min(a_j, b_i) < \min(a_i, b_j)$, swapping them does not increase any of these path lengths. Johnson's order is exactly an order with
+no such adjacent pair (jobs placed early are those with small $a$, so that machine $2$ starts soon, and jobs placed late are those with small $b$, so that it finishes soon), and every order can be brought to it by such swaps.
+\end{proof}
+
+\begin{exa}
+\label{ex:johnson}
+Six jobs have times $(a_j, b_j)$: $J_1$ $(5, 2)$, $J_2$ $(1, 6)$, $J_3$ $(9, 7)$, $J_4$ $(3, 8)$, $J_5$ $(10, 4)$, $J_6$ $(7, 3)$. The jobs with $a_j < b_j$ are $J_2$, $J_4$, in increasing $a$; the rest are $J_3$, $J_5$, $J_6$, $J_1$ in decreasing $b$ ($7, 4, 3, 2$). Johnson's order $J_2, J_4, J_3, J_5, J_6, J_1$ has makespan $37$
+(Figure~\ref{fig:gantt}). Checking all $720$ orders confirms that $37$ is the minimum; the worst order takes $52$ (Software~\ref{sw:johnson}).
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-1.6,-0.65) rectangle (10.6,2.25);
+\node[font=\scriptsize,anchor=east] at (-0.1,1.5) {machine $1$};
+\node[font=\scriptsize,anchor=east] at (-0.1,0.6) {machine $2$};
+\draw[fill=orange!35] (0.00,1.2) rectangle (0.24,1.7999999999999998); \node[font=\tiny] at (0.12,1.5) {J2};
+\draw[fill=blue!25] (0.24,0.3) rectangle (1.68,0.8999999999999999); \node[font=\tiny] at (0.96,0.6) {J2};
+\draw[fill=orange!35] (0.24,1.2) rectangle (0.96,1.7999999999999998); \node[font=\tiny] at (0.60,1.5) {J4};
+\draw[fill=blue!25] (1.68,0.3) rectangle (3.60,0.8999999999999999); \node[font=\tiny] at (2.64,0.6) {J4};
+\draw[fill=orange!35] (0.96,1.2) rectangle (3.12,1.7999999999999998); \node[font=\tiny] at (2.04,1.5) {J3};
+\draw[fill=blue!25] (3.60,0.3) rectangle (5.28,0.8999999999999999); \node[font=\tiny] at (4.44,0.6) {J3};
+\draw[fill=orange!35] (3.12,1.2) rectangle (5.52,1.7999999999999998); \node[font=\tiny] at (4.32,1.5) {J5};
+\draw[fill=blue!25] (5.52,0.3) rectangle (6.48,0.8999999999999999); \node[font=\tiny] at (6.00,0.6) {J5};
+\draw[fill=orange!35] (5.52,1.2) rectangle (7.20,1.7999999999999998); \node[font=\tiny] at (6.36,1.5) {J6};
+\draw[fill=blue!25] (7.20,0.3) rectangle (7.92,0.8999999999999999); \node[font=\tiny] at (7.56,0.6) {J6};
+\draw[fill=orange!35] (7.20,1.2) rectangle (8.40,1.7999999999999998); \node[font=\tiny] at (7.80,1.5) {J1};
+\draw[fill=blue!25] (8.40,0.3) rectangle (8.88,0.8999999999999999); \node[font=\tiny] at (8.64,0.6) {J1};
+\draw[->] (0,0) -- (9.5,0) node[right,font=\scriptsize] {time};
+\foreach \t in {0,10,20,30,37} \draw ({0.24*\t},0.06) -- ({0.24*\t},-0.06) node[below,font=\tiny] {$\t$};
+\draw[red!70!black,dashed] (8.88,0) -- (8.88,2.0) node[above,font=\scriptsize] {makespan $37$};
+\end{tikzpicture}
+\caption{A Gantt chart of Johnson's order for Example~\ref{ex:johnson}. Machine $1$ works without a break and finishes at $35$; machine $2$ waits only $7$ time units in all, at the start and in three short gaps, and finishes at $37$. The job with the shortest first operation goes first, and the job with the shortest second operation last.}
+\label{fig:gantt}
+\end{figure}
+
+For three machines Johnson's rule applies to the two-machine problem with times $a_j + b_j$ and $b_j + c_j$ when the middle machine is dominated ($\min a_j \geq \max b_j$ or $\min c_j \geq \max b_j$); in general the flow shop with three or more machines is NP-hard, and branch and bound or heuristics are used.
+
+\subsection{Dynamic programming in software}
+\label{ssec:software11}
+
+\begin{software}[The knapsack table]
+\label{sw:knapsack}
+The table $f_k(c)$ for the knapsack problem, filled row by row; its last row; the items chosen, read back from the table; and a brute-force check over all $2^4$ subsets:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from itertools import combinations, permutations
+>>> v = [10, 13, 7, 8]; w = [4, 6, 3, 5]; W = 10   # the knapsack of Section 9
+>>> n = len(v)
+>>> f = np.zeros((n + 1, W + 1), int)  # f[k, c]: first k items, room c
+>>> for k in range(1, n + 1):
+...     for c in range(W + 1):
+...         f[k, c] = f[k - 1, c]          # skip item k ...
+...         if w[k - 1] <= c:              # ... or take it
+...             f[k, c] = max(f[k, c], v[k - 1] + f[k - 1, c - w[k - 1]])
+...
+>>> f[n]  # best value for every capacity 0..10
+array([ 0,  0,  0,  7, 10, 10, 13, 17, 17, 20, 23])
+>>> take, c = [], W                        # trace back the decisions
+>>> for k in range(n, 0, -1):
+...     if f[k, c] != f[k - 1, c]: take.append(k); c -= w[k - 1]
+...
+>>> sorted(take), f[n, W]
+([1, 2], 23)
+>>> subsets = [S for r in range(n + 1) for S in combinations(range(n), r)]
+>>> best = max((sum(v[i] for i in S), S) for S in subsets
+...            if sum(w[i] for i in S) <= W)
+>>> best                                   # brute force over all 16 subsets
+(23, (0, 1))
+\end{verbatim}}
+\textbf{Reading the output.} The last row gives the best value for every capacity from $0$ to $10$; at $10$ it is $23$, taking items $1$ and $2$, which agrees with the enumeration in the section on integer programming and with the brute force (items $0$ and $1$ in Python's numbering).
+
+\textbf{MATLAB/Octave:} the same double loop over a matrix \texttt{f}.
+\end{software}
+
+\begin{software}[Allocating salesmen]
+\label{sw:allocation}
+Example~\ref{ex:allocation}, with the value function stored in a dictionary indexed by stage and state, computed backwards, and the decisions read forwards; then the value functions of stages $3$ and $2$:
+{\small\begin{verbatim}
+>>> R = np.array([[0, 20, 33, 42, 48, 52, 54],    # sales (Rs. 1000), region 1
+...               [0, 15, 28, 39, 48, 55, 60],    # region 2
+...               [0, 25, 38, 46, 51, 54, 56]])   # region 3; 0..6 salesmen
+>>> N = 6
+>>> F = {(4, s): 0 for s in range(N + 1)}  # stage 4: no regions left, value 0
+>>> choice = {}
+>>> for k in (3, 2, 1):  # backward: regions k..3, s salesmen
+...     for s in range(N + 1):
+...         val = lambda x: R[k - 1, x] + F[(k + 1, s - x)]
+...         choice[(k, s)] = max(range(s + 1), key=val)
+...         F[(k, s)] = val(choice[(k, s)])
+...
+>>> plan, s = [], N                        # forward: read off the decisions
+>>> for k in (1, 2, 3):
+...     plan.append(choice[(k, s)]); s -= choice[(k, s)]
+...
+>>> plan, F[(1, N)]
+([2, 2, 2], 99)
+>>> [F[(3, s)] for s in range(N + 1)], [F[(2, s)] for s in range(N + 1)]
+([0, 25, 38, 46, 51, 54, 56], [0, 25, 40, 53, 66, 77, 86])
+\end{verbatim}}
+\textbf{Reading the output.} Two salesmen to each region, total sales $99$. $f_2(4) = 66$ is the best that regions $2$ and $3$ can do with four salesmen ($28 + 38$), and the full table $f_2$ answers the question for every number left over by region~$1$.
+
+\textbf{MATLAB/Octave:} a matrix \texttt{F(k, s+1)} and the same loops.
+\end{software}
+
+\begin{software}[Johnson's rule]
+\label{sw:johnson}
+The makespan of a two-machine flow shop for a given order, Johnson's order for Example~\ref{ex:johnson}, and the best and worst makespans over all $720$ orders, with that of the order $J_1, \ldots, J_6$:
+{\small\begin{verbatim}
+>>> p = {'J1': (5, 2), 'J2': (1, 6), 'J3': (9, 7), 'J4': (3, 8),
+...      'J5': (10, 4), 'J6': (7, 3)}  # times on machine 1, then machine 2
+>>> def makespan(order):
+...     t1 = t2 = 0
+...     for j in order:
+...         t1 += p[j][0]; t2 = max(t2, t1) + p[j][1]
+...     return t2
+...
+>>> first = sorted([j for j in p if p[j][0] < p[j][1]], key=lambda j: p[j][0])
+>>> last = sorted([j for j in p if p[j][0] >= p[j][1]],
+...               key=lambda j: -p[j][1])
+>>> johnson = first + last                 # Johnson's rule
+>>> johnson, makespan(johnson)
+(['J2', 'J4', 'J3', 'J5', 'J6', 'J1'], 37)
+>>> spans = [makespan(o) for o in permutations(p)]   # all 720 orders
+>>> min(spans), max(spans), makespan(list(p))
+(37, 52, 38)
+\end{verbatim}}
+\textbf{Reading the output.} Johnson's order has makespan $37$, the minimum over all orders; the worst order takes $52$, and the natural order $J_1, \ldots, J_6$ happens to take $38$. The rule needed one sort; the enumeration, $720$ evaluations, which would be $2.4 \times 10^{18}$ for $20$ jobs.
+
+\textbf{MATLAB/Octave:} \texttt{perms(1:6)} for the enumeration.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+Use dynamic programming to find the shortest route from $A$ to $H$ in a staged network with arcs $A$--$B$: $2$, $A$--$C$: $4$, $A$--$D$: $3$; $B$--$E$: $7$, $B$--$F$: $4$, $C$--$E$: $3$, $C$--$F$: $2$, $D$--$E$: $4$, $D$--$F$: $5$; $E$--$H$: $3$, $F$--$H$: $4$.
+\end{problem}
+
+\begin{solution}
+Backwards: $f(E) = 3$, $f(F) = 4$. Then $f(B) = \min(7 + 3, 4 + 4) = 8$, $f(C) = \min(3 + 3, 2 + 4) = 6$, $f(D) = \min(4 + 3, 5 + 4) = 7$. Finally $f(A) = \min(2 + 8, 4 + 6, 3 + 7) = 10$, attained three ways: $A, B, F, H$; $A, C, E, H$ or $A, C, F, H$; and $A, D, E, H$, all of length $10$.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:allocation}, how should $4$ salesmen be allocated, and what is the marginal value of the fifth and sixth?
+\end{problem}
+
+\begin{solution}
+$f_1(4) = \max_x\{R_1(x) + f_2(4 - x)\}$ with $f_2 = (0, 25, 40, 53, 66)$: for $x = 0, 1, 2, 3, 4$ the values are $66$, $73$, $73$, $67$, $48$, so $f_1(4) = 73$, attained by the allocations $(1, 1, 2)$, $(1, 2, 1)$ and $(2, 1, 1)$. In the same way $f_1(5) = 86$, by $(1, 2, 2)$, $(2, 1, 2)$ or $(2, 2, 1)$, and $f_1(6) = 99$, only by
+$(2, 2, 2)$. The fifth salesman adds $86 - 73 = 13$ and the sixth $99 - 86 = 13$.
+\end{solution}
+
+\begin{problem}
+Five jobs on one machine have times $4, 2, 7, 1, 5$. Find the order minimising the mean completion time, and the mean.
+\end{problem}
+
+\begin{solution}
+SPT: times $1, 2, 4, 5, 7$, with completion times $1, 3, 7, 12, 19$, mean $\frac{42}5 = 8.4$. Any other order is worse; for example the given order has completion times $4, 6, 13, 14, 19$, mean $11.2$.
+\end{solution}
+
+\begin{problem}
+Apply Johnson's rule to jobs with times $(a, b)$: $(3, 6)$, $(7, 2)$, $(4, 4)$, $(5, 8)$, $(6, 3)$, and find the makespan.
+\end{problem}
+
+\begin{solution}
+$a < b$: jobs $1$ $(3)$ and $4$ $(5)$, in that order. The rest, in decreasing $b$: job $3$ $(b = 4)$, job $5$ $(3)$, job $2$ $(2)$. Order $1, 4, 3, 5, 2$. Machine $1$ finishes jobs at $3, 8, 12, 18, 25$; machine $2$ at $9, 17, 21, 24, 27$. Makespan $27$.
+\end{solution}
+
+\begin{problem}
+Show that the knapsack recursion, with $W$ given in binary, takes time exponential in the input length, and explain why this does not contradict its usefulness.
+\end{problem}
+
+\begin{solution}
+The input uses about $n\log_2W$ bits for the weights, but the table has $nW$ entries, and $W = 2^{\log_2W}$ is exponential in $\log_2W$. When the weights are moderate integers, say capacities of a few thousand, $nW$ is small and the method is fast; it is only for huge or very precise weights that it fails, which is where the NP-hardness lives.
+\end{solution}
+
+\begin{problem}
+State the dynamic programming recursion for a production plan over $T$ months with demand $d_t$, production cost $c(x)$, holding cost $h$ per unit, stock bounded by $S$, and no initial stock.
+\end{problem}
+
+\begin{solution}
+State: stock $I$ at the start of month $t$. Decision: production $x$ with $0 \leq I + x - d_t \leq S$. Recursion: $f_t(I) = \min_x\{c(x) + h(I + x - d_t) + f_{t + 1}(I + x - d_t)\}$, $f_{T + 1}(I) = 0$, and the answer is $f_1(0)$. Unlike the LP of Example~\ref{ex:multiperiod}, $c(x)$ may include set-up costs or economies
+of scale.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -2932,6 +3203,7 @@ At $x = 0$ no constraint is active and $\nabla f = 0$, so the KKT conditions hol
 \subhead{Further reading}
 \begin{enumerate}
 \item Beale, E. M. L. (1955), Cycling in the dual simplex algorithm, \emph{Naval Research Logistics Quarterly}, 2, 269--275.
+\item Bellman, R. (1957), \emph{Dynamic Programming}, Princeton University Press.
 \item Bellman, R. (1958), On a routing problem, \emph{Quarterly of Applied Mathematics}, 16, 87--90.
 \item Birkhoff, G. (1946), Tres observaciones sobre el \'algebra lineal, \emph{Universidad Nacional de Tucum\'an, Revista, Serie A}, 5, 147--151.
 \item Blackett, P. M. S. (1962), \emph{Studies of War: Nuclear and Conventional}, Edinburgh, Oliver and Boyd.
@@ -2954,12 +3226,15 @@ At $x = 0$ no constraint is active and $\nabla f = 0$, so the KKT conditions hol
 \item Forrest, J. J. H., and Tomlin, J. A. (1972), Updated triangular factors of the basis to maintain sparsity in the product form simplex method, \emph{Mathematical Programming}, 2, 263--278.
 \item Gal, T., and Greenberg, H. J. (eds.) (1997), \emph{Advances in Sensitivity Analysis and Parametric Programming}, Boston, Kluwer.
 \item Gale, D., Kuhn, H. W., and Tucker, A. W. (1951), Linear programming and the theory of games, in T. C. Koopmans (ed.), \emph{Activity Analysis of Production and Allocation}, New York, Wiley, 317--329.
+\item Garey, M. R., Johnson, D. S., and Sethi, R. (1976), The complexity of flowshop and jobshop scheduling, \emph{Mathematics of Operations Research}, 1, 117--129.
 \item Gass, S. I., and Saaty, T. L. (1955), The computational algorithm for the parametric objective function, \emph{Naval Research Logistics Quarterly}, 2, 39--45.
 \item Goldfarb, D., and Reid, J. K. (1977), A practicable steepest-edge simplex algorithm, \emph{Mathematical Programming}, 12, 361--371.
 \item Gomory, R. E. (1958), Outline of an algorithm for integer solutions to linear programs, \emph{Bulletin of the American Mathematical Society}, 64, 275--278.
 \item Harris, P. M. J. (1973), Pivot selection methods of the Devex LP code, \emph{Mathematical Programming}, 5, 1--28.
 \item Hitchcock, F. L. (1941), The distribution of a product from several sources to numerous localities, \emph{Journal of Mathematics and Physics}, 20, 224--230.
 \item Hoffman, A. J., and Kruskal, J. B. (1956), Integral boundary points of convex polyhedra, in H. W. Kuhn and A. W. Tucker (eds.), \emph{Linear Inequalities and Related Systems}, Annals of Mathematics Studies 38, Princeton University Press, 223--246.
+\item Jackson, J. R. (1955), \emph{Scheduling a Production Line to Minimize Maximum Tardiness}, Research Report 43, Management Science Research Project, University of California, Los Angeles.
+\item Johnson, S. M. (1954), Optimal two- and three-stage production schedules with setup times included, \emph{Naval Research Logistics Quarterly}, 1, 61--68.
 \item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.
 \item Karmarkar, N. (1984), A new polynomial-time algorithm for linear programming, \emph{Combinatorica}, 4, 373--395.
 \item Karp, R. M. (1972), Reducibility among combinatorial problems, in R. E. Miller and J. W. Thatcher (eds.), \emph{Complexity of Computer Computations}, New York, Plenum, 85--103.
@@ -2980,6 +3255,7 @@ At $x = 0$ no constraint is active and $\nabla f = 0$, so the KKT conditions hol
 \item von Neumann, J. (1947), Discussion of a maximum problem, unpublished manuscript, in A. H. Taub (ed.), \emph{John von Neumann: Collected Works}, Vol.~VI (1963), Oxford, Pergamon, 89--95.
 \item Padberg, M., and Rinaldi, G. (1991), A branch-and-cut algorithm for the resolution of large-scale symmetric traveling salesman problems, \emph{SIAM Review}, 33, 60--100.
 \item Slater, M. (1950), Lagrange multipliers revisited, \emph{Cowles Commission Discussion Paper: Mathematics}, 403.
+\item Smith, W. E. (1956), Various optimizers for single-stage production, \emph{Naval Research Logistics Quarterly}, 3, 59--66.
 \item Spielman, D. A., and Teng, S.-H. (2004), Smoothed analysis of algorithms: why the simplex algorithm usually takes polynomial time, \emph{Journal of the ACM}, 51, 385--463.
 \item Stigler, G. J. (1945), The cost of subsistence, \emph{Journal of Farm Economics}, 27, 303--314.
 \item Vogel, W. R. (1958), A short-cut solution to the transportation problem, cited in N. V. Reinfeld and W. R. Vogel, \emph{Mathematical Programming}, Englewood Cliffs, Prentice-Hall.
