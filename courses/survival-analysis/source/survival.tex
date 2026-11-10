@@ -1705,6 +1705,250 @@ Show that at an event time with $d_j = 1$ the variance $V_j$ equals $p_j(1 - p_j
 With $d_j = 1$, $\frac{n_j - d_j}{n_j - 1} = 1$ and $V_j = p_j(1 - p_j)$, the variance of a Bernoulli variable: with one death, the question is only whether it falls in group $1$, which under $H_0$ happens with probability $p_j$, the group's share of those at risk.
 \end{solution}
 
+%======================================================================
+\section{The Cox Proportional Hazards Model}
+\label{sec:cox}
+
+The log-rank test says whether groups differ; it does not measure the difference, and it cannot handle several factors at once or continuous ones such as age. For that we need a regression model for survival data. The model proposed by Cox in 1972 is by far the most used: it relates the hazard to the covariates through a hazard ratio, leaves the shape of
+the hazard over time completely unspecified, and is estimated by a \textbf{partial likelihood} that does not need that shape at all. This section introduces the model, derives the partial likelihood, and shows how to interpret and test its coefficients.
+
+\subsection{The model}
+\label{ssec:coxmodel}
+
+For a subject with covariates $x = (x_1, \ldots, x_p)$, the \textbf{proportional hazards model} is
+\[
+h(t \mid x) = h_0(t)\exp(\beta_1x_1 + \cdots + \beta_px_p) = h_0(t)e^{\beta^{\mathsf T}x} ,
+\]
+where $h_0(t)$, the \textbf{baseline hazard}, is the hazard of a subject with all covariates zero, and is left unspecified. For two subjects with covariates $x$ and $x'$,
+\[
+\frac{h(t \mid x)}{h(t \mid x')} = e^{\beta^{\mathsf T}(x - x')} ,
+\]
+which does not depend on $t$: the hazards are \textbf{proportional}. This is the model's one strong assumption, checked in a later section. Its consequences for interpretation are simple:
+\begin{itemize}
+\item for a binary covariate (say $1$ for treated, $0$ for control), $e^{\beta}$ is the \textbf{hazard ratio} (HR) of treated to control, at every time;
+\item for a continuous covariate, $e^{\beta}$ is the hazard ratio for a one-unit increase, and $e^{c\beta}$ for an increase of $c$ units;
+\item $\beta > 0$ (HR $> 1$) means higher risk and shorter survival; $\beta < 0$ (HR $< 1$) lower risk; $\beta = 0$ no effect.
+\end{itemize}
+In terms of survival, $S(t \mid x) = S_0(t)^{\exp(\beta^{\mathsf T}x)}$, since $H(t \mid x) = H_0(t)e^{\beta^{\mathsf T}x}$: a hazard ratio of $2$ squares the survival probability at every time ($0.8$ becomes $0.64$). A hazard ratio is not a ratio of probabilities of dying, nor of median survival times, though for small risks it is close to the first.
+
+\subsection{The partial likelihood}
+\label{ssec:partial}
+
+Suppose there are no ties, and order the event times $t_{(1)} < \cdots < t_{(r)}$, with $i_j$ the subject who has the event at $t_{(j)}$ and $R_j$ the risk set just before it. Given that exactly one of the subjects in $R_j$ has an event at $t_{(j)}$, the probability that it is subject $i_j$ is
+\[
+\frac{h(t_{(j)} \mid x_{i_j})}{\sum_{l \in R_j}h(t_{(j)} \mid x_l)} = \frac{h_0(t_{(j)})e^{\beta^{\mathsf T}x_{i_j}}}{\sum_{l \in R_j}h_0(t_{(j)})e^{\beta^{\mathsf T}x_l}} = \frac{e^{\beta^{\mathsf T}x_{i_j}}}{\sum_{l \in R_j}e^{\beta^{\mathsf T}x_l}} ,
+\]
+and the unknown baseline hazard cancels. Multiplying over the event times gives Cox's \textbf{partial likelihood}
+\[
+L_P(\beta) = \prod_{j = 1}^r\frac{e^{\beta^{\mathsf T}x_{i_j}}}{\sum_{l \in R_j}e^{\beta^{\mathsf T}x_l}}, \qquad \ell_P(\beta) = \sum_{j = 1}^r\Bigl(\beta^{\mathsf T}x_{i_j} - \log\sum_{l \in R_j}e^{\beta^{\mathsf T}x_l}\Bigr) .
+\]
+It is not a full likelihood, since it ignores the information in the exact times between events, but Cox showed, and later work with counting processes proved, that maximising it gives consistent, asymptotically normal estimates, with standard errors from the inverse of the information $-\partial^2\ell_P/\partial\beta^2$, as for an ordinary likelihood.
+Censored subjects enter only through the risk sets, as they should. The maximisation uses Newton--Raphson; $\ell_P$ is concave, so the maximum is unique when it exists.
+
+\begin{exa}
+\label{ex:pl}
+Eight subjects have times $2, 3, 5^+, 6, 8, 9^+, 11, 14$ and a binary covariate $x = 1, 0, 1, 1, 0, 1, 0, 0$. At the first event (time $2$, $x = 1$) all eight are at risk, four with $x = 1$, so the factor is $e^\beta/(4e^\beta + 4)$. At time $3$ ($x = 0$) seven are at risk, three with $x = 1$: $1/(3e^\beta + 4)$. Continuing over the six events and maximising gives
+$\hat\beta = 0.444$, $\widehat{\text{HR}} = 1.56$ (Software~\ref{sw:plhand}).
+\end{exa}
+
+\begin{thm}
+\label{thm:scorelogrank}
+For a single binary covariate and no ties, the score test of $\beta = 0$ in the Cox model is the log-rank test.
+\end{thm}
+
+\begin{proof}
+At $\beta = 0$, $\partial\ell_P/\partial\beta = \sum_j\bigl(x_{i_j} - \sum_{l \in R_j}x_l/|R_j|\bigr) = \sum_j(d_{1j} - n_{1j}/n_j)$, which is $O_1 - E_1$. The information at $\beta = 0$ is $\sum_j(n_{1j}/n_j)(1 - n_{1j}/n_j)$, the log-rank variance with $d_j = 1$. The score statistic is $(O_1 - E_1)^2/V$.
+\end{proof}
+
+With ties the two differ slightly, according to how the ties are handled (the subject of the next section): for sex in \texttt{lung}, the score test gives $10.325$ and the log-rank test $10.327$.
+
+\subsection{Inference and interpretation}
+\label{ssec:coxinference}
+
+Three tests of $\beta = 0$ are available: the \textbf{Wald} test $(\hat\beta/\operatorname{se})^2$, the \textbf{likelihood ratio} test $2(\ell_P(\hat\beta) - \ell_P(0))$, and the \textbf{score} test; all are approximately $\chi^2$ with as many degrees of freedom as parameters tested, and they agree in large samples. A $95\%$ confidence interval for a hazard ratio is
+$\exp(\hat\beta \pm 1.96\,\operatorname{se})$, computed on the log scale because $\hat\beta$, not $e^{\hat\beta}$, is approximately normal.
+
+\begin{exa}
+\label{ex:coxsex}
+For sex in \texttt{lung} ($1$ = male, $2$ = female), $\hat\beta = -0.531$, s.e.\ $0.167$, so $\widehat{\text{HR}} = 0.588$ with $95\%$ interval $(0.424, 0.816)$: women's hazard of death was $41\%$ lower than men's. The Wald, likelihood ratio and score statistics are $10.1$, $10.6$ and $10.3$, all with $p \approx 0.001$
+(Software~\ref{sw:coxsex}).
+\end{exa}
+
+\begin{exa}
+\label{ex:coxmulti}
+With age, sex and ECOG score together (for the $227$ patients with all three recorded), the hazard ratios are $1.011$ per year of age ($1.12$ per ten years, interval $0.93$ to $1.34$), $0.575$ for women ($0.41$ to $0.80$) and $1.59$ per point of ECOG score ($1.27$ to $1.99$) (Figure~\ref{fig:forest}). Each is \textbf{adjusted} for the others: the
+effect of sex is estimated for patients of the same age and performance score. Performance score is the strongest predictor; age, once score is allowed for, adds little ($p = 0.23$).
+\end{exa}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-3.6,-0.75) rectangle (9.6,3.2);
+\draw (0,0) -- (7,0);
+\node[font=\scriptsize,anchor=east] at (-0.2,2.4) {age, per 10 years};
+\draw[blue!60!black,thick] (3.444,2.4) -- (4.549,2.4);
+\fill[blue!60!black] (3.927,2.33) rectangle (4.067,2.4699999999999998);
+\node[font=\tiny,anchor=west] at (7.3,2.4) {$1.12$ ($0.93$, $1.34$)};
+\node[font=\scriptsize,anchor=east] at (-0.2,1.5) {female vs male};
+\draw[blue!60!black,thick] (0.981,1.5) -- (2.980,1.5);
+\fill[blue!60!black] (1.910,1.43) rectangle (2.050,1.57);
+\node[font=\tiny,anchor=west] at (7.3,1.5) {$0.58$ ($0.41$, $0.80$)};
+\node[font=\scriptsize,anchor=east] at (-0.2,0.5999999999999999) {ECOG score, per point};
+\draw[blue!60!black,thick] (4.393,0.5999999999999999) -- (5.747,0.5999999999999999);
+\fill[blue!60!black] (5.000,0.5299999999999998) rectangle (5.140,0.6699999999999999);
+\node[font=\tiny,anchor=west] at (7.3,0.5999999999999999) {$1.59$ ($1.27$, $1.99$)};
+\draw (0.000,0.0) -- (0.000,-0.08) node[below,font=\tiny] {$0.3$};
+\draw (1.553,0.0) -- (1.553,-0.08) node[below,font=\tiny] {$0.5$};
+\draw (3.660,0.0) -- (3.660,-0.08) node[below,font=\tiny] {$1$};
+\draw (5.767,0.0) -- (5.767,-0.08) node[below,font=\tiny] {$2$};
+\draw (7.000,0.0) -- (7.000,-0.08) node[below,font=\tiny] {$3$};
+\draw[black!50,dashed] (3.660,0) -- (3.660,2.85);
+\node[font=\scriptsize] at (3.5,-0.6) {hazard ratio (log scale)};
+\node[font=\scriptsize,anchor=west,black!70] at (7.3,2.95) {HR ($95\%$ CI)};
+\node[font=\tiny,anchor=east,green!40!black] at (3.6,2.95) {lower risk};
+\node[font=\tiny,anchor=west,red!60!black] at (4.0,2.95) {higher risk};
+\end{tikzpicture}
+\caption{Adjusted hazard ratios with $95\%$ confidence intervals from the Cox model with age, sex and ECOG score for the \texttt{lung} data. The dashed line is a hazard ratio of $1$, no effect; intervals that cross it are not significant at the $5\%$ level. On the log scale, equal distances mean equal multiplicative effects.}
+\label{fig:forest}
+\end{figure}
+
+\subsection{The baseline hazard and predicted survival}
+\label{ssec:breslow}
+
+Although the partial likelihood does not need $h_0$, predictions do. Given $\hat\beta$, the \textbf{Breslow estimator} of the baseline cumulative hazard is
+\[
+\hat H_0(t) = \sum_{t_{(j)} \leq t}\frac{d_j}{\sum_{l \in R_j}e^{\hat\beta^{\mathsf T}x_l}} ,
+\]
+the Nelson--Aalen estimator with each subject at risk counted with weight $e^{\hat\beta^{\mathsf T}x_l}$. The predicted survival of a subject with covariates $x$ is $\hat S(t \mid x) = \exp\bigl(-\hat H_0(t)e^{\hat\beta^{\mathsf T}x}\bigr)$. In R, \texttt{survfit} applied to a fitted Cox model with a data frame of covariate values gives these curves, which the next
+section uses for adjusted survival curves.
+
+\subsection{Cox regression in software}
+\label{ssec:software7}
+
+\begin{software}[The partial likelihood by hand]
+\label{sw:plhand}
+Example~\ref{ex:pl}: the log partial likelihood written as a sum over events of $\beta x_i - \log\sum_{\text{risk set}}e^{\beta x_l}$, maximised with \texttt{optimize}; then \texttt{coxph}:
+{\small\begin{verbatim}
+> library(survival)
+> tm <- c(2, 3, 5, 6, 8, 9, 11, 14)           # eight subjects, no ties
+> ev <- c(1, 1, 0, 1, 1, 0, 1, 1)
+> x  <- c(1, 0, 1, 1, 0, 1, 0, 0)             # a binary covariate
+> logPL <- function(b) {
++   s <- 0
++   for (i in which(ev == 1)) {               # one term per event
++     risk <- tm >= tm[i]                     # the risk set at that time
++     s <- s + b * x[i] - log(sum(exp(b * x[risk])))
++   }
++   s
++ }
+> o <- optimize(logPL, c(-5, 5), maximum = TRUE)
+> round(c(beta = o$maximum, logPL = o$objective), 4)
+   beta   logPL 
+ 0.4442 -7.6200 
+> round(coef(coxph(Surv(tm, ev) ~ x)), 4)    # coxph agrees
+     x 
+0.4442 
+\end{verbatim}}
+\textbf{Reading the output.} The maximum is at $\hat\beta = 0.4442$, and \texttt{coxph} gives the same value. The baseline hazard never appears: only the covariates of those at risk at each event time matter.
+
+\textbf{Python:} \texttt{lifelines.CoxPHFitter().fit(df, 'time', 'event')}.
+\end{software}
+
+\begin{software}[Sex as a predictor]
+\label{sw:coxsex}
+Example~\ref{ex:coxsex}: the coefficient table, the hazard ratio with its interval, the three tests of $\beta = 0$, and the log-rank statistic for comparison:
+{\small\begin{verbatim}
+> fit <- coxph(Surv(time, status) ~ sex, data = lung)
+> round(summary(fit)$coefficients, 4)
+      coef exp(coef) se(coef)       z Pr(>|z|)
+sex -0.531     0.588   0.1672 -3.1764   0.0015
+> round(summary(fit)$conf.int, 4)             # HR for women vs men, and CI
+    exp(coef) exp(-coef) lower .95 upper .95
+sex     0.588     1.7007    0.4237     0.816
+> round(c(wald = summary(fit)$waldtest[1], lr = summary(fit)$logtest[1],
++         score = summary(fit)$sctest[1]), 3)
+ wald.test    lr.test score.test 
+    10.090     10.634     10.325 
+> round(survdiff(Surv(time, status) ~ sex, data = lung)$chisq, 3)  # log-rank
+[1] 10.327
+\end{verbatim}}
+\textbf{Reading the output.} $\hat\beta = -0.531$, HR $0.588$ ($0.424$ to $0.816$), $p = 0.0015$ by the Wald test. \texttt{exp(-coef)} $= 1.70$ is the hazard ratio the other way round: men's hazard was $1.7$ times women's. The score test, $10.325$, is the log-rank test up to the treatment of ties.
+
+\textbf{Python:} \texttt{cph.print\_summary()} shows \texttt{exp(coef)} and its interval.
+\end{software}
+
+\begin{software}[Several covariates]
+\label{sw:coxmulti}
+Example~\ref{ex:coxmulti}: hazard ratios, intervals and $p$-values for age, sex and ECOG score, and the hazard ratio for ten years of age:
+{\small\begin{verbatim}
+> lg <- na.omit(lung[, c("time", "status", "age", "sex", "ph.ecog")])
+> m <- coxph(Surv(time, status) ~ age + sex + ph.ecog, data = lg)
+> round(cbind(HR = exp(coef(m)), exp(confint(m)),
++             p = summary(m)$coefficients[, 5]), 4)
+            HR  2.5 % 97.5 %      p
+age     1.0111 0.9929 1.0297 0.2324
+sex     0.5754 0.4142 0.7994 0.0010
+ph.ecog 1.5900 1.2727 1.9864 0.0000
+> round(exp(10 * coef(m)["age"]), 4)          # HR for ten years of age
+  age 
+1.117 
+\end{verbatim}}
+\textbf{Reading the output.} After adjustment, each point of ECOG score multiplies the hazard by $1.59$, and being female by $0.58$; ten years of age multiply it by $1.12$, not significantly. These are the values of Figure~\ref{fig:forest}.
+
+\textbf{Python:} the same model with \texttt{CoxPHFitter} and a formula \texttt{'age + sex + ph\_ecog'}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+A Cox model for a trial gives $\hat\beta = -0.35$ (s.e.\ $0.12$) for treatment. Give the hazard ratio, its $95\%$ interval, and an interpretation.
+\end{problem}
+
+\begin{solution}
+$\widehat{\text{HR}} = e^{-0.35} = 0.705$, interval $\exp(-0.35 \pm 0.235) = (0.557, 0.891)$. Treated patients had about $30\%$ lower hazard of the event at any time than controls; the interval excludes $1$, so the effect is significant at the $5\%$ level ($z = -2.92$, $p = 0.004$).
+\end{solution}
+
+\begin{problem}
+In a model with age in years, $\hat\beta_{\text{age}} = 0.025$. What is the hazard ratio for a $70$-year-old compared with a $50$-year-old, with all other covariates equal?
+\end{problem}
+
+\begin{solution}
+$e^{20 \times 0.025} = e^{0.5} = 1.65$: the $70$-year-old's hazard is $65\%$ higher.
+\end{solution}
+
+\begin{problem}
+If the control group's one-year survival is $0.70$ and the hazard ratio of treated to control is $0.6$, what is the predicted one-year survival of treated patients under proportional hazards?
+\end{problem}
+
+\begin{solution}
+$S_{\text{treated}} = S_{\text{control}}^{\text{HR}} = 0.70^{0.6} = e^{0.6\log 0.70} = e^{-0.214} = 0.807$. One-year mortality falls from $30\%$ to $19.3\%$, a relative reduction of $36\%$, not the $40\%$ that the hazard ratio suggests: hazard ratios and risk ratios differ unless risks are small.
+\end{solution}
+
+\begin{problem}
+Write the factors of the partial likelihood in Example~\ref{ex:pl} at the events at times $6$ and $8$.
+\end{problem}
+
+\begin{solution}
+At $6$ the risk set is the subjects with times $\geq 6$: times $6, 8, 9, 11, 14$ with $x = 1, 0, 1, 0, 0$, and the subject who dies has $x = 1$: factor $e^\beta/(2e^\beta + 3)$. At $8$ the risk set is $8, 9, 11, 14$ with $x = 0, 1, 0, 0$, and the subject who dies has $x = 0$: factor $1/(e^\beta + 3)$.
+\end{solution}
+
+\begin{problem}
+Explain why the partial likelihood does not depend on the baseline hazard, and what information it ignores.
+\end{problem}
+
+\begin{solution}
+Each factor is the conditional probability that the subject who failed was the one who did, given that one failure occurred at that time among those at risk; the common factor $h_0(t)$ cancels between numerator and denominator. It ignores the information in the exact times of the events (only their order and the risk sets matter), which under the model carries little
+information about $\beta$ when $h_0$ is unknown.
+\end{solution}
+
+\begin{problem}
+A model with three covariates has log partial likelihood $-737.2$; dropping one of them gives $-739.9$. Test whether the dropped covariate is needed.
+\end{problem}
+
+\begin{solution}
+The likelihood ratio statistic is $2(-737.2 + 739.9) = 5.4$ on $1$ degree of freedom, $p = 0.020$: the covariate improves the model significantly at the $5\%$ level.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -1736,9 +1980,13 @@ With $d_j = 1$, $\frac{n_j - d_j}{n_j - 1} = 1$ and $V_j = p_j(1 - p_j)$, the va
 \begin{enumerate}
 \item Aalen, O. O. (1978), Nonparametric inference for a family of counting processes, \emph{Annals of Statistics}, 6, 701--726.
 \item Akaike, H. (1974), A new look at the statistical model identification, \emph{IEEE Transactions on Automatic Control}, 19, 716--723.
+\item Andersen, P. K., and Gill, R. D. (1982), Cox's regression model for counting processes: a large sample study, \emph{Annals of Statistics}, 10, 1100--1120.
+\item Breslow, N. E. (1972), Contribution to the discussion of the paper by D. R. Cox, \emph{Journal of the Royal Statistical Society B}, 34, 216--217.
 \item Brookmeyer, R., and Crowley, J. (1982), A confidence interval for the median survival time, \emph{Biometrics}, 38, 29--41.
 \item Chiang, C. L. (1984), \emph{The Life Table and Its Applications}, Malabar, Krieger.
 \item Cohen, A. C. (1965), Maximum likelihood estimation in the Weibull distribution based on complete and on censored samples, \emph{Technometrics}, 7, 579--588.
+\item Cox, D. R. (1972), Regression models and life-tables, \emph{Journal of the Royal Statistical Society B}, 34, 187--220.
+\item Cox, D. R. (1975), Partial likelihood, \emph{Biometrika}, 62, 269--276.
 \item Cutler, S. J., and Ederer, F. (1958), Maximum utilization of the life table method in analyzing survival, \emph{Journal of Chronic Diseases}, 8, 699--712.
 \item Edmonson, J. H., Fleming, T. R., Decker, D. G., et al. (1979), Different chemotherapeutic sensitivities and host factors affecting prognosis in advanced ovarian carcinoma versus minimal residual disease, \emph{Cancer Treatment Reports}, 63, 241--247.
 \item Epstein, B., and Sobel, M. (1953), Life testing, \emph{Journal of the American Statistical Association}, 48, 486--502.
