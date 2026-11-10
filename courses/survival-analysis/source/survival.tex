@@ -3106,6 +3106,312 @@ Explain the difference between the Andersen--Gill and PWP models for recurrent e
 Andersen--Gill uses one baseline intensity for all events and keeps every subject at risk throughout, so a first and a fifth event have the same baseline rate; it suits events that do not change the subject, such as minor infections or seizures. PWP stratifies by event number, with subjects at risk of the $m$th event only after the $(m-1)$th; it suits events that change the risk, such as successive heart attacks or tumour recurrences after surgery.
 \end{solution}
 
+%======================================================================
+\section{Design, a Case Study and Review}
+\label{sec:design}
+
+The course ends where a study begins and where an analysis ends. A survival study must be planned to observe enough events, and the first part of this section shows how many are needed and how many patients it takes to see them. The second part carries a complete analysis of a clinical trial through the methods of the course, from Kaplan--Meier curves to a checked Cox model. The
+last part reviews which method answers which question.
+
+\subsection{How many events?}
+\label{ssec:samplesize}
+
+In a survival trial the information about a hazard ratio comes from the events, not from the number of patients: a thousand patients followed until two have died say almost nothing. Sample size calculations therefore first find the number of events needed and then the number of patients that will produce them.
+
+\begin{thm}[Schoenfeld's formula]
+\label{thm:schoenfeld}
+For a two-sided log-rank test at level $\alpha$ with power $1 - \beta$ to detect a hazard ratio $\Delta$ under proportional hazards, with a proportion $p$ of patients allocated to the new treatment, the number of events required is approximately
+\[
+d = \frac{(z_{\alpha/2} + z_\beta)^2}{p(1 - p)(\log\Delta)^2} ,
+\]
+where $z_{\alpha/2}$ and $z_\beta$ are the upper $\alpha/2$ and $\beta$ points of the standard normal distribution.
+\end{thm}
+
+\begin{proof}[Sketch of proof]
+The log-rank statistic is $Z = U/\sqrt V$, with $U = \sum_j(d_{1j} - e_{1j})$ the observed minus expected events in the treated group (the section on the log-rank test). For $\Delta$ near $1$ and similar risk sets in the two groups, each event contributes about $p(1 - p)$ to $V$, so $V \approx dp(1 - p)$, and the score is approximately $E[U] \approx V\log\Delta$, as for the score
+test of the Cox model, of which the log-rank test is a special case. So $Z$ is approximately normal with mean $\sqrt{dp(1 - p)}\log\Delta$ and variance $1$. The test rejects when $|Z| > z_{\alpha/2}$, and the probability of this is about $1 - \beta$ when $\sqrt{dp(1 - p)}\,|\log\Delta| = z_{\alpha/2} + z_\beta$; solving for $d$ gives the formula.
+\end{proof}
+
+The required number of events grows with $1/(\log\Delta)^2$, so halving the effect to be detected on the log scale quadruples it, and it is smallest for equal allocation, $p = \frac12$, when $p(1 - p) = \frac14$. Freedman's (1982) variant, $d = (z_{\alpha/2} + z_\beta)^2(1 + \Delta)^2/(1 - \Delta)^2$ for equal allocation, gives slightly larger answers.
+
+To turn events into patients, divide by the probability that a patient's event is observed during the study. If patients are recruited uniformly over an accrual period $a$ and then followed for a further time $f$, a patient's time from entry to the end of the study is uniform on $(f, f + a)$, and the probability of an event is $1 - \frac1a\int_f^{f+a}S(u)\,\mathrm du$, which Simpson's rule approximates by
+\[
+P(\text{event}) \approx 1 - \tfrac16\big\{S(f) + 4S(f + \tfrac a2) + S(f + a)\big\} ,
+\]
+averaged over the two arms. The number of patients is $d/P(\text{event})$, inflated further for expected losses to follow-up.
+
+\begin{exa}
+\label{ex:samplesize}
+A trial is to detect a hazard ratio of $0.7$ with $80\%$ power at the two-sided $5\%$ level, with equal allocation. Then $z_{0.025} + z_{0.2} = 1.960 + 0.842 = 2.802$, $(\log 0.7)^2 = 0.1272$, and
+\[
+d = \frac{2.802^2}{0.25 \times 0.1272} = \frac{7.849}{0.0318} = 247
+\]
+events are needed; Freedman's formula gives $252$. Suppose the control group's survival is exponential with median $12$ months, patients are recruited over $24$ months and followed for $12$ more. The probability of an observed death is $0.729$ in the control arm and $0.606$ in the treated arm, $0.668$ on average, so $247/0.668 = 370$ patients are needed (Software~\ref{sw:samplesize}). In $2000$ simulated
+trials of this design with $370$ patients, the log-rank test rejected in $78.9\%$, with $247$ deaths on average: the approximations are good. Detecting a hazard ratio of $0.8$ instead would need $631$ events, and $0.5$ only $65$ (Figure~\ref{fig:design}).
+\end{exa}
+
+Several practical points follow. Because the events drive the power, many trials are designed to stop when the target number of events is reached rather than at a fixed date. Longer follow-up can substitute for more patients, at the cost of time. If hazards are not proportional, for example a treatment whose effect starts late, the log-rank test loses power and the calculation should be done by simulation under the expected pattern, as in Software~\ref{sw:power}.
+
+\subsection{A case study: primary biliary cholangitis}
+\label{ssec:casestudy}
+
+Primary biliary cholangitis (PBC, formerly cirrhosis) is a chronic autoimmune liver disease. Between 1974 and 1984 the Mayo Clinic ran a randomized placebo-controlled trial of the drug D-penicillamine in $312$ patients, recording the time to death or liver transplantation and many laboratory measurements at entry (the \texttt{pbc} data). The analysis below uses death as the event
+and treats transplantation, which removes a patient from the risk of dying of the disease, as censoring, the usual convention for these data, although it could also be handled as a competing risk (the section on competing risks).
+
+\emph{Describe and compare.} There were $65$ deaths among $158$ patients on D-penicillamine and $60$ among $154$ on placebo. The Kaplan--Meier estimates of survival are $70.8\%$ and $71.5\%$ at $5$ years and $42.5\%$ and $45.7\%$ at $10$ years, and the log-rank test gives $\chi^2_1 = 0.10$, $p = 0.75$ (Software~\ref{sw:pbc}). The drug does not prolong survival.
+
+\emph{Model.} The trial is still valuable as a cohort, for learning what predicts survival in PBC. The Mayo model uses age, oedema (coded $0$, $\frac12$ and $1$ for none, controlled and resistant to diuretics) and the logarithms of serum bilirubin, albumin and prothrombin time, logarithms because the effects of these skewed measurements are closer to linear on that scale. The hazard
+ratios are $1.034$ per year of age, $2.19$ for oedema resistant to treatment against none, $1.84$ for each doubling of bilirubin, $0.12$ for each doubling of albumin and $8.1$ for each doubling of prothrombin time, all significant (Software~\ref{sw:mayo}). Bilirubin is the dominant predictor: a patient with four times another's bilirubin has $1.84^2 = 3.4$ times the hazard.
+
+\emph{Check.} The global test of proportional hazards gives $p = 0.061$, with weak evidence of time-varying effects for oedema ($p = 0.038$) and prothrombin time ($p = 0.021$); with five tests, and the global test not significant, the model is acceptable, though the two effects could be split by period as in the section on checking proportional hazards if precise early and late hazard ratios were needed. The concordance
+index is $0.84$, high for a prognostic model: in $84\%$ of comparable pairs, the patient with the higher risk score died first.
+
+\emph{Use.} Grouping patients by thirds of the risk score $\hat\beta^{\mathsf T}x$ separates them sharply: $10$-year survival is $84\%$ in the lowest third, $51\%$ in the middle and $5\%$ in the highest (Figure~\ref{fig:design}). Adding treatment to the model gives an adjusted hazard ratio of $1.15$ ($p = 0.47$), confirming the unadjusted result. Scores of this kind were used for years to time liver transplants, before
+transplantation became routine for PBC.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-1.0,-0.75) rectangle (6.1,3.55);
+\draw[->] (0,0) -- (5.65,0) node[right,font=\scriptsize] {$\Delta$};
+\draw[->] (0,0) -- (0,3.3) node[right,font=\scriptsize] {events $d$};
+\foreach \h in {0.5,0.6,0.7,0.8} \draw ({(\h-0.5)*18},0.06) -- ({(\h-0.5)*18},-0.06) node[below,font=\tiny] {$\h$};
+\foreach \d in {200,400,600,800} \draw (0.06,{\d/300}) -- (-0.06,{\d/300}) node[left,font=\tiny] {$\d$};
+\draw[red!70!black,thick] (0.000,0.218) -- (0.180,0.231) -- (0.360,0.245) -- (0.540,0.260) -- (0.720,0.276) -- (0.900,0.293) -- (1.080,0.311) -- (1.260,0.331) -- (1.440,0.353) -- (1.620,0.376) -- (1.800,0.401) -- (1.980,0.428) -- (2.160,0.458) -- (2.340,0.490) -- (2.520,0.525) -- (2.700,0.564) -- (2.880,0.606) -- (3.060,0.653) -- (3.240,0.704) -- (3.420,0.760) -- (3.600,0.823) -- (3.780,0.892) -- (3.960,0.970) -- (4.140,1.057) -- (4.320,1.154) -- (4.500,1.265) -- (4.680,1.390) -- (4.860,1.532) -- (5.040,1.695) -- (5.220,1.883) -- (5.400,2.102);
+\draw[blue!60!black,thick] (0.000,0.292) -- (0.180,0.309) -- (0.360,0.328) -- (0.540,0.348) -- (0.720,0.369) -- (0.900,0.392) -- (1.080,0.417) -- (1.260,0.443) -- (1.440,0.472) -- (1.620,0.503) -- (1.800,0.537) -- (1.980,0.573) -- (2.160,0.613) -- (2.340,0.656) -- (2.520,0.703) -- (2.700,0.755) -- (2.880,0.811) -- (3.060,0.874) -- (3.240,0.942) -- (3.420,1.018) -- (3.600,1.101) -- (3.780,1.194) -- (3.960,1.298) -- (4.140,1.415) -- (4.320,1.545) -- (4.500,1.693) -- (4.680,1.860) -- (4.860,2.051) -- (5.040,2.269) -- (5.220,2.521) -- (5.400,2.814);
+\draw[black!40,dashed] (3.6,0) -- (3.6,0.823) -- (0,0.823);
+\fill[orange!80!black] (3.6,0.823) circle (1.6pt);
+\node[font=\tiny,anchor=west] at (3.7,0.62) {$247$ events};
+\node[font=\tiny,blue!60!black,anchor=west] at (2.5,2.65) {$90\%$ power};
+\node[font=\tiny,red!70!black,anchor=west] at (4.75,1.05) {$80\%$};
+\node[font=\scriptsize,anchor=north] at (2.6,-0.4) {(a) events needed, $\alpha = 0.05$};
+\begin{scope}[xshift=7.7cm]
+\fill[green!5,rounded corners=4pt] (-0.9,-0.75) rectangle (6.0,3.55);
+\draw[->] (0,0) -- (5.6,0) node[right,font=\scriptsize] {years};
+\draw[->] (0,0) -- (0,3.3) node[right,font=\scriptsize] {$\hat S(t)$};
+\foreach \y in {0,4,8,12} \draw ({\y*0.43},0.06) -- ({\y*0.43},-0.06) node[below,font=\tiny] {$\y$};
+\foreach \s in {0,0.5,1} \draw (0.06,{\s*3}) -- (-0.06,{\s*3}) node[left,font=\tiny] {$\s$};
+\draw[green!40!black,thick] (0,3) -- (0.233,3.000) -- (0.233,2.971) -- (0.606,2.971) -- (0.606,2.942) -- (1.353,2.942) -- (1.353,2.942) -- (1.358,2.942) -- (1.358,2.942) -- (1.427,2.942) -- (1.427,2.913) -- (1.448,2.913) -- (1.448,2.913) -- (1.496,2.913) -- (1.496,2.913) -- (1.555,2.913) -- (1.555,2.913) -- (1.588,2.913) -- (1.588,2.913) -- (1.649,2.913) -- (1.649,2.913) -- (1.687,2.913) -- (1.687,2.913) -- (1.688,2.913) -- (1.688,2.913) -- (1.689,2.913) -- (1.689,2.913) -- (1.713,2.913) -- (1.713,2.913) -- (1.715,2.913) -- (1.715,2.913) -- (1.744,2.913) -- (1.744,2.913) -- (1.795,2.913) -- (1.795,2.913) -- (1.846,2.913) -- (1.846,2.913) -- (1.847,2.913) -- (1.847,2.913) -- (1.900,2.913) -- (1.900,2.913) -- (2.003,2.913) -- (2.003,2.913) -- (2.042,2.913) -- (2.042,2.913) -- (2.082,2.913) -- (2.082,2.913) -- (2.091,2.913) -- (2.091,2.913) -- (2.107,2.913) -- (2.107,2.913) -- (2.156,2.913) -- (2.156,2.913) -- (2.157,2.913) -- (2.157,2.913) -- (2.175,2.913) -- (2.175,2.875) -- (2.246,2.875) -- (2.246,2.875) -- (2.290,2.875) -- (2.290,2.875) -- (2.297,2.875) -- (2.297,2.875) -- (2.316,2.875) -- (2.316,2.875) -- (2.328,2.875) -- (2.328,2.875) -- (2.380,2.875) -- (2.380,2.875) -- (2.414,2.875) -- (2.414,2.875) -- (2.419,2.875) -- (2.419,2.832) -- (2.540,2.832) -- (2.540,2.832) -- (2.552,2.832) -- (2.552,2.832) -- (2.555,2.832) -- (2.555,2.832) -- (2.562,2.832) -- (2.562,2.832) -- (2.564,2.832) -- (2.564,2.832) -- (2.609,2.832) -- (2.609,2.832) -- (2.615,2.832) -- (2.615,2.832) -- (2.618,2.832) -- (2.618,2.785) -- (2.638,2.785) -- (2.638,2.785) -- (2.655,2.785) -- (2.655,2.785) -- (2.675,2.785) -- (2.675,2.785) -- (2.701,2.785) -- (2.701,2.785) -- (2.775,2.785) -- (2.775,2.785) -- (2.784,2.785) -- (2.784,2.785) -- (2.876,2.785) -- (2.876,2.785) -- (2.883,2.785) -- (2.883,2.785) -- (2.887,2.785) -- (2.887,2.785) -- (2.903,2.785) -- (2.903,2.729) -- (2.948,2.729) -- (2.948,2.729) -- (2.975,2.729) -- (2.975,2.729) -- (3.008,2.729) -- (3.008,2.729) -- (3.030,2.729) -- (3.030,2.729) -- (3.033,2.729) -- (3.033,2.729) -- (3.038,2.729) -- (3.038,2.729) -- (3.041,2.729) -- (3.041,2.666) -- (3.071,2.666) -- (3.071,2.666) -- (3.078,2.666) -- (3.078,2.666) -- (3.089,2.666) -- (3.089,2.666) -- (3.113,2.666) -- (3.113,2.666) -- (3.166,2.666) -- (3.166,2.596) -- (3.169,2.596) -- (3.169,2.596) -- (3.194,2.596) -- (3.194,2.596) -- (3.260,2.596) -- (3.260,2.522) -- (3.263,2.522) -- (3.263,2.522) -- (3.338,2.522) -- (3.338,2.522) -- (3.370,2.522) -- (3.370,2.522) -- (3.403,2.522) -- (3.403,2.522) -- (3.466,2.522) -- (3.466,2.522) -- (3.504,2.522) -- (3.504,2.522) -- (3.590,2.522) -- (3.590,2.522) -- (3.601,2.522) -- (3.601,2.522) -- (3.613,2.522) -- (3.613,2.522) -- (3.640,2.522) -- (3.640,2.522) -- (3.649,2.522) -- (3.649,2.522) -- (3.707,2.522) -- (3.707,2.522) -- (3.708,2.522) -- (3.708,2.522) -- (3.832,2.522) -- (3.832,2.522) -- (3.882,2.522) -- (3.882,2.522) -- (4.029,2.522) -- (4.029,2.522) -- (4.071,2.522) -- (4.071,2.522) -- (4.211,2.522) -- (4.211,2.522) -- (4.216,2.522) -- (4.216,2.522) -- (4.251,2.522) -- (4.251,2.522) -- (4.323,2.522) -- (4.323,2.522) -- (4.364,2.522) -- (4.364,2.522) -- (4.501,2.522) -- (4.501,2.522) -- (4.533,2.522) -- (4.533,2.522) -- (4.630,2.522) -- (4.630,2.522) -- (4.700,2.522) -- (4.700,2.522) -- (4.739,2.522) -- (4.739,2.522) -- (4.747,2.522) -- (4.747,2.522) -- (4.755,2.522) -- (4.755,2.522) -- (4.859,2.522) -- (4.859,2.522) -- (4.926,2.522) -- (4.926,2.522) -- (4.933,2.522) -- (4.933,2.522) -- (5.010,2.522) -- (5.010,2.522) -- (5.249,2.522) -- (5.249,2.522);
+\draw[orange!80!black,thick] (0,3) -- (0.627,3.000) -- (0.627,3.000) -- (0.817,3.000) -- (0.817,2.971) -- (0.833,2.971) -- (0.833,2.942) -- (0.868,2.942) -- (0.868,2.942) -- (0.925,2.942) -- (0.925,2.912) -- (0.928,2.912) -- (0.928,2.912) -- (0.970,2.912) -- (0.970,2.883) -- (0.986,2.883) -- (0.986,2.883) -- (0.988,2.883) -- (0.988,2.883) -- (1.032,2.883) -- (1.032,2.883) -- (1.061,2.883) -- (1.061,2.883) -- (1.106,2.883) -- (1.106,2.883) -- (1.170,2.883) -- (1.170,2.883) -- (1.176,2.883) -- (1.176,2.851) -- (1.213,2.851) -- (1.213,2.851) -- (1.431,2.851) -- (1.431,2.851) -- (1.471,2.851) -- (1.471,2.851) -- (1.522,2.851) -- (1.522,2.851) -- (1.525,2.851) -- (1.525,2.851) -- (1.530,2.851) -- (1.530,2.851) -- (1.532,2.851) -- (1.532,2.851) -- (1.601,2.851) -- (1.601,2.816) -- (1.605,2.816) -- (1.605,2.816) -- (1.658,2.816) -- (1.658,2.816) -- (1.662,2.816) -- (1.662,2.816) -- (1.669,2.816) -- (1.669,2.816) -- (1.672,2.816) -- (1.672,2.816) -- (1.688,2.816) -- (1.688,2.779) -- (1.704,2.779) -- (1.704,2.779) -- (1.757,2.779) -- (1.757,2.740) -- (1.771,2.740) -- (1.771,2.740) -- (1.808,2.740) -- (1.808,2.702) -- (1.834,2.702) -- (1.834,2.702) -- (1.874,2.702) -- (1.874,2.702) -- (1.961,2.702) -- (1.961,2.702) -- (1.980,2.702) -- (1.980,2.662) -- (2.004,2.662) -- (2.004,2.662) -- (2.050,2.662) -- (2.050,2.621) -- (2.084,2.621) -- (2.084,2.621) -- (2.099,2.621) -- (2.099,2.621) -- (2.101,2.621) -- (2.101,2.621) -- (2.103,2.621) -- (2.103,2.578) -- (2.206,2.578) -- (2.206,2.578) -- (2.275,2.578) -- (2.275,2.578) -- (2.330,2.578) -- (2.330,2.578) -- (2.393,2.578) -- (2.393,2.578) -- (2.450,2.578) -- (2.450,2.532) -- (2.460,2.532) -- (2.460,2.486) -- (2.478,2.486) -- (2.478,2.440) -- (2.479,2.440) -- (2.479,2.440) -- (2.556,2.440) -- (2.556,2.440) -- (2.584,2.440) -- (2.584,2.440) -- (2.618,2.440) -- (2.618,2.440) -- (2.704,2.440) -- (2.704,2.390) -- (2.709,2.390) -- (2.709,2.390) -- (2.729,2.390) -- (2.729,2.390) -- (2.743,2.390) -- (2.743,2.390) -- (2.746,2.390) -- (2.746,2.390) -- (2.767,2.390) -- (2.767,2.390) -- (2.782,2.390) -- (2.782,2.390) -- (2.848,2.390) -- (2.848,2.333) -- (2.891,2.333) -- (2.891,2.333) -- (2.906,2.333) -- (2.906,2.333) -- (2.914,2.333) -- (2.914,2.333) -- (2.947,2.333) -- (2.947,2.272) -- (2.948,2.272) -- (2.948,2.272) -- (3.009,2.272) -- (3.009,2.272) -- (3.017,2.272) -- (3.017,2.272) -- (3.029,2.272) -- (3.029,2.272) -- (3.059,2.272) -- (3.059,2.203) -- (3.128,2.203) -- (3.128,2.203) -- (3.139,2.203) -- (3.139,2.203) -- (3.292,2.203) -- (3.292,2.129) -- (3.293,2.129) -- (3.293,2.129) -- (3.352,2.129) -- (3.352,2.053) -- (3.379,2.053) -- (3.379,2.053) -- (3.520,2.053) -- (3.520,2.053) -- (3.633,2.053) -- (3.633,1.971) -- (3.647,1.971) -- (3.647,1.971) -- (3.732,1.971) -- (3.732,1.885) -- (3.813,1.885) -- (3.813,1.885) -- (3.819,1.885) -- (3.819,1.796) -- (3.953,1.796) -- (3.953,1.706) -- (3.997,1.706) -- (3.997,1.616) -- (4.056,1.616) -- (4.056,1.616) -- (4.219,1.616) -- (4.219,1.521) -- (4.429,1.521) -- (4.429,1.426) -- (4.497,1.426) -- (4.497,1.426) -- (4.536,1.426) -- (4.536,1.324) -- (4.607,1.324) -- (4.607,1.324) -- (4.802,1.324) -- (4.802,1.214) -- (4.934,1.214) -- (4.934,1.103) -- (4.940,1.103) -- (4.940,1.103) -- (4.982,1.103) -- (4.982,1.103) -- (5.139,1.103) -- (5.139,1.103) -- (5.212,1.103) -- (5.212,1.103) -- (5.243,1.103) -- (5.243,1.103) -- (5.259,1.103) -- (5.259,1.103) -- (5.298,1.103) -- (5.298,1.103) -- (5.308,1.103) -- (5.308,1.103) -- (5.325,1.103) -- (5.325,1.103) -- (5.364,1.103) -- (5.364,1.103);
+\draw[red!70!black,thick] (0,3) -- (0.048,3.000) -- (0.048,2.971) -- (0.060,2.971) -- (0.060,2.942) -- (0.083,2.942) -- (0.083,2.914) -- (0.091,2.914) -- (0.091,2.885) -- (0.129,2.885) -- (0.129,2.856) -- (0.153,2.856) -- (0.153,2.827) -- (0.154,2.827) -- (0.154,2.798) -- (0.165,2.798) -- (0.165,2.769) -- (0.211,2.769) -- (0.211,2.740) -- (0.219,2.740) -- (0.219,2.711) -- (0.225,2.711) -- (0.225,2.683) -- (0.244,2.683) -- (0.244,2.654) -- (0.254,2.654) -- (0.254,2.625) -- (0.263,2.625) -- (0.263,2.596) -- (0.311,2.596) -- (0.311,2.539) -- (0.358,2.539) -- (0.358,2.510) -- (0.378,2.510) -- (0.378,2.481) -- (0.384,2.481) -- (0.384,2.452) -- (0.393,2.452) -- (0.393,2.423) -- (0.410,2.423) -- (0.410,2.394) -- (0.457,2.394) -- (0.457,2.365) -- (0.471,2.365) -- (0.471,2.336) -- (0.541,2.336) -- (0.541,2.308) -- (0.646,2.308) -- (0.646,2.279) -- (0.650,2.279) -- (0.650,2.250) -- (0.703,2.250) -- (0.703,2.221) -- (0.719,2.221) -- (0.719,2.192) -- (0.792,2.192) -- (0.792,2.164) -- (0.862,2.164) -- (0.862,2.164) -- (0.863,2.164) -- (0.863,2.134) -- (0.883,2.134) -- (0.883,2.105) -- (0.897,2.105) -- (0.897,2.076) -- (0.905,2.076) -- (0.905,2.047) -- (0.930,2.047) -- (0.930,2.017) -- (0.938,2.017) -- (0.938,1.988) -- (0.941,1.988) -- (0.941,1.959) -- (1.001,1.959) -- (1.001,1.930) -- (1.004,1.930) -- (1.004,1.900) -- (1.011,1.900) -- (1.011,1.871) -- (1.048,1.871) -- (1.048,1.842) -- (1.064,1.842) -- (1.064,1.813) -- (1.095,1.813) -- (1.095,1.784) -- (1.110,1.784) -- (1.110,1.754) -- (1.143,1.754) -- (1.143,1.725) -- (1.147,1.725) -- (1.147,1.696) -- (1.154,1.696) -- (1.154,1.667) -- (1.177,1.667) -- (1.177,1.637) -- (1.192,1.637) -- (1.192,1.608) -- (1.221,1.608) -- (1.221,1.579) -- (1.256,1.579) -- (1.256,1.579) -- (1.268,1.579) -- (1.268,1.549) -- (1.272,1.549) -- (1.272,1.519) -- (1.275,1.519) -- (1.275,1.490) -- (1.276,1.490) -- (1.276,1.490) -- (1.356,1.490) -- (1.356,1.459) -- (1.372,1.459) -- (1.372,1.429) -- (1.377,1.429) -- (1.377,1.398) -- (1.402,1.398) -- (1.402,1.337) -- (1.433,1.337) -- (1.433,1.307) -- (1.453,1.307) -- (1.453,1.307) -- (1.454,1.307) -- (1.454,1.276) -- (1.527,1.276) -- (1.527,1.245) -- (1.533,1.245) -- (1.533,1.245) -- (1.554,1.245) -- (1.554,1.245) -- (1.565,1.245) -- (1.565,1.245) -- (1.589,1.245) -- (1.589,1.211) -- (1.597,1.211) -- (1.597,1.177) -- (1.664,1.177) -- (1.664,1.144) -- (1.680,1.144) -- (1.680,1.110) -- (1.700,1.110) -- (1.700,1.077) -- (1.751,1.077) -- (1.751,1.043) -- (1.815,1.043) -- (1.815,1.043) -- (1.855,1.043) -- (1.855,1.008) -- (1.901,1.008) -- (1.901,1.008) -- (1.950,1.008) -- (1.950,1.008) -- (1.951,1.008) -- (1.951,0.971) -- (1.974,0.971) -- (1.974,0.971) -- (1.990,0.971) -- (1.990,0.893) -- (2.078,0.893) -- (2.078,0.893) -- (2.131,0.893) -- (2.131,0.893) -- (2.151,0.893) -- (2.151,0.850) -- (2.216,0.850) -- (2.216,0.850) -- (2.266,0.850) -- (2.266,0.803) -- (2.656,0.803) -- (2.656,0.756) -- (2.694,0.756) -- (2.694,0.709) -- (2.809,0.709) -- (2.809,0.661) -- (2.826,0.661) -- (2.826,0.614) -- (2.990,0.614) -- (2.990,0.567) -- (3.204,0.567) -- (3.204,0.567) -- (3.526,0.567) -- (3.526,0.567) -- (3.638,0.567) -- (3.638,0.510) -- (3.793,0.510) -- (3.793,0.454) -- (3.864,0.454) -- (3.864,0.397) -- (3.927,0.397) -- (3.927,0.397) -- (3.989,0.397) -- (3.989,0.397) -- (4.036,0.397) -- (4.036,0.318) -- (4.056,0.318) -- (4.056,0.238) -- (4.208,0.238) -- (4.208,0.159) -- (4.520,0.159) -- (4.520,0.080) -- (4.768,0.080) -- (4.768,0.080);
+\node[font=\tiny,green!40!black,anchor=west] at (4.3,2.75) {low risk};
+\node[font=\tiny,orange!80!black,anchor=west] at (3.0,1.15) {middle};
+\node[font=\tiny,red!70!black,anchor=west] at (1.5,0.35) {high risk};
+\node[font=\scriptsize,anchor=north] at (2.6,-0.4) {(b) \texttt{pbc}: thirds of the Mayo score};
+\end{scope}
+\end{tikzpicture}
+\caption{(a) Events needed by Schoenfeld's formula for a two-sided $5\%$ log-rank test with equal allocation, against the hazard ratio to be detected, for $80\%$ and $90\%$ power; the trial of Example~\ref{ex:samplesize} needs $247$. (b) Kaplan--Meier curves for the $312$ patients of the PBC trial grouped by thirds of the risk score of the Mayo model: survival at $10$ years is $84\%$, $51\%$ and $5\%$.}
+\label{fig:design}
+\end{figure}
+
+\subsection{Review: which method for which question}
+\label{ssec:review}
+
+Table~\ref{tab:review} collects the methods of the course by the question they answer. Three habits run through all of them: account for censoring rather than discarding it; state what the time origin and the event are; and check the assumptions of a model, proportional hazards above all, before reporting its single summary numbers.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lll}
+\hline
+Question & Method & In R \\
+\hline
+What fraction survive to $t$? & Kaplan--Meier, Greenwood (Section~\ref{sec:km}) & \texttt{survfit} \\
+What is the cumulative risk? & Nelson--Aalen, life tables (Section~\ref{sec:nelson}) & \texttt{survfit} \\
+A smooth model, extrapolation & Weibull and others (Section~\ref{sec:parametric}) & \texttt{survreg} \\
+Do groups differ? & log-rank tests (Section~\ref{sec:logrank}) & \texttt{survdiff} \\
+Covariate effects on the hazard & Cox model (Sections~\ref{sec:cox} and~\ref{sec:coxfit}) & \texttt{coxph} \\
+Is the hazard ratio constant? & Schoenfeld residuals (Section~\ref{sec:ph}) & \texttt{cox.zph} \\
+Effects on time; predictions & AFT models (Section~\ref{sec:aft}) & \texttt{survreg} \\
+Several kinds of event & incidence, Fine--Gray (Section~\ref{sec:multi}) & \texttt{survfit}, \texttt{finegray} \\
+Clusters, repeated events & frailty, Andersen--Gill (Section~\ref{sec:multi}) & \texttt{frailty}, \texttt{cluster} \\
+How many patients? & Schoenfeld's formula (Section~\ref{sec:design}) & simulation \\
+\hline
+\end{tabular}
+\caption{The methods of the course, by question.}
+\label{tab:review}
+\end{table}
+
+\subsection{Design and the case study in software}
+\label{ssec:software12}
+
+\begin{software}[Events and patients]
+\label{sw:samplesize}
+Schoenfeld's and Freedman's formulas for a hazard ratio of $0.7$, the events needed for four hazard ratios, and the conversion to patients with Simpson's rule:
+{\small\begin{verbatim}
+> library(survival); options(show.signif.stars = FALSE)
+> events <- function(hr, alpha = 0.05, power = 0.8, p = 0.5)
++   (qnorm(1 - alpha / 2) + qnorm(power))^2 / (p * (1 - p) * log(hr)^2)
+> freedman <- (qnorm(0.975) + qnorm(0.8))^2 * (1.7 / 0.3)^2
+> round(c(schoenfeld = events(0.7), freedman = freedman))
+schoenfeld   freedman 
+       247        252 
+> round(sapply(c(0.5, 0.6, 0.7, 0.8), events))   # events needed, 80% power
+[1]  65 120 247 631
+> # probability of an event: accrual a = 24, further follow-up f = 12 months
+> S <- function(t, hr = 1) exp(-hr * log(2) / 12 * t)   # control median 12
+> pev <- function(hr, a = 24, f = 12)
++   1 - (S(f, hr) + 4 * S(f + a / 2, hr) + S(f + a, hr)) / 6   # Simpson
+> pbar <- mean(c(pev(1), pev(0.7)))
+> round(c(p_control = pev(1), p_treated = pev(0.7), p_mean = pbar), 4)
+p_control p_treated    p_mean 
+   0.7292    0.6059    0.6675 
+> ceiling(events(0.7) / pbar)                    # patients needed
+[1] 370
+\end{verbatim}}
+\textbf{Reading the output.} $247$ events (Freedman $252$) for $\Delta = 0.7$; the number rises steeply as $\Delta$ approaches $1$. With the given accrual and follow-up, two-thirds of patients will be seen to die, so $370$ are needed.
+
+\textbf{Python:} \texttt{lifelines.statistics.sample\_size\_necessary\_under\_cph}.
+\end{software}
+
+\begin{software}[Power by simulation]
+\label{sw:power}
+$2000$ trials of the design of Example~\ref{ex:samplesize}, with exponential survival, uniform accrual over $24$ months and $12$ months of further follow-up, each analysed by the log-rank test:
+{\small\begin{verbatim}
+> set.seed(12)
+> sim <- function(n, hr = 0.7, a = 24, f = 12) {
++   g <- rep(0:1, length.out = n)
++   t <- rexp(n, log(2) / 12 * hr^g)               # survival times
++   cens <- f + runif(n, 0, a)                     # time from entry to end
++   y <- pmin(t, cens); d <- as.numeric(t <= cens)
++   c(p = 1 - pchisq(survdiff(Surv(y, d) ~ g)$chisq, 1), events = sum(d))
++ }
+> r <- replicate(2000, sim(370))
+> round(c(power = mean(r["p", ] < 0.05), events = mean(r["events", ])), 3)
+  power  events 
+  0.789 247.018 
+\end{verbatim}}
+\textbf{Reading the output.} The simulated power is $78.9\%$ (with simulation error about $0.9\%$), close to the $80\%$ intended, and the trials see $247$ deaths on average, the number the formula asked for. Changing the simulated survival times gives power for any pattern of hazards.
+
+\textbf{Python:} the same loop with \texttt{numpy} and \texttt{lifelines.statistics.logrank\_test}.
+\end{software}
+
+\begin{software}[The PBC trial]
+\label{sw:pbc}
+The $312$ randomized patients, deaths by arm, the log-rank test and Kaplan--Meier estimates at $5$ and $10$ years (\texttt{trt} is $1$ for D-penicillamine and $2$ for placebo):
+{\small\begin{verbatim}
+> pb <- pbc[!is.na(pbc$trt), ]                     # the 312 trial patients
+> pb$death <- as.numeric(pb$status == 2)           # transplant = censored
+> table(trt = pb$trt, death = pb$death)
+   death
+trt  0  1
+  1 93 65
+  2 94 60
+> survdiff(Surv(time / 365.25, death) ~ trt, data = pb)
+Call:
+survdiff(formula = Surv(time/365.25, death) ~ trt, data = pb)
+
+        N Observed Expected (O-E)^2/E (O-E)^2/V
+trt=1 158       65     63.2    0.0502     0.102
+trt=2 154       60     61.8    0.0513     0.102
+
+ Chisq= 0.1  on 1 degrees of freedom, p= 0.7 
+> km <- survfit(Surv(time / 365.25, death) ~ trt, data = pb)
+> matrix(round(summary(km, times = c(5, 10))$surv, 3), 2,
++        dimnames = list(years = c(5, 10), trt = c("D-pen", "placebo")))
+     trt
+years D-pen placebo
+   5  0.708   0.715
+   10 0.425   0.457
+\end{verbatim}}
+\textbf{Reading the output.} Observed and expected deaths are almost equal in both arms ($65$ against $63.2$, $60$ against $61.8$), $p = 0.75$; survival is similar at $5$ and $10$ years.
+
+\textbf{Python:} \texttt{KaplanMeierFitter} and \texttt{logrank\_test}.
+\end{software}
+
+\begin{software}[The Mayo model]
+\label{sw:mayo}
+The Cox model with age, oedema and three log-transformed laboratory values, its hazard ratios per year and per doubling, the tests of proportional hazards, the concordance index, and the treatment effect adjusted for the model:
+{\small\begin{verbatim}
+> mayo <- coxph(Surv(time, death) ~ age + edema + log(bili) + log(albumin) +
++                 log(protime), data = pb)
+> unit <- c(1, 1, log(2), log(2), log(2))         # per year; per doubling
+> round(cbind(HR = exp(coef(mayo) * unit), p = summary(mayo)$coef[, 5]), 4)
+                 HR      p
+age          1.0338 0.0001
+edema        2.1943 0.0086
+log(bili)    1.8404 0.0000
+log(albumin) 0.1199 0.0000
+log(protime) 8.0781 0.0032
+> round(cox.zph(mayo)$table, 3)
+              chisq df     p
+age           0.571  1 0.450
+edema         4.295  1 0.038
+log(bili)     1.512  1 0.219
+log(albumin)  0.153  1 0.696
+log(protime)  5.352  1 0.021
+GLOBAL       10.551  5 0.061
+> round(concordance(mayo)$concordance, 3)
+[1] 0.844
+> m2 <- update(mayo, . ~ . + trt)
+> round(summary(m2)$coef["trt", c(2, 5)], 3)       # treatment, adjusted
+exp(coef)  Pr(>|z|) 
+    1.145     0.465 
+\end{verbatim}}
+\textbf{Reading the output.} All five predictors are strong (the $p$-values shown as $0$ are below $0.00005$). The proportional hazards tests are acceptable overall; $C = 0.84$; adjusted for prognosis, the drug's hazard ratio is $1.15$, $p = 0.47$.
+
+\textbf{Python:} \texttt{CoxPHFitter} with \texttt{check\_assumptions} and \texttt{concordance\_index\_}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+How many events are needed to detect a hazard ratio of $0.75$ with $90\%$ power at the two-sided $5\%$ level and equal allocation? How does the answer change with allocation $2:1$ to the new treatment?
+\end{problem}
+
+\begin{solution}
+$z_{0.025} + z_{0.1} = 1.960 + 1.282 = 3.242$, $(\log 0.75)^2 = 0.0828$, so $d = 10.51/(0.25 \times 0.0828) = 508$. With $p = \frac23$, $p(1 - p) = \frac29 = 0.222$ instead of $0.25$, and $d = 10.51/(0.222 \times 0.0828) = 572$, about $12\%$ more.
+\end{solution}
+
+\begin{problem}
+A trial needs $300$ events. In the planned population, $40\%$ of patients will die during the study and $10\%$ will be lost to follow-up. How many patients should be recruited?
+\end{problem}
+
+\begin{solution}
+$300/0.40 = 750$ patients would give the events if no-one were lost; allowing for $10\%$ losses, $750/0.9 = 834$. (This simple inflation is approximate; losses also remove patients who would have died.)
+\end{solution}
+
+\begin{problem}
+Using the derivation of Theorem~\ref{thm:schoenfeld}, find the power of a trial with $150$ events and equal allocation to detect a hazard ratio of $0.7$ at the two-sided $5\%$ level.
+\end{problem}
+
+\begin{solution}
+$\sqrt{dp(1 - p)}\,|\log\Delta| = \sqrt{150 \times 0.25} \times 0.357 = 6.12 \times 0.357 = 2.18$. Power $\approx P(Z > 1.960 - 2.18) = P(Z > -0.22) = \Phi(0.22) = 0.59$.
+\end{solution}
+
+\begin{problem}
+Why does a survival trial's sample size depend on the number of events rather than on the number of patients, and why are many trials stopped at a fixed number of events?
+\end{problem}
+
+\begin{solution}
+The variance of the log-rank statistic, and of the estimated log hazard ratio, is about $1/\{dp(1 - p)\}$: censored patients contribute to the risk sets but not to this information directly. A trial stopped at a fixed number of events has known power whatever the event rate turns out to be, while one stopped at a fixed date may see fewer events than planned if patients do better than expected.
+\end{solution}
+
+\begin{problem}
+In the Mayo model, patient A has bilirubin $1$ mg/dl and patient B $8$ mg/dl, with all else equal. What is the hazard ratio of B to A?
+\end{problem}
+
+\begin{solution}
+$8$ is three doublings of $1$, so the ratio is $1.84^3 = 6.2$. Equivalently $8^{0.880} = e^{0.880\log 8} = 6.2$, where $0.880 = \log 2.411$ is the coefficient of $\log(\text{bili})$.
+\end{solution}
+
+\begin{problem}
+The PBC trial found no treatment effect, yet the data produced a widely used prognostic model. Explain why a negative trial can still be a good source for such a model, and what limits its use.
+\end{problem}
+
+\begin{solution}
+Randomization does not matter for prognosis when the treatment has no effect, so the trial is a well-documented cohort with careful follow-up, standardized measurements at entry and few missing values. Its limits: the patients were those eligible and willing to enter a trial at one centre in 1974--1984, and later changes in diagnosis and treatment (earlier detection, ursodeoxycholic acid, transplantation) change the baseline risk, so
+the model should be validated in current patients before use.
+\end{solution}
+
+\begin{problem}
+For each of the following, name the method from Table~\ref{tab:review} and say why: (a) the probability that a dialysis patient receives a transplant within $3$ years, when many die first; (b) whether a new drug reduces the rate of hospital admissions, which recur; (c) the median time to relapse in a single group, with $30\%$ censored.
+\end{problem}
+
+\begin{solution}
+(a) The cumulative incidence of transplantation, with death as a competing risk, since one minus Kaplan--Meier would overstate it. (b) The Andersen--Gill model (or PWP) with robust standard errors, since admissions recur within patients and are correlated. (c) The Kaplan--Meier estimate and its median, with a confidence interval from Greenwood's formula, since it uses the censored times correctly without assuming a distribution.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -3149,11 +3455,13 @@ Andersen--Gill uses one baseline intensity for all events and keeps every subjec
 \item Cox, D. R. (1975), Partial likelihood, \emph{Biometrika}, 62, 269--276.
 \item Cox, D. R., and Snell, E. J. (1968), A general definition of residuals, \emph{Journal of the Royal Statistical Society, Series B}, 30, 248--275.
 \item Cutler, S. J., and Ederer, F. (1958), Maximum utilization of the life table method in analyzing survival, \emph{Journal of Chronic Diseases}, 8, 699--712.
+\item Dickson, E. R., Grambsch, P. M., Fleming, T. R., Fisher, L. D., and Langworthy, A. (1989), Prognosis in primary biliary cirrhosis: model for decision making, \emph{Hepatology}, 10, 1--7.
 \item Edmonson, J. H., Fleming, T. R., Decker, D. G., et al. (1979), Different chemotherapeutic sensitivities and host factors affecting prognosis in advanced ovarian carcinoma versus minimal residual disease, \emph{Cancer Treatment Reports}, 63, 241--247.
 \item Efron, B. (1977), The efficiency of Cox's likelihood function for censored data, \emph{Journal of the American Statistical Association}, 72, 557--565.
 \item Epstein, B., and Sobel, M. (1953), Life testing, \emph{Journal of the American Statistical Association}, 48, 486--502.
 \item Fine, J. P., and Gray, R. J. (1999), A proportional hazards model for the subdistribution of a competing risk, \emph{Journal of the American Statistical Association}, 94, 496--509.
 \item Fleming, T. R., and Harrington, D. P. (1984), Nonparametric estimation of the survival distribution in censored data, \emph{Communications in Statistics: Theory and Methods}, 13, 2469--2486.
+\item Freedman, L. S. (1982), Tables of the number of patients required in clinical trials using the logrank test, \emph{Statistics in Medicine}, 1, 121--129.
 \item Gehan, E. A. (1965), A generalized Wilcoxon test for comparing arbitrarily singly-censored samples, \emph{Biometrika}, 52, 203--223.
 \item Gompertz, B. (1825), On the nature of the function expressive of the law of human mortality, \emph{Philosophical Transactions of the Royal Society of London}, 115, 513--583.
 \item Grambsch, P. M., and Therneau, T. M. (1994), Proportional hazards tests and diagnostics based on weighted residuals, \emph{Biometrika}, 81, 515--526.
@@ -3180,6 +3488,7 @@ Andersen--Gill uses one baseline intensity for all events and keeps every subjec
 \item Prentice, R. L., Williams, B. J., and Peterson, A. V. (1981), On the regression analysis of multivariate failure time data, \emph{Biometrika}, 68, 373--379.
 \item Schemper, M., and Smith, T. L. (1996), A note on quantifying follow-up in studies of failure time, \emph{Controlled Clinical Trials}, 17, 343--346.
 \item Schoenfeld, D. (1982), Partial residuals for the proportional hazards regression model, \emph{Biometrika}, 69, 239--241.
+\item Schoenfeld, D. A. (1983), Sample-size formula for the proportional-hazards regression model, \emph{Biometrics}, 39, 499--503.
 \item Therneau, T. M., Grambsch, P. M., and Fleming, T. R. (1990), Martingale-based residuals for survival models, \emph{Biometrika}, 77, 147--160.
 \item Vaupel, J. W., Manton, K. G., and Stallard, E. (1979), The impact of heterogeneity in individual frailty on the dynamics of mortality, \emph{Demography}, 16, 439--454.
 \item Wei, L. J. (1992), The accelerated failure time model: a useful alternative to the Cox regression model in survival analysis, \emph{Statistics in Medicine}, 11, 1871--1879.
