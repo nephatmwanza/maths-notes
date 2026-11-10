@@ -1949,6 +1949,232 @@ A model with three covariates has log partial likelihood $-737.2$; dropping one 
 The likelihood ratio statistic is $2(-737.2 + 739.9) = 5.4$ on $1$ degree of freedom, $p = 0.020$: the covariate improves the model significantly at the $5\%$ level.
 \end{solution}
 
+%======================================================================
+\section{Fitting Cox Models in Practice}
+\label{sec:coxfit}
+
+A Cox model in a real study includes several covariates of different kinds, has to deal with tied event times, may need interactions, and is used to predict survival for particular patients. This section works through these practical matters with the \texttt{veteran} lung cancer trial, in which $137$ men were randomised to a standard or a test chemotherapy, with
+tumour cell type and the Karnofsky performance score (from $10$, moribund, to $100$, normal) recorded for each.
+
+\subsection{Categorical covariates}
+\label{ssec:categorical}
+
+A factor with $K$ levels enters the model as $K - 1$ indicator (dummy) variables, each comparing one level with a \textbf{reference level}. In R the reference is the first level unless changed with \texttt{relevel}. The coefficients are then log hazard ratios relative to the reference, and the question whether the factor matters at all is answered by a test of
+all $K - 1$ coefficients together: a likelihood ratio test comparing the models with and without the factor, on $K - 1$ degrees of freedom.
+
+\begin{exa}
+\label{ex:veteran}
+With treatment, cell type and Karnofsky score, and squamous cell as the reference, the hazard ratios are $2.28$ for small-cell ($95\%$ interval $1.35$ to $3.87$), $3.17$ for adenocarcinoma ($1.78$ to $5.65$) and $1.48$ for large-cell ($0.85$ to $2.58$) tumours. Removing cell type lowers the log partial likelihood from $-474.9$ to $-484.0$, a likelihood
+ratio statistic of $18.1$ on $3$ degrees of freedom, $p = 0.0004$: cell type matters, although the large-cell group alone does not differ significantly from squamous. Each Karnofsky point lowers the hazard by a factor $0.969$, so $10$ points by $0.969^{10} = 0.73$. The treatment hazard ratio, $1.30$ ($0.88$ to $1.93$), shows no benefit of the test regimen
+(Software~\ref{sw:veteran}).
+\end{exa}
+
+\subsection{Tied event times}
+\label{ssec:ties}
+
+The partial likelihood assumed that no two events occur at the same time. Recorded times are rounded, to days or months, so ties are common: the \texttt{veteran} data have $31$ death times shared with another death. Three methods handle them.
+\begin{itemize}
+\item \textbf{Breslow}: use the full risk set in the denominator for each of the $d_j$ tied events. Simple, but biased towards zero when ties are many.
+\item \textbf{Efron}: as the tied subjects' events are thought of as happening one after another in unknown order, remove on average a fraction of them from the risk set for each successive event. Much more accurate, and R's default.
+\item \textbf{Exact}: average over all the possible orderings of the tied events. Exact for the continuous-time model but expensive with many ties.
+\end{itemize}
+In the \texttt{veteran} model the treatment coefficient is $0.257$ by Breslow, $0.262$ by Efron and $0.263$ by the exact method (Software~\ref{sw:ties}): with moderate ties the methods hardly differ, and Breslow's is the one furthest from the exact answer. Software packages differ in their defaults (SAS and Stata use Breslow), which explains small discrepancies between them.
+
+\subsection{Interactions and stratification}
+\label{ssec:interactions}
+
+An \textbf{interaction} between treatment and another covariate lets the treatment effect differ between groups (\textbf{effect modification}). In \texttt{veteran}, adding the treatment-by-cell-type interaction raises the log partial likelihood from $-474.9$ to $-471.6$, a statistic of $6.6$ on $3$ degrees of freedom, $p = 0.08$: weak evidence at most that the treatment
+works differently for different tumours. Subgroup analyses of this kind should be pre-specified and interpreted cautiously, since with many subgroups some will appear to differ by chance.
+
+A \textbf{stratified Cox model} gives each stratum its own baseline hazard $h_{0s}(t)$, with common coefficients for the other covariates:
+\[
+h(t \mid x, s) = h_{0s}(t)e^{\beta^{\mathsf T}x} .
+\]
+It is used for a factor whose effect is not proportional, or which is a nuisance whose effect need not be estimated, such as the centre in a multicentre trial. Stratifying \texttt{veteran} by cell type gives a treatment hazard ratio of $1.26$ and $0.965$ per Karnofsky point, close to the unstratified values; the price is that no hazard ratio is estimated for the stratification
+factor itself.
+
+\subsection{Model building}
+\label{ssec:building}
+
+Some guidelines for building a Cox model:
+\begin{itemize}
+\item decide in advance which covariates are of primary interest (in a trial, treatment) and which are adjustments; do not select the variable of interest by significance tests;
+\item for other covariates, use subject-matter knowledge first, then likelihood ratio tests or AIC; automatic stepwise selection gives over-optimistic $p$-values and unstable models;
+\item keep about $10$ to $20$ \emph{events} per estimated coefficient; the \texttt{veteran} model's $6$ coefficients with $128$ deaths is comfortable;
+\item check the functional form of continuous covariates (is the effect of age linear in the log hazard?) with splines or categories, and check proportional hazards (the next section).
+\end{itemize}
+A model's ability to separate high-risk from low-risk subjects is measured by the \textbf{concordance index} $C$: among pairs of subjects whose order of events can be determined, the proportion in which the subject with the higher predicted risk has the event first. $C = 0.5$ is no better than chance and $C = 1$ is perfect ordering; the \texttt{veteran} model has $C = 0.737$,
+good discrimination for a clinical model.
+
+\subsection{Adjusted survival curves}
+\label{ssec:adjusted}
+
+A fitted Cox model with the Breslow baseline gives a predicted survival curve for any covariate pattern, $\hat S(t \mid x) = \hat S_0(t)^{\exp(\hat\beta^{\mathsf T}x)}$. Plotting curves for chosen patterns shows the size of effects in terms patients and clinicians understand (Figure~\ref{fig:adjusted}). For a patient with a squamous tumour on the standard regimen, the
+predicted median survival is $92$ days with a Karnofsky score of $40$, $144$ days with $60$, and $283$ days with $80$; the predicted six-month survival is $19\%$, $41\%$ and $62\%$.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-0.9,-0.75) rectangle (7.9,3.7);
+\draw[->] (0,0) -- (7.5,0) node[below,font=\scriptsize] {days};
+\draw[->] (0,0) -- (0,3.45) node[left,font=\scriptsize] {$\hat S(t \mid x)$};
+\foreach \x in {100,200,300,400,500,600} \draw ({\x/600*7},0.06) -- ({\x/600*7},-0.06) node[below,font=\tiny] {$\x$};
+\foreach \y in {0.25,0.5,0.75,1} \draw (0.06,{3.2*\y}) -- (-0.06,{3.2*\y}) node[left,font=\tiny] {$\y$};
+\draw[black!35,dashed] (0,1.6) -- (7.0,1.6);
+\draw[red!70!black,thick] (0.000,3.200) -- (0.012,3.200) -- (0.012,3.171) -- (0.023,3.171) -- (0.023,3.157) -- (0.035,3.157) -- (0.035,3.142) -- (0.047,3.142) -- (0.047,3.127) -- (0.082,3.127) -- (0.082,3.081) -- (0.093,3.081) -- (0.093,3.018) -- (0.117,3.018) -- (0.117,2.985) -- (0.128,2.985) -- (0.128,2.969) -- (0.140,2.969) -- (0.140,2.936) -- (0.152,2.936) -- (0.152,2.903) -- (0.175,2.903) -- (0.175,2.869) -- (0.187,2.869) -- (0.187,2.853) -- (0.210,2.853) -- (0.210,2.800) -- (0.222,2.800) -- (0.222,2.764) -- (0.233,2.764) -- (0.233,2.726) -- (0.245,2.726) -- (0.245,2.687) -- (0.257,2.687) -- (0.257,2.667) -- (0.280,2.667) -- (0.280,2.627) -- (0.292,2.627) -- (0.292,2.564) -- (0.315,2.564) -- (0.315,2.542) -- (0.338,2.542) -- (0.338,2.521) -- (0.350,2.521) -- (0.350,2.477) -- (0.362,2.477) -- (0.362,2.433) -- (0.385,2.433) -- (0.385,2.411) -- (0.408,2.411) -- (0.408,2.389) -- (0.420,2.389) -- (0.420,2.367) -- (0.490,2.367) -- (0.490,2.344) -- (0.502,2.344) -- (0.502,2.321) -- (0.513,2.321) -- (0.513,2.299) -- (0.525,2.299) -- (0.525,2.276) -- (0.560,2.276) -- (0.560,2.253) -- (0.572,2.253) -- (0.572,2.228) -- (0.595,2.228) -- (0.595,2.148) -- (0.607,2.148) -- (0.607,2.064) -- (0.618,2.064) -- (0.618,2.036) -- (0.630,2.036) -- (0.630,1.980) -- (0.653,1.980) -- (0.653,1.952) -- (0.688,1.952) -- (0.688,1.924) -- (0.712,1.924) -- (0.712,1.895) -- (0.735,1.895) -- (0.735,1.867) -- (0.840,1.867) -- (0.840,1.838) -- (0.852,1.838) -- (0.852,1.809) -- (0.933,1.809) -- (0.933,1.749) -- (0.957,1.749) -- (0.957,1.717) -- (0.968,1.717) -- (0.968,1.717) -- (0.980,1.717) -- (0.980,1.685) -- (1.015,1.685) -- (1.015,1.653) -- (1.050,1.653) -- (1.050,1.620) -- (1.073,1.620) -- (1.073,1.587) -- (1.108,1.587) -- (1.108,1.519) -- (1.132,1.519) -- (1.132,1.519) -- (1.155,1.519) -- (1.155,1.450) -- (1.167,1.450) -- (1.167,1.415) -- (1.202,1.415) -- (1.202,1.380) -- (1.225,1.380) -- (1.225,1.345) -- (1.283,1.345) -- (1.283,1.310) -- (1.295,1.310) -- (1.295,1.242) -- (1.307,1.242) -- (1.307,1.208) -- (1.365,1.208) -- (1.365,1.142) -- (1.377,1.142) -- (1.377,1.109) -- (1.423,1.109) -- (1.423,1.077) -- (1.435,1.077) -- (1.435,1.077) -- (1.470,1.077) -- (1.470,1.043) -- (1.540,1.043) -- (1.540,1.009) -- (1.552,1.009) -- (1.552,0.976) -- (1.622,0.976) -- (1.622,0.943) -- (1.633,0.943) -- (1.633,0.910) -- (1.668,0.910) -- (1.668,0.877) -- (1.680,0.877) -- (1.680,0.844) -- (1.762,0.844) -- (1.762,0.811) -- (1.785,0.811) -- (1.785,0.777) -- (1.820,0.777) -- (1.820,0.743) -- (1.890,0.743) -- (1.890,0.676) -- (1.913,0.676) -- (1.913,0.643) -- (2.065,0.643) -- (2.065,0.611) -- (2.123,0.611) -- (2.123,0.611) -- (2.170,0.611) -- (2.170,0.578) -- (2.333,0.578) -- (2.333,0.545) -- (2.345,0.545) -- (2.345,0.514) -- (2.520,0.514) -- (2.520,0.483) -- (2.660,0.483) -- (2.660,0.453) -- (2.695,0.453) -- (2.695,0.423) -- (2.823,0.423) -- (2.823,0.392) -- (2.917,0.392) -- (2.917,0.361) -- (3.033,0.361) -- (3.033,0.331) -- (3.243,0.331) -- (3.243,0.303) -- (3.302,0.303) -- (3.302,0.275) -- (3.348,0.275) -- (3.348,0.249) -- (3.663,0.249) -- (3.663,0.222) -- (3.967,0.222) -- (3.967,0.196) -- (4.165,0.196) -- (4.165,0.172) -- (4.410,0.172) -- (4.410,0.149) -- (4.480,0.149) -- (4.480,0.128) -- (4.538,0.128) -- (4.538,0.106) -- (4.573,0.106) -- (4.573,0.087) -- (4.795,0.087) -- (4.795,0.060) -- (5.448,0.060) -- (5.448,0.039) -- (6.452,0.039) -- (6.452,0.024) -- (6.848,0.024) -- (6.848,0.012);
+\draw[orange!80!black,thick] (0.000,3.200) -- (0.012,3.200) -- (0.012,3.184) -- (0.023,3.184) -- (0.023,3.177) -- (0.035,3.177) -- (0.035,3.169) -- (0.047,3.169) -- (0.047,3.161) -- (0.082,3.161) -- (0.082,3.136) -- (0.093,3.136) -- (0.093,3.101) -- (0.117,3.101) -- (0.117,3.083) -- (0.128,3.083) -- (0.128,3.074) -- (0.140,3.074) -- (0.140,3.056) -- (0.152,3.056) -- (0.152,3.038) -- (0.175,3.038) -- (0.175,3.019) -- (0.187,3.019) -- (0.187,3.009) -- (0.210,3.009) -- (0.210,2.979) -- (0.222,2.979) -- (0.222,2.959) -- (0.233,2.959) -- (0.233,2.937) -- (0.245,2.937) -- (0.245,2.915) -- (0.257,2.915) -- (0.257,2.903) -- (0.280,2.903) -- (0.280,2.879) -- (0.292,2.879) -- (0.292,2.842) -- (0.315,2.842) -- (0.315,2.829) -- (0.338,2.829) -- (0.338,2.816) -- (0.350,2.816) -- (0.350,2.790) -- (0.362,2.790) -- (0.362,2.764) -- (0.385,2.764) -- (0.385,2.750) -- (0.408,2.750) -- (0.408,2.737) -- (0.420,2.737) -- (0.420,2.723) -- (0.490,2.723) -- (0.490,2.709) -- (0.502,2.709) -- (0.502,2.695) -- (0.513,2.695) -- (0.513,2.681) -- (0.525,2.681) -- (0.525,2.667) -- (0.560,2.667) -- (0.560,2.652) -- (0.572,2.652) -- (0.572,2.636) -- (0.595,2.636) -- (0.595,2.585) -- (0.607,2.585) -- (0.607,2.531) -- (0.618,2.531) -- (0.618,2.512) -- (0.630,2.512) -- (0.630,2.475) -- (0.653,2.475) -- (0.653,2.456) -- (0.688,2.456) -- (0.688,2.438) -- (0.712,2.438) -- (0.712,2.418) -- (0.735,2.418) -- (0.735,2.398) -- (0.840,2.398) -- (0.840,2.378) -- (0.852,2.378) -- (0.852,2.358) -- (0.933,2.358) -- (0.933,2.316) -- (0.957,2.316) -- (0.957,2.294) -- (0.968,2.294) -- (0.968,2.294) -- (0.980,2.294) -- (0.980,2.271) -- (1.015,2.271) -- (1.015,2.247) -- (1.050,2.247) -- (1.050,2.223) -- (1.073,2.223) -- (1.073,2.199) -- (1.108,2.199) -- (1.108,2.148) -- (1.132,2.148) -- (1.132,2.148) -- (1.155,2.148) -- (1.155,2.095) -- (1.167,2.095) -- (1.167,2.068) -- (1.202,2.068) -- (1.202,2.041) -- (1.225,2.041) -- (1.225,2.012) -- (1.283,2.012) -- (1.283,1.984) -- (1.295,1.984) -- (1.295,1.929) -- (1.307,1.929) -- (1.307,1.900) -- (1.365,1.900) -- (1.365,1.844) -- (1.377,1.844) -- (1.377,1.816) -- (1.423,1.816) -- (1.423,1.787) -- (1.435,1.787) -- (1.435,1.787) -- (1.470,1.787) -- (1.470,1.757) -- (1.540,1.757) -- (1.540,1.726) -- (1.552,1.726) -- (1.552,1.695) -- (1.622,1.695) -- (1.622,1.664) -- (1.633,1.664) -- (1.633,1.633) -- (1.668,1.633) -- (1.668,1.601) -- (1.680,1.601) -- (1.680,1.568) -- (1.762,1.568) -- (1.762,1.535) -- (1.785,1.535) -- (1.785,1.501) -- (1.820,1.501) -- (1.820,1.465) -- (1.890,1.465) -- (1.890,1.393) -- (1.913,1.393) -- (1.913,1.356) -- (2.065,1.356) -- (2.065,1.319) -- (2.123,1.319) -- (2.123,1.319) -- (2.170,1.319) -- (2.170,1.281) -- (2.333,1.281) -- (2.333,1.242) -- (2.345,1.242) -- (2.345,1.203) -- (2.520,1.203) -- (2.520,1.164) -- (2.660,1.164) -- (2.660,1.124) -- (2.695,1.124) -- (2.695,1.084) -- (2.823,1.084) -- (2.823,1.041) -- (2.917,1.041) -- (2.917,0.996) -- (3.033,0.996) -- (3.033,0.951) -- (3.243,0.951) -- (3.243,0.906) -- (3.302,0.906) -- (3.302,0.860) -- (3.348,0.860) -- (3.348,0.816) -- (3.663,0.816) -- (3.663,0.768) -- (3.967,0.768) -- (3.967,0.719) -- (4.165,0.719) -- (4.165,0.670) -- (4.410,0.670) -- (4.410,0.621) -- (4.480,0.621) -- (4.480,0.572) -- (4.538,0.572) -- (4.538,0.517) -- (4.573,0.517) -- (4.573,0.464) -- (4.795,0.464) -- (4.795,0.381) -- (5.448,0.381) -- (5.448,0.303) -- (6.452,0.303) -- (6.452,0.234) -- (6.848,0.234) -- (6.848,0.163);
+\draw[green!45!black,thick] (0.000,3.200) -- (0.012,3.200) -- (0.012,3.192) -- (0.023,3.192) -- (0.023,3.187) -- (0.035,3.187) -- (0.035,3.183) -- (0.047,3.183) -- (0.047,3.179) -- (0.082,3.179) -- (0.082,3.166) -- (0.093,3.166) -- (0.093,3.147) -- (0.117,3.147) -- (0.117,3.137) -- (0.128,3.137) -- (0.128,3.132) -- (0.140,3.132) -- (0.140,3.122) -- (0.152,3.122) -- (0.152,3.112) -- (0.175,3.112) -- (0.175,3.102) -- (0.187,3.102) -- (0.187,3.096) -- (0.210,3.096) -- (0.210,3.080) -- (0.222,3.080) -- (0.222,3.068) -- (0.233,3.068) -- (0.233,3.057) -- (0.245,3.057) -- (0.245,3.044) -- (0.257,3.044) -- (0.257,3.037) -- (0.280,3.037) -- (0.280,3.024) -- (0.292,3.024) -- (0.292,3.003) -- (0.315,3.003) -- (0.315,2.996) -- (0.338,2.996) -- (0.338,2.989) -- (0.350,2.989) -- (0.350,2.974) -- (0.362,2.974) -- (0.362,2.959) -- (0.385,2.959) -- (0.385,2.951) -- (0.408,2.951) -- (0.408,2.943) -- (0.420,2.943) -- (0.420,2.935) -- (0.490,2.935) -- (0.490,2.927) -- (0.502,2.927) -- (0.502,2.919) -- (0.513,2.919) -- (0.513,2.911) -- (0.525,2.911) -- (0.525,2.903) -- (0.560,2.903) -- (0.560,2.894) -- (0.572,2.894) -- (0.572,2.885) -- (0.595,2.885) -- (0.595,2.855) -- (0.607,2.855) -- (0.607,2.823) -- (0.618,2.823) -- (0.618,2.811) -- (0.630,2.811) -- (0.630,2.789) -- (0.653,2.789) -- (0.653,2.778) -- (0.688,2.778) -- (0.688,2.766) -- (0.712,2.766) -- (0.712,2.754) -- (0.735,2.754) -- (0.735,2.742) -- (0.840,2.742) -- (0.840,2.730) -- (0.852,2.730) -- (0.852,2.718) -- (0.933,2.718) -- (0.933,2.692) -- (0.957,2.692) -- (0.957,2.678) -- (0.968,2.678) -- (0.968,2.678) -- (0.980,2.678) -- (0.980,2.663) -- (1.015,2.663) -- (1.015,2.649) -- (1.050,2.649) -- (1.050,2.634) -- (1.073,2.634) -- (1.073,2.618) -- (1.108,2.618) -- (1.108,2.585) -- (1.132,2.585) -- (1.132,2.585) -- (1.155,2.585) -- (1.155,2.551) -- (1.167,2.551) -- (1.167,2.533) -- (1.202,2.533) -- (1.202,2.515) -- (1.225,2.515) -- (1.225,2.497) -- (1.283,2.497) -- (1.283,2.478) -- (1.295,2.478) -- (1.295,2.441) -- (1.307,2.441) -- (1.307,2.421) -- (1.365,2.421) -- (1.365,2.383) -- (1.377,2.383) -- (1.377,2.363) -- (1.423,2.363) -- (1.423,2.343) -- (1.435,2.343) -- (1.435,2.343) -- (1.470,2.343) -- (1.470,2.322) -- (1.540,2.322) -- (1.540,2.300) -- (1.552,2.300) -- (1.552,2.278) -- (1.622,2.278) -- (1.622,2.255) -- (1.633,2.255) -- (1.633,2.233) -- (1.668,2.233) -- (1.668,2.209) -- (1.680,2.209) -- (1.680,2.185) -- (1.762,2.185) -- (1.762,2.160) -- (1.785,2.160) -- (1.785,2.134) -- (1.820,2.134) -- (1.820,2.106) -- (1.890,2.106) -- (1.890,2.050) -- (1.913,2.050) -- (1.913,2.022) -- (2.065,2.022) -- (2.065,1.992) -- (2.123,1.992) -- (2.123,1.992) -- (2.170,1.992) -- (2.170,1.961) -- (2.333,1.961) -- (2.333,1.928) -- (2.345,1.928) -- (2.345,1.896) -- (2.520,1.896) -- (2.520,1.863) -- (2.660,1.863) -- (2.660,1.828) -- (2.695,1.828) -- (2.695,1.793) -- (2.823,1.793) -- (2.823,1.755) -- (2.917,1.755) -- (2.917,1.714) -- (3.033,1.714) -- (3.033,1.672) -- (3.243,1.672) -- (3.243,1.629) -- (3.302,1.629) -- (3.302,1.585) -- (3.348,1.585) -- (3.348,1.540) -- (3.663,1.540) -- (3.663,1.491) -- (3.967,1.491) -- (3.967,1.439) -- (4.165,1.439) -- (4.165,1.386) -- (4.410,1.386) -- (4.410,1.331) -- (4.480,1.331) -- (4.480,1.273) -- (4.538,1.273) -- (4.538,1.206) -- (4.573,1.206) -- (4.573,1.139) -- (4.795,1.139) -- (4.795,1.025) -- (5.448,1.025) -- (5.448,0.907) -- (6.452,0.907) -- (6.452,0.789) -- (6.848,0.789) -- (6.848,0.650);
+\draw[green!45!black,thick] (4.3,3.2) -- (4.8,3.2) node[right,font=\tiny,black] {Karnofsky $80$: median $283$ days};
+\draw[orange!80!black,thick] (4.3,2.9) -- (4.8,2.9) node[right,font=\tiny,black] {Karnofsky $60$: median $144$};
+\draw[red!70!black,thick] (4.3,2.6) -- (4.8,2.6) node[right,font=\tiny,black] {Karnofsky $40$: median $92$};
+\end{tikzpicture}
+\caption{Predicted survival curves from the Cox model with treatment, cell type and Karnofsky score, for a patient with a squamous-cell tumour on the standard regimen and three performance scores. The curves are powers of one another, $\hat S_0(t)^{e^{\hat\beta^{\mathsf T}x}}$, as proportional hazards requires; the medians are where they cross the dashed line.}
+\label{fig:adjusted}
+\end{figure}
+
+\subsection{Model fitting in software}
+\label{ssec:software8}
+
+\begin{software}[Factors and their overall test]
+\label{sw:veteran}
+Example~\ref{ex:veteran}: the numbers of each cell type, the hazard ratios with their intervals, and the likelihood ratio test for cell type by comparing the models with and without it:
+{\small\begin{verbatim}
+> library(survival); options(show.signif.stars = FALSE)
+> vet <- veteran; vet$trt <- factor(vet$trt, labels = c("standard", "test"))
+> table(vet$celltype)                    # reference level: squamous
+
+ squamous smallcell     adeno     large 
+       35        48        27        27 
+> m1 <- coxph(Surv(time, status) ~ trt + celltype + karno, data = vet)
+> round(cbind(HR = exp(coef(m1)), exp(confint(m1))), 3)
+                     HR 2.5 % 97.5 %
+trttest           1.299 0.876  1.926
+celltypesmallcell 2.282 1.347  3.865
+celltypeadeno     3.171 1.778  5.653
+celltypelarge     1.484 0.853  2.580
+karno             0.969 0.959  0.979
+> m0 <- coxph(Surv(time, status) ~ trt + karno, data = vet)
+> anova(m0, m1)  # LR test of the three cell-type terms
+Analysis of Deviance Table
+ Cox model: response is  Surv(time, status)
+ Model 1: ~ trt + karno
+ Model 2: ~ trt + celltype + karno
+   loglik  Chisq Df Pr(>|Chi|)
+1 -483.97                     
+2 -474.91 18.102  3   0.000419
+\end{verbatim}}
+\textbf{Reading the output.} Adenocarcinoma and small-cell tumours carry about three and two times the hazard of squamous tumours; the overall test of cell type is $\chi^2_3 = 18.1$, $p = 0.0004$. The test regimen's hazard ratio, $1.30$, is not significant.
+
+\textbf{Python:} \texttt{CoxPHFitter} with \texttt{formula='trt + C(celltype) + karno'}.
+\end{software}
+
+\begin{software}[Ties and concordance]
+\label{sw:ties}
+The coefficients of treatment and Karnofsky score under the Breslow, Efron and exact methods for ties; the number of tied death times; and the concordance of the model:
+{\small\begin{verbatim}
+> f <- Surv(time, status) ~ trt + celltype + karno
+> ties <- sapply(c("breslow", "efron", "exact"),
++                function(m) coef(coxph(f, data = vet, ties = m))[c(1, 5)])
+> round(ties, 5)
+         breslow    efron    exact
+trttest  0.25731  0.26174  0.26258
+karno   -0.03111 -0.03127 -0.03156
+> sum(duplicated(vet$time[vet$status == 1]))   # tied death times
+[1] 31
+> round(c(concordance = m1$concordance[["concordance"]]), 4)
+concordance 
+     0.7371 
+\end{verbatim}}
+\textbf{Reading the output.} The three methods differ only in the third decimal place. With $31$ tied death times out of $128$, Efron's method is close to the exact one, Breslow's slightly further. The concordance is $0.737$.
+
+\textbf{Python:} \texttt{lifelines} uses Efron's method; \texttt{cph.concordance\_index\_} gives $C$.
+\end{software}
+
+\begin{software}[Interactions, strata and predictions]
+\label{sw:predict}
+The likelihood ratio test of a treatment-by-cell-type interaction; the stratified model; and predicted survival at $30$, $90$ and $180$ days (rows) and medians for Karnofsky scores $40$, $60$, $80$ (columns), squamous tumour, standard regimen:
+{\small\begin{verbatim}
+> m2 <- coxph(Surv(time, status) ~ trt * celltype + karno, data = vet)
+> anova(m1, m2)                          # does the treatment effect vary?
+Analysis of Deviance Table
+ Cox model: response is  Surv(time, status)
+ Model 1: ~ trt + celltype + karno
+ Model 2: ~ trt * celltype + karno
+   loglik  Chisq Df Pr(>|Chi|)
+1 -474.91                     
+2 -471.59 6.6458  3    0.08409
+> ms <- coxph(Surv(time, status) ~ trt + karno + strata(celltype), data = vet)
+> round(exp(coef(ms)), 4)                # stratified by cell type
+trttest   karno 
+ 1.2622  0.9648 
+> nd <- data.frame(trt = "standard", celltype = "squamous",
++                  karno = c(40, 60, 80))
+> sf <- survfit(m1, newdata = nd)
+> round(summary(sf, times = c(30, 90, 180))$surv, 3)  # rows: times
+         1     2     3
+[1,] 0.774 0.872 0.929
+[2,] 0.506 0.695 0.823
+[3,] 0.191 0.412 0.623
+> summary(sf)$table[, "median"]
+  1   2   3 
+ 92 144 283 
+\end{verbatim}}
+\textbf{Reading the output.} The interaction test gives $\chi^2_3 = 6.6$, $p = 0.08$. Stratified by cell type, the treatment hazard ratio is $1.26$. The predictions show the strength of the performance score: six-month survival rises from $19\%$ at score $40$ to $62\%$ at $80$, and the median from $92$ to $283$ days.
+
+\textbf{Python:} \texttt{cph.predict\_survival\_function(new\_patients)}.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+A factor with four levels is replaced in a Cox model by three indicators. The models with and without it have log partial likelihoods $-612.4$ and $-618.9$. Test whether the factor is needed.
+\end{problem}
+
+\begin{solution}
+$2(-612.4 + 618.9) = 13.0$ on $3$ degrees of freedom; the $5\%$ critical value is $7.81$ and $p = 0.0046$. The factor is needed, even if some of the individual indicators are not significant.
+\end{solution}
+
+\begin{problem}
+In Example~\ref{ex:veteran}, find the hazard ratio of an adenocarcinoma patient with Karnofsky score $50$ against a squamous-cell patient with score $80$, on the same regimen.
+\end{problem}
+
+\begin{solution}
+$3.17 \times 0.969^{-30} = 3.17 \times e^{30 \times 0.0315} = 3.17 \times 2.57 = 8.2$, using $\log 0.969 = -0.0315$. The combination of tumour type and poorer performance gives about eight times the hazard.
+\end{solution}
+
+\begin{problem}
+Why can tied event times not be handled by simply listing the tied events in any order in the partial likelihood?
+\end{problem}
+
+\begin{solution}
+The order affects the risk sets: whichever tied subject is placed first remains in the risk set for the others. Different arbitrary orders give different partial likelihoods. The Breslow method avoids choosing by keeping all tied subjects in every denominator; Efron's and the exact method average over the possible orders.
+\end{solution}
+
+\begin{problem}
+A study has $60$ deaths. How many covariates (counting each indicator as one) can sensibly be included in a Cox model?
+\end{problem}
+
+\begin{solution}
+At $10$ to $20$ events per coefficient, $3$ to $6$ coefficients. More risks over-fitting: coefficients that are too large, unstable selection, and optimistic predictions.
+\end{solution}
+
+\begin{problem}
+Explain the difference between adjusting for a covariate and stratifying by it in a Cox model, and when to prefer stratification.
+\end{problem}
+
+\begin{solution}
+Adjusting includes the covariate in $e^{\beta^{\mathsf T}x}$, assuming that its effect multiplies the hazard by a constant factor and estimating that factor. Stratifying gives each level its own baseline hazard, making no assumption about the shape of its effect over time, but estimating no hazard ratio for it. Prefer stratification when the covariate violates proportional
+hazards or is a nuisance factor with many levels, such as hospital.
+\end{solution}
+
+\begin{problem}
+Two patients have predicted linear predictors $\hat\beta^{\mathsf T}x$ of $0.2$ and $1.1$. If the first has a predicted one-year survival of $0.6$, what is the second's, and which is more likely to die first?
+\end{problem}
+
+\begin{solution}
+$\hat S_2 = \hat S_1^{\exp(1.1 - 0.2)} = 0.6^{e^{0.9}} = 0.6^{2.46} = 0.285$. The second patient, with the higher linear predictor, has the higher hazard at all times and the lower survival, and a concordant model predicts that this patient dies first.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -1989,19 +2215,23 @@ The likelihood ratio statistic is $2(-737.2 + 739.9) = 5.4$ on $1$ degree of fre
 \item Cox, D. R. (1975), Partial likelihood, \emph{Biometrika}, 62, 269--276.
 \item Cutler, S. J., and Ederer, F. (1958), Maximum utilization of the life table method in analyzing survival, \emph{Journal of Chronic Diseases}, 8, 699--712.
 \item Edmonson, J. H., Fleming, T. R., Decker, D. G., et al. (1979), Different chemotherapeutic sensitivities and host factors affecting prognosis in advanced ovarian carcinoma versus minimal residual disease, \emph{Cancer Treatment Reports}, 63, 241--247.
+\item Efron, B. (1977), The efficiency of Cox's likelihood function for censored data, \emph{Journal of the American Statistical Association}, 72, 557--565.
 \item Epstein, B., and Sobel, M. (1953), Life testing, \emph{Journal of the American Statistical Association}, 48, 486--502.
 \item Fleming, T. R., and Harrington, D. P. (1984), Nonparametric estimation of the survival distribution in censored data, \emph{Communications in Statistics: Theory and Methods}, 13, 2469--2486.
 \item Gehan, E. A. (1965), A generalized Wilcoxon test for comparing arbitrarily singly-censored samples, \emph{Biometrika}, 52, 203--223.
 \item Gompertz, B. (1825), On the nature of the function expressive of the law of human mortality, \emph{Philosophical Transactions of the Royal Society of London}, 115, 513--583.
 \item Greenwood, M. (1926), The natural duration of cancer, \emph{Reports on Public Health and Medical Subjects}, 33, London, His Majesty's Stationery Office.
 \item Halley, E. (1693), An estimate of the degrees of the mortality of mankind, \emph{Philosophical Transactions of the Royal Society of London}, 17, 596--610.
+\item Harrell, F. E., Califf, R. M., Pryor, D. B., Lee, K. L., and Rosati, R. A. (1982), Evaluating the yield of medical tests, \emph{Journal of the American Medical Association}, 247, 2543--2546.
 \item Harrington, D. P., and Fleming, T. R. (1982), A class of rank test procedures for censored survival data, \emph{Biometrika}, 69, 553--566.
 \item Kaplan, E. L., and Meier, P. (1958), Nonparametric estimation from incomplete observations, \emph{Journal of the American Statistical Association}, 53, 457--481.
+\item Karnofsky, D. A., and Burchenal, J. H. (1949), The clinical evaluation of chemotherapeutic agents in cancer, in C. M. MacLeod (ed.), \emph{Evaluation of Chemotherapeutic Agents}, New York, Columbia University Press, 191--205.
 \item Leung, K.-M., Elashoff, R. M., and Afifi, A. A. (1997), Censoring issues in survival analysis, \emph{Annual Review of Public Health}, 18, 83--104.
 \item Loprinzi, C. L., et al. (1994), Prospective evaluation of prognostic variables from patient-completed questionnaires, \emph{Journal of Clinical Oncology}, 12, 601--607.
 \item Mantel, N. (1966), Evaluation of survival data and two new rank order statistics arising in its consideration, \emph{Cancer Chemotherapy Reports}, 50, 163--170.
 \item Mantel, N., and Haenszel, W. (1959), Statistical aspects of the analysis of data from retrospective studies of disease, \emph{Journal of the National Cancer Institute}, 22, 719--748.
 \item Nelson, W. (1969), Hazard plotting for incomplete failure data, \emph{Journal of Quality Technology}, 1, 27--52.
+\item Peduzzi, P., Concato, J., Feinstein, A. R., and Holford, T. R. (1995), Importance of events per independent variable in proportional hazards regression analysis, \emph{Journal of Clinical Epidemiology}, 48, 1503--1510.
 \item Peto, R., and Peto, J. (1972), Asymptotically efficient rank invariant test procedures, \emph{Journal of the Royal Statistical Society A}, 135, 185--207.
 \item Pocock, S. J., Clayton, T. C., and Altman, D. G. (2002), Survival plots of time-to-event outcomes in clinical trials: good practice and pitfalls, \emph{The Lancet}, 359, 1686--1689.
 \item Prentice, R. L. (1973), Exponential survivals with censoring and explanatory variables, \emph{Biometrika}, 60, 279--288.
