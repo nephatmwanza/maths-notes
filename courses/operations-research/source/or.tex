@@ -3693,6 +3693,255 @@ Write $Q = \mu + z\sigma$. The expected leftover is $\mathbb E(Q - X)^+ = \sigma
 $(c_u + c_o)\varphi(z)$, so the loss from uncertainty is $(c_u + c_o)\varphi(z)\sigma$, proportional to $\sigma$: halving the forecast error halves the cost of uncertainty, which measures what better forecasting is worth.
 \end{solution}
 
+%======================================================================
+\section{Queueing Theory}
+\label{sec:queues}
+
+Queues form wherever customers arrive at random and service takes time: at bank counters, hospital clinics, toll gates, telephone exchanges, computer servers. Adding servers costs money; waiting costs customers' time and the provider's goodwill. \textbf{Queueing theory}, begun by Erlang in 1909 for the Copenhagen telephone exchange, predicts
+the lengths of queues and the times spent waiting from the arrival rate, the service rate and the number of servers, and so allows the trade-off to be made. Its most striking lesson is that queues grow without bound as the load approaches capacity: a system that is busy $95\%$ of the time is not $5\%$ from trouble, it is in it.
+
+\subsection{Notation and Little's law}
+\label{ssec:little}
+
+A queue is described in \textbf{Kendall's notation} $A/B/c$: the inter-arrival distribution $A$, the service distribution $B$, and the number of servers $c$, where $M$ (Markov) means exponential, $D$ deterministic and $G$ general. So M/M/1 has Poisson arrivals at rate $\lambda$, exponential services at rate $\mu$ and one server. The
+\textbf{traffic intensity} $\rho = \lambda/(c\mu)$ is the fraction of time each server is busy; the queue is stable only if $\rho < 1$. The quantities of interest are $L$ and $L_q$, the mean numbers in the system and in the queue, and $W$ and $W_q$, the mean times spent in the system and waiting.
+
+\begin{thm}[Little's law, 1961]
+\label{thm:little}
+In a stable queueing system in steady state, $L = \lambda W$; likewise $L_q = \lambda W_q$, and the mean number in service is $\lambda/\mu$.
+\end{thm}
+
+\begin{proof}[Sketch]
+Let $N(t)$ be the number in the system at time $t$. Over a long interval $[0, T]$, the area $\int_0^TN(t)\,dt$ can be computed in two ways: as $T$ times the average number present, $TL$; and as the sum over customers of the times they spent in the system, about $\lambda T$ customers each staying $W$ on average. Dividing by $T$ and letting
+$T \to \infty$ gives $L = \lambda W$. The argument uses no assumption about the distributions or the service discipline.
+\end{proof}
+
+Exponential times are special because they are \textbf{memoryless}: $P(S > s + t \mid S > s) = P(S > t)$, so the time a service still has to run does not depend on how long it has run. With exponential inter-arrival and service times the number in the system is therefore a Markov process, and its steady state can be found exactly.
+
+\subsection{Birth--death queues}
+\label{ssec:birthdeath}
+
+In a \textbf{birth--death process} the state $n = 0, 1, 2, \ldots$ jumps to $n + 1$ at rate $\lambda_n$ and to $n - 1$ at rate $\mu_n$.
+
+\begin{thm}
+\label{thm:birthdeath}
+If $S = \sum_{n \geq 0}\prod_{k = 1}^n\frac{\lambda_{k - 1}}{\mu_k}$ is finite, the process has the stationary distribution
+\[
+p_n = p_0\prod_{k = 1}^n\frac{\lambda_{k - 1}}{\mu_k}, \qquad p_0 = \frac1S .
+\]
+\end{thm}
+
+\begin{proof}
+In steady state the rate at which the process crosses from $n$ to $n + 1$ equals the rate at which it crosses back, since between two upward crossings of the cut between $n$ and $n + 1$ there is exactly one downward crossing. The first rate is $p_n\lambda_n$ and the second $p_{n + 1}\mu_{n + 1}$, so
+$p_{n + 1} = p_n\lambda_n/\mu_{n + 1}$, and induction gives the product; the probabilities sum to $1$ when $p_0 = 1/S$.
+\end{proof}
+
+\textbf{M/M/1.} Here $\lambda_n = \lambda$ and $\mu_n = \mu$, so $p_n = (1 - \rho)\rho^n$, a geometric distribution, for $\rho < 1$. Then
+\[
+L = \frac\rho{1 - \rho}, \qquad W = \frac L\lambda = \frac1{\mu - \lambda}, \qquad W_q = W - \frac1\mu = \frac\rho{\mu - \lambda}, \qquad L_q = \lambda W_q = \frac{\rho^2}{1 - \rho} .
+\]
+The probability that an arrival must wait is $1 - p_0 = \rho$, and the time in the system is exponential with rate $\mu - \lambda$. With $\lambda = 4$ and $\mu = 5$ an hour: $\rho = 0.8$, $L = 4$, $W = 1$ hour, $W_q = 48$ minutes, $L_q = 3.2$ (Software~\ref{sw:mm1}). Since $L = \rho/(1 - \rho)$, raising the load from $0.8$ to
+$0.9$ doubles the mean number present, and from $0.9$ to $0.95$ doubles it again (Figure~\ref{fig:queue}).
+
+\textbf{M/M/$c$.} With $c$ servers, $\mu_n = \min(n, c)\mu$. Writing $a = \lambda/\mu$ (the offered load, in erlangs) and $\rho = a/c$, the probability that an arrival must wait is the \textbf{Erlang C formula}
+\[
+C(c, a) = \frac{\dfrac{a^c}{c!(1 - \rho)}}{\displaystyle\sum_{k = 0}^{c - 1}\frac{a^k}{k!} + \frac{a^c}{c!(1 - \rho)}}, \qquad W_q = \frac{C(c, a)}{c\mu - \lambda} .
+\]
+\textbf{Loss systems.} If arrivals that find all $c$ servers busy are lost (M/M/$c$/$c$, as for telephone lines), the fraction lost is the \textbf{Erlang B formula} $B(c, a) = \dfrac{a^c/c!}{\sum_{k = 0}^ca^k/k!}$, which, remarkably, holds for any service distribution with mean $1/\mu$.
+
+\begin{exa}
+\label{ex:bank}
+A bank branch has $24$ customers an hour, and a teller serves $10$ an hour on average. With $3$ tellers ($\rho = 0.8$) the probability of waiting is $0.647$ and the mean wait $6.5$ minutes; with $4$, $0.287$ and $1.1$ minutes; with $5$, $0.11$ and $0.26$ minutes. If instead each of the $3$ tellers had a separate queue taking a third of
+the customers, each would be an M/M/1 queue with $\lambda = 8$, $\mu = 10$, and the mean wait would be $24$ minutes, almost four times as long: \textbf{pooling} servers into one queue keeps none of them idle while customers wait at another (Software~\ref{sw:mmc}).
+\end{exa}
+
+\subsection{General service times}
+\label{ssec:mg1}
+
+When service times are not exponential the number in the system is no longer Markov, but for one server and Poisson arrivals the mean queue is still known exactly.
+
+\begin{thm}[Pollaczek--Khinchine]
+\label{thm:pk}
+For the M/G/1 queue with service time $S$ of mean $1/\mu$ and variance $\sigma^2$, and $\rho = \lambda/\mu < 1$,
+\[
+L_q = \frac{\lambda^2\sigma^2 + \rho^2}{2(1 - \rho)} = \frac{\rho^2}{1 - \rho}\cdot\frac{1 + c_s^2}2, \qquad c_s^2 = \mu^2\sigma^2 .
+\]
+\end{thm}
+
+\begin{proof}[Sketch]
+An arrival, seeing the time-average state (Poisson arrivals see time averages), waits for the $L_q$ customers ahead of it, each needing $1/\mu$ on average, plus the remaining service of the customer in service, if any. That customer is present with probability $\rho$, and the mean remaining time of the service in progress, by the length-biased
+sampling of renewal theory, is $\mathbb E[S^2]/2\mathbb E[S]$. So $W_q = L_q/\mu + \lambda\mathbb E[S^2]/2$, and with $L_q = \lambda W_q$ this gives $W_q = \lambda\mathbb E[S^2]/2(1 - \rho)$, which is the formula since $\mathbb E[S^2] = \sigma^2 + 1/\mu^2$.
+\end{proof}
+
+The queue depends on the service time only through its mean and its variance: at the same load, deterministic service ($c_s^2 = 0$, M/D/1) halves the queue of M/M/1 ($c_s^2 = 1$), and highly variable service ($c_s^2 = 4$) multiplies it by $2.5$ (Software~\ref{sw:pk}). Reducing variability, by standardising tasks or separating long jobs from short ones, shortens
+queues as surely as adding capacity.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+\fill[blue!4,rounded corners=4pt] (-0.9,-0.75) rectangle (9.2,4.3);
+\draw[->] (0,0) -- (8.4,0) node[below,font=\small] {$\rho$};
+\draw[->] (0,0) -- (0,4.15) node[left,font=\small] {$L_q$};
+\foreach \r in {0.2,0.4,0.6,0.8,0.95} \draw ({8*\r},0.06) -- ({8*\r},-0.06) node[below,font=\scriptsize] {$\r$};
+\foreach \l in {3,6,9,12} \draw (0.06,{0.33*\l}) -- (-0.06,{0.33*\l}) node[left,font=\scriptsize] {$\l$};
+\draw[green!45!black] (0.000,0.000) -- (0.064,0.000) -- (0.128,0.000) -- (0.192,0.000) -- (0.255,0.000) -- (0.319,0.000) -- (0.383,0.000) -- (0.447,0.001) -- (0.511,0.001) -- (0.575,0.001) -- (0.639,0.001) -- (0.703,0.001) -- (0.766,0.002) -- (0.830,0.002) -- (0.894,0.002) -- (0.958,0.003) -- (1.022,0.003) -- (1.086,0.004) -- (1.150,0.004) -- (1.213,0.004) -- (1.277,0.005) -- (1.341,0.006) -- (1.405,0.006) -- (1.469,0.007) -- (1.533,0.007) -- (1.597,0.008) -- (1.661,0.009) -- (1.724,0.010) -- (1.788,0.011) -- (1.852,0.012) -- (1.916,0.012) -- (1.980,0.013) -- (2.044,0.014) -- (2.108,0.016) -- (2.171,0.017) -- (2.235,0.018) -- (2.299,0.019) -- (2.363,0.020) -- (2.427,0.022) -- (2.491,0.023) -- (2.555,0.025) -- (2.618,0.026) -- (2.682,0.028) -- (2.746,0.030) -- (2.810,0.031) -- (2.874,0.033) -- (2.938,0.035) -- (3.002,0.037) -- (3.066,0.039) -- (3.129,0.041) -- (3.193,0.044) -- (3.257,0.046) -- (3.321,0.049) -- (3.385,0.051) -- (3.449,0.054) -- (3.513,0.057) -- (3.576,0.060) -- (3.640,0.063) -- (3.704,0.066) -- (3.768,0.069) -- (3.832,0.073) -- (3.896,0.076) -- (3.960,0.080) -- (4.024,0.084) -- (4.087,0.088) -- (4.151,0.092) -- (4.215,0.097) -- (4.279,0.101) -- (4.343,0.106) -- (4.407,0.111) -- (4.471,0.117) -- (4.534,0.122) -- (4.598,0.128) -- (4.662,0.134) -- (4.726,0.141) -- (4.790,0.147) -- (4.854,0.154) -- (4.918,0.162) -- (4.982,0.170) -- (5.045,0.178) -- (5.109,0.186) -- (5.173,0.195) -- (5.237,0.205) -- (5.301,0.215) -- (5.365,0.225) -- (5.429,0.236) -- (5.492,0.248) -- (5.556,0.261) -- (5.620,0.274) -- (5.684,0.288) -- (5.748,0.303) -- (5.812,0.318) -- (5.876,0.335) -- (5.939,0.353) -- (6.003,0.372) -- (6.067,0.393) -- (6.131,0.415) -- (6.195,0.439) -- (6.259,0.464) -- (6.323,0.492) -- (6.387,0.521) -- (6.450,0.554) -- (6.514,0.589) -- (6.578,0.628) -- (6.642,0.670) -- (6.706,0.717) -- (6.770,0.768) -- (6.834,0.826) -- (6.897,0.890) -- (6.961,0.962) -- (7.025,1.044) -- (7.089,1.138) -- (7.153,1.246) -- (7.217,1.372) -- (7.281,1.520) -- (7.345,1.697) -- (7.408,1.913) -- (7.472,2.182) -- (7.536,2.525) -- (7.600,2.978);
+\draw[blue!60!black,very thick] (0.000,0.000) -- (0.064,0.000) -- (0.128,0.000) -- (0.192,0.000) -- (0.255,0.000) -- (0.319,0.001) -- (0.383,0.001) -- (0.447,0.001) -- (0.511,0.001) -- (0.575,0.002) -- (0.639,0.002) -- (0.703,0.003) -- (0.766,0.003) -- (0.830,0.004) -- (0.894,0.005) -- (0.958,0.005) -- (1.022,0.006) -- (1.086,0.007) -- (1.150,0.008) -- (1.213,0.009) -- (1.277,0.010) -- (1.341,0.011) -- (1.405,0.012) -- (1.469,0.014) -- (1.533,0.015) -- (1.597,0.016) -- (1.661,0.018) -- (1.724,0.020) -- (1.788,0.021) -- (1.852,0.023) -- (1.916,0.025) -- (1.980,0.027) -- (2.044,0.029) -- (2.108,0.031) -- (2.171,0.033) -- (2.235,0.036) -- (2.299,0.038) -- (2.363,0.041) -- (2.427,0.044) -- (2.491,0.046) -- (2.555,0.049) -- (2.618,0.053) -- (2.682,0.056) -- (2.746,0.059) -- (2.810,0.063) -- (2.874,0.066) -- (2.938,0.070) -- (3.002,0.074) -- (3.066,0.079) -- (3.129,0.083) -- (3.193,0.088) -- (3.257,0.092) -- (3.321,0.097) -- (3.385,0.102) -- (3.449,0.108) -- (3.513,0.113) -- (3.576,0.119) -- (3.640,0.125) -- (3.704,0.132) -- (3.768,0.138) -- (3.832,0.145) -- (3.896,0.153) -- (3.960,0.160) -- (4.024,0.168) -- (4.087,0.176) -- (4.151,0.185) -- (4.215,0.194) -- (4.279,0.203) -- (4.343,0.213) -- (4.407,0.223) -- (4.471,0.234) -- (4.534,0.245) -- (4.598,0.256) -- (4.662,0.269) -- (4.726,0.281) -- (4.790,0.295) -- (4.854,0.309) -- (4.918,0.324) -- (4.982,0.339) -- (5.045,0.355) -- (5.109,0.372) -- (5.173,0.390) -- (5.237,0.409) -- (5.301,0.429) -- (5.365,0.450) -- (5.429,0.473) -- (5.492,0.496) -- (5.556,0.521) -- (5.620,0.547) -- (5.684,0.575) -- (5.748,0.605) -- (5.812,0.637) -- (5.876,0.670) -- (5.939,0.706) -- (6.003,0.745) -- (6.067,0.786) -- (6.131,0.830) -- (6.195,0.877) -- (6.259,0.928) -- (6.323,0.983) -- (6.387,1.043) -- (6.450,1.108) -- (6.514,1.178) -- (6.578,1.255) -- (6.642,1.340) -- (6.706,1.433) -- (6.770,1.537) -- (6.834,1.652) -- (6.897,1.780) -- (6.961,1.925) -- (7.025,2.088) -- (7.089,2.276) -- (7.153,2.492) -- (7.217,2.743) -- (7.281,3.040) -- (7.345,3.395) -- (7.408,3.827);
+\draw[red!70!black] (0.000,0.000) -- (0.064,0.000) -- (0.128,0.000) -- (0.192,0.000) -- (0.255,0.001) -- (0.319,0.001) -- (0.383,0.002) -- (0.447,0.003) -- (0.511,0.004) -- (0.575,0.005) -- (0.639,0.006) -- (0.703,0.007) -- (0.766,0.008) -- (0.830,0.010) -- (0.894,0.012) -- (0.958,0.013) -- (1.022,0.015) -- (1.086,0.018) -- (1.150,0.020) -- (1.213,0.022) -- (1.277,0.025) -- (1.341,0.028) -- (1.405,0.031) -- (1.469,0.034) -- (1.533,0.037) -- (1.597,0.041) -- (1.661,0.045) -- (1.724,0.049) -- (1.788,0.053) -- (1.852,0.058) -- (1.916,0.062) -- (1.980,0.067) -- (2.044,0.072) -- (2.108,0.078) -- (2.171,0.083) -- (2.235,0.089) -- (2.299,0.096) -- (2.363,0.102) -- (2.427,0.109) -- (2.491,0.116) -- (2.555,0.124) -- (2.618,0.131) -- (2.682,0.140) -- (2.746,0.148) -- (2.810,0.157) -- (2.874,0.166) -- (2.938,0.176) -- (3.002,0.186) -- (3.066,0.196) -- (3.129,0.207) -- (3.193,0.219) -- (3.257,0.231) -- (3.321,0.243) -- (3.385,0.256) -- (3.449,0.269) -- (3.513,0.284) -- (3.576,0.298) -- (3.640,0.313) -- (3.704,0.329) -- (3.768,0.346) -- (3.832,0.363) -- (3.896,0.381) -- (3.960,0.400) -- (4.024,0.420) -- (4.087,0.440) -- (4.151,0.462) -- (4.215,0.484) -- (4.279,0.507) -- (4.343,0.532) -- (4.407,0.557) -- (4.471,0.584) -- (4.534,0.612) -- (4.598,0.641) -- (4.662,0.672) -- (4.726,0.704) -- (4.790,0.737) -- (4.854,0.772) -- (4.918,0.809) -- (4.982,0.848) -- (5.045,0.888) -- (5.109,0.931) -- (5.173,0.976) -- (5.237,1.024) -- (5.301,1.074) -- (5.365,1.126) -- (5.429,1.182) -- (5.492,1.241) -- (5.556,1.303) -- (5.620,1.369) -- (5.684,1.439) -- (5.748,1.513) -- (5.812,1.592) -- (5.876,1.676) -- (5.939,1.766) -- (6.003,1.861) -- (6.067,1.964) -- (6.131,2.074) -- (6.195,2.193) -- (6.259,2.320) -- (6.323,2.458) -- (6.387,2.607) -- (6.450,2.769) -- (6.514,2.946) -- (6.578,3.138) -- (6.642,3.350) -- (6.706,3.583) -- (6.770,3.842);
+\draw[black!40,dashed] (8,0) -- (8,4.0);
+\draw[red!70!black] (0.5,3.6) -- (1.1,3.6) node[right,font=\scriptsize] {M/G/1, $c_s^2 = 4$};
+\draw[blue!60!black,very thick] (0.5,3.2) -- (1.1,3.2) node[right,font=\scriptsize] {M/M/1, $c_s^2 = 1$};
+\draw[green!45!black] (0.5,2.8) -- (1.1,2.8) node[right,font=\scriptsize] {M/D/1, $c_s^2 = 0$};
+\end{tikzpicture}
+\caption{The mean queue length $L_q$ against the traffic intensity $\rho$ for a single server, from the Pollaczek--Khinchine formula, for deterministic, exponential and highly variable service times. All three grow like $1/(1 - \rho)$ as $\rho \to 1$; variability multiplies the queue at every load.}
+\label{fig:queue}
+\end{figure}
+
+\subsection{Designing a service system}
+\label{ssec:queuedesign}
+
+A typical decision is the number of servers. If a server costs $C_s$ an hour and a customer's time in the system costs $C_w$ an hour, the hourly cost with $c$ servers is $cC_s + C_wL(c)$, where $L(c) = L_q(c) + a$; the best $c$ is found by computing $L(c)$ from the Erlang C formula for a few values of $c$
+(Problem~\ref{prob:staffing}). Service-level targets, such as answering $80\%$ of calls within $20$ seconds, are handled the same way, using the waiting-time distribution $P(W_q > t) = C(c, a)e^{-(c\mu - \lambda)t}$. For large systems the \textbf{square-root staffing rule} $c \approx a + \beta\sqrt a$ achieves a fixed service level, so that the
+spare capacity needed grows only like the square root of the load: large systems are more efficient, the economies of scale of pooling. Networks of queues, in which customers move between service stations, have product-form solutions when arrivals are Poisson and services exponential (Jackson, 1957); otherwise they are studied by simulation, the subject of the last section.
+
+\subsection{Queues in software}
+\label{ssec:software14}
+
+\begin{software}[M/M/1]
+\label{sw:mm1}
+The M/M/1 formulas for $\lambda = 4$, $\mu = 5$, and a simulation of $400\,000$ customers by Lindley's recursion $W_{n + 1} = \max(0, W_n + S_n - A_{n + 1})$, which gives the wait of each customer from that of the one before:
+{\small\begin{verbatim}
+>>> import numpy as np
+>>> from math import factorial
+>>> lam, mu = 4.0, 5.0                     # arrivals and services an hour
+>>> rho = lam / mu
+>>> L, W = rho / (1 - rho), 1 / (mu - lam)
+>>> Wq = rho / (mu - lam); Lq = lam * Wq
+>>> rho, L, W, Wq, Lq                      # Little: L = lam W, Lq = lam Wq
+(0.8, 4.000000000000001, 1.0, 0.8, 3.2)
+>>> rng = np.random.default_rng(0)
+>>> def fifo_waits(inter, serv):           # Lindley's recursion for the waits
+...     w = np.zeros(len(serv))
+...     for n in range(1, len(serv)):
+...         w[n] = max(0.0, w[n - 1] + serv[n - 1] - inter[n])
+...     return w
+...
+>>> n = 400000
+>>> inter = rng.exponential(1 / lam, n); serv = rng.exponential(1 / mu, n)
+>>> wq = fifo_waits(inter, serv)[n // 10:]   # discard the warm-up
+>>> round(wq.mean(), 4), round((wq > 0).mean(), 4)   # Wq, P(wait) = rho
+(0.7943, 0.7987)
+\end{verbatim}}
+\textbf{Reading the output.} $\rho = 0.8$, $L = 4$, $W = 1$, $W_q = 0.8$ hours, $L_q = 3.2$. The simulated mean wait, after discarding the first tenth as warm-up, is $0.794$ hours, and the fraction of customers who wait is $0.799$, close to $\rho$. The simulation needs many customers because successive waits are strongly correlated
+when $\rho$ is high.
+
+\textbf{MATLAB/Octave:} the same recursion in a loop.
+\end{software}
+
+\begin{software}[Erlang C and pooling]
+\label{sw:mmc}
+The Erlang C formula, the probability of waiting and mean wait for $3$, $4$ and $5$ tellers in Example~\ref{ex:bank}, and the wait with three separate M/M/1 queues against one pooled queue:
+{\small\begin{verbatim}
+>>> def erlang_c(c, lam, mu):              # P(an arrival waits) in M/M/c
+...     a = lam / mu; r = a / c
+...     top = a**c / factorial(c) / (1 - r)
+...     return top / (sum(a**k / factorial(k) for k in range(c)) + top)
+...
+>>> lam, mu = 24.0, 10.0                   # a bank: 24 customers an hour
+>>> for c in (3, 4, 5):
+...     pw = erlang_c(c, lam, mu); wq = pw / (c * mu - lam)
+...     print(c, round(pw, 4), round(60 * wq, 2), 'min')
+...
+3 0.6472 6.47 min
+4 0.287 1.08 min
+5 0.1135 0.26 min
+>>> pw1 = erlang_c(1, 8.0, 10.0)           # three separate tellers, 8 each
+>>> pooled = erlang_c(3, 24, 10)           # one queue for all three
+>>> round(60 * pw1 / (10 - 8), 2), round(60 * pooled / (30 - 24), 2)
+(24.0, 6.47)
+\end{verbatim}}
+\textbf{Reading the output.} With $3$, $4$, $5$ tellers the probability of waiting is $0.647$, $0.287$, $0.114$ and the mean wait $6.47$, $1.08$, $0.26$ minutes; the fourth teller cuts the wait by a factor of six. Three separate queues give a mean wait of $24$ minutes against $6.47$ for one shared queue with the same tellers.
+
+\textbf{MATLAB/Octave:} the same function, with \texttt{factorial}.
+\end{software}
+
+\begin{software}[The Pollaczek--Khinchine formula]
+\label{sw:pk}
+$L_q$ from the formula and from simulation for one server at $\rho = 0.8$ with deterministic, exponential and gamma service times of squared coefficient of variation $0$, $1$ and $4$:
+{\small\begin{verbatim}
+>>> lam, mu = 4.0, 5.0; rho = lam / mu
+>>> def pk_lq(cv2):                  # Pollaczek-Khinchine, Var S = cv2 / mu^2
+...     return (lam**2 * cv2 / mu**2 + rho**2) / (2 * (1 - rho))
+...
+>>> laws = (('M/D/1', 0.0, lambda k: np.full(k, 1 / mu)),
+...         ('M/M/1', 1.0, lambda k: rng.exponential(1 / mu, k)),
+...         ('M/G/1, cv2 = 4', 4.0, lambda k: rng.gamma(0.25, 4 / mu, k)))
+>>> for name, cv2, gen in laws:
+...     s = gen(n); wq = fifo_waits(rng.exponential(1 / lam, n), s)[n // 10:]
+...     print(f"{name:15s} Lq: formula {pk_lq(cv2):.3f}, "
+...           f"simulated {lam * wq.mean():.3f}")
+...
+M/D/1           Lq: formula 1.600, simulated 1.576
+M/M/1           Lq: formula 3.200, simulated 3.204
+M/G/1, cv2 = 4  Lq: formula 8.000, simulated 7.702
+\end{verbatim}}
+\textbf{Reading the output.} The formula gives $1.6$, $3.2$ and $8.0$, in the ratio $1 : 2 : 5$ of $(1 + c_s^2)/2$, and the simulations agree, the last ($7.70$) less closely: with very variable services, rare long jobs dominate the average, and the simulation converges slowly.
+
+\textbf{MATLAB/Octave:} \texttt{gamrnd(0.25, 4/mu, 1, n)} for the variable service times.
+\end{software}
+
+\subsection{Practice Problems}
+
+\begin{problem}
+A single clerk serves customers arriving at $10$ an hour, taking on average $5$ minutes each (exponential). Find $\rho$, $L$, $W$, $W_q$ and the probability that $4$ or more customers are present.
+\end{problem}
+
+\begin{solution}
+$\mu = 12$, $\rho = \frac56$. $L = \rho/(1 - \rho) = 5$, $W = 1/(12 - 10) = 0.5$ hours, $W_q = \rho/(\mu - \lambda) = 0.417$ hours $= 25$ minutes. $P(N \geq 4) = \rho^4 = 0.482$.
+\end{solution}
+
+\begin{problem}
+For $\lambda = 16$ an hour, compare one fast server with $\mu = 20$ against two servers each with $\mu = 10$, by $W_q$ and by $W$.
+\end{problem}
+
+\begin{solution}
+One fast server: $W_q = 0.8/4 = 0.2$ hours, $W = 0.25$ hours. Two slow servers: $a = 1.6$, $\rho = 0.8$, $C(2, 1.6) = \frac{1.28/0.2}{1 + 1.6 + 1.28/0.2} = \frac{6.4}9 = 0.711$, $W_q = 0.711/(20 - 16) = 0.178$ hours, $W = 0.178 + 0.1 = 0.278$ hours. The pair has the shorter wait in the queue, but the fast server the
+shorter total time, because the slow servers take twice as long to serve each customer.
+\end{solution}
+
+\begin{problem}
+A firm has $3$ telephone lines and receives calls at $4$ an hour with mean duration $30$ minutes; callers who find all lines busy hang up. What fraction of calls is lost?
+\end{problem}
+
+\begin{solution}
+$a = 4 \times 0.5 = 2$ erlangs. $B(3, 2) = \frac{8/6}{1 + 2 + 2 + 8/6} = \frac{1.333}{6.333} = 0.211$: about one call in five is lost. A fourth line gives $B(4, 2) = \frac{16/24}{6.333 + 0.667} = 0.095$.
+\end{solution}
+
+\begin{problem}
+A shop has on average $30$ customers inside, and $90$ customers enter each hour. How long does a customer spend in the shop?
+\end{problem}
+
+\begin{solution}
+By Little's law $W = L/\lambda = 30/90$ hours $= 20$ minutes, whatever the distributions.
+\end{solution}
+
+\begin{problem}
+\label{prob:staffing}
+In Example~\ref{ex:bank}, a teller costs Rs.~20 an hour and a customer's time in the bank is valued at Rs.~30 an hour. How many tellers minimise the total cost?
+\end{problem}
+
+\begin{solution}
+$L(c) = \lambda W_q(c) + a$ with $a = 2.4$. For $c = 3$: $W_q = 0.1079$ hours, $L = 2.589 + 2.4 = 4.99$, cost $60 + 149.7 = 209.7$. For $c = 4$: $W_q = 0.01794$, $L = 2.83$, cost $80 + 84.9 = 164.9$. For $c = 5$: $W_q = 0.00437$, $L = 2.50$, cost $100 + 75.1 = 175.1$. The minimum is at $4$ tellers.
+\end{solution}
+
+\begin{problem}
+Show that for M/M/1 the probability that an arriving customer waits longer than $t$ is $\rho e^{-(\mu - \lambda)t}$, and evaluate it for $\lambda = 4$, $\mu = 5$, $t = 1$ hour.
+\end{problem}
+
+\begin{solution}
+An arrival finds $n$ customers with probability $(1 - \rho)\rho^n$ (Poisson arrivals see time averages) and then waits for $n$ exponential services, a gamma time. Summing, $P(W_q > t) = \sum_{n \geq 1}(1 - \rho)\rho^nP(\text{Gamma}(n, \mu) > t) = \rho e^{-(\mu - \lambda)t}$, as can be checked by differentiating. For the numbers,
+$0.8e^{-1} = 0.294$: nearly a third of customers wait more than an hour, although the mean wait is $48$ minutes.
+\end{solution}
+
 %SECTIONS
 
 \section*{References}
@@ -3742,6 +3991,8 @@ $(c_u + c_o)\varphi(z)$, so the loss from uncertainty is $(c_u + c_o)\varphi(z)\
 \item Edmonds, J. (1965), Maximum matching and a polyhedron with 0,1-vertices, \emph{Journal of Research of the National Bureau of Standards}, 69B, 125--130.
 \item Edmonds, J., and Karp, R. M. (1972), Theoretical improvements in algorithmic efficiency for network flow problems, \emph{Journal of the ACM}, 19, 248--264.
 \item Egerv\'ary, J. (1931), M\'atrixok kombinatorius tulajdons\'agair\'ol, \emph{Matematikai \'es Fizikai Lapok}, 38, 16--28.
+\item Erlang, A. K. (1909), Sandsynlighedsregning og telefonsamtaler, \emph{Nyt Tidsskrift for Matematik B}, 20, 33--39.
+\item Erlang, A. K. (1917), L\o sning af nogle problemer fra sandsynlighedsregningen af betydning for de automatiske telefoncentraler, \emph{Elektroteknikeren}, 13, 5--13.
 \item Farkas, J. (1902), Theorie der einfachen Ungleichungen, \emph{Journal f\"ur die reine und angewandte Mathematik}, 124, 1--27.
 \item Fiacco, A. V., and McCormick, G. P. (1968), \emph{Nonlinear Programming: Sequential Unconstrained Minimization Techniques}, New York, Wiley.
 \item Ford, L. R., and Fulkerson, D. R. (1956), Maximal flow through a network, \emph{Canadian Journal of Mathematics}, 8, 399--404.
@@ -3752,18 +4003,22 @@ $(c_u + c_o)\varphi(z)$, so the loss from uncertainty is $(c_u + c_o)\varphi(z)\
 \item Gass, S. I., and Saaty, T. L. (1955), The computational algorithm for the parametric objective function, \emph{Naval Research Logistics Quarterly}, 2, 39--45.
 \item Goldfarb, D., and Reid, J. K. (1977), A practicable steepest-edge simplex algorithm, \emph{Mathematical Programming}, 12, 361--371.
 \item Gomory, R. E. (1958), Outline of an algorithm for integer solutions to linear programs, \emph{Bulletin of the American Mathematical Society}, 64, 275--278.
+\item Halfin, S., and Whitt, W. (1981), Heavy-traffic limits for queues with many exponential servers, \emph{Operations Research}, 29, 567--588.
 \item Harris, F. W. (1913), How many parts to make at once, \emph{Factory, The Magazine of Management}, 10, 135--136, 152.
 \item Harris, P. M. J. (1973), Pivot selection methods of the Devex LP code, \emph{Mathematical Programming}, 5, 1--28.
 \item Hitchcock, F. L. (1941), The distribution of a product from several sources to numerous localities, \emph{Journal of Mathematics and Physics}, 20, 224--230.
 \item Hoffman, A. J., and Kruskal, J. B. (1956), Integral boundary points of convex polyhedra, in H. W. Kuhn and A. W. Tucker (eds.), \emph{Linear Inequalities and Related Systems}, Annals of Mathematics Studies 38, Princeton University Press, 223--246.
 \item Jackson, J. R. (1955), \emph{Scheduling a Production Line to Minimize Maximum Tardiness}, Research Report 43, Management Science Research Project, University of California, Los Angeles.
+\item Jackson, J. R. (1957), Networks of waiting lines, \emph{Operations Research}, 5, 518--521.
 \item Johnson, S. M. (1954), Optimal two- and three-stage production schedules with setup times included, \emph{Naval Research Logistics Quarterly}, 1, 61--68.
 \item Kantorovich, L. V. (1939), \emph{Mathematical Methods of Organizing and Planning Production} (in Russian), Leningrad State University; English translation (1960), \emph{Management Science}, 6, 366--422.
 \item Karmarkar, N. (1984), A new polynomial-time algorithm for linear programming, \emph{Combinatorica}, 4, 373--395.
 \item Karp, R. M. (1972), Reducibility among combinatorial problems, in R. E. Miller and J. W. Thatcher (eds.), \emph{Complexity of Computer Computations}, New York, Plenum, 85--103.
 \item Karush, W. (1939), \emph{Minima of Functions of Several Variables with Inequalities as Side Conditions}, M.Sc. dissertation, University of Chicago.
 \item Kelley, J. E., and Walker, M. R. (1959), Critical-path planning and scheduling, \emph{Proceedings of the Eastern Joint Computer Conference}, 160--173.
+\item Kendall, D. G. (1953), Stochastic processes occurring in the theory of queues and their analysis by the method of the imbedded Markov chain, \emph{Annals of Mathematical Statistics}, 24, 338--354.
 \item Khachiyan, L. G. (1979), A polynomial algorithm in linear programming, \emph{Soviet Mathematics Doklady}, 20, 191--194.
+\item Khintchine, A. Y. (1932), Mathematical theory of a stationary queue (in Russian), \emph{Matematicheskii Sbornik}, 39, 73--84.
 \item Klee, V., and Minty, G. J. (1972), How good is the simplex algorithm?, in O. Shisha (ed.), \emph{Inequalities III}, New York, Academic Press, 159--175.
 \item K\"onig, D. (1931), Gr\'afok \'es m\'atrixok, \emph{Matematikai \'es Fizikai Lapok}, 38, 116--119.
 \item Koopmans, T. C. (ed.) (1951), \emph{Activity Analysis of Production and Allocation}, New York, Wiley.
@@ -3771,6 +4026,8 @@ $(c_u + c_o)\varphi(z)$, so the loss from uncertainty is $(c_u + c_o)\varphi(z)\
 \item Kuhn, H. W., and Tucker, A. W. (1951), Nonlinear programming, in J. Neyman (ed.), \emph{Proceedings of the Second Berkeley Symposium on Mathematical Statistics and Probability}, Berkeley, University of California Press, 481--492.
 \item Land, A. H., and Doig, A. G. (1960), An automatic method of solving discrete programming problems, \emph{Econometrica}, 28, 497--520.
 \item Lemke, C. E. (1954), The dual method of solving the linear programming problem, \emph{Naval Research Logistics Quarterly}, 1, 36--47.
+\item Lindley, D. V. (1952), The theory of queues with a single server, \emph{Mathematical Proceedings of the Cambridge Philosophical Society}, 48, 277--289.
+\item Little, J. D. C. (1961), A proof for the queuing formula $L = \lambda W$, \emph{Operations Research}, 9, 383--387.
 \item MacCrimmon, K. R., and Ryavec, C. A. (1964), An analytical study of the PERT assumptions, \emph{Operations Research}, 12, 16--37.
 \item Malcolm, D. G., Roseboom, J. H., Clark, C. E., and Fazar, W. (1959), Application of a technique for research and development program evaluation, \emph{Operations Research}, 7, 646--669.
 \item Markowitz, H. (1952), Portfolio selection, \emph{Journal of Finance}, 7, 77--91.
@@ -3780,6 +4037,7 @@ $(c_u + c_o)\varphi(z)$, so the loss from uncertainty is $(c_u + c_o)\varphi(z)\
 \item von Neumann, J. (1947), Discussion of a maximum problem, unpublished manuscript, in A. H. Taub (ed.), \emph{John von Neumann: Collected Works}, Vol.~VI (1963), Oxford, Pergamon, 89--95.
 \item von Neumann, J., and Morgenstern, O. (1944), \emph{Theory of Games and Economic Behavior}, Princeton University Press.
 \item Padberg, M., and Rinaldi, G. (1991), A branch-and-cut algorithm for the resolution of large-scale symmetric traveling salesman problems, \emph{SIAM Review}, 33, 60--100.
+\item Pollaczek, F. (1930), \"Uber eine Aufgabe der Wahrscheinlichkeitstheorie, \emph{Mathematische Zeitschrift}, 32, 64--100.
 \item Raiffa, H., and Schlaifer, R. (1961), \emph{Applied Statistical Decision Theory}, Boston, Harvard Business School.
 \item Savage, L. J. (1951), The theory of statistical decision, \emph{Journal of the American Statistical Association}, 46, 55--67.
 \item Scarf, H. (1960), The optimality of (S, s) policies in the dynamic inventory problem, in K. J. Arrow, S. Karlin and P. Suppes (eds.), \emph{Mathematical Methods in the Social Sciences}, Stanford University Press, 196--202.
